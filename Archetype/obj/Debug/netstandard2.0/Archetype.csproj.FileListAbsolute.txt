@@ -1,9 +1,0 @@
-C:\Users\Bjornar\source\repos\Archetype\Archetype\bin\Debug\netstandard2.0\Archetype.deps.json
-C:\Users\Bjornar\source\repos\Archetype\Archetype\bin\Debug\netstandard2.0\Archetype.dll
-C:\Users\Bjornar\source\repos\Archetype\Archetype\bin\Debug\netstandard2.0\Archetype.pdb
-C:\Users\Bjornar\source\repos\Archetype\Archetype\obj\Debug\netstandard2.0\Archetype.csprojAssemblyReference.cache
-C:\Users\Bjornar\source\repos\Archetype\Archetype\obj\Debug\netstandard2.0\Archetype.csproj.CoreCompileInputs.cache
-C:\Users\Bjornar\source\repos\Archetype\Archetype\obj\Debug\netstandard2.0\Archetype.AssemblyInfoInputs.cache
-C:\Users\Bjornar\source\repos\Archetype\Archetype\obj\Debug\netstandard2.0\Archetype.AssemblyInfo.cs
-C:\Users\Bjornar\source\repos\Archetype\Archetype\obj\Debug\netstandard2.0\Archetype.dll
-C:\Users\Bjornar\source\repos\Archetype\Archetype\obj\Debug\netstandard2.0\Archetype.pdb

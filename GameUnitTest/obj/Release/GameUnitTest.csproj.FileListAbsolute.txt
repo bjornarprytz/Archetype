@@ -1,0 +1,16 @@
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\GameUnitTest.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\GameUnitTest.pdb
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Archetype.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Archetype.pdb
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\bin\Release\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\obj\Release\GameUnitTest.csprojAssemblyReference.cache
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\obj\Release\GameUnitTest.csproj.CoreCompileInputs.cache
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\obj\Release\GameUnitTest.csproj.CopyComplete
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\obj\Release\GameUnitTest.dll
+C:\Users\Bjornar\source\repos\Archetype\GameUnitTest\obj\Release\GameUnitTest.pdb
