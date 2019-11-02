@@ -43,6 +43,12 @@ namespace Archetype
             }
         }
 
+        public void CommitEffectSpan(EffectSpan span)
+        {
+            Effects.Add(span);
+            span.StartTime = CurrentTick;
+        }
+
         public void ResolveTurns(GameState gameState, DecisionPrompt prompt)
         {
             InitiativeOrder = gameState.ActiveUnits.OrderByDescending(u => u.Speed).ToList();
@@ -50,7 +56,7 @@ namespace Archetype
             foreach (Unit unit in InitiativeOrder)
             {
                 if (unit.HasTurn(CurrentTick))
-                    unit.TakeTurn(gameState, prompt);
+                    unit.TakeTurn(this, gameState, prompt);
             }
         }
     }

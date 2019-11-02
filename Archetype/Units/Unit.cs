@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Archetype
 {
@@ -18,6 +19,8 @@ namespace Archetype
         public event CardDiscarded OnCardDiscarded;
         public event CardMilled OnCardMilled;
         public event DeckShuffled OnDeckShuffled;
+
+        public bool IsAlive => Life > 0;
 
         public Deck Deck { get; set; }
         public Hand Hand { get; set; }
@@ -70,7 +73,7 @@ namespace Archetype
             return NextMoveTick == tick;
         }
 
-        public abstract void TakeTurn(GameState gameState, DecisionPrompt prompt);
+        public abstract void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt);
 
         public void Discard(Guid cardId)
         {
@@ -86,7 +89,7 @@ namespace Archetype
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
 
-        public void Discard(int x)
+        public void Discard(int x, DecisionPrompt prompt)
         {
             if (x < 1) return;
 
@@ -96,13 +99,19 @@ namespace Archetype
                 return;
             }
 
-            while (x > 0)
+            if (x >= Hand.Count)
             {
-                Guid cardId = Guid.NewGuid(); /* TODO: Get user input */
-                Discard(cardId);
-                x--;
+                foreach (Card card in Hand) Discard(card.Id);
+                return;
             }
 
+
+            PromptResult result = prompt(new PromptRequirements(x, typeof(Card)));
+
+            foreach (Card card in result.ChosenPieces)
+            {
+                Discard(card.Id);
+            }
         }
 
         internal void Draw(int x)

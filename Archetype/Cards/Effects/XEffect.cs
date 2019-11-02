@@ -11,21 +11,22 @@ namespace Archetype
 
         private int _x;
 
-        public XEffect(Unit source, int x) : base(source)
+        public XEffect(Unit source, int x, int minTargets, int maxTargets) 
+            : base(source, new PromptRequirements(minTargets, maxTargets, typeof(Unit)))
         {
             X = x;
         }
 
-        protected override Resolution _resolve => delegate 
+        protected override Resolution _resolve => (prompt) =>
         {
             X += Source.ModifierAsSource(Keyword);
 
             foreach(Unit target in Targets)
             {
-                _affect(target, target.ModifierAsTarget(Keyword));
+                _affect(target, target.ModifierAsTarget(Keyword), prompt);
             }
         };
 
-        protected abstract void _affect(Unit target, int modifier);
+        protected abstract void _affect(Unit target, int modifier, DecisionPrompt prompt);
     }
 }

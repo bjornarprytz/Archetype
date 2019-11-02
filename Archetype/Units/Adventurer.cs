@@ -11,7 +11,7 @@ namespace Archetype
             Deck.PutCardsOnTop(cards);
         }
 
-        public override void TakeTurn(GameState gameState, DecisionPrompt prompt)
+        public override void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt)
         {
             throw new NotImplementedException();
         }

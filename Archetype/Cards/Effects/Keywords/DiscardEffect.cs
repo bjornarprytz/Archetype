@@ -7,14 +7,13 @@ namespace Archetype
 
         public int CardsToDiscard => X;
 
-        public DiscardEffect(Unit source, Unit target, int x) : base(source, x)
-        {
-            Targets.Add(target);
-        }
+        public DiscardEffect(Unit source, Unit target, int x, int minTargets, int maxTargets) 
+            : base(source, x, minTargets, maxTargets)
+        { }
 
-        protected override void _affect(Unit target, int modifier)
+        protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)
         {
-            target.Discard(CardsToDiscard + modifier);
+            target.Discard(CardsToDiscard + modifier, prompt);
         }
     }
 }

@@ -3,16 +3,13 @@ using System.Collections.Generic;
 
 namespace Archetype
 {
-    public class EffectSpan
+    public class EffectSpan : GamePiece
     {
         public int StartTime { get; set; }
         public Dictionary<int, List<Effect>> ChainOfEvents { get; set; }
 
-        public EffectSpan(int currentTick, Dictionary<int, List<Effect>> chainOfEvents)
+        public EffectSpan(Dictionary<int, List<Effect>> chainOfEvents) : base()
         {
-            if (chainOfEvents.Count == 0) throw new Exception("Empty effect span..");
-
-            StartTime = currentTick;
             ChainOfEvents = chainOfEvents;
 
             foreach (List<Effect> effects in ChainOfEvents.Values)
@@ -29,19 +26,16 @@ namespace Archetype
             return ChainOfEvents[tick] ?? new List<Effect>();
         }
 
-        public bool ResolveTick(int tick, DecisionPrompt prompt) // Called by the game state
+        public void ResolveTick(int currentTick, DecisionPrompt prompt) // Called by the game state
         {
-            if (!ChainOfEvents.ContainsKey(tick)) return true;
+            int relativeTick = currentTick - StartTime;
 
-            foreach (Effect effect in ChainOfEvents[tick])
+            if (!ChainOfEvents.ContainsKey(relativeTick)) return;
+
+            foreach (Effect effect in ChainOfEvents[relativeTick])
             {
                 effect.Resolve(prompt);
             }
-
-            ChainOfEvents[tick].Clear();
-            ChainOfEvents.Remove(tick);
-
-            return ChainOfEvents.Count != 0;
         }
 
         public void Cancel()

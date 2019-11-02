@@ -15,6 +15,16 @@ namespace Archetype
         public event ResolvedEffect OnResolve;
         public event CancelledEffect OnCancel;
 
+        public void PromptForTargets(DecisionPrompt prompt)
+        {
+            PromptResult result = prompt(Requirements);
+
+            foreach (Unit unit in result.ChosenPieces)
+            {
+                Targets.Add(unit);
+            }
+        }
+
         public void Resolve(DecisionPrompt prompt)
         {
             _resolve?.Invoke(prompt);
@@ -28,13 +38,15 @@ namespace Archetype
 
         public bool HasSource { get { return Source != null; } }
         public bool HasTargets { get { return Targets.Count > 0; } }
+        public PromptRequirements Requirements { get; set; }
         public List<Unit> Targets { get; set; }
         public Unit Source { get; set; }
 
-        public Effect(Unit source)
+        public Effect(Unit source, PromptRequirements requirements)
         {
             Source = source;
             Targets = new List<Unit>();
+            Requirements = requirements;
         }
 
         public EffectSpan Whence { get; set; }

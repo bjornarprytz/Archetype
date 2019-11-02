@@ -11,6 +11,15 @@ namespace Archetype
         public Type Type { get; private set; }
         public int Max { get; private set; }
         public int Min { get; private set; }
+
+        public PromptRequirements(int x, Type t)
+        {
+            if (!t.IsSubclassOf(typeof(GamePiece))) throw new Exception("Can only require Game Piece types in prompts");
+
+            Type = t;
+            Min = Max = x;
+        }
+
         public PromptRequirements(int min, int max, Type t)
         {
             if (!t.IsSubclassOf(typeof(GamePiece))) throw new Exception("Can only require Game Piece types in prompts");

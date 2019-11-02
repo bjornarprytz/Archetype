@@ -18,7 +18,7 @@ namespace Archetype
             // Make moves based on game state
         }
 
-        public override void TakeTurn(GameState gameState, DecisionPrompt prompt)
+        public override void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt)
         {
             if (Hand.IsEmpty)
             {
@@ -38,7 +38,7 @@ namespace Archetype
                 }
             }
 
-            chosenMove.Play(prompt);
+            chosenMove.Play(timeline, prompt);
         }
 
         private int Evaluate(Card move, GameState gameState)

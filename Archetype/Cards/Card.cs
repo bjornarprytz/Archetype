@@ -34,14 +34,14 @@ namespace Archetype
 
         public static Card Dummy (string name)
         {
-            return new Card(name, delegate { });
+            return new Card(name, new EffectSpan(new Dictionary<int, List<Effect>>()));
         }
 
-        public Card(string name, PlayCard play, Zone zone=null) : base(zone == null ? Faction.Neutral : zone.Owner.Team)
+        public Card(string name, EffectSpan effects, Zone zone=null)
+            : base(zone == null ? Faction.Neutral : zone.Owner.Team)
         {
             Name = name;
             CurrentZone = zone;
-            _play = play;
         }
 
         public void MoveTo(Zone newZone)
@@ -54,13 +54,23 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public virtual void Play(DecisionPrompt prompt)
+        public virtual void Play(Timeline timeline, DecisionPrompt prompt)
         {
+            foreach(List<Effect> effects in Effects.ChainOfEvents.Values)
+            {
+                foreach (Effect effecet in effects)
+                {
+                    effecet.PromptForTargets(prompt);
+                }
+            }
+
+
             OnBeforePlay?.Invoke();
-            _play(prompt);
+            
+
+
             OnAfterPlay?.Invoke();
         }
 
-        private PlayCard _play;
     }
 }

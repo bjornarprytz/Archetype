@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Archetype
 {
     public class GameState
     {
-        Timeline TimeLine { get; set; }
-        Player Player { get; set; }
-        List<Enemy> Enemies { get; set; }
+        public Player Player { get; set; }
+        public List<Enemy> Enemies { get; set; }
 
         public List<Unit> ActiveUnits
         {
@@ -23,10 +21,20 @@ namespace Archetype
             }
         }
 
-        private GameState()
+        public bool Unresolved
         {
-            TimeLine = new Timeline();
+            get
+            {
+                bool defeat = !Player.ActiveHeroes.Any(u => u.IsAlive);
+
+                bool victory = !Enemies.Any(e => e.IsAlive);
+
+                return defeat || victory;
+            }
         }
+
+        private GameState() { }
+
         public static GameState InitiateBattle(Player player, List<Enemy> enemies)
         {
             return new GameState()

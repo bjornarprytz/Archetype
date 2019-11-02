@@ -18,8 +18,13 @@ namespace Archetype
 
         public void Start()
         {
-            Upkeep();
-            Turns();
+            while (State.Unresolved)
+            {
+                Upkeep();
+                Turns();
+                EndTick();
+            }
+            
         }
 
         private void Turns()
@@ -30,6 +35,11 @@ namespace Archetype
         private void Upkeep()
         {
             Time.ResolveEffects(PromptUser);
+        }
+
+        private void EndTick()
+        {
+            Time.AdvanceTime();
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Archetype
 
         public bool AllyOf(GamePiece other) => Team == other.Team;
 
-        public GamePiece(Faction team)
+        public GamePiece(Faction team = Faction.Neutral)
         {
             Team = team;
             Id = Guid.NewGuid();
