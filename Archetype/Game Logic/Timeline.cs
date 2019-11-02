@@ -18,12 +18,6 @@ namespace Archetype
             InitiativeOrder = new List<Unit>();
         }
 
-        public void ResolveTick(GameState gameState)
-        {
-            ResolveEffects();
-            ResolveTurns(gameState);
-        }
-
         public void AdvanceTime()
         {
             CurrentTick++;
@@ -41,22 +35,22 @@ namespace Archetype
             return futureTicks;
         }
 
-        private void ResolveEffects()
+        public void ResolveEffects(DecisionPrompt prompt)
         {
             foreach (EffectSpan span in Effects)
             {
-                span.ResolveTick(CurrentTick);
+                span.ResolveTick(CurrentTick, prompt);
             }
         }
 
-        private void ResolveTurns(GameState gameState)
+        public void ResolveTurns(GameState gameState, DecisionPrompt prompt)
         {
             InitiativeOrder = gameState.ActiveUnits.OrderByDescending(u => u.Speed).ToList();
 
             foreach (Unit unit in InitiativeOrder)
             {
                 if (unit.HasTurn(CurrentTick))
-                    unit.TakeTurn(gameState);
+                    unit.TakeTurn(gameState, prompt);
             }
         }
     }

@@ -6,12 +6,12 @@ namespace Archetype
 {
     public class Adventurer : Unit
     {
-        public Adventurer(string name, List<Card> cards) : base(name)
+        public Adventurer(string name, List<Card> cards) : base(name, Faction.Player)
         {
             Deck.PutCardsOnTop(cards);
         }
 
-        public override void TakeTurn(GameState gameState)
+        public override void TakeTurn(GameState gameState, DecisionPrompt prompt)
         {
             throw new NotImplementedException();
         }

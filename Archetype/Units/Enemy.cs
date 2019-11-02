@@ -1,36 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace Archetype
 {
     public class Enemy : Unit
     {
-        List<Move> MoveSet { get; set; }
-        List<Move> AvailableMoves { get; set; }
+        public List<Card> AvailableMoves => Hand.Cards.Values.ToList();
 
-        public Enemy(string name) : base(name)
+        public Enemy(string name) : base(name, Faction.Enemy)
         {
-            MoveSet = new List<Move>();
-            AvailableMoves = new List<Move>();
+
         }
 
-        public void MakeMove(Move move)
+        public void MakeMove(Card move)
         {
             // Make moves based on game state
         }
 
-        public override void TakeTurn(GameState gameState)
+        public override void TakeTurn(GameState gameState, DecisionPrompt prompt)
         {
-            if (AvailableMoves.Count == 0)
+            if (Hand.IsEmpty)
             {
                 Console.WriteLine($"No available moves for <{Name}>!");
                 return;
             }
 
             int maxVal = -1;
-            Move chosenMove = AvailableMoves[0];
-            foreach (Move move in AvailableMoves)
+            Card chosenMove = AvailableMoves[0];
+            foreach (Card move in AvailableMoves)
             {
                 int moveVal = Evaluate(move, gameState);
                 if (moveVal > maxVal)
@@ -40,10 +38,10 @@ namespace Archetype
                 }
             }
 
-            MakeMove(chosenMove);
+            chosenMove.Play(prompt);
         }
 
-        private int Evaluate(Move move, GameState gameState)
+        private int Evaluate(Card move, GameState gameState)
         {
             // TODO: Do smart things
 

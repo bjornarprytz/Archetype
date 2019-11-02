@@ -11,7 +11,6 @@ namespace Archetype
         public event CardIn OnCardEntered;
         public event CardOut OnCardExited;
 
-
         public Zone(Unit owner) { Owner = owner; }
         public Unit Owner { get; private set; }
         public virtual void Out(Card cardToMove) { OnCardExited?.Invoke(cardToMove); }

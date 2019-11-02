@@ -37,13 +37,13 @@ namespace Archetype
 
             return sampleList;
         }
-        public static List<Move> TestMoveSet(int size)
+        public static List<Card> TestMoveSet(int size)
         {
-            List<Move> sampleList = new List<Move>();
+            List<Card> sampleList = new List<Card>();
 
             for (int i = 0; i < size; i++)
             {
-                Move newMove = new Move($"Move {i}", null);
+                Card newMove = new Card($"Move {i}", null);
 
                 sampleList.Add(newMove);
             }

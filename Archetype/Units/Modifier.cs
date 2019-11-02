@@ -2,14 +2,14 @@
 
 namespace Archetype
 {
-    public class Modifier : GamePiece
+    public class Modifier
     {
         public string Keyword => _keyword.Keyword;
         private IKeyword _keyword;
         public int Value { get; private set; }
 
 
-        public Modifier(int value, IKeyword keyword) : base()
+        public Modifier(int value, IKeyword keyword)
         {
             Value = value;
             _keyword = keyword;

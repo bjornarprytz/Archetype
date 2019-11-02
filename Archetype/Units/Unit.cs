@@ -34,7 +34,7 @@ namespace Archetype
         private Dictionary<string, int> _modifierAsSource;
         private Dictionary<string, int> _modifierAsTarget;
 
-        public Unit(string name) : base()
+        public Unit(string name, Faction team) : base(team)
         {
             _modifierAsSource = new Dictionary<string, int>();
             _modifierAsTarget = new Dictionary<string, int>();
@@ -70,7 +70,7 @@ namespace Archetype
             return NextMoveTick == tick;
         }
 
-        public abstract void TakeTurn(GameState gameState);
+        public abstract void TakeTurn(GameState gameState, DecisionPrompt prompt);
 
         public void Discard(Guid cardId)
         {

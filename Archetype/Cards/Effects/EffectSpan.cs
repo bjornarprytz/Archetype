@@ -26,16 +26,16 @@ namespace Archetype
 
         public List<Effect> EffectsAtTick(int tick)
         {
-            return ChainOfEvents[tick] ?? new List<Effect>(); ;
+            return ChainOfEvents[tick] ?? new List<Effect>();
         }
 
-        public bool ResolveTick(int tick) // Called by the game state
+        public bool ResolveTick(int tick, DecisionPrompt prompt) // Called by the game state
         {
             if (!ChainOfEvents.ContainsKey(tick)) return true;
 
             foreach (Effect effect in ChainOfEvents[tick])
             {
-                effect.Resolve();
+                effect.Resolve(prompt);
             }
 
             ChainOfEvents[tick].Clear();

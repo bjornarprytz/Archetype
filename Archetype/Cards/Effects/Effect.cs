@@ -6,7 +6,7 @@ namespace Archetype
 {
     public abstract class Effect
     {
-        public delegate void Resolution();
+        public delegate void Resolution(DecisionPrompt prompt);
         public delegate void Cancellation();
 
         public delegate void ResolvedEffect(Effect effect);
@@ -15,9 +15,9 @@ namespace Archetype
         public event ResolvedEffect OnResolve;
         public event CancelledEffect OnCancel;
 
-        public void Resolve()
+        public void Resolve(DecisionPrompt prompt)
         {
-            _resolve?.Invoke();
+            _resolve?.Invoke(prompt);
             OnResolve?.Invoke(this);
         }
         public void Cancel()

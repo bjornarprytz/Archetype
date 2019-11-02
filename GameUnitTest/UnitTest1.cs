@@ -15,10 +15,10 @@ namespace GameUnitTest
                 "Hercules",
                 new List<Card>()
                 {
-                    new Card("High"),
-                    new Card("Top"),
-                    new Card("Low"),
-                    new Card("Bottom"),
+                    Card.Dummy("High"),
+                    Card.Dummy("Top"),
+                    Card.Dummy("Low"),
+                    Card.Dummy("Bottom"),
                 });
 
 
@@ -26,14 +26,14 @@ namespace GameUnitTest
                 "Hades",
                 new List<Card>()
                 {
-                    new Card("High"),
-                    new Card("Top"),
+                    Card.Dummy("High"),
+                    Card.Dummy("Top"),
                 });
 
             hero2.Deck.PutCardsOnBottom(new List<Card>()
             {
-                new Card("Low"),
-                new Card("Bottom"),
+                Card.Dummy("Low"),
+                Card.Dummy("Bottom"),
             });
 
             Assert.AreEqual(hero1.Deck.Cards.Count, hero2.Deck.Cards.Count);

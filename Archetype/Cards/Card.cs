@@ -7,9 +7,13 @@ namespace Archetype
     public class Card : GamePiece
     {
         public delegate void ZoneChange(Zone from, Zone to);
-        public delegate void Resolved();
+        public delegate void BeforePlay();
+        public delegate void PlayCard(DecisionPrompt prompt);
+        public delegate void AfterPlay();
+
         public event ZoneChange OnZoneChanged;
-        public event Resolved OnResolved;
+        public event BeforePlay OnBeforePlay;
+        public event AfterPlay OnAfterPlay;
 
         public string Name { get; set; }
         public string RulesText { get; set; }
@@ -28,10 +32,16 @@ namespace Archetype
         }
         private Zone currZone;
 
-        public Card(string name, Zone zone=null) : base()
+        public static Card Dummy (string name)
+        {
+            return new Card(name, delegate { });
+        }
+
+        public Card(string name, PlayCard play, Zone zone=null) : base(zone == null ? Faction.Neutral : zone.Owner.Team)
         {
             Name = name;
             CurrentZone = zone;
+            _play = play;
         }
 
         public void MoveTo(Zone newZone)
@@ -44,6 +54,13 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public virtual void Resolve() { OnResolved?.Invoke(); }
+        public virtual void Play(DecisionPrompt prompt)
+        {
+            OnBeforePlay?.Invoke();
+            _play(prompt);
+            OnAfterPlay?.Invoke();
+        }
+
+        private PlayCard _play;
     }
 }
