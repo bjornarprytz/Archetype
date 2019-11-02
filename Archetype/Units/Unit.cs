@@ -34,13 +34,13 @@ namespace Archetype
         public Dictionary<string, List<Modifier>> ModifiersAsSource { get; set; } // Keyword -> Modifier
         public Dictionary<string, List<Modifier>> ModifiersAsTarget { get; set; } // Keyword -> Modifier
 
-        public Unit(string name, List<Card> cards) : base()
+        public Unit(string name) : base()
         {
             ModifiersAsSource = new Dictionary<string, List<Modifier>>();
             ModifiersAsTarget = new Dictionary<string, List<Modifier>>();
             Name = name;
 
-            Deck = new Deck(this, cards);
+            Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
             ActiveEffects = new List<EffectSpan>();
@@ -79,6 +79,20 @@ namespace Archetype
             cardToDiscard.MoveTo(DiscardPile);
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
+
+        public void Discard()
+        {
+            if (Hand.IsEmpty)
+            {
+                Console.WriteLine($"\"I don't even have a single card in my hand... Can't discard shit\" says {Name}");
+                return;
+            }
+
+            Guid cardId = Guid.NewGuid(); /* Get user input */
+
+            Discard(cardId);
+        }
+
 
         public void Draw()
         {
@@ -134,7 +148,7 @@ namespace Archetype
             }
         }
 
-        internal void TakeCards(DrawCards effect)
+        internal void TakeCards(DrawEffect effect)
         {
             int nCardsToDraw = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
 
@@ -145,7 +159,7 @@ namespace Archetype
             }
         }
 
-        internal void DealCards(DrawCards effect)
+        internal void DealCards(DrawEffect effect)
         {
             effect.ModEffect(GetModifiersAsSource(effect.Keyword));
 
@@ -155,7 +169,7 @@ namespace Archetype
             }
         }
 
-        internal void TakeMill(MillCards effect)
+        internal void TakeMill(MillEffect effect)
         {
             int nCardsToMill = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
 
@@ -166,15 +180,32 @@ namespace Archetype
             }
         }
 
-        internal void DealMill(MillCards effect)
+        internal void DealMill(MillEffect effect)
+        {
+            int nCardsToDiscard = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
+
+            while (nCardsToDiscard > 0)
+            {
+                Discard();
+                nCardsToDiscard--;
+            }
+        }
+
+        internal void TakeDiscard(DiscardEffect effect)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void DealDiscard(DiscardEffect effect)
         {
             effect.ModEffect(GetModifiersAsSource(effect.Keyword));
 
             foreach (Unit target in effect.Targets)
             {
-                target.TakeMill(effect);
+                target.TakeDiscard(effect);
             }
         }
+
 
 
         private void AddModifier(Dictionary<string, List<Modifier>> modifierCollection, Modifier modifier)

@@ -4,17 +4,17 @@ using System.Text;
 
 namespace Archetype
 {
-    public class MillCards : XEffect, IKeyword
+    public class MillEffect : XEffect, IKeyword
     {
         public string Keyword => "Mill";
         public int CardsToMill => X;
 
-        public MillCards(Unit source, int x) : base(source, x)
+        public MillEffect(Unit source, int x) : base(source, x)
         {
             Targets.Add(source);
         }
 
-        public MillCards(Unit source, Unit target, int x) : base(source, x)
+        public MillEffect(Unit source, Unit target, int x) : base(source, x)
         {
             Targets.Add(target);
         }

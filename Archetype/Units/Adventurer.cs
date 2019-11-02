@@ -6,9 +6,9 @@ namespace Archetype
 {
     public class Adventurer : Unit
     {
-        public Adventurer(string name, List<Card> cards) : base(name, cards)
+        public Adventurer(string name, List<Card> cards) : base(name)
         {
-            
+            Deck.PutCardsOnTop(cards);
         }
 
         public override void TakeTurn(GameState gameState)

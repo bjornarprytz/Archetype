@@ -7,6 +7,7 @@ namespace Archetype
 {
     public class Hand : Zone, IEnumerable<Card>
     {
+        public bool IsEmpty => Cards.Count == 0;
         public int Count => Cards.Count;
         public Dictionary<Guid, Card> Cards { get; set; }
         public Hand(Unit owner) : base(owner)
