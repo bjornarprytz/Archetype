@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class XEffect : Effect
+    public abstract class XEffect : Effect, IKeyword
     {
+        public abstract string Keyword { get; }
         public int X { get { return _x > 0 ? _x : 0; } set { _x = value; } }
 
         private int _x;
@@ -15,19 +16,16 @@ namespace Archetype
             X = x;
         }
 
-        public void ModEffect(List<Modifier> modifiers)
+        protected override Resolution _resolve => delegate 
         {
-            modifiers.ForEach(m => X += m.Value);
-        }
+            X += Source.ModifierAsSource(Keyword);
 
-        public int ModOutput(List<Modifier> modifiers)
-        {
-            int modifiedValue = _x;
+            foreach(Unit target in Targets)
+            {
+                _affect(target, target.ModifierAsTarget(Keyword));
+            }
+        };
 
-            modifiers.ForEach(m => modifiedValue += m.Value);
-
-            return modifiedValue > 0 ? modifiedValue : 0;
-        }
-
+        protected abstract void _affect(Unit target, int modifier);
     }
 }

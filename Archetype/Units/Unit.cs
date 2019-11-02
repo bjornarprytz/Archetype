@@ -31,13 +31,13 @@ namespace Archetype
 
         public int HandLimit { get; set; }
 
-        public Dictionary<string, List<Modifier>> ModifiersAsSource { get; set; } // Keyword -> Modifier
-        public Dictionary<string, List<Modifier>> ModifiersAsTarget { get; set; } // Keyword -> Modifier
+        private Dictionary<string, int> _modifierAsSource;
+        private Dictionary<string, int> _modifierAsTarget;
 
         public Unit(string name) : base()
         {
-            ModifiersAsSource = new Dictionary<string, List<Modifier>>();
-            ModifiersAsTarget = new Dictionary<string, List<Modifier>>();
+            _modifierAsSource = new Dictionary<string, int>();
+            _modifierAsTarget = new Dictionary<string, int>();
             Name = name;
 
             Deck = new Deck(this);
@@ -45,18 +45,24 @@ namespace Archetype
             DiscardPile = new DiscardPile(this);
             ActiveEffects = new List<EffectSpan>();
         }
-
-        public List<Modifier> GetModifiersAsSource(string keyword) => ModifiersAsSource[keyword] ?? new List<Modifier>();
-        public List<Modifier> GetModifiersAsTarget(string keyword) => ModifiersAsTarget[keyword] ?? new List<Modifier>();
         
         public void AddModifierAsSource(Modifier modifier)
         {
-            AddModifier(ModifiersAsSource, modifier);
+            AddModifier(_modifierAsSource, modifier);
         }
 
         public void AddModifierAsTarget(Modifier modifier)
         {
-            AddModifier(ModifiersAsTarget, modifier);
+            AddModifier(_modifierAsTarget, modifier);
+        }
+
+        public int ModifierAsSource(string keyword)
+        {
+            return GetModifier(_modifierAsSource, keyword);
+        }
+        public int ModifierAsTarget(string keyword)
+        {
+            return GetModifier(_modifierAsTarget, keyword);
         }
 
         public bool HasTurn(int tick)
@@ -80,35 +86,65 @@ namespace Archetype
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
 
-        public void Discard()
+        public void Discard(int x)
         {
+            if (x < 1) return;
+
             if (Hand.IsEmpty)
             {
                 Console.WriteLine($"\"I don't even have a single card in my hand... Can't discard shit\" says {Name}");
                 return;
             }
 
-            Guid cardId = Guid.NewGuid(); /* Get user input */
-
-            Discard(cardId);
-        }
-
-
-        public void Draw()
-        {
-            Card cardToDraw = Deck.PeekTop();
-
-            if (cardToDraw == null)
+            while (x > 0)
             {
-                Console.WriteLine($"\"Fuck everything! My deck is empty!\" says {Name}");
-                return;
+                Guid cardId = Guid.NewGuid(); /* TODO: Get user input */
+                Discard(cardId);
+                x--;
             }
 
-            cardToDraw.MoveTo(Hand);
-            OnCardDrawn?.Invoke(cardToDraw);
         }
 
-        public void Mill()
+        internal void Draw(int x)
+        {
+            while (x > 0)
+            {
+                Draw();
+                x--;
+            }
+        }
+
+
+        public void Mill(int x)
+        {
+            while (x > 0)
+            {
+                Mill();
+                x--;
+            }
+        }
+
+        public void Shuffle()
+        {
+            Deck.Shuffle();
+            OnDeckShuffled?.Invoke(Deck);
+        }
+
+        public int TakeDamage(Unit source, int damageTaken)
+        {
+            Life -= damageTaken;
+            OnDamageTaken?.Invoke(source, damageTaken);
+
+            return damageTaken;
+        }
+
+        public void DealDamage(Unit target, int damage)
+        {
+            OnDamageDealt?.Invoke(target, target.TakeDamage(this, damage));
+        }
+
+
+        private void Mill()
         {
             Card cardToMill = Deck.PeekTop();
 
@@ -122,99 +158,32 @@ namespace Archetype
             OnCardMilled?.Invoke(cardToMill);
         }
 
-        public void Shuffle()
+        private void Draw()
         {
-            Deck.Shuffle();
-            OnDeckShuffled?.Invoke(Deck);
-        }
+            Card cardToDraw = Deck.PeekTop();
 
-        internal int TakeDamage(DamageEffect effect)
-        {
-            int damageDone = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
-
-            Life -= damageDone;
-            OnDamageTaken?.Invoke(effect.Source, damageDone);
-
-            return damageDone;
-        }
-
-        internal void DealDamage(DamageEffect effect)
-        {
-            effect.ModEffect(GetModifiersAsSource(effect.Keyword));
-
-            foreach (Unit target in effect.Targets)
+            if (cardToDraw == null)
             {
-                OnDamageDealt?.Invoke(target, target.TakeDamage(effect));
+                Console.WriteLine($"\"Fuck everything! My deck is empty!\" says {Name}");
+                return;
             }
+
+            cardToDraw.MoveTo(Hand);
+            OnCardDrawn?.Invoke(cardToDraw);
         }
 
-        internal void TakeCards(DrawEffect effect)
-        {
-            int nCardsToDraw = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
-
-            while (nCardsToDraw > 0)
-            {
-                Draw();
-                nCardsToDraw--;
-            }
-        }
-
-        internal void DealCards(DrawEffect effect)
-        {
-            effect.ModEffect(GetModifiersAsSource(effect.Keyword));
-
-            foreach (Unit target in effect.Targets)
-            {
-                target.TakeCards(effect);
-            }
-        }
-
-        internal void TakeMill(MillEffect effect)
-        {
-            int nCardsToMill = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
-
-            while (nCardsToMill > 0)
-            {
-                Mill();
-                nCardsToMill--;
-            }
-        }
-
-        internal void DealMill(MillEffect effect)
-        {
-            int nCardsToDiscard = effect.ModOutput(GetModifiersAsTarget(effect.Keyword));
-
-            while (nCardsToDiscard > 0)
-            {
-                Discard();
-                nCardsToDiscard--;
-            }
-        }
-
-        internal void TakeDiscard(DiscardEffect effect)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void DealDiscard(DiscardEffect effect)
-        {
-            effect.ModEffect(GetModifiersAsSource(effect.Keyword));
-
-            foreach (Unit target in effect.Targets)
-            {
-                target.TakeDiscard(effect);
-            }
-        }
-
-
-
-        private void AddModifier(Dictionary<string, List<Modifier>> modifierCollection, Modifier modifier)
+        private void AddModifier(Dictionary<string, int> modifierCollection, Modifier modifier)
         {
             string keyword = modifier.Keyword;
 
-            if (!modifierCollection.ContainsKey(keyword)) modifierCollection[keyword] = new List<Modifier>();
+            if (!modifierCollection.ContainsKey(keyword)) modifierCollection[keyword] = 0;
 
-            modifierCollection[keyword].Add(modifier);
+            modifierCollection[keyword] += modifier.Value;
+        }
+
+        private int GetModifier(Dictionary<string, int> modifierCollection, string keyword)
+        {
+            return modifierCollection.ContainsKey(keyword) ? modifierCollection[keyword] : 0;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Archetype
 {
     public class MillEffect : XEffect, IKeyword
     {
-        public string Keyword => "Mill";
+        public override string Keyword => "Mill";
         public int CardsToMill => X;
 
         public MillEffect(Unit source, int x) : base(source, x)
@@ -19,6 +19,9 @@ namespace Archetype
             Targets.Add(target);
         }
 
-        protected override Resolution _resolve => delegate { Source.DealMill(this); };
+        protected override void _affect(Unit target, int modifier)
+        {
+            target.Mill(CardsToMill + modifier);
+        }
     }
 }

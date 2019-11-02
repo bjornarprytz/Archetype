@@ -2,9 +2,9 @@
 
 namespace Archetype
 {
-    public class DamageEffect : XEffect, IKeyword
+    public class DamageEffect : XEffect
     {
-        public string Keyword => "Damage";
+        public override string Keyword => "Damage";
         public int Damage => X;
 
         public DamageEffect(Unit attacker, List<Unit> targets, int x) 
@@ -19,6 +19,9 @@ namespace Archetype
             Targets.Add(target);
         }
 
-        protected override Resolution _resolve => delegate { Source.DealDamage(this); };
+        protected override void _affect(Unit target, int modifier)
+        {
+            Source.DealDamage(target, Damage + modifier);
+        }
     }
 }

@@ -3,7 +3,7 @@ namespace Archetype
 {
     public class DiscardEffect : XEffect, IKeyword
     {
-        public string Keyword => "Discard";
+        public override string Keyword => "Discard";
 
         public int CardsToDiscard => X;
 
@@ -12,6 +12,9 @@ namespace Archetype
             Targets.Add(target);
         }
 
-        protected override Resolution _resolve => delegate { Source.DealDiscard(this); };
+        protected override void _affect(Unit target, int modifier)
+        {
+            target.Discard(CardsToDiscard + modifier);
+        }
     }
 }

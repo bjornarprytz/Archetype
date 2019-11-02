@@ -2,7 +2,7 @@
 {
     public class DrawEffect : XEffect, IKeyword
     {
-        public string Keyword => "Draw";
+        public override string Keyword => "Draw";
         public int CardsToDraw => X;
 
         public DrawEffect(Unit source, int x)
@@ -17,6 +17,9 @@
             Targets.Add(target);
         }
 
-        protected override Resolution _resolve => delegate { Source.DealCards(this); };
+        protected override void _affect(Unit target, int modifier)
+        {
+            target.Draw(CardsToDraw + modifier);
+        }
     }
 }
