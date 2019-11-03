@@ -9,8 +9,8 @@ namespace Archetype
         public override string Keyword => "Mill";
         public int CardsToMill => X;
 
-        public MillEffect(Unit source, int x, int minTargets, int maxTargets) 
-            : base(source, x, minTargets, maxTargets)
+        public MillEffect(Unit source, int x, int minTargets, int maxTargets, Faction targetFaction) 
+            : base(source, x, minTargets, maxTargets, targetFaction)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

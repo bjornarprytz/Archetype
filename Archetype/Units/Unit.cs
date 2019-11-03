@@ -106,7 +106,7 @@ namespace Archetype
             }
 
 
-            PromptResult result = prompt(new PromptRequirements(x, typeof(Card)));
+            PromptResult result = prompt(new PromptRequirements(x, typeof(Card), Faction.Any));
 
             foreach (Card card in result.ChosenPieces)
             {

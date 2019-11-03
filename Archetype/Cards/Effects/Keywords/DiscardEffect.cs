@@ -7,8 +7,8 @@ namespace Archetype
 
         public int CardsToDiscard => X;
 
-        public DiscardEffect(Unit source, Unit target, int x, int minTargets, int maxTargets) 
-            : base(source, x, minTargets, maxTargets)
+        public DiscardEffect(Unit source, Unit target, int x, int minTargets, int maxTargets, Faction targetFaction) 
+            : base(source, x, minTargets, maxTargets, targetFaction)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

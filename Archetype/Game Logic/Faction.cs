@@ -4,10 +4,14 @@ using System.Text;
 
 namespace Archetype
 {
+    [Flags]
     public enum Faction
     {
-        Neutral,
-        Player,
-        Enemy
+        Neutral = 1 << 0,
+        Player  = 1 << 1,
+        Enemy   = 1 << 2,
+
+
+        Any     = Neutral | Player | Enemy,
     }
 }
