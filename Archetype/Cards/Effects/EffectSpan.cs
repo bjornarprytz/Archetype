@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Archetype
 {
@@ -50,6 +51,17 @@ namespace Archetype
             }
 
             ChainOfEvents.Clear();
+        }
+
+        internal string GenerateRulesText()
+        {
+            StringBuilder rulesText = new StringBuilder();
+
+            ChainOfEvents.Keys.ToList()
+                .ForEach(tick => ChainOfEvents[tick]
+                .ForEach(effect => rulesText.AppendLine($"{tick}: {effect.RulesText}")));
+
+            return rulesText.ToString();
         }
 
         private void AddEffect(Effect effect, int when)

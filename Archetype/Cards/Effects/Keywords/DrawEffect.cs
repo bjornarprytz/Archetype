@@ -5,6 +5,8 @@
         public override string Keyword => "Draw";
         public int CardsToDraw => X;
 
+        internal override string RulesText => $"{Requirements.TargetsText} draw(s) {X} card(s)";
+
         public DrawEffect(Unit source, int x, Faction targetFaction)
             : base(source, x, 0, 0, targetFaction)
         {

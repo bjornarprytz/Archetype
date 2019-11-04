@@ -51,8 +51,10 @@ namespace Archetype
             Requirements = requirements;
         }
 
+        internal abstract string RulesText { get; }
 
         protected abstract Resolution _resolve { get; }
         protected virtual Cancellation _cancel => delegate { /* What to do when cancelling an effect? */ };
+
     }
 }

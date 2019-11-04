@@ -7,6 +7,8 @@ namespace Archetype
 
         public int CardsToDiscard => X;
 
+        internal override string RulesText => $"{Requirements.TargetsText} discards {X} cards.";
+
         public DiscardEffect(Unit source, Unit target, int x, int minTargets, int maxTargets, Faction targetFaction) 
             : base(source, x, minTargets, maxTargets, targetFaction)
         { }

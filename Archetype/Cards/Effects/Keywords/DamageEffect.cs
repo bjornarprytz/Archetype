@@ -7,6 +7,8 @@ namespace Archetype
         public override string Keyword => "Damage";
         public int Damage => X;
 
+        internal override string RulesText => $"Deal {X} damage to {Requirements.TargetsText}.";
+
         public DamageEffect(Unit attacker, int damage, int minTargets, int maxTargets, Faction targetFaction) 
             : base(attacker, damage, minTargets, maxTargets, targetFaction)
         { }

@@ -9,6 +9,8 @@ namespace Archetype
         public override string Keyword => "Mill";
         public int CardsToMill => X;
 
+        internal override string RulesText => $"Mill {Requirements.TargetsText} for {X} card(s)";
+
         public MillEffect(Unit source, int x, int minTargets, int maxTargets, Faction targetFaction) 
             : base(source, x, minTargets, maxTargets, targetFaction)
         { }
