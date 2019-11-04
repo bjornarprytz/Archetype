@@ -73,9 +73,9 @@ namespace Archetype
             return NextMoveTick == tick;
         }
 
-        public abstract void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt);
+        internal abstract void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt);
 
-        public void Discard(Guid cardId)
+        internal void Discard(Guid cardId)
         {
             Card cardToDiscard = Hand.Pick(cardId);
 
@@ -89,7 +89,7 @@ namespace Archetype
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
 
-        public void Discard(int x, DecisionPrompt prompt)
+        internal void Discard(int x, DecisionPrompt prompt)
         {
             if (x < 1) return;
 
@@ -123,8 +123,7 @@ namespace Archetype
             }
         }
 
-
-        public void Mill(int x)
+        internal void Mill(int x)
         {
             while (x > 0)
             {
@@ -133,13 +132,13 @@ namespace Archetype
             }
         }
 
-        public void Shuffle()
+        internal void Shuffle()
         {
             Deck.Shuffle();
             OnDeckShuffled?.Invoke(Deck);
         }
 
-        public int TakeDamage(Unit source, int damageTaken)
+        internal int TakeDamage(Unit source, int damageTaken)
         {
             Life -= damageTaken;
             OnDamageTaken?.Invoke(source, damageTaken);
@@ -147,7 +146,7 @@ namespace Archetype
             return damageTaken;
         }
 
-        public void DealDamage(Unit target, int damage)
+        internal void DealDamage(Unit target, int damage)
         {
             OnDamageDealt?.Invoke(target, target.TakeDamage(this, damage));
         }

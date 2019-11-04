@@ -18,7 +18,7 @@ namespace Archetype
             // Make moves based on game state
         }
 
-        public override void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt)
+        internal override void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt)
         {
             if (Hand.IsEmpty)
             {

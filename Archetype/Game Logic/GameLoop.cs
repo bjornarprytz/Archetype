@@ -13,7 +13,7 @@ namespace Archetype
         public GameLoop(GameState initialState, DecisionPrompt handlePrompt)
         {
             State = initialState;
-            PromptUser += handlePrompt;
+            PromptUser = handlePrompt;
         }
 
         public void Start()
@@ -27,14 +27,14 @@ namespace Archetype
             
         }
 
-        private void Turns()
-        {
-            Time.ResolveTurns(State, PromptUser);
-        }
-
         private void Upkeep()
         {
             Time.ResolveEffects(PromptUser);
+        }
+
+        private void Turns()
+        {
+            Time.ResolveTurns(State, PromptUser);
         }
 
         private void EndTick()
