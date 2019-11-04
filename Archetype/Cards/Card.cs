@@ -67,7 +67,7 @@ namespace Archetype
 
             OnBeforePlay?.Invoke();
             
-
+            // TODO: Put EffectSpan onto the timeline
 
             OnAfterPlay?.Invoke();
         }
