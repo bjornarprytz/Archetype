@@ -27,7 +27,7 @@ namespace Archetype
             return ChainOfEvents[tick] ?? new List<Effect>();
         }
 
-        public void ResolveTick(int currentTick, DecisionPrompt prompt) // Called by the game state
+        public void ResolveTick(int currentTick, DecisionPrompt prompt)
         {
             int relativeTick = currentTick - StartTime;
 
@@ -57,7 +57,7 @@ namespace Archetype
         {
             StringBuilder rulesText = new StringBuilder();
 
-            ChainOfEvents.Keys.ToList()
+            ChainOfEvents.Keys.OrderBy(tick => tick).ToList()
                 .ForEach(tick => ChainOfEvents[tick]
                 .ForEach(effect => rulesText.AppendLine($"{tick}: {effect.RulesText}")));
 

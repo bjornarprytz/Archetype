@@ -27,10 +27,7 @@ namespace Archetype
 
             for (int i=0; i<size; i++)
             {
-                Card newCard = new Card($"Card {i}", null)
-                {
-                    RulesText = $"This card does nothing! [{i}]"
-                };
+                Card newCard = Card.Dummy($"Card {i}");
 
                 sampleList.Add(newCard);
             }
@@ -43,7 +40,7 @@ namespace Archetype
 
             for (int i = 0; i < size; i++)
             {
-                Card newMove = new Card($"Move {i}", null);
+                Card newMove = Card.Dummy($"Card {i}");
 
                 sampleList.Add(newMove);
             }

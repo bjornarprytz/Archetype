@@ -45,6 +45,8 @@ namespace Archetype
 
         public void CommitEffectSpan(EffectSpan span)
         {
+            // TODO: Be aware that the span could be part of a CardTemplate (which is shared among copies of that card),
+            // and that would probably lead to some undesired behaviour.
             Effects.Add(span);
             span.StartTime = CurrentTick;
         }

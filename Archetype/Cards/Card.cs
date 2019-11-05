@@ -15,9 +15,10 @@ namespace Archetype
         public event BeforePlay OnBeforePlay;
         public event AfterPlay OnAfterPlay;
 
-        public string Name { get; set; }
+
+        public string Name => Template.Name;
         public string RulesText { get; set; }
-        public EffectSpan Effects { get; set; }
+        public CardTemplate Template { get; private set; }
 
         
         public Zone CurrentZone
@@ -34,13 +35,13 @@ namespace Archetype
 
         public static Card Dummy (string name)
         {
-            return new Card(name, new EffectSpan(new Dictionary<int, List<Effect>>()));
+            return new Card(CardTemplate.Dummy(name));
         }
 
-        public Card(string name, EffectSpan effects, Zone zone=null)
+        public Card(CardTemplate template, Zone zone=null)
             : base(zone == null ? Faction.Neutral : zone.Owner.Team)
         {
-            Name = name;
+            Template = template;
             CurrentZone = zone;
         }
 
@@ -56,18 +57,18 @@ namespace Archetype
 
         public virtual void Play(Timeline timeline, DecisionPrompt prompt)
         {
-            foreach(List<Effect> effects in Effects.ChainOfEvents.Values)
+            foreach(List<Effect> effects in Template.EffectSpan.ChainOfEvents.Values)
             {
-                foreach (Effect effecet in effects)
+                foreach (Effect effect in effects)
                 {
-                    effecet.PromptForTargets(prompt);
+                    effect.PromptForTargets(prompt);
                 }
             }
 
 
             OnBeforePlay?.Invoke();
-            
-            // TODO: Put EffectSpan onto the timeline
+
+            timeline.CommitEffectSpan(Template.EffectSpan);
 
             OnAfterPlay?.Invoke();
         }

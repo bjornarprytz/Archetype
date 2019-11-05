@@ -25,9 +25,9 @@ namespace Archetype
         {
             get
             {
-                bool defeat = !Player.ActiveHeroes.Any(u => u.IsAlive);
+                bool defeat = Player.ActiveHeroes.All(u => !u.IsAlive);
 
-                bool victory = !Enemies.Any(e => e.IsAlive);
+                bool victory = Enemies.All(e => !e.IsAlive);
 
                 return defeat || victory;
             }
