@@ -32,7 +32,7 @@ namespace Archetype
                 sampleList.Add(newCard);
             }
 
-            return sampleList;
+            return sampleList; 
         }
         public static List<Card> TestMoveSet(int size)
         {
