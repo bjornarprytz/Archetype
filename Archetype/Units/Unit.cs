@@ -8,6 +8,8 @@ namespace Archetype
     {
         public delegate void DamageTaken(Unit source, int damage);
         public delegate void DamageDealt(Unit target, int damage);
+        public delegate void HealReceived(Unit source, int heal);
+        public delegate void HealGiven(Unit target, int heal);
         public delegate void CardDrawn(Card drawnCard);
         public delegate void CardDiscarded(Card discardedCard);
         public delegate void CardMilled(Card milledCard);
@@ -15,6 +17,8 @@ namespace Archetype
 
         public event DamageTaken OnDamageTaken;
         public event DamageDealt OnDamageDealt;
+        public event HealReceived OnHealReceived;
+        public event HealGiven OnHealGiven;
         public event CardDrawn OnCardDrawn;
         public event CardDiscarded OnCardDiscarded;
         public event CardMilled OnCardMilled;
@@ -136,6 +140,19 @@ namespace Archetype
         {
             Deck.Shuffle();
             OnDeckShuffled?.Invoke(Deck);
+        }
+
+        internal int ReceiveHeal(Unit source, int healAmount)
+        {
+            Life += healAmount;
+            OnHealReceived?.Invoke(source, healAmount);
+
+            return healAmount;
+        }
+
+        internal void GiveHeal(Unit target, int heal)
+        {
+            OnHealGiven(target, target.ReceiveHeal(this, heal));
         }
 
         internal int TakeDamage(Unit source, int damageTaken)
