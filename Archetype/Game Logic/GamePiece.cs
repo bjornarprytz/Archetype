@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class GamePiece
+    public abstract class GamePiece
     {
         public Guid Id { get; private set; }
         public Faction Team { get; private set; }

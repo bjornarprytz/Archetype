@@ -13,8 +13,8 @@ namespace Archetype.Cards.Effects.Keywords
         internal override string RulesText => $"Heal {X} damage from {Requirements.TargetsText}.";
 
 
-        public HealEffect(Unit giver, int amount, int minTargets, int maxTargets, Faction targetFaction)
-            : base(giver, amount, minTargets, maxTargets, targetFaction)
+        public HealEffect(int amount, int minTargets, int maxTargets, Faction targetFaction)
+            : base(amount, minTargets, maxTargets, targetFaction)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

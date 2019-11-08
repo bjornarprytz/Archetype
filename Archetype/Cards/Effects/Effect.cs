@@ -20,16 +20,19 @@ namespace Archetype
         public PromptRequirements Requirements { get; set; }
         public List<Unit> Targets { get; set; }
         public Unit Source { get; set; }
-        public EffectSpan Whence { get; set; }
 
-        public void PromptForTargets(DecisionPrompt prompt)
+        public bool PromptForTargets(DecisionPrompt prompt)
         {
             PromptResult result = prompt(Requirements);
+
+            if (result.Aborted) return false;
 
             foreach (Unit unit in result.ChosenPieces)
             {
                 Targets.Add(unit);
             }
+
+            return true;
         }
 
         public void Resolve(DecisionPrompt prompt)
@@ -43,10 +46,8 @@ namespace Archetype
             OnCancel?.Invoke(this);
         }
 
-
-        public Effect(Unit source, PromptRequirements requirements)
+        public Effect(PromptRequirements requirements)
         {
-            Source = source;
             Targets = new List<Unit>();
             Requirements = requirements;
         }

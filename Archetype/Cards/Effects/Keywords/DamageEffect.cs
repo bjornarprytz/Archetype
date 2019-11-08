@@ -9,8 +9,8 @@ namespace Archetype
 
         internal override string RulesText => $"Deal {X} damage to {Requirements.TargetsText}.";
 
-        public DamageEffect(Unit attacker, int damage, int minTargets, int maxTargets, Faction targetFaction) 
-            : base(attacker, damage, minTargets, maxTargets, targetFaction)
+        public DamageEffect(int damage, int minTargets, int maxTargets, Faction targetFaction) 
+            : base(damage, minTargets, maxTargets, targetFaction)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

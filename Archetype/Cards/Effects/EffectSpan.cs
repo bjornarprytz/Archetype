@@ -12,14 +12,6 @@ namespace Archetype
         public EffectSpan(Dictionary<int, List<Effect>> chainOfEvents) : base()
         {
             ChainOfEvents = chainOfEvents;
-
-            foreach (List<Effect> effects in ChainOfEvents.Values)
-            {
-                foreach (Effect effect in effects)
-                {
-                    effect.Whence = this;
-                }
-            }
         }
 
         public List<Effect> EffectsAtTick(int tick)
@@ -66,11 +58,10 @@ namespace Archetype
 
         private void AddEffect(Effect effect, int when)
         {
-            effect.Whence = this;
-
             if (!ChainOfEvents.ContainsKey(when)) ChainOfEvents[when] = new List<Effect>();
 
             ChainOfEvents[when].Add(effect);
         }
+
     }
 }

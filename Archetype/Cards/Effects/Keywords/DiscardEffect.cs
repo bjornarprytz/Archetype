@@ -9,8 +9,8 @@ namespace Archetype
 
         internal override string RulesText => $"{Requirements.TargetsText} discards {X} cards.";
 
-        public DiscardEffect(Unit source, Unit target, int x, int minTargets, int maxTargets, Faction targetFaction) 
-            : base(source, x, minTargets, maxTargets, targetFaction)
+        public DiscardEffect(Unit target, int x, int minTargets, int maxTargets, Faction targetFaction) 
+            : base(x, minTargets, maxTargets, targetFaction)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

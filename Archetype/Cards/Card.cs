@@ -15,11 +15,12 @@ namespace Archetype
         public event BeforePlay OnBeforePlay;
         public event AfterPlay OnAfterPlay;
 
-
         public string Name => Template.Name;
+        public EffectSpan EffectSpan => Template.EffectSpan;
         public string RulesText { get; set; }
         public CardTemplate Template { get; private set; }
-
+        public bool HasOwner => Owner != null;
+        public Unit Owner { get; private set; }
         
         public Zone CurrentZone
         {
@@ -28,10 +29,12 @@ namespace Archetype
             {
                 Zone previousZone = currZone;
                 currZone = value;
+                Owner = currZone?.Owner;
                 OnZoneChanged?.Invoke(previousZone, currZone);
             }
         }
         private Zone currZone;
+
 
         public static Card Dummy (string name)
         {
@@ -55,22 +58,25 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public virtual void Play(Timeline timeline, DecisionPrompt prompt)
+        public virtual bool Play(Timeline timeline, DecisionPrompt prompt)
         {
-            foreach(List<Effect> effects in Template.EffectSpan.ChainOfEvents.Values)
+            foreach(List<Effect> effects in EffectSpan.ChainOfEvents.Values)
             {
                 foreach (Effect effect in effects)
                 {
-                    effect.PromptForTargets(prompt);
+                    if (!effect.PromptForTargets(prompt)) return false;
+
+                    effect.Source = Owner;
                 }
             }
 
-
             OnBeforePlay?.Invoke();
 
-            timeline.CommitEffectSpan(Template.EffectSpan);
+            timeline.CommitEffectSpan(EffectSpan);
 
             OnAfterPlay?.Invoke();
+
+            return true;
         }
 
     }

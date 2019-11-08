@@ -11,8 +11,8 @@ namespace Archetype
 
         internal override string RulesText => $"Mill {Requirements.TargetsText} for {X} card(s)";
 
-        public MillEffect(Unit source, int x, int minTargets, int maxTargets, Faction targetFaction) 
-            : base(source, x, minTargets, maxTargets, targetFaction)
+        public MillEffect(int x, int minTargets, int maxTargets, Faction targetFaction) 
+            : base(x, minTargets, maxTargets, targetFaction)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

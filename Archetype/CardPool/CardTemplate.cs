@@ -24,6 +24,7 @@ namespace Archetype
             RulesText = effectSpan.GenerateRulesText();
         }
 
+
         public static CardTemplate Dummy(string name)
         {
             return new CardTemplate(name, new EffectSpan(new Dictionary<int, List<Effect>>()));
