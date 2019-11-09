@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace Archetype
 {
@@ -11,17 +9,15 @@ namespace Archetype
 
         private int _damage;
 
-        public DamageTemplate(int amount, PromptRequirements requirements)
+        public DamageTemplate(int amount, PromptRequirements requirements) 
+            : base (requirements)
         {
             _damage = amount;
-            Requirements = requirements;
         }
 
         public override Effect CreateEffect(Unit source, PromptResult userInput)
         {
-            if (!userInput.Meets(Requirements)) throw new Exception("User input insufficient to create effect");
-
-            List<Unit> targets = new List<Unit>(userInput.ChosenPieces.Select(piece => (Unit)piece));
+            List<Unit> targets = HandleUserInput(userInput);
 
             return new DamageEffect(_damage, source, targets);
         }
