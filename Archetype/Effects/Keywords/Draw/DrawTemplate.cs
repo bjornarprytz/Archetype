@@ -6,11 +6,11 @@ namespace Archetype
     {
         public override string RulesText => $"{Requirements.TargetsText} draw(s) {_cardsToDraw} card(s)";
 
-        public override PromptRequirements Requirements { get; protected set; }
+        public override PlayCardPrompt Requirements { get; protected set; }
 
         private int _cardsToDraw;
 
-        public DrawTemplate(int amount, PromptRequirements requirements)
+        public DrawTemplate(int amount, PlayCardPrompt requirements)
             : base (requirements)
         {
             _cardsToDraw = amount;

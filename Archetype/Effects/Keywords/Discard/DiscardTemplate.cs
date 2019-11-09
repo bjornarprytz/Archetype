@@ -6,11 +6,11 @@ namespace Archetype
     {
         public override string RulesText => $"{Requirements.TargetsText} discards {_cardsToDiscard} cards.";
 
-        public override PromptRequirements Requirements { get; protected set; }
+        public override PlayCardPrompt Requirements { get; protected set; }
 
         private int _cardsToDiscard;
 
-        public DiscardTemplate(int amount, PromptRequirements requirements)
+        public DiscardTemplate(int amount, PlayCardPrompt requirements)
             : base(requirements)
         {
             _cardsToDiscard = amount;

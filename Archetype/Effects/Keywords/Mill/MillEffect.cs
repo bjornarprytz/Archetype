@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public class MillEffect : XEffect, IKeyword
+    public class MillEffect : XEffect
     {
         public override string Keyword => "Mill";
         public int CardsToMill => X;

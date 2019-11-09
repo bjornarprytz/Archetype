@@ -109,8 +109,7 @@ namespace Archetype
                 return;
             }
 
-
-            PromptResult result = prompt(new PromptRequirements(x, typeof(Card), Faction.Any));
+            PromptResult result = prompt(new EffectResolutionPrompt(x, typeof(Card)));
 
             foreach (Card card in result.ChosenPieces)
             {

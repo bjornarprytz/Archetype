@@ -6,11 +6,11 @@ namespace Archetype
     {
         public override string RulesText => $"Heal {_amountToHeal} damage from {Requirements.TargetsText}.";
 
-        public override PromptRequirements Requirements { get; protected set; }
+        public override PlayCardPrompt Requirements { get; protected set; }
 
         private int _amountToHeal;
 
-        public HealTemplate(int amount, PromptRequirements requirements)
+        public HealTemplate(int amount, PlayCardPrompt requirements)
             : base (requirements)
         {
             _amountToHeal = amount;

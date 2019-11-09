@@ -8,9 +8,9 @@ namespace Archetype
     public abstract class EffectTemplate
     {
         public abstract string RulesText { get; }
-        public virtual PromptRequirements Requirements { get; protected set; }
+        public virtual PlayCardPrompt Requirements { get; protected set; }
 
-        protected EffectTemplate(PromptRequirements requirements)
+        protected EffectTemplate(PlayCardPrompt requirements)
         {
             Requirements = requirements;
         }

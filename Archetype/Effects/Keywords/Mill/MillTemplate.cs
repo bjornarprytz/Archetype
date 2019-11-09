@@ -6,11 +6,11 @@ namespace Archetype
     {
         public override string RulesText => $"Mill {Requirements.TargetsText} for {_amountToMill} card(s)";
 
-        public override PromptRequirements Requirements { get; protected set; }
+        public override PlayCardPrompt Requirements { get; protected set; }
 
         private int _amountToMill;
 
-        public MillTemplate(int amount, PromptRequirements requirements)
+        public MillTemplate(int amount, PlayCardPrompt requirements)
             : base (requirements)
         {
             _amountToMill = amount;
