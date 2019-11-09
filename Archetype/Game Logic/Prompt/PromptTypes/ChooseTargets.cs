@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class PlayCardPrompt : UserPrompt
+    public class ChooseTargets : ActionPrompt
     {
         
         internal string TargetsText => $"{_numberOfTargets} {_targetsFaction} {_typeTargets}";
@@ -10,13 +10,13 @@ namespace Archetype
         private Faction _allowedFactions;
         protected override Type _typeRestriction => typeof(GamePiece);
 
-        public PlayCardPrompt(int x, Type t, Faction allowedFactions)
+        public ChooseTargets(int x, Type t, Faction allowedFactions)
             : base(x, t)
         {
             _allowedFactions = allowedFactions;
         }
 
-        public PlayCardPrompt(int min, int max, Type t, Faction allowedFactions)
+        public ChooseTargets(int min, int max, Type t, Faction allowedFactions)
             : base(min, max, t)
         {
             _allowedFactions = allowedFactions;

@@ -2,18 +2,18 @@
 
 namespace Archetype
 {
-    public class ChooseCardPrompt : UserPrompt
+    public class ChooseCards : ActionPrompt
     {
 
         protected override Type _typeRestriction => typeof(Card);
 
-        public ChooseCardPrompt(int x)
+        public ChooseCards(int x)
             : base (x, typeof(Card))
         {
 
         }
 
-        public ChooseCardPrompt(int min, int max, Type requiredType)
+        public ChooseCards(int min, int max)
             : base(min, max, typeof(Card))
         {
 

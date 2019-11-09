@@ -20,7 +20,7 @@ namespace Archetype
             return ChainOfEvents[tick] ?? new List<Effect>();
         }
 
-        public void ResolveTick(int currentTick, DecisionPrompt prompt)
+        public void ResolveTick(int currentTick, RequiredAction prompt)
         {
             int relativeTick = currentTick - StartTime;
 

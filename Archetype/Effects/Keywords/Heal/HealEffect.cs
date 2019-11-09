@@ -14,7 +14,7 @@ namespace Archetype
             : base(x, source, targets)
         { }
 
-        protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)
+        protected override void _affect(Unit target, int modifier, RequiredAction prompt)
         {
             Source.GiveHeal(target, HealAmount);
         }

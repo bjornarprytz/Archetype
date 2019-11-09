@@ -6,11 +6,11 @@ namespace Archetype
 {
     public class GameLoop
     {
-        public event DecisionPrompt PromptUser;
+        public event RequiredAction PromptUser;
         public Timeline Time { get; set; }
         public GameState State { get; set; }
 
-        public GameLoop(GameState initialState, DecisionPrompt handlePrompt)
+        public GameLoop(GameState initialState, RequiredAction handlePrompt)
         {
             State = initialState;
             PromptUser = handlePrompt;

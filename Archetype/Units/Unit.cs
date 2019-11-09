@@ -77,7 +77,7 @@ namespace Archetype
             return NextMoveTick == tick;
         }
 
-        internal abstract void TakeTurn(Timeline timeline, GameState gameState, DecisionPrompt prompt);
+        internal abstract void TakeTurn(Timeline timeline, GameState gameState, RequiredAction prompt);
 
         internal void Discard(Guid cardId)
         {
@@ -93,7 +93,7 @@ namespace Archetype
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
 
-        internal void Discard(int x, DecisionPrompt prompt)
+        internal void Discard(int x, RequiredAction prompt)
         {
             if (x < 1) return;
 
@@ -109,7 +109,7 @@ namespace Archetype
                 return;
             }
 
-            PromptResult result = prompt(new EffectResolutionPrompt(x, typeof(Card)));
+            Decision result = prompt(new ChooseCards(x));
 
             foreach (Card card in result.ChosenPieces)
             {

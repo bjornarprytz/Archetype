@@ -9,7 +9,7 @@ namespace Archetype
     {
         public delegate void ZoneChange(Zone from, Zone to);
         public delegate void BeforePlay();
-        public delegate void PlayCard(DecisionPrompt prompt);
+        public delegate void PlayCard(RequiredAction prompt);
         public delegate void AfterPlay();
 
         public event ZoneChange OnZoneChanged;
@@ -52,7 +52,7 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public virtual bool Play(Timeline timeline, DecisionPrompt prompt)
+        public virtual bool Play(Timeline timeline, RequiredAction prompt)
         {
             EffectSpan effectSpan = PromptForTargets(prompt);
             if (effectSpan == null) return false;
@@ -66,7 +66,7 @@ namespace Archetype
             return true;
         }
 
-        private EffectSpan PromptForTargets(DecisionPrompt prompt)
+        private EffectSpan PromptForTargets(RequiredAction prompt)
         {
             EffectSpan effectSpan = new EffectSpan();
 
@@ -74,7 +74,7 @@ namespace Archetype
             {
                 foreach (EffectTemplate effectTemplate in _effects[tick])
                 {
-                    PromptResult result = prompt(effectTemplate.Requirements);
+                    Decision result = prompt(effectTemplate.Requirements);
 
                     if (result.Aborted) return null; // TODO: Find a better way to signal aborted prompts
 

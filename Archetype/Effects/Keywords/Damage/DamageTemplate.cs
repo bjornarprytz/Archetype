@@ -5,17 +5,17 @@ namespace Archetype
     public class DamageTemplate : EffectTemplate
     {
         public override string RulesText => $"Deal {_damage} damage to {Requirements.TargetsText}.";
-        public override PlayCardPrompt Requirements { get; protected set; }
+        public override ChooseTargets Requirements { get; protected set; }
 
         private int _damage;
 
-        public DamageTemplate(int amount, PlayCardPrompt requirements) 
+        public DamageTemplate(int amount, ChooseTargets requirements) 
             : base (requirements)
         {
             _damage = amount;
         }
 
-        public override Effect CreateEffect(Unit source, PromptResult userInput)
+        public override Effect CreateEffect(Unit source, Decision userInput)
         {
             List<Unit> targets = HandleUserInput(userInput);
 

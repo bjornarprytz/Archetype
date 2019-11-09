@@ -35,7 +35,7 @@ namespace Archetype
             return futureTicks;
         }
 
-        public void ResolveEffects(DecisionPrompt prompt)
+        public void ResolveEffects(RequiredAction prompt)
         {
             foreach (EffectSpan span in Effects)
             {
@@ -51,7 +51,7 @@ namespace Archetype
             span.StartTime = CurrentTick;
         }
 
-        public void ResolveTurns(GameState gameState, DecisionPrompt prompt)
+        public void ResolveTurns(GameState gameState, RequiredAction prompt)
         {
             InitiativeOrder = gameState.ActiveUnits.OrderByDescending(u => u.Speed).ToList();
 

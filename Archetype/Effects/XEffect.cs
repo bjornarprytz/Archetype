@@ -27,6 +27,6 @@ namespace Archetype
             }
         };
 
-        protected abstract void _affect(Unit target, int modifier, DecisionPrompt prompt);
+        protected abstract void _affect(Unit target, int modifier, RequiredAction prompt);
     }
 }

@@ -8,16 +8,16 @@ namespace Archetype
     public abstract class EffectTemplate
     {
         public abstract string RulesText { get; }
-        public virtual PlayCardPrompt Requirements { get; protected set; }
+        public virtual ChooseTargets Requirements { get; protected set; }
 
-        protected EffectTemplate(PlayCardPrompt requirements)
+        protected EffectTemplate(ChooseTargets requirements)
         {
             Requirements = requirements;
         }
 
-        public abstract Effect CreateEffect(Unit source, PromptResult userInput);
+        public abstract Effect CreateEffect(Unit source, Decision userInput);
 
-        protected List<Unit> HandleUserInput(PromptResult userInput)
+        protected List<Unit> HandleUserInput(Decision userInput)
         {
             if (!userInput.Meets(Requirements)) throw new Exception("User input insufficient to create effect");
 

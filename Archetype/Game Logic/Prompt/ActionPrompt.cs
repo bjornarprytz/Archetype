@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class UserPrompt
+    public abstract class ActionPrompt
     {
         public int MaxChoices { get; protected set; }
         public int MinChoices { get; protected set; }
@@ -22,12 +22,12 @@ namespace Archetype
         private Type _requiredType;
         protected virtual Type _typeRestriction => typeof(object);
 
-        public UserPrompt(int x, Type requiredType)
+        public ActionPrompt(int x, Type requiredType)
         {
             RequiredType = requiredType;
             MaxChoices = MinChoices = x;
         }
-        public UserPrompt(int min, int max, Type requiredType)
+        public ActionPrompt(int min, int max, Type requiredType)
         {
             RequiredType = requiredType;
             MaxChoices = max;

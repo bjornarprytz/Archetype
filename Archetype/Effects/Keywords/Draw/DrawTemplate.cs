@@ -6,17 +6,17 @@ namespace Archetype
     {
         public override string RulesText => $"{Requirements.TargetsText} draw(s) {_cardsToDraw} card(s)";
 
-        public override PlayCardPrompt Requirements { get; protected set; }
+        public override ChooseTargets Requirements { get; protected set; }
 
         private int _cardsToDraw;
 
-        public DrawTemplate(int amount, PlayCardPrompt requirements)
+        public DrawTemplate(int amount, ChooseTargets requirements)
             : base (requirements)
         {
             _cardsToDraw = amount;
         }
 
-        public override Effect CreateEffect(Unit source, PromptResult userInput)
+        public override Effect CreateEffect(Unit source, Decision userInput)
         {
             List<Unit> targets = HandleUserInput(userInput);
 
