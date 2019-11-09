@@ -9,9 +9,10 @@ namespace Archetype
         public int StartTime { get; set; }
         public Dictionary<int, List<Effect>> ChainOfEvents { get; set; }
 
-        public EffectSpan(Dictionary<int, List<Effect>> chainOfEvents) : base()
+        public EffectSpan(Dictionary<int, List<Effect>> chainOfEvents=null) : base()
         {
-            ChainOfEvents = chainOfEvents;
+
+            ChainOfEvents = chainOfEvents ?? new Dictionary<int, List<Effect>>(); ;
         }
 
         public List<Effect> EffectsAtTick(int tick)
@@ -45,18 +46,7 @@ namespace Archetype
             ChainOfEvents.Clear();
         }
 
-        internal string GenerateRulesText()
-        {
-            StringBuilder rulesText = new StringBuilder();
-
-            ChainOfEvents.Keys.OrderBy(tick => tick).ToList()
-                .ForEach(tick => ChainOfEvents[tick]
-                .ForEach(effect => rulesText.AppendLine($"{tick}: {effect.RulesText}")));
-
-            return rulesText.ToString();
-        }
-
-        private void AddEffect(Effect effect, int when)
+        public void AddEffect(int when, Effect effect)
         {
             if (!ChainOfEvents.ContainsKey(when)) ChainOfEvents[when] = new List<Effect>();
 

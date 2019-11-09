@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Archetype.Cards.Effects.Keywords
+namespace Archetype
 {
     public class HealEffect : XEffect
     {
@@ -10,11 +10,8 @@ namespace Archetype.Cards.Effects.Keywords
 
         public int HealAmount => X;
 
-        internal override string RulesText => $"Heal {X} damage from {Requirements.TargetsText}.";
-
-
-        public HealEffect(int amount, int minTargets, int maxTargets, Faction targetFaction)
-            : base(amount, minTargets, maxTargets, targetFaction)
+        public HealEffect(int x, Unit source, List<Unit> targets)
+            : base(x, source, targets)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Archetype
@@ -15,12 +16,11 @@ namespace Archetype
         public event BeforePlay OnBeforePlay;
         public event AfterPlay OnAfterPlay;
 
-        public string Name => Template.Name;
-        public EffectSpan EffectSpan => Template.EffectSpan;
-        public string RulesText { get; set; }
-        public CardTemplate Template { get; private set; }
+        public string Name { get; private set; }
+        public string RulesText { get; private set; }
         public bool HasOwner => Owner != null;
         public Unit Owner { get; private set; }
+        private Dictionary<int, List<EffectTemplate>> _effects;
         
         public Zone CurrentZone
         {
@@ -35,17 +35,11 @@ namespace Archetype
         }
         private Zone currZone;
 
-
-        public static Card Dummy (string name)
+        internal Card(string name, Dictionary<int, List<EffectTemplate>> effects=null)
         {
-            return new Card(CardTemplate.Dummy(name));
-        }
-
-        public Card(CardTemplate template, Zone zone=null)
-            : base(zone == null ? Faction.Neutral : zone.Owner.Team)
-        {
-            Template = template;
-            CurrentZone = zone;
+            Name = name;
+            _effects = effects ?? new Dictionary<int, List<EffectTemplate>>();
+            RulesText = GenerateRulesText(_effects);
         }
 
         public void MoveTo(Zone newZone)
@@ -60,23 +54,46 @@ namespace Archetype
 
         public virtual bool Play(Timeline timeline, DecisionPrompt prompt)
         {
-            foreach(List<Effect> effects in EffectSpan.ChainOfEvents.Values)
-            {
-                foreach (Effect effect in effects)
-                {
-                    if (!effect.PromptForTargets(prompt)) return false;
-
-                    effect.Source = Owner;
-                }
-            }
+            EffectSpan effectSpan = PromptForTargets(prompt);
+            if (effectSpan == null) return false;
 
             OnBeforePlay?.Invoke();
 
-            timeline.CommitEffectSpan(EffectSpan);
+            timeline.CommitEffectSpan(effectSpan);
 
             OnAfterPlay?.Invoke();
 
             return true;
+        }
+
+        private EffectSpan PromptForTargets(DecisionPrompt prompt)
+        {
+            EffectSpan effectSpan = new EffectSpan();
+
+            foreach (int tick in _effects.Keys)
+            {
+                foreach (EffectTemplate effectTemplate in _effects[tick])
+                {
+                    PromptResult result = prompt(effectTemplate.Requirements);
+
+                    if (result.Aborted) return null; // TODO: Find a better way to signal aborted prompts
+
+                    effectSpan.AddEffect(tick, effectTemplate.CreateEffect(Owner, result)); // TODO: Make sure Owner can't be null at this point
+                }
+            }
+
+            return effectSpan;
+        }
+
+        private string GenerateRulesText(Dictionary<int, List<EffectTemplate>> effects)
+        {
+            StringBuilder rulesText = new StringBuilder();
+
+            effects.Keys.OrderBy(tick => tick).ToList()
+                .ForEach(tick => effects[tick]
+                .ForEach(effect => rulesText.AppendLine($"{tick}: {effect.RulesText}")));
+
+            return rulesText.ToString();
         }
 
     }

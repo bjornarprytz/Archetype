@@ -10,24 +10,19 @@ namespace Archetype
      should be factories for actual copies of those cards (ie. the cards that 
      you draw and play with).
      */
-    public class CardTemplate
+    public abstract class CardTemplate
     {
         public string Name { get; set; }
         public string RulesText { get; private set; }
-        public EffectSpan EffectSpan { get; set; }
+        internal Dictionary<int, List<EffectTemplate>> EffectSpan { get; set; }
 
 
-        public CardTemplate(string name, EffectSpan effectSpan)
+        internal CardTemplate(string name, Dictionary<int, List<EffectTemplate>> effectSpan)
         {
             Name = name;
             EffectSpan = effectSpan;
-            RulesText = effectSpan.GenerateRulesText();
         }
 
-
-        public static CardTemplate Dummy(string name)
-        {
-            return new CardTemplate(name, new EffectSpan(new Dictionary<int, List<Effect>>()));
-        }
+        public virtual Card CreateCard() { return new Card("Dummy"); }
     }
 }

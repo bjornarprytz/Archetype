@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace Archetype
 {
     public class DiscardEffect : XEffect, IKeyword
@@ -7,10 +9,8 @@ namespace Archetype
 
         public int CardsToDiscard => X;
 
-        internal override string RulesText => $"{Requirements.TargetsText} discards {X} cards.";
-
-        public DiscardEffect(Unit target, int x, int minTargets, int maxTargets, Faction targetFaction) 
-            : base(x, minTargets, maxTargets, targetFaction)
+        public DiscardEffect(int damage, Unit source, List<Unit> targets = null)
+            : base(damage, source, targets)
         { }
 
         protected override void _affect(Unit target, int modifier, DecisionPrompt prompt)

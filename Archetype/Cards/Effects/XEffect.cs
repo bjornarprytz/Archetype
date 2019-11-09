@@ -11,8 +11,8 @@ namespace Archetype
 
         private int _x;
 
-        public XEffect(int x, int minTargets, int maxTargets, Faction targetFaction) 
-            : base(new PromptRequirements(minTargets, maxTargets, typeof(Unit), targetFaction))
+        public XEffect(int x, Unit source, List<Unit> targets=null) 
+            : base(source, targets)
         {
             X = x;
         }

@@ -16,24 +16,10 @@ namespace Archetype
         public event CancelledEffect OnCancel;
 
         public bool HasSource { get { return Source != null; } }
-        public bool HasTargets { get { return Targets.Count > 0; } }
-        public PromptRequirements Requirements { get; set; }
+        public bool HasTargets { get { return Targets != null && Targets.Count > 0; } }
         public List<Unit> Targets { get; set; }
         public Unit Source { get; set; }
 
-        public bool PromptForTargets(DecisionPrompt prompt)
-        {
-            PromptResult result = prompt(Requirements);
-
-            if (result.Aborted) return false;
-
-            foreach (Unit unit in result.ChosenPieces)
-            {
-                Targets.Add(unit);
-            }
-
-            return true;
-        }
 
         public void Resolve(DecisionPrompt prompt)
         {
@@ -46,13 +32,11 @@ namespace Archetype
             OnCancel?.Invoke(this);
         }
 
-        public Effect(PromptRequirements requirements)
+        public Effect(Unit source, List<Unit> targets=null)
         {
-            Targets = new List<Unit>();
-            Requirements = requirements;
+            Source = source;
+            Targets = targets ?? new List<Unit>();
         }
-
-        internal abstract string RulesText { get; }
 
         protected abstract Resolution _resolve { get; }
         protected virtual Cancellation _cancel => delegate { /* What to do when cancelling an effect? */ };
