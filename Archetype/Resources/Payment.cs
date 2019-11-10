@@ -4,11 +4,17 @@ using System.Text;
 
 namespace Archetype
 {
-    public struct Payment<C> where C : Resource
+    public abstract class Payment
     {
-        public int Amount { get; private set; }
+        public abstract Type Currency { get; }
+        public virtual int Amount { get; protected set; }
 
-        public Payment(int amount)
+    }
+
+    public class Payment<C> : Payment where C : Resource
+    {
+        public override Type Currency => typeof(C);
+        public Payment(int amount) 
         {
             Amount = amount;
         } 

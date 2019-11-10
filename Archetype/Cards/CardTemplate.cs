@@ -18,11 +18,17 @@ namespace Archetype
         internal Dictionary<int, List<EffectTemplate>> EffectSpan { get; set; }
 
 
-        internal CardTemplate(string name, Payment<Resource>[] cost, Dictionary<int, List<EffectTemplate>> effectSpan)
+        internal CardTemplate(string name, Payment[] cost, params KeyValuePair<int, EffectTemplate>[] effects)
         {
             Name = name;
             Cost = new CompoundPayment(cost);
-            EffectSpan = effectSpan;
+            EffectSpan = new Dictionary<int, List<EffectTemplate>>();
+            foreach(var effect in effects)
+            {
+                if (EffectSpan.ContainsKey(effect.Key)) EffectSpan.Add(effect.Key, new List<EffectTemplate>());
+
+                EffectSpan[effect.Key].Add(effect.Value);
+            }
         }
 
         public virtual Card CreateCard() { return new Card("Dummy", Cost); }

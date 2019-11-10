@@ -10,14 +10,14 @@ namespace Archetype
         public Resource() { }
 
 
-        public virtual bool CanAfford<C>(Payment<C> cost) where C : Resource
+        public virtual bool CanAfford(Payment cost)
         {
             if (cost.Amount == 0) return true;
 
             return Value >= cost.Amount;
         }
 
-        public virtual bool TryPay<C>(Payment<C> cost) where C : Resource
+        public virtual bool TryPay(Payment cost)
         {
             if (!CanAfford(cost)) return false;
 
@@ -26,12 +26,12 @@ namespace Archetype
             return true;
         }
 
-        public virtual void ForcePay<C>(Payment<C> cost) where C : Resource
+        public virtual void ForcePay(Payment cost)
         {
             Value -= cost.Amount;
         }
 
-        public virtual void Gain<C>(Payment<C> payment) where C : Resource
+        public virtual void Gain(Payment payment)
         {
             Value += payment.Amount;
         }

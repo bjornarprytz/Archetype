@@ -27,36 +27,36 @@ namespace Archetype
         public bool Gain(CompoundPayment cost) => cost.Payments.All(p => Gain(p));
         public bool ForcePay(CompoundPayment cost) => cost.Payments.All(p => ForcePay(p));
 
-        public bool CanAfford<C>(Payment<C> cost) where C : Resource
+        public bool CanAfford(Payment cost)
         {
-            if (!_balance.ContainsKey(typeof(C))) return false;
+            if (!_balance.ContainsKey(cost.Currency)) return false;
 
-            return _balance[typeof(C)].CanAfford(cost);
+            return _balance[cost.Currency].CanAfford(cost);
         }
 
-        public bool TryPay<C>(Payment<C> cost) where C : Resource
+        public bool TryPay(Payment cost)
         {
-            if (!_balance.ContainsKey(typeof(C))) return false;
+            if (!_balance.ContainsKey(cost.Currency)) return false;
 
-            return _balance[typeof(C)].TryPay(cost);
+            return _balance[cost.Currency].TryPay(cost);
         }
 
-        public bool ForcePay<C>(Payment<C> cost) where C : Resource
+        public bool ForcePay(Payment cost)
         {
-            if (!_balance.ContainsKey(typeof(C))) return false;
+            if (!_balance.ContainsKey(cost.Currency)) return false;
 
 
-            _balance[typeof(C)].ForcePay(cost);
+            _balance[cost.Currency].ForcePay(cost);
 
             return true;
         }
 
-        public bool Gain<C>(Payment<C> payment) where C : Resource
+        public bool Gain(Payment payment)
         {
-            if (!_balance.ContainsKey(typeof(C))) return false;
+            if (!_balance.ContainsKey(payment.Currency)) return false;
 
 
-            _balance[typeof(C)].Gain(payment);
+            _balance[payment.Currency].Gain(payment);
 
             return true;
         }
