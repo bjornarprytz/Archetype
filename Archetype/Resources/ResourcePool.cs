@@ -16,7 +16,6 @@ namespace Archetype
             _balance.Add(resource.GetType(), resource); // TODO: Figure out what to do if key exists (overwrite or abort?)
         }
 
-
         public int Amount<C>() where C : Resource
         {
             return _balance.ContainsKey(typeof(C)) ? _balance[typeof(C)].Value : 0;

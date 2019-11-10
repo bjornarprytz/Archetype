@@ -9,7 +9,13 @@ namespace Archetype
     {
         public Dictionary<string, Adventurer> Roster { get; set; }
 
-        public int Coin { get; set; }
+        public ResourcePool Resources { get; set; }
+
+        public Player(ResourcePool resources)
+        {
+            Resources = resources;
+        }
+
         public List<Adventurer> ActiveHeroes
         {
             get

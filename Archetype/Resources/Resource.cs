@@ -4,8 +4,9 @@ namespace Archetype
 {
     public abstract class Resource
     {
-        public abstract int Value { get; set; }
+        public virtual int Value { get; set; }
 
+        public Resource(int initialValue) { Value = initialValue; }
         public Resource() { }
 
 
@@ -18,7 +19,7 @@ namespace Archetype
 
         public virtual bool TryPay<C>(Payment<C> cost) where C : Resource
         {
-            if (!CanAfford<C>(cost)) return false;
+            if (!CanAfford(cost)) return false;
 
             Value -= cost.Amount;
 
