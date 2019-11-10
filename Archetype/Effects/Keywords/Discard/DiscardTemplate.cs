@@ -4,8 +4,6 @@ namespace Archetype
 {
     public class DiscardTemplate : EffectTemplate
     {
-        public override string RulesText => $"{Requirements.TargetsText} discards {_cardsToDiscard} cards.";
-
         public override ChooseTargets Requirements { get; protected set; }
 
         private int _cardsToDiscard;

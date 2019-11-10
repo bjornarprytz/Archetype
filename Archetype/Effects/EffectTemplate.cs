@@ -7,7 +7,6 @@ namespace Archetype
 {
     public abstract class EffectTemplate
     {
-        public abstract string RulesText { get; }
         public virtual ChooseTargets Requirements { get; protected set; }
 
         protected EffectTemplate(ChooseTargets requirements)

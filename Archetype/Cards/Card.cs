@@ -18,7 +18,6 @@ namespace Archetype
 
         public string Name { get; private set; }
         public CompoundPayment Cost { get; set; }
-        public string RulesText { get; private set; }
         public bool HasOwner => Owner != null;
         public Unit Owner { get; private set; }
         private Dictionary<int, List<EffectTemplate>> _effects;
@@ -41,7 +40,6 @@ namespace Archetype
             Name = name;
             Cost = cost;
             _effects = effects ?? new Dictionary<int, List<EffectTemplate>>();
-            RulesText = GenerateRulesText(_effects);
         }
 
         public void MoveTo(Zone newZone)
@@ -86,17 +84,5 @@ namespace Archetype
 
             return effectSpan;
         }
-
-        private string GenerateRulesText(Dictionary<int, List<EffectTemplate>> effects)
-        {
-            StringBuilder rulesText = new StringBuilder();
-
-            effects.Keys.OrderBy(tick => tick).ToList()
-                .ForEach(tick => effects[tick]
-                .ForEach(effect => rulesText.AppendLine($"{tick}: {effect.RulesText}")));
-
-            return rulesText.ToString();
-        }
-
     }
 }

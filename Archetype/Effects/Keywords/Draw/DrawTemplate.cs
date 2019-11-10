@@ -4,8 +4,6 @@ namespace Archetype
 {
     public class DrawTemplate : EffectTemplate
     {
-        public override string RulesText => $"{Requirements.TargetsText} draw(s) {_cardsToDraw} card(s)";
-
         public override ChooseTargets Requirements { get; protected set; }
 
         private int _cardsToDraw;

@@ -4,8 +4,6 @@ namespace Archetype
 {
     public class MillTemplate : EffectTemplate
     {
-        public override string RulesText => $"Mill {Requirements.TargetsText} for {_amountToMill} card(s)";
-
         public override ChooseTargets Requirements { get; protected set; }
 
         private int _amountToMill;

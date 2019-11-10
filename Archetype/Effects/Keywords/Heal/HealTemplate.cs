@@ -4,8 +4,6 @@ namespace Archetype
 {
     public class HealTemplate : EffectTemplate
     {
-        public override string RulesText => $"Heal {_amountToHeal} damage from {Requirements.TargetsText}.";
-
         public override ChooseTargets Requirements { get; protected set; }
 
         private int _amountToHeal;

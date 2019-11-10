@@ -111,7 +111,7 @@ namespace Archetype
                 return;
             }
 
-            Decision result = prompt(new ChooseCards(x));
+            Decision result = prompt(new ChooseTargets<Card>(x, Team));
 
             foreach (Card card in result.ChosenPieces)
             {

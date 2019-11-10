@@ -4,8 +4,6 @@ namespace Archetype
 {
     public abstract class ChooseTargets : ActionPrompt
     {
-        internal string TargetsText => $"{_numberOfTargets} {_targetsFaction} {_typeTargets}";
-
         protected Faction _allowedFactions;
         public ChooseTargets(int x, Faction allowedFactions) : base(x)
         {
@@ -24,27 +22,6 @@ namespace Archetype
 
             return true;
         }
-
-        private string _numberOfTargets => MaxChoices == MinChoices ? $"{MaxChoices}" : $"{MinChoices}-{MaxChoices}";
-        private string _targetsFaction
-        {
-            get
-            {
-                switch (_allowedFactions)
-                {
-                    case Faction.Enemy:
-                        return "enemy";
-                    case Faction.Player:
-                        return "friendly";
-                    case Faction.Neutral:
-                        return "neutral";
-                    case Faction.Any:
-                    default:
-                        return string.Empty;
-                }
-            }
-        }
-        private string _typeTargets => $"{RequiredType}";
     }
 
     public class ChooseTargets<T> : ChooseTargets  where T : GamePiece
