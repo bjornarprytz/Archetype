@@ -17,6 +17,7 @@ namespace Archetype
         public event AfterPlay OnAfterPlay;
 
         public string Name { get; private set; }
+        public CompoundPayment Cost { get; set; }
         public string RulesText { get; private set; }
         public bool HasOwner => Owner != null;
         public Unit Owner { get; private set; }
@@ -35,9 +36,10 @@ namespace Archetype
         }
         private Zone currZone;
 
-        internal Card(string name, Dictionary<int, List<EffectTemplate>> effects=null)
+        internal Card(string name, CompoundPayment cost, Dictionary<int, List<EffectTemplate>> effects=null)
         {
             Name = name;
+            Cost = cost;
             _effects = effects ?? new Dictionary<int, List<EffectTemplate>>();
             RulesText = GenerateRulesText(_effects);
         }

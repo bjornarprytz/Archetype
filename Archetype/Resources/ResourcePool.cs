@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Archetype
 {
@@ -20,6 +21,11 @@ namespace Archetype
         {
             return _balance.ContainsKey(typeof(C)) ? _balance[typeof(C)].Value : 0;
         }
+
+        public bool CanAfford(CompoundPayment cost) => cost.Payments.All(p => CanAfford(p));
+        public bool TryPay(CompoundPayment cost) => cost.Payments.All(p => TryPay(p));
+        public bool Gain(CompoundPayment cost) => cost.Payments.All(p => Gain(p));
+        public bool ForcePay(CompoundPayment cost) => cost.Payments.All(p => ForcePay(p));
 
         public bool CanAfford<C>(Payment<C> cost) where C : Resource
         {

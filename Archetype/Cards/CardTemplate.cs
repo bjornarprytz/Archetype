@@ -12,17 +12,19 @@ namespace Archetype
      */
     public abstract class CardTemplate
     {
+        public CompoundPayment Cost;
         public string Name { get; set; }
         public string RulesText { get; private set; }
         internal Dictionary<int, List<EffectTemplate>> EffectSpan { get; set; }
 
 
-        internal CardTemplate(string name, Dictionary<int, List<EffectTemplate>> effectSpan)
+        internal CardTemplate(string name, Payment<Resource>[] cost, Dictionary<int, List<EffectTemplate>> effectSpan)
         {
             Name = name;
+            Cost = new CompoundPayment(cost);
             EffectSpan = effectSpan;
         }
 
-        public virtual Card CreateCard() { return new Card("Dummy"); }
+        public virtual Card CreateCard() { return new Card("Dummy", Cost); }
     }
 }
