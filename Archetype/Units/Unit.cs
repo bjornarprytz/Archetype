@@ -24,15 +24,15 @@ namespace Archetype
         public event CardMilled OnCardMilled;
         public event DeckShuffled OnDeckShuffled;
 
-        public bool IsAlive => Life > 0;
+        public bool IsAlive => Resources.Amount<Life>() > 0;
 
         public Deck Deck { get; set; }
         public Hand Hand { get; set; }
         public DiscardPile DiscardPile { get; set; }
         public List<EffectSpan> ActiveEffects { get; set; }
         public string Name { get; set; }
-        public int Life { get; set; }
-        public int Mana { get; set; }
+
+        public ResourcePool Resources { get; set; }
         public int Speed { get; set; } // Determines initiative order
         public int NextMoveTick { get; set; }
 
@@ -143,7 +143,7 @@ namespace Archetype
 
         internal int ReceiveHeal(Unit source, int healAmount)
         {
-            Life += healAmount;
+            Resources.Gain(new Payment<Life>(healAmount));
             OnHealReceived?.Invoke(source, healAmount);
 
             return healAmount;
@@ -156,7 +156,7 @@ namespace Archetype
 
         internal int TakeDamage(Unit source, int damageTaken)
         {
-            Life -= damageTaken;
+            Resources.ForcePay(new Payment<Life>(damageTaken));
             OnDamageTaken?.Invoke(source, damageTaken);
 
             return damageTaken;
