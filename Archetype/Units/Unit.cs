@@ -41,11 +41,13 @@ namespace Archetype
         private Dictionary<string, int> _modifierAsSource;
         private Dictionary<string, int> _modifierAsTarget;
 
-        public Unit(string name, Faction team) : base(team)
+        public Unit(string name, ResourcePool resources, Faction team) : base(team)
         {
             _modifierAsSource = new Dictionary<string, int>();
             _modifierAsTarget = new Dictionary<string, int>();
             Name = name;
+
+            Resources = resources;
 
             Deck = new Deck(this);
             Hand = new Hand(this);

@@ -4,20 +4,15 @@ using System.Text;
 
 namespace Archetype
 {
-    public class Life : Currency
+    public class Life : CappedResource
     {
-        public Life(int initial, int cap)
+        public Life(int initial, int cap) : base(0, cap)
         {
             Value = initial;
-            UpperCap = cap;
-            LowerCap = 0;
         }
-        public Life(int cap)
+        public Life(int cap) : base (0, cap)
         {
-            Value = UpperCap = cap;
-            LowerCap = 0;
+            Value = cap;
         }
-
-        public Life() { }
     }
 }

@@ -8,7 +8,7 @@ namespace Archetype
     {
         public List<Card> AvailableMoves => Hand.Cards.Values.ToList();
 
-        public Enemy(string name) : base(name, Faction.Enemy)
+        public Enemy(string name, ResourcePool resources) : base(name, resources, Faction.Enemy)
         {
 
         }

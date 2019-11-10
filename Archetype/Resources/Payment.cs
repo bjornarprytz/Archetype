@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public struct Payment<C> where C : Currency
+    public struct Payment<C> where C : Resource
     {
         public int Amount { get; private set; }
 
