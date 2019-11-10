@@ -18,7 +18,7 @@ namespace Archetype
 
         protected List<Unit> HandleUserInput(Decision userInput)
         {
-            if (!userInput.Meets(Requirements)) throw new Exception("User input insufficient to create effect");
+            if (!userInput.Meets(Requirements)) throw new Exception($"User input insufficient to create effect {GetType()}");
 
             return new List<Unit>(userInput.ChosenPieces.Select(piece => (Unit)piece));
         }

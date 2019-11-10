@@ -6,6 +6,10 @@ namespace Archetype
 {
     public class ResourcePool
     {
+        /* TODO:    Fix some of the transaction logic in here. It can be a bit error prone. Especially if 
+         *          CompoundPayments include multiple payments of the same currency. Not that they should,
+         *          but there's nothing stopping them.
+         */
         private Dictionary<Type, Resource> _balance;
 
         public ResourcePool()
@@ -23,7 +27,7 @@ namespace Archetype
         }
 
         public bool CanAfford(CompoundPayment cost) => cost.Payments.All(p => CanAfford(p));
-        public bool TryPay(CompoundPayment cost) => cost.Payments.All(p => TryPay(p));
+        public bool TryPay(CompoundPayment cost) => cost.Payments.All(p => CanAfford(p)) && cost.Payments.All(p => TryPay(p));
         public bool Gain(CompoundPayment cost) => cost.Payments.All(p => Gain(p));
         public bool ForcePay(CompoundPayment cost) => cost.Payments.All(p => ForcePay(p));
 
