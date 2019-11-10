@@ -2,26 +2,20 @@
 
 namespace Archetype
 {
-    public class ChooseTargets : ActionPrompt
+    public abstract class ChooseTargets : ActionPrompt
     {
-        
         internal string TargetsText => $"{_numberOfTargets} {_targetsFaction} {_typeTargets}";
 
-        private Faction _allowedFactions;
-        protected override Type _typeRestriction => typeof(GamePiece);
-
-        public ChooseTargets(int x, Type t, Faction allowedFactions)
-            : base(x, t)
+        protected Faction _allowedFactions;
+        public ChooseTargets(int x, Faction allowedFactions) : base(x)
         {
             _allowedFactions = allowedFactions;
         }
 
-        public ChooseTargets(int min, int max, Type t, Faction allowedFactions)
-            : base(min, max, t)
+        public ChooseTargets(int min, int max, Faction allowedFactions) : base(min, max)
         {
             _allowedFactions = allowedFactions;
         }
-
 
         public override bool MeetsRequirements(object piece)
         {
@@ -51,5 +45,20 @@ namespace Archetype
             }
         }
         private string _typeTargets => $"{RequiredType}";
+    }
+
+    public class ChooseTargets<T> : ChooseTargets  where T : GamePiece
+    {
+        public override Type RequiredType => typeof(T);
+        
+        public ChooseTargets(int x, Faction allowedFactions)
+            : base(x, allowedFactions)
+        {
+        }
+
+        public ChooseTargets(int min, int max, Faction allowedFactions)
+            : base(min, max, allowedFactions)
+        {
+        }
     }
 }

@@ -9,27 +9,14 @@ namespace Archetype
         public int MaxChoices { get; protected set; }
         public int MinChoices { get; protected set; }
 
-        public Type RequiredType
-        {
-            get { return _requiredType; }
-            private set
-            {
-                if (!value.IsSubclassOf(_typeRestriction)) throw new Exception($"Supplied type should be subclass of {_typeRestriction}");
+        public abstract Type RequiredType { get; }
 
-                _requiredType = value;
-            }
-        }
-        private Type _requiredType;
-        protected virtual Type _typeRestriction => typeof(object);
-
-        public ActionPrompt(int x, Type requiredType)
+        public ActionPrompt(int x)
         {
-            RequiredType = requiredType;
             MaxChoices = MinChoices = x;
         }
-        public ActionPrompt(int min, int max, Type requiredType)
+        public ActionPrompt(int min, int max)
         {
-            RequiredType = requiredType;
             MaxChoices = max;
             MinChoices = min;
         }
