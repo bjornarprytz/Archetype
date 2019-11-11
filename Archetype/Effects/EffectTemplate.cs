@@ -7,19 +7,17 @@ namespace Archetype
 {
     public abstract class EffectTemplate
     {
-        public virtual ChooseTargets Requirements { get; protected set; }
+        public TargetParams<Unit> TargetParams { get; private set; }
 
-        protected EffectTemplate(ChooseTargets requirements)
+        protected EffectTemplate(TargetParams<Unit> requirements)
         {
-            Requirements = requirements;
+            TargetParams = requirements;
         }
 
         public abstract Effect CreateEffect(Unit source, Decision userInput);
 
         protected List<Unit> HandleUserInput(Decision userInput)
         {
-            if (!userInput.Meets(Requirements)) throw new Exception($"User input insufficient to create effect {GetType()}");
-
             return new List<Unit>(userInput.ChosenPieces.Select(piece => (Unit)piece));
         }
     }

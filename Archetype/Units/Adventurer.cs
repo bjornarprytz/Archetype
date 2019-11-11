@@ -36,11 +36,11 @@ namespace Archetype
         private Card HandleGetCardToPlay(RequiredAction prompt)
         {
             // TODO: This looks pretty confusing. The ChooseTargets leaves something to be desired.
-            Decision result = prompt(new ChooseTargets<Card>(1, Team));
+            Decision result = prompt(new ChooseTargets<Card>(1, c => c.AllyOf(this)));
 
             while (result.Aborted)
             {
-                result = prompt(new ChooseTargets<Card>(1, Team));
+                result = prompt(new ChooseTargets<Card>(1, c => c.AllyOf(this)));
             }
 
             return result.ChosenPieces.First() as Card;

@@ -4,11 +4,9 @@ namespace Archetype
 {
     public class DamageTemplate : EffectTemplate
     {
-        public override ChooseTargets Requirements { get; protected set; }
-
         private int _damage;
 
-        public DamageTemplate(int amount, ChooseTargets requirements) 
+        public DamageTemplate(int amount, TargetParams<Unit> requirements) 
             : base (requirements)
         {
             _damage = amount;

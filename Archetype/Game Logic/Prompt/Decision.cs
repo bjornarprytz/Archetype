@@ -13,13 +13,5 @@ namespace Archetype
         {
             ChosenPieces = new List<GamePiece>();
         }
-
-        internal bool Meets(ActionPrompt requirements)
-        {
-            return ChosenPieces.Count > requirements.MaxChoices ? false
-                 : ChosenPieces.Count < requirements.MinChoices ? false
-                 : ChosenPieces.Any(piece => !requirements.MeetsRequirements(piece)) ? false
-                 : true;
-        }
     }
 }

@@ -74,7 +74,7 @@ namespace Archetype
             {
                 foreach (EffectTemplate effectTemplate in _effects[tick])
                 {
-                    Decision result = prompt(effectTemplate.Requirements);
+                    Decision result = prompt(effectTemplate.TargetParams.GetPrompt(Owner));
 
                     if (result.Aborted) return null; // TODO: Find a better way to signal aborted prompts
 

@@ -4,11 +4,9 @@ namespace Archetype
 {
     public class HealTemplate : EffectTemplate
     {
-        public override ChooseTargets Requirements { get; protected set; }
-
         private int _amountToHeal;
 
-        public HealTemplate(int amount, ChooseTargets requirements)
+        public HealTemplate(int amount, TargetParams<Unit> requirements)
             : base (requirements)
         {
             _amountToHeal = amount;

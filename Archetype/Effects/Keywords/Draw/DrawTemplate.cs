@@ -4,11 +4,9 @@ namespace Archetype
 {
     public class DrawTemplate : EffectTemplate
     {
-        public override ChooseTargets Requirements { get; protected set; }
-
         private int _cardsToDraw;
 
-        public DrawTemplate(int amount, ChooseTargets requirements)
+        public DrawTemplate(int amount, TargetParams<Unit> requirements)
             : base (requirements)
         {
             _cardsToDraw = amount;

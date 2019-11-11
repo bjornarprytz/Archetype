@@ -8,6 +8,7 @@ namespace Archetype
         public Faction Team { get; private set; }
 
         public bool AllyOf(GamePiece other) => Team == other.Team;
+        public bool EnemyOf(GamePiece other) => Team != other.Team;
 
         public GamePiece(Faction team = Faction.Neutral)
         {

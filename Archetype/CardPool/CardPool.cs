@@ -13,9 +13,9 @@ namespace Archetype
                 : base("Killer Swing", 
                       new Payment[] { new Payment<Mana>(4) },
                       new KeyValuePair<int, EffectTemplate>(
-                          0, new DamageTemplate(4, new ChooseTargets<Unit>(2, Faction.Enemy))),
+                          0, new DamageTemplate(4, TargetParams<Unit>.Enemy(4))),
                       new KeyValuePair<int, EffectTemplate>(
-                          0, new HealTemplate(3, new ChooseTargets<Unit>(0, Faction.Any)))
+                          0, new HealTemplate(3, TargetParams<Unit>.Ally(4)))
                       )                      
             {
 

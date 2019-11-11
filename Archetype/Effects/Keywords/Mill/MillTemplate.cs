@@ -4,11 +4,9 @@ namespace Archetype
 {
     public class MillTemplate : EffectTemplate
     {
-        public override ChooseTargets Requirements { get; protected set; }
-
         private int _amountToMill;
 
-        public MillTemplate(int amount, ChooseTargets requirements)
+        public MillTemplate(int amount, TargetParams<Unit> requirements)
             : base (requirements)
         {
             _amountToMill = amount;

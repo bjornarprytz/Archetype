@@ -4,11 +4,9 @@ namespace Archetype
 {
     public class DiscardTemplate : EffectTemplate
     {
-        public override ChooseTargets Requirements { get; protected set; }
-
         private int _cardsToDiscard;
 
-        public DiscardTemplate(int amount, ChooseTargets requirements)
+        public DiscardTemplate(int amount, TargetParams<Unit> requirements)
             : base(requirements)
         {
             _cardsToDiscard = amount;
