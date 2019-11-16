@@ -6,11 +6,8 @@ namespace Archetype
 {
     public abstract class ActionPrompt
     {
-        public Predicate<object> MatchesType => o => o.GetType() == RequiredType;
         public int MaxChoices { get; protected set; }
         public int MinChoices { get; protected set; }
-
-        public abstract Type RequiredType { get; }
 
         public ActionPrompt(int x)
         {

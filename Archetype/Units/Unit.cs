@@ -111,7 +111,7 @@ namespace Archetype
                 return;
             }
 
-            Decision result = prompt(new ChooseTargets<Card>(x, (c) => c.AllyOf(this)));
+            Decision result = prompt(new Choose<Card>(x, Hand));
 
             foreach (Card card in result.ChosenPieces)
             {

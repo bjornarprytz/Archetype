@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Archetype
 {
@@ -24,9 +23,9 @@ namespace Archetype
             return new TargetParams<T>(n, (s, t) => s.AllyOf(t));
         }
 
-        internal ChooseTargets<T> GetPrompt(Unit owner)
+        internal Choose<T> GetPrompt(Unit owner, IEnumerable<T> possibleChoices)
         {
-            return new ChooseTargets<T>(_number, (t) => _predicate(owner, t));
+            return new Choose<T>(_number, possibleChoices.Where((p => _predicate(owner, p))));
         }
     }
 }

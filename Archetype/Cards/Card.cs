@@ -52,9 +52,9 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public virtual bool Play(Timeline timeline, RequiredAction prompt)
+        public virtual bool Play(Timeline timeline, GameState gameState, RequiredAction prompt)
         {
-            EffectSpan effectSpan = PromptForTargets(prompt);
+            EffectSpan effectSpan = PromptForTargets(gameState, prompt);
             if (effectSpan == null) return false;
 
             OnBeforePlay?.Invoke();
@@ -66,7 +66,7 @@ namespace Archetype
             return true;
         }
 
-        private EffectSpan PromptForTargets(RequiredAction prompt)
+        private EffectSpan PromptForTargets(GameState gameState, RequiredAction prompt)
         {
             EffectSpan effectSpan = new EffectSpan();
 
@@ -74,7 +74,7 @@ namespace Archetype
             {
                 foreach (EffectTemplate effectTemplate in _effects[tick])
                 {
-                    Decision result = prompt(effectTemplate.TargetParams.GetPrompt(Owner));
+                    Decision result = prompt(effectTemplate.TargetPrompt(Owner, gameState));
 
                     if (result.Aborted) return null; // TODO: Find a better way to signal aborted prompts
 

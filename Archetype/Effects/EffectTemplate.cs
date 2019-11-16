@@ -9,6 +9,8 @@ namespace Archetype
     {
         public TargetParams<Unit> TargetParams { get; private set; }
 
+        public Choose<Unit> TargetPrompt(Unit source, GameState gameState) => TargetParams.GetPrompt(source, gameState.ActiveUnits);
+
         protected EffectTemplate(TargetParams<Unit> requirements)
         {
             TargetParams = requirements;

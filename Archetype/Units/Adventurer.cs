@@ -23,7 +23,7 @@ namespace Archetype
 
                 if (!Resources.CanAfford(cardToPlay.Cost)) continue;
 
-                if (!cardToPlay.Play(timeline, prompt)) continue;
+                if (!cardToPlay.Play(timeline, gameState, prompt)) continue;
                 
                 Resources.ForcePay(cardToPlay.Cost);
 
@@ -36,11 +36,11 @@ namespace Archetype
         private Card HandleGetCardToPlay(RequiredAction prompt)
         {
             // TODO: This looks pretty confusing. The ChooseTargets leaves something to be desired.
-            Decision result = prompt(new ChooseTargets<Card>(1, c => c.AllyOf(this)));
+            Decision result = prompt(new Choose<Card>(1, Hand));
 
             while (result.Aborted)
             {
-                result = prompt(new ChooseTargets<Card>(1, c => c.AllyOf(this)));
+                result = prompt(new Choose<Card>(1, Hand));
             }
 
             return result.ChosenPieces.First() as Card;

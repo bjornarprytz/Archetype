@@ -38,7 +38,7 @@ namespace Archetype
                 }
             }
 
-            if (!chosenMove.Play(timeline, prompt)) throw new Exception("Failed to play card, how to handle this?");
+            if (!chosenMove.Play(timeline, gameState, prompt)) throw new Exception("Failed to play card, how to handle this?");
 
         }
 
