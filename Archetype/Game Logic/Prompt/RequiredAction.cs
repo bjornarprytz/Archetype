@@ -4,5 +4,5 @@ using System.Text;
 
 namespace Archetype
 {
-    public delegate Decision RequiredAction(ActionPrompt requirements);
+    public delegate void RequiredAction(ActionPrompt requirements);
 }

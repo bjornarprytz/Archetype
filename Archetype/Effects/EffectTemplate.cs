@@ -16,11 +16,6 @@ namespace Archetype
             TargetParams = requirements;
         }
 
-        public abstract Effect CreateEffect(Unit source, Decision userInput);
-
-        protected List<Unit> HandleUserInput(Decision userInput)
-        {
-            return new List<Unit>(userInput.ChosenPieces.Select(piece => (Unit)piece));
-        }
+        public abstract Effect CreateEffect(Unit source, List<Unit> targets);
     }
 }

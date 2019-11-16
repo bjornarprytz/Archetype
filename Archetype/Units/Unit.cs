@@ -111,9 +111,11 @@ namespace Archetype
                 return;
             }
 
-            Decision result = prompt(new Choose<Card>(x, Hand));
+            Choose<Card> choose = new Choose<Card>(x, Hand);
 
-            foreach (Card card in result.ChosenPieces)
+            prompt(choose);
+
+            foreach (Card card in choose.Choices)
             {
                 Discard(card.Id);
             }

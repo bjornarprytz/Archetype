@@ -12,10 +12,8 @@ namespace Archetype
             _amountToHeal = amount;
         }
 
-        public override Effect CreateEffect(Unit source, Decision userInput)
+        public override Effect CreateEffect(Unit source, List<Unit> targets)
         {
-            List<Unit> targets = HandleUserInput(userInput);
-
             return new HealEffect(_amountToHeal, source, targets);
         }
     }

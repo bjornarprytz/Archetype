@@ -35,15 +35,17 @@ namespace Archetype
 
         private Card HandleGetCardToPlay(RequiredAction prompt)
         {
-            // TODO: This looks pretty confusing. The ChooseTargets leaves something to be desired.
-            Decision result = prompt(new Choose<Card>(1, Hand));
+            Choose<Card> choose = new Choose<Card>(1, Hand);
 
-            while (result.Aborted)
+            prompt(choose);
+
+            while (choose.Aborted)
             {
-                result = prompt(new Choose<Card>(1, Hand));
+                choose = new Choose<Card>(1, Hand);
+                prompt(choose);
             }
 
-            return result.ChosenPieces.First() as Card;
+            return choose.Choices.First() as Card;
         }
     }
 }

@@ -12,10 +12,8 @@ namespace Archetype
             _damage = amount;
         }
 
-        public override Effect CreateEffect(Unit source, Decision userInput)
+        public override Effect CreateEffect(Unit source, List<Unit> targets)
         {
-            List<Unit> targets = HandleUserInput(userInput);
-
             return new DamageEffect(_damage, source, targets);
         }
     }

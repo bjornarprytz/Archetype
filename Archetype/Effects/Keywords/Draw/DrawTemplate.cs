@@ -12,10 +12,8 @@ namespace Archetype
             _cardsToDraw = amount;
         }
 
-        public override Effect CreateEffect(Unit source, Decision userInput)
+        public override Effect CreateEffect(Unit source, List<Unit> targets)
         {
-            List<Unit> targets = HandleUserInput(userInput);
-
             return new DrawEffect(_cardsToDraw, source, targets);
         }
     }

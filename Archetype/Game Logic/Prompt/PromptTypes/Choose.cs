@@ -5,6 +5,7 @@ namespace Archetype
 {
     public class Choose<T> : ActionPrompt where T : GamePiece
     {
+        public bool Aborted { get; set; }
         public IEnumerable<T> Options { get; private set; }
         public List<T> Choices { get; set; }
 
@@ -20,6 +21,11 @@ namespace Archetype
         {
             Options = options;
             Choices = new List<T>(max);
+        }
+
+        public void Abort()
+        {
+            Aborted = true;
         }
     }
 }
