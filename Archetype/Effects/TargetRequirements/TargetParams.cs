@@ -23,9 +23,9 @@ namespace Archetype
             return new TargetParams<T>(n, (s, t) => s.AllyOf(t));
         }
 
-        internal Choose<T> GetPrompt(Unit owner, IEnumerable<T> possibleChoices)
+        internal Choose<T> GetPrompt(Unit owner, IEnumerable<T> options)
         {
-            return new Choose<T>(_number, possibleChoices.Where((p => _predicate(owner, p))));
+            return new Choose<T>(_number, options.Where((p => _predicate(owner, p))));
         }
     }
 }

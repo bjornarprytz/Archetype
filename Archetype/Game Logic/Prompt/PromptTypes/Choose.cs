@@ -5,17 +5,20 @@ namespace Archetype
 {
     public class Choose<T> : ActionPrompt where T : GamePiece
     {
+        public IEnumerable<T> Options { get; private set; }
         public List<T> Choices { get; set; }
 
-        public Choose(int x, IEnumerable<T> availableChoices)
+        public Choose(int x, IEnumerable<T> options)
             : base(x)
         {
+            Options = options;
             Choices = new List<T>(x);
         }
 
-        public Choose(int min, int max, IEnumerable<T> availableChoices)
+        public Choose(int min, int max, IEnumerable<T> options)
             : base(min, max)
         {
+            Options = options;
             Choices = new List<T>(max);
         }
     }
