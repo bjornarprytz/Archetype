@@ -6,8 +6,6 @@ namespace Archetype
 {
     public class Adventurer : Unit
     {
-        private int _movesLeft = 3; // TODO: Find some good logic to determine whether there's more to do for this unit.
-
         public Adventurer(string name, ResourcePool resources, List<Card> cards) 
             : base(name, resources, Faction.Player)
         {
@@ -16,8 +14,8 @@ namespace Archetype
 
         internal override void TakeTurn(Timeline timeline, GameState gameState, RequiredAction prompt)
         {
-            // TODO: Take into account empty hands, no resources, skipping turn etc.
-            while (_movesLeft > 0)
+            // TODO: Take into account skipping turn etc.
+            while (HasMovesAvailable)
             {
                 Card cardToPlay = HandleGetCardToPlay(prompt);
 
@@ -26,8 +24,6 @@ namespace Archetype
                 if (!cardToPlay.Play(timeline, gameState, prompt)) continue;
                 
                 Resources.ForcePay(cardToPlay.Cost);
-
-                _movesLeft--;
             }
 
         }

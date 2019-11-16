@@ -11,6 +11,7 @@ namespace Archetype
             
             public KillerSwing()
                 : base("Killer Swing", 
+                      // Cost: 4 mana
                       new Payment[] { new Payment<Mana>(4) },
                       
                       // Tick 0: Deal 4 damage to 4 Enemies

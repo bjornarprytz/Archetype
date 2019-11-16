@@ -32,6 +32,7 @@ namespace Archetype
         public List<EffectSpan> ActiveEffects { get; set; }
         public string Name { get; set; }
 
+        public bool HasMovesAvailable => Hand.Any(c => Resources.CanAfford(c.Cost));
         public ResourcePool Resources { get; set; }
         public int Speed { get; set; } // Determines initiative order
         public int NextMoveTick { get; set; }
