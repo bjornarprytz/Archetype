@@ -6,17 +6,12 @@ namespace Archetype
 {
     public abstract class ActionPrompt
     {
-        public int MaxChoices { get; protected set; }
-        public int MinChoices { get; protected set; }
+        public bool Aborted { get; set; }
 
-        public ActionPrompt(int x)
+
+        public virtual void Abort()
         {
-            MaxChoices = MinChoices = x;
-        }
-        public ActionPrompt(int min, int max)
-        {
-            MaxChoices = max;
-            MinChoices = min;
+            Aborted = true;
         }
     }
 }

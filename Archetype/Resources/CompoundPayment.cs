@@ -1,17 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Archetype
 {
     public struct CompoundPayment
     {
-        // TODO: Maybe this should be a dictionary<Type, Payment> and create logic to accumulate values from paymens of the same currency.
-        public List<Payment> Payments { get; set; }
+        public List<Payment> Payments => _payments.Values.ToList();
 
+        private Dictionary<Type, Payment> _payments;
         public CompoundPayment(IEnumerable<Payment> payments)
         {
-            Payments = new List<Payment>(payments);
+            _payments = new Dictionary<Type, Payment>();
+
+            foreach (Payment payment in payments)
+            {
+                Add(payment);
+            }
+        }
+
+        public void Add(Payment payment)
+        {
+            if (_payments.ContainsKey(payment.Currency)) _payments[payment.Currency].Compound(payment);
+            else _payments.Add(payment.Currency, payment);
         }
     }
 }
