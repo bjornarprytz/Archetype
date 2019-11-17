@@ -13,6 +13,7 @@ namespace Archetype
 
         public Player(ResourcePool resources)
         {
+            Roster = new Dictionary<string, Adventurer>();
             Resources = resources;
         }
 

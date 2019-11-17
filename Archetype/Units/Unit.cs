@@ -172,6 +172,10 @@ namespace Archetype
             OnDamageDealt?.Invoke(target, target.TakeDamage(this, damage));
         }
 
+        internal int ResourceDifference<R>(Unit other) where R : Resource
+        {
+            return Resources.Amount<R>() - other.Resources.Amount<R>();
+        }
 
         private void Mill()
         {
