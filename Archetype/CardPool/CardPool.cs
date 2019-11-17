@@ -23,7 +23,7 @@ namespace Archetype
                       // Tick 1: Deal 4 damage to one Enemy with more life than source
                       (1, new DamageTemplate(4, 
                               new TargetParams<Unit>(1, 
-                                  (s, t) => t.EnemyOf(s) && t.Resources.Amount<Life>() > s.Resources.Amount<Life>()))) 
+                                  (s, t) => t.EnemyOf(s) && s.ResourceDifference<Life>(t) < 0))) 
                       )                      
             {
 
