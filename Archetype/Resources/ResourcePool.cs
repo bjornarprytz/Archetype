@@ -18,7 +18,10 @@ namespace Archetype
         }
         public void AddResource(Resource resource)
         {
-            _balance.Add(resource.GetType(), resource); // TODO: Figure out what to do if key exists (overwrite or abort?)
+            Type resourceType = resource.GetType();
+
+            if (_balance.ContainsKey(resourceType)) _balance[resourceType].Value += resource.Value;
+            else _balance.Add(resourceType, resource);
         }
 
         public int Amount<C>() where C : Resource
