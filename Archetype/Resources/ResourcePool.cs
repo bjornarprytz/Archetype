@@ -16,6 +16,16 @@ namespace Archetype
         {
             _balance = new Dictionary<Type, Resource>();
         }
+
+        public ResourcePool(params Resource[] startResources)
+        {
+            _balance = new Dictionary<Type, Resource>();
+
+            foreach (Resource resource in startResources)
+            {
+                AddResource(resource);
+            }
+        }
         public void AddResource(Resource resource)
         {
             Type resourceType = resource.GetType();
