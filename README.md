@@ -11,4 +11,4 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Avoid using null in card zone-transitions
 - [ ] Avoid using null in game logic
 - [ ] Rules text on cards
-- [ ] Unit Tests
+- [ ] Unit Tests 
