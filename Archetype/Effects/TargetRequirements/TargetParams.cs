@@ -3,29 +3,15 @@ using System.Linq;
 
 namespace Archetype
 {
-    public class TargetParams<T> where T : GamePiece
+    public abstract class TargetParams<T> where T : GamePiece
     {
-        private int _number;
-        private TargetPredicate<T> _predicate;
+        protected TargetPredicate<T> _predicate;
 
-        public TargetParams(int n, TargetPredicate<T> predicate)
+        public TargetParams(TargetPredicate<T> predicate)
         {
-            _number = n;
             _predicate = predicate;
         }
 
-        public static TargetParams<T> Enemy(int n)
-        {
-            return new TargetParams<T>(n, (s, t) => s.EnemyOf(t));
-        }
-        public static TargetParams<T> Ally(int n)
-        {
-            return new TargetParams<T>(n, (s, t) => s.AllyOf(t));
-        }
-
-        internal Choose<T> GetPrompt(Unit owner, IEnumerable<T> options)
-        {
-            return new Choose<T>(_number, options.Where((p => _predicate(owner, p))));
-        }
+        internal abstract Choose<T> GetPrompt(Unit owner, IEnumerable<T> options);
     }
 }
