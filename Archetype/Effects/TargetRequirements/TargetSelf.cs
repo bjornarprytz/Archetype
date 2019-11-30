@@ -8,9 +8,9 @@ namespace Archetype
     {
         public TargetSelf() : base((s, t) => t.Id == s.Id) { }
 
-        internal override Choose<Unit> GetPrompt(Unit owner, IEnumerable<Unit> options)
+        internal override PromptResponse GetTargets(Unit owner, IEnumerable<Unit> options, RequiredAction actionPrompt)
         {
-            return new Choose<Unit>(1, options.Where((p => _predicate(owner, p))));
+            return PromptResponse.Choose(options.Where(o => _predicate(owner, o)).ToList());
         }
     }
 }

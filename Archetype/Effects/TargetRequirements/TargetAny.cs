@@ -23,9 +23,9 @@ namespace Archetype
             return new TargetAny<T>(n, (s, t) => s.AllyOf(t));
         }
 
-        internal override Choose<T> GetPrompt(Unit owner, IEnumerable<T> options)
+        internal override PromptResponse GetTargets(Unit owner, IEnumerable<T> options, RequiredAction actionPrompt)
         {
-            return new Choose<T>(_number, options.Where((p => _predicate(owner, p))));
+            return actionPrompt(new Choose<T>(_number, options.Where(o => _predicate(owner, o))));
         }
     }
 }

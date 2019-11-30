@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Archetype
@@ -7,11 +8,16 @@ namespace Archetype
     {
         protected TargetPredicate<T> _predicate;
 
-        public TargetParams(TargetPredicate<T> predicate)
+        protected TargetParams(TargetPredicate<T> predicate)
         {
             _predicate = predicate;
         }
 
-        internal abstract Choose<T> GetPrompt(Unit owner, IEnumerable<T> options);
+        internal abstract PromptResponse GetTargets(Unit owner, IEnumerable<T> options, RequiredAction actionPrompt);
+
+        protected bool HasValidTargets(Unit owner, IEnumerable<T> options) => options.Any(p => _predicate(owner, p));
+
+        protected List<T> GetValidTargets(Unit owner, IEnumerable<T> options) => options.Where(p => _predicate(owner, p)).ToList();
+        
     }
 }

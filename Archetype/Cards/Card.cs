@@ -74,13 +74,11 @@ namespace Archetype
             {
                 foreach (EffectTemplate effectTemplate in _effects[tick])
                 {
-                    Choose<Unit> choose = effectTemplate.TargetPrompt(Owner, gameState);
+                    PromptResponse result = effectTemplate.TargetParams.GetTargets(Owner, gameState.ActiveUnits, prompt);
 
-                    prompt(choose);
+                    if (result.Aborted) return null; // TODO: Find a better way to signal aborted prompts
 
-                    if (choose.Aborted) return null; // TODO: Find a better way to signal aborted prompts
-
-                    effectSpan.AddEffect(tick, effectTemplate.CreateEffect(Owner, choose.Choices)); // TODO: Make sure Owner can't be null at this point
+                    effectSpan.AddEffect(tick, effectTemplate.CreateEffect(Owner, result.Choices)); // TODO: Make sure Owner can't be null at this point
                 }
             }
 

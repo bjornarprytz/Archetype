@@ -5,17 +5,13 @@ using System.Text;
 
 namespace Archetype
 {
-    class TargetAll<T> : TargetParams<T> where T : GamePiece
-    {
-        public TargetAll(TargetPredicate<T> predicate)
-            : base (predicate)
-        {
+    class TargetAll<T> : TargetParams<T> where T : Unit
+    {   
+        public TargetAll(TargetPredicate<T> predicate) : base (predicate) { }
 
-        }
-
-        internal override Choose<T> GetPrompt(Unit owner, IEnumerable<T> options)
+        internal override PromptResponse GetTargets(Unit owner, IEnumerable<T> options, RequiredAction actionPrompt)
         {
-            return new Choose<T>(100, options.Where((p => _predicate(owner, p)))); // TODO: Find a good way to express Choosing 'all', not just many
+            return PromptResponse.Choose(options.Where(o => _predicate(owner, o)).ToList());
         }
     }
 }

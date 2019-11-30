@@ -1,4 +1,4 @@
 ﻿namespace Archetype
 {
-    public delegate void RequiredAction(ActionPrompt requirements);
+    public delegate PromptResponse RequiredAction(ActionPrompt requirements);
 }
