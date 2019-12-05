@@ -80,8 +80,6 @@ namespace Archetype
             return NextMoveTick == tick;
         }
 
-        internal abstract void TakeTurn(Timeline timeline, GameState gameState, RequiredAction prompt);
-
         internal void Discard(Guid cardId)
         {
             Card cardToDiscard = Hand.Pick(cardId);

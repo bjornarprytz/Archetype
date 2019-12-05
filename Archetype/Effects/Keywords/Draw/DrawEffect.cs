@@ -2,13 +2,13 @@
 
 namespace Archetype
 {
-    public class DrawEffect : XEffect
+    public class DrawEffect : XEffect<Unit>
     {
         public override string Keyword => "Draw";
         public int CardsToDraw => X;
 
-        public DrawEffect(int x, Unit source, List<Unit> targets)
-            : base(x, source, targets)
+        public DrawEffect(int x, EffectArgs args)
+            : base(x, args)
         { }
 
         protected override void _affect(Unit target, int modifier, RequiredAction prompt)

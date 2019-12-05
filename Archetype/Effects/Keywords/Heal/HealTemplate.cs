@@ -6,15 +6,12 @@ namespace Archetype
     {
         private int _amountToHeal;
 
-        public HealTemplate(int amount, TargetParams<Unit> requirements)
-            : base (requirements)
+        public HealTemplate(int amount, TargetParams<Unit> requirements, TargetOptions targetPool)
+            : base (requirements, targetPool)
         {
             _amountToHeal = amount;
         }
 
-        public override Effect CreateEffect(Unit source, List<Unit> targets)
-        {
-            return new HealEffect(_amountToHeal, source, targets);
-        }
+        public override Effect CreateEffect(EffectArgs args) => new HealEffect(_amountToHeal, args);
     }
 }

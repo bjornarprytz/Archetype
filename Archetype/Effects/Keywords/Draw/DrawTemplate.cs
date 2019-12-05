@@ -6,15 +6,12 @@ namespace Archetype
     {
         private int _cardsToDraw;
 
-        public DrawTemplate(int amount, TargetParams<Unit> requirements)
-            : base (requirements)
+        public DrawTemplate(int amount, TargetParams<Unit> requirements, TargetOptions targetPool)
+            : base (requirements, targetPool)
         {
             _cardsToDraw = amount;
         }
 
-        public override Effect CreateEffect(Unit source, List<Unit> targets)
-        {
-            return new DrawEffect(_cardsToDraw, source, targets);
-        }
+        public override Effect CreateEffect(EffectArgs args) => new DrawEffect(_cardsToDraw, args);
     }
 }

@@ -6,15 +6,12 @@ namespace Archetype
     {
         private int _amountToMill;
 
-        public MillTemplate(int amount, TargetParams<Unit> requirements)
-            : base (requirements)
+        public MillTemplate(int amount, TargetParams<Unit> requirements, TargetOptions targetPool)
+            : base (requirements, targetPool)
         {
             _amountToMill = amount;
         }
 
-        public override Effect CreateEffect(Unit source, List<Unit> targets)
-        {
-            return new MillEffect(_amountToMill, source, targets);
-        }
+        public override Effect CreateEffect(EffectArgs args) => new MillEffect(_amountToMill, args);
     }
 }

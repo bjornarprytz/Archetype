@@ -8,6 +8,8 @@ namespace Archetype
     {
         private int _number;
 
+        public override int Max => _number;
+
         public TargetAny(int n, TargetPredicate<T> predicate) 
             : base (predicate)
         {
@@ -21,11 +23,6 @@ namespace Archetype
         public static TargetAny<T> Ally(int n)
         {
             return new TargetAny<T>(n, (s, t) => s.AllyOf(t));
-        }
-
-        internal override PromptResponse GetTargets(Unit owner, IEnumerable<T> options, RequiredAction actionPrompt)
-        {
-            return actionPrompt(new Choose<T>(_number, options.Where(o => _predicate(owner, o))));
         }
     }
 }

@@ -9,9 +9,7 @@ namespace Archetype
     {   
         public TargetAll(TargetPredicate<T> predicate) : base (predicate) { }
 
-        internal override PromptResponse GetTargets(Unit owner, IEnumerable<T> options, RequiredAction actionPrompt)
-        {
-            return PromptResponse.Choose(options.Where(o => _predicate(owner, o)).ToList());
-        }
+        public override int Max => int.MaxValue;
+        public override int Min => 0;
     }
 }

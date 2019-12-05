@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Archetype
 {
-    public class MillEffect : XEffect
+    public class MillEffect : XEffect<Unit>
     {
         public override string Keyword => "Mill";
         public int CardsToMill => X;
 
-        public MillEffect(int x, Unit source, List<Unit> targets)
-            : base(x, source, targets)
+        public MillEffect(int x, EffectArgs args)
+            : base(x, args)
         { }
 
         protected override void _affect(Unit target, int modifier, RequiredAction prompt)

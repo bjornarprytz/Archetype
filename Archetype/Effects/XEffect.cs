@@ -4,15 +4,15 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class XEffect : Effect, IKeyword
+    public abstract class XEffect<T> : Effect<T>, IKeyword where T : GamePiece
     {
         public abstract string Keyword { get; }
         public int X { get { return _x > 0 ? _x : 0; } set { _x = value; } }
 
         private int _x;
 
-        public XEffect(int x, Unit source, List<Unit> targets=null) 
-            : base(source, targets)
+        public XEffect(int x, EffectArgs args) 
+            : base(args)
         {
             X = x;
         }

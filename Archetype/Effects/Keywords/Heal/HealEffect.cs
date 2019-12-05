@@ -4,14 +4,14 @@ using System.Text;
 
 namespace Archetype
 {
-    public class HealEffect : XEffect
+    public class HealEffect : XEffect<Unit>
     {
         public override string Keyword => "Heal";
 
         public int HealAmount => X;
 
-        public HealEffect(int x, Unit source, List<Unit> targets)
-            : base(x, source, targets)
+        public HealEffect(int x, EffectArgs args)
+            : base(x, args)
         { }
 
         protected override void _affect(Unit target, int modifier, RequiredAction prompt)

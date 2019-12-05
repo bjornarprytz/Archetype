@@ -48,16 +48,5 @@ namespace Archetype
             Effects.Add(span);
             span.StartTime = CurrentTick;
         }
-
-        public void ResolveTurns(GameState gameState, RequiredAction prompt)
-        {
-            InitiativeOrder = gameState.ActiveUnits.OrderByDescending(u => u.Speed).ToList();
-
-            foreach (Unit unit in InitiativeOrder)
-            {
-                if (unit.HasTurn(CurrentTick))
-                    unit.TakeTurn(this, gameState, prompt);
-            }
-        }
     }
 }

@@ -52,10 +52,12 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public virtual bool Play(Timeline timeline, GameState gameState, RequiredAction prompt)
+        internal bool Play(CardArgs args, Timeline timeline)
         {
-            EffectSpan effectSpan = PromptForTargets(gameState, prompt);
-            if (effectSpan == null) return false;
+            if (!args.Valid) return false;
+
+
+            EffectSpan effectSpan = GenerateEffectSpan(args);
 
             OnBeforePlay?.Invoke();
 
@@ -66,19 +68,15 @@ namespace Archetype
             return true;
         }
 
-        private EffectSpan PromptForTargets(GameState gameState, RequiredAction prompt)
+        private EffectSpan GenerateEffectSpan(CardArgs cardArgs)
         {
             EffectSpan effectSpan = new EffectSpan();
 
             foreach (int tick in _effects.Keys)
             {
-                foreach (EffectTemplate effectTemplate in _effects[tick])
+                foreach (EffectArgs effectArg in cardArgs.EffectArgs)
                 {
-                    PromptResponse result = effectTemplate.TargetParams.GetTargets(Owner, gameState.ActiveUnits, prompt);
-
-                    if (result.Aborted) return null; // TODO: Find a better way to signal aborted prompts
-
-                    effectSpan.AddEffect(tick, effectTemplate.CreateEffect(Owner, result.Choices)); // TODO: Make sure Owner can't be null at this point
+                    effectSpan.AddEffect(tick, effectArg.Effect.CreateEffect(effectArg));
                 }
             }
 

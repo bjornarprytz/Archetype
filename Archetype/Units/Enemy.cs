@@ -18,29 +18,6 @@ namespace Archetype
             // Make moves based on game state
         }
 
-        internal override void TakeTurn(Timeline timeline, GameState gameState, RequiredAction prompt)
-        {
-            if (Hand.IsEmpty)
-            {
-                Console.WriteLine($"No available moves for <{Name}>!");
-                return;
-            }
-
-            int maxVal = -1;
-            Card chosenMove = AvailableMoves[0];
-            foreach (Card move in AvailableMoves)
-            {
-                int moveVal = Evaluate(move, gameState);
-                if (moveVal > maxVal)
-                {
-                    maxVal = moveVal;
-                    chosenMove = move;
-                }
-            }
-
-            if (!chosenMove.Play(timeline, gameState, prompt)) throw new Exception("Failed to play card, how to handle this?");
-
-        }
 
         private int Evaluate(Card move, GameState gameState)
         {

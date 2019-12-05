@@ -2,12 +2,12 @@
 
 namespace Archetype
 {
-    public class DamageEffect : XEffect
+    public class DamageEffect : XEffect<Unit>
     {
         public override string Keyword => "Damage";
 
-        public DamageEffect(int damage, Unit source, List<Unit> targets=null) 
-            : base(damage, source, targets)
+        public DamageEffect(int damage, EffectArgs args) 
+            : base(damage, args)
         { }
 
         protected override void _affect(Unit target, int modifier, RequiredAction prompt)

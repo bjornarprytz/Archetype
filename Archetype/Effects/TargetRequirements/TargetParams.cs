@@ -13,11 +13,14 @@ namespace Archetype
             _predicate = predicate;
         }
 
-        internal abstract PromptResponse GetTargets(Unit owner, IEnumerable<T> options, RequiredAction actionPrompt);
+        public EffectArgs GetArgs(Unit owner, IEnumerable<T> options) => new EffectArgs(Min, Max, ValidTargets(owner, options));
 
-        protected bool HasValidTargets(Unit owner, IEnumerable<T> options) => options.Any(p => _predicate(owner, p));
+        public abstract int Max { get; }
+        public virtual int Min => 0;
 
-        protected List<T> GetValidTargets(Unit owner, IEnumerable<T> options) => options.Where(p => _predicate(owner, p)).ToList();
+        internal bool HasEnoughTargets(Unit owner, IEnumerable<T> options) => ValidTargets(owner, options).Count() >= Min;
+        internal bool HasValidTargets(Unit owner, IEnumerable<T> options) => options.Any(p => _predicate(owner, p));
+        internal IEnumerable<T> ValidTargets(Unit owner, IEnumerable<T> options) => options.Where(p => _predicate(owner, p));
         
     }
 }

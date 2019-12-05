@@ -4,6 +4,13 @@ using System.Text;
 
 namespace Archetype
 {
+    public abstract class Effect<T> : Effect where T : GamePiece
+    {
+        public override Type TargetType => typeof(T);
+
+        public Effect(EffectArgs args) : base(args) { }
+    }
+
     public abstract class Effect
     {
         public delegate void Resolution(RequiredAction prompt);
@@ -20,7 +27,9 @@ namespace Archetype
 
         public bool HasSource { get { return Source != null; } }
         public bool HasTargets { get { return Targets != null && Targets.Count > 0; } }
-        public List<Unit> Targets { get; set; }
+        
+        public abstract Type TargetType { get; } 
+        public List<GamePiece> Targets { get; set; }
         public Unit Source { get; set; }
 
 
@@ -41,10 +50,10 @@ namespace Archetype
             OnCleanup?.Invoke(this);
         }
 
-        public Effect(Unit source, List<Unit> targets=null)
+        public Effect(EffectArgs args)
         {
-            Source = source;
-            Targets = targets ?? new List<Unit>();
+            Source = args.Source;
+            Targets = args.Targets;
         }
 
         protected abstract Resolution _resolve { get; }

@@ -6,15 +6,12 @@ namespace Archetype
     {
         private int _damage;
 
-        public DamageTemplate(int amount, TargetParams<Unit> requirements) 
-            : base (requirements)
+        public DamageTemplate(int amount, TargetParams<Unit> requirements, TargetOptions targetPool) 
+            : base (requirements, targetPool)
         {
             _damage = amount;
         }
 
-        public override Effect CreateEffect(Unit source, List<Unit> targets)
-        {
-            return new DamageEffect(_damage, source, targets);
-        }
+        public override Effect CreateEffect(EffectArgs args) => new DamageEffect(_damage, args);
     }
 }

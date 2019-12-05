@@ -5,7 +5,7 @@ namespace Archetype
 {
     public class GameState
     {
-        public Player Player { get; set; }
+        public HumanPlayer Player { get; set; }
         public List<Enemy> Enemies { get; set; }
 
         public List<Unit> ActiveUnits
@@ -14,7 +14,7 @@ namespace Archetype
             {
                 List<Unit> activeUnits = new List<Unit>();
 
-                activeUnits.AddRange(Player.ActiveHeroes);
+                activeUnits.AddRange(Player.ActiveUnits);
                 activeUnits.AddRange(Enemies);
 
                 return activeUnits;
@@ -25,7 +25,7 @@ namespace Archetype
         {
             get
             {
-                bool defeat = Player.ActiveHeroes.All(u => !u.IsAlive);
+                bool defeat = Player.ActiveUnits.All(u => !u.IsAlive);
 
                 bool victory = Enemies.All(e => !e.IsAlive);
 
@@ -35,7 +35,7 @@ namespace Archetype
 
         private GameState() { }
 
-        public static GameState InitiateBattle(Player player, List<Enemy> enemies)
+        public static GameState InitiateBattle(HumanPlayer player, List<Enemy> enemies)
         {
             return new GameState()
             {
