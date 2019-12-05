@@ -6,7 +6,7 @@ namespace Archetype
     public class PlayCard : ICommand
     {
         private Action _action;
-        public PlayCard(Card cardToPlay, CardArgs args, Timeline timeline)
+        public PlayCard(Card cardToPlay, CardArgs args, Timeline timeline) // Remove the dependency to timeline here
         {
             _action = () => cardToPlay.Play(args, timeline);
         }

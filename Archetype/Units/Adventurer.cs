@@ -11,20 +11,5 @@ namespace Archetype
         {
             Deck.PutCardsOnTop(cards);
         }
-
-        private Card HandleGetCardToPlay(RequiredAction prompt)
-        {
-            Choose<Card> choose = new Choose<Card>(1, Hand);
-
-            prompt(choose);
-
-            while (choose.Aborted)
-            {
-                choose = new Choose<Card>(1, Hand);
-                prompt(choose);
-            }
-
-            return choose.Choices.First() as Card;
-        }
     }
 }

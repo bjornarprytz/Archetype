@@ -110,7 +110,7 @@ namespace Archetype
                 return;
             }
 
-            Choose<Card> choose = new Choose<Card>(x, Hand);
+            Choose<Card> choose = new Choose<Card>(x, Hand); // TODO: Figure out a good way to prompt user in cases where some action is forced.
 
             prompt(choose);
 
