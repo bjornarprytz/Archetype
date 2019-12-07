@@ -52,7 +52,7 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        internal bool Play(CardArgs args, Timeline timeline)
+        internal bool Play(PlayCardArgs args, Timeline timeline)
         {
             if (!args.Valid) return false;
 
@@ -68,7 +68,7 @@ namespace Archetype
             return true;
         }
 
-        private EffectSpan GenerateEffectSpan(CardArgs cardArgs)
+        private EffectSpan GenerateEffectSpan(PlayCardArgs cardArgs)
         {
             EffectSpan effectSpan = new EffectSpan();
 

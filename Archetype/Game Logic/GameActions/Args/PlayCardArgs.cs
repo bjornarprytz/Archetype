@@ -5,9 +5,8 @@ using System.Text;
 
 namespace Archetype
 {
-    public class CardArgs : ChoiceArgs
+    public class PlayCardArgs : ChoiceArgs
     {
-        internal Card Card { get; private set; }
         public List<EffectArgs> EffectArgs { get; set; }
 
         public override bool Valid => EffectArgs.All(arg => arg.Valid);
