@@ -7,19 +7,14 @@ namespace Archetype
 {
     public class PromptResponse
     {
-        public List<Unit> Choices { get; set; }
+        public List<GamePiece> Choices { get; private set; }
         public bool Aborted { get; protected set; }
 
+        private PromptResponse() { }
 
-
-        public static PromptResponse Choose(IEnumerable<Unit> choices)
+        public static PromptResponse Choose(IEnumerable<GamePiece> choices)
         {
             return new PromptResponse() { Choices = choices.ToList(), Aborted = false };
-        }
-
-        public static PromptResponse Abort()
-        {
-            return new PromptResponse() { Aborted = true };
         }
     }
 }

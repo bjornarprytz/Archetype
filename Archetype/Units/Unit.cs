@@ -112,9 +112,11 @@ namespace Archetype
 
             Choose<Card> choose = new Choose<Card>(x, Hand); // TODO: Figure out a good way to prompt user in cases where some action is forced.
 
-            prompt(choose);
+            PromptResponse response = prompt(choose);
 
-            foreach (Card card in choose.Choices)
+
+
+            foreach (Card card in response.Choices)
             {
                 Discard(card.Id);
             }

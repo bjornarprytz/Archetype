@@ -5,26 +5,9 @@ namespace Archetype
 {
     public class Choose<T> : ActionPrompt where T : GamePiece
     {
-        public int MaxChoices { get; protected set; }
-        public int MinChoices { get; protected set; }
+        public override Type OptionsType => typeof(T);
 
-
-        public IEnumerable<T> Options { get; private set; }
-        public List<T> Choices { get; set; }
-
-        public Choose(int x, IEnumerable<T> options)
-        {
-            MaxChoices = MinChoices = x;
-            Options = options;
-            Choices = new List<T>(x);
-        }
-
-        public Choose(int min, int max, IEnumerable<T> options)
-        {
-            MaxChoices = max;
-            MinChoices = min;
-            Options = options;
-            Choices = new List<T>(max);
-        }
+        public Choose(int x, IEnumerable<T> options) : base (x, x, options) { }
+        public Choose(int min, int max, IEnumerable<T> options) : base(min, max, options) { }
     }
 }
