@@ -16,14 +16,14 @@ namespace Archetype
             PromptUser = handlePrompt;
         }
 
+        internal void EndTurn(Unit unit)
+        {
+            unit.EndTurn();
+        }
+
         private void Upkeep()
         {
             Timeline.ResolveEffects(PromptUser);
-        }
-
-        private void EndTick() // TODO: Make this trigger by command instead
-        {
-            Timeline.AdvanceTime();
         }
     }
 }

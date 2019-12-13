@@ -52,7 +52,7 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        internal bool Play(PlayCardArgs args, Timeline timeline)
+        internal bool Play(PlayCardArgs args, GameLoop gameLoop)
         {
             if (!args.Valid) return false;
 
@@ -61,7 +61,7 @@ namespace Archetype
 
             OnBeforePlay?.Invoke();
 
-            timeline.CommitEffectSpan(effectSpan);
+            gameLoop.Timeline.CommitEffectSpan(effectSpan);
 
             OnAfterPlay?.Invoke();
 

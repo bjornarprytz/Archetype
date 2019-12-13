@@ -55,30 +55,32 @@ namespace Archetype
             DiscardPile = new DiscardPile(this);
             ActiveEffects = new List<EffectSpan>();
         }
-        
-        public void AddModifierAsSource(Modifier modifier)
+
+        internal void AddModifierAsSource(Modifier modifier)
         {
             AddModifier(_modifierAsSource, modifier);
         }
 
-        public void AddModifierAsTarget(Modifier modifier)
+        internal void AddModifierAsTarget(Modifier modifier)
         {
             AddModifier(_modifierAsTarget, modifier);
         }
 
-        public int ModifierAsSource(string keyword)
+        internal int ModifierAsSource(string keyword)
         {
             return GetModifier(_modifierAsSource, keyword);
         }
-        public int ModifierAsTarget(string keyword)
+        internal int ModifierAsTarget(string keyword)
         {
             return GetModifier(_modifierAsTarget, keyword);
         }
 
-        public bool HasTurn(int tick)
+        internal bool HasTurn(int tick)
         {
             return NextMoveTick == tick;
         }
+
+        internal virtual void EndTurn() { }
 
         internal void Discard(Guid cardId)
         {
@@ -110,7 +112,7 @@ namespace Archetype
                 return;
             }
 
-            Choose<Card> choose = new Choose<Card>(x, Hand); // TODO: Figure out a good way to prompt user in cases where some action is forced.
+            Choose<Card> choose = new Choose<Card>(x, Hand);
 
             PromptResponse response = prompt(choose);
 

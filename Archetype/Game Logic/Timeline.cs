@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace Archetype
@@ -8,16 +7,14 @@ namespace Archetype
     public class Timeline
     {
         public int CurrentTick { get; private set; }
-        public List<EffectSpan> Effects;
-        public List<Unit> InitiativeOrder; // Ordered on speed?
+        
+        private List<EffectSpan> Effects { get; set; }
 
         public Timeline(int startTick=0)
         {
             CurrentTick = startTick;
             Effects = new List<EffectSpan>();
-            InitiativeOrder = new List<Unit>();
         }
-
         public void AdvanceTime()
         {
             CurrentTick++;

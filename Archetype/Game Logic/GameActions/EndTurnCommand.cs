@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Archetype
+namespace Archetype.Game_Logic.GameActions
 {
-    public class PlayCardCommand : ICommand
+    public class EndTurnCommand : ICommand
     {
-        private readonly Action<GameLoop> _action;
-        public PlayCardCommand(Card cardToPlay, PlayCardArgs args)
-        {
-            _action = (gameLoop) => cardToPlay.Play(args, gameLoop);
-        }
-
         public event EventHandler CanExecuteChanged;
+
+        private Action<GameLoop> _action;
+
+        public EndTurnCommand(Unit unit)
+        {
+            _action = (gameLoop) => gameLoop.EndTurn(unit);
+        }
 
         public bool CanExecute(object parameter)
         {
