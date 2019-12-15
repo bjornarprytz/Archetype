@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public class Card : GamePiece
+    public class Card : GamePiece, ICreateEffects
     {
         public delegate void ZoneChange(Zone from, Zone to);
         public delegate void BeforePlay();
@@ -57,7 +57,7 @@ namespace Archetype
             if (!args.Valid) return false;
 
 
-            EffectSpan effectSpan = GenerateEffectSpan(args);
+            EffectSpan effectSpan = CreateEffects(args);
 
             OnBeforePlay?.Invoke();
 
@@ -68,7 +68,7 @@ namespace Archetype
             return true;
         }
 
-        private EffectSpan GenerateEffectSpan(PlayCardArgs cardArgs)
+        public EffectSpan CreateEffects(PlayCardArgs cardArgs)
         {
             EffectSpan effectSpan = new EffectSpan();
 

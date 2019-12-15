@@ -5,10 +5,8 @@ using System.Text;
 
 namespace Archetype
 {
-    public class PlayCardArgs : ChoiceArgs
+    public class PlayCardArgs : MultipleChoicesArgs<EffectArgs>
     {
-        public List<EffectArgs> EffectArgs { get; set; }
-
-        public override bool Valid => EffectArgs.All(arg => arg.Valid);
+        public List<EffectArgs> EffectArgs => SubChoices;
     }
 }
