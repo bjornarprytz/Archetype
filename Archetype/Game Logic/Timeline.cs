@@ -15,11 +15,6 @@ namespace Archetype
             CurrentTick = startTick;
             Effects = new List<EffectSpan>();
         }
-        public void AdvanceTime()
-        {
-            CurrentTick++;
-        }
-
         public List<Tick> FutureTicks(int nTicksForward)
         {
             List<Tick> futureTicks = new List<Tick>();
@@ -32,7 +27,13 @@ namespace Archetype
             return futureTicks;
         }
 
-        public void ResolveEffects(RequiredAction prompt)
+        internal void AdvanceTime()
+        {
+            CurrentTick++;
+        }
+
+
+        internal void ResolveEffects(RequiredAction prompt)
         {
             foreach (EffectSpan span in Effects)
             {
@@ -40,7 +41,7 @@ namespace Archetype
             }
         }
 
-        public void CommitEffectSpan(EffectSpan span)
+        internal void CommitEffectSpan(EffectSpan span)
         {
             Effects.Add(span);
             span.StartTime = CurrentTick;

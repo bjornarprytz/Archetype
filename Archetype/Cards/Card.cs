@@ -9,7 +9,6 @@ namespace Archetype
     {
         public delegate void ZoneChange(Zone from, Zone to);
         public delegate void BeforePlay();
-        public delegate void PlayCard(RequiredAction prompt);
         public delegate void AfterPlay();
 
         public event ZoneChange OnZoneChanged;
