@@ -5,12 +5,15 @@ using System.Text;
 
 namespace Archetype
 {
-    public class DiscardPile : Zone, IEnumerable<Card>
+    public class DiscardPile : Zone<Card>, IOwned<Unit>
     {
+        public Unit Owner { get; set; }
         public int Count => Cards.Count;
         public Dictionary<Guid, Card> Cards { get; set; }
-        public DiscardPile(Unit owner) : base(owner)
+        public DiscardPile(Unit owner)
         {
+            Owner = owner;
+
             Cards = new Dictionary<Guid, Card>();
         }
 
@@ -21,15 +24,7 @@ namespace Archetype
             return Cards[Id];
         }
 
-        public IEnumerator<Card> GetEnumerator()
-        {
-            return ((IEnumerable<Card>)Cards).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable<Card>)Cards).GetEnumerator();
-        }
+        public override IEnumerator<Card> GetEnumerator() => Cards.Values.GetEnumerator();
 
         public override void Out(Card cardToMove)
         {

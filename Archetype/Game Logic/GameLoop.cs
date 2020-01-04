@@ -10,11 +10,11 @@ namespace Archetype
         public event RequiredAction PromptUser;
         public Timeline Timeline { get; private set; }
         private IEnumerator<Unit> TurnOrder { get; set; }
-        public GameState State { get; private set; }
+        public Battlefield Battlefield { get; private set; }
 
-        public GameLoop(GameState initialState, RequiredAction handlePrompt)
+        public GameLoop(IEnumerable<Unit> units, RequiredAction handlePrompt)
         {
-            State = initialState;
+            Battlefield = new Battlefield(units);
             PromptUser = handlePrompt;
         }
 
@@ -32,9 +32,9 @@ namespace Archetype
         internal void EndTick()
         {
             Timeline.AdvanceTime();
-            TurnOrder = State.ActiveUnits.Where(u => u.HasTurn(Timeline.CurrentTick)).GetEnumerator();
+            TurnOrder = Battlefield.Where(u => u.HasTurn(Timeline.CurrentTick)).GetEnumerator();
             Upkeep();
-            if (TurnOrder.Current == null) EndTick(); // TODO: Avoid getting stuck in endless recursion 
+            if (TurnOrder.Current == null) EndTick(); // TODO: Avoid getting stuck in endless recursion
         }
 
         private void Upkeep()

@@ -6,19 +6,23 @@ using System.Text;
 
 namespace Archetype
 {
-    public class Deck : Zone, IEnumerable<Card>
+    public class Deck : Zone<Card>, IOwned<Unit>
     {
+        public Unit Owner { get; set; }
         public Stack<Card> Cards { get; set; }
         public int Count => Cards.Count;
-        public Deck(Unit owner, IEnumerable<Card> cards) : base(owner)
+        public Deck(Unit owner, IEnumerable<Card> cards)
         {
+            Owner = owner;
+
             Cards = new Stack<Card>();
 
             PutCardsOnTop(cards);
         }
 
-        public Deck(Unit owner) : base(owner)
+        public Deck(Unit owner)
         {
+            Owner = owner;
             Cards = new Stack<Card>();
         }
         public static List<Card> Sample(int size)
@@ -74,7 +78,7 @@ namespace Archetype
             return cardsToLookAt;
         }
 
-        public void Draw(Zone into)
+        public void Draw(Zone<Card> into)
         {
             if (Cards.Count == 0) return; // TODO: No null
             Card card = Cards.Peek();
@@ -134,15 +138,7 @@ namespace Archetype
             c2 = temp;
         }
 
-        public IEnumerator<Card> GetEnumerator()
-        {
-            return ((IEnumerable<Card>)Cards).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable<Card>)Cards).GetEnumerator();
-        }
+        public override IEnumerator<Card> GetEnumerator() =>  ((IEnumerable<Card>)Cards).GetEnumerator();
 
         public override void Out(Card cardToMove)
         {

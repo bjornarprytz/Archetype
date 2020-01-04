@@ -19,7 +19,7 @@ namespace Archetype
         }
 
 
-        private int Evaluate(Card move, GameState gameState)
+        private int Evaluate(Card move, Battlefield battlefield)
         {
             // TODO: Do smart things
 

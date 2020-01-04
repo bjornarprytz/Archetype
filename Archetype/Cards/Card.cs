@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Archetype
 {
-    public class Card : GamePiece, ICreateEffects
+    public class Card : GamePiece, ICreateEffects, IOwned<Unit>
     {
-        public delegate void ZoneChange(Zone from, Zone to);
+        public delegate void ZoneChange(Zone<Card> from, Zone<Card> to);
         public delegate void BeforePlay();
         public delegate void AfterPlay();
 
@@ -17,22 +17,21 @@ namespace Archetype
 
         public string Name { get; private set; }
         public CompoundPayment Cost { get; set; }
-        public bool HasOwner => Owner != null;
-        public Unit Owner { get; private set; }
+
+        public Unit Owner { get; set; }
         private Dictionary<int, List<EffectTemplate>> _effects;
         
-        public Zone CurrentZone
+        public Zone<Card> CurrentZone
         {
             get { return currZone; }
             private set
             {
-                Zone previousZone = currZone;
+                Zone<Card> previousZone = currZone;
                 currZone = value;
-                Owner = currZone?.Owner;
                 OnZoneChanged?.Invoke(previousZone, currZone);
             }
         }
-        private Zone currZone;
+        private Zone<Card> currZone;
 
         internal Card(string name, CompoundPayment cost, Dictionary<int, List<EffectTemplate>> effects=null)
         {
@@ -41,7 +40,7 @@ namespace Archetype
             _effects = effects ?? new Dictionary<int, List<EffectTemplate>>();
         }
 
-        public void MoveTo(Zone newZone)
+        public void MoveTo(Zone<Card> newZone)
         {
             if (CurrentZone == newZone) return;
 

@@ -7,7 +7,7 @@ namespace Archetype
 {
     public abstract class EffectTemplate
     {
-        public delegate IEnumerable<Unit> TargetOptions(GameState gameState);
+        public delegate IEnumerable<Unit> TargetOptions(GameLoop gameLoop);
 
         protected TargetParams<Unit> TargetParams { get; private set; }
 
@@ -20,7 +20,7 @@ namespace Archetype
 
         protected TargetOptions TargetPool { get; private set; }
 
-        internal EffectArgs Args(Unit owner, GameState gameState) => TargetParams.GetArgs(owner, TargetPool(gameState));
+        internal EffectArgs Args(Unit owner, GameLoop gameLoop) => TargetParams.GetArgs(owner, TargetPool(gameLoop));
  
 
         public abstract Effect CreateEffect(EffectArgs args);
