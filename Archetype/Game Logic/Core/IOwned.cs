@@ -1,9 +1,8 @@
 ﻿
-
 namespace Archetype
 {
-    public interface IOwned<O> where O : GamePiece
+    public interface IOwned<T> where T : GamePiece
     {
-        O Owner { get; set; }
+        T Owner { get; set; }
     }
 }
