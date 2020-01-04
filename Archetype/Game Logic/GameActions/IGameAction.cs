@@ -3,8 +3,8 @@ namespace Archetype
 {
     public interface IGameAction
     {
-        bool CanExecute(GameLoop gameLoop);
+        bool CanExecute(GameState gameState);
 
-        void Execute(GameLoop gameLoop);
+        void Execute(GameState gameState);
     }
 }

@@ -5,7 +5,7 @@ namespace Archetype
 {
     public class PlayCardAction : IGameAction
     {
-        private readonly Action<GameLoop> _action;
+        private readonly Action<GameState> _action;
         private readonly Unit _player;
         private readonly PlayCardArgs _args;
 
@@ -16,8 +16,8 @@ namespace Archetype
             _args = args;
         }
 
-        public bool CanExecute(GameLoop gameLoop) => gameLoop.HasTurn(_player) &&  _args.Valid;
+        public bool CanExecute(GameState gameState) => gameState.HasTurn(_player) &&  _args.Valid;
 
-        public void Execute(GameLoop gameLoop) => _action(gameLoop);
+        public void Execute(GameState gameState) => _action(gameState);
     }
 }

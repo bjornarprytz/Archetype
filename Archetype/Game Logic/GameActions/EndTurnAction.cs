@@ -4,7 +4,7 @@ namespace Archetype
 {
     public class EndTurnAction : IGameAction
     {
-        private readonly Action<GameLoop> _action;
+        private readonly Action<GameState> _action;
         private readonly Unit _unit;
 
         public EndTurnAction(Unit unit)
@@ -13,8 +13,8 @@ namespace Archetype
             _unit = unit;
         }
 
-        public bool CanExecute(GameLoop gameLoop) => gameLoop.HasTurn(_unit);
+        public bool CanExecute(GameState gameState) => gameState.HasTurn(_unit);
 
-        public void Execute(GameLoop gameLoop) => _action(gameLoop);
+        public void Execute(GameState gameState) => _action(gameState);
     }
 }

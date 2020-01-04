@@ -5,14 +5,14 @@ using System.Text;
 
 namespace Archetype
 {
-    public class GameLoop
+    public class GameState
     {
         public event RequiredAction PromptUser;
         public Timeline Timeline { get; private set; }
         private IEnumerator<Unit> TurnOrder { get; set; }
         public Battlefield Battlefield { get; private set; }
 
-        public GameLoop(IEnumerable<Unit> units, RequiredAction handlePrompt)
+        public GameState(IEnumerable<Unit> units, RequiredAction handlePrompt)
         {
             Battlefield = new Battlefield(units);
             PromptUser = handlePrompt;
