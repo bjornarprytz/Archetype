@@ -6,24 +6,20 @@ namespace Archetype
 {
     public class Tick
     {
-        public int Timestamp { get; set; }
-        public List<Effect> Effects { get; private set; }
-
-        public Tick(int timestamp, List<EffectSpan> allKnownSpans)
+        public int Timestamp { get; private set; }
+        public Stack<Effect> Effects { get; private set; }
+        private Tick()
+        {
+            Effects = new Stack<Effect>();
+        }
+        public Tick(int timestamp) : this()
         {
             Timestamp = timestamp;
-
-            UpdateEffects(allKnownSpans);
         }
 
-        public void UpdateEffects(List<EffectSpan> allKnownSpans)
+        public void AddEffect(Effect effect)
         {
-            Effects = new List<Effect>();
-
-            foreach (EffectSpan span in allKnownSpans)
-            {
-                Effects.AddRange(span.EffectsAtTick(Timestamp));
-            }
+            Effects.Push(effect);
         }
     }
 }

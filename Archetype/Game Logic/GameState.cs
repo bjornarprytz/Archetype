@@ -32,7 +32,7 @@ namespace Archetype
         internal void EndTick()
         {
             Timeline.AdvanceTime();
-            TurnOrder = Battlefield.Where(u => u.HasTurn(Timeline.CurrentTick)).GetEnumerator();
+            // TODO: Determine turn order.
             Upkeep();
             if (TurnOrder.Current == null) EndTick(); // TODO: Avoid getting stuck in endless recursion
         }

@@ -6,45 +6,46 @@ namespace Archetype
 {
     public class Timeline
     {
-        public int CurrentTick { get; private set; }
+        public Tick CurrentTick => Ticks.ContainsKey(_currTick) ? Ticks[_currTick] : new Tick(_currTick);
+        private int _currTick;
         
         private List<EffectSpan> Effects { get; set; }
 
+        private Dictionary<int, Tick> Ticks { get; set; }
+
         public Timeline(int startTick=0)
         {
-            CurrentTick = startTick;
+            _currTick = startTick;
             Effects = new List<EffectSpan>();
         }
-        public List<Tick> FutureTicks(int nTicksForward)
-        {
-            List<Tick> futureTicks = new List<Tick>();
-
-            for (int i = 0; i < nTicksForward; i++)
-            {
-                futureTicks.Add(new Tick(CurrentTick, Effects));
-            }
-
-            return futureTicks;
-        }
+        public IEnumerable<Tick> FutureTicks(int nTicksForward) => Ticks.Values.Where(t => t.Timestamp > _currTick && t.Timestamp < _currTick + nTicksForward);
 
         internal void AdvanceTime()
         {
-            CurrentTick++;
+            _currTick++;
         }
 
 
         internal void ResolveEffects(RequiredAction prompt)
         {
-            foreach (EffectSpan span in Effects)
+            while(CurrentTick.Effects.Count > 0)
             {
-                span.ResolveTick(CurrentTick, prompt);
+                CurrentTick.Effects.Pop().Resolve(prompt);
             }
         }
 
         internal void CommitEffectSpan(EffectSpan span)
         {
             Effects.Add(span);
-            span.StartTime = CurrentTick;
+            span.StartTime = _currTick;
+            foreach(int relativeTimeStamp in span.ChainOfEvents.Keys)
+            {
+                int absTimeStamp = relativeTimeStamp + _currTick;
+
+                if (!Ticks.ContainsKey(relativeTimeStamp)) Ticks.Add(absTimeStamp, new Tick(absTimeStamp));
+
+                Ticks[relativeTimeStamp].AddEffect(span.ChainOfEvents[relativeTimeStamp]);
+            }
         }
     }
 }
