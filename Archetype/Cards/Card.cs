@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public class Card : GamePiece, ICreateEffects, IOwned<Unit>
+    public class Card : GamePiece, IOwned<Unit>
     {
         public delegate void ZoneChange(Zone<Card> from, Zone<Card> to);
         public delegate void BeforePlay();
@@ -19,7 +19,7 @@ namespace Archetype
         public CompoundPayment Cost { get; set; }
 
         public Unit Owner { get; set; }
-        private Dictionary<int, List<EffectTemplate>> _effects;
+        private List<EffectTemplate> _effectTemplates;
         
         public Zone<Card> CurrentZone
         {
@@ -33,14 +33,14 @@ namespace Archetype
         }
         private Zone<Card> currZone;
 
-        internal Card(string name, CompoundPayment cost, Dictionary<int, List<EffectTemplate>> effects=null)
+        internal Card(string name, CompoundPayment cost, List<EffectTemplate> effects=null)
         {
             Name = name;
             Cost = cost;
-            _effects = effects ?? new Dictionary<int, List<EffectTemplate>>();
+            _effectTemplates = effects ?? new List<EffectTemplate>();
         }
 
-        public void MoveTo(Zone<Card> newZone)
+        internal void MoveTo(Zone<Card> newZone)
         {
             if (CurrentZone == newZone) return;
 
@@ -54,31 +54,22 @@ namespace Archetype
         {
             if (!args.Valid) return false;
 
-
-            EffectSpan effectSpan = CreateEffects(args);
-
             OnBeforePlay?.Invoke();
 
-            gameState.Timeline.CommitEffectSpan(effectSpan);
+            args.EffectArgs.Select(a => a.Effect.CreateEffect(a));
+
+            foreach (Effect effect in args.CreateEffects())
+            {
+                effect.Resolve(gameState);
+            }
 
             OnAfterPlay?.Invoke();
+
+            MoveTo(Owner.DiscardPile);
 
             return true;
         }
 
-        public EffectSpan CreateEffects(PlayCardArgs cardArgs)
-        {
-            EffectSpan effectSpan = new EffectSpan();
-
-            foreach (int tick in _effects.Keys)
-            {
-                foreach (EffectArgs effectArg in cardArgs.EffectArgs)
-                {
-                    effectSpan.AddEffect(tick, effectArg.Effect.CreateEffect(effectArg));
-                }
-            }
-
-            return effectSpan;
-        }
+        public IEnumerable<EffectArgs> GetArgs(GameState gameState) => _effectTemplates.Select(e => e.Args(Owner, gameState));
     }
 }

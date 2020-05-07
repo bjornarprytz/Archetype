@@ -13,7 +13,7 @@ namespace Archetype
 
     public abstract class Effect
     {
-        public delegate void Resolution(RequiredAction prompt);
+        public delegate void Resolution(IPromptable prompt);
         public delegate void Cancellation();
         public delegate void CleanUp();
 
@@ -33,7 +33,7 @@ namespace Archetype
         public Unit Source { get; set; }
 
 
-        public void Resolve(RequiredAction prompt)
+        public void Resolve(IPromptable prompt)
         {
             _resolve?.Invoke(prompt);
             OnResolve?.Invoke(this);

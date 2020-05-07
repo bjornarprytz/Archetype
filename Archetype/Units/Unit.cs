@@ -29,7 +29,6 @@ namespace Archetype
         public Deck Deck { get; set; }
         public Hand Hand { get; set; }
         public DiscardPile DiscardPile { get; set; }
-        public List<EffectSpan> ActiveEffects { get; set; }
         public string Name { get; set; }
 
         public bool HasMovesAvailable => Hand.Any(c => Resources.CanAfford(c.Cost));
@@ -53,7 +52,6 @@ namespace Archetype
             Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
-            ActiveEffects = new List<EffectSpan>();
         }
 
         internal void AddModifierAsSource(Modifier modifier)
@@ -96,7 +94,7 @@ namespace Archetype
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
 
-        internal void Discard(int x, RequiredAction prompt)
+        internal void Discard(int x, IPromptable prompt)
         {
             if (x < 1) return;
 
@@ -114,14 +112,15 @@ namespace Archetype
 
             Choose<Card> choose = new Choose<Card>(x, Hand);
 
-            PromptResponse response = prompt(choose);
+            prompt.Prompt(choose);
 
-
-
+            // TODO: Handle Prompt Response somehow. Create response handler callback?
+            /*
             foreach (Card card in response.Choices)
             {
                 Discard(card.Id);
             }
+             */
         }
 
         internal void Draw(int x)

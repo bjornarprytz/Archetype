@@ -15,21 +15,21 @@ namespace Archetype
 
         public IEnumerable<GamePiece> Options { get; private set; }
 
-        public EffectArgs(int minTargets, int maxTargets, IEnumerable<GamePiece> opttions)
+        public EffectArgs(int minTargets, int maxTargets, IEnumerable<GamePiece> options)
         {
             Targets = new List<GamePiece>();
 
             MinTargets = minTargets;
             MaxTargets = maxTargets;
-            Options = opttions;
+            Options = options;
         }
 
-        public EffectArgs(int nTargets, IEnumerable<Unit> opttions)
+        public EffectArgs(int nTargets, IEnumerable<Unit> options)
         {
             Targets = new List<GamePiece>();
 
             MinTargets = MaxTargets = nTargets;
-            Options = opttions;
+            Options = options;
         }
 
         public override bool Valid => Targets.Count <= MaxTargets && Targets.Count >= MinTargets;

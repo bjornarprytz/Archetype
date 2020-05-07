@@ -5,17 +5,17 @@ using System.Text;
 
 namespace Archetype
 {
-    public class GameState
+    public class GameState : IPromptable
     {
-        public event RequiredAction PromptUser;
-        public Timeline Timeline { get; private set; }
         private IEnumerator<Unit> TurnOrder { get; set; }
         public Battlefield Battlefield { get; private set; }
 
-        public GameState(IEnumerable<Unit> units, RequiredAction handlePrompt)
+        public Queue<ActionPrompt> PromptQueue { get; private set; }
+
+        public GameState(IEnumerable<Unit> units)
         {
             Battlefield = new Battlefield(units);
-            PromptUser = handlePrompt;
+            PromptQueue = new Queue<ActionPrompt>();
         }
 
         internal bool HasTurn(Unit unit)
@@ -31,15 +31,22 @@ namespace Archetype
 
         internal void EndTick()
         {
-            Timeline.AdvanceTime();
             // TODO: Determine turn order.
             Upkeep();
             if (TurnOrder.Current == null) EndTick(); // TODO: Avoid getting stuck in endless recursion
         }
 
+        public void Prompt(ActionPrompt actionPrompt)
+        {
+            PromptQueue.Enqueue(actionPrompt);
+            // TODO: event?
+        }
+
         private void Upkeep()
         {
-            Timeline.ResolveEffects(PromptUser);
+            // TODO: Anything here?
         }
+
+        
     }
 }
