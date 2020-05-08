@@ -9,6 +9,7 @@ namespace Archetype
     {
         private IEnumerator<Unit> TurnOrder { get; set; }
         public Battlefield Battlefield { get; private set; }
+        public Graveyard Graveyard { get; private set; }
 
         public Queue<ActionPrompt> PromptQueue { get; private set; }
 

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : GamePiece
+    public abstract class Unit : GamePiece, IZoned<Unit>
     {
         public delegate void DamageTaken(Unit source, int damage);
         public delegate void DamageDealt(Unit target, int damage);
@@ -24,6 +24,8 @@ namespace Archetype
         public event CardMilled OnCardMilled;
         public event DeckShuffled OnDeckShuffled;
 
+        public event ZoneChange<Unit> OnZoneChanged;
+
         public bool IsAlive => Resources.Amount<Life>() > 0;
 
         public Deck Deck { get; set; }
@@ -36,6 +38,18 @@ namespace Archetype
         public int Speed { get; set; } // Determines initiative order
 
         public int HandLimit { get; set; }
+
+        public Zone<Unit> CurrentZone
+        {
+            get { return currZone; }
+            private set
+            {
+                Zone<Unit> previousZone = currZone;
+                currZone = value;
+                OnZoneChanged?.Invoke(previousZone, currZone);
+            }
+        }
+        private Zone<Unit> currZone;
 
         private Dictionary<string, int> _modifierAsSource;
         private Dictionary<string, int> _modifierAsTarget;
@@ -51,6 +65,18 @@ namespace Archetype
             Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
+        }
+
+        public void MoveTo(Zone<Unit> newZone)
+        {
+            // TODO: Move this implementation to the IZoned interface (available in C# 8.0)
+
+            if (CurrentZone == newZone) return;
+
+            if (CurrentZone != null) CurrentZone.Out(this);
+            if (newZone != null) newZone.Into(this);
+
+            CurrentZone = newZone;
         }
 
         internal void AddModifierAsSource(Modifier modifier)
@@ -132,7 +158,7 @@ namespace Archetype
             }
         }
 
-        internal void Shuffle()
+        internal void ShuffleDeck()
         {
             Deck.Shuffle();
             OnDeckShuffled?.Invoke(Deck);
