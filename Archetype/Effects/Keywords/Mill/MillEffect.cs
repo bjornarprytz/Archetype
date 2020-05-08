@@ -4,18 +4,24 @@ using System.Text;
 
 namespace Archetype
 {
-    public class MillEffect : XEffect<Unit>
+    public class MillEffect : XEffect
     {
         public override string Keyword => "Mill";
-        public int CardsToMill => X;
 
         public MillEffect(int x, EffectArgs args)
             : base(x, args)
         { }
 
-        protected override void _affect(Unit target, int modifier, IPromptable prompt)
+        protected override void _affectX(Unit target, int amount, IPromptable prompt)
         {
-            target.Mill(CardsToMill + modifier);
+            for(int x=0; x < amount; x++)
+            {
+                Card cardToMill = target.Deck.PeekTop();
+
+                if (cardToMill == null) break;
+
+                cardToMill.MoveTo(target.DiscardPile);
+            }
         }
     }
 }

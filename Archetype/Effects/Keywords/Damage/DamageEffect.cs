@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class DamageEffect : XEffect<Unit>
+    public class DamageEffect : XEffect
     {
         public override string Keyword => "Damage";
 
@@ -10,9 +10,12 @@ namespace Archetype
             : base(damage, args)
         { }
 
-        protected override void _affect(Unit target, int modifier, IPromptable prompt)
+        protected override void _affectX(Unit target, int amount, IPromptable prompt)
         {
-            Source.DealDamage(target, X + modifier);
+            target.TakeDamage(Source, amount);
+            
+            
+            //Source.DealDamage(target, X);
         }
     }
 }

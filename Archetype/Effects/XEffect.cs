@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class XEffect<T> : Effect<T>, IKeyword where T : GamePiece
+    public abstract class XEffect : Effect<Unit>, IKeyword
     {
         public abstract string Keyword { get; }
         public int X { get { return _x > 0 ? _x : 0; } set { _x = value; } }
@@ -19,14 +19,16 @@ namespace Archetype
 
         protected override Resolution _resolve => (prompt) =>
         {
-            X += Source.ModifierAsSource(Keyword);
+            Source.ModifyOutgoingEffect(this); // TODO: Verify that this is not of type XEffect, but the concrete subtype inheriting from XEffect
 
-            foreach(Unit target in Targets)
+            foreach (Unit target in Targets)
             {
-                _affect(target, target.ModifierAsTarget(Keyword), prompt);
+                int modifiedValue = target.ModifiedIncomingEffect(this); // TODO: Verify that this is not of type XEffect, but the concrete subtype inheriting from XEffect
+
+                _affectX(target, modifiedValue, prompt);
             }
         };
 
-        protected abstract void _affect(Unit target, int modifier, IPromptable prompt);
+        protected abstract void _affectX(Unit target, int amount, IPromptable prompt);
     }
 }

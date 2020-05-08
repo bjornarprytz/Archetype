@@ -4,19 +4,17 @@ using System.Text;
 
 namespace Archetype
 {
-    public class HealEffect : XEffect<Unit>
+    public class HealEffect : XEffect
     {
         public override string Keyword => "Heal";
-
-        public int HealAmount => X;
 
         public HealEffect(int x, EffectArgs args)
             : base(x, args)
         { }
 
-        protected override void _affect(Unit target, int modifier, IPromptable prompt)
+        protected override void _affectX(Unit target, int amount, IPromptable prompt)
         {
-            Source.GiveHeal(target, HealAmount);
+            target.Resources.Gain(new Payment<Life>(amount));
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Archetype
         public delegate void HealGiven(Unit target, int heal);
         public delegate void CardDrawn(Card drawnCard);
         public delegate void CardDiscarded(Card discardedCard);
+
         public delegate void CardMilled(Card milledCard);
         public delegate void DeckShuffled(Deck deck);
 
@@ -51,13 +52,13 @@ namespace Archetype
         }
         private Zone<Unit> currZone;
 
-        private Dictionary<string, int> _modifierAsSource;
-        private Dictionary<string, int> _modifierAsTarget;
+        private EffectModifiers ModifiersAsSource { get; set; }
+        private EffectModifiers ModifiersAsTarget { get; set; }
 
         public Unit(string name, ResourcePool resources, Faction team) : base(team)
         {
-            _modifierAsSource = new Dictionary<string, int>();
-            _modifierAsTarget = new Dictionary<string, int>();
+            ModifiersAsSource = new EffectModifiers();
+            ModifiersAsTarget = new EffectModifiers();
             Name = name;
 
             Resources = resources;
@@ -79,23 +80,14 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        internal void AddModifierAsSource(Modifier modifier)
+        internal void ModifyOutgoingEffect<T>(T xEffect) where T : XEffect
         {
-            AddModifier(_modifierAsSource, modifier);
+            xEffect.X += ModifiersAsSource.Get<T>();
         }
 
-        internal void AddModifierAsTarget(Modifier modifier)
+        internal int ModifiedIncomingEffect<T>(T xEffect) where T : XEffect
         {
-            AddModifier(_modifierAsTarget, modifier);
-        }
-
-        internal int ModifierAsSource(string keyword)
-        {
-            return GetModifier(_modifierAsSource, keyword);
-        }
-        internal int ModifierAsTarget(string keyword)
-        {
-            return GetModifier(_modifierAsTarget, keyword);
+            return xEffect.X + ModifiersAsTarget.Get<T>();
         }
 
         internal virtual void EndTurn() { }
@@ -149,15 +141,6 @@ namespace Archetype
             }
         }
 
-        internal void Mill(int x)
-        {
-            while (x > 0)
-            {
-                Mill();
-                x--;
-            }
-        }
-
         internal void ShuffleDeck()
         {
             Deck.Shuffle();
@@ -195,20 +178,6 @@ namespace Archetype
             return Resources.Amount<R>() - other.Resources.Amount<R>();
         }
 
-        private void Mill()
-        {
-            Card cardToMill = Deck.PeekTop();
-
-            if (cardToMill == null)
-            {
-                Console.WriteLine($"\"Can't mill! My deck is empty!\" says {Name}");
-                return;
-            }
-
-            cardToMill.MoveTo(DiscardPile);
-            OnCardMilled?.Invoke(cardToMill);
-        }
-
         private void Draw()
         {
             Card cardToDraw = Deck.PeekTop();
@@ -221,20 +190,6 @@ namespace Archetype
 
             cardToDraw.MoveTo(Hand);
             OnCardDrawn?.Invoke(cardToDraw);
-        }
-
-        private void AddModifier(Dictionary<string, int> modifierCollection, Modifier modifier)
-        {
-            string keyword = modifier.Keyword;
-
-            if (!modifierCollection.ContainsKey(keyword)) modifierCollection[keyword] = 0;
-
-            modifierCollection[keyword] += modifier.Value;
-        }
-
-        private int GetModifier(Dictionary<string, int> modifierCollection, string keyword)
-        {
-            return modifierCollection.ContainsKey(keyword) ? modifierCollection[keyword] : 0;
         }
     }
 }
