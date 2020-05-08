@@ -7,5 +7,6 @@ namespace Archetype
     public interface IPromptable
     {
        void Prompt(ActionPrompt actionPrompt);
+       PromptResponse PromptImmediate(ActionPrompt actionPrompt);
     }
 }

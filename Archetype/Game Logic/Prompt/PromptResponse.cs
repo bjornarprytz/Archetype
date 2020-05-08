@@ -10,11 +10,10 @@ namespace Archetype
         public List<GamePiece> Choices { get; private set; }
         public bool Aborted { get; protected set; }
 
-        private PromptResponse() { }
-
-        public static PromptResponse Choose(IEnumerable<GamePiece> choices)
+        public PromptResponse(IEnumerable<GamePiece> choices, bool aborted = false) 
         {
-            return new PromptResponse() { Choices = choices.ToList(), Aborted = false };
+            Choices = choices.ToList();
+            Aborted = aborted;
         }
     }
 }

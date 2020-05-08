@@ -42,6 +42,12 @@ namespace Archetype
             // TODO: event?
         }
 
+        public PromptResponse PromptImmediate(ActionPrompt actionPrompt)
+        {
+            // TODO: call an event handler?
+            return actionPrompt.Abort();
+        }
+
         private void Upkeep()
         {
             // TODO: Anything here?

@@ -3,6 +3,6 @@ namespace Archetype
 {
     public interface IOwned<OwnerType> where OwnerType : GamePiece
     {
-        OwnerType Owner { get; set; }
+        OwnerType Owner { get; }
     }
 }

@@ -34,7 +34,6 @@ namespace Archetype
         public bool HasMovesAvailable => Hand.Any(c => Resources.CanAfford(c.Cost));
         public ResourcePool Resources { get; set; }
         public int Speed { get; set; } // Determines initiative order
-        public int NextMoveTick { get; set; }
 
         public int HandLimit { get; set; }
 
@@ -73,11 +72,6 @@ namespace Archetype
             return GetModifier(_modifierAsTarget, keyword);
         }
 
-        internal bool HasTurn(int tick)
-        {
-            return NextMoveTick == tick;
-        }
-
         internal virtual void EndTurn() { }
 
         internal void Discard(Guid cardId)
@@ -110,17 +104,14 @@ namespace Archetype
                 return;
             }
 
-            Choose<Card> choose = new Choose<Card>(x, Hand);
+            Choose<Card> choose = new Choose<Card>(this, x, Hand);
 
-            prompt.Prompt(choose);
+            var response = prompt.PromptImmediate(choose);
 
-            // TODO: Handle Prompt Response somehow. Create response handler callback?
-            /*
             foreach (Card card in response.Choices)
             {
                 Discard(card.Id);
             }
-             */
         }
 
         internal void Draw(int x)

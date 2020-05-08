@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace Archetype
 {
-    public abstract class Effect<T> : Effect where T : GamePiece
+    public abstract class Effect<T> : Effect, IOwned<Unit> where T : GamePiece
     {
         public override Type TargetType => typeof(T);
 
@@ -31,6 +32,7 @@ namespace Archetype
         public abstract Type TargetType { get; } 
         public List<GamePiece> Targets { get; set; }
         public Unit Source { get; set; }
+        public Unit Owner => Source;
 
 
         public void Resolve(IPromptable prompt)
