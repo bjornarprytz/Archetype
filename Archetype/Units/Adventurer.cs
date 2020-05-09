@@ -6,8 +6,8 @@ namespace Archetype
 {
     public class Adventurer : Unit
     {
-        public Adventurer(string name, ResourcePool resources, List<Card> cards) 
-            : base(name, resources, Faction.Player)
+        public Adventurer(string name, int life, int resources, List<Card> cards) 
+            : base(name, life, resources, Faction.Player)
         {
             Deck.PutCardsOnTop(cards);
         }

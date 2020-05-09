@@ -8,13 +8,13 @@ namespace Archetype
     public abstract class Player<UnitType> where UnitType : Unit
     {
         public List<UnitType> Roster { get; set; }
-        public ResourcePool Resources { get; set; }
+        public int Coin { get; set; }
 
 
-        public Player(ResourcePool resources)
+        public Player(int coin)
         {
             Roster = new List<UnitType>();
-            Resources = resources;
+            Coin = coin;
         }
 
         public IEnumerable<UnitType> ActiveUnits => Roster.Where(unit => unit.IsAlive);

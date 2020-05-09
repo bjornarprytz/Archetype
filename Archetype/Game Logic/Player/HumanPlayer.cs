@@ -8,7 +8,7 @@ namespace Archetype
     public class HumanPlayer : Player<Adventurer>
     {
 
-        public HumanPlayer(ResourcePool resources) : base(resources) { }
+        public HumanPlayer(int coin) : base(coin) { }
 
     }
 }

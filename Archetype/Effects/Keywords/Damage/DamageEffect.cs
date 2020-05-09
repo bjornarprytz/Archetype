@@ -10,12 +10,9 @@ namespace Archetype
             : base(damage, args)
         { }
 
-        protected override void _affectX(Unit target, int amount, IPromptable prompt)
+        protected override void _affect(Unit target, IPromptable prompt)
         {
-            target.TakeDamage(Source, amount);
-            
-            
-            //Source.DealDamage(target, X);
+            target.Damage(this);
         }
     }
 }

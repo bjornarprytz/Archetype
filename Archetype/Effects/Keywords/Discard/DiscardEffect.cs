@@ -13,28 +13,9 @@ namespace Archetype
             : base(damage, args)
         { }
 
-        protected override void _affectX(Unit target, int amount, IPromptable prompt)
+        protected override void _affect(Unit target, IPromptable prompt)
         {
-            target.Discard(CardsToDiscard, prompt);
-
-            if (amount < 1) return;
-
-            if (target.Hand.IsEmpty) return;
-
-            if (amount >= target.Hand.Count)
-            {
-                foreach (Card card in target.Hand) target.Discard(card.Id);
-                return;
-            }
-
-            Choose<Card> choose = new Choose<Card>(target, amount, target.Hand);
-
-            var response = prompt.PromptImmediate(choose);
-
-            foreach (Card card in response.Choices)
-            {
-                target.Discard(card.Id);
-            }
+            target.Discard(this, prompt);
         }
     }
 }

@@ -12,16 +12,16 @@ namespace Archetype
      */
     public abstract class CardTemplate
     {
-        public CompoundPayment Cost;
+        public int Cost;
         public string Name { get; set; }
         public string RulesText { get; private set; }
         internal Dictionary<int, List<EffectTemplate>> EffectSpan { get; set; }
 
 
-        internal CardTemplate(string name, Payment[] cost, params (int, EffectTemplate)[] effects)
+        internal CardTemplate(string name, int cost, params (int, EffectTemplate)[] effects)
         {
             Name = name;
-            Cost = new CompoundPayment(cost);
+            Cost = cost;
             EffectSpan = new Dictionary<int, List<EffectTemplate>>();
             foreach(var effect in effects)
             {

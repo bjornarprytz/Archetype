@@ -9,9 +9,9 @@ namespace Archetype
             : base(x, args)
         { }
 
-        protected override void _affectX(Unit target, int amount, IPromptable prompt)
+        protected override void _affect(Unit target, IPromptable prompt)
         {
-            target.Draw(amount);
+            target.Draw(this);
         }
     }
 }

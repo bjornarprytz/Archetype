@@ -16,7 +16,7 @@ namespace Archetype
         public event AfterPlay OnAfterPlay;
 
         public string Name { get; private set; }
-        public CompoundPayment Cost { get; set; }
+        public int Cost { get; set; }
 
         public Zone<Card> CurrentZone
         {
@@ -33,7 +33,7 @@ namespace Archetype
         public Unit Owner { get; set; }
         private List<EffectTemplate> _effectTemplates;
 
-        internal Card(string name, CompoundPayment cost, List<EffectTemplate> effects=null)
+        internal Card(string name, int cost, List<EffectTemplate> effects=null)
         {
             Name = name;
             Cost = cost;

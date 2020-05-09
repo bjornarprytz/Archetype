@@ -10,6 +10,8 @@ namespace Archetype
         public override Type TargetType => typeof(T);
 
         public Effect(EffectArgs args) : base(args) { }
+
+        protected abstract void _affect(Unit target, IPromptable prompt);
     }
 
     public abstract class Effect

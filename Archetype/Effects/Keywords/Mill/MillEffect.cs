@@ -12,16 +12,9 @@ namespace Archetype
             : base(x, args)
         { }
 
-        protected override void _affectX(Unit target, int amount, IPromptable prompt)
+        protected override void _affect(Unit target, IPromptable prompt)
         {
-            for(int x=0; x < amount; x++)
-            {
-                Card cardToMill = target.Deck.PeekTop();
-
-                if (cardToMill == null) break;
-
-                cardToMill.MoveTo(target.DiscardPile);
-            }
+            target.Mill(this);
         }
     }
 }

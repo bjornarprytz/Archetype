@@ -23,12 +23,8 @@ namespace Archetype
 
             foreach (Unit target in Targets)
             {
-                int modifiedValue = target.ModifiedIncomingEffect(this); // TODO: Verify that this is not of type XEffect, but the concrete subtype inheriting from XEffect
-
-                _affectX(target, modifiedValue, prompt);
+                _affect(target, prompt);
             }
         };
-
-        protected abstract void _affectX(Unit target, int amount, IPromptable prompt);
     }
 }

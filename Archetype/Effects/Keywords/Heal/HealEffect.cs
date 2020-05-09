@@ -12,9 +12,9 @@ namespace Archetype
             : base(x, args)
         { }
 
-        protected override void _affectX(Unit target, int amount, IPromptable prompt)
+        protected override void _affect(Unit target, IPromptable prompt)
         {
-            target.Resources.Gain(new Payment<Life>(amount));
+            target.Heal(this);
         }
     }
 }
