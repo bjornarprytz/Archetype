@@ -25,8 +25,8 @@ namespace Archetype
         public event CardMilled OnCardMilled;
         public event DeckShuffled OnDeckShuffled;
         
-
         public event ZoneChange<Unit> OnZoneChanged;
+        public event Action OnDied; 
 
         public bool IsAlive => Life > 0;
 
@@ -40,7 +40,14 @@ namespace Archetype
         public int Life 
         { 
             get => _life; 
-            set => _life = Math.Min(_life, MaxLife); 
+            set 
+            {
+                bool wasAlive = IsAlive;
+
+                _life = Math.Min(_life, MaxLife);
+
+                if (!IsAlive && wasAlive) OnDied?.Invoke();
+            }
         }
         private int _life;
         public int MaxLife { get; set; }
@@ -100,8 +107,6 @@ namespace Archetype
         }
 
         internal virtual void EndTurn() { }
-
-        
 
         internal void Discard(DiscardEffect discardEffect, IPromptable prompt)
         {
