@@ -6,8 +6,6 @@ namespace Archetype
 {
     public class HealEffect : XEffect
     {
-        public override string Keyword => "Heal";
-
         public HealEffect(int x, EffectArgs args)
             : base(x, args)
         { }

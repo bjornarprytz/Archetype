@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class Effect<T> : Effect, IOwned<Unit> where T : GamePiece
+    public abstract class Effect<T> : Effect where T : GamePiece
     {
         public override Type TargetType => typeof(T);
 
@@ -14,7 +14,7 @@ namespace Archetype
         protected abstract void _affect(Unit target, IPromptable prompt);
     }
 
-    public abstract class Effect
+    public abstract class Effect : IOwned<Unit>
     {
         public delegate void Resolution(IPromptable prompt);
         public delegate void Cancellation();

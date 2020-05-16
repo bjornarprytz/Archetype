@@ -6,8 +6,6 @@ namespace Archetype
 {
     public class MillEffect : XEffect
     {
-        public override string Keyword => "Mill";
-
         public MillEffect(int x, EffectArgs args)
             : base(x, args)
         { }

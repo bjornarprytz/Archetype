@@ -3,10 +3,8 @@ using System.Collections.Generic;
 
 namespace Archetype
 {
-    public class DiscardEffect : XEffect, IKeyword
+    public class DiscardEffect : XEffect
     {
-        public override string Keyword => "Discard";
-
         public int CardsToDiscard => X;
 
         public DiscardEffect(int damage, EffectArgs args)

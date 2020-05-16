@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : GamePiece, IZoned<Unit>
+    public abstract class Unit : GamePiece, IZoned<Unit>, IHoldCounters
     {
         public delegate void DamageTaken(Unit source, int damage);
         public delegate void DamageDealt(Unit target, int damage);
@@ -69,6 +69,7 @@ namespace Archetype
 
         private EffectModifiers ModifiersAsSource { get; set; }
         private EffectModifiers ModifiersAsTarget { get; set; }
+        private TypeDictionary<Counter> ActiveCounters { get; set; }
 
         public Unit(string name, int life, int resources, Faction team) : base(team)
         {
@@ -82,6 +83,19 @@ namespace Archetype
             Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
+        }
+
+        public void Apply<T>(T counter) where T : Counter
+        {
+            if (!ActiveCounters.Has<T>())
+                ActiveCounters.Set<T>(counter);
+            else
+                ActiveCounters.Get<T>().Combine(counter);
+        }
+
+        public void Remove<T>() where T : Counter
+        {
+            ActiveCounters.Remove<T>();
         }
 
         public void MoveTo(Zone<Unit> newZone)
