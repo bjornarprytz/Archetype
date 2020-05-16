@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public class Card : GamePiece, IOwned<Unit>, IZoned<Card>
+    public abstract class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters
     {
         public event ZoneChange<Card> OnZoneChanged;
 
@@ -15,7 +15,7 @@ namespace Archetype
         public event BeforePlay OnBeforePlay;
         public event AfterPlay OnAfterPlay;
 
-        public string Name { get; private set; }
+        public string Name { get; protected set; }
         public int Cost { get; set; }
 
         public Zone<Card> CurrentZone
@@ -31,13 +31,14 @@ namespace Archetype
         private Zone<Card> currZone;
 
         public Unit Owner { get; set; }
-        private List<EffectTemplate> _effectTemplates;
 
-        internal Card(string name, int cost, List<EffectTemplate> effects=null)
+        protected List<EffectTemplate> _effectTemplates;
+        public TypeDictionary<Counter> ActiveCounters { get; private set; }
+
+        internal Card()
         {
-            Name = name;
-            Cost = cost;
-            _effectTemplates = effects ?? new List<EffectTemplate>();
+            ActiveCounters = new TypeDictionary<Counter>();
+            _effectTemplates = CreateEffectList();
         }
 
         public void MoveTo(Zone<Card> newZone)
@@ -53,6 +54,18 @@ namespace Archetype
         }
 
         public IEnumerable<EffectArgs> GetArgs(GameState gameState) => _effectTemplates.Select(e => e.Args(Owner, gameState));
+        
+        public virtual void Apply<T>(T counter) where T : Counter
+        {
+            if (ActiveCounters.Has<T>())
+                ActiveCounters.Get<T>().Combine(counter);
+            else
+                ActiveCounters.Set<T>(counter);
+        }
+        public void Remove<T>() where T : Counter
+        {
+            if (ActiveCounters.Has<T>()) ActiveCounters.Remove<T>();
+        }
 
         internal bool Play(PlayCardArgs args, GameState gameState)
         {
@@ -74,5 +87,7 @@ namespace Archetype
             return true;
         }
 
+
+        protected abstract List<EffectTemplate> CreateEffectList();
     }
 }

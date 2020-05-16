@@ -27,7 +27,7 @@ namespace Archetype
         {
             // TODO: Make a way to differentiate damage from attacks and poison (allow simpler formulation)
 
-            // Owner.Damage(new DamageEffect(Charges, new EffectArgs()))
+            // Owner.Damage(new DamageEffect(Charges, new EffectArgs()));
         }
     }
 }

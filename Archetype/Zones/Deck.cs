@@ -31,7 +31,7 @@ namespace Archetype
 
             for (int i=0; i<size; i++)
             {
-                Card newCard = new Card($"Card {i}", default);
+                CardPool.DummyCard newCard = new CardPool.DummyCard();
 
                 sampleList.Add(newCard);
             }
@@ -44,7 +44,7 @@ namespace Archetype
 
             for (int i = 0; i < size; i++)
             {
-                Card newMove = new Card($"Card {i}", default);
+                CardPool.DummyCard newMove = new CardPool.DummyCard();
 
                 sampleList.Add(newMove);
             }

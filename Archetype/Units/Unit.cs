@@ -66,10 +66,10 @@ namespace Archetype
             }
         }
         private Zone<Unit> currZone;
+        public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
         private EffectModifiers ModifiersAsSource { get; set; }
         private EffectModifiers ModifiersAsTarget { get; set; }
-        private TypeDictionary<Counter> ActiveCounters { get; set; }
 
         public Unit(string name, int life, int resources, Faction team) : base(team)
         {
