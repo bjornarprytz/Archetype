@@ -12,11 +12,13 @@ namespace Archetype
         public Graveyard Graveyard { get; private set; }
 
         public Queue<ActionPrompt> PromptQueue { get; private set; }
+        public Queue<Effect> EffectQueue { get; private set; }
 
         public GameState(IEnumerable<Unit> units)
         {
             Battlefield = new Battlefield(units);
             PromptQueue = new Queue<ActionPrompt>();
+            EffectQueue = new Queue<Effect>();
         }
 
         internal bool HasTurn(Unit unit)

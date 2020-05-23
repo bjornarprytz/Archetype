@@ -11,6 +11,7 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Unit Tests
 - [ ] Counters (Ongoing effects on a Card or a Unit)
 - [ ] Card Pool (collection of card templates, which generate a deck)
+- [ ] Refactor Effects, EffectTemplates and TargetRequirements.
 - [ ] Events
 -- [ ] Applying / Removing counters
 -- [ ] Start / End turn
