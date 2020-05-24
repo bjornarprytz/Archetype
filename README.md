@@ -10,8 +10,11 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Avoid using null in game logic
 - [ ] Unit Tests
 - [ ] Counters (Ongoing effects on a Card or a Unit)
-- [ ] Card Pool (collection of card templates, which generate a deck)
-- [ ] Refactor Effects, EffectTemplates and TargetRequirements.
+-- [
+- [x] Refactor Effects, EffectTemplates and TargetRequirements.
+- [ ] Allow non-unit targets for cards and actions
+-- [ ] Retrieve action (DiscardPile -> Hand)
+-- [ ] Steal action (from zone with different owner -> Hand)
 - [ ] Events
 -- [ ] Applying / Removing counters
 -- [ ] Start / End turn
