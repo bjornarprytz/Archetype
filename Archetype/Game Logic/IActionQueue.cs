@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Archetype
 {
-    public interface IEffectQueue
+    public interface IActionQueue
     {
-        void Enqueue(Effect effect);
+        void Enqueue(ActionInfo action);
     }
 }

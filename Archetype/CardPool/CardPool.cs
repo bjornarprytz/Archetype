@@ -11,20 +11,21 @@
             {
                 Name = "Killer Swing";
                 Cost = 4;
-
             }
 
             public override TargetInfo GetRequirements(GameState gameState) => TargetInfo.Exactly(3, gameState.Battlefield.Enemies);
 
-            protected override void PlayActual(PlayCardArgs args, IEffectQueue effectQueue)
+            protected override void PlayActual(PlayCardArgs args, IActionQueue effectQueue)
             {
                 var targets = args.Targets.CastTargets<Unit>();
 
                 foreach(var target in targets)
                 {
-                    effectQueue.Enqueue(new Effect((_) => target.Damage(new DamageInfo(Owner, Damage))));
+                    effectQueue.Enqueue(new DamageActionArgs(Owner, target, Damage));
                 }
             }
+
+            public override Card MakeCopy() => new KillerSwing();
         }
 
         public class DummyCard : Card
@@ -40,15 +41,17 @@
 
             public override TargetInfo GetRequirements(GameState gameState) => TargetInfo.Exactly(3, gameState.Battlefield.Enemies);
 
-            protected override void PlayActual(PlayCardArgs args, IEffectQueue effectQueue)
+            protected override void PlayActual(PlayCardArgs args, IActionQueue effectQueue)
             {
                 var targets = args.Targets.CastTargets<Unit>();
 
                 foreach (var target in targets)
                 {
-                    effectQueue.Enqueue(new Effect((_) => target.Damage(new DamageInfo(Owner, Damage))));
+                    effectQueue.Enqueue(new DamageActionArgs(Owner, target, Damage));
                 }
             }
+
+            public override Card MakeCopy() => new DummyCard();
         }
     }
 }

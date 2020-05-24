@@ -5,20 +5,20 @@ using System.Text;
 
 namespace Archetype
 {
-    public class GameState : IPromptable, IEffectQueue
+    public class GameState : IPromptable, IActionQueue
     {
         private IEnumerator<Unit> TurnOrder { get; set; }
         public Battlefield Battlefield { get; private set; }
         public Graveyard Graveyard { get; private set; }
 
         public Queue<ActionPrompt> PromptQueue { get; private set; }
-        public Queue<Effect> EffectQueue { get; private set; }
+        public Queue<ActionInfo> EffectQueue { get; private set; }
 
         public GameState(IEnumerable<Unit> units)
         {
             Battlefield = new Battlefield(units);
             PromptQueue = new Queue<ActionPrompt>();
-            EffectQueue = new Queue<Effect>();
+            EffectQueue = new Queue<ActionInfo>();
         }
 
         internal bool HasTurn(Unit unit)
@@ -50,9 +50,9 @@ namespace Archetype
             // TODO: call an event handler?
             return actionPrompt.Abort();
         }
-        public void Enqueue(Effect effect)
+        public void Enqueue(ActionInfo action)
         {
-            EffectQueue.Enqueue(effect);
+            EffectQueue.Enqueue(action);
         }
 
         private void Upkeep()

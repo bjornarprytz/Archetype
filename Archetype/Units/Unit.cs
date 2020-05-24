@@ -6,24 +6,22 @@ namespace Archetype
 {
     public abstract class Unit : GamePiece, IZoned<Unit>, IHoldCounters
     {
-        public delegate void DamageTaken(Unit source, int damage);
-        public delegate void DamageDealt(Unit target, int damage);
-        public delegate void HealReceived(Unit source, int heal);
-        public delegate void HealGiven(Unit target, int heal);
+
         public delegate void CardDrawn(Card drawnCard);
         public delegate void CardDiscarded(Card discardedCard);
 
         public delegate void CardMilled(Card milledCard);
         public delegate void DeckShuffled(Deck deck);
 
-        public event DamageTaken OnDamageTaken;
-        public event DamageDealt OnDamageDealt;
-        public event HealReceived OnHealReceived;
-        public event HealGiven OnHealGiven;
         public event CardDrawn OnCardDrawn;
         public event CardDiscarded OnCardDiscarded;
         public event CardMilled OnCardMilled;
         public event DeckShuffled OnDeckShuffled;
+
+        public event EventHandler<ActionInfo> OnTargetOfActionBefore;
+        public event EventHandler<ActionInfo> OnTargetOfActionAfter;
+        public event EventHandler<ActionInfo> OnSourceOfActionBefore;
+        public event EventHandler<ActionInfo> OnSourceOfActionAfter;
         
         public event ZoneChange<Unit> OnZoneChanged;
         public event Action OnDied; 
@@ -68,13 +66,9 @@ namespace Archetype
         private Zone<Unit> currZone;
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
-        public ActionModifiers SourceModifier { get; private set; }
-        public ActionModifiers TargetModifier { get; private set; }
 
         public Unit(string name, int life, int resources, Faction team) : base(team)
         {
-            SourceModifier = new ActionModifiers();
-            TargetModifier = new ActionModifiers();
             Name = name;
 
             Life = life;
@@ -112,10 +106,8 @@ namespace Archetype
 
         internal virtual void EndTurn() { }
 
-        internal void Discard(DiscardInfo discardInfo, IPromptable prompt)
+        internal void Discard(int cardsToDiscard, IPromptable prompter)
         {
-            int cardsToDiscard = TargetModifier.GetModifiedVal(discardInfo);
-
             if (cardsToDiscard < 1) return;
 
             if (Hand.IsEmpty)
@@ -132,7 +124,7 @@ namespace Archetype
 
             Choose<Card> choose = new Choose<Card>(this, cardsToDiscard, Hand);
 
-            var response = prompt.PromptImmediate(choose);
+            var response = prompter.PromptImmediate(choose);
 
             foreach (Card card in response.Choices)
             {
@@ -160,42 +152,38 @@ namespace Archetype
             OnDeckShuffled?.Invoke(Deck);
         }
 
-        internal void Heal(HealInfo healInfo)
+        public void Act(ActionInfo actionInfo, Action payload)
         {
-            int amountToHeal = TargetModifier.GetModifiedVal(healInfo);
+            OnSourceOfActionBefore?.Invoke(this, actionInfo);
 
-            Life += amountToHeal;
+            actionInfo.Target.React(actionInfo, payload);
 
-            OnHealReceived?.Invoke(healInfo.Source, amountToHeal);
-
-            OnHealGiven?.Invoke(this, amountToHeal);
+            OnSourceOfActionAfter?.Invoke(this, actionInfo);
         }
 
-        internal void Damage(DamageInfo damageInfo)
+        public void React(ActionInfo action, Action payload)
         {
-            int damageToTake = TargetModifier.GetModifiedVal(damageInfo);
+            OnTargetOfActionBefore?.Invoke(this, action);
 
-            Life -= damageToTake;
+            payload();
 
-            OnDamageTaken?.Invoke(damageInfo.Source, damageToTake);
-
-            damageInfo.Source.OnDamageDealt(this, damageToTake);
+            OnTargetOfActionAfter?.Invoke(this, action);
         }
 
-        internal void Draw(DrawInfo drawInfo)
-        {
-            int cardsToDraw = TargetModifier.GetModifiedVal(drawInfo); ;
+        internal void Heal(int amount) => Life += amount;
 
+        internal void Damage(int amount) => Life -= amount;
+
+        internal void Draw(int cardsToDraw)
+        {
             for (int i=0; i < cardsToDraw; i++)
             {
                 DrawCard();
             }
         }
 
-        internal void Mill(MillInfo millInfo)
+        internal void Mill(int cardsToMill)
         {
-            int cardsToMill = TargetModifier.GetModifiedVal(millInfo);
-
             for (int i = 0; i < cardsToMill; i++)
             {
                 MillCard();

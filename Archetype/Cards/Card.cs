@@ -65,7 +65,7 @@ namespace Archetype
             if (ActiveCounters.Has<T>()) ActiveCounters.Remove<T>();
         }
 
-        internal bool Play(PlayCardArgs args, IEffectQueue effectQueue)
+        internal bool Play(PlayCardArgs args, IActionQueue effectQueue)
         {
             if (!args.Valid) return false;
 
@@ -80,6 +80,8 @@ namespace Archetype
             return true;
         }
 
-        protected abstract void PlayActual(PlayCardArgs args, IEffectQueue effectQueue);
+        public abstract Card MakeCopy();
+
+        protected abstract void PlayActual(PlayCardArgs args, IActionQueue effectQueue);
     }
 }
