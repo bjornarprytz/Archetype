@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.Linq;
 
 namespace Archetype
@@ -68,13 +68,13 @@ namespace Archetype
         private Zone<Unit> currZone;
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
-        private EffectModifiers ModifiersAsSource { get; set; }
-        private EffectModifiers ModifiersAsTarget { get; set; }
+        public ActionModifiers SourceModifier { get; private set; }
+        public ActionModifiers TargetModifier { get; private set; }
 
         public Unit(string name, int life, int resources, Faction team) : base(team)
         {
-            ModifiersAsSource = new EffectModifiers();
-            ModifiersAsTarget = new EffectModifiers();
+            SourceModifier = new ActionModifiers();
+            TargetModifier = new ActionModifiers();
             Name = name;
 
             Life = life;
@@ -110,21 +110,11 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        internal void ModifyOutgoingEffect<T>(T xEffect) where T : XEffect
-        {
-            xEffect.X += ModifiersAsSource.Get<T>();
-        }
-
-        internal int ModifiedIncomingEffect<T>(T xEffect) where T : XEffect
-        {
-            return xEffect.X + ModifiersAsTarget.Get<T>();
-        }
-
         internal virtual void EndTurn() { }
 
-        internal void Discard(DiscardEffect discardEffect, IPromptable prompt)
+        internal void Discard(DiscardInfo discardInfo, IPromptable prompt)
         {
-            int cardsToDiscard = ModifiedIncomingEffect(discardEffect);
+            int cardsToDiscard = TargetModifier.GetModifiedVal(discardInfo);
 
             if (cardsToDiscard < 1) return;
 
@@ -170,27 +160,31 @@ namespace Archetype
             OnDeckShuffled?.Invoke(Deck);
         }
 
-        internal void Heal(HealEffect healEffect)
+        internal void Heal(HealInfo healInfo)
         {
-            int amountToHeal = ModifiedIncomingEffect(healEffect);
+            int amountToHeal = TargetModifier.GetModifiedVal(healInfo);
 
             Life += amountToHeal;
 
-            OnHealReceived?.Invoke(healEffect.Source, amountToHeal);
+            OnHealReceived?.Invoke(healInfo.Source, amountToHeal);
+
+            OnHealGiven?.Invoke(this, amountToHeal);
         }
 
-        internal void Damage(DamageEffect damageEffect)
+        internal void Damage(DamageInfo damageInfo)
         {
-            int damageToTake = ModifiedIncomingEffect(damageEffect);
+            int damageToTake = TargetModifier.GetModifiedVal(damageInfo);
 
             Life -= damageToTake;
 
-            OnDamageTaken?.Invoke(damageEffect.Source, damageToTake);
+            OnDamageTaken?.Invoke(damageInfo.Source, damageToTake);
+
+            damageInfo.Source.OnDamageDealt(this, damageToTake);
         }
 
-        internal void Draw(DrawEffect drawEffect)
+        internal void Draw(DrawInfo drawInfo)
         {
-            int cardsToDraw = ModifiedIncomingEffect(drawEffect);
+            int cardsToDraw = TargetModifier.GetModifiedVal(drawInfo); ;
 
             for (int i=0; i < cardsToDraw; i++)
             {
@@ -198,9 +192,9 @@ namespace Archetype
             }
         }
 
-        internal void Mill(MillEffect millEffect)
+        internal void Mill(MillInfo millInfo)
         {
-            int cardsToMill = ModifiedIncomingEffect(millEffect);
+            int cardsToMill = TargetModifier.GetModifiedVal(millInfo);
 
             for (int i = 0; i < cardsToMill; i++)
             {

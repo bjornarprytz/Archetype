@@ -1,13 +1,11 @@
-﻿
-
-using System.Collections.Generic;
-
-namespace Archetype
+﻿namespace Archetype
 {
     public static class CardPool
     {
         public class KillerSwing : Card
         {
+
+            public int Damage = 4;
 
             public KillerSwing()
             {
@@ -16,26 +14,23 @@ namespace Archetype
 
             }
 
-            protected override List<EffectTemplate> CreateEffectList()
+            public override TargetInfo GetRequirements(GameState gameState) => TargetInfo.Exactly(3, gameState.Battlefield.Enemies);
+
+            protected override void PlayActual(PlayCardArgs args, IEffectQueue effectQueue)
             {
-                List<EffectTemplate> effects = new List<EffectTemplate>();
+                var targets = args.Targets.CastTargets<Unit>();
 
-                // Deal 4 damage to All Enemies
-                effects.Add(new DamageTemplate(4, new TargetAll<Unit>((s, t) => s.EnemyOf(t)), (g) => g.Battlefield));
-                // Heal 3 damage from 4 Allies
-                effects.Add(new HealTemplate(3, TargetAny<Unit>.Ally(4), (g) => g.Battlefield));
-                // Deal 4 damage to one Enemy with more life than source
-                effects.Add(new DamageTemplate(4,
-                              new TargetAny<Unit>(1,
-                                  (s, t) => t.EnemyOf(s) && s.Life < t.Life), (g) => g.Battlefield));
-
-                return effects;
+                foreach(var target in targets)
+                {
+                    effectQueue.Enqueue(new Effect((_) => target.Damage(new DamageInfo(Owner, Damage))));
+                }
             }
         }
 
         public class DummyCard : Card
         {
 
+            public int Damage = 69;
             public DummyCard()
             {
                 Name = "Dummy Card";
@@ -43,14 +38,16 @@ namespace Archetype
 
             }
 
-            protected override List<EffectTemplate> CreateEffectList()
+            public override TargetInfo GetRequirements(GameState gameState) => TargetInfo.Exactly(3, gameState.Battlefield.Enemies);
+
+            protected override void PlayActual(PlayCardArgs args, IEffectQueue effectQueue)
             {
-                List<EffectTemplate> effects = new List<EffectTemplate>();
+                var targets = args.Targets.CastTargets<Unit>();
 
-                // Deal 1 damage to self
-                effects.Add(new DamageTemplate(1, new TargetSelf(), (g) => g.Battlefield));
-
-                return effects;
+                foreach (var target in targets)
+                {
+                    effectQueue.Enqueue(new Effect((_) => target.Damage(new DamageInfo(Owner, Damage))));
+                }
             }
         }
     }

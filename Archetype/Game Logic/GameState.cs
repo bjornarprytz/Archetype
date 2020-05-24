@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public class GameState : IPromptable
+    public class GameState : IPromptable, IEffectQueue
     {
         private IEnumerator<Unit> TurnOrder { get; set; }
         public Battlefield Battlefield { get; private set; }
@@ -50,12 +50,15 @@ namespace Archetype
             // TODO: call an event handler?
             return actionPrompt.Abort();
         }
+        public void Enqueue(Effect effect)
+        {
+            EffectQueue.Enqueue(effect);
+        }
 
         private void Upkeep()
         {
             // TODO: Anything here?
         }
 
-        
     }
 }

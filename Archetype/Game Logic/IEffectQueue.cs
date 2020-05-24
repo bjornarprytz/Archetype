@@ -4,5 +4,8 @@ using System.Text;
 
 namespace Archetype
 {
-    public delegate bool TargetPredicate<T>(Unit source, T target) where T : GamePiece;
+    public interface IEffectQueue
+    {
+        void Enqueue(Effect effect);
+    }
 }

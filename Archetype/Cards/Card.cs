@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters
+    public abstract class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITargetRequirements
     {
         public event ZoneChange<Card> OnZoneChanged;
 
@@ -32,13 +32,13 @@ namespace Archetype
 
         public Unit Owner { get; set; }
 
-        protected List<EffectTemplate> _effectTemplates;
+        public abstract TargetInfo GetRequirements(GameState gameState);
+
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
         internal Card()
         {
             ActiveCounters = new TypeDictionary<Counter>();
-            _effectTemplates = CreateEffectList();
         }
 
         public void MoveTo(Zone<Card> newZone)
@@ -53,8 +53,6 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        public IEnumerable<EffectArgs> GetArgs(GameState gameState) => _effectTemplates.Select(e => e.Args(Owner, gameState));
-        
         public virtual void Apply<T>(T counter) where T : Counter
         {
             if (ActiveCounters.Has<T>())
@@ -67,18 +65,13 @@ namespace Archetype
             if (ActiveCounters.Has<T>()) ActiveCounters.Remove<T>();
         }
 
-        internal bool Play(PlayCardArgs args, GameState gameState)
+        internal bool Play(PlayCardArgs args, IEffectQueue effectQueue)
         {
             if (!args.Valid) return false;
 
             OnBeforePlay?.Invoke();
 
-            args.EffectArgs.Select(a => a.Effect.CreateEffect(a));
-
-            foreach (Effect effect in args.CreateEffects())
-            {
-                effect.Resolve(gameState);
-            }
+            PlayActual(args, effectQueue);
 
             OnAfterPlay?.Invoke();
 
@@ -87,7 +80,6 @@ namespace Archetype
             return true;
         }
 
-
-        protected abstract List<EffectTemplate> CreateEffectList();
+        protected abstract void PlayActual(PlayCardArgs args, IEffectQueue effectQueue);
     }
 }

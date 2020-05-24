@@ -5,16 +5,10 @@ using System.Text;
 
 namespace Archetype
 {
-    public class PlayCardArgs : MultipleChoicesArgs<EffectArgs>
+    public class PlayCardArgs
     {
-        public List<EffectArgs> EffectArgs => SubChoices;
-        
-        public IEnumerable<Effect> CreateEffects()
-        {
-            if (!Valid) throw new Exception("Trying to create effects with invalid parameters");
+        public TargetInfo Targets { get; set; }
 
-
-            return EffectArgs.Select(e => e.Effect.CreateEffect(e));
-        }
+        public bool Valid => Targets.Valid;
     }
 }
