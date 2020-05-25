@@ -152,20 +152,20 @@ namespace Archetype
             OnDeckShuffled?.Invoke(Deck);
         }
 
-        public void Act(ActionInfo actionInfo, Action payload)
+        public void Act(ActionInfo action, Action payload)
         {
-            OnSourceOfActionBefore?.Invoke(this, actionInfo);
+            OnSourceOfActionBefore?.Invoke(this, action);
 
-            actionInfo.Target.React(actionInfo, payload);
+            action.Target.React(action, payload);
 
-            OnSourceOfActionAfter?.Invoke(this, actionInfo);
+            OnSourceOfActionAfter?.Invoke(this, action);
         }
 
         public void React(ActionInfo action, Action payload)
         {
             OnTargetOfActionBefore?.Invoke(this, action);
 
-            payload();
+            payload(); // This is where the action happens
 
             OnTargetOfActionAfter?.Invoke(this, action);
         }

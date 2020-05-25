@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Archetype
 {
@@ -31,7 +29,7 @@ namespace Archetype
 
             for (int i=0; i<size; i++)
             {
-                CardPool.DummyCard newCard = new CardPool.DummyCard();
+                CardExamples.DummyCard newCard = new CardExamples.DummyCard();
 
                 sampleList.Add(newCard);
             }
@@ -44,7 +42,7 @@ namespace Archetype
 
             for (int i = 0; i < size; i++)
             {
-                CardPool.DummyCard newMove = new CardPool.DummyCard();
+                CardExamples.DummyCard newMove = new CardExamples.DummyCard();
 
                 sampleList.Add(newMove);
             }

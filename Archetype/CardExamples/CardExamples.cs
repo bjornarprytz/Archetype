@@ -1,6 +1,6 @@
 ﻿namespace Archetype
 {
-    public static class CardPool
+    public static class CardExamples
     {
         public class KillerSwing : Card
         {
