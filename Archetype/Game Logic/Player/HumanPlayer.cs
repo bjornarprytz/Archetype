@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Archetype
 {
-    public class HumanPlayer : Player<Adventurer>
+    public class HumanPlayer : Player
     {
 
-        public HumanPlayer(int coin) : base(coin) { }
+        public HumanPlayer(int coin) : base(coin, Faction.Player) { }
 
     }
 }

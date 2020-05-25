@@ -1,10 +1,11 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : GamePiece, IZoned<Unit>, IHoldCounters
+    public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters
     {
 
         public delegate void CardDrawn(Card drawnCard);
@@ -22,11 +23,13 @@ namespace Archetype
         public event EventHandler<ActionInfo> OnTargetOfActionAfter;
         public event EventHandler<ActionInfo> OnSourceOfActionBefore;
         public event EventHandler<ActionInfo> OnSourceOfActionAfter;
-        
+
         public event ZoneChange<Unit> OnZoneChanged;
-        public event Action OnDied; 
+        public event Action OnDied;
 
         public bool IsAlive => Life > 0;
+
+        public Pool<Unit> CardPool { get; set; }
 
         public Deck Deck { get; set; }
         public Hand Hand { get; set; }
@@ -35,10 +38,10 @@ namespace Archetype
 
         public bool HasMovesAvailable => Hand.Any(c => Resources >= c.Cost);
         public int Resources { get; set; }
-        public int Life 
-        { 
-            get => _life; 
-            set 
+        public int Life
+        {
+            get => _life;
+            set
             {
                 bool wasAlive = IsAlive;
 
@@ -66,14 +69,17 @@ namespace Archetype
         private Zone<Unit> currZone;
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
+        public Player Owner { get; private set; }
 
-        public Unit(string name, int life, int resources, Faction team) : base(team)
+        public Unit(Player owner, IEnumerable<Card> cards, string name, int life, int resources, Faction team) : base(team)
         {
             Name = name;
+            Owner = owner;
 
             Life = life;
             Resources = resources;
 
+            CardPool = new Pool<Unit>(this, cards);
             Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);

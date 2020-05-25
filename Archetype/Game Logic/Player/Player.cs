@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Archetype
 {
-    public abstract class Player<UnitType> where UnitType : Unit
+    public abstract class Player : GamePiece
     {
-        public List<UnitType> Roster { get; set; }
+        public List<Unit> Roster { get; set; }
+        public Pool<Player> CardPool { get; set; }
         public int Coin { get; set; }
 
 
-        public Player(int coin)
+        public Player(int coin, Faction faction) : base(faction)
         {
-            Roster = new List<UnitType>();
+            Roster = new List<Unit>();
+            CardPool = new Pool<Player>(this);
             Coin = coin;
         }
 
-        public IEnumerable<UnitType> ActiveUnits => Roster.Where(unit => unit.IsAlive);
+        public IEnumerable<Unit> ActiveUnits => Roster.Where(unit => unit.IsAlive);
     }
 }

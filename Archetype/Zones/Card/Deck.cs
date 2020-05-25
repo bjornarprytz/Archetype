@@ -21,7 +21,7 @@ namespace Archetype
         public Deck(Unit owner)
         {
             Owner = owner;
-            Cards = new Stack<Card>();
+            Cards = new Stack<Card>(owner.CardPool.Select(c => c.MakeCopy()));
         }
         public static List<Card> Sample(int size)
         {
