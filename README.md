@@ -10,17 +10,22 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Avoid using null in game logic
 - [ ] Unit Tests
 - [ ] Counters (Ongoing effects on a Card or a Unit)
--- [
 - [x] Refactor Effects, EffectTemplates and TargetRequirements.
 - [ ] Allow non-unit targets for cards and actions
--- [ ] Retrieve action (DiscardPile -> Hand)
--- [ ] Steal action (from zone with different owner -> Hand)
+	- [ ] Retrieve action (DiscardPile -> Hand)
+	- [ ] Steal action (from zone with different owner -> Hand)
 - [ ] Events
--- [ ] Applying / Removing counters
--- [ ] Start / End turn
-
-
-- [ ] Separate the targeting decision from the resolution of EffectArgs (Make it possible to create effects with pre-chosen targets).
+	- [ ] Applying / Removing counters
+	- [ ] Start / End turn
+- [x] Separate the targeting decision from the resolution of EffectArgs (Make it possible to create effects with pre-chosen targets).
+- [ ] Chaos Bag Mechanic
+- [ ] Deck Building
+	- [ ] Player Card Pool
+	- [ ] Unit Roster
+- [ ] Flesh out the GameState
+	- [ ] Game loop
+	- [ ] Prompter
+	- [ ] ActionQueue
 
 ### Card Sets
 - [ ] API
