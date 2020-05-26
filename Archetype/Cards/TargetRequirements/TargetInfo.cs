@@ -40,6 +40,12 @@ namespace Archetype
         public bool Valid => ChosenTargets.Count() <= MaxTargets && ChosenTargets.Count() >= MinTargets;
 
 
+        public static TargetInfo Any(int min, int max, IEnumerable<GamePiece> options) => new TargetInfo(min, max, options, TargetMethod.Any);
+
+        public static TargetInfo Exactly(int n, IEnumerable<GamePiece> options) => new TargetInfo(n, n, options, TargetMethod.Any);
+
+        public static TargetInfo None() => new TargetInfo(0, 0, null, TargetMethod.None);
+
         public static TargetInfo All(IEnumerable<GamePiece> options)
         {
             var targetInfo = new TargetInfo(0, int.MaxValue, options, TargetMethod.All);
@@ -51,11 +57,16 @@ namespace Archetype
 
             return targetInfo;
         }
+        public static TargetInfo Random(int n, IEnumerable<GamePiece> options)
+        {
+            var targetInfo = new TargetInfo(0, n, options, TargetMethod.Random);
 
-        public static TargetInfo Any(int min, int max, IEnumerable<GamePiece> options) => new TargetInfo(min, max, options, TargetMethod.Any);
+            foreach(var target in options.GrabRandom(n))
+            {
+                targetInfo.Add(target);
+            }
 
-        public static TargetInfo Exactly(int n, IEnumerable<GamePiece> options) => new TargetInfo(n, n, options, TargetMethod.Any);
-
-        public static TargetInfo None() => new TargetInfo(0, 0, null, TargetMethod.None);
+            return targetInfo;
+        }
     }
 }

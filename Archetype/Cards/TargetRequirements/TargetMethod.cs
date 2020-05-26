@@ -5,5 +5,6 @@
         None,
         Any,
         All,
+        Random,
     }
 }
