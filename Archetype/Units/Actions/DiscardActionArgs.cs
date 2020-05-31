@@ -13,7 +13,7 @@ namespace Archetype
 
         protected override void Resolve()
         {
-            Target.Discard(Strength, _prompter);
+            (Target as Unit).Discard(Strength, _prompter);
         }
     }
 }

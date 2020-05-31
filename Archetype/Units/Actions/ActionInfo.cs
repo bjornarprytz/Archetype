@@ -5,11 +5,12 @@ namespace Archetype
 {
     public abstract class ActionInfo : EventArgs
     {
-        public Unit Source { get; protected set; }
-        public Unit Target { get; protected set; }
+        public ISource Source { get; protected set; }
+        public ITarget Target { get; protected set; }
         public int Strength { get; set; }
+        public bool IsCancelled { get; set; }
 
-        public ActionInfo(Unit source, Unit target, int strength)
+        public ActionInfo(ISource source, ITarget target, int strength)
         {
             Source = source;
             Target = target;
@@ -18,7 +19,16 @@ namespace Archetype
 
         public void Execute()
         {
-            Source.Act(this, Resolve);
+            Source.PreActionAsSource(this);
+            Target.PreActionAsTarget(this);
+
+            if (!IsCancelled)
+            {
+                Resolve();
+            }
+
+            Target.PostActionAsTarget(this);
+            Source.PostActionAsSource(this);
         }
 
         protected abstract void Resolve();

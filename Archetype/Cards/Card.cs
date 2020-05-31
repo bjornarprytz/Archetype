@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Archetype
 {
-    public abstract class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITargetRequirements
+    public abstract class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITargetRequirements, ITarget
     {
         public event ZoneChange<Card> OnZoneChanged;
 
@@ -83,5 +83,8 @@ namespace Archetype
         public abstract Card MakeCopy();
 
         protected abstract void PlayActual(PlayCardArgs args, IActionQueue effectQueue);
+
+        public void PostActionAsTarget(ActionInfo action) { }
+        public void PreActionAsTarget(ActionInfo action) { }
     }
 }

@@ -8,7 +8,7 @@
 
         protected override void Resolve()
         {
-            Target.Heal(Strength);
+            (Target as Unit).Heal(Strength);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters
+    public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters, ITarget, ISource
     {
 
         public delegate void CardDrawn(Card drawnCard);
@@ -157,22 +157,23 @@ namespace Archetype
             Deck.Shuffle();
             OnDeckShuffled?.Invoke(Deck);
         }
-
-        public void Act(ActionInfo action, Action payload)
+        public void PreActionAsSource(ActionInfo action)
         {
             OnSourceOfActionBefore?.Invoke(this, action);
+        }
 
-            action.Target.React(action, payload);
-
+        public void PostActionAsSource(ActionInfo action)
+        {
             OnSourceOfActionAfter?.Invoke(this, action);
         }
 
-        public void React(ActionInfo action, Action payload)
+        public void PreActionAsTarget(ActionInfo action)
         {
             OnTargetOfActionBefore?.Invoke(this, action);
+        }
 
-            payload(); // This is where the action happens
-
+        public void PostActionAsTarget(ActionInfo action)
+        {
             OnTargetOfActionAfter?.Invoke(this, action);
         }
 

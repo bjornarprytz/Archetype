@@ -10,13 +10,13 @@ namespace Archetype
         public int MinTargets { get; set; }
         public int Count => ChosenTargets.Count;
         public int MaxTargets { get; set; }
-        public IEnumerable<GamePiece> Options { get; private set; }
+        public IEnumerable<ITarget> Options { get; private set; }
 
-        public bool IsValidTarget(GamePiece target) => Options.Contains(target);
-        public List<GamePiece> ChosenTargets { get; private set; }
-        public IEnumerable<T> CastTargets<T>() where T : GamePiece => ChosenTargets as IEnumerable<T>;
+        public bool IsValidTarget(ITarget target) => Options.Contains(target);
+        public List<ITarget> ChosenTargets { get; private set; }
+        public IEnumerable<T> CastTargets<T>() where T : ITarget => ChosenTargets as IEnumerable<T>;
 
-        public TargetInfo(int min, int max, IEnumerable<GamePiece> options, TargetMethod method)
+        public TargetInfo(int min, int max, IEnumerable<ITarget> options, TargetMethod method)
         {
             MinTargets = min;
             MaxTargets = max;
@@ -24,7 +24,7 @@ namespace Archetype
             TargetMethod = method;
         }
 
-        public bool Add(GamePiece newTarget)
+        public bool Add(ITarget newTarget)
         {
             if (TargetMethod == TargetMethod.None) return false;
             if (Count >= MaxTargets) return false;
@@ -40,13 +40,13 @@ namespace Archetype
         public bool Valid => ChosenTargets.Count() <= MaxTargets && ChosenTargets.Count() >= MinTargets;
 
 
-        public static TargetInfo Any(int min, int max, IEnumerable<GamePiece> options) => new TargetInfo(min, max, options, TargetMethod.Any);
+        public static TargetInfo Any(int min, int max, IEnumerable<ITarget> options) => new TargetInfo(min, max, options, TargetMethod.Any);
 
-        public static TargetInfo Exactly(int n, IEnumerable<GamePiece> options) => new TargetInfo(n, n, options, TargetMethod.Any);
+        public static TargetInfo Exactly(int n, IEnumerable<ITarget> options) => new TargetInfo(n, n, options, TargetMethod.Any);
 
         public static TargetInfo None() => new TargetInfo(0, 0, null, TargetMethod.None);
 
-        public static TargetInfo All(IEnumerable<GamePiece> options)
+        public static TargetInfo All(IEnumerable<ITarget> options)
         {
             var targetInfo = new TargetInfo(0, int.MaxValue, options, TargetMethod.All);
 
@@ -57,7 +57,7 @@ namespace Archetype
 
             return targetInfo;
         }
-        public static TargetInfo Random(int n, IEnumerable<GamePiece> options)
+        public static TargetInfo Random(int n, IEnumerable<ITarget> options)
         {
             var targetInfo = new TargetInfo(0, n, options, TargetMethod.Random);
 

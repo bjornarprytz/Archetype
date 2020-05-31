@@ -9,7 +9,7 @@ namespace Archetype
 
         protected override void Resolve()
         {
-            Target.Mill(Strength);
+            (Target as Unit).Mill(Strength);
         }
     }
 }

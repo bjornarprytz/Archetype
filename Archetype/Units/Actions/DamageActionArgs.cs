@@ -10,7 +10,7 @@ namespace Archetype
 
         protected override void Resolve()
         {
-            Target.Damage(Strength);
+            (Target as Unit).Damage(Strength);
         }
     }
 }

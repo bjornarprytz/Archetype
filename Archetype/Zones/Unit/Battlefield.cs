@@ -9,9 +9,14 @@ namespace Archetype
         public IEnumerable<Unit> Enemies => _units.Where(u => u.Team == Faction.Enemy);
         private List<Unit> _units;
 
-        public Battlefield(IEnumerable<Unit> units)
+        public Battlefield()
         {
-            _units = new List<Unit>(units);
+            _units = new List<Unit>();
+        }
+
+        public void Add(IEnumerable<Unit> units)
+        {
+            _units.AddRange(units);
         }
 
         public override IEnumerator<Unit> GetEnumerator() => _units.GetEnumerator();

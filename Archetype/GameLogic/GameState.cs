@@ -7,36 +7,43 @@ namespace Archetype
 {
     public class GameState : IPromptable, IActionQueue
     {
-        private IEnumerator<Unit> TurnOrder { get; set; }
         public Battlefield Battlefield { get; private set; }
         public Graveyard Graveyard { get; private set; }
+
 
         public Queue<ActionPrompt> PromptQueue { get; private set; }
         public Queue<ActionInfo> EffectQueue { get; private set; }
 
-        public GameState(IEnumerable<Unit> units)
+        internal void EndTurn(Unit unit)
         {
-            Battlefield = new Battlefield(units);
+            throw new NotImplementedException();
+        }
+        internal bool HasTurn(Unit unit)
+        {
+            throw new NotImplementedException();
+        }
+
+        public GameState()
+        {
+            Battlefield = new Battlefield();
             PromptQueue = new Queue<ActionPrompt>();
             EffectQueue = new Queue<ActionInfo>();
         }
 
-        internal bool HasTurn(Unit unit)
+        public void AddUnits(IEnumerable<Unit> units)
         {
-            return TurnOrder.Current != null && TurnOrder.Current == unit;
+            Battlefield.Add(units);
         }
 
-        internal void EndTurn(Unit unit)
+        public void Update()
         {
-            unit.EndTurn();
-            if (!TurnOrder.MoveNext()) EndTick();
-        }
+            // Progress game loop here
 
-        internal void EndTick()
-        {
-            // TODO: Determine turn order.
-            Upkeep();
-            if (TurnOrder.Current == null) EndTick(); // TODO: Avoid getting stuck in endless recursion
+            while (EffectQueue.Any())
+            {
+                EffectQueue.Dequeue().Execute();
+
+            }
         }
 
         public void Prompt(ActionPrompt actionPrompt)
@@ -54,11 +61,5 @@ namespace Archetype
         {
             EffectQueue.Enqueue(action);
         }
-
-        private void Upkeep()
-        {
-            // TODO: Anything here?
-        }
-
     }
 }

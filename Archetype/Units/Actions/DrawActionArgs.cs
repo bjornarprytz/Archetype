@@ -8,7 +8,7 @@
 
         protected override void Resolve()
         {
-            Target.Draw(Strength);
+            (Target as Unit).Draw(Strength);
         }
     }
 }
