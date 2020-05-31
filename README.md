@@ -18,7 +18,8 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Applying / Removing counters
 	- [ ] Start / End turn
 - [x] Separate the targeting decision from the resolution of EffectArgs (Make it possible to create effects with pre-chosen targets).
-- [ ] Chaos Bag Mechanic
+- [x] Chaos Bag Mechanic
+	- [ ] Chaos tokens
 - [ ] Deck Building
 	- [ ] Player Card Pool
 	- [ ] Unit Roster
