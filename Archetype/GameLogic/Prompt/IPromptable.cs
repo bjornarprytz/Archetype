@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Archetype
+﻿namespace Archetype
 {
     public interface IPromptable
     {
-       void Prompt(ActionPrompt actionPrompt);
-       PromptResponse PromptImmediate(ActionPrompt actionPrompt);
+        void Choose<T>(Choose<T> chooseArgs) where T : GamePiece;
     }
 }

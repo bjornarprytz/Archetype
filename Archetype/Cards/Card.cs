@@ -84,7 +84,7 @@ namespace Archetype
 
         protected abstract void PlayActual(PlayCardArgs args, IActionQueue effectQueue);
 
-        public void PostActionAsTarget(ActionInfo action) { }
-        public void PreActionAsTarget(ActionInfo action) { }
+        public virtual void PostActionAsTarget(ActionInfo action) { }
+        public virtual void PreActionAsTarget(ActionInfo action) { }
     }
 }

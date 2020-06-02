@@ -112,27 +112,13 @@ namespace Archetype
 
         internal virtual void EndTurn() { }
 
-        internal void Discard(int cardsToDiscard, IPromptable prompter)
+        internal void Discard(int nCardsToDiscard, IPromptable prompter)
         {
-            if (cardsToDiscard < 1) return;
+            var choiceArgs = new Choose<Card>(nCardsToDiscard, Hand);
 
-            if (Hand.IsEmpty)
-            {
-                Console.WriteLine($"\"I don't even have a single card in my hand... Can't discard shit\" says {Name}");
-                return;
-            }
+            prompter.Choose(choiceArgs);
 
-            if (cardsToDiscard >= Hand.Count)
-            {
-                foreach (Card card in Hand) DiscardCard(card.Id);
-                return;
-            }
-
-            Choose<Card> choose = new Choose<Card>(this, cardsToDiscard, Hand);
-
-            var response = prompter.PromptImmediate(choose);
-
-            foreach (Card card in response.Choices)
+            foreach (Card card in choiceArgs.Choices)
             {
                 DiscardCard(card.Id);
             }
