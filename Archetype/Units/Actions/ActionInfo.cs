@@ -7,14 +7,12 @@ namespace Archetype
     {
         public ISource Source { get; protected set; }
         public ITarget Target { get; protected set; }
-        public int Strength { get; set; }
         public bool IsCancelled { get; set; }
 
-        public ActionInfo(ISource source, ITarget target, int strength)
+        public ActionInfo(ISource source, ITarget target)
         {
             Source = source;
             Target = target;
-            Strength = strength;
         }
 
         public void Execute()

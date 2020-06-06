@@ -5,10 +5,12 @@ namespace Archetype
     public class DiscardActionArgs : ActionInfo
     {
         private IPromptable _prompter;
+        public int Strength { get; set; }
 
-        public DiscardActionArgs(Unit source, Unit target, int strength, IPromptable prompter) : base(source, target, strength)
+        public DiscardActionArgs(Unit source, Unit target, int strength, IPromptable prompter) : base(source, target)
         {
             _prompter = prompter;
+            Strength = strength;
         }
 
         protected override void Resolve()

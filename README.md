@@ -27,6 +27,9 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Game loop
 	- [ ] Prompter
 	- [ ] ActionQueue
+- [ ] Refactor Cards to be 100% data
+	- [ ] Make Card Data (de)serializable
+	- [ ] (De)Serialization of concrete action data (damageData, drawData, etc.)
 
 ### Card Sets
 - [ ] API

@@ -3,8 +3,10 @@ namespace Archetype
 {
     public class MillActionArgs : ActionInfo
     {
-        public MillActionArgs(Unit source, Unit target, int strength) : base(source, target, strength)
+        public int Strength { get; set; }
+        public MillActionArgs(Unit source, Unit target, int strength) : base(source, target)
         {
+            Strength = strength;
         }
 
         protected override void Resolve()

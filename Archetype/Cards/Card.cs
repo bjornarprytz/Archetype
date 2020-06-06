@@ -18,6 +18,7 @@ namespace Archetype
         public string Name { get; protected set; }
         public int Cost { get; set; }
 
+
         public Zone<Card> CurrentZone
         {
             get { return currZone; }
