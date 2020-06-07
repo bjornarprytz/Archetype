@@ -11,7 +11,7 @@ namespace Archetype
 
         public PlayCardAction(Unit player, Card cardToPlay, PlayCardArgs args)
         {
-            _action = (gameLoop) => cardToPlay.Play(args, gameLoop);
+            _action = (gameState) => cardToPlay.Play(args, gameState);
             _player = player;
             _args = args;
         }

@@ -9,6 +9,8 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Avoid using null in card zone-transitions
 - [ ] Avoid using null in game logic
 - [ ] Unit Tests
+	- [ ] GameState
+	- [ ] Data (De)Serialization
 - [ ] Counters (Ongoing effects on a Card or a Unit)
 - [x] Refactor Effects, EffectTemplates and TargetRequirements.
 - [ ] Allow non-unit targets for cards and actions
@@ -32,7 +34,10 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] (De)Serialization of concrete action data (damageData, drawData, etc.)
 - [ ] Additional Predicates
 	- [ ] For Cards
+		- [ ] Cost
+		- [ ] HasActionType (e.g. DealsDamage)
 	- [ ] For Units
+		- [ ] Health (e.g. health < 100)
 
 ### Card Sets
 - [ ] API

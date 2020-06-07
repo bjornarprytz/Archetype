@@ -63,13 +63,13 @@ namespace Archetype
             if (ActiveCounters.Has<T>()) ActiveCounters.Remove<T>();
         }
 
-        internal bool Play(PlayCardArgs args, IActionQueue effectQueue)
+        internal bool Play(PlayCardArgs args, GameState gameState)
         {
             if (!args.Valid) return false;
 
             OnBeforePlay?.Invoke();
 
-            PlayActual(args, effectQueue);
+            PlayActual(args, gameState);
 
             OnAfterPlay?.Invoke();
 
@@ -80,15 +80,15 @@ namespace Archetype
 
         public Card MakeCopy(Unit owner) => new Card(owner, Data);
 
-        protected void PlayActual(PlayCardArgs args, IActionQueue effectQueue)
+        protected void PlayActual(PlayCardArgs args, GameState gameState)
         {
             if (!args.Valid) throw new Exception("WHat the hell, PlayCardArgs are invalid!?");
 
-            foreach(var actions in Data.Actions.Zip(args.TargetInfos, (a, t) => a.GetArgs(Owner, t)))
+            foreach(var actions in Data.Actions.Zip(args.TargetInfos, (a, t) => a.GetArgs(Owner, t, gameState)))
             {
                 foreach (var action in actions)
                 {
-                    effectQueue.Enqueue(action);
+                    gameState.Enqueue(action);
                 }
             }
         }

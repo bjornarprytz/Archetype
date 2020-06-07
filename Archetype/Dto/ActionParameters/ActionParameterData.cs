@@ -1,7 +1,4 @@
-﻿
-
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Archetype
@@ -10,12 +7,8 @@ namespace Archetype
     {
         public TargetRequirementData TargetRequirements { get; set; }
 
-        internal IEnumerable<ActionInfo> GetArgs(Unit source, TargetInfo targets)
-        {
-            return targets.ChosenTargets.Select(target => GetActionInfo(source, target));
-        }
+        internal IEnumerable<ActionInfo> GetArgs(Unit source, TargetInfo targets, GameState gameState) => targets.ChosenTargets.Select(target => GetActionInfo(source, target, gameState));
 
-        protected abstract ActionInfo GetActionInfo(Unit source, ITarget target);
-
+        protected abstract ActionInfo GetActionInfo(Unit source, ITarget target, GameState gameState);
     }
 }

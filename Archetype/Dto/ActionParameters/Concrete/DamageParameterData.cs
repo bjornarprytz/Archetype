@@ -9,6 +9,6 @@ namespace Archetype
     {
         public int Strength { get; set; }
 
-        protected override ActionInfo GetActionInfo(Unit source, ITarget target) => new DamageActionArgs(source, target as Unit, Strength);
+        protected override ActionInfo GetActionInfo(Unit source, ITarget target, GameState _) => new DamageActionArgs(source, target as Unit, Strength);
     }
 }
