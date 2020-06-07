@@ -10,6 +10,9 @@ namespace Archetype
         public bool AllyOf(GamePiece other) => Team == other.Team;
         public bool EnemyOf(GamePiece other) => Team != other.Team;
 
+        public bool Me(GamePiece other) => Id == other.Id;
+        public bool Other(GamePiece other) => Id != other.Id;
+
         
 
         public GamePiece(Faction team = Faction.Neutral)

@@ -28,7 +28,6 @@ namespace Archetype
             Battlefield = new Battlefield();
             EffectQueue = new Queue<ActionInfo>();
 
-
             if (choiceHandler == null) throw new Exception("Please provide an event handler for choices");
 
             OnChoose = choiceHandler;

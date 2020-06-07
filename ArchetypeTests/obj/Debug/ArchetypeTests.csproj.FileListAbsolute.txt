@@ -1,0 +1,16 @@
+C:\Programmering\Archetype\ArchetypeTests\obj\Debug\ArchetypeTests.csprojAssemblyReference.cache
+C:\Programmering\Archetype\ArchetypeTests\obj\Debug\ArchetypeTests.csproj.CoreCompileInputs.cache
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\ArchetypeTests.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\ArchetypeTests.pdb
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Archetype.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Archetype.pdb
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\Programmering\Archetype\ArchetypeTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\Programmering\Archetype\ArchetypeTests\obj\Debug\ArchetypeTests.csproj.CopyComplete
+C:\Programmering\Archetype\ArchetypeTests\obj\Debug\ArchetypeTests.dll
+C:\Programmering\Archetype\ArchetypeTests\obj\Debug\ArchetypeTests.pdb

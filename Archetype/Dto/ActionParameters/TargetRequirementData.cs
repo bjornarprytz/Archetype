@@ -3,8 +3,8 @@ namespace Archetype
 {
     public class TargetRequirementData
     {
-        public int Min { get; set; }
-        public int Max { get; set; }
+        public int Min { get; set; } = 0;
+        public int Max { get; set; } = int.MaxValue;
         public TargetPredicateData Predicate { get; set; }
 
         public SelectionMethod SelectionMethod { get; set; }

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Archetype
 {
-    class DamageParameterData : ActionParameterData
+    public class DamageParameterData : ActionParameterData
     {
         public int Strength { get; set; }
 

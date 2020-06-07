@@ -39,6 +39,10 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] For Units
 		- [ ] Health (e.g. health < 100)
 
+- [ ] ActionParameterData
+	- [ ] Either: Allow multiple targets (e.g. copy 1 target card to the DiscardPile of 1 target Unit (more verbose)
+	- [ ] Or: Allow Cards to keep a temporary context between Actions, to allow more composition to take place (more error prone)
+
 ### Card Sets
 - [ ] API
 - [ ] Rules text on cards

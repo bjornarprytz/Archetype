@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Archetype
 {
@@ -9,6 +10,7 @@ namespace Archetype
     {
         public UnitZone UnitZone { get; set; }
         public TargetRelation Relation { get; set; }
+        public Sameness Sameness { get; set; }
 
         public override IEnumerable<ITarget> GetOptions(Unit source, GameState gameState)
         {
@@ -26,24 +28,45 @@ namespace Archetype
                     throw new Exception($"Unrecognized UnitZone: {UnitZone}");
             }
 
-            Func<Unit, bool> unitRestriction;
+            
+
+            Func<Unit, bool> factionRestriction;
 
             switch (Relation)
             {
                 case TargetRelation.Ally:
-                    unitRestriction = source.AllyOf;
+                    factionRestriction = source.AllyOf;
                     break;
                 case TargetRelation.Enemy:
-                    unitRestriction = source.EnemyOf;
+                    factionRestriction = source.EnemyOf;
                     break;
                 case TargetRelation.Any:
-                    unitRestriction = (_) => true;
+                    factionRestriction = (_) => true;
                     break;
                 default:
                     throw new Exception($"Unrecognized TargetRelation: {Relation}");
             }
 
-            return zone.Where(unitRestriction);
+            Func<Unit, bool> whoRestriction;
+
+            switch (Sameness)
+            {
+                case Sameness.Any:
+                    whoRestriction = (_) => true;
+                    break;
+                case Sameness.Other:
+                    whoRestriction = source.Other;
+                    break;
+                case Sameness.Me:
+                    whoRestriction = source.Me;
+                    break;
+                default:
+                    throw new Exception($"Unrecognized Sameness: {Sameness}");
+            }
+
+            return zone
+                .Where(whoRestriction)
+                .Where(factionRestriction);
         }
     }
 }

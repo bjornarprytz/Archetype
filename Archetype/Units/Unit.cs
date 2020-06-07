@@ -29,8 +29,7 @@ namespace Archetype
 
         public bool IsAlive => Life > 0;
 
-        public Pool<Unit> CardPool { get; set; }
-
+        public Pool CardPool { get; set; }
         public Deck Deck { get; set; }
         public Hand Hand { get; set; }
         public DiscardPile DiscardPile { get; set; }
@@ -71,7 +70,7 @@ namespace Archetype
 
         public Player Owner { get; private set; }
 
-        public Unit(Player owner, IEnumerable<Card> cards, string name, int life, int resources, Faction team) : base(team)
+        public Unit(Player owner, string name, int life, int resources) : base(owner.Team)
         {
             Name = name;
             Owner = owner;
@@ -79,7 +78,7 @@ namespace Archetype
             Life = life;
             Resources = resources;
 
-            CardPool = new Pool<Unit>(this, cards);
+            CardPool = new Pool(this);
             Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
