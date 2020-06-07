@@ -84,7 +84,7 @@ namespace Archetype
         {
             if (!args.Valid) throw new Exception("WHat the hell, PlayCardArgs are invalid!?");
 
-            foreach(var actions in Data.Actions.Zip(args.TargetInfos, (a, t) => a.GetArgs(Owner, t, gameState)))
+            foreach(var actions in Data.Actions.Zip(args.TargetInfos, (a, t) => a.MakeAction(Owner, t, gameState)))
             {
                 foreach (var action in actions)
                 {
