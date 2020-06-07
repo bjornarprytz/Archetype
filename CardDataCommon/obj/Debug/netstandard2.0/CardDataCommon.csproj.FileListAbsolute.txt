@@ -1,0 +1,9 @@
+C:\Programmering\Archetype\CardDataCommon\bin\Debug\netstandard2.0\CardDataCommon.deps.json
+C:\Programmering\Archetype\CardDataCommon\bin\Debug\netstandard2.0\CardDataCommon.dll
+C:\Programmering\Archetype\CardDataCommon\obj\Debug\netstandard2.0\CardDataCommon.csprojAssemblyReference.cache
+C:\Programmering\Archetype\CardDataCommon\obj\Debug\netstandard2.0\CardDataCommon.AssemblyInfoInputs.cache
+C:\Programmering\Archetype\CardDataCommon\obj\Debug\netstandard2.0\CardDataCommon.AssemblyInfo.cs
+C:\Programmering\Archetype\CardDataCommon\bin\Debug\netstandard2.0\CardDataCommon.pdb
+C:\Programmering\Archetype\CardDataCommon\obj\Debug\netstandard2.0\CardDataCommon.csproj.CoreCompileInputs.cache
+C:\Programmering\Archetype\CardDataCommon\obj\Debug\netstandard2.0\CardDataCommon.dll
+C:\Programmering\Archetype\CardDataCommon\obj\Debug\netstandard2.0\CardDataCommon.pdb

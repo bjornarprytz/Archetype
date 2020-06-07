@@ -21,33 +21,7 @@ namespace Archetype
         public Deck(Unit owner)
         {
             Owner = owner;
-            Cards = new Stack<Card>(owner.CardPool.Select(c => c.MakeCopy()));
-        }
-        public static List<Card> Sample(int size)
-        {
-            List<Card> sampleList = new List<Card>();
-
-            for (int i=0; i<size; i++)
-            {
-                CardExamples.DummyCard newCard = new CardExamples.DummyCard();
-
-                sampleList.Add(newCard);
-            }
-
-            return sampleList; 
-        }
-        public static List<Card> TestMoveSet(int size)
-        {
-            List<Card> sampleList = new List<Card>();
-
-            for (int i = 0; i < size; i++)
-            {
-                CardExamples.DummyCard newMove = new CardExamples.DummyCard();
-
-                sampleList.Add(newMove);
-            }
-
-            return sampleList;
+            Cards = new Stack<Card>();
         }
 
         public Card PeekTop()

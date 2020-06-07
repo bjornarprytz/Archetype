@@ -36,7 +36,7 @@ namespace Archetype
         public DiscardPile DiscardPile { get; set; }
         public string Name { get; set; }
 
-        public bool HasMovesAvailable => Hand.Any(c => Resources >= c.Cost);
+        public bool HasMovesAvailable => Hand.Any(c => Resources >= c.Data.Cost);
         public int Resources { get; set; }
         public int Life
         {

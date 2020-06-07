@@ -30,6 +30,9 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Refactor Cards to be 100% data
 	- [ ] Make Card Data (de)serializable
 	- [ ] (De)Serialization of concrete action data (damageData, drawData, etc.)
+- [ ] Additional Predicates
+	- [ ] For Cards
+	- [ ] For Units
 
 ### Card Sets
 - [ ] API

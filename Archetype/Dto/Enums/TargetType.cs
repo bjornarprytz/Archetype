@@ -5,6 +5,5 @@ namespace Archetype
     {
         Unit,
         Card,
-        Any
     }
 }

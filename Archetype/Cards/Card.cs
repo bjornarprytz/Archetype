@@ -1,11 +1,11 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Archetype
 {
-    public abstract class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITargetRequirements, ITarget
+    public class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITarget, ICardFactory
     {
         public event ZoneChange<Card> OnZoneChanged;
 
@@ -15,9 +15,10 @@ namespace Archetype
         public event BeforePlay OnBeforePlay;
         public event AfterPlay OnAfterPlay;
 
-        public string Name { get; protected set; }
-        public int Cost { get; set; }
+        public Unit Owner { get; set; }
+        public CardData Data { get; private set; }
 
+        public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
         public Zone<Card> CurrentZone
         {
@@ -31,14 +32,10 @@ namespace Archetype
         }
         private Zone<Card> currZone;
 
-        public Unit Owner { get; set; }
-
-        public abstract TargetInfo GetRequirements(GameState gameState);
-
-        public TypeDictionary<Counter> ActiveCounters { get; private set; }
-
-        internal Card()
+        internal Card(Unit owner, CardData data)
         {
+            Owner = owner;
+            Data = data;
             ActiveCounters = new TypeDictionary<Counter>();
         }
 
@@ -81,11 +78,27 @@ namespace Archetype
             return true;
         }
 
-        public abstract Card MakeCopy();
+        public Card MakeCopy(Unit owner) => new Card(owner, Data);
 
-        protected abstract void PlayActual(PlayCardArgs args, IActionQueue effectQueue);
+        protected void PlayActual(PlayCardArgs args, IActionQueue effectQueue)
+        {
+            if (!args.Valid) throw new Exception("WHat the hell, PlayCardArgs are invalid!?");
+
+            foreach(var actions in Data.Actions.Zip(args.TargetInfos, (a, t) => a.GetArgs(Owner, t)))
+            {
+                foreach (var action in actions)
+                {
+                    effectQueue.Enqueue(action);
+                }
+            }
+        }
 
         public virtual void PostActionAsTarget(ActionInfo action) { }
         public virtual void PreActionAsTarget(ActionInfo action) { }
+
+        public IList<TargetInfo> GetRequirements(GameState gameState)
+        {
+            return Data.Actions.Select(a => a.TargetRequirements.GetTargetInfo(Owner, gameState)).ToList();
+        }
     }
 }
