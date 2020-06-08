@@ -38,6 +38,11 @@ The goal for this project is to provide a useful framework for a card game.
 		- [ ] HasActionType (e.g. DealsDamage)
 	- [ ] For Units
 		- [ ] Health (e.g. health < 100)
+- [ ] CardData
+	- [ ] Card types (e.g. Instant, Sorcery)
+	- [ ] Card Context (e.g. actions on the same card can share some memory)
+	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
+	- [ ] Referrential Values (e.g. deal damage equal to half your health)
 
 ### Card Sets
 - [ ] API
