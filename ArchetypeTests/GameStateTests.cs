@@ -9,10 +9,6 @@ namespace ArchetypeTests
     [TestClass]
     public class GameStateTests : ArchetypeTestBase
     {
-        
-
-        
-
         [TestInitialize]
         public override void InitializeTests()
         {
@@ -22,13 +18,7 @@ namespace ArchetypeTests
         [TestMethod]
         public void TestMethod1()
         {
-            GameState.AddUnits(GenerateAdventurers(2));
-            GameState.AddUnits(GenerateEnemies(3));
+            
         }
-
-        
-
-        
-        
     }
 }

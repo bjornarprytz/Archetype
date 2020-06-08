@@ -43,6 +43,15 @@ namespace ArchetypeTests
             Enemy2 = new Enemy(EnemyPlayer, "Enemy 2", 2, 0);
             Enemy3 = new Enemy(EnemyPlayer, "Enemy 3", 3, 0);
 
+
+            GameState.AddUnits(new List<Unit>
+            {
+                Friend1,
+                Friend2,
+                Enemy1,
+                Enemy2,
+                Enemy3,
+            });
         }
 
         protected virtual void ChoiceHandler(object sender, Choose chooseArgs)

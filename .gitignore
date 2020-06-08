@@ -1,4 +1,4 @@
 .vs/
-Archetype/bin/
-Archetype/obj/
+**/bin
+**/obj
 packages/
