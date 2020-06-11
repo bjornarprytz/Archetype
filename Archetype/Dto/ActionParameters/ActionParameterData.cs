@@ -7,7 +7,7 @@ namespace Archetype
     {
         public TargetRequirementData TargetRequirements { get; set; }
 
-        public IEnumerable<ActionInfo> MakeAction(Unit source, TargetInfo targets, GameState gameState) => targets.ChosenTargets.Select(target => GetActionInfo(source, target, gameState));
+        public IEnumerable<ActionInfo> CreateAction(Unit source, ITargetSelectInfo targets, GameState gameState) => targets.ConfirmedSelection.Select(target => GetActionInfo(source, target, gameState));
 
         protected abstract ActionInfo GetActionInfo(Unit source, ITarget target, GameState gameState);
     }

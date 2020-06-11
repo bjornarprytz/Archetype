@@ -14,13 +14,19 @@ namespace Archetype
 
         public Queue<ActionInfo> EffectQueue { get; private set; }
 
-        internal void EndTurn(Unit unit)
+        public Unit ActiveUnit { get; private set; }
+
+        public void StartTurn(Unit unit)
         {
-            throw new NotImplementedException();
+            ActiveUnit = unit;
         }
-        internal bool HasTurn(Unit unit)
+        public void EndTurn(Unit unit)
         {
-            throw new NotImplementedException();
+            ActiveUnit = null;
+        }
+        public bool HasTurn(Unit unit)
+        {
+            return ActiveUnit == unit;
         }
 
         public GameState(EventHandler<Choose> choiceHandler)
@@ -46,6 +52,13 @@ namespace Archetype
             {
                 EffectQueue.Dequeue().Execute();
             }
+        }
+
+        public void TakeAction(IGameAction action)
+        {
+            if (!action.CanExecute(this)) return;
+
+            action.Execute(this);
         }
 
         public void Choose<T>(Choose<T> actionPrompt) where T : GamePiece

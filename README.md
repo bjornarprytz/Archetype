@@ -13,7 +13,7 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Data (De)Serialization
 - [ ] Counters (Ongoing effects on a Card or a Unit)
 - [x] Refactor Effects, EffectTemplates and TargetRequirements.
-- [ ] Allow non-unit targets for cards and actions
+- [x] Allow non-unit targets for cards and actions
 	- [ ] Retrieve action (DiscardPile -> Hand)
 	- [ ] Steal action (from zone with different owner -> Hand)
 - [ ] Events
@@ -29,6 +29,7 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Game loop
 	- [ ] Prompter
 	- [ ] ActionQueue
+	- [ ] Unit turn order
 - [ ] Refactor Cards to be 100% data
 	- [ ] Make Card Data (de)serializable
 	- [ ] (De)Serialization of concrete action data (damageData, drawData, etc.)
@@ -40,6 +41,7 @@ The goal for this project is to provide a useful framework for a card game.
 		- [ ] Health (e.g. health < 100)
 - [ ] CardData
 	- [ ] Card types (e.g. Instant, Sorcery)
+	- [ ] Rarity
 	- [ ] Card Context (e.g. actions on the same card can share some memory)
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
 	- [ ] Referrential Values (e.g. deal damage equal to half your health)

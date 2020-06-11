@@ -13,9 +13,9 @@ namespace ArchetypeTests
         protected EnemyPlayer EnemyPlayer { get; set; }
         protected List<GamePiece> ChoicesToMake { get; set; }
 
-        protected CardData Card1 { get; set; }
-        protected CardData Card2 { get; set; }
-        protected CardData Card3 { get; set; }
+        protected CardData AttackCard { get; set; }
+        protected CardData HealCard { get; set; }
+        protected CardData CopyCard { get; set; }
 
         protected Adventurer Friend1 { get; set; }
         protected Adventurer Friend2 { get; set; }
@@ -32,9 +32,9 @@ namespace ArchetypeTests
             ChoicesToMake = new List<GamePiece>();
             GameState = new GameState(ChoiceHandler);
 
-            Card1 = AttackAnEnemy(3);
-            Card2 = SelfDamageAndHealAlly(1, 4);
-            Card3 = CopyACard();
+            AttackCard = AttackAnEnemy(3);
+            HealCard = SelfDamageAndHealAlly(1, 4);
+            CopyCard = CopyACard();
 
             Friend1 = new Adventurer(HumanPlayer, "Friend with vitality", 15, 4);
             Friend2 = new Adventurer(HumanPlayer, "Low Energy Friend", 3, 2);
@@ -121,6 +121,15 @@ namespace ArchetypeTests
                 Max = max,
                 Predicate = LivingEnemiesPredicate(),
                 SelectionMethod = SelectionMethod.Any
+            };
+        }
+
+        protected TargetRequirementData Self()
+        {
+            return new TargetRequirementData
+            {
+                Predicate = new UnitPredicateData { Relation = TargetRelation.Ally, Sameness = Sameness.Me, UnitZone = UnitZone.Any },
+                SelectionMethod = SelectionMethod.Self,
             };
         }
 

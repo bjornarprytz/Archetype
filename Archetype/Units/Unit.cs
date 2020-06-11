@@ -44,7 +44,7 @@ namespace Archetype
             {
                 bool wasAlive = IsAlive;
 
-                _life = Math.Min(_life, MaxLife);
+                _life = Math.Min(value, MaxLife);
 
                 if (!IsAlive && wasAlive) OnDied?.Invoke();
             }
@@ -75,6 +75,7 @@ namespace Archetype
             Name = name;
             Owner = owner;
 
+            MaxLife = life;
             Life = life;
             Resources = resources;
 
@@ -109,9 +110,9 @@ namespace Archetype
             CurrentZone = newZone;
         }
 
-        internal virtual void EndTurn() { }
+        public virtual void EndTurn() { }
 
-        internal void Discard(int nCardsToDiscard, IPromptable prompter)
+        public void Discard(int nCardsToDiscard, IPromptable prompter)
         {
             var choiceArgs = new Choose<Card>(nCardsToDiscard, Hand);
 
@@ -123,7 +124,7 @@ namespace Archetype
             }
         }
 
-        internal void DiscardCard(Guid cardId)
+        public void DiscardCard(Guid cardId)
         {
             Card cardToDiscard = Hand.Pick(cardId);
 
@@ -137,7 +138,7 @@ namespace Archetype
             OnCardDiscarded?.Invoke(cardToDiscard);
         }
 
-        internal void ShuffleDeck()
+        public void ShuffleDeck()
         {
             Deck.Shuffle();
             OnDeckShuffled?.Invoke(Deck);
@@ -162,11 +163,11 @@ namespace Archetype
             OnTargetOfActionAfter?.Invoke(this, action);
         }
 
-        internal void Heal(int amount) => Life += amount;
+        public void Heal(int amount) => Life += amount;
 
-        internal void Damage(int amount) => Life -= amount;
+        public void Damage(int amount) => Life -= amount;
 
-        internal void Draw(int cardsToDraw)
+        public void Draw(int cardsToDraw)
         {
             for (int i=0; i < cardsToDraw; i++)
             {
@@ -174,7 +175,7 @@ namespace Archetype
             }
         }
 
-        internal void Mill(int cardsToMill)
+        public void Mill(int cardsToMill)
         {
             for (int i = 0; i < cardsToMill; i++)
             {

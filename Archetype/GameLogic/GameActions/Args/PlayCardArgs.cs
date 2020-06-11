@@ -5,8 +5,13 @@ namespace Archetype
 {
     public class PlayCardArgs
     {
-        public IList<TargetInfo> TargetInfos { get; set; }
+        public IList<ITargetSelectInfo> TargetInfos { get; set; }
 
-        public bool Valid => TargetInfos.All(targetInfo => targetInfo.Valid);
+        public PlayCardArgs(IList<ITargetSelectInfo> targetInfos)
+        {
+            TargetInfos = targetInfos;
+        }
+
+        public bool Valid => TargetInfos.All(targetInfo => targetInfo.IsValid);
     }
 }

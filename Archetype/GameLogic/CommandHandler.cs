@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Archetype.Game_Logic
+﻿namespace Archetype
 {
-    class CommandHandler
+    public class CommandHandler
     {
+        private IGameAction _action { get; set; }
+
+        public CommandHandler(IGameAction gameAction)
+        {
+            _action = gameAction;
+        }
 
     }
 }

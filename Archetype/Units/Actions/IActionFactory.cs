@@ -5,6 +5,6 @@ namespace Archetype
 {
     public interface IActionFactory
     {
-        IEnumerable<ActionInfo> MakeAction(Unit source, TargetInfo targets, GameState gameState);
+        IEnumerable<ActionInfo> CreateAction(Unit source, ITargetSelectInfo targets, GameState gameState);
     }
 }

@@ -4,11 +4,14 @@ using System.Collections.Generic;
 
 namespace Archetype
 {
-    public class CardData : ICardFactory
+    public struct CardData : ICardFactory
     {
         public int Cost { get; set; }
         public string Name { get; set; }
         public string Id { get; set; }
+
+        public CardRarity Rarity { get; set; }
+        public CardType Type { get; set; }
 
         public string RulesText { get; set; }
         public string ImagePath { get; set; }
