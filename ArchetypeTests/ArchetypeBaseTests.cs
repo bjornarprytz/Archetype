@@ -37,7 +37,7 @@ namespace ArchetypeTests
             CopyCard = CopyACard();
 
             Friend1 = new Adventurer(HumanPlayer, "Friend with vitality", 15, 4);
-            Friend2 = new Adventurer(HumanPlayer, "Low Energy Friend", 3, 2);
+            Friend2 = new Adventurer(HumanPlayer, "Low Energy Friend", 7, 2);
 
             Enemy1 = new Enemy(EnemyPlayer, "Enemy 1", 1, 0);
             Enemy2 = new Enemy(EnemyPlayer, "Enemy 2", 2, 0);

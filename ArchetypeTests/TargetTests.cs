@@ -54,7 +54,7 @@ namespace ArchetypeTests
         [TestMethod]
         public void HealCardAffectsSelf()
         {
-            Friend2.Damage(2);
+            Friend2.Damage(5);
 
             var healCard = HealCard.MakeCopy(Friend1);
             var damageStrength = (healCard.Data.Actions.First() as DamageParameterData).Strength;
@@ -65,6 +65,7 @@ namespace ArchetypeTests
             targetInfo.Last().Add(Friend2);
 
             var friend1PrePlayLife = Friend1.Life;
+            var friend2PrePlayLife = Friend2.Life;
 
             GameState.StartTurn(Friend1);
             GameState.TakeAction(new PlayCardAction(Friend1, healCard, new PlayCardArgs(targetInfo)));
@@ -72,7 +73,7 @@ namespace ArchetypeTests
             GameState.Update();
 
             Assert.AreEqual(friend1PrePlayLife - damageStrength, Friend1.Life);
-            Assert.AreEqual(Friend2.MaxLife, Friend2.Life);
+            Assert.AreEqual(friend2PrePlayLife + healStrength, Friend2.Life);
         }
     }
 }

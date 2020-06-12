@@ -42,9 +42,11 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] CardData
 	- [ ] Card types (e.g. Instant, Sorcery)
 	- [ ] Rarity
+	- [ ] Color
 	- [ ] Card Context (e.g. actions on the same card can share some memory)
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
 	- [ ] Referrential Values (e.g. deal damage equal to half your health)
+	- [ ] Static effects (e.g. Cards cost 1 less while this card is in the DiscardPile)
 
 ### Card Sets
 - [ ] API
