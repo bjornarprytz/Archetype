@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Archetype
 {
@@ -10,7 +9,7 @@ namespace Archetype
     {
         public UnitZone UnitZone { get; set; }
         public TargetRelation Relation { get; set; }
-        public Sameness Sameness { get; set; }
+        public Selfness Selfness { get; set; }
 
         public override IEnumerable<ITarget> GetOptions(Unit source, GameState gameState)
         {
@@ -49,19 +48,19 @@ namespace Archetype
 
             Func<Unit, bool> whoRestriction;
 
-            switch (Sameness)
+            switch (Selfness)
             {
-                case Sameness.Any:
+                case Selfness.Any:
                     whoRestriction = (_) => true;
                     break;
-                case Sameness.Other:
+                case Selfness.Other:
                     whoRestriction = source.Other;
                     break;
-                case Sameness.Me:
+                case Selfness.Me:
                     whoRestriction = source.Me;
                     break;
                 default:
-                    throw new Exception($"Unrecognized Sameness: {Sameness}");
+                    throw new Exception($"Unrecognized Sameness: {Selfness}");
             }
 
             return zone

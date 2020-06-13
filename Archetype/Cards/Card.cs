@@ -96,7 +96,7 @@ namespace Archetype
         public virtual void PostActionAsTarget(ActionInfo action) { }
         public virtual void PreActionAsTarget(ActionInfo action) { }
 
-        public IList<ITargetSelectInfo> GetTargetRequirements(GameState gameState)
+        public IList<ISelectionInfo<ITarget>> GetTargetRequirements(GameState gameState)
         {
             return Data.Actions.Select(a => a.TargetRequirements.GetTargetInfo(Owner, gameState)).ToList();
         }

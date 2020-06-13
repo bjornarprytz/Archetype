@@ -26,9 +26,9 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Player Card Pool
 	- [ ] Unit Roster
 - [ ] Flesh out the GameState
-	- [ ] Game loop
-	- [ ] Prompter
-	- [ ] ActionQueue
+	- [x] Game loop
+	- [x] Prompter
+	- [x] ActionQueue
 	- [ ] Unit turn order
 - [ ] Refactor Cards to be 100% data
 	- [ ] Make Card Data (de)serializable
@@ -40,9 +40,9 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] For Units
 		- [ ] Health (e.g. health < 100)
 - [ ] CardData
-	- [ ] Card types (e.g. Instant, Sorcery)
-	- [ ] Rarity
-	- [ ] Color
+	- [x] Card types (e.g. Instant, Sorcery)
+	- [x] Rarity
+	- [x] Color
 	- [ ] Card Context (e.g. actions on the same card can share some memory)
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
 	- [ ] Referrential Values (e.g. deal damage equal to half your health)

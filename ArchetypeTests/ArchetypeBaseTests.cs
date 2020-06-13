@@ -107,7 +107,7 @@ namespace ArchetypeTests
                 Predicate = new CardPredicateData
                 {
                     CardZone = CardZone.DiscardPile,
-                    OwnerPredicate = new UnitPredicateData { Sameness = Sameness.Me }
+                    OwnerPredicate = new UnitPredicateData { Selfness = Selfness.Me }
                 },
                 SelectionMethod = SelectionMethod.All
             };
@@ -128,7 +128,7 @@ namespace ArchetypeTests
         {
             return new TargetRequirementData
             {
-                Predicate = new UnitPredicateData { Relation = TargetRelation.Ally, Sameness = Sameness.Me, UnitZone = UnitZone.Any },
+                Predicate = new UnitPredicateData { Relation = TargetRelation.Ally, Selfness = Selfness.Me, UnitZone = UnitZone.Any },
                 SelectionMethod = SelectionMethod.Self,
             };
         }

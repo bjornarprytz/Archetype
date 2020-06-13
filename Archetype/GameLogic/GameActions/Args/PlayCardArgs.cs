@@ -5,9 +5,9 @@ namespace Archetype
 {
     public class PlayCardArgs
     {
-        public IList<ITargetSelectInfo> TargetInfos { get; set; }
+        public IList<ISelectionInfo<ITarget>> TargetInfos { get; set; }
 
-        public PlayCardArgs(IList<ITargetSelectInfo> targetInfos)
+        public PlayCardArgs(IList<ISelectionInfo<ITarget>> targetInfos)
         {
             TargetInfos = targetInfos;
         }

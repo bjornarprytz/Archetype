@@ -1,13 +1,11 @@
 ﻿
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Archetype
 {
     public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters, ITarget, ISource
     {
-
         public delegate void CardDrawn(Card drawnCard);
         public delegate void CardDiscarded(Card discardedCard);
 

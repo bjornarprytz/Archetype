@@ -3,7 +3,7 @@ using System;
 
 namespace Archetype
 {
-    public class TargetRequirementData : ITargetSelectInfoFactory
+    public class TargetRequirementData : ITargetSelectionInfoFactory
     {
         public int Min { get; set; } = 0;
         public int Max { get; set; } = int.MaxValue;
@@ -11,7 +11,7 @@ namespace Archetype
 
         public SelectionMethod SelectionMethod { get; set; }
 
-        public ITargetSelectInfo GetTargetInfo(Unit source, GameState gameState)
+        public ISelectionInfo<ITarget> GetTargetInfo(Unit source, GameState gameState)
         {
             switch (SelectionMethod)
             {
@@ -20,7 +20,7 @@ namespace Archetype
                 case SelectionMethod.Any:
                     return new AnySelectionInfo(Min, Max, Predicate.GetOptions(source, gameState));
                 case SelectionMethod.Random:
-                    return new RandomSelectionInfo(Min, Predicate.GetOptions(source, gameState));
+                    return new RandomSelectionInfo(Max, Predicate.GetOptions(source, gameState));
                 case SelectionMethod.Self:
                     return new SelfSelectionInfo(source);
                 case SelectionMethod.None:

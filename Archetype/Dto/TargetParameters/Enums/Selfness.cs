@@ -1,6 +1,6 @@
 ﻿namespace Archetype
 {
-    public enum Sameness
+    public enum Selfness
     {
         Any,
         Me,
