@@ -45,6 +45,7 @@ The goal for this project is to provide a useful framework for a card game.
 	- [x] Color
 	- [ ] Card Context (e.g. actions on the same card can share some memory)
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
+		- [x] Context-less triggers (can't handle various TriggerArgs)
 		- [ ] Zone triggers
 		- [ ] Card triggers
 		- [ ] Unit triggers

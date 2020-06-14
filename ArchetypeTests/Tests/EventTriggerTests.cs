@@ -37,19 +37,19 @@ namespace ArchetypeTests
         {
             var triggerCard = TriggerCard.MakeCopy(Friend1);
 
-            var targetInfo = triggerCard.GetTargetRequirements(GameState).ToList();
-
-            targetInfo.Last().Add(Enemy1);
+            var targetInfo = triggerCard.GetTargetRequirements(GameState);
 
             GameState.StartTurn(Friend1);
             GameState.TakeAction(new PlayCardAction(Friend1, triggerCard, new PlayCardArgs(targetInfo)));
 
             GameState.Update();
 
-            Enemy1.ShuffleDeck();
-            Enemy1.ShuffleDeck();
-            Enemy1.ShuffleDeck();
-            Enemy1.ShuffleDeck();
+            Friend1.ShuffleDeck();
+            GameState.Update();
+            Assert.AreEqual(14, Friend1.Life);
+            Friend1.ShuffleDeck();
+            GameState.Update();
+            Assert.AreEqual(13, Friend1.Life);
 
         }
     }

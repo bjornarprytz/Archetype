@@ -257,6 +257,7 @@ namespace ArchetypeTests
                         EventData = new EventReferenceData<Unit>(nameof(Unit.OnDeckShuffled)),
                         TriggerAction = new DamageParameterData
                         {
+                            TargetRequirements = Self(),
                             Strength = 1,
                         }
                     }

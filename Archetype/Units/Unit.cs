@@ -6,13 +6,13 @@ namespace Archetype
 {
     public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters, ITarget, ISource
     {
-        public event EventHandler<CardTriggerArgs> OnCardDrawn;
-        public event EventHandler<CardTriggerArgs> OnCardDiscarded;
-        public event EventHandler<CardTriggerArgs> OnCardMilled;
-        public event EventHandler<GenericTriggerArgs<Deck>> OnDeckShuffled;
+        public event EventHandler<TriggerArgs> OnCardDrawn;
+        public event EventHandler<TriggerArgs> OnCardDiscarded;
+        public event EventHandler<TriggerArgs> OnCardMilled;
+        public event EventHandler<TriggerArgs> OnDeckShuffled;
 
-        public event EventHandler<GenericTriggerArgs<int>> OnDamaged;
-        public event EventHandler<GenericTriggerArgs<int>> OnHealed;
+        public event EventHandler<TriggerArgs> OnDamaged;
+        public event EventHandler<TriggerArgs> OnHealed;
 
         public event EventHandler<ActionInfo> OnTargetOfActionBefore;
         public event EventHandler<ActionInfo> OnTargetOfActionAfter;
@@ -130,13 +130,13 @@ namespace Archetype
             }
 
             cardToDiscard.MoveTo(DiscardPile);
-            OnCardDiscarded?.Invoke(this, new CardTriggerArgs(cardToDiscard));
+            OnCardDiscarded?.Invoke(this, new TriggerArgs());
         }
 
         public void ShuffleDeck()
         {
             Deck.Shuffle();
-            OnDeckShuffled?.Invoke(this, new GenericTriggerArgs<Deck>(Deck));
+            OnDeckShuffled?.Invoke(this, new TriggerArgs());
         }
         public void PreActionAsSource(ActionInfo action)
         {
@@ -161,13 +161,13 @@ namespace Archetype
         public void Heal(int amount)
         {
             Life += amount;
-            OnHealed?.Invoke(this, new GenericTriggerArgs<int>(amount));
+            OnHealed?.Invoke(this, new TriggerArgs());
         }
 
         public void Damage(int amount)
         {
             Life -= amount;
-            OnDamaged?.Invoke(this, new GenericTriggerArgs<int>(amount));
+            OnDamaged?.Invoke(this, new TriggerArgs());
         }
 
         public void Draw(int cardsToDraw)
@@ -197,7 +197,7 @@ namespace Archetype
             }
 
             cardToDraw.MoveTo(Hand);
-            OnCardDrawn?.Invoke(this, new CardTriggerArgs(cardToDraw));
+            OnCardDrawn?.Invoke(this, new TriggerArgs());
         }
 
         private void MillCard()
@@ -211,7 +211,7 @@ namespace Archetype
             }
 
             cardToMill.MoveTo(DiscardPile);
-            OnCardMilled?.Invoke(this, new CardTriggerArgs(cardToMill));
+            OnCardMilled?.Invoke(this, new TriggerArgs());
         }
     }
 }

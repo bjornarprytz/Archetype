@@ -3,7 +3,7 @@ using System;
 
 namespace Archetype
 {
-    public abstract class TriggerArgs : EventArgs
+    public class TriggerArgs : EventArgs
     {
     }
 }
