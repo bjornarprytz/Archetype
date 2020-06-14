@@ -45,6 +45,12 @@ The goal for this project is to provide a useful framework for a card game.
 	- [x] Color
 	- [ ] Card Context (e.g. actions on the same card can share some memory)
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
+		- [ ] Zone triggers
+		- [ ] Card triggers
+		- [ ] Unit triggers
+		- [x] AttachTrigger
+		- [ ] DetachTrigger
+		- [ ] Use Event Args from (e.g. Deal Damage equal to Cost of the discarded card)
 	- [ ] Referrential Values (e.g. deal damage equal to half your health)
 	- [ ] Static effects (e.g. Cards cost 1 less while this card is in the DiscardPile)
 

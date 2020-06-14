@@ -8,10 +8,8 @@ namespace Archetype
     public abstract class Zone<T>: IEnumerable<T>
         where T : GamePiece 
     {
-        public delegate void PieceIn(T cardThatEnteredZone);
-        public delegate void PieceOut(T cardThatLeftZone);
-        public event PieceIn OnEntered;
-        public event PieceOut OnExited;
+        public event Action<T> OnEntered;
+        public event Action<T> OnExited;
 
         public virtual void Out(T pieceToMove) { OnExited?.Invoke(pieceToMove); }
         public virtual void Into(T pieceToMove) { OnEntered?.Invoke(pieceToMove); }

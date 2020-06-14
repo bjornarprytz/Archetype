@@ -5,14 +5,14 @@ using System.Text;
 
 namespace Archetype
 {
-    public class GameState : IPromptable, IActionQueue
+    public class GameState : IPromptable
     {
         public Battlefield Battlefield { get; private set; }
         public Graveyard Graveyard { get; private set; }
 
         public EventHandler<Choose> OnChoose { get; private set; }
 
-        public Queue<ActionInfo> EffectQueue { get; private set; }
+        public IActionQueue ActionQueue { get; private set; }
 
         public Unit ActiveUnit { get; private set; }
 
@@ -32,7 +32,7 @@ namespace Archetype
         public GameState(EventHandler<Choose> choiceHandler)
         {
             Battlefield = new Battlefield();
-            EffectQueue = new Queue<ActionInfo>();
+            ActionQueue = new ActionQueue();
 
             if (choiceHandler == null) throw new Exception("Please provide an event handler for choices");
 
@@ -46,12 +46,7 @@ namespace Archetype
 
         public void Update()
         {
-            // Progress game loop here
-
-            while (EffectQueue.Any())
-            {
-                EffectQueue.Dequeue().Execute();
-            }
+            ActionQueue.ResolveAll();
         }
 
         public void TakeAction(IGameAction action)
@@ -64,10 +59,6 @@ namespace Archetype
         public void Choose<T>(Choose<T> actionPrompt) where T : GamePiece
         {
             OnChoose?.Invoke(this, actionPrompt);
-        }
-        public void Enqueue(ActionInfo action)
-        {
-            EffectQueue.Enqueue(action);
         }
     }
 }

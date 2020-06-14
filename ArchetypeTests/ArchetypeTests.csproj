@@ -49,10 +49,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameStateTests.cs" />
+    <Compile Include="Tests\EventTriggerTests.cs" />
+    <Compile Include="Tests\GameStateTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TargetTests.cs" />
-    <Compile Include="ArchetypeBaseTests.cs" />
+    <Compile Include="Tests\TargetTests.cs" />
+    <Compile Include="Tests\ArchetypeBaseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

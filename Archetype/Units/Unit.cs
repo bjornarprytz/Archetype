@@ -6,23 +6,20 @@ namespace Archetype
 {
     public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters, ITarget, ISource
     {
-        public delegate void CardDrawn(Card drawnCard);
-        public delegate void CardDiscarded(Card discardedCard);
+        public event EventHandler<CardTriggerArgs> OnCardDrawn;
+        public event EventHandler<CardTriggerArgs> OnCardDiscarded;
+        public event EventHandler<CardTriggerArgs> OnCardMilled;
+        public event EventHandler<GenericTriggerArgs<Deck>> OnDeckShuffled;
 
-        public delegate void CardMilled(Card milledCard);
-        public delegate void DeckShuffled(Deck deck);
-
-        public event CardDrawn OnCardDrawn;
-        public event CardDiscarded OnCardDiscarded;
-        public event CardMilled OnCardMilled;
-        public event DeckShuffled OnDeckShuffled;
+        public event EventHandler<GenericTriggerArgs<int>> OnDamaged;
+        public event EventHandler<GenericTriggerArgs<int>> OnHealed;
 
         public event EventHandler<ActionInfo> OnTargetOfActionBefore;
         public event EventHandler<ActionInfo> OnTargetOfActionAfter;
         public event EventHandler<ActionInfo> OnSourceOfActionBefore;
         public event EventHandler<ActionInfo> OnSourceOfActionAfter;
 
-        public event ZoneChange<Unit> OnZoneChanged;
+        public event EventHandler<ZoneChangeTriggerArgs<Unit>> OnZoneChanged;
         public event Action OnDied;
 
         public bool IsAlive => Life > 0;
@@ -60,7 +57,7 @@ namespace Archetype
             {
                 Zone<Unit> previousZone = currZone;
                 currZone = value;
-                OnZoneChanged?.Invoke(previousZone, currZone);
+                OnZoneChanged?.Invoke(this, new ZoneChangeTriggerArgs<Unit>(this, previousZone, currZone));
             }
         }
         private Zone<Unit> currZone;
@@ -133,13 +130,13 @@ namespace Archetype
             }
 
             cardToDiscard.MoveTo(DiscardPile);
-            OnCardDiscarded?.Invoke(cardToDiscard);
+            OnCardDiscarded?.Invoke(this, new CardTriggerArgs(cardToDiscard));
         }
 
         public void ShuffleDeck()
         {
             Deck.Shuffle();
-            OnDeckShuffled?.Invoke(Deck);
+            OnDeckShuffled?.Invoke(this, new GenericTriggerArgs<Deck>(Deck));
         }
         public void PreActionAsSource(ActionInfo action)
         {
@@ -161,9 +158,17 @@ namespace Archetype
             OnTargetOfActionAfter?.Invoke(this, action);
         }
 
-        public void Heal(int amount) => Life += amount;
+        public void Heal(int amount)
+        {
+            Life += amount;
+            OnHealed?.Invoke(this, new GenericTriggerArgs<int>(amount));
+        }
 
-        public void Damage(int amount) => Life -= amount;
+        public void Damage(int amount)
+        {
+            Life -= amount;
+            OnDamaged?.Invoke(this, new GenericTriggerArgs<int>(amount));
+        }
 
         public void Draw(int cardsToDraw)
         {
@@ -192,7 +197,7 @@ namespace Archetype
             }
 
             cardToDraw.MoveTo(Hand);
-            OnCardDrawn?.Invoke(cardToDraw);
+            OnCardDrawn?.Invoke(this, new CardTriggerArgs(cardToDraw));
         }
 
         private void MillCard()
@@ -206,7 +211,7 @@ namespace Archetype
             }
 
             cardToMill.MoveTo(DiscardPile);
-            OnCardMilled?.Invoke(cardToMill);
+            OnCardMilled?.Invoke(this, new CardTriggerArgs(cardToMill));
         }
     }
 }

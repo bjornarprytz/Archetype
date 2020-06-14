@@ -16,6 +16,7 @@ namespace ArchetypeTests
         protected CardData AttackCard { get; set; }
         protected CardData HealCard { get; set; }
         protected CardData CopyCard { get; set; }
+        protected CardData TriggerCard { get; set; }
 
         protected Adventurer Friend1 { get; set; }
         protected Adventurer Friend2 { get; set; }
@@ -35,6 +36,7 @@ namespace ArchetypeTests
             AttackCard = AttackAnEnemy(3);
             HealCard = SelfDamageAndHealAlly(1, 4);
             CopyCard = CopyACard();
+            TriggerCard = DealDamageWhenDeckIsShuffled();
 
             Friend1 = new Adventurer(HumanPlayer, "Friend with vitality", 15, 4);
             Friend2 = new Adventurer(HumanPlayer, "Low Energy Friend", 7, 2);
@@ -237,6 +239,26 @@ namespace ArchetypeTests
                     new CopyCardParameterData
                     {
                         TargetRequirements = AnyCardInAnEnemyHand()
+                    }
+                }
+            };
+        }
+
+        protected CardData DealDamageWhenDeckIsShuffled()
+        {
+            return new CardData
+            {
+                Cost = 0,
+                Actions = new List<ActionParameterData>
+                {
+                    new TriggerParameterData
+                    {
+                        TargetRequirements = Self(),
+                        EventData = new EventReferenceData<Unit>(nameof(Unit.OnDeckShuffled)),
+                        TriggerAction = new DamageParameterData
+                        {
+                            Strength = 1,
+                        }
                     }
                 }
             };
