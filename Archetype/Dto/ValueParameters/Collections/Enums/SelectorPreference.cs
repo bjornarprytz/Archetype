@@ -1,6 +1,6 @@
 ﻿namespace Archetype
 {
-    public enum SelectorType
+    public enum SelectorPreference
     {
         Highest,
         Lowest,

@@ -3,29 +3,39 @@ using System.Reflection;
 
 namespace Archetype
 {
-    public class ValueProvider<R, M> : ValueProvider
-        where R : new()
+    public class ValueProvider<R, V> : ValueProvider<V>
     {
-        public override Type ValueType => typeof(M);
-        public override Type ReferenceType  => typeof(R);
-
-        public ValueProvider(string memberName)
+        public ValueProvider(string memberName) : base(typeof(R), memberName) { }
+        public V GetValue(R reference)
         {
-            MemberName = memberName;
+            return (V) GetPropertyInfo().GetValue(reference);
+        }
+    }
+
+    public class ValueProvider<V> : ValueProvider
+    {
+
+        public ValueProvider(Type referenceType, string memberName) : base (referenceType, typeof(V), memberName) { }
+
+        public V GetValue(object reference)
+        {
+            return (V) GetPropertyInfo().GetValue(reference);
         }
 
-        public M GetValue(R reference)
-        {
-            return (M) GetPropertyInfo().GetValue(reference);
-        }
     }
 
     public class ValueProvider
     {
-        public virtual Type ValueType { get; set; }
-        public virtual Type ReferenceType { get; set; }
+        public Type ReferenceType { get; set; }
+        public Type ValueType { get; set; }
         public string MemberName { get; set; }
 
+        public ValueProvider(Type referenceType, Type valueType, string memberName)
+        {
+            ReferenceType = referenceType;
+            ValueType = valueType;
+            MemberName = memberName;
+        }
 
         public PropertyInfo GetPropertyInfo() => ReferenceType?.GetProperty(MemberName);
     }
