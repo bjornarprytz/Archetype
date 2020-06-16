@@ -49,8 +49,8 @@ namespace ArchetypeTests
             Friend2.Damage(5);
 
             var healCard = HealCard.MakeCopy(Friend1);
-            var damageStrength = (healCard.Data.Actions.First() as DamageParameterData).Strength;
-            var healStrength = (healCard.Data.Actions.Last() as HealParameterData).Strength;
+            var damageStrength = (healCard.Data.Actions.First() as DamageParameterData).Strength.CreateGetter(Friend1, GameState).Invoke();
+            var healStrength = (healCard.Data.Actions.Last() as HealParameterData).Strength.CreateGetter(Friend1, GameState).Invoke();
 
             var targetInfo = healCard.GetTargetRequirements(GameState).ToList();
 

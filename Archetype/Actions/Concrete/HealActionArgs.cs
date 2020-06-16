@@ -1,11 +1,14 @@
-﻿namespace Archetype
+﻿using System;
+
+namespace Archetype
 {
     public class HealActionArgs : ActionInfo
     {
-        public int Strength { get; set; }
-        public HealActionArgs(Unit source, Unit target, int strength) : base(source, target)
+        private Func<int> _getter;
+        public int Strength => _getter();
+        public HealActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target)
         {
-            Strength = strength;
+            _getter = getter;
         }
 
         protected override void Resolve()

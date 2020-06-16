@@ -50,7 +50,8 @@ namespace ArchetypeTests
             Friend1.ShuffleDeck();
             GameState.Update();
             Assert.AreEqual(13, Friend1.Life);
-
+            
+            // TODO : test different targets for 'Action' as well as 'TriggerAction'
         }
     }
 }

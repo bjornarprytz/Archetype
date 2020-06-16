@@ -1,13 +1,16 @@
 ﻿
+using System;
+
 namespace Archetype
 {
     public class DamageActionArgs : ActionInfo
     {
-        public int Strength { get; set; }
+        private Func<int> _getter { get; set; }
+        public int Strength => _getter();
 
-        public DamageActionArgs(Unit source, Unit target, int damage) : base(source, target)
+        public DamageActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target)
         {
-            Strength = damage;
+            _getter = getter;
         }
 
         protected override void Resolve()

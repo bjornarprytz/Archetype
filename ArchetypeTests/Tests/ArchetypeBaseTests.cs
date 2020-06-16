@@ -202,7 +202,7 @@ namespace ArchetypeTests
                     new DamageParameterData
                     {
                         TargetRequirements = AnyEnemies(1, 1),
-                        Strength = damage
+                        Strength = new ImmediateValue<int>(damage)
                     }
                 }
             };
@@ -218,12 +218,12 @@ namespace ArchetypeTests
                     new DamageParameterData
                     {
                         TargetRequirements = new TargetRequirementData{ SelectionMethod = SelectionMethod.Self },
-                        Strength = damage
+                        Strength = new ImmediateValue<int>(damage)
                     },
                     new HealParameterData
                     {
                         TargetRequirements = AnyAllies(1, 1),
-                        Strength = heal
+                        Strength = new ImmediateValue<int>(heal)
                     }
                 }
             };
@@ -258,7 +258,7 @@ namespace ArchetypeTests
                         TriggerAction = new DamageParameterData
                         {
                             TargetRequirements = Self(),
-                            Strength = 1,
+                            Strength = new ImmediateValue<int>(1),
                         }
                     }
                 }

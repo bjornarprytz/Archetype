@@ -2,8 +2,8 @@
 {
     public class DamageParameterData : ActionParameterData
     {
-        public int Strength { get; set; }
+        public ValueDescriptor<int> Strength { get; set; }
 
-        protected override ActionInfo GetActionInfo(Unit source, ITarget target, GameState _) => new DamageActionArgs(source, target as Unit, Strength);
+        protected override ActionInfo GetActionInfo(Unit source, ITarget target, GameState gameState) => new DamageActionArgs(source, target as Unit, Strength.CreateGetter(source, gameState));
     }
 }
