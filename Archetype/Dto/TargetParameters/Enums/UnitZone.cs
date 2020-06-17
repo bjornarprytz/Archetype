@@ -1,5 +1,4 @@
-﻿
-namespace Archetype
+﻿namespace Archetype
 {
     public enum UnitZone
     {
@@ -7,5 +6,5 @@ namespace Archetype
         Battlefield = 1 << 0,
         Graveyard   = 1 << 1,
 
-    }
+    }  
 }

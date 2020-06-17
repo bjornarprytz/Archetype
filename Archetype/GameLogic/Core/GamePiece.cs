@@ -7,11 +7,11 @@ namespace Archetype
         public Guid Id { get; private set; }
         public Faction Team { get; private set; }
 
-        public bool AllyOf(GamePiece other) => Team == other.Team;
-        public bool EnemyOf(GamePiece other) => Team != other.Team;
+        public bool IsAllyOf(GamePiece other) => Team == other.Team;
+        public bool IsEnemyOf(GamePiece other) => Team != other.Team;
 
-        public bool Me(GamePiece other) => Id == other.Id;
-        public bool Other(GamePiece other) => Id != other.Id;
+        public bool IsMe(GamePiece other) => Id == other.Id;
+        public bool IsOther(GamePiece other) => Id != other.Id;
 
         
 

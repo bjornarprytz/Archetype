@@ -13,59 +13,9 @@ namespace Archetype
 
         public override IEnumerable<ITarget> GetOptions(Unit source, GameState gameState)
         {
-            IEnumerable<Unit> zone;
-
-            switch (UnitZone)
-            {
-                case UnitZone.Battlefield:
-                    zone = gameState.Battlefield;
-                    break;
-                case UnitZone.Graveyard:
-                    zone = gameState.Graveyard;
-                    break;
-                default:
-                    throw new Exception($"Unrecognized UnitZone: {UnitZone}");
-            }
-
-            
-
-            Func<Unit, bool> factionRestriction;
-
-            switch (Relation)
-            {
-                case TargetRelation.Ally:
-                    factionRestriction = source.AllyOf;
-                    break;
-                case TargetRelation.Enemy:
-                    factionRestriction = source.EnemyOf;
-                    break;
-                case TargetRelation.Any:
-                    factionRestriction = (_) => true;
-                    break;
-                default:
-                    throw new Exception($"Unrecognized TargetRelation: {Relation}");
-            }
-
-            Func<Unit, bool> whoRestriction;
-
-            switch (Selfness)
-            {
-                case Selfness.Any:
-                    whoRestriction = (_) => true;
-                    break;
-                case Selfness.Other:
-                    whoRestriction = source.Other;
-                    break;
-                case Selfness.Me:
-                    whoRestriction = source.Me;
-                    break;
-                default:
-                    throw new Exception($"Unrecognized Sameness: {Selfness}");
-            }
-
-            return zone
-                .Where(whoRestriction)
-                .Where(factionRestriction);
+            return UnitZone.GetZone(gameState)
+                .Where(Selfness.Getter(source))
+                .Where(Relation.Getter(source));
         }
     }
 }

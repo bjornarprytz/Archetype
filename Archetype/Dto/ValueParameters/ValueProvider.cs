@@ -37,6 +37,11 @@ namespace Archetype
             MemberName = memberName;
         }
 
+        public V GetValue<V>(object reference)
+        {
+            return (V)GetPropertyInfo().GetValue(reference);
+        }
+
         public PropertyInfo GetPropertyInfo() => ReferenceType?.GetProperty(MemberName);
     }
 }
