@@ -36,7 +36,7 @@ namespace Archetype
 
         protected virtual ISelectionInfo<ITarget> SelecetTargets(Unit source, ITarget target, GameState gameState, TriggerArgs triggerArgs)
         {
-            var targets = TriggerAction.TargetRequirements.GetTargetInfo(source, gameState);
+            var targets = TriggerAction.TargetRequirements.GetSelectionInfo(source, gameState);
 
             if (!targets.IsAutomatic) throw new Exception($"Unable to handle non-automatic target selection in triggered actions");
 

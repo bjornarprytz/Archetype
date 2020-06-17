@@ -87,8 +87,6 @@ namespace ArchetypeTests
         {
             return new TargetRequirementData
             {
-                Min = 1,
-                Max = 1,
                 Predicate = new CardPredicateData
                 {
                     CardZone = CardZone.Hand,
@@ -98,7 +96,11 @@ namespace ArchetypeTests
                         UnitZone = UnitZone.Battlefield 
                     }
                 },
-                SelectionMethod = SelectionMethod.Any
+                Selection = new AnySelectionData
+                {
+                    Min = 1,
+                    Max = 1,
+                },
             };
         }
 
@@ -111,7 +113,7 @@ namespace ArchetypeTests
                     CardZone = CardZone.DiscardPile,
                     OwnerPredicate = new UnitPredicateData { Selfness = Selfness.Me }
                 },
-                SelectionMethod = SelectionMethod.All
+                Selection = new AllSelectionData(),
             };
         }
 
@@ -119,10 +121,12 @@ namespace ArchetypeTests
         {
             return new TargetRequirementData
             {
-                Min = min,
-                Max = max,
                 Predicate = LivingEnemiesPredicate(),
-                SelectionMethod = SelectionMethod.Any
+                Selection = new AnySelectionData 
+                { 
+                    Min = min, 
+                    Max = max,
+                },
             };
         }
 
@@ -131,7 +135,7 @@ namespace ArchetypeTests
             return new TargetRequirementData
             {
                 Predicate = new UnitPredicateData { Relation = TargetRelation.Ally, Selfness = Selfness.Me, UnitZone = UnitZone.Any },
-                SelectionMethod = SelectionMethod.Self,
+                Selection = new AllSelectionData(),
             };
         }
 
@@ -140,7 +144,7 @@ namespace ArchetypeTests
             return new TargetRequirementData
             {
                 Predicate = LivingEnemiesPredicate(),
-                SelectionMethod = SelectionMethod.All,
+                Selection = new AllSelectionData(),
             };
         }
 
@@ -148,9 +152,8 @@ namespace ArchetypeTests
         {
             return new TargetRequirementData
             {
-                Max = n,
                 Predicate = LivingEnemiesPredicate(),
-                SelectionMethod = SelectionMethod.Random,
+                Selection = new RandomSelectionData { Max = n },
             };
         }
 
@@ -158,10 +161,12 @@ namespace ArchetypeTests
         {
             return new TargetRequirementData
             {
-                Min = min,
-                Max = max,
                 Predicate = LivingAlliesPredicate(),
-                SelectionMethod = SelectionMethod.Any,
+                Selection = new AnySelectionData 
+                { 
+                    Min = min, 
+                    Max = max, 
+                },
             };
         }
 
@@ -170,7 +175,7 @@ namespace ArchetypeTests
             return new TargetRequirementData
             {
                 Predicate = DeadAlliesPredicate(),
-                SelectionMethod = SelectionMethod.All,
+                Selection = new AllSelectionData(),
             };
         }
 
@@ -217,7 +222,11 @@ namespace ArchetypeTests
                 {
                     new DamageParameterData
                     {
-                        TargetRequirements = new TargetRequirementData{ SelectionMethod = SelectionMethod.Self },
+                        TargetRequirements = new TargetRequirementData
+                        {
+                            Predicate = new UnitPredicateData{ Selfness = Selfness.Me, Relation = TargetRelation.Ally, UnitZone = UnitZone.Any, },
+                            Selection = new AllSelectionData(),
+                        },
                         Strength = new ImmediateValue<int>(damage)
                     },
                     new HealParameterData

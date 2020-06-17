@@ -98,7 +98,7 @@ namespace Archetype
 
         public IList<ISelectionInfo<ITarget>> GetTargetRequirements(GameState gameState)
         {
-            return Data.Actions.Select(a => a.TargetRequirements.GetTargetInfo(Owner, gameState)).ToList();
+            return Data.Actions.Select(a => a.TargetRequirements.GetSelectionInfo(Owner, gameState)).ToList();
         }
     }
 }

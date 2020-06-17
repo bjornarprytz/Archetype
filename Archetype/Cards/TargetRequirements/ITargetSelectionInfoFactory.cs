@@ -2,6 +2,6 @@
 {
     public interface ITargetSelectionInfoFactory
     {
-        ISelectionInfo<ITarget> GetTargetInfo(Unit source, GameState gameState);
+        ISelectionInfo<ITarget> GetSelectionInfo(Unit source, GameState gameState);
     }
 }
