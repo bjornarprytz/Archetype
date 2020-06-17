@@ -134,7 +134,7 @@ namespace ArchetypeTests
         {
             return new TargetRequirementData
             {
-                Predicate = new UnitPredicateData { Relation = TargetRelation.Ally, Selfness = Selfness.Me, UnitZone = UnitZone.Any },
+                Predicate = new UnitPredicateData { Relation = TargetRelation.Ally, Selfness = Selfness.Me, UnitZone = UnitZone.Battlefield },
                 Selection = new AllSelectionData(),
             };
         }
@@ -224,7 +224,7 @@ namespace ArchetypeTests
                     {
                         TargetRequirements = new TargetRequirementData
                         {
-                            Predicate = new UnitPredicateData{ Selfness = Selfness.Me, Relation = TargetRelation.Ally, UnitZone = UnitZone.Any, },
+                            Predicate = new UnitPredicateData{ Selfness = Selfness.Me, Relation = TargetRelation.Ally, UnitZone = UnitZone.Battlefield, },
                             Selection = new AllSelectionData(),
                         },
                         Strength = new ImmediateValue<int>(damage)

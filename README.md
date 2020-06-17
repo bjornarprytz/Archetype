@@ -31,9 +31,9 @@ The goal for this project is to provide a useful framework for a card game.
 	- [x] ActionQueue
 	- [ ] Unit turn order
 	- [ ] Limbo Zone (keep cards temporarily here while their actions resolve to avoid them referring to themselves)
-- [ ] Refactor Cards to be 100% data
-	- [ ] Make Card Data (de)serializable
-	- [ ] (De)Serialization of concrete action data (damageData, drawData, etc.)
+- [x] Refactor Cards to be 100% data
+	- [x] Make Card Data (de)serializable
+	- [x] (De)Serialization of concrete action data (damageData, drawData, etc.)
 - [ ] Additional Predicates
 	- [ ] For Cards
 		- [ ] Cost
