@@ -6,7 +6,7 @@ namespace Archetype
 {
     public interface IActionQueue
     {
-        void Enqueue(ActionInfo action);
+        void EnqueueAction(ActionInfo action);
         void ResolveAll();
         void ResolveNext();
     }

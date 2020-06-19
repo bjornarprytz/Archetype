@@ -88,7 +88,7 @@ namespace Archetype
             {
                 foreach (var action in actions)
                 {
-                    gameState.ActionQueue.Enqueue(action);
+                    gameState.ActionQueue.EnqueueAction(action);
                 }
             }
         }

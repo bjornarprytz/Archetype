@@ -30,7 +30,7 @@ namespace Archetype
             {
                 // TODO: Use something other than the ActionQueue here; Trigger queue?
                 // TODO: How to detach trigger?
-                gameState.ActionQueue.Enqueue(action);
+                gameState.ActionQueue.EnqueueAction(action);
             }
         }
 

@@ -6,29 +6,30 @@ namespace Archetype
 {
     public class ActionQueue : IActionQueue
     {
-        private Queue<ActionInfo> _queue;
+        private Queue<ActionInfo> _actions;
 
         public ActionQueue()
         {
-            _queue = new Queue<ActionInfo>();
+            _actions = new Queue<ActionInfo>();
+
         }
 
-        public void Enqueue(ActionInfo action)
+        public void EnqueueAction(ActionInfo action)
         {
-            _queue.Enqueue(action);
+            _actions.Enqueue(action);
         }
 
         public void ResolveAll()
         {
-            while (_queue.Any())
+            while (_actions.Any())
             {
-                _queue.Dequeue().Execute();
+                _actions.Dequeue().Execute();
             }
         }
 
         public void ResolveNext()
         {
-            if (_queue.Any()) _queue.Dequeue().Execute();
+            if (_actions.Any()) _actions.Dequeue().Execute();
         }
     }
 }
