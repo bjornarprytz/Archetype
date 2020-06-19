@@ -1,9 +1,6 @@
 ﻿using Archetype;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-
-
-using CardPort;
 using System.Linq;
 
 namespace ArchetypeTests

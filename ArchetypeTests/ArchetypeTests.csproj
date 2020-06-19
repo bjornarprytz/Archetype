@@ -67,10 +67,6 @@
       <Project>{1092f2fe-e291-4ccb-814f-dc5c353c7301}</Project>
       <Name>Archetype</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CardDataCommon\CardPort.csproj">
-      <Project>{46078e47-530f-40ed-9e77-e5b8267d2bd8}</Project>
-      <Name>CardPort</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
