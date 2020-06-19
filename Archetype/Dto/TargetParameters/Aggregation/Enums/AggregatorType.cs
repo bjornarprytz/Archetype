@@ -5,5 +5,8 @@
         Sum,
         Average,
         Count,
+        High,
+        Low,
+        Random,
     }
 }

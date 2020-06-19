@@ -2,8 +2,8 @@
 {
     public enum SelectorPreference
     {
-        Highest,
-        Lowest,
+        High,
+        Low,
         Random
     }
 }
