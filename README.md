@@ -55,6 +55,7 @@ The goal for this project is to provide a useful framework for a card game.
 		- [ ] Use Event Args from (e.g. Deal Damage equal to Cost of the discarded card)
 	- [ ] Referrential Values (e.g. deal damage equal to half your health)
 	- [ ] Static effects (e.g. Cards cost 1 less while this card is in the DiscardPile)
+- [x] Port to .NET Core
 
 ### Card Sets
 - [ ] API
