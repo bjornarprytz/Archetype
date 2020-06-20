@@ -7,62 +7,46 @@ namespace Archetype
     {
         public static IEnumerable<Unit> GetZone(this UnitZone unitZone, GameState gameState)
         {
-            switch (unitZone)
+            return unitZone switch
             {
-                case UnitZone.Battlefield:
-                    return gameState.Battlefield;
-                case UnitZone.Graveyard:
-                    return gameState.Graveyard;
-                default:
-                    throw new Exception($"Unrecognized UnitZone: {unitZone}");
-            }
+                UnitZone.Battlefield    => gameState.Battlefield,
+                UnitZone.Graveyard      => gameState.Graveyard,
+                _                       => throw new Exception($"Unrecognized UnitZone: {unitZone}"),
+            };
         }
 
         public static IEnumerable<Card> GetZone(this CardZone cardZone, Unit owner)
         {
-            switch (cardZone)
+            return cardZone switch
             {
-                case CardZone.Deck:
-                    return owner.Deck;
-                case CardZone.DiscardPile:
-                    return owner.DiscardPile;
-                case CardZone.Hand:
-                    return owner.Hand;
-                case CardZone.Pool:
-                    return owner.CardPool;
-                default:
-                    throw new Exception($"Unrecognized CardZone: {cardZone}");
-            }
+                CardZone.Deck           => owner.Deck,
+                CardZone.DiscardPile    => owner.DiscardPile,
+                CardZone.Hand           => owner.Hand,
+                CardZone.Pool           => owner.CardPool,
+                _                       => throw new Exception($"Unrecognized CardZone: {cardZone}"),
+            };
         }
 
         public static Func<Unit, bool> Getter(this TargetRelation relation, Unit source)
         {
-            switch (relation)
+            return relation switch
             {
-                case TargetRelation.Ally:
-                    return source.IsAllyOf;
-                case TargetRelation.Enemy:
-                    return source.IsEnemyOf;
-                case TargetRelation.Any:
-                    return (_) => true;
-                default:
-                    throw new Exception($"Unrecognized TargetRelation: {relation}");
-            }
+                TargetRelation.Ally     => source.IsAllyOf,
+                TargetRelation.Enemy    => source.IsEnemyOf,
+                TargetRelation.Any      => (_) => true,
+                _                       => throw new Exception($"Unrecognized TargetRelation: {relation}"),
+            };
         }
 
         public static Func<Unit, bool> Getter(this Selfness selfness, Unit source)
         {
-            switch (selfness)
+            return selfness switch
             {
-                case Selfness.Any:
-                    return (_) => true;
-                case Selfness.Other:
-                    return source.IsOther;
-                case Selfness.Me:
-                    return source.IsMe;
-                default:
-                    throw new Exception($"Unrecognized Sameness: {selfness}");
-            }
+                Selfness.Any    => (_) => true,
+                Selfness.Other  => source.IsOther,
+                Selfness.Me     => source.IsMe,
+                _               => throw new Exception($"Unrecognized Sameness: {selfness}"),
+            };
         }
     }
 }

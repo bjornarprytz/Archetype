@@ -9,42 +9,27 @@ namespace Archetype
         public static T Select<T, V>(this SelectorPreference preference, IEnumerable<T> options, ValueProvider<T, V> valueProvider)
             where V : IComparable
         {
-            switch (preference)
+            return preference switch
             {
-                case SelectorPreference.High:
-                    return options.OrderByDescending(option => valueProvider.GetValue(option)).FirstOrDefault();
-                case SelectorPreference.Low:
-                    return options.OrderBy(option => valueProvider.GetValue(option)).FirstOrDefault();
-                case SelectorPreference.Random:
-                    return options.GrabRandom(1).FirstOrDefault();
-                default:
-                    throw new Exception($"Unhandled SelectorPreference {preference}");
-            }
+                SelectorPreference.High     => options.OrderByDescending(option => valueProvider.GetValue(option)).FirstOrDefault(),
+                SelectorPreference.Low      => options.OrderBy(option => valueProvider.GetValue(option)).FirstOrDefault(),
+                SelectorPreference.Random   => options.GrabRandom(1).FirstOrDefault(),
+                _                           => throw new Exception($"Unhandled SelectorPreference {preference}"),
+            };
         }
 
         public static int Compute<T>(this AggregatorType aggregator, IEnumerable<T> set, ValueProvider<T, int> valueProvider)
         {
-            switch (aggregator)
+            return aggregator switch
             {
-                case AggregatorType.Average:
-                    return (int)set.Average(o => valueProvider.GetValue(o));
-                case AggregatorType.Count:
-                    return set.Count();
-                case AggregatorType.High:
-                    return set.Select(o => valueProvider.GetValue(o))
-                        .OrderByDescending(x=>x).FirstOrDefault();
-                case AggregatorType.Low:
-                    return set.Select(o => valueProvider.GetValue(o))
-                        .OrderBy(x=>x).FirstOrDefault();
-                case AggregatorType.Random:
-                    return set.Select(o => valueProvider.GetValue(o))
-                        .GrabRandom(1).FirstOrDefault();
-                case AggregatorType.Sum:
-                    return set.Sum(o => valueProvider.GetValue(o));
-                default:
-                    throw new Exception($"Unhandled AggregatorType {aggregator}");
-
-            }
+                AggregatorType.Average  => (int)set.Average(o => valueProvider.GetValue(o)),
+                AggregatorType.Count    => set.Count(),
+                AggregatorType.High     => set.Select(o => valueProvider.GetValue(o)).OrderByDescending(x => x).FirstOrDefault(),
+                AggregatorType.Low      => set.Select(o => valueProvider.GetValue(o)).OrderBy(x => x).FirstOrDefault(),
+                AggregatorType.Random   => set.Select(o => valueProvider.GetValue(o)).GrabRandom(1).FirstOrDefault(),
+                AggregatorType.Sum      => set.Sum(o => valueProvider.GetValue(o)),
+                _                       => throw new Exception($"Unhandled AggregatorType {aggregator}"),
+            };
         }
     }
 }
