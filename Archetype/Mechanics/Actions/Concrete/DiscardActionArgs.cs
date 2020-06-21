@@ -1,16 +1,14 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System;
 
 namespace Archetype
 {
-    public class DiscardActionArgs : ActionInfo
+    public class DiscardActionArgs : ParameterizedActionInfo<int>
     {
         private IPromptable _prompter;
-        public int Strength { get; set; }
 
-        public DiscardActionArgs(Unit source, Unit target, int strength, IPromptable prompter) : base(source, target)
+        public DiscardActionArgs(Unit source, Unit target, Func<int> getter, IPromptable prompter) : base(source, target, getter)
         {
             _prompter = prompter;
-            Strength = strength;
         }
 
         protected override void Resolve()

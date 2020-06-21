@@ -1,12 +1,10 @@
-﻿namespace Archetype
+﻿using System;
+
+namespace Archetype
 {
-    public class DrawActionArgs : ActionInfo
+    public class DrawActionArgs : ParameterizedActionInfo<int>
     {
-        public int Strength { get; set; }
-        public DrawActionArgs(Unit source, Unit target, int strength) : base(source, target)
-        {
-            Strength = strength;
-        }
+        public DrawActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 
         protected override void Resolve()
         {

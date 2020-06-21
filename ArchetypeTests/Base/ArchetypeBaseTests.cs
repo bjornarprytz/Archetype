@@ -273,5 +273,13 @@ namespace ArchetypeTests
                 }
             };
         }
+
+        protected void InsertCardsIntoZone(int n, Unit owner, Zone<Card> zone)
+        {
+            for(var i = 0; i < n; i++)
+            {
+                AttackCard.MakeCopy(owner).MoveTo(zone);
+            }
+        }
     }
 }

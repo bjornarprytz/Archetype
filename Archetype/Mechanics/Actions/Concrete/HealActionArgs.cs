@@ -2,14 +2,9 @@
 
 namespace Archetype
 {
-    public class HealActionArgs : ActionInfo
+    public class HealActionArgs : ParameterizedActionInfo<int>
     {
-        private Func<int> _getter;
-        public int Strength => _getter();
-        public HealActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target)
-        {
-            _getter = getter;
-        }
+        public HealActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 
         protected override void Resolve()
         {

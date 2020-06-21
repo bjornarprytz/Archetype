@@ -4,8 +4,6 @@
 The goal for this project is to provide a useful framework for a card game.
 
 ## TODO
-- [x] Ability to make custom effects (not just keyworded ones)
-- [x] Clean up the transaction logic in ResourcePool
 - [ ] Avoid using null in card zone-transitions
 - [ ] Avoid using null in game logic
 - [ ] Unit Tests
@@ -26,9 +24,7 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Player Card Pool
 	- [ ] Unit Roster
 - [ ] Flesh out the GameState
-	- [x] Game loop
-	- [x] Prompter
-	- [x] ActionQueue
+	- [ ] IPrompter should be part of the composition of the GameState, not its implementation
 	- [ ] Unit turn order
 	- [ ] Limbo Zone (keep cards temporarily here while their actions resolve to avoid them referring to themselves)
 - [x] Refactor Cards to be 100% data

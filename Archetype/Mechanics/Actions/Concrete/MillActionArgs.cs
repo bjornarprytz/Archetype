@@ -1,13 +1,11 @@
 ﻿
+using System;
+
 namespace Archetype
 {
-    public class MillActionArgs : ActionInfo
+    public class MillActionArgs : ParameterizedActionInfo<int>
     {
-        public int Strength { get; set; }
-        public MillActionArgs(Unit source, Unit target, int strength) : base(source, target)
-        {
-            Strength = strength;
-        }
+        public MillActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 
         protected override void Resolve()
         {
