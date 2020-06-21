@@ -6,9 +6,6 @@ The goal for this project is to provide a useful framework for a card game.
 ## TODO
 - [ ] Avoid using null in card zone-transitions
 - [ ] Avoid using null in game logic
-- [ ] Unit Tests
-	- [ ] GameState
-	- [ ] Data (De)Serialization
 - [ ] Counters (Ongoing effects on a Card or a Unit)
 - [x] Refactor Effects, EffectTemplates and TargetRequirements.
 - [x] Allow non-unit targets for cards and actions
@@ -24,7 +21,6 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Player Card Pool
 	- [ ] Unit Roster
 - [ ] Flesh out the GameState
-	- [ ] IPrompter should be part of the composition of the GameState, not its implementation
 	- [ ] Unit turn order
 	- [ ] Limbo Zone (keep cards temporarily here while their actions resolve to avoid them referring to themselves)
 - [x] Refactor Cards to be 100% data
@@ -53,7 +49,14 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Referrential Values (e.g. deal damage equal to half your health)
 	- [ ] Static effects (e.g. Cards cost 1 less while this card is in the DiscardPile)
 - [x] Port to .NET Core
-
+- [ ] Units
+	- [ ] IPromptable should be provided per unit, not per gamestate
+- [ ] Tests
+	- [ ] Data Transfer Objects (serialization & data mapping(?))
+	- [ ] Game Logic
+	- [ ] Mechanics
+	- [ ] Game Pieces
+	- [ ] General (?)
 ### Card Sets
 - [ ] API
 - [ ] Rules text on cards

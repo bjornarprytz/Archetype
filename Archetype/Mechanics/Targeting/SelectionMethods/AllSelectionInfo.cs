@@ -3,17 +3,15 @@ using System.Collections.Generic;
 
 namespace Archetype
 {
-    public class AllSelectionInfo : TargetInfo
+    public class AllSelectionInfo<T> : SelectionInfo<T>
     {
         public override bool IsAutomatic => true;
 
-        public AllSelectionInfo(IEnumerable<ITarget> options)
+        public AllSelectionInfo(IEnumerable<T> options) : base(options)
         {
-            _options = new List<ITarget>(options);
-
-            foreach (var target in _options)
+            foreach (var option in _options)
             {
-                Add(target);
+                Add(option);
             }
         }
     }

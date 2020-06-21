@@ -17,4 +17,9 @@
     <ProjectReference Include="..\Archetype\Archetype.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GamePieces\" />
+    <Folder Include="General\" />
+  </ItemGroup>
+
 </Project>

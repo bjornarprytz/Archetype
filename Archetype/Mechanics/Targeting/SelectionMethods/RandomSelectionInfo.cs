@@ -1,20 +1,16 @@
-﻿
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Archetype
 {
-    public class RandomSelectionInfo : TargetInfo
+    public class RandomSelectionInfo<T> : SelectionInfo<T>
     {
         public override bool IsAutomatic => true;
 
-        public RandomSelectionInfo(int n, IEnumerable<ITarget> options)
+        public RandomSelectionInfo(int n, IEnumerable<T> options) : base(options)
         {
-            _options = new List<ITarget>(options);
-
-            foreach (var target in _options.GrabRandom(n))
+            foreach (var choice in _options.GrabRandom(n))
             {
-                Add(target);
+                Add(choice);
             }
         }
     }

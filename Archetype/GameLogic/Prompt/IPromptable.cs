@@ -2,6 +2,6 @@
 {
     public interface IPromptable
     {
-        void Choose<T>(Choose<T> chooseArgs) where T : GamePiece;
+        void Choose<T>(ISelectionInfo<T> selectionInfo);
     }
 }

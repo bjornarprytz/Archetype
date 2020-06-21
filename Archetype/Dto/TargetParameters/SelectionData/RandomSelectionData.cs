@@ -8,7 +8,7 @@ namespace Archetype
 
         public override ISelectionInfo<ITarget> GetSelectionInfo(IEnumerable<ITarget> options)
         {
-            return new RandomSelectionInfo(Max, options);
+            return new RandomSelectionInfo<ITarget>(Max, options);
         }
     }
 }

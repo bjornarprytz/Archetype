@@ -6,12 +6,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ArchetypeTests
 {
     [TestClass]
-    public abstract class ArchetypeTestBase
+    public abstract class ArchetypeTestBase : IPromptable
     {
         protected GameState GameState { get; set; }
         protected HumanPlayer HumanPlayer { get; set; }
         protected EnemyPlayer EnemyPlayer { get; set; }
-        protected List<GamePiece> ChoicesToMake { get; set; }
+
+        protected List<object> ChoicesToMake { get; set; }
 
         protected CardData AttackCard { get; set; }
         protected CardData HealCard { get; set; }
@@ -30,8 +31,9 @@ namespace ArchetypeTests
         {
             HumanPlayer = new HumanPlayer(69);
             EnemyPlayer = new EnemyPlayer();
-            ChoicesToMake = new List<GamePiece>();
-            GameState = new GameState(ChoiceHandler);
+            GameState = new GameState(this);
+
+            ChoicesToMake = new List<object>();
 
             AttackCard = AttackAnEnemy(3);
             HealCard = SelfDamageAndHealAlly(1, 4);
@@ -56,10 +58,6 @@ namespace ArchetypeTests
             });
         }
 
-        protected virtual void ChoiceHandler(object sender, Choose chooseArgs)
-        {
-            chooseArgs.TryChoose(ChoicesToMake);
-        }
         protected IEnumerable<Adventurer> GenerateAdventurers(int n)
         {
             List<Adventurer> units = new List<Adventurer>();
@@ -279,6 +277,16 @@ namespace ArchetypeTests
             for(var i = 0; i < n; i++)
             {
                 AttackCard.MakeCopy(owner).MoveTo(zone);
+            }
+        }
+
+        public virtual void Choose<T>(ISelectionInfo<T> selectionInfo)
+        {
+            if (selectionInfo.IsAutomatic) return;
+
+            foreach (var choice in ChoicesToMake)
+            {
+                selectionInfo.Add((T)choice);
             }
         }
     }

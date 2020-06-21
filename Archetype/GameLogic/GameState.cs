@@ -5,14 +5,13 @@ using System.Text;
 
 namespace Archetype
 {
-    public class GameState : IPromptable
+    public class GameState
     {
         public Battlefield Battlefield { get; private set; }
         public Graveyard Graveyard { get; private set; }
 
-        public EventHandler<Choose> OnChoose { get; private set; }
-
         public IActionQueue ActionQueue { get; private set; }
+        public IPromptable Prompter { get; private set; }
 
         public Unit ActiveUnit { get; private set; }
 
@@ -29,16 +28,16 @@ namespace Archetype
             return ActiveUnit == unit;
         }
 
-        public GameState(EventHandler<Choose> choiceHandler)
+        public GameState(IPromptable prompter)
         {
             Battlefield = new Battlefield();
             Graveyard = new Graveyard();
 
             ActionQueue = new ActionQueue();
 
-            if (choiceHandler == null) throw new Exception("Please provide an event handler for choices");
+            if (prompter == null) throw new Exception("Please provide an valid prompter");
 
-            OnChoose = choiceHandler;
+            Prompter = prompter;
         }
 
         public void AddUnits(IEnumerable<Unit> units)
@@ -56,11 +55,6 @@ namespace Archetype
             if (!action.CanExecute(this)) return;
 
             action.Execute(this);
-        }
-
-        public void Choose<T>(Choose<T> actionPrompt) where T : GamePiece
-        {
-            OnChoose?.Invoke(this, actionPrompt);
         }
     }
 }

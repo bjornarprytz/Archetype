@@ -6,7 +6,7 @@ namespace Archetype
     {
         public override ISelectionInfo<ITarget> GetSelectionInfo(IEnumerable<ITarget> options)
         {
-            return new AllSelectionInfo(options);
+            return new AllSelectionInfo<ITarget>(options);
         }
     }
 }

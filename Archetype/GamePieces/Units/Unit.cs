@@ -102,11 +102,11 @@ namespace Archetype
 
         public void Discard(int nCardsToDiscard, IPromptable prompter)
         {
-            var choiceArgs = new Choose<Card>(nCardsToDiscard, Hand);
+            var choiceArgs = new ForcedSelectionInfo<Card>(nCardsToDiscard, Hand);
 
             prompter.Choose(choiceArgs);
 
-            foreach (Card card in choiceArgs.Choices)
+            foreach (Card card in choiceArgs.ConfirmedSelection)
             {
                 DiscardCard(card.Id);
             }
