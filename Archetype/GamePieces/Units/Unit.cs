@@ -6,6 +6,8 @@ namespace Archetype
 {
     public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters, ITarget, ISource
     {
+        public event EventHandler<ZoneChangeArgs<Unit>> OnZoneChanged;
+
         public event EventHandler<TriggerArgs> OnCardDrawn;
         public event EventHandler<TriggerArgs> OnCardDiscarded;
         public event EventHandler<TriggerArgs> OnCardMilled;
@@ -19,7 +21,6 @@ namespace Archetype
         public event EventHandler<ActionInfo> OnSourceOfActionBefore;
         public event EventHandler<ActionInfo> OnSourceOfActionAfter;
 
-        public event EventHandler<ZoneChangeTriggerArgs<Unit>> OnZoneChanged;
         public event Action OnDied;
 
         public bool IsAlive => Life > 0;
@@ -50,17 +51,7 @@ namespace Archetype
 
         public int HandLimit { get; set; }
 
-        public Zone<Unit> CurrentZone
-        {
-            get { return currZone; }
-            private set
-            {
-                Zone<Unit> previousZone = currZone;
-                currZone = value;
-                OnZoneChanged?.Invoke(this, new ZoneChangeTriggerArgs<Unit>(this, previousZone, currZone));
-            }
-        }
-        private Zone<Unit> currZone;
+        public Zone<Unit> CurrentZone { get; private set; }
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
         public Player Owner { get; private set; }
@@ -95,14 +86,16 @@ namespace Archetype
 
         public void MoveTo(Zone<Unit> newZone)
         {
-            // TODO: Move this implementation to the IZoned interface (available in C# 8.0)
+            if (newZone == CurrentZone) return;
 
-            if (CurrentZone == newZone) return;
-
-            if (CurrentZone != null) CurrentZone.Out(this);
-            if (newZone != null) newZone.Into(this);
-
+            CurrentZone?.Eject(this);
+            
             CurrentZone = newZone;
+
+            newZone?.Insert(this);
+
+
+            OnZoneChanged?.Invoke(this, new ZoneChangeArgs<Unit>(this, CurrentZone, newZone));
         }
 
         public virtual void EndTurn() { }

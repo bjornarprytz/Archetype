@@ -28,18 +28,14 @@ namespace Archetype
 
         public override IEnumerator<Card> GetEnumerator() => Cards.Values.GetEnumerator(); 
 
-        public override void Out(Card cardToMove)
+        protected override void InsertInternal(Card pieceToMove)
         {
-            Cards.Remove(cardToMove.Id);
-
-            base.Out(cardToMove);
+            Cards.Add(pieceToMove.Id, pieceToMove);
         }
 
-        public override void Into(Card cardToMove)
+        protected override void EjectInternal(Card pieceToEject)
         {
-            Cards.Add(cardToMove.Id, cardToMove);
-
-            base.Into(cardToMove);
+            Cards.Remove(pieceToEject.Id);
         }
     }
 }

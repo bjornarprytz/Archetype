@@ -32,6 +32,8 @@ namespace Archetype
         public GameState(EventHandler<Choose> choiceHandler)
         {
             Battlefield = new Battlefield();
+            Graveyard = new Graveyard();
+
             ActionQueue = new ActionQueue();
 
             if (choiceHandler == null) throw new Exception("Please provide an event handler for choices");

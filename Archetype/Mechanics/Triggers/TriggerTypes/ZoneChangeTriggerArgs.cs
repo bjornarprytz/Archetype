@@ -3,7 +3,7 @@
 namespace Archetype
 {
     public class ZoneChangeTriggerArgs<T> : TriggerArgs 
-        where T : GamePiece
+        where T : IZoned<T>
     {
         public T Target { get; set; }
         public Zone<T> From { get; set; }

@@ -7,7 +7,7 @@ namespace Archetype
 {
     public class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITarget, ICardFactory
     {
-        public event ZoneChange<Card> OnZoneChanged;
+        public event EventHandler<ZoneChangeArgs<Card>> OnZoneChanged;
 
         public delegate void BeforePlay();
         public delegate void AfterPlay();
@@ -20,17 +20,7 @@ namespace Archetype
 
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
 
-        public Zone<Card> CurrentZone
-        {
-            get { return currZone; }
-            private set
-            {
-                Zone<Card> previousZone = currZone;
-                currZone = value;
-                OnZoneChanged?.Invoke(previousZone, currZone);
-            }
-        }
-        private Zone<Card> currZone;
+        public Zone<Card> CurrentZone { get; private set; }
 
         internal Card(Unit owner, CardData data)
         {
@@ -41,14 +31,15 @@ namespace Archetype
 
         public void MoveTo(Zone<Card> newZone)
         {
-            // TODO: Move this implementation to the IZoned interface (available in C# 8.0)
-
             if (CurrentZone == newZone) return;
 
-            if (CurrentZone != null) CurrentZone.Out(this);
-            if (newZone != null) newZone.Into(this);
+            CurrentZone?.Eject(this);
 
             CurrentZone = newZone;
+
+            newZone?.Insert(this);
+
+            OnZoneChanged?.Invoke(this, new ZoneChangeArgs<Card>(this, CurrentZone, newZone));
         }
 
         public virtual void Apply<T>(T counter) where T : Counter

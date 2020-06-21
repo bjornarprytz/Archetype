@@ -112,7 +112,7 @@ namespace Archetype
 
         public override IEnumerator<Card> GetEnumerator() =>  ((IEnumerable<Card>)Cards).GetEnumerator();
 
-        public override void Out(Card cardToMove)
+        protected override void EjectInternal(Card cardToMove)
         {
             Stack<Card> cardsToKeep = new Stack<Card>();
 
@@ -129,15 +129,11 @@ namespace Archetype
             {
                 Cards.Push(cardsToKeep.Pop());
             }
-
-            base.Out(cardToMove);
         }
 
-        public override void Into(Card cardToMove)
+        protected override void InsertInternal(Card cardToMove)
         {
             Cards.Push(cardToMove);
-
-            base.Into(cardToMove);
         }
     }
 }

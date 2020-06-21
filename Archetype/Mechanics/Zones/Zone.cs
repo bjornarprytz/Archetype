@@ -1,18 +1,27 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
-
 namespace Archetype
 {
     public abstract class Zone<T>: IEnumerable<T>
-        where T : GamePiece 
+        where T : IZoned<T> 
     {
         public event Action<T> OnEntered;
         public event Action<T> OnExited;
 
-        public virtual void Out(T pieceToMove) { OnExited?.Invoke(pieceToMove); }
-        public virtual void Into(T pieceToMove) { OnEntered?.Invoke(pieceToMove); }
+        public void Eject(T pieceToMove) 
+        {
+            EjectInternal(pieceToMove);
+            OnExited?.Invoke(pieceToMove);
+        }
+        public void Insert(T pieceToMove) 
+        {
+            InsertInternal(pieceToMove);
+            OnEntered?.Invoke(pieceToMove); 
+        }
+
+        protected abstract void InsertInternal(T pieceToMove);
+        protected abstract void EjectInternal(T pieceToEject);
 
         public abstract IEnumerator<T> GetEnumerator();
 

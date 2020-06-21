@@ -20,5 +20,15 @@ namespace Archetype
         }
 
         public override IEnumerator<Unit> GetEnumerator() => _units.GetEnumerator();
+
+        protected override void InsertInternal(Unit pieceToMove)
+        {
+            _units.Add(pieceToMove);
+        }
+
+        protected override void EjectInternal(Unit pieceToEject)
+        {
+            _units.Remove(pieceToEject);
+        }
     }
 }
