@@ -48,6 +48,7 @@ The goal for this project is to provide a useful framework for a card game.
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
 		- [x] Context-less triggers (can't handle various TriggerArgs)
 		- [ ] Zone triggers
+			- [ ] Resolve ambiguity between ZoneChange and ZoneChangeTrigger EventArgs.
 		- [ ] Card triggers
 		- [ ] Unit triggers
 		- [x] AttachTrigger
