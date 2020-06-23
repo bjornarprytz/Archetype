@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Archetype
 {
@@ -11,7 +9,6 @@ namespace Archetype
         public Graveyard Graveyard { get; private set; }
 
         public IActionQueue ActionQueue { get; private set; }
-        public IPromptable Prompter { get; private set; }
 
         public Unit ActiveUnit { get; private set; }
 
@@ -28,16 +25,12 @@ namespace Archetype
             return ActiveUnit == unit;
         }
 
-        public GameState(IPromptable prompter)
+        public GameState()
         {
             Battlefield = new Battlefield();
             Graveyard = new Graveyard();
 
             ActionQueue = new ActionQueue();
-
-            if (prompter == null) throw new Exception("Please provide an valid prompter");
-
-            Prompter = prompter;
         }
 
         public void AddUnits(IEnumerable<Unit> units)

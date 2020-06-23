@@ -4,8 +4,8 @@ namespace Archetype
 {
     public class Adventurer : Unit
     {
-        public Adventurer(Player owner, string name, int life, int resources) 
-            : base(owner, name, life, resources)
+        public Adventurer(Player owner, UnitData unitData, IPrompter prompter) 
+            : base(owner, unitData, prompter)
         {
         }
     }

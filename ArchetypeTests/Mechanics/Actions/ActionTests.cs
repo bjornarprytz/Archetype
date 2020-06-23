@@ -74,7 +74,7 @@ namespace ArchetypeTests
 
             InsertCardsIntoZone(discardValue, Enemy1, Enemy1.Hand);
 
-            var discard = new DiscardActionArgs(Friend1, Enemy1, () => discardValue, GameState.Prompter);
+            var discard = new DiscardActionArgs(Friend1, Enemy1, () => discardValue);
 
             discard.Execute();
 
@@ -93,7 +93,7 @@ namespace ArchetypeTests
 
             ChoicesToMake.Add(cardToDiscard);
 
-            var discard = new DiscardActionArgs(Friend1, Enemy1, () => discardValue, GameState.Prompter);
+            var discard = new DiscardActionArgs(Friend1, Enemy1, () => discardValue);
 
             discard.Execute();
 
@@ -108,7 +108,7 @@ namespace ArchetypeTests
 
             InsertCardsIntoZone(discardValue, Enemy1, Enemy1.Hand);
 
-            var discard = new DiscardActionArgs(Friend1, Enemy1, () => discardValue, GameState.Prompter);
+            var discard = new DiscardActionArgs(Friend1, Enemy1, () => discardValue);
 
             discard.Execute();
 

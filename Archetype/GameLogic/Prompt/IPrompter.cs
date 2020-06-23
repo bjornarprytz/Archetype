@@ -1,6 +1,6 @@
 ﻿namespace Archetype
 {
-    public interface IPromptable
+    public interface IPrompter
     {
         void Choose<T>(ISelectionInfo<T> selectionInfo);
     }

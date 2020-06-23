@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ArchetypeTests
 {
     [TestClass]
-    public abstract class ArchetypeTestBase : IPromptable
+    public abstract class ArchetypeTestBase : IPrompter
     {
         protected GameState GameState { get; set; }
         protected HumanPlayer HumanPlayer { get; set; }
@@ -31,7 +31,7 @@ namespace ArchetypeTests
         {
             HumanPlayer = new HumanPlayer(69);
             EnemyPlayer = new EnemyPlayer();
-            GameState = new GameState(this);
+            GameState = new GameState();
 
             ChoicesToMake = new List<object>();
 
@@ -40,12 +40,12 @@ namespace ArchetypeTests
             CopyCard = CopyACard();
             TriggerCard = DealDamageWhenDeckIsShuffled();
 
-            Friend1 = new Adventurer(HumanPlayer, "Friend with vitality", 15, 4);
-            Friend2 = new Adventurer(HumanPlayer, "Low Energy Friend", 7, 2);
+            Friend1 = new Adventurer(HumanPlayer, GenerateUnitStats(15, 4), this);
+            Friend2 = new Adventurer(HumanPlayer, GenerateUnitStats(7, 2), this);
 
-            Enemy1 = new Enemy(EnemyPlayer, "Enemy 1", 1, 0);
-            Enemy2 = new Enemy(EnemyPlayer, "Enemy 2", 2, 0);
-            Enemy3 = new Enemy(EnemyPlayer, "Enemy 3", 3, 0);
+            Enemy1 = new Enemy(EnemyPlayer, GenerateUnitStats(1, 0), this);
+            Enemy2 = new Enemy(EnemyPlayer, GenerateUnitStats(2, 0), this);
+            Enemy3 = new Enemy(EnemyPlayer, GenerateUnitStats(3, 0), this);
 
 
             GameState.AddUnits(new List<Unit>
@@ -56,29 +56,6 @@ namespace ArchetypeTests
                 Enemy2,
                 Enemy3,
             });
-        }
-
-        protected IEnumerable<Adventurer> GenerateAdventurers(int n)
-        {
-            List<Adventurer> units = new List<Adventurer>();
-
-            for (int i = 0; i < n; i++)
-            {
-                units.Add(new Adventurer(HumanPlayer, $"FriendlyUnit_{i}", 5, 3));
-            }
-
-            return units;
-        }
-        protected IEnumerable<Enemy> GenerateEnemies(int n)
-        {
-            List<Enemy> units = new List<Enemy>();
-
-            for (int i = 0; i < n; i++)
-            {
-                units.Add(new Enemy(EnemyPlayer, $"EnemyUnit_{i}", 5, 3));
-            }
-
-            return units;
         }
 
         protected TargetRequirementData AnyCardInAnEnemyHand()
@@ -165,6 +142,16 @@ namespace ArchetypeTests
                     Min = min, 
                     Max = max, 
                 },
+            };
+        }
+
+        protected UnitData GenerateUnitStats(int life, int resources)
+        {
+            return new UnitData
+            {
+                Name = "Place Holder",
+                MaxLife = life,
+                StartingResources = resources,
             };
         }
 

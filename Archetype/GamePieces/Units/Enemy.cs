@@ -8,10 +8,7 @@ namespace Archetype
     {
         public List<Card> AvailableMoves => Hand.Cards.Values.ToList();
 
-        public Enemy(Player owner, string name, int life, int resources) : base(owner, name, life, resources)
-        {
-
-        }
+        public Enemy(Player owner, UnitData unitData, IPrompter prompter) : base(owner, unitData, prompter) { }
 
         public void MakeMove(Card move)
         {
