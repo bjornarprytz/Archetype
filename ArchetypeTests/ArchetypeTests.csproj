@@ -20,6 +20,7 @@
   <ItemGroup>
     <Folder Include="GamePieces\" />
     <Folder Include="General\" />
+    <Folder Include="Mechanics\LastingEffects\" />
   </ItemGroup>
 
 </Project>
