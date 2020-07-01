@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -20,7 +20,7 @@
   <ItemGroup>
     <Folder Include="GamePieces\" />
     <Folder Include="General\" />
-    <Folder Include="Mechanics\LastingEffects\" />
+    <Folder Include="Mechanics\Triggers\" />
   </ItemGroup>
 
 </Project>

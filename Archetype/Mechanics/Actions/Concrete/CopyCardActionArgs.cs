@@ -5,7 +5,7 @@
         public Unit NewOwner { get; set; }
         public Zone<Card> TargetZone { get; set; }
 
-        public CopyCardActionArgs(Unit source, Card target, Unit newOwner, Zone<Card> targetZone) :base(source, target)
+        public CopyCardActionArgs(Unit source, Card target, Unit newOwner, Zone<Card> targetZone) : base(source, target)
         {
             NewOwner = newOwner;
             TargetZone = targetZone;

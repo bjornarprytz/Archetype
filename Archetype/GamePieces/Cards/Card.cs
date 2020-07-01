@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Archetype
 {
-    public class Card : GamePiece, IOwned<Unit>, IZoned<Card>, IHoldCounters, ITarget, ICardFactory
+    public class Card : GamePiece, IOwned<Unit>, IZoned<Card>, ITarget, ICardFactory
     {
         public event EventHandler<ZoneChangeArgs<Card>> OnZoneChanged;
 
@@ -19,6 +19,7 @@ namespace Archetype
         public CardData Data { get; private set; }
 
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
+        public TypeDictionary<Trigger> Triggers { get; private set; }
 
         public Zone<Card> CurrentZone { get; private set; }
 
@@ -27,6 +28,7 @@ namespace Archetype
             Owner = owner;
             Data = data;
             ActiveCounters = new TypeDictionary<Counter>();
+            Triggers = new TypeDictionary<Trigger>();
         }
 
         public void MoveTo(Zone<Card> newZone)
@@ -40,18 +42,6 @@ namespace Archetype
             newZone?.Insert(this);
 
             OnZoneChanged?.Invoke(this, new ZoneChangeArgs<Card>(this, CurrentZone, newZone));
-        }
-
-        public virtual void Apply<T>(T counter) where T : Counter
-        {
-            if (ActiveCounters.Has<T>())
-                ActiveCounters.Get<T>().Combine(counter);
-            else
-                ActiveCounters.Set<T>(counter);
-        }
-        public void Remove<T>() where T : Counter
-        {
-            if (ActiveCounters.Has<T>()) ActiveCounters.Remove<T>();
         }
 
         internal bool Play(PlayCardArgs args, GameState gameState)
@@ -84,12 +74,27 @@ namespace Archetype
             }
         }
 
-        public virtual void PostActionAsTarget(ActionInfo action) { }
-        public virtual void PreActionAsTarget(ActionInfo action) { }
 
         public IList<ISelectionInfo<ITarget>> GetTargetRequirements(GameState gameState)
         {
             return Data.Actions.Select(a => a.TargetRequirements.GetSelectionInfo(Owner, gameState)).ToList();
         }
+
+        public void AttachTrigger<T>(T trigger) where T : Trigger
+        {
+            if (Triggers.Has<T>())
+            {
+                Triggers.Get<T>().Stack(trigger);
+            }
+            else
+            {
+                trigger.AttachTo(this);
+                Triggers.Set<T>(trigger);
+            }
+        }
+        
+        public virtual void PostActionAsTarget(ActionInfo action) { }
+        public virtual void PreActionAsTarget(ActionInfo action) { }
+
     }
 }

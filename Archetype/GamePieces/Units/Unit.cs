@@ -53,8 +53,10 @@ namespace Archetype
 
         public Zone<Unit> CurrentZone { get; private set; }
         public TypeDictionary<Counter> ActiveCounters { get; private set; }
+        public TypeDictionary<Trigger> Triggers { get; private set; }
 
         public Player Owner { get; private set; }
+
 
         public Unit(Player owner, UnitData data, IPrompter prompter) : base(owner.Team)
         {
@@ -69,19 +71,9 @@ namespace Archetype
             Deck = new Deck(this);
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
-        }
 
-        public void Apply<T>(T counter) where T : Counter
-        {
-            if (!ActiveCounters.Has<T>())
-                ActiveCounters.Set<T>(counter);
-            else
-                ActiveCounters.Get<T>().Combine(counter);
-        }
-
-        public void Remove<T>() where T : Counter
-        {
-            ActiveCounters.Remove<T>();
+            ActiveCounters = new TypeDictionary<Counter>();
+            Triggers = new TypeDictionary<Trigger>();
         }
 
         public void MoveTo(Zone<Unit> newZone)
@@ -204,6 +196,19 @@ namespace Archetype
 
             cardToMill.MoveTo(DiscardPile);
             OnCardMilled?.Invoke(this, new TriggerArgs());
+        }
+
+        public void AttachTrigger<T>(T trigger) where T : Trigger
+        {
+            if (Triggers.Has<T>())
+            {
+                Triggers.Get<T>().Stack(trigger);
+            }
+            else
+            {
+                trigger.AttachTo(this);
+                Triggers.Set<T>(trigger);
+            }
         }
     }
 }
