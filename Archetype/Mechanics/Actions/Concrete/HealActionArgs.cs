@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class HealActionArgs : ParameterizedActionInfo<int>
+    public class HealActionArgs : ModifiableActionInfo
     {
         public HealActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 

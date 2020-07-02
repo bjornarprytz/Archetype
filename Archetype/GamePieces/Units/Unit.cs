@@ -1,10 +1,11 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, IHoldCounters, ITarget, ISource
+    public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, ITarget, ISource
     {
         public event EventHandler<ZoneChangeArgs<Unit>> OnZoneChanged;
 
@@ -52,11 +53,11 @@ namespace Archetype
         public int MaxLife { get; set; }
 
         public Zone<Unit> CurrentZone { get; private set; }
-        public TypeDictionary<Counter> ActiveCounters { get; private set; }
-        public TypeDictionary<Trigger> Triggers { get; private set; }
 
         public Player Owner { get; private set; }
 
+        public TypeDictionary<ActionModifier<Unit>> ActionModifiers { get; private set; }
+        public List<Trigger<Unit>> Triggers { get; private set; }
 
         public Unit(Player owner, UnitData data, IPrompter prompter) : base(owner.Team)
         {
@@ -72,8 +73,8 @@ namespace Archetype
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
 
-            ActiveCounters = new TypeDictionary<Counter>();
-            Triggers = new TypeDictionary<Trigger>();
+            ActionModifiers = new TypeDictionary<ActionModifier<Unit>>();
+            Triggers = new List<Trigger<Unit>>();
         }
 
         public void MoveTo(Zone<Unit> newZone)
@@ -170,6 +171,42 @@ namespace Archetype
             }
         }
 
+        public void AttachModifier<TMod>(TMod modifier)
+            where TMod : ActionModifier<Unit>
+        {
+            if (ActionModifiers.Has<TMod>())
+            {
+                ActionModifiers.Get<TMod>().StackModifiers(modifier);
+            }
+            else
+            {
+                ActionModifiers.Set<TMod>(modifier);
+                modifier.AttachHandler(this);
+            }
+        }
+
+        public void DetachModifier<TMod>()
+            where TMod : ActionModifier<Unit>
+        {
+            if (ActionModifiers.Has<TMod>())
+            {
+                ActionModifiers.Get<TMod>().DetachHandler(this);
+                ActionModifiers.Remove<TMod>();
+            }
+        }
+
+        public void AttachTrigger(Trigger<Unit> trigger)
+        {
+            Triggers.Add(trigger);
+            trigger.AttachHandler(this);
+        }
+
+        public void DetachTrigger(Trigger<Unit> trigger)
+        {
+            trigger.DetachHandler(this);
+            Triggers.Remove(trigger);
+        }
+
         private void DrawCard()
         {
             Card cardToDraw = Deck.PeekTop();
@@ -196,19 +233,6 @@ namespace Archetype
 
             cardToMill.MoveTo(DiscardPile);
             OnCardMilled?.Invoke(this, new TriggerArgs());
-        }
-
-        public void AttachTrigger<T>(T trigger) where T : Trigger
-        {
-            if (Triggers.Has<T>())
-            {
-                Triggers.Get<T>().Stack(trigger);
-            }
-            else
-            {
-                trigger.AttachTo(this);
-                Triggers.Set<T>(trigger);
-            }
         }
     }
 }

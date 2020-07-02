@@ -20,7 +20,7 @@
   <ItemGroup>
     <Folder Include="GamePieces\" />
     <Folder Include="General\" />
-    <Folder Include="Mechanics\Triggers\" />
+    <Folder Include="Mechanics\Counters\" />
   </ItemGroup>
 
 </Project>

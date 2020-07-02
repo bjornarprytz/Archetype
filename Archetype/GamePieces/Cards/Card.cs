@@ -15,20 +15,24 @@ namespace Archetype
         public event BeforePlay OnBeforePlay;
         public event AfterPlay OnAfterPlay;
 
+        public event EventHandler<ActionInfo> OnTargetOfActionBefore;
+        public event EventHandler<ActionInfo> OnTargetOfActionAfter;
+
         public Unit Owner { get; set; }
         public CardData Data { get; private set; }
 
-        public TypeDictionary<Counter> ActiveCounters { get; private set; }
-        public TypeDictionary<Trigger> Triggers { get; private set; }
-
         public Zone<Card> CurrentZone { get; private set; }
+
+        public TypeDictionary<ActionModifier<Card>> ActionModifiers { get; private set; }
+        public List<Trigger<Card>> Triggers { get; private set; }
 
         internal Card(Unit owner, CardData data)
         {
             Owner = owner;
             Data = data;
-            ActiveCounters = new TypeDictionary<Counter>();
-            Triggers = new TypeDictionary<Trigger>();
+
+            ActionModifiers = new TypeDictionary<ActionModifier<Card>>();
+            Triggers = new List<Trigger<Card>>();
         }
 
         public void MoveTo(Zone<Card> newZone)
@@ -80,21 +84,39 @@ namespace Archetype
             return Data.Actions.Select(a => a.TargetRequirements.GetSelectionInfo(Owner, gameState)).ToList();
         }
 
-        public void AttachTrigger<T>(T trigger) where T : Trigger
+
+        
+        public virtual void PreActionAsTarget(ActionInfo action) 
         {
-            if (Triggers.Has<T>())
+            OnTargetOfActionBefore?.Invoke(this, action);
+        }
+        public virtual void PostActionAsTarget(ActionInfo action) 
+        {
+            OnTargetOfActionAfter?.Invoke(this, action);
+        }
+
+        public void AttachModifier<TMod>(TMod modifier)
+            where TMod : ActionModifier<Card>
+        {
+            if (ActionModifiers.Has<TMod>())
             {
-                Triggers.Get<T>().Stack(trigger);
+                ActionModifiers.Get<TMod>().StackModifiers(modifier);
             }
             else
             {
-                trigger.AttachTo(this);
-                Triggers.Set<T>(trigger);
+                ActionModifiers.Set<TMod>(modifier);
+                modifier.AttachHandler(this);
             }
         }
-        
-        public virtual void PostActionAsTarget(ActionInfo action) { }
-        public virtual void PreActionAsTarget(ActionInfo action) { }
 
+        public void DetachModifier<TMod>()
+            where TMod : ActionModifier<Card>
+        {
+            if (ActionModifiers.Has<TMod>())
+            {
+                ActionModifiers.Get<TMod>().DetachHandler(this);
+                ActionModifiers.Remove<TMod>();
+            }
+        }
     }
 }

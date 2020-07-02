@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class DiscardActionArgs : ParameterizedActionInfo<int>
+    public class DiscardActionArgs : ModifiableActionInfo
     {
         public DiscardActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 

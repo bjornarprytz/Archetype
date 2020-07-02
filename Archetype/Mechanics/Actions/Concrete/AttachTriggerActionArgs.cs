@@ -2,16 +2,15 @@
 {
     public class AttachTriggerActionArgs : ActionInfo
     {
-        public Trigger Trigger { get; set; }
-
-        public AttachTriggerActionArgs(ISource source, ITarget target, Trigger trigger) : base(source, target)
+        public Trigger<Unit> Trigger { get; set; }
+        public AttachTriggerActionArgs(ISource source, Unit target, Trigger<Unit> trigger) : base(source, target)
         {
             Trigger = trigger;
         }
 
         protected override void Resolve()
         {
-            Target.AttachTrigger(Trigger);
+            (Target as Unit).AttachTrigger(Trigger);
         }
     }
 }

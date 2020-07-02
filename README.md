@@ -42,7 +42,9 @@ The goal for this project is to provide a useful framework for a card game.
 		- [ ] Zone triggers
 			- [ ] Resolve ambiguity between ZoneChange and ZoneChangeTrigger EventArgs.
 		- [ ] Card triggers
-		- [ ] Unit triggers
+			- [ ] Tests
+		- [x] Unit triggers
+			- [ ] Tests
 		- [x] AttachTrigger
 		- [ ] DetachTrigger
 		- [ ] Use Event Args from (e.g. Deal Damage equal to Cost of the discarded card)

@@ -3,7 +3,7 @@ using System;
 
 namespace Archetype
 {
-    public class DamageActionArgs : ParameterizedActionInfo<int>
+    public class DamageActionArgs : ModifiableActionInfo
     {
         public DamageActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 

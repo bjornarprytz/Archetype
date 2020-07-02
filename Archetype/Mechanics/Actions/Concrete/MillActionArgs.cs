@@ -3,7 +3,7 @@ using System;
 
 namespace Archetype
 {
-    public class MillActionArgs : ParameterizedActionInfo<int>
+    public class MillActionArgs : ModifiableActionInfo
     {
         public MillActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 

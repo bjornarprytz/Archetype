@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class DrawActionArgs : ParameterizedActionInfo<int>
+    public class DrawActionArgs : ModifiableActionInfo
     {
         public DrawActionArgs(Unit source, Unit target, Func<int> getter) : base(source, target, getter) { }
 
