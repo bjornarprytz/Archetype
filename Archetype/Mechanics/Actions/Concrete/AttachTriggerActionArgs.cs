@@ -1,16 +1,18 @@
 ﻿namespace Archetype
 {
-    public class AttachTriggerActionArgs : ActionInfo
+    public class AttachTriggerActionArgs<THost> : ActionInfo
+        where THost : class, ITarget, ITriggerAttachee<THost>
     {
-        public Trigger<Unit> Trigger { get; set; }
-        public AttachTriggerActionArgs(ISource source, Unit target, Trigger<Unit> trigger) : base(source, target)
+        public Trigger<THost> Trigger { get; set; }
+
+        public AttachTriggerActionArgs(ISource source, THost target, Trigger<THost> trigger) : base(source, target)
         {
             Trigger = trigger;
         }
 
         protected override void Resolve()
         {
-            (Target as Unit).AttachTrigger(Trigger);
+            (Target as THost).AttachTrigger(Trigger);
         }
     }
 }

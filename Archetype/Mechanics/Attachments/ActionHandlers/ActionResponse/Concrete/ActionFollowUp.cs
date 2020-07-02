@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class ActionFollowUp<TAct> : CustomActionHandler<ISource, TAct>
+    public class ActionFollowUp<TAct> : ActionResponse<ISource, TAct>
         where TAct : ActionInfo
     {
         public ActionFollowUp(EventHandler<TAct> handler) : base(handler)

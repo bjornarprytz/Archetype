@@ -5,7 +5,15 @@ using System.Linq;
 
 namespace Archetype
 {
-    public class Card : GamePiece, IOwned<Unit>, IZoned<Card>, ITarget, ICardFactory
+    public class Card : 
+        GamePiece, 
+        IOwned<Unit>, 
+        IZoned<Card>, 
+        ITarget,
+        ITriggerAttachee<Card>,
+        IModifierAttachee<Card>,
+        IResponseAttachee<Card>,
+        ICardFactory
     {
         public event EventHandler<ZoneChangeArgs<Card>> OnZoneChanged;
 
@@ -25,6 +33,7 @@ namespace Archetype
 
         public TypeDictionary<ActionModifier<Card>> ActionModifiers { get; private set; }
         public List<Trigger<Card>> Triggers { get; private set; }
+        public List<ActionResponse<Card>> Responses { get; private set; }
 
         internal Card(Unit owner, CardData data)
         {
@@ -33,6 +42,7 @@ namespace Archetype
 
             ActionModifiers = new TypeDictionary<ActionModifier<Card>>();
             Triggers = new List<Trigger<Card>>();
+            Responses = new List<ActionResponse<Card>>();
         }
 
         public void MoveTo(Zone<Card> newZone)
@@ -117,6 +127,29 @@ namespace Archetype
                 ActionModifiers.Get<TMod>().DetachHandler(this);
                 ActionModifiers.Remove<TMod>();
             }
+        }
+
+        public void AttachTrigger(Trigger<Card> trigger)
+        {
+            Triggers.Add(trigger);
+            trigger.AttachHandler(this);
+        }
+        public void DetachTrigger(Trigger<Card> trigger)
+        {
+            trigger.DetachHandler(this);
+            Triggers.Remove(trigger);
+        }
+
+        public void AttachResponse(ActionResponse<Card> response)
+        {
+            response.AttachHandler(this);
+            Responses.Add(response);
+        }
+
+        public void DetachResponse(ActionResponse<Card> response)
+        {
+            response.DetachHandler(this);
+            Responses.Remove(response);
         }
     }
 }

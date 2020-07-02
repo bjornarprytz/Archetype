@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public class ActionReaction<TAct> : CustomActionHandler<ITarget, TAct>
+    public class ActionReaction<TAct> : ActionResponse<ITarget, TAct>
         where TAct : ActionInfo
     {
         public ActionReaction(EventHandler<TAct> handler) : base (handler)

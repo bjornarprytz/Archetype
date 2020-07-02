@@ -2,12 +2,17 @@
 
 namespace Archetype
 {
-    public abstract class CustomActionHandler<THost, TAct> : ActionHandler<THost>
+    public abstract class ActionResponse<THost> : ActionHandler<THost>
+    {
+
+    }
+
+    public abstract class ActionResponse<THost, TAct> : ActionResponse<THost>
         where TAct : ActionInfo
     {
         private EventHandler<TAct> _handler;
 
-        public CustomActionHandler(EventHandler<TAct> handler)
+        public ActionResponse(EventHandler<TAct> handler)
         {
             _handler = handler;
         }

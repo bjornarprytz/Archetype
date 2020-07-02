@@ -2,11 +2,11 @@
 
 namespace Archetype
 {
-    public abstract class DefensiveActionModifier<TAct> : ActionModifier<ITarget, TAct>
+    public class DefensiveActionModifier<TAct> : ActionModifier<ITarget, TAct>
         where TAct : ModifiableActionInfo
     {
 
-        protected DefensiveActionModifier(int modifier=0, float multiplier=1f) : base (modifier, multiplier)
+        public DefensiveActionModifier(int modifier=0, float multiplier=1f) : base (modifier, multiplier)
         {
         }
 

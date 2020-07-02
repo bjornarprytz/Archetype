@@ -5,7 +5,15 @@ using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : GamePiece, IZoned<Unit>, IOwned<Player>, ITarget, ISource
+    public abstract class Unit : 
+        GamePiece, 
+        IZoned<Unit>, 
+        IOwned<Player>, 
+        ITarget, 
+        ISource, 
+        IModifierAttachee<Unit>, 
+        ITriggerAttachee<Unit>,
+        IResponseAttachee<Unit>
     {
         public event EventHandler<ZoneChangeArgs<Unit>> OnZoneChanged;
 
@@ -58,6 +66,7 @@ namespace Archetype
 
         public TypeDictionary<ActionModifier<Unit>> ActionModifiers { get; private set; }
         public List<Trigger<Unit>> Triggers { get; private set; }
+        public List<ActionResponse<Unit>> Responses { get; private set; }
 
         public Unit(Player owner, UnitData data, IPrompter prompter) : base(owner.Team)
         {
@@ -75,6 +84,7 @@ namespace Archetype
 
             ActionModifiers = new TypeDictionary<ActionModifier<Unit>>();
             Triggers = new List<Trigger<Unit>>();
+            Responses = new List<ActionResponse<Unit>>();
         }
 
         public void MoveTo(Zone<Unit> newZone)
@@ -205,6 +215,18 @@ namespace Archetype
         {
             trigger.DetachHandler(this);
             Triggers.Remove(trigger);
+        }
+
+        public void AttachResponse(ActionResponse<Unit> response)
+        {
+            response.AttachHandler(this);
+            Responses.Add(response);
+        }
+
+        public void DetachResponse(ActionResponse<Unit> response)
+        {
+            response.DetachHandler(this);
+            Responses.Remove(response);
         }
 
         private void DrawCard()

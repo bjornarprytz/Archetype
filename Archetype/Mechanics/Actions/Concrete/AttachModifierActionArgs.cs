@@ -1,19 +1,18 @@
-﻿using System;
-
-namespace Archetype
+﻿namespace Archetype
 {
-    public class AttachModifierActionArgs : ActionInfo
+    public class AttachModifierActionArgs<THost> : ActionInfo
+        where THost : class, ITarget, IModifierAttachee<THost>
     {
-        public ActionModifier<Unit> Modifier { get; set; }
+        ActionModifier<THost> Modifier { get; set; }
 
-        public AttachModifierActionArgs(ISource source, Unit target, ActionModifier<Unit> modifier) : base(source, target)
+        public AttachModifierActionArgs(ISource source, THost target, ActionModifier<THost> modifier) : base(source, target)
         {
             Modifier = modifier;
         }
 
         protected override void Resolve()
         {
-            (Target as Unit).AttachModifier(Modifier);
+            (Target as THost).AttachModifier(Modifier);
         }
     }
 }
