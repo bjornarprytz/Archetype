@@ -181,54 +181,6 @@ namespace Archetype
             }
         }
 
-        public void AttachModifier<TMod>(TMod modifier)
-            where TMod : ActionModifier<Unit>
-        {
-            if (ActionModifiers.Has<TMod>())
-            {
-                ActionModifiers.Get<TMod>().StackModifiers(modifier);
-            }
-            else
-            {
-                ActionModifiers.Set<TMod>(modifier);
-                modifier.AttachHandler(this);
-            }
-        }
-
-        public void DetachModifier<TMod>()
-            where TMod : ActionModifier<Unit>
-        {
-            if (ActionModifiers.Has<TMod>())
-            {
-                ActionModifiers.Get<TMod>().DetachHandler(this);
-                ActionModifiers.Remove<TMod>();
-            }
-        }
-
-        public void AttachTrigger(Trigger<Unit> trigger)
-        {
-            Triggers.Add(trigger);
-            trigger.AttachHandler(this);
-        }
-
-        public void DetachTrigger(Trigger<Unit> trigger)
-        {
-            trigger.DetachHandler(this);
-            Triggers.Remove(trigger);
-        }
-
-        public void AttachResponse(ActionResponse<Unit> response)
-        {
-            response.AttachHandler(this);
-            Responses.Add(response);
-        }
-
-        public void DetachResponse(ActionResponse<Unit> response)
-        {
-            response.DetachHandler(this);
-            Responses.Remove(response);
-        }
-
         private void DrawCard()
         {
             Card cardToDraw = Deck.PeekTop();

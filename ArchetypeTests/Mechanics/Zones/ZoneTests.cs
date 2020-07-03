@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-namespace ArchetypeTests.Mechanics
+namespace ArchetypeTests
 {
     [TestClass]
     public class ZoneTests : ArchetypeTestBase

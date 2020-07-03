@@ -38,7 +38,6 @@ namespace ArchetypeTests
             AttackCard = AttackAnEnemy(3);
             HealCard = SelfDamageAndHealAlly(1, 4);
             CopyCard = CopyACard();
-            TriggerCard = DealDamageWhenDeckIsShuffled();
 
             Friend1 = new Adventurer(HumanPlayer, GenerateUnitStats(15, 4), this);
             Friend2 = new Adventurer(HumanPlayer, GenerateUnitStats(7, 2), this);
@@ -233,27 +232,6 @@ namespace ArchetypeTests
                     new CopyCardParameterData
                     {
                         TargetRequirements = AnyCardInAnEnemyHand()
-                    }
-                }
-            };
-        }
-
-        protected CardData DealDamageWhenDeckIsShuffled()
-        {
-            return new CardData
-            {
-                Cost = 0,
-                Actions = new List<ActionParameterData>
-                {
-                    new TriggerParameterData
-                    {
-                        TargetRequirements = Self(),
-                        EventData = new EventReferenceData<Unit>(nameof(Unit.OnDeckShuffled)),
-                        TriggerAction = new DamageParameterData
-                        {
-                            TargetRequirements = Self(),
-                            Strength = new ImmediateValue<int>(1),
-                        }
                     }
                 }
             };

@@ -94,8 +94,6 @@ namespace Archetype
             return Data.Actions.Select(a => a.TargetRequirements.GetSelectionInfo(Owner, gameState)).ToList();
         }
 
-
-        
         public virtual void PreActionAsTarget(ActionInfo action) 
         {
             OnTargetOfActionBefore?.Invoke(this, action);
@@ -103,53 +101,6 @@ namespace Archetype
         public virtual void PostActionAsTarget(ActionInfo action) 
         {
             OnTargetOfActionAfter?.Invoke(this, action);
-        }
-
-        public void AttachModifier<TMod>(TMod modifier)
-            where TMod : ActionModifier<Card>
-        {
-            if (ActionModifiers.Has<TMod>())
-            {
-                ActionModifiers.Get<TMod>().StackModifiers(modifier);
-            }
-            else
-            {
-                ActionModifiers.Set<TMod>(modifier);
-                modifier.AttachHandler(this);
-            }
-        }
-
-        public void DetachModifier<TMod>()
-            where TMod : ActionModifier<Card>
-        {
-            if (ActionModifiers.Has<TMod>())
-            {
-                ActionModifiers.Get<TMod>().DetachHandler(this);
-                ActionModifiers.Remove<TMod>();
-            }
-        }
-
-        public void AttachTrigger(Trigger<Card> trigger)
-        {
-            Triggers.Add(trigger);
-            trigger.AttachHandler(this);
-        }
-        public void DetachTrigger(Trigger<Card> trigger)
-        {
-            trigger.DetachHandler(this);
-            Triggers.Remove(trigger);
-        }
-
-        public void AttachResponse(ActionResponse<Card> response)
-        {
-            response.AttachHandler(this);
-            Responses.Add(response);
-        }
-
-        public void DetachResponse(ActionResponse<Card> response)
-        {
-            response.DetachHandler(this);
-            Responses.Remove(response);
         }
     }
 }
