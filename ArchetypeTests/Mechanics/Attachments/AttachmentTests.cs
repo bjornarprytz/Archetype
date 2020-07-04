@@ -52,5 +52,28 @@ namespace ArchetypeTests
 
             Assert.AreEqual(2, valueToModify);
         }
+
+        [TestMethod]
+        public void Modifier_OffensiveActionModifierModifiesDamageAction()
+        {
+            var damage = 0;
+            var damageModifier = 1;
+
+            var attachModifier = new AttachModifierActionArgs<Unit>(
+                Friend1, Friend2,
+                new OffensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+
+            attachModifier.Execute();
+
+            var previousHealth = Enemy1.Life;
+
+            var damageAction = new DamageActionArgs(Friend2, Enemy1, () => damage);
+
+            damageAction.Execute();
+
+            var remainingHealth = Enemy1.Life;
+
+            Assert.AreEqual(remainingHealth, previousHealth - (damage + damageModifier));
+        }
     }
 }
