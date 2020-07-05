@@ -102,5 +102,29 @@ namespace Archetype
         {
             OnTargetOfActionAfter?.Invoke(this, action);
         }
+
+        public void AttachModifier<TMod>(TMod modifier)
+            where TMod : ActionModifier<Card>
+        {
+            if (ActionModifiers.Has<TMod>())
+            {
+                ActionModifiers.Get<TMod>().StackModifiers(modifier);
+            }
+            else
+            {
+                modifier.AttachHandler(this);
+                ActionModifiers.Set<TMod>(modifier);
+            }
+        }
+
+        public void DetachModifier<TMod>()
+            where TMod : ActionModifier<Card>
+        {
+            var modifier = ActionModifiers.Get<TMod>();
+
+            ActionModifiers.Remove<TMod>();
+
+            modifier?.DetachHandler(this);
+        }
     }
 }

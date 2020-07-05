@@ -18,6 +18,8 @@ namespace Archetype
         {
             if (Has<K>()) _dict.Remove(typeof(K));
         }
+
+        public int Count => _dict.Count;
     }
 
     public class TypeDictionary<VType> : TypeDictionary<VType, VType> { }

@@ -82,5 +82,21 @@ namespace ArchetypeTests
             Assert.AreEqual(mod2, ConstrainedTDict.Get<DefensiveActionModifier<Unit, HealActionArgs>>());
         }
 
+
+        public void AttachModifier<THost, TMod>(TMod modifier)
+            where THost : class, IModifierAttachee<THost>
+            where TMod : ActionModifier<THost>
+        {
+            TypeDictionary<ActionModifier<THost>> ActionModifiers = new TypeDictionary<ActionModifier<THost>>();
+
+            if (ActionModifiers.Has<TMod>())
+            {
+                ActionModifiers.Get<TMod>().StackModifiers(modifier);
+            }
+            else
+            {
+                ActionModifiers.Set<TMod>(modifier);
+            }
+        }
     }
 }

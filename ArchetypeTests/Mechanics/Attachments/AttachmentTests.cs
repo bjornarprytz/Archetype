@@ -54,6 +54,18 @@ namespace ArchetypeTests
         }
 
         [TestMethod]
+        public void Modifier_ActionModifierIsAttached()
+        {
+            var attachModifier = new AttachModifierActionArgs<Unit>(
+                Friend1, Friend2,
+                new OffensiveActionModifier<Unit, DamageActionArgs>());
+
+            attachModifier.Execute();
+
+            Assert.AreEqual(1, Friend2.ActionModifiers.Count);
+        }
+
+        [TestMethod]
         public void Modifier_OffensiveActionModifierModifiesDamageAction()
         {
             var damage = 0;

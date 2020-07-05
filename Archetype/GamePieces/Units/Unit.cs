@@ -181,6 +181,30 @@ namespace Archetype
             }
         }
 
+        public void AttachModifier<TMod>(TMod modifier)
+            where TMod : ActionModifier<Unit>
+        {
+            if (ActionModifiers.Has<TMod>())
+            {
+                ActionModifiers.Get<TMod>().StackModifiers(modifier);
+            }
+            else
+            {
+                modifier.AttachHandler(this);
+                ActionModifiers.Set<TMod>(modifier);
+            }
+        }
+
+        public void DetachModifier<TMod>()
+            where TMod : ActionModifier<Unit>
+        {
+            var modifier = ActionModifiers.Get<TMod>();
+
+            ActionModifiers.Remove<TMod>();
+
+            modifier?.DetachHandler(this);
+        }
+
         private void DrawCard()
         {
             Card cardToDraw = Deck.PeekTop();
