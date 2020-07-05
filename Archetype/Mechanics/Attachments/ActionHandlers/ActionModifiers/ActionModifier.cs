@@ -1,6 +1,6 @@
 ﻿namespace Archetype
 {
-    public abstract class ActionModifier<THost> : ActionHandler<THost> 
+    public abstract class ActionModifier<THost> : Attachment<THost, ActionInfo> 
     {
         public int Modifier { get; set; }
         public float Multiplier { get; set; }
@@ -20,6 +20,7 @@
     }
 
     public abstract class ActionModifier<THost, TAct> : ActionModifier<THost>
+        where THost: class, IModifierAttachee<THost>
         where TAct : ModifiableActionInfo
     {
         protected ActionModifier(int modifier, float multiplier) : base(modifier, multiplier)

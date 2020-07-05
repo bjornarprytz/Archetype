@@ -1,7 +1,7 @@
 ﻿namespace Archetype
 {
     public class OffensiveActionModifier<THost, TAct> : ActionModifier<THost, TAct>
-        where THost : ISource
+        where THost : class, ISource, IModifierAttachee<THost>
         where TAct : ModifiableActionInfo
     {
         public OffensiveActionModifier(int modifier=0, float multiplier=1f) : base(modifier, multiplier)

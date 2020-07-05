@@ -2,7 +2,8 @@
 
 namespace Archetype
 {
-    public class DefensiveActionModifier<TAct> : ActionModifier<ITarget, TAct>
+    public class DefensiveActionModifier<THost, TAct> : ActionModifier<THost, TAct>
+        where THost : class, ITarget, IModifierAttachee<THost>
         where TAct : ModifiableActionInfo
     {
 
@@ -10,12 +11,12 @@ namespace Archetype
         {
         }
 
-        public override void AttachHandler(ITarget host)
+        public override void AttachHandler(THost host)
         {
             host.OnTargetOfActionBefore += Handler;
         }
 
-        public override void DetachHandler(ITarget host)
+        public override void DetachHandler(THost host)
         {
             host.OnTargetOfActionBefore -= Handler;
         }

@@ -3,7 +3,7 @@
     public class AttachModifierActionArgs<THost> : ActionInfo
         where THost : class, ITarget, IModifierAttachee<THost>
     {
-        ActionModifier<THost> Modifier { get; set; }
+        public ActionModifier<THost> Modifier { get; set; }
 
         public AttachModifierActionArgs(ISource source, THost target, ActionModifier<THost> modifier) : base(source, target)
         {

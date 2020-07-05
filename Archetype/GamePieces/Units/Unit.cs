@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Archetype
 {
-    public abstract class Unit : 
+    public class Unit : 
         GamePiece, 
         IZoned<Unit>, 
         IOwned<Player>, 

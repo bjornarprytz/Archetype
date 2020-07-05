@@ -6,7 +6,8 @@ namespace Archetype
     {
         TypeDictionary<ActionModifier<THost>> ActionModifiers { get; }
 
-        void AttachModifier<TMod>(TMod modifier) where TMod : ActionModifier<THost>
+        void AttachModifier<TMod>(TMod modifier) 
+            where TMod : ActionModifier<THost>
         {
             if (ActionModifiers.Has<TMod>())
             {
@@ -19,7 +20,8 @@ namespace Archetype
             }
         }
 
-        void DetachModifier<TMod>() where TMod : ActionModifier<THost>
+        void DetachModifier<TMod>() 
+            where TMod : ActionModifier<THost>
         {
             var modifier = ActionModifiers.Get<TMod>();
 

@@ -2,7 +2,7 @@
 
 namespace Archetype
 {
-    public abstract class ActionResponse<THost> : ActionHandler<THost>
+    public abstract class ActionResponse<THost> : Attachment<THost, ActionInfo>
     {
 
     }

@@ -19,12 +19,12 @@ namespace ArchetypeTests
         protected CardData CopyCard { get; set; }
         protected CardData TriggerCard { get; set; }
 
-        protected Adventurer Friend1 { get; set; }
-        protected Adventurer Friend2 { get; set; }
+        protected Unit Friend1 { get; set; }
+        protected Unit Friend2 { get; set; }
 
-        protected Enemy Enemy1 { get; set; }
-        protected Enemy Enemy2 { get; set; }
-        protected Enemy Enemy3 { get; set; }
+        protected Unit Enemy1 { get; set; }
+        protected Unit Enemy2 { get; set; }
+        protected Unit Enemy3 { get; set; }
 
         [TestInitialize]
         public virtual void InitializeTests()
@@ -39,12 +39,12 @@ namespace ArchetypeTests
             HealCard = SelfDamageAndHealAlly(1, 4);
             CopyCard = CopyACard();
 
-            Friend1 = new Adventurer(HumanPlayer, GenerateUnitStats(15, 4), this);
-            Friend2 = new Adventurer(HumanPlayer, GenerateUnitStats(7, 2), this);
+            Friend1 = new Unit(HumanPlayer, GenerateUnitStats(15, 4), this);
+            Friend2 = new Unit(HumanPlayer, GenerateUnitStats(7, 2), this);
 
-            Enemy1 = new Enemy(EnemyPlayer, GenerateUnitStats(1, 0), this);
-            Enemy2 = new Enemy(EnemyPlayer, GenerateUnitStats(2, 0), this);
-            Enemy3 = new Enemy(EnemyPlayer, GenerateUnitStats(3, 0), this);
+            Enemy1 = new Unit(EnemyPlayer, GenerateUnitStats(1, 0), this);
+            Enemy2 = new Unit(EnemyPlayer, GenerateUnitStats(2, 0), this);
+            Enemy3 = new Unit(EnemyPlayer, GenerateUnitStats(3, 0), this);
 
 
             GameState.AddUnits(new List<Unit>

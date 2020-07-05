@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <Folder Include="GamePieces\" />
-    <Folder Include="General\" />
     <Folder Include="Mechanics\Counters\" />
   </ItemGroup>
 
