@@ -2,19 +2,20 @@
 
 namespace Archetype
 {
-    public class ActionReaction<TAct> : ActionResponse<ITarget, TAct>
+    public class ActionReaction<THost, TAct> : ActionResponse<THost, TAct>
+        where THost : ITarget
         where TAct : ActionInfo
     {
         public ActionReaction(EventHandler<TAct> handler) : base (handler)
         {
         }
 
-        public override void AttachHandler(ITarget host)
+        public override void AttachHandler(THost host)
         {
             host.OnTargetOfActionAfter += Handler;
         }
 
-        public override void DetachHandler(ITarget host)
+        public override void DetachHandler(THost host)
         {
             host.OnTargetOfActionAfter -= Handler;
         }

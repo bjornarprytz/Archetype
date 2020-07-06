@@ -64,7 +64,7 @@ namespace Archetype
 
         public Player Owner { get; private set; }
 
-        public TypeDictionary<ActionModifier<Unit>> ActionModifiers { get; private set; }
+        public List<ActionModifier<Unit>> Modifiers { get; private set; }
         public List<Trigger<Unit>> Triggers { get; private set; }
         public List<ActionResponse<Unit>> Responses { get; private set; }
 
@@ -82,7 +82,7 @@ namespace Archetype
             Hand = new Hand(this);
             DiscardPile = new DiscardPile(this);
 
-            ActionModifiers = new TypeDictionary<ActionModifier<Unit>>();
+            Modifiers = new List<ActionModifier<Unit>>();
             Triggers = new List<Trigger<Unit>>();
             Responses = new List<ActionResponse<Unit>>();
         }
@@ -179,30 +179,6 @@ namespace Archetype
             {
                 MillCard();
             }
-        }
-
-        public void AttachModifier<TMod>(TMod modifier)
-            where TMod : ActionModifier<Unit>
-        {
-            if (ActionModifiers.Has<TMod>())
-            {
-                ActionModifiers.Get<TMod>().StackModifiers(modifier);
-            }
-            else
-            {
-                modifier.AttachHandler(this);
-                ActionModifiers.Set<TMod>(modifier);
-            }
-        }
-
-        public void DetachModifier<TMod>()
-            where TMod : ActionModifier<Unit>
-        {
-            var modifier = ActionModifiers.Get<TMod>();
-
-            ActionModifiers.Remove<TMod>();
-
-            modifier?.DetachHandler(this);
         }
 
         private void DrawCard()

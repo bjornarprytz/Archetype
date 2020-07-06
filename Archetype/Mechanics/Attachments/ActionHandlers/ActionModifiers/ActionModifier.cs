@@ -11,13 +11,6 @@
             Modifier = modifier;
             Multiplier = multiplier;
         }
-
-        public virtual void StackModifiers<TMod>(TMod other)
-            where TMod : ActionModifier<THost>
-        {
-            Modifier += other.Modifier;
-            Multiplier += (other.Multiplier - 1f);
-        }
     }
 
     public abstract class ActionModifier<THost, TAct> : ActionModifier<THost>

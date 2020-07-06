@@ -31,7 +31,7 @@ namespace Archetype
 
         public Zone<Card> CurrentZone { get; private set; }
 
-        public TypeDictionary<ActionModifier<Card>> ActionModifiers { get; private set; }
+        public List<ActionModifier<Card>> Modifiers { get; private set; }
         public List<Trigger<Card>> Triggers { get; private set; }
         public List<ActionResponse<Card>> Responses { get; private set; }
 
@@ -40,7 +40,7 @@ namespace Archetype
             Owner = owner;
             Data = data;
 
-            ActionModifiers = new TypeDictionary<ActionModifier<Card>>();
+            Modifiers = new List<ActionModifier<Card>>();
             Triggers = new List<Trigger<Card>>();
             Responses = new List<ActionResponse<Card>>();
         }
@@ -88,7 +88,6 @@ namespace Archetype
             }
         }
 
-
         public IList<ISelectionInfo<ITarget>> GetTargetRequirements(GameState gameState)
         {
             return Data.Actions.Select(a => a.TargetRequirements.GetSelectionInfo(Owner, gameState)).ToList();
@@ -101,30 +100,6 @@ namespace Archetype
         public virtual void PostActionAsTarget(ActionInfo action) 
         {
             OnTargetOfActionAfter?.Invoke(this, action);
-        }
-
-        public void AttachModifier<TMod>(TMod modifier)
-            where TMod : ActionModifier<Card>
-        {
-            if (ActionModifiers.Has<TMod>())
-            {
-                ActionModifiers.Get<TMod>().StackModifiers(modifier);
-            }
-            else
-            {
-                modifier.AttachHandler(this);
-                ActionModifiers.Set<TMod>(modifier);
-            }
-        }
-
-        public void DetachModifier<TMod>()
-            where TMod : ActionModifier<Card>
-        {
-            var modifier = ActionModifiers.Get<TMod>();
-
-            ActionModifiers.Remove<TMod>();
-
-            modifier?.DetachHandler(this);
         }
     }
 }
