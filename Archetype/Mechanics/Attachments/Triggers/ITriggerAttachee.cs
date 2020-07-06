@@ -7,13 +7,13 @@ namespace Archetype
     {
         List<Trigger<THost>> Triggers { get; }
 
-        void AttachTrigger(Trigger<THost> trigger)
+        public void AttachTrigger(Trigger<THost> trigger)
         {
             trigger.AttachHandler(this as THost);
             Triggers.Add(trigger);
 
         }
-        void DetachTrigger(Trigger<THost> trigger)
+        public void DetachTrigger(Trigger<THost> trigger)
         {
             Triggers.Remove(trigger);
             trigger.DetachHandler(this as THost);
