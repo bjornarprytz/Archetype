@@ -59,21 +59,11 @@ namespace Archetype
 
         public void Shuffle()
         {
-            Random rand = new Random();
-
-            Card[] pile = Cards.ToArray();
-
-            // Knuth-Fisher-Yates shuffle algorithm
-            for (int i = pile.Length - 1; i > 0; i--)
-            {
-                int n = rand.Next(i + 1);
-                Swap(ref pile[i], ref pile[n]);
-            }
+            var newOrder = Cards.GetRandomOrder();
 
             Cards.Clear();
             
-            // Rebuild the deck.
-            foreach(Card card in pile)
+            foreach(Card card in newOrder)
             {
                 Cards.Push(card);
             }
@@ -103,12 +93,7 @@ namespace Archetype
             // TODO: Fix this shitty function.
         }
 
-        private void Swap(ref Card c1, ref Card c2)
-        {
-            Card temp = c1;
-            c1 = c2;
-            c2 = temp;
-        }
+        
 
         public override IEnumerator<Card> GetEnumerator() =>  ((IEnumerable<Card>)Cards).GetEnumerator();
 

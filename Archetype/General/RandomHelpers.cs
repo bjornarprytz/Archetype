@@ -11,9 +11,25 @@ namespace Archetype
         {
             if (n >= candidates.Count()) return candidates;
 
-            if (rand == null) rand = new Random();
+            rand ??= new Random();
 
             return candidates.OrderBy(i => rand.Next()).Take(n);
+        }
+
+        public static IEnumerable<T> GetRandomOrder<T>(this IEnumerable<T> items, Random rand = null)
+        {
+            rand ??= new Random();
+
+            var pile = items.ToArray();
+
+            // Knuth-Fisher-Yates shuffle algorithm
+            for (int i = pile.Length - 1; i > 0; i--)
+            {
+                int n = rand.Next(i + 1);
+                Swap(ref pile[i], ref pile[n]);
+            }
+
+            return pile;
         }
 
         public static T WeightedChoice<T>(this IEnumerable<(T, int)> candidates, Random rand=null)
@@ -22,7 +38,7 @@ namespace Archetype
 
             int sum = candidates.Select(t => t.Item2).Sum();
 
-            if (rand == null) rand = new Random();
+            rand ??= new Random();
 
             int number = rand.Next(sum);
 
@@ -34,6 +50,13 @@ namespace Archetype
             }
 
             return candidates.Last().Item1;
+        }
+
+        private static void Swap<T>(ref T c1, ref T c2)
+        {
+            T temp = c1;
+            c1 = c2;
+            c2 = temp;
         }
     }
 }
