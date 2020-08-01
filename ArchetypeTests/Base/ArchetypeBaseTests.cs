@@ -31,7 +31,7 @@ namespace ArchetypeTests
         {
             HumanPlayer = new HumanPlayer(69);
             EnemyPlayer = new EnemyPlayer();
-            GameState = new GameState();
+            GameState = new GameState(new ActionQueue());
 
             ChoicesToMake = new List<object>();
 

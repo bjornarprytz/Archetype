@@ -4,9 +4,9 @@
     {
         public ValueDescriptor<int> Strength { get; set; }
 
-        protected override ActionInfo GetActionInfo(Unit source, ITarget target, GameState gameState)
+        protected override ActionInfo GetActionInfo(ISource source, ITarget target, GameState gameState)
         {
-            return new DamageActionArgs(source, target as Unit, Strength.CreateGetter(source, gameState));
+            return new DamageActionArgs(source as Unit, target as Unit, Strength.CreateGetter(source as Unit, gameState));
         }
     }
 }

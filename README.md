@@ -9,6 +9,9 @@ The goal for this project is to provide a useful framework for a card game.
 - [ ] Counters (Ongoing effects on a Card or a Unit)
 - [x] Refactor Effects, EffectTemplates and TargetRequirements.
 - [x] Allow non-unit targets for cards and actions
+
+- [ ] Add more Action Types
+	- [ ] Gain / Drain Mana
 	- [ ] Retrieve action (DiscardPile -> Hand)
 	- [ ] Steal action (from zone with different owner -> Hand)
 - [ ] Events
@@ -36,12 +39,11 @@ The goal for this project is to provide a useful framework for a card game.
 	- [x] Card types (e.g. Instant, Sorcery)
 	- [x] Rarity
 	- [x] Color
-	- [ ] Card Context (e.g. actions on the same card can share some memory)
 	- [ ] Triggers (e.g. when a card is discarded, trigger an event)
 		- [x] Context-less triggers (can't handle various TriggerArgs)
 		- [ ] Zone triggers
 			- [ ] Resolve ambiguity between ZoneChange and ZoneChangeTrigger EventArgs.
-		- [x] Card triggers
+		- [ ] Card triggers
 			- [ ] Tests
 		- [x] Unit triggers
 			- [ ] Tests
@@ -50,15 +52,14 @@ The goal for this project is to provide a useful framework for a card game.
 		- [x] Use Event Args from (e.g. Deal Damage equal to Cost of the discarded card)
 	- [x] Referrential Values (e.g. deal damage equal to half your health)
 	- [ ] Static effects (e.g. Cards cost 1 less while this card is in the DiscardPile)
+	- [ ] Conditional Actions (e.g. if target health is below 10, deal 2 damage)
 - [x] Port to .NET Core
-- [ ] Units
-	- [ ] IPromptable should be provided per unit, not per gamestate
 - [ ] Tests
 	- [ ] Data Transfer Objects (serialization & data mapping(?))
 	- [ ] Game Logic
 	- [ ] Mechanics
 	- [ ] Game Pieces
 	- [ ] General (?)
-### Card Sets
-- [ ] API
-- [ ] Rules text on cards
+## Future
+- [ ] ActionHandlers (e.g. responding to an action, with its results taken into consideration)
+- [ ] Card Context (e.g. actions on the same card can share some memory)

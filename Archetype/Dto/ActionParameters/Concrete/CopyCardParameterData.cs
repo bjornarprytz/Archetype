@@ -2,9 +2,10 @@
 {
     public class CopyCardParameterData : ActionParameterData
     {
-        protected override ActionInfo GetActionInfo(Unit source, ITarget target, GameState gameState)
+        public CardZone TargetZone { get; set; }
+        protected override ActionInfo GetActionInfo(ISource source, ITarget target, GameState gameState)
         {
-            return new CopyCardActionArgs(source, target as Card, source, source.Hand);
+            return new CopyCardActionArgs(source as Unit, target as Card, source as Unit, TargetZone.GetZone(source as Unit));
         }
     }
 }

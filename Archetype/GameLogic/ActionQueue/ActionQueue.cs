@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Archetype
@@ -17,6 +16,14 @@ namespace Archetype
         public void EnqueueAction(ActionInfo action)
         {
             _actions.Enqueue(action);
+        }
+
+        public void EnqueueActions(IEnumerable<ActionInfo> actions)
+        {
+            foreach(var action in actions)
+            {
+                EnqueueAction(action);
+            }
         }
 
         public void ResolveAll()

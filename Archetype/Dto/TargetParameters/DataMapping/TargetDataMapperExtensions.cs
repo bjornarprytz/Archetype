@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Archetype
 {
     public static class TargetDataMapperExtensions
     {
-        public static IEnumerable<Unit> GetZone(this UnitZone unitZone, GameState gameState)
+        public static Zone<Unit> GetZone(this UnitZone unitZone, GameState gameState)
         {
             return unitZone switch
             {
@@ -15,7 +14,7 @@ namespace Archetype
             };
         }
 
-        public static IEnumerable<Card> GetZone(this CardZone cardZone, Unit owner)
+        public static Zone<Card> GetZone(this CardZone cardZone, Unit owner)
         {
             return cardZone switch
             {

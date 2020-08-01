@@ -79,13 +79,10 @@ namespace Archetype
         {
             if (!args.Valid) throw new Exception("WHat the hell, PlayCardArgs are invalid!?");
 
-            foreach(var actions in Data.Actions.Zip(args.TargetInfos, (a, t) => a.CreateAction(Owner, t, gameState)))
-            {
-                foreach (var action in actions)
-                {
-                    gameState.ActionQueue.EnqueueAction(action);
-                }
-            }
+            gameState.ActionQueue.EnqueueActions(
+                Data.Actions.Zip(args.TargetInfos, 
+                (actionData, targets) => actionData.CreateAction(Owner, targets, gameState))
+                .SelectMany(a => a));
         }
 
         public IList<ISelectionInfo<ITarget>> GetTargetRequirements(GameState gameState)

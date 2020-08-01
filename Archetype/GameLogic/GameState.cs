@@ -25,12 +25,12 @@ namespace Archetype
             return ActiveUnit == unit;
         }
 
-        public GameState()
+        public GameState(IActionQueue actionQueue)
         {
             Battlefield = new Battlefield();
             Graveyard = new Graveyard();
 
-            ActionQueue = new ActionQueue();
+            ActionQueue = actionQueue ?? throw new ArgumentException("Please provide a valid action queue");
         }
 
         public void AddUnits(IEnumerable<Unit> units)
