@@ -152,7 +152,7 @@ namespace ArchetypeTests
             var damage = 2;
 
             (Friend1 as IResponseAttachee<Unit>)
-                .AttachResponse(new ActionReaction<Unit, DamageActionArgs>((s, e) => valToModify = e.Strength)); ;
+                .AttachResponse(new ActionReaction<Unit, DamageActionArgs>((s, e) => valToModify = e.Strength));
 
             new DamageActionArgs(Enemy1, Friend1, () => damage)
                 .Execute();
@@ -167,7 +167,7 @@ namespace ArchetypeTests
             var damage = 2;
 
             (Enemy1 as IResponseAttachee<Unit>)
-                .AttachResponse(new ActionFollowUp<Unit, DamageActionArgs>((s, e) => valToModify = e.Strength)); ;
+                .AttachResponse(new ActionFollowUp<Unit, DamageActionArgs>((s, e) => valToModify = e.Strength));
 
             new DamageActionArgs(Enemy1, Friend1, () => damage)
                 .Execute();

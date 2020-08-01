@@ -5,7 +5,7 @@ namespace Archetype
     public abstract class Trigger<THost> : Attachment<THost, TriggerArgs>
         where THost : class, ITriggerAttachee<THost>
     {
-        private EventHandler<TriggerArgs> _handler;
+        private readonly EventHandler<TriggerArgs> _handler;
 
         protected Trigger(EventHandler<TriggerArgs> handler)
         {

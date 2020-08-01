@@ -15,13 +15,10 @@ namespace Archetype
         IResponseAttachee<Card>,
         ICardFactory
     {
-        public event EventHandler<ZoneChangeArgs<Card>> OnZoneChanged;
+        public event EventHandler<ZoneChangeEventArgs<Card>> OnZoneChanged;
 
-        public delegate void BeforePlay();
-        public delegate void AfterPlay();
-
-        public event BeforePlay OnBeforePlay;
-        public event AfterPlay OnAfterPlay;
+        public event Action OnBeforePlay;
+        public event Action OnAfterPlay;
 
         public event EventHandler<ActionInfo> OnTargetOfActionBefore;
         public event EventHandler<ActionInfo> OnTargetOfActionAfter;
@@ -55,7 +52,7 @@ namespace Archetype
 
             newZone?.Insert(this);
 
-            OnZoneChanged?.Invoke(this, new ZoneChangeArgs<Card>(this, CurrentZone, newZone));
+            OnZoneChanged?.Invoke(this, new ZoneChangeEventArgs<Card>(this, CurrentZone, newZone));
         }
 
         internal bool Play(PlayCardArgs args, GameState gameState)
@@ -77,8 +74,6 @@ namespace Archetype
 
         protected void PlayActual(PlayCardArgs args, GameState gameState)
         {
-            if (!args.Valid) throw new Exception("WHat the hell, PlayCardArgs are invalid!?");
-
             gameState.ActionQueue.EnqueueActions(
                 Data.Actions.Zip(args.TargetInfos, 
                 (actionData, targets) => actionData.CreateAction(Owner, targets, gameState))
@@ -90,11 +85,11 @@ namespace Archetype
             return Data.Actions.Select(a => a.TargetRequirements.GetSelectionInfo(Owner, gameState)).ToList();
         }
 
-        public virtual void PreActionAsTarget(ActionInfo action) 
+        public void PreActionAsTarget(ActionInfo action) 
         {
             OnTargetOfActionBefore?.Invoke(this, action);
         }
-        public virtual void PostActionAsTarget(ActionInfo action) 
+        public void PostActionAsTarget(ActionInfo action) 
         {
             OnTargetOfActionAfter?.Invoke(this, action);
         }

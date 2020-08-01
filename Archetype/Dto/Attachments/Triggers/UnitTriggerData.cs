@@ -1,11 +1,11 @@
 ﻿namespace Archetype
 {
-    public class UnitTriggerData : AttachmentData
+    public class UnitTriggerData : ActionParameterData
     {
         public UnitTriggerCause Cause { get; set; }
         public ActionParameterData TriggerAction { get; set; }
 
-        public override ActionInfo GetAttachmentActionInfo(ISource source, ITarget target, GameState gameState)
+        protected override ActionInfo GetActionInfo(ISource source, ITarget target, GameState gameState)
         {
             return new AttachTriggerActionArgs<Unit>(
                 source,

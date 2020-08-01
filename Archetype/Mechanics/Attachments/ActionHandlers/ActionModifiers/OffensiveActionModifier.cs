@@ -1,10 +1,10 @@
 ﻿namespace Archetype
 {
-    public class OffensiveActionModifier<THost, TAct> : ActionModifier<THost, TAct>
+    public abstract class OffensiveActionModifier<THost, TAct> : ActionModifier<THost, TAct>
         where THost : class, ISource, IModifierAttachee<THost>
         where TAct : ModifiableActionInfo
     {
-        public OffensiveActionModifier(int modifier=0, float multiplier=1f) : base(modifier, multiplier)
+        protected OffensiveActionModifier(int modifier=0, float multiplier=1f) : base(modifier, multiplier)
         {
         }
 

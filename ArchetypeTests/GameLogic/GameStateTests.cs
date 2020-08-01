@@ -1,5 +1,4 @@
 ﻿
-using Archetype;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ArchetypeTests
@@ -11,7 +10,7 @@ namespace ArchetypeTests
         [TestMethod]
         public void TestMethod1()
         {
-            
+            Assert.IsTrue(true);
         }
     }
 }

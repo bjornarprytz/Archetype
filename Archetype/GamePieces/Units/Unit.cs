@@ -15,7 +15,7 @@ namespace Archetype
         ITriggerAttachee<Unit>,
         IResponseAttachee<Unit>
     {
-        public event EventHandler<ZoneChangeArgs<Unit>> OnZoneChanged;
+        public event EventHandler<ZoneChangeEventArgs<Unit>> OnZoneChanged;
 
         public event EventHandler<TriggerArgs> OnCardDrawn;
         public event EventHandler<TriggerArgs> OnCardDiscarded;
@@ -97,7 +97,7 @@ namespace Archetype
 
             newZone?.Insert(this);
 
-            OnZoneChanged?.Invoke(this, new ZoneChangeArgs<Unit>(this, CurrentZone, newZone));
+            OnZoneChanged?.Invoke(this, new ZoneChangeEventArgs<Unit>(this, CurrentZone, newZone));
         }
 
         public virtual void EndTurn() { }

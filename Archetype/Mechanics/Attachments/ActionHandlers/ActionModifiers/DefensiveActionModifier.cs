@@ -1,13 +1,10 @@
-﻿using System;
-
-namespace Archetype
+﻿namespace Archetype
 {
-    public class DefensiveActionModifier<THost, TAct> : ActionModifier<THost, TAct>
+    public abstract class DefensiveActionModifier<THost, TAct> : ActionModifier<THost, TAct>
         where THost : class, ITarget, IModifierAttachee<THost>
         where TAct : ModifiableActionInfo
     {
-
-        public DefensiveActionModifier(int modifier=0, float multiplier=1f) : base (modifier, multiplier)
+        protected DefensiveActionModifier(int modifier=0, float multiplier=1f) : base (modifier, multiplier)
         {
         }
 

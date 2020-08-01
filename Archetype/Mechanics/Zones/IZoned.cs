@@ -7,7 +7,7 @@ namespace Archetype
     public interface IZoned<T> 
         where T : IZoned<T>
     {
-        event EventHandler<ZoneChangeArgs<T>> OnZoneChanged;
+        event EventHandler<ZoneChangeEventArgs<T>> OnZoneChanged;
 
         Zone<T> CurrentZone { get; }
 

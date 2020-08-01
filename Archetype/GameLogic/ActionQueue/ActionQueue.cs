@@ -5,7 +5,7 @@ namespace Archetype
 {
     public class ActionQueue : IActionQueue
     {
-        private Queue<ActionInfo> _actions;
+        private readonly Queue<ActionInfo> _actions;
 
         public ActionQueue()
         {
