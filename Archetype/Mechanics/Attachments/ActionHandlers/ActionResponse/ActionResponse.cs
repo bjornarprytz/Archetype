@@ -10,9 +10,9 @@ namespace Archetype
     public abstract class ActionResponse<THost, TAct> : ActionResponse<THost>
         where TAct : ActionInfo
     {
-        private EventHandler<TAct> _handler;
+        private readonly EventHandler<TAct> _handler;
 
-        public ActionResponse(EventHandler<TAct> handler)
+        protected ActionResponse(EventHandler<TAct> handler)
         {
             _handler = handler;
         }

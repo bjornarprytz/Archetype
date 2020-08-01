@@ -62,24 +62,24 @@ namespace ArchetypeTests
         [TestMethod]
         public void TypeDictionary_ConstraintAllowsSubclasses()
         {
-            var mod = new DefensiveActionModifier<Unit, DamageActionArgs>();
+            var mod = new Resistance();
 
-            ConstrainedTDict.Set<DefensiveActionModifier<Unit, DamageActionArgs>>(mod);
+            ConstrainedTDict.Set<Resistance>(mod);
 
-            Assert.AreEqual(mod, ConstrainedTDict.Get<DefensiveActionModifier<Unit, DamageActionArgs>>());
+            Assert.AreEqual(mod, ConstrainedTDict.Get<Resistance>());
         }
 
         [TestMethod]
         public void TypeDictionary_ConstraintAllowsMultipleSubclasses()
         {
-            var mod1 = new DefensiveActionModifier<Unit, DamageActionArgs>();
-            var mod2 = new DefensiveActionModifier<Unit, HealActionArgs>();
+            var mod1 = new Resistance();
+            var mod2 = new Strength();
             
-            ConstrainedTDict.Set<DefensiveActionModifier<Unit, DamageActionArgs>>(mod1);
-            ConstrainedTDict.Set<DefensiveActionModifier<Unit, HealActionArgs>>(mod2);
+            ConstrainedTDict.Set<Resistance>(mod1);
+            ConstrainedTDict.Set<Strength>(mod2);
 
-            Assert.AreEqual(mod1, ConstrainedTDict.Get<DefensiveActionModifier<Unit, DamageActionArgs>>());
-            Assert.AreEqual(mod2, ConstrainedTDict.Get<DefensiveActionModifier<Unit, HealActionArgs>>());
+            Assert.AreEqual(mod1, ConstrainedTDict.Get<Resistance>());
+            Assert.AreEqual(mod2, ConstrainedTDict.Get<Strength>());
         }
     }
 }

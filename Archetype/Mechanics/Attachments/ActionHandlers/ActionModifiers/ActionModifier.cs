@@ -3,8 +3,8 @@
     public abstract class ActionModifier<THost> : Attachment<THost, ActionInfo>
         where THost : class, IModifierAttachee<THost>
     {
-        public int Modifier { get; set; }
-        public float Multiplier { get; set; }
+        public int Modifier { get; protected set; }
+        public float Multiplier { get; protected set; }
 
         protected ActionModifier(int modifier, float multiplier)
         {

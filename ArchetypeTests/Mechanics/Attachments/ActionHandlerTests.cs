@@ -10,7 +10,7 @@ namespace ArchetypeTests
         [TestMethod]
         public void Modifier_ActionModifierIsAttached()
         {
-            var modifier = new OffensiveActionModifier<Unit, DamageActionArgs>();
+            var modifier = new Strength();
 
             (Friend1 as IModifierAttachee<Unit>).AttachModifier(modifier);
 
@@ -20,7 +20,7 @@ namespace ArchetypeTests
         [TestMethod]
         public void Modifier_ActionModifierIsDetached()
         {
-            var modifier = new OffensiveActionModifier<Unit, DamageActionArgs>();
+            var modifier = new Strength();
 
             (Friend1 as IModifierAttachee<Unit>).AttachModifier(modifier);
 
@@ -38,7 +38,7 @@ namespace ArchetypeTests
             var damageModifier = 1;
 
             (Friend2 as IModifierAttachee<Unit>).AttachModifier(
-                new OffensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+                new Strength(damageModifier));
 
             var previousHealth = Enemy1.Life;
 
@@ -56,7 +56,7 @@ namespace ArchetypeTests
             var damageModifier = 1;
 
             (Enemy1 as IModifierAttachee<Unit>).AttachModifier(
-                new DefensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+                new Resistance(damageModifier));
 
             var previousHealth = Enemy1.Life;
 
@@ -74,10 +74,10 @@ namespace ArchetypeTests
             var damageModifier = 1;
 
             (Enemy1 as IModifierAttachee<Unit>).AttachModifier(
-                new DefensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+                new Resistance(damageModifier));
 
             (Enemy1 as IModifierAttachee<Unit>).AttachModifier(
-                new DefensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+                new Resistance(damageModifier));
                 
             var previousHealth = Enemy1.Life;
 
@@ -96,13 +96,13 @@ namespace ArchetypeTests
             var damageMultiplier = 2f;
 
             (Enemy1 as IModifierAttachee<Unit>).AttachModifier(
-                new DefensiveActionModifier<Unit, DamageActionArgs>(multiplier: damageMultiplier));
+                new Resistance(multiplier: damageMultiplier));
             
             (Enemy1 as IModifierAttachee<Unit>).AttachModifier(
-                new DefensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+                new Resistance(damageModifier));
             
             (Enemy1 as IModifierAttachee<Unit>).AttachModifier(
-                new DefensiveActionModifier<Unit, DamageActionArgs>(damageModifier));
+                new Resistance(damageModifier));
 
             var previousHealth = Enemy1.Life;
 
