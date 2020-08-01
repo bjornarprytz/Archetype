@@ -55,7 +55,7 @@ namespace Archetype
             OnZoneChanged?.Invoke(this, new ZoneChangeEventArgs<Card>(this, CurrentZone, newZone));
         }
 
-        internal bool Play(PlayCardArgs args, GameState gameState)
+        public bool Play(PlayCardArgs args, GameState gameState)
         {
             if (!args.Valid) return false;
 

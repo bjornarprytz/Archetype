@@ -2,10 +2,10 @@
 
 namespace Archetype
 {
-    public class ImmediateValue<T> : ValueDescriptor<T>
+    public class Immediate<T> : ValueDescriptor<T>
     {
         public T Value { get; set; }
-        public ImmediateValue(T value)
+        public Immediate(T value)
         {
             Value = value;
         }

@@ -41,5 +41,20 @@ namespace ArchetypeTests
 
             Assert.AreEqual(2, valueToModify);
         }
+
+        [TestMethod]
+        public void Trigger_CanBeDetached()
+        {
+            var trigger = new HealTrigger(delegate { });
+
+            (Friend2 as ITriggerAttachee<Unit>)
+                .AttachTrigger(trigger);
+
+            (Friend2 as ITriggerAttachee<Unit>)
+                .DetachTrigger(trigger);
+
+
+            Assert.AreEqual(0, Friend2.Triggers.Count);
+        }
     }
 }

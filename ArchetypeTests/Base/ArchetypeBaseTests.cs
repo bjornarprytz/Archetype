@@ -191,7 +191,7 @@ namespace ArchetypeTests
                     new DamageParameterData
                     {
                         TargetRequirements = AnyEnemies(1, 1),
-                        Strength = new ImmediateValue<int>(damage)
+                        Strength = new Immediate<int>(damage)
                     }
                 }
             };
@@ -211,12 +211,12 @@ namespace ArchetypeTests
                             Predicate = new UnitPredicateData{ Selfness = Selfness.Me, Relation = TargetRelation.Ally, UnitZone = UnitZone.Battlefield, },
                             Selection = new AllSelectionData(),
                         },
-                        Strength = new ImmediateValue<int>(damage)
+                        Strength = new Immediate<int>(damage)
                     },
                     new HealParameterData
                     {
                         TargetRequirements = AnyAllies(1, 1),
-                        Strength = new ImmediateValue<int>(heal)
+                        Strength = new Immediate<int>(heal)
                     }
                 }
             };

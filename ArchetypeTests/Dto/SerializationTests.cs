@@ -8,28 +8,64 @@ namespace ArchetypeTests
     [TestClass]
     public class SerializationTests : ArchetypeTestBase
     {
-        [TestMethod]
-        public void ImmediateValue_Is_Serialized()
+        private CardData cardData;
+
+        [TestInitialize]
+        public override void InitializeTests()
         {
-            var data1 = new CardData
+            cardData = new CardData
             {
+                Cost = 1,
                 Actions = new List<ActionParameterData>
                 {
-                    new DamageParameterData
+                    new UnitTriggerData
                     {
-                        Strength = new ImmediateValue<int>(1),
+                        Cause = UnitTriggerCause.Damaged,
+                        TriggerAction = new HealParameterData
+                        {
+                            Strength = new Immediate<int>(3),
+                            TargetRequirements = new TargetRequirementData
+                            {
+                                Predicate = new UnitPredicateData(),
+                                Selection = new AllSelectionData(),
+                            }
+                        }
                     }
                 }
             };
 
 
-            var json = CardSerializer.SerializeCardData(data1);
+            base.InitializeTests();
+        }
 
-            var data2 = CardSerializer.DeserializeCardJson(json);
+        [TestMethod]
+        public void CardData_SerializationWorksBothWays()
+        {
+            var json = CardSerializer.SerializeCardData(cardData);
 
-            var damageValue = ((ImmediateValue<int>)((DamageParameterData)data2.Actions.First()).Strength).Value;
+            var cardData2 = CardSerializer.DeserializeCardJson(json);
 
-            Assert.AreEqual(1, damageValue);
+            Assert.AreEqual(cardData.GetHashCode(), cardData2.GetHashCode());
+        }
+
+        [TestMethod]
+        public void CardData_CreatesCorrectCard()
+        {
+            var card = cardData.MakeCopy(Friend1);
+
+            card.Play(
+                new PlayCardArgs(
+                    new List<ISelectionInfo<ITarget>>
+                    {
+                        new AllSelectionInfo<ITarget>(
+                            new List<ITarget> { Enemy1 })
+
+                    }),
+                    GameState);
+
+            GameState.ActionQueue.ResolveAll();
+
+            Assert.AreEqual(1, Enemy1.Triggers.Count);
         }
     }
 }
