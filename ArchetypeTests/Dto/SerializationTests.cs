@@ -24,11 +24,7 @@ namespace ArchetypeTests
                         TriggerAction = new HealParameterData
                         {
                             Strength = new Immediate<int>(3),
-                            TargetRequirements = new TargetRequirementData
-                            {
-                                Predicate = new UnitPredicateData(),
-                                Selection = new AllSelectionData(),
-                            }
+                            TargetRequirements = Self()
                         }
                     }
                 }

@@ -1,11 +1,15 @@
 ﻿namespace Archetype
 {
-    public class ModifierData : AttachmentData
+    public abstract class ModifierData : ActionParameterData
     {
+        public int Modifier { get; set; }
+        public float Multiplier { get; set; }
 
-        public override ActionInfo GetAttachmentActionInfo(ISource source, ITarget target, GameState gameState)
+        protected override ActionInfo GetActionInfo(ISource source, ITarget target, GameState gameState)
         {
-            throw new System.NotImplementedException();
+            return new AttachModifierActionArgs<Unit>(source, target as Unit, GetModifier());
         }
+
+        protected abstract ActionModifier<Unit> GetModifier();
     }
 }
