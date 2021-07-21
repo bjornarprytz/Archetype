@@ -3,45 +3,45 @@ using System;
 
 namespace Archetype.CardBuilder
 {
-    public class SetBuilderContext : BaseBuilder<SetData>
+    public class SetBuilder : BaseBuilder<SetData>
     {
         private CardData _cardTemplate;
 
-        private SetBuilderContext(string name)
+        private SetBuilder(string name)
         {
             _cardTemplate = new();
 
             Construction.Name = name;
         }
 
-        public static SetBuilderContext CreateSet(string name)
+        public static SetBuilder CreateSet(string name)
         {
-            return new SetBuilderContext(name);
+            return new SetBuilder(name);
         }
 
-        public SetBuilderContext Template(Action<TemplateBuilder> provideContext)
+        public SetBuilder Template(Action<TemplateBuilder> builderProvider)
         {
             var cbc = BuilderFactory.TemplateBuilder();
 
-            provideContext(cbc);
+            builderProvider(cbc);
 
             _cardTemplate = cbc.Build();
 
             return this;
         }
 
-        public SetBuilderContext Creature(Action<CreatureBuilder> provideContext)
+        public SetBuilder Creature(Action<CreatureBuilder> builderProvider)
         {
             var cbc = BuilderFactory.CreatureBuilder(_cardTemplate); // Input template here
 
-            provideContext(cbc);
+            builderProvider(cbc);
 
             Construction.Cards.Add(cbc.Build());
 
             return this;
         }
 
-        public SetBuilderContext Spell(Action<SpellBuilder> provideContext)
+        public SetBuilder Spell(Action<SpellBuilder> provideContext)
         {
             var cbc = BuilderFactory.SpellBuilder(_cardTemplate); // Input template here
 

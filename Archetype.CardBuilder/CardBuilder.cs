@@ -14,6 +14,11 @@ namespace Archetype.CardBuilder
             Construction = template with { Id = Guid.NewGuid() };
         }
 
+        public Action<TBuilder> ToProvider()
+        {
+            return provider => provider.Construction = Construction;
+        }
+
         public TBuilder Name(string name)
         {
             Construction.Name = name;

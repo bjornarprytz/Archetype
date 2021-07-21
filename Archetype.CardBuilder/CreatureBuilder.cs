@@ -1,4 +1,5 @@
 ﻿using Archetype.Core;
+using System;
 
 namespace Archetype.CardBuilder
 {
