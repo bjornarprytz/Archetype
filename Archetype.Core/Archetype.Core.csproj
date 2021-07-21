@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Effects\" />
+    <Folder Include="Play\Effects\" />
+    <Folder Include="Play\Pieces\" />
   </ItemGroup>
 
 </Project>
