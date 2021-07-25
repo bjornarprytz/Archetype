@@ -1,5 +1,7 @@
 ﻿using Archetype.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Archetype.CardBuilder
 {
@@ -63,6 +65,13 @@ namespace Archetype.CardBuilder
         public TBuilder Art(string link)
         {
             Construction.ImagePath = link;
+
+            return this as TBuilder;
+        }
+
+        public TBuilder Effect(Expression<Func<IEnemy, IGameState, IEffectResult>> expression)
+        {
+            Construction.Effects.Add(new CardEffect(expression));
 
             return this as TBuilder;
         }

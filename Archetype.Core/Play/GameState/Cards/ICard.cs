@@ -6,8 +6,8 @@ namespace Archetype.Core
     {
         CardData Data { get; set; }
 
-        CardPlayArgs GetPlayArgs();
-        bool ValidateArgs(CardPlayArgs args, IGameState gameState);
-        Task ResolveAsync(CardPlayArgs args, IGameState gameState);
+        ICardArgs GetPlayArgs();
+        bool ValidateArgs(ICardArgs args, IGameState gameState);
+        Task ResolveAsync(ICardArgs args, IGameState gameState);
     }
 }

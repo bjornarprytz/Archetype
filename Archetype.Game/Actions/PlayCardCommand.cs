@@ -9,7 +9,7 @@ namespace Archetype.Game
     {
         public ICard Card { get; set; }
 
-        public CardPlayArgs Args { get; set; }
+        public ICardArgs Args { get; set; }
     }
 
     public class PlayCardCommandHandler : IRequestHandler<PlayCardCommand, bool>

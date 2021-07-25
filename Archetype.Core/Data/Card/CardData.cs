@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Archetype.Core
 {
@@ -13,5 +14,7 @@ namespace Archetype.Core
 
         public string RulesText { get; set; }
         public string ImagePath { get; set; }
+
+        public IList<CardEffect> Effects { get; } = new List<CardEffect>();
     }
 }

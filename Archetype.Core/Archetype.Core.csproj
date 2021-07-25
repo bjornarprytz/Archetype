@@ -8,4 +8,9 @@
     <Folder Include="Play\GameState\Pieces\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Remote.Linq" Version="6.3.0" />
+    <PackageReference Include="Remote.Linq.Newtonsoft.Json" Version="6.3.0" />
+  </ItemGroup>
+
 </Project>
