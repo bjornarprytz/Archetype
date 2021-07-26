@@ -15,6 +15,6 @@ namespace Archetype.Core
         public string RulesText { get; set; }
         public string ImagePath { get; set; }
 
-        public IList<CardEffect> Effects { get; } = new List<CardEffect>();
+        public List<CardEffect> Effects { get; } = new ();
     }
 }
