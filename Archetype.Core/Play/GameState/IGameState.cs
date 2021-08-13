@@ -10,6 +10,7 @@ namespace Archetype.Core
     {
         IPlayer Player { get; }
         IBoard Map { get; }
+        ICardStack Stack { get; }
         IEffectQueue EffectQueue { get; }
         /* Also needs a list of pieces */
     }

@@ -2,6 +2,6 @@
 {
     public interface IEffect
     {
-
+        IEffectResult Resolve();
     }
 }

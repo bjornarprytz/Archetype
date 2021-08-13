@@ -10,5 +10,7 @@ namespace Archetype.Core
     {
         public IHand Hand { get; }
         public IDiscardPile DiscardPile { get; }
+        
+        public int Resources { get; set; }
     }
 }

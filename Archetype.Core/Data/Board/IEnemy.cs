@@ -3,8 +3,7 @@
     public interface IEnemy
     {
         public int Health { get; set; }
-
-        public IEffectResult Damage(int i);
+        public int Damage { get; set; }
     }
 }
 

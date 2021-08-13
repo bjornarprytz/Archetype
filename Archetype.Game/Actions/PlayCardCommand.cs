@@ -2,33 +2,31 @@
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
+using Archetype.Game.Infrastructure;
 
 namespace Archetype.Game
 {
-    public class PlayCardCommand : IRequest<bool>
+    public class PlayCardCommand : IRequestWrapper
     {
+        public IPlayer Player { get; set; }
         public ICard Card { get; set; }
-
         public ICardArgs Args { get; set; }
     }
 
-    public class PlayCardCommandHandler : IRequestHandler<PlayCardCommand, bool>
+    public class PlayCardCommandHandler : IHandlerWrapper<PlayCardCommand>
     {
-        private readonly IGameState _gameState;
+        private readonly ICardStack _cardStack;
 
-        public PlayCardCommandHandler(IGameState gameState)
+        public PlayCardCommandHandler(ICardStack cardStack)
         {
-            _gameState = gameState;
+            _cardStack = cardStack;
         }
 
-        public async Task<bool> Handle(PlayCardCommand request, CancellationToken cancellationToken)
+        public Task<IResponseWrapper> Handle(PlayCardCommand request, CancellationToken cancellationToken)
         {
-            if (!request.Card.ValidateArgs(request.Args, _gameState))
-                return false;
+            _cardStack.Push(request.Card, request.Args);
 
-            await request.Card.ResolveAsync(request.Args, _gameState);
-
-            return true;
+            return Task.FromResult<IResponseWrapper>(Response.Ok());
         }
     }
 }
