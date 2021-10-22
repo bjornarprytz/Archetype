@@ -30,22 +30,11 @@ namespace Archetype.CardBuilder
             return this;
         }
 
-        public SetBuilder Creature(Action<CreatureBuilder> builderProvider)
+        public SetBuilder Card(Action<CardBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.CreatureBuilder(_cardTemplate); // Input template here
+            var cbc = BuilderFactory.CardBuilder(); // Input template data here
 
             builderProvider(cbc);
-
-            Construction.Cards.Add(cbc.Build());
-
-            return this;
-        }
-
-        public SetBuilder Spell(Action<SpellBuilder> provideContext)
-        {
-            var cbc = BuilderFactory.SpellBuilder(_cardTemplate); // Input template here
-
-            provideContext(cbc);
 
             Construction.Cards.Add(cbc.Build());
 

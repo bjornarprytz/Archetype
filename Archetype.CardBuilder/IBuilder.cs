@@ -1,4 +1,6 @@
-﻿namespace Archetype.CardBuilder
+﻿using System;
+
+namespace Archetype.CardBuilder
 {
     public interface IBuilder { }
 
@@ -17,6 +19,11 @@
         }
         internal T Construction { get; set; }
         protected abstract void PreBuild();
+        public Action<TBuilder> ToProvider<TBuilder>()
+            where TBuilder : BaseBuilder<T>
+        {
+            return provider => provider.Construction = Construction;
+        }
         public T Build() {
             PreBuild();
             return Construction;

@@ -8,6 +8,9 @@ namespace Archetype.Core
     public class CardEffect<TTarget, TResult> : IEffect
         where TTarget : IGamePiece
     {
+        private Func<TTarget, IGameState, TResult> _resolve;
+        private Func<TTarget, IGameState, bool> _validate;
+        
         public CardEffect()
         {
             // Only for serialization
@@ -27,10 +30,27 @@ namespace Archetype.Core
         public LambdaExpression TargetValidationExpression { get; set; }
 
         [JsonIgnore]
-        public Func<TTarget, IGameState, TResult> Resolve => (Func<TTarget, IGameState, TResult>)EffectExpression.ToLinqExpression().Compile();
-        
+        public Func<TTarget, IGameState, TResult> Resolve
+        {
+            get
+            {
+                _resolve ??= (Func<TTarget, IGameState, TResult>)EffectExpression.ToLinqExpression().Compile();
+                
+                return _resolve;
+            }
+        }
+
         [JsonIgnore]
-        public Func<TTarget, IGameState, bool> Validate => (Func<TTarget, IGameState, bool>)TargetValidationExpression.ToLinqExpression().Compile();
+        public Func<TTarget, IGameState, bool> Validate
+        {
+            get
+            {
+                _validate ??= (Func<TTarget, IGameState, bool>)TargetValidationExpression.ToLinqExpression().Compile();
+
+                return _validate;
+            }
+        } 
+            
 
         public Type TargetType => typeof(TTarget);
         public Type ResultType => typeof(TResult);

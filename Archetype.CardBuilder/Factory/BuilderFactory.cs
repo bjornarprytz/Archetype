@@ -4,14 +4,10 @@ namespace Archetype.CardBuilder
 {
     public class BuilderFactory
     {
-        public static CreatureBuilder CreatureBuilder(CardData template = null)
-        {
-            return new CreatureBuilder(template as CreatureCardData);
-        }
 
-        public static SpellBuilder SpellBuilder(CardData template = null)
+        public static CardBuilder CardBuilder(CardData template = null)
         {
-            return new SpellBuilder(template as SpellCardData);
+            return new CardBuilder(template);
         }
 
         public static TemplateBuilder TemplateBuilder(CardData template = null)

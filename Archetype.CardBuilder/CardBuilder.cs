@@ -1,79 +1,86 @@
 ﻿using Archetype.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace Archetype.CardBuilder
 {
-    public abstract class CardBuilder<T, TBuilder> : BaseBuilder<T>
-        where T : CardData, new()
-        where TBuilder : CardBuilder<T, TBuilder>
+    public class CardBuilder : BaseBuilder<CardData>
     {
-        protected CardBuilder(T template)
+        private StringBuilder _rulesTextBuilder = new ();
+        
+        internal CardBuilder(CardData template)
         {
-            if (template == null) template = new T();
+            template ??= new CardData()
+            {
+                Id = Guid.NewGuid()
+            };
 
-            Construction = template; // TODO: set new Guid
+            Construction = template;
         }
 
-        public Action<TBuilder> ToProvider()
-        {
-            return provider => provider.Construction = Construction;
-        }
+        
 
-        public TBuilder Name(string name)
+        public CardBuilder Name(string name)
         {
             Construction.Name = name;
 
-            return this as TBuilder;
+            return this;
         }
 
-        public TBuilder Rarity(CardRarity rarity)
+        public CardBuilder Rarity(CardRarity rarity)
         {
             Construction.Rarity = rarity;
 
-            return this as TBuilder;
+            return this;
         }
 
-        public TBuilder Cost(int cost)
+        public CardBuilder Cost(int cost)
         {
             Construction.Cost = cost;
 
-            return this as TBuilder;
+            return this;
         }
 
-        public TBuilder Color(CardColor color)
+        public CardBuilder Color(CardColor color)
         {
             Construction.Color = color;
 
-            return this as TBuilder;
+            return this;
         }
 
        
 
-        public TBuilder Text(string text)
+        public CardBuilder Text(string text)
         {
-            Construction.RulesText = text;
+            _rulesTextBuilder = new StringBuilder(text);
 
-            return this as TBuilder;
+            return this;
+        }
+        
+        public CardBuilder AddTextLine(string text)
+        {
+            _rulesTextBuilder.AppendLine(text);
+
+            return this;
         }
 
-        public TBuilder Art(string link)
+        public CardBuilder Art(string link)
         {
             Construction.ImageUri = link;
 
-            return this as TBuilder;
+            return this;
         }
 
-        public TBuilder Effect<TTarget, TResult>(Expression<Func<TTarget, IGameState, TResult>> expression)
+        public CardBuilder Effect<TTarget, TResult>(Expression<Func<TTarget, IGameState, TResult>> expression)
             where TTarget : IGamePiece
         {
             Construction.Effects.Add(new CardEffect<TTarget, TResult>(expression));
 
-            return this as TBuilder;
+            return this;
         }
         
-        public TBuilder Effect<TTarget, TResult>(
+        public CardBuilder Effect<TTarget, TResult>(
             Expression<Func<TTarget, IGameState, bool>> validationExpression,
             Expression<Func<TTarget, IGameState, TResult>> resolutionExpression
             )
@@ -81,11 +88,13 @@ namespace Archetype.CardBuilder
         {
             Construction.Effects.Add(new CardEffect<TTarget, TResult>(resolutionExpression, validationExpression));
 
-            return this as TBuilder;
+            return this;
         }
 
         protected override void PreBuild()
         {
+            Construction.RulesText = _rulesTextBuilder.ToString();
+            
             Console.WriteLine($"Creating card {Construction.Name}");
         }
     }

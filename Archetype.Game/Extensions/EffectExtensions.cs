@@ -8,7 +8,7 @@ namespace Archetype.Game.Extensions
 
         public static bool CallTargetValidationMethod(this IEffect effect, IGamePiece gamePiece, IGameState gameState)
         {
-            dynamic validationLambda = effect.GetType().GetProperty("Validate");
+            dynamic validationLambda = effect.GetType().GetProperty("Validate").GetValue(effect);
 
             dynamic dynGamePiece = gamePiece;
 
@@ -17,7 +17,7 @@ namespace Archetype.Game.Extensions
         
         public static object CallResolveMethod(this IEffect effect, IGamePiece gamePiece, IGameState gameState)
         {
-            dynamic resolutionLambda = effect.GetType().GetProperty("Resolve");
+            dynamic resolutionLambda = effect.GetType().GetProperty("Resolve").GetValue(effect);
 
             dynamic dynGamePiece = gamePiece;
 

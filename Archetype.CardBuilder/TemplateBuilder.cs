@@ -2,7 +2,7 @@
 
 namespace Archetype.CardBuilder
 {
-    public class TemplateBuilder : CardBuilder<CardData, TemplateBuilder>
+    public class TemplateBuilder : CardBuilder
     {
         internal TemplateBuilder(CardData template) : base(template)
         {
