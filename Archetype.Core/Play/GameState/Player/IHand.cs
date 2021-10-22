@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Archetype.Core
 {
-    public interface IHand
+    public interface IHand  : IZone
     {
-        IEnumerable<ICard> Cards { get; }
     }
 }

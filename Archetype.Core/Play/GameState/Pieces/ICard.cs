@@ -2,11 +2,10 @@
 
 namespace Archetype.Core
 {
-    public interface ICard
+    public interface ICard : IGamePiece
     {
-        CardData Data { get; set; }
-
-        ICardArgs GenerateArgs();
-        Task ResolveAsync(ICardArgs args, IGameState gameState);
+        CardData Data { get; }
+        
+        IZone CurrentZone { get; }
     }
 }

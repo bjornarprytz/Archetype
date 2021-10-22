@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Archetype.Core.Pieces;
 
 namespace Archetype.CardBuilder
 {
@@ -70,9 +69,10 @@ namespace Archetype.CardBuilder
             return this as TBuilder;
         }
 
-        public TBuilder Effect(Expression<Func<IEnemy, IGameState, IEffectResult>> expression)
+        public TBuilder Effect<TTarget, TResult>(Expression<Func<TTarget, IGameState, TResult>> expression)
+            where TTarget : IGamePiece
         {
-            Construction.Effects.Add(new CardEffect(expression));
+            Construction.Effects.Add(new CardEffect<TTarget, TResult>(expression));
 
             return this as TBuilder;
         }

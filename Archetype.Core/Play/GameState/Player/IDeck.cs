@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Archetype.Core
 {
-    public interface IDeck
+    public interface IDeck : IZone
     {
         ICard Draw();
         void Shuffle();

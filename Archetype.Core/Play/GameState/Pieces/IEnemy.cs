@@ -1,8 +1,8 @@
 using Archetype.Core.Enemy;
 
-namespace Archetype.Core.Pieces
+namespace Archetype.Core
 {
-    public interface IEnemy
+    public interface IEnemy : IGamePiece
     {
         EnemyData Data { get; set; }
         

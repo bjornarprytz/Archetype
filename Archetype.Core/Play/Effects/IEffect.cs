@@ -1,7 +1,10 @@
-﻿namespace Archetype.Core
+﻿using System;
+
+namespace Archetype.Core
 {
     public interface IEffect
     {
-        IEffectResult Resolve();
+        Type TargetType { get; }
+        Type ResultType { get; }
     }
 }

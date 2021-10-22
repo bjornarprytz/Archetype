@@ -5,9 +5,9 @@ namespace Archetype.Core
 {
     public class CardData
     {
+        public Guid Id { get; set; }
         public int Cost { get; set; }
         public string Name { get; set; }
-        public Guid Id { get; set; }
 
         public CardRarity Rarity { get; set; }
         public CardColor Color { get; set; }
@@ -16,6 +16,6 @@ namespace Archetype.Core
         
         public string ImageUri { get; set; }
 
-        public List<CardEffect> Effects { get; } = new List<CardEffect>();
+        public List<IEffect> Effects { get; } = new ();
     }
 }

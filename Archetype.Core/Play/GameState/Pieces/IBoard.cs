@@ -1,7 +1,9 @@
-﻿namespace Archetype.Core
+﻿using System.Collections.Generic;
+
+namespace Archetype.Core
 {
     public interface IBoard
     {
-        MapData MapData { get; }
+        IEnumerable<IZone> Zones { get; }
     }
 }

@@ -2,8 +2,7 @@
 
 namespace Archetype.Core
 {
-    public interface IDiscardPile
+    public interface IDiscardPile : IZone
     {
-        IEnumerable<ICard> Cards { get; set; }
     }
 }
