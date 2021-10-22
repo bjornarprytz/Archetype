@@ -49,11 +49,7 @@ namespace Archetype.CardBuilder
             return this as TBuilder;
         }
 
-        public TBuilder Red() => Color(CardColor.Red);
-        public TBuilder Blue() => Color(CardColor.Blue);
-        public TBuilder Black() => Color(CardColor.Black);
-        public TBuilder White() => Color(CardColor.White);
-        public TBuilder Green() => Color(CardColor.Green);
+       
 
         public TBuilder Text(string text)
         {
@@ -73,6 +69,17 @@ namespace Archetype.CardBuilder
             where TTarget : IGamePiece
         {
             Construction.Effects.Add(new CardEffect<TTarget, TResult>(expression));
+
+            return this as TBuilder;
+        }
+        
+        public TBuilder Effect<TTarget, TResult>(
+            Expression<Func<TTarget, IGameState, bool>> validationExpression,
+            Expression<Func<TTarget, IGameState, TResult>> resolutionExpression
+            )
+            where TTarget : IGamePiece
+        {
+            Construction.Effects.Add(new CardEffect<TTarget, TResult>(resolutionExpression, validationExpression));
 
             return this as TBuilder;
         }
