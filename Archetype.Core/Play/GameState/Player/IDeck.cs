@@ -6,8 +6,7 @@ namespace Archetype.Core
 {
     public interface IDeck
     {
-        Stack<ICard> Cards { get; }
-
+        ICard Draw();
         void Shuffle();
     }
 }

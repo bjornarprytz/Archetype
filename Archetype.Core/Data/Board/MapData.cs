@@ -2,7 +2,7 @@
 {
     public class MapData
     {
-        // Graph of zones
-        public IEnemy Test { get; set; }
+        // Graph of zones ?
+        // Enemies ?
     }
 }

@@ -2,6 +2,7 @@
 using Remote.Linq;
 using Remote.Linq.Expressions;
 using System;
+using Archetype.Core.Pieces;
 
 namespace Archetype.Core
 {

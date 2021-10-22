@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Archetype.Core.Pieces;
 
 namespace Archetype.CardBuilder
 {
@@ -11,9 +12,9 @@ namespace Archetype.CardBuilder
     {
         protected CardBuilder(T template)
         {
-            template ??= new();
+            if (template == null) template = new T();
 
-            Construction = template with { Id = Guid.NewGuid() };
+            Construction = template; // TODO: set new Guid
         }
 
         public Action<TBuilder> ToProvider()
@@ -64,7 +65,7 @@ namespace Archetype.CardBuilder
 
         public TBuilder Art(string link)
         {
-            Construction.ImagePath = link;
+            Construction.ImageUri = link;
 
             return this as TBuilder;
         }

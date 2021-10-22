@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,8 +9,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Remote.Linq" Version="6.3.0" />
-    <PackageReference Include="Remote.Linq.Newtonsoft.Json" Version="6.3.0" />
+    <PackageReference Include="Remote.Linq" Version="7.0.0" />
+    <PackageReference Include="Remote.Linq.Newtonsoft.Json" Version="7.0.0" />
   </ItemGroup>
 
 </Project>

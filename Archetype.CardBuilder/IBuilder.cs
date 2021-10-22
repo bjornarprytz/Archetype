@@ -5,7 +5,7 @@
     public interface IBuilder<out T> : IBuilder
         where T : new()
     {
-        public T Build();
+        T Build();
     }
 
     public abstract class BaseBuilder<T> : IBuilder<T>
@@ -13,7 +13,7 @@
     {
         protected BaseBuilder()
         {
-            Construction = new();
+            Construction = new T();
         }
         internal T Construction { get; set; }
         protected abstract void PreBuild();

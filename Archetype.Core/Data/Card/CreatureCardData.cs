@@ -1,6 +1,6 @@
 ﻿namespace Archetype.Core
 {
-    public record CreatureCardData : CardData
+    public class CreatureCardData : CardData
     {
         public string Type { get; set; }
 

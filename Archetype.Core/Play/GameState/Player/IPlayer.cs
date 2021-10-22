@@ -8,9 +8,8 @@ namespace Archetype.Core
 {
     public interface IPlayer
     {
-        public IHand Hand { get; }
-        public IDiscardPile DiscardPile { get; }
-        
-        public int Resources { get; set; }
+        IHand Hand { get; }
+        IDiscardPile DiscardPile { get; }
+        int Resources { get; set; }
     }
 }

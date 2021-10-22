@@ -9,7 +9,7 @@ namespace Archetype.CardBuilder
 
         private SetBuilder(string name)
         {
-            _cardTemplate = new();
+            _cardTemplate = new CardData();
 
             Construction.Name = name;
         }

@@ -2,6 +2,6 @@
 {
     public interface IEffectResult
     {
-        public int Val { get; }
+        int Val { get; }
     }
 }
