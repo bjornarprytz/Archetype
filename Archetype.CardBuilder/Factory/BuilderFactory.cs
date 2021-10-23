@@ -9,6 +9,12 @@ namespace Archetype.CardBuilder
         {
             return new CardBuilder(template);
         }
+        
+        public static EffectBuilder<TTarget, TResult> EffectBuilder<TTarget, TResult>(EffectData<TTarget, TResult> template = null)
+            where TTarget : IGamePiece
+        {
+            return new EffectBuilder<TTarget, TResult>(template);
+        }
 
         public static TemplateBuilder TemplateBuilder(CardData template = null)
         {

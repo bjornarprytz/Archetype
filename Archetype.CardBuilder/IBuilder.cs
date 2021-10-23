@@ -5,17 +5,18 @@ namespace Archetype.CardBuilder
     public interface IBuilder { }
 
     public interface IBuilder<out T> : IBuilder
-        where T : new()
     {
         T Build();
     }
 
     public abstract class BaseBuilder<T> : IBuilder<T>
-        where T : new()
     {
-        protected BaseBuilder()
+        private readonly Func<T> _factory;
+        protected BaseBuilder(Func<T> factory)
         {
-            Construction = new T();
+            _factory = factory;
+            
+            Construction = factory();
         }
         internal T Construction { get; set; }
         protected abstract void PreBuild();

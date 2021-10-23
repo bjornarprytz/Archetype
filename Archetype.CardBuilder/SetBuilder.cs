@@ -7,7 +7,7 @@ namespace Archetype.CardBuilder
     {
         private CardData _cardTemplate;
 
-        private SetBuilder(string name)
+        private SetBuilder(string name) : base(() => new SetData())
         {
             _cardTemplate = new CardData();
 

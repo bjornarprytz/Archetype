@@ -2,6 +2,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Text;
+using Archetype.CardBuilder.Extensions;
 
 namespace Archetype.CardBuilder
 {
@@ -9,14 +10,8 @@ namespace Archetype.CardBuilder
     {
         private StringBuilder _rulesTextBuilder = new ();
         
-        internal CardBuilder(CardData template)
+        internal CardBuilder(CardData template=null) : base(() => template ?? new CardData{ Id = Guid.NewGuid() })
         {
-            template ??= new CardData()
-            {
-                Id = Guid.NewGuid()
-            };
-
-            Construction = template;
         }
 
         
@@ -71,28 +66,52 @@ namespace Archetype.CardBuilder
 
             return this;
         }
-
-        public CardBuilder Effect<TTarget, TResult>(Expression<Func<TTarget, IGameState, TResult>> expression)
-            where TTarget : IGamePiece
+        
+        public CardBuilder EffectBuilder<TTarget, TResult>(Action<EffectBuilder<TTarget, TResult>> builderProvider)
+            where  TTarget : IGamePiece
         {
-            Construction.Effects.Add(new EffectData<TTarget, TResult>(expression));
+            var cbc = BuilderFactory.EffectBuilder<TTarget, TResult>(); // Input template data here
+
+            builderProvider(cbc);
+
+            Construction.Effects.Add(cbc.Build());
 
             return this;
         }
         
         public CardBuilder Effect<TTarget, TResult>(
-            Expression<Func<TTarget, IGameState, bool>> validationExpression,
-            Expression<Func<TTarget, IGameState, TResult>> resolutionExpression
+            Func<TTarget, IGameState, TResult> resolveEffect,
+            Func<TTarget, IGameState, bool> validateEffect=null,
+            Func<TTarget, IGameState, string> rulesText=null
             )
-            where TTarget : IGamePiece
+            where  TTarget : IGamePiece
         {
-            Construction.Effects.Add(new EffectData<TTarget, TResult>(resolutionExpression, validationExpression));
-
-            return this;
+            return EffectBuilder<TTarget, TResult>(provider => 
+                provider
+                    .Validate(validateEffect ?? ((piece, state) => true) )
+                    .Resolve(resolveEffect)
+                    .Text(rulesText ?? ((piece, state) => string.Empty) )
+                );
         }
 
         protected override void PreBuild()
         {
+            foreach (var effect in Construction.Effects)
+            {
+                string textLine;
+
+                try
+                {
+                    textLine = effect.CallTextMethod(null, null);
+                }
+                catch (NullReferenceException)
+                {
+                    textLine = "Text error: Additional state needed";
+                }
+                
+                AddTextLine(textLine);
+            }
+
             Construction.RulesText = _rulesTextBuilder.ToString();
             
             Console.WriteLine($"Creating card {Construction.Name}");

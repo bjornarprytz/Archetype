@@ -8,48 +8,54 @@ namespace Archetype.Core
     public class EffectData<TTarget, TResult> : IEffectMetaData 
         where TTarget : IGamePiece
     {
-        private Func<TTarget, IGameState, TResult> _resolve;
         private Func<TTarget, IGameState, bool> _validate;
-        
-        private readonly LambdaExpression _effectExpression;
-        private readonly LambdaExpression _targetValidationExpression;
+        private Func<TTarget, IGameState, string> _rulesText;
+
+        public EffectData() { }
         
         public EffectData(
-            System.Linq.Expressions.Expression<Func<TTarget, IGameState, TResult>> effectExpression,
-            System.Linq.Expressions.Expression<Func<TTarget, IGameState, bool>> validationExpression = null
+            Func<TTarget, IGameState, TResult> effectFunc,
+            Func<TTarget, IGameState, bool> validationFunc = null,
+            Func<TTarget, IGameState, string> rulesTextFunc = null
             )
         {
-            validationExpression ??= (piece, state) => true;
+            validationFunc ??= (piece, state) => true;
+            rulesTextFunc ??= (piece, state) => string.Empty;
             
-            _effectExpression = effectExpression.ToRemoteLinqExpression();
-            _targetValidationExpression = validationExpression.ToRemoteLinqExpression();
+            Validate = validationFunc;
+            Resolve = effectFunc;
+            RulesText = rulesTextFunc;
         }
-        
-        [JsonIgnore]
-        public Func<TTarget, IGameState, TResult> Resolve
-        {
-            get
-            {
-                _resolve ??= (Func<TTarget, IGameState, TResult>)_effectExpression.ToLinqExpression().Compile();
-                
-                return _resolve;
-            }
-        }
+
+        [JsonIgnore] public Func<TTarget, IGameState, TResult> Resolve { get; set; }
 
         [JsonIgnore]
         public Func<TTarget, IGameState, bool> Validate
         {
             get
             {
-                _validate ??= (Func<TTarget, IGameState, bool>)_targetValidationExpression.ToLinqExpression().Compile();
-
+                _validate ??= (piece, state) => true;
                 return _validate;
+            } 
+            set => _validate = value;
+        }
+
+        [JsonIgnore]
+        public Func<TTarget, IGameState, string> RulesText
+        {
+            get
+            {
+                _rulesText ??= (piece, state) => string.Empty;
+                return _rulesText;
             }
-        } 
-            
+            set => _rulesText = value;
+        }
+
 
         public Type TargetType => typeof(TTarget);
         public Type ResultType => typeof(TResult);
+        
+        public string RulesTextFunctionName => nameof(RulesText);
         public string ValidationFunctionName => nameof(Validate);
         public string ResolutionFunctionName => nameof(Resolve);
     }

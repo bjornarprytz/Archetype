@@ -7,6 +7,8 @@ namespace Archetype.Core
         Type TargetType { get; }
         Type ResultType { get; }
         
+        
+        string RulesTextFunctionName { get; }
         string ValidationFunctionName { get; }
         string ResolutionFunctionName { get; }
     }

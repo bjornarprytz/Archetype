@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using Archetype.Core;
 
@@ -36,16 +37,22 @@ namespace Archetype.CardBuilder.Extensions
             where TBuilder : CardBuilder
         {
             return builder
-                .AddTextLine($"Deal {strength}")
-                .Effect<IEnemy, int>((target, state) => target.Attack(strength)) as TBuilder;
+                .EffectBuilder<IEnemy, int>(provider => 
+                    provider
+                        .Resolve((target, state) => target.Attack(strength))
+                        .Text($"Deal {strength}")
+                    ) as TBuilder;
         }
         
         public static TBuilder Heal<TBuilder>(this TBuilder builder, int strength)
             where TBuilder : CardBuilder
         {
             return builder
-                .AddTextLine($"Heal {strength}")
-                .Effect<IEnemy, int>((target, state) => target.Heal(strength)) as TBuilder;
+                .EffectBuilder<IEnemy, int>(provider => 
+                    provider
+                        .Resolve((target, state) => target.Heal(strength))
+                        .Text($"Heal {strength}")
+                ) as TBuilder;
         }
     }
 }
