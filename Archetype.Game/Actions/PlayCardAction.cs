@@ -44,6 +44,9 @@ namespace Archetype.Game
         
         public async Task<int> Handle(PlayCardAction request, CancellationToken cancellationToken)
         {
+            if (!_gameState.IsPayerTurn)
+                return 0; // Not the player's turn
+            
             if (_gameState.GetGamePiece(request.CardId) is not ICard card)
                 return 1; // GamePiece is not a card
             
@@ -57,16 +60,21 @@ namespace Archetype.Game
 
             if (targets.Any(t => t == null))
                 return 4; // Some targets are null
+
+            if (targets.Count != card.Data.Effects.Count)
+                return 5; // Mismatching number of targets to effects
             
             foreach (var (effect, target) in card.Data.Effects.Select(effect => effect)
                                                                 .Zip(targets.Select(target => target)))
             {
                 if (!target.GetType().Implements(effect.TargetType))
-                    return 5; // Some targets are illegal
+                    return 6; // Some targets are illegal
 
                 if (!effect.CallTargetValidationMethod(target, _gameState))
-                    return 6; // Some targets are illegal
+                    return 7; // Some targets are illegal
             }
+
+            _gameState.Player.Resources -= card.Data.Cost;
             
             foreach (var (effect, target) in card.Data.Effects.Select(effect => effect)
                 .Zip(targets.Select(target => target)))
@@ -75,7 +83,7 @@ namespace Archetype.Game
             }
 
 
-            return 7; // Success
+            return 8; // Success
         }
     }
 }

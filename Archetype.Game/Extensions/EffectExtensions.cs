@@ -6,18 +6,18 @@ namespace Archetype.Game.Extensions
     public static class EffectExtensions
     {
 
-        public static bool CallTargetValidationMethod(this IEffect effect, IGamePiece gamePiece, IGameState gameState)
+        public static bool CallTargetValidationMethod(this IEffectMetaData effectMetaData, IGamePiece gamePiece, IGameState gameState)
         {
-            dynamic validationLambda = effect.GetType().GetProperty("Validate").GetValue(effect);
+            dynamic validationLambda = effectMetaData.GetType().GetProperty(effectMetaData.ValidationFunctionName)?.GetValue(effectMetaData);
 
             dynamic dynGamePiece = gamePiece;
 
             return validationLambda(dynGamePiece, gameState);
         }
         
-        public static object CallResolveMethod(this IEffect effect, IGamePiece gamePiece, IGameState gameState)
+        public static object CallResolveMethod(this IEffectMetaData effectMetaData, IGamePiece gamePiece, IGameState gameState)
         {
-            dynamic resolutionLambda = effect.GetType().GetProperty("Resolve").GetValue(effect);
+            dynamic resolutionLambda = effectMetaData.GetType().GetProperty(effectMetaData.ResolutionFunctionName)?.GetValue(effectMetaData);
 
             dynamic dynGamePiece = gamePiece;
 

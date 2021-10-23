@@ -75,7 +75,7 @@ namespace Archetype.CardBuilder
         public CardBuilder Effect<TTarget, TResult>(Expression<Func<TTarget, IGameState, TResult>> expression)
             where TTarget : IGamePiece
         {
-            Construction.Effects.Add(new CardEffect<TTarget, TResult>(expression));
+            Construction.Effects.Add(new EffectData<TTarget, TResult>(expression));
 
             return this;
         }
@@ -86,7 +86,7 @@ namespace Archetype.CardBuilder
             )
             where TTarget : IGamePiece
         {
-            Construction.Effects.Add(new CardEffect<TTarget, TResult>(resolutionExpression, validationExpression));
+            Construction.Effects.Add(new EffectData<TTarget, TResult>(resolutionExpression, validationExpression));
 
             return this;
         }

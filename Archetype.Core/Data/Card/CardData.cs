@@ -15,7 +15,7 @@ namespace Archetype.Core
         public string RulesText { get; set; }
         
         public string ImageUri { get; set; }
-
-        public List<IEffect> Effects { get; } = new ();
+        
+        public List<IEffectMetaData> Effects { get; } = new ();
     }
 }
