@@ -1,12 +1,16 @@
 using Aqua.EnumerableExtensions;
 using Archetype.CardBuilder;
 using Archetype.CardBuilder.Extensions;
+using Archetype.Game.Actions;
 using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Server.Schema;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 
 namespace Archetype.Server
 {
@@ -21,8 +25,13 @@ namespace Archetype.Server
             
             // Add GraphQL Services
             services
+                .AddMediatR(typeof(PlayCardAction).Assembly)
                 .AddGraphQLServer()
-                .AddQueryType<Query>();
+                .AddQueryType<Queries>()
+                .AddMutationType<Mutations>()
+                .AddSubscriptionType<Subscriptions>()
+                .AddInMemorySubscriptions()
+                ;
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -33,6 +42,7 @@ namespace Archetype.Server
             }
 
             app
+                .UseWebSockets()
                 .UseRouting()
                 .UseEndpoints(endpoints =>
                 {

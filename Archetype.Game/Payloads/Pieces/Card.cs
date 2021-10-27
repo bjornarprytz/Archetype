@@ -17,7 +17,7 @@ namespace Archetype.Game.Payloads.Pieces
         public IList<ITarget> Targets { get; } = new List<ITarget>();
         public IList<IEffect> Effects { get; } = new List<IEffect>();
 
-        public IZone CurrentZone { get; }
+        public IZone CurrentZone { get; } 
         public long OwnerId { get; }
         public long Id { get; }
 
