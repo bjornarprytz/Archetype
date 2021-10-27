@@ -5,9 +5,9 @@ namespace Archetype.Game.Extensions
 {
     public static class EffectExtensions
     {
-        public static bool CallTargetValidationMethod(this IEffectMetaData effectMetaData, IGamePiece gamePiece, IGameState gameState)
+        public static bool CallTargetValidationMethod(this ITargetMetaData targetMetaData, IGamePiece gamePiece, IGameState gameState)
         {
-            dynamic validationLambda = effectMetaData.GetType().GetProperty(effectMetaData.ValidationFunctionName)?.GetValue(effectMetaData);
+            dynamic validationLambda = targetMetaData.GetType().GetProperty(targetMetaData.ValidationFunctionName)?.GetValue(targetMetaData);
 
             dynamic dynGamePiece = gamePiece;
 

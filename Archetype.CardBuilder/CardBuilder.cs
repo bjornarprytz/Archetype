@@ -1,5 +1,6 @@
 ﻿using Archetype.Core;
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using Archetype.CardBuilder.Extensions;
@@ -66,6 +67,43 @@ namespace Archetype.CardBuilder
 
             return this;
         }
+
+        public CardBuilder Target<TTarget>(Func<TTarget, IGameState, bool> validateTarget=null)
+            where TTarget : IGamePiece
+        {
+            Construction.TargetData.Add(new TargetData<TTarget>(validateTarget));
+
+            return this;
+        }
+        public CardBuilder Targets<TT1, TT2>(
+            Func<TT1, IGameState, bool> validateTarget1=null, 
+            Func<TT2, IGameState, bool> validateTarget2=null
+        )
+            where TT1 : IGamePiece
+            where TT2 : IGamePiece
+        {
+            
+            Construction.TargetData.Add(new TargetData<TT1>(validateTarget1));
+            Construction.TargetData.Add(new TargetData<TT2>(validateTarget2));
+
+            return this;
+        }
+        public CardBuilder Targets<TT1, TT2, TT3>(
+            Func<TT1, IGameState, bool> validateTarget1=null, 
+            Func<TT2, IGameState, bool> validateTarget2=null, 
+            Func<TT3, IGameState, bool> validateTarget3=null 
+            )
+            where TT1 : IGamePiece
+            where TT2 : IGamePiece
+            where TT3 : IGamePiece
+        {
+            
+            Construction.TargetData.Add(new TargetData<TT1>(validateTarget1));
+            Construction.TargetData.Add(new TargetData<TT2>(validateTarget2));
+            Construction.TargetData.Add(new TargetData<TT3>(validateTarget3));
+
+            return this;
+        }
         
         public CardBuilder EffectBuilder<TTarget, TResult>(Action<EffectBuilder<TTarget, TResult>> builderProvider)
             where  TTarget : IGamePiece
@@ -76,21 +114,27 @@ namespace Archetype.CardBuilder
 
             Construction.Effects.Add(cbc.Build());
 
+            if (Construction.TargetData.All(td => td.TargetType != typeof(TTarget)))
+            {
+                Console.WriteLine("Automatically adding target data for effect without it. To avoid this, you should create target data before creating effects");
+                Construction.TargetData.Add(new TargetData<TTarget>());
+            }
+
             return this;
         }
         
         public CardBuilder Effect<TTarget, TResult>(
             Func<TTarget, IGameState, TResult> resolveEffect,
-            Func<TTarget, IGameState, bool> validateEffect=null,
-            Func<TTarget, IGameState, string> rulesText=null
+            Func<TTarget, IGameState, string> rulesText=null,
+            int targetIndex = -1
             )
             where  TTarget : IGamePiece
         {
             return EffectBuilder<TTarget, TResult>(provider => 
                 provider
-                    .Validate(validateEffect ?? ((piece, state) => true) )
+                    .TargetIndex(targetIndex)
                     .Resolve(resolveEffect)
-                    .Text(rulesText ?? ((piece, state) => string.Empty) )
+                    .Text(rulesText ?? ((_, _) => string.Empty) )
                 );
         }
 

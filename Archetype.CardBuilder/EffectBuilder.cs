@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Archetype.Core;
 
 namespace Archetype.CardBuilder
@@ -12,9 +10,9 @@ namespace Archetype.CardBuilder
 
         public EffectBuilder(EffectData<TTarget, TResult> template = null) : base(() => template ?? new EffectData<TTarget, TResult>()) { }
         
-        public EffectBuilder<TTarget, TResult> Validate(Func<TTarget, IGameState, bool> func)
+        public EffectBuilder<TTarget, TResult> TargetIndex(int i)
         {
-            _effect.Validate = func;
+            _effect.TargetIndex = i;
 
             return this;
         }
@@ -35,7 +33,7 @@ namespace Archetype.CardBuilder
         
         public EffectBuilder<TTarget, TResult> Text(string text)
         {
-            _effect.RulesText = (piece, state) => text;
+            _effect.RulesText = (_, _) => text;
 
             return this;
         }

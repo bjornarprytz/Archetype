@@ -33,23 +33,25 @@ namespace Archetype.CardBuilder.Extensions
             return builder.Color(CardColor.Blue) as TBuilder; 
         }
 
-        public static TBuilder Attack<TBuilder>(this TBuilder builder, int strength)
+        public static TBuilder Attack<TBuilder>(this TBuilder builder, int strength, int targetIndex=0)
             where TBuilder : CardBuilder
         {
             return builder
                 .EffectBuilder<IEnemy, int>(provider => 
                     provider
+                        .TargetIndex(targetIndex)
                         .Resolve((target, state) => target.Attack(strength))
                         .Text($"Deal {strength}")
                     ) as TBuilder;
         }
         
-        public static TBuilder Heal<TBuilder>(this TBuilder builder, int strength)
+        public static TBuilder Heal<TBuilder>(this TBuilder builder, int strength, int targetIndex=0)
             where TBuilder : CardBuilder
         {
             return builder
                 .EffectBuilder<IEnemy, int>(provider => 
                     provider
+                        .TargetIndex(targetIndex)
                         .Resolve((target, state) => target.Heal(strength))
                         .Text($"Heal {strength}")
                 ) as TBuilder;

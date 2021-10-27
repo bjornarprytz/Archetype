@@ -9,7 +9,7 @@ using MediatR;
 
 namespace Archetype.Game
 {
-    public class PlayCardAction : IRequest<int>
+    public class PlayCardAction : IRequest<string>
     {
         public long CardId { get; }
         public IEnumerable<long> TargetsIds { get; }
@@ -33,7 +33,7 @@ namespace Archetype.Game
         }
     }
     
-    public class PlayCardActionHandler : IRequestHandler<PlayCardAction, int>
+    public class PlayCardActionHandler : IRequestHandler<PlayCardAction, string>
     {
         private readonly IGameState _gameState;
 
@@ -42,48 +42,51 @@ namespace Archetype.Game
             _gameState = gameState;
         }
         
-        public async Task<int> Handle(PlayCardAction request, CancellationToken cancellationToken)
+        public async Task<string> Handle(PlayCardAction request, CancellationToken cancellationToken)
         {
             if (!_gameState.IsPayerTurn)
-                return 0; // Not the player's turn
-            
+                return "Not player's turn";
+
             if (_gameState.GetGamePiece(request.CardId) is not ICard card)
-                return 1; // GamePiece is not a card
-            
+                return "GamePiece is not a card";
+
             if (card.CurrentZone != _gameState.Player.Hand)
-                return 2; // Card is not in hand
-            
+                return "Card is not in hand";
+
             if (card.Data.Cost > _gameState.Player.Resources)
-                return 3; // Can't pay cost
+                return "Can't pay cost";
             
             var targets = request.TargetsIds.Select(_gameState.GetGamePiece).ToList();
 
             if (targets.Any(t => t == null))
-                return 4; // Some targets are null
+                return "Some targets are null";
 
-            if (targets.Count != card.Data.Effects.Count)
-                return 5; // Mismatching number of targets to effects
+            if (targets.Count != card.Data.TargetData.Count)
+                return $"Mismatching number of targets {targets.Count} != {card.Data.TargetData.Count}";
             
-            foreach (var (effect, target) in card.Data.Effects.Select(effect => effect)
-                                                                .Zip(targets.Select(target => target)))
+            foreach (var (targetData, chosenTarget) in card.Data.TargetData.Zip(targets))
             {
-                if (!target.GetType().Implements(effect.TargetType))
-                    return 6; // Some targets are illegal
+                if (!chosenTarget.GetType().Implements(targetData.TargetType))
+                    return "Some targets are of the wrong type";
 
-                if (!effect.CallTargetValidationMethod(target, _gameState))
-                    return 7; // Some targets are illegal
+                if (!targetData.CallTargetValidationMethod(chosenTarget, _gameState))
+                    return "Some targets are illegal";
             }
 
             _gameState.Player.Resources -= card.Data.Cost;
             
-            foreach (var (effect, target) in card.Data.Effects.Select(effect => effect)
-                .Zip(targets.Select(target => target)))
+            foreach (var effect in card.Data.Effects)
             {
+                if (effect.TargetIndex >= targets.Count)
+                    return $"Target index ({effect.TargetIndex}) out of range {targets.Count}";
+                
+                var target = targets[effect.TargetIndex];
+                
                 effect.CallResolveMethod(target, _gameState);
             }
 
 
-            return 8; // Success
+            return "Resolves."; // Success
         }
     }
 }
