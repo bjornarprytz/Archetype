@@ -111,15 +111,8 @@ namespace Archetype.CardBuilder
             var cbc = BuilderFactory.EffectBuilder<TTarget, TResult>(); // Input template data here
 
             builderProvider(cbc);
-
-            var effect = cbc.Build();
             
-            Construction.Effects.Add(effect);
-
-            if (effect.TargetIndex != -1 && Construction.TargetData.All(td => td.TargetType != typeof(TTarget)))
-            {
-                Console.WriteLine($"Warning: No targets for effect with targetType {typeof(TTarget)}");
-            }
+            Construction.Effects.Add(cbc.Build());
 
             return this;
         }
@@ -164,6 +157,8 @@ namespace Archetype.CardBuilder
 
         protected override void PreBuild()
         {
+            var targetCount = Construction.TargetData.Count;
+            
             foreach (var effect in Construction.Effects)
             {
                 string textLine;
@@ -178,6 +173,11 @@ namespace Archetype.CardBuilder
                 }
                 
                 AddTextLine(textLine);
+
+                if (effect.TargetIndex >= targetCount)
+                {
+                    throw new InvalidTargetIndexException(effect.TargetIndex, targetCount);
+                }
             }
 
             Construction.RulesText = _rulesTextBuilder.ToString();
