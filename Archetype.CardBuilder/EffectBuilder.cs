@@ -43,4 +43,39 @@ namespace Archetype.CardBuilder
             if (_effect.Resolve == null) throw new Exception("Card must have an effect");
         }
     }
+
+    public class EffectBuilder<TResult> : BaseBuilder<IEffectMetaData>
+    {
+        private EffectData<TResult> _effect => ( EffectData<TResult>) Construction;
+        
+        public EffectBuilder(EffectData<TResult> template = null) : base(() => template ?? new EffectData<TResult>())
+        {
+        }
+        
+        public EffectBuilder<TResult> Resolve(Func<IGameState, TResult> func)
+        {
+            _effect.Resolve = func;
+
+            return this;
+        }
+        
+        public EffectBuilder<TResult> Text(Func<IGameState, string> func)
+        {
+            _effect.RulesText = func;
+
+            return this;
+        }
+        
+        public EffectBuilder<TResult> Text(string text)
+        {
+            _effect.RulesText = _ => text;
+
+            return this;
+        }
+
+        protected override void PreBuild()
+        {
+            if (_effect.Resolve == null) throw new Exception("Card must have an effect");
+        }
+    }
 }

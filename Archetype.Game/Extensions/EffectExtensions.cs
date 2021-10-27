@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Aqua.TypeSystem;
 using Archetype.Core;
 
@@ -14,13 +15,21 @@ namespace Archetype.Game.Extensions
             return validationLambda(dynGamePiece, gameState);
         }
         
-        public static object CallResolveMethod(this IEffectMetaData effectMetaData, IGamePiece gamePiece, IGameState gameState)
+        public static object CallResolveMethod(this IEffectMetaData effectMetaData, IList<IGamePiece> availableTargets, IGameState gameState)
         {
             dynamic resolutionLambda = effectMetaData.GetType().GetProperty(effectMetaData.ResolutionFunctionName)?.GetValue(effectMetaData);
 
-            dynamic dynGamePiece = gamePiece;
-
-            return resolutionLambda(dynGamePiece, gameState);
+            var target = effectMetaData.TargetType != default ? availableTargets[effectMetaData.TargetIndex] : null;
+            
+            if (target == null)
+            {
+                return resolutionLambda(gameState);
+            }
+            else
+            {
+                dynamic dynGamePiece = target;
+                return resolutionLambda(dynGamePiece, gameState);
+            }
         }
     }
 }

@@ -77,15 +77,9 @@ namespace Archetype.Game
             
             foreach (var effect in card.Data.Effects)
             {
-                if (effect.TargetIndex >= targets.Count)
-                    return $"Target index ({effect.TargetIndex}) out of range {targets.Count}";
-                
-                var target = targets[effect.TargetIndex];
-                
-                effect.CallResolveMethod(target, _gameState);
+                effect.CallResolveMethod(targets, _gameState);
             }
-
-
+            
             return "Resolves."; // Success
         }
     }

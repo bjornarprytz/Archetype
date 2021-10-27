@@ -112,21 +112,33 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
 
-            Construction.Effects.Add(cbc.Build());
+            var effect = cbc.Build();
+            
+            Construction.Effects.Add(effect);
 
-            if (Construction.TargetData.All(td => td.TargetType != typeof(TTarget)))
+            if (effect.TargetIndex != -1 && Construction.TargetData.All(td => td.TargetType != typeof(TTarget)))
             {
-                Console.WriteLine("Automatically adding target data for effect without it. To avoid this, you should create target data before creating effects");
-                Construction.TargetData.Add(new TargetData<TTarget>());
+                Console.WriteLine($"Warning: No targets for effect with targetType {typeof(TTarget)}");
             }
 
             return this;
         }
         
+        public CardBuilder EffectBuilder<TResult>(Action<EffectBuilder<TResult>> builderProvider)
+        {
+            var cbc = BuilderFactory.EffectBuilder<TResult>(); // Input template data here
+
+            builderProvider(cbc);
+            
+            Construction.Effects.Add(cbc.Build());
+
+            return this;
+        }
+        
         public CardBuilder Effect<TTarget, TResult>(
+            int targetIndex,
             Func<TTarget, IGameState, TResult> resolveEffect,
-            Func<TTarget, IGameState, string> rulesText=null,
-            int targetIndex = -1
+            Func<TTarget, IGameState, string> rulesText=null
             )
             where  TTarget : IGamePiece
         {
@@ -136,6 +148,18 @@ namespace Archetype.CardBuilder
                     .Resolve(resolveEffect)
                     .Text(rulesText ?? ((_, _) => string.Empty) )
                 );
+        }
+        
+        public CardBuilder Effect<TResult>(
+            Func<IGameState, TResult> resolveEffect,
+            Func<IGameState, string> rulesText=null
+        )
+        {
+            return EffectBuilder<TResult>(provider => 
+                provider
+                    .Resolve(resolveEffect)
+                    .Text(rulesText ?? (_ => string.Empty) )
+            );
         }
 
         protected override void PreBuild()
@@ -148,7 +172,7 @@ namespace Archetype.CardBuilder
                 {
                     textLine = effect.CallTextMethod(null, null);
                 }
-                catch (NullReferenceException)
+                catch
                 {
                     textLine = "Text error: Additional state needed";
                 }

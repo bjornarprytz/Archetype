@@ -15,6 +15,11 @@ namespace Archetype.CardBuilder
         {
             return new EffectBuilder<TTarget, TResult>(template);
         }
+        
+        public static EffectBuilder<TResult> EffectBuilder<TResult>(EffectData<TResult> template = null)
+        {
+            return new EffectBuilder<TResult>(template);
+        }
 
         public static TemplateBuilder TemplateBuilder(CardData template = null)
         {
