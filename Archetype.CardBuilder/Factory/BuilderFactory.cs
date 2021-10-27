@@ -1,29 +1,25 @@
 ﻿using Archetype.Core;
+using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.CardBuilder
 {
     public class BuilderFactory
     {
 
-        public static CardBuilder CardBuilder(CardData template = null)
+        public static CardBuilder CardBuilder()
         {
-            return new CardBuilder(template);
+            return new CardBuilder();
         }
         
-        public static EffectBuilder<TTarget, TResult> EffectBuilder<TTarget, TResult>(EffectData<TTarget, TResult> template = null)
+        public static EffectBuilder<TTarget, TResult> EffectBuilder<TTarget, TResult>()
             where TTarget : IGamePiece
         {
-            return new EffectBuilder<TTarget, TResult>(template);
+            return new EffectBuilder<TTarget, TResult>();
         }
         
-        public static EffectBuilder<TResult> EffectBuilder<TResult>(EffectData<TResult> template = null)
+        public static EffectBuilder<TResult> EffectBuilder<TResult>()
         {
-            return new EffectBuilder<TResult>(template);
-        }
-
-        public static TemplateBuilder TemplateBuilder(CardData template = null)
-        {
-            return new TemplateBuilder(template);
+            return new EffectBuilder<TResult>();
         }
     }
 }

@@ -1,14 +1,20 @@
 using System;
 using Archetype.Core;
+using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Metadata;
+using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.CardBuilder
 {
-    public class EffectBuilder<TTarget, TResult> : BaseBuilder<IEffectMetaData>
+    public class EffectBuilder<TTarget, TResult> : IBuilder<IEffect>
         where TTarget : IGamePiece
     {
-        private EffectData<TTarget, TResult> _effect => ( EffectData<TTarget, TResult>) Construction;
+        private Effect<TTarget, TResult> _effect;
 
-        public EffectBuilder(EffectData<TTarget, TResult> template = null) : base(() => template ?? new EffectData<TTarget, TResult>()) { }
+        public EffectBuilder()
+        {
+            _effect = new Effect<TTarget, TResult>();
+        }
         
         public EffectBuilder<TTarget, TResult> TargetIndex(int i)
         {
@@ -37,19 +43,22 @@ namespace Archetype.CardBuilder
 
             return this;
         }
-        
-        protected override void PreBuild()
+
+        public IEffect Build()
         {
-            if (_effect.Resolve == null) throw new Exception("Card must have an effect");
+            if (_effect.Resolve == null) throw new MissingResolutionFunctionException();
+
+            return _effect;
         }
     }
 
-    public class EffectBuilder<TResult> : BaseBuilder<IEffectMetaData>
+    public class EffectBuilder<TResult> : IBuilder<IEffect>
     {
-        private EffectData<TResult> _effect => ( EffectData<TResult>) Construction;
+        private Effect<TResult> _effect;
         
-        public EffectBuilder(EffectData<TResult> template = null) : base(() => template ?? new EffectData<TResult>())
+        public EffectBuilder()
         {
+            _effect = new Effect<TResult>();
         }
         
         public EffectBuilder<TResult> Resolve(Func<IGameState, TResult> func)
@@ -73,9 +82,11 @@ namespace Archetype.CardBuilder
             return this;
         }
 
-        protected override void PreBuild()
+        public IEffect Build()
         {
-            if (_effect.Resolve == null) throw new Exception("Card must have an effect");
+            if (_effect.Resolve == null) throw new MissingResolutionFunctionException();
+
+            return _effect;
         }
     }
 }

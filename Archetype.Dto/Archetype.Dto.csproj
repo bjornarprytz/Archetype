@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Archetype.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Remote.Linq" Version="7.0.0" />
+    <PackageReference Include="Remote.Linq.Newtonsoft.Json" Version="7.0.0" />
+  </ItemGroup>
+
+</Project>

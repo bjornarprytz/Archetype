@@ -1,33 +1,26 @@
 ﻿using Archetype.Core;
 using System;
+using System.Linq;
+using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.CardBuilder
 {
-    public class SetBuilder : BaseBuilder<SetData>
+    public class SetBuilder : IBuilder<ICardSet>
     {
-        private CardData _cardTemplate;
 
-        private SetBuilder(string name) : base(() => new SetData())
+        private CardSet _setData;
+
+        private SetBuilder(string name)
         {
-            _cardTemplate = new CardData();
-
-            Construction.Name = name;
+            _setData = new CardSet
+            {
+                Name = name
+            };
         }
 
         public static SetBuilder CreateSet(string name)
         {
             return new SetBuilder(name);
-        }
-
-        public SetBuilder Template(Action<TemplateBuilder> builderProvider)
-        {
-            var cbc = BuilderFactory.TemplateBuilder();
-
-            builderProvider(cbc);
-
-            _cardTemplate = cbc.Build();
-
-            return this;
         }
 
         public SetBuilder Card(Action<CardBuilder> builderProvider)
@@ -36,14 +29,16 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
 
-            Construction.Cards.Add(cbc.Build());
+            _setData.AddCard(cbc.Build());
 
             return this;
         }
 
-        protected override void PreBuild()
+        public ICardSet Build()
         {
-            Console.WriteLine($"Created set with {Construction.Cards.Count} cards");
+            Console.WriteLine($"Created set with {_setData.Cards.Count()} cards");
+
+            return _setData;
         }
     }
 }

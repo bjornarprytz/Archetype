@@ -3,11 +3,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Aqua.TypeExtensions;
-using Archetype.Core;
-using Archetype.Game.Extensions;
+using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Pieces;
 using MediatR;
 
-namespace Archetype.Game
+namespace Archetype.Game.Actions
 {
     public class PlayCardAction : IRequest<string>
     {
@@ -53,7 +53,7 @@ namespace Archetype.Game
             if (card.CurrentZone != _gameState.Player.Hand)
                 return "Card is not in hand";
 
-            if (card.Data.Cost > _gameState.Player.Resources)
+            if (card.Cost > _gameState.Player.Resources)
                 return "Can't pay cost";
             
             var targets = request.TargetsIds.Select(_gameState.GetGamePiece).ToList();
@@ -61,21 +61,18 @@ namespace Archetype.Game
             if (targets.Any(t => t == null))
                 return "Some targets are null";
 
-            if (targets.Count != card.Data.TargetData.Count)
-                return $"Mismatching number of targets {targets.Count} != {card.Data.TargetData.Count}";
+            if (targets.Count != card.Targets.Count)
+                return $"Mismatching number of targets {targets.Count} != {card.Targets.Count}";
             
-            foreach (var (targetData, chosenTarget) in card.Data.TargetData.Zip(targets))
+            foreach (var (targetData, chosenTarget) in card.Targets.Zip(targets))
             {
-                if (!chosenTarget.GetType().Implements(targetData.TargetType))
-                    return "Some targets are of the wrong type";
-
-                if (!targetData.CallTargetValidationMethod(chosenTarget, _gameState))
+                if (targetData.CallTargetValidationMethod(chosenTarget, _gameState));
                     return "Some targets are illegal";
             }
 
-            _gameState.Player.Resources -= card.Data.Cost;
+            _gameState.Player.Resources -= card.Cost;
             
-            foreach (var effect in card.Data.Effects)
+            foreach (var effect in card.Effects)
             {
                 effect.CallResolveMethod(targets, _gameState);
             }

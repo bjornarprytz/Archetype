@@ -1,10 +1,10 @@
-using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Core;
+using Archetype.Game.Payloads;
 using MediatR;
 
-namespace Archetype.Game
+namespace Archetype.Game.Actions
 {
     public class EndTurnAction : IRequest { }
 

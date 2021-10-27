@@ -1,46 +1,49 @@
 ﻿using Archetype.Core;
 using System;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
-using Archetype.CardBuilder.Extensions;
+using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Metadata;
+using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.CardBuilder
 {
-    public class CardBuilder : BaseBuilder<CardData>
+    public class CardBuilder : IBuilder<ICard>
     {
         private StringBuilder _rulesTextBuilder = new ();
-        
-        internal CardBuilder(CardData template=null) : base(() => template ?? new CardData{ Id = Guid.NewGuid() })
-        {
-        }
+        private CardData _cardData;
 
+        private Card _card;
         
+        internal CardBuilder()
+        {
+            _cardData = new CardData();
+            _card = new Card(_cardData);
+        }
 
         public CardBuilder Name(string name)
         {
-            Construction.Name = name;
+            _cardData.Name = name;
 
             return this;
         }
 
         public CardBuilder Rarity(CardRarity rarity)
         {
-            Construction.Rarity = rarity;
+            _cardData.Rarity = rarity;
 
             return this;
         }
 
         public CardBuilder Cost(int cost)
         {
-            Construction.Cost = cost;
+            _cardData.Cost = cost;
 
             return this;
         }
 
         public CardBuilder Color(CardColor color)
         {
-            Construction.Color = color;
+            _cardData.Color = color;
 
             return this;
         }
@@ -63,7 +66,7 @@ namespace Archetype.CardBuilder
 
         public CardBuilder Art(string link)
         {
-            Construction.ImageUri = link;
+            _cardData.ImageUri = link;
 
             return this;
         }
@@ -71,7 +74,7 @@ namespace Archetype.CardBuilder
         public CardBuilder Target<TTarget>(Func<TTarget, IGameState, bool> validateTarget=null)
             where TTarget : IGamePiece
         {
-            Construction.TargetData.Add(new TargetData<TTarget>(validateTarget));
+            _card.Targets.Add(new Target<TTarget>(validateTarget));
 
             return this;
         }
@@ -83,8 +86,8 @@ namespace Archetype.CardBuilder
             where TT2 : IGamePiece
         {
             
-            Construction.TargetData.Add(new TargetData<TT1>(validateTarget1));
-            Construction.TargetData.Add(new TargetData<TT2>(validateTarget2));
+            _card.Targets.Add(new Target<TT1>(validateTarget1));
+            _card.Targets.Add(new Target<TT2>(validateTarget2));
 
             return this;
         }
@@ -98,9 +101,9 @@ namespace Archetype.CardBuilder
             where TT3 : IGamePiece
         {
             
-            Construction.TargetData.Add(new TargetData<TT1>(validateTarget1));
-            Construction.TargetData.Add(new TargetData<TT2>(validateTarget2));
-            Construction.TargetData.Add(new TargetData<TT3>(validateTarget3));
+            _card.Targets.Add(new Target<TT1>(validateTarget1));
+            _card.Targets.Add(new Target<TT2>(validateTarget2));
+            _card.Targets.Add(new Target<TT3>(validateTarget3));
 
             return this;
         }
@@ -112,7 +115,7 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
             
-            Construction.Effects.Add(cbc.Build());
+            _card.Effects.Add(cbc.Build());
 
             return this;
         }
@@ -123,7 +126,7 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
             
-            Construction.Effects.Add(cbc.Build());
+            _card.Effects.Add(cbc.Build());
 
             return this;
         }
@@ -155,11 +158,11 @@ namespace Archetype.CardBuilder
             );
         }
 
-        protected override void PreBuild()
+        public ICard Build()
         {
-            var targetCount = Construction.TargetData.Count;
+            var targetCount = _card.Targets.Count;
             
-            foreach (var effect in Construction.Effects)
+            foreach (var effect in _card.Effects)
             {
                 string textLine;
 
@@ -180,9 +183,11 @@ namespace Archetype.CardBuilder
                 }
             }
 
-            Construction.RulesText = _rulesTextBuilder.ToString();
+            _cardData.RulesText = _rulesTextBuilder.ToString();
             
-            Console.WriteLine($"Creating card {Construction.Name}");
+            Console.WriteLine($"Creating card {_cardData.Name}");
+
+            return _card;
         }
     }
 }
