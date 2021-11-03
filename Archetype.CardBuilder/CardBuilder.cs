@@ -1,72 +1,59 @@
 ﻿using Archetype.Core;
 using System;
-using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Metadata;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.CardBuilder
 {
-    public class CardBuilder : IBuilder<ICard>
+    public class CardBuilder : IBuilder<ICardProtoData>
     {
-        private StringBuilder _rulesTextBuilder = new ();
-        private CardData _cardData;
+        private readonly CardProtoData _cardProtoData;
 
-        private Card _card;
-        
+        private readonly CardMetaData _cardMetaData = new();
+
+        private readonly List<ITarget> _targets = new();
+        private readonly List<IEffect> _effects = new();
+
         internal CardBuilder()
         {
-            _cardData = new CardData();
-            _card = new Card(_cardData);
+            _cardProtoData = new CardProtoData(Guid.NewGuid(), _cardMetaData, _targets, _effects);
         }
 
         public CardBuilder Name(string name)
         {
-            _cardData.Name = name;
+            _cardMetaData.Name = name;
 
             return this;
         }
 
         public CardBuilder Rarity(CardRarity rarity)
         {
-            _cardData.Rarity = rarity;
+            _cardMetaData.Rarity = rarity;
 
             return this;
         }
 
         public CardBuilder Cost(int cost)
         {
-            _cardData.Cost = cost;
+            _cardProtoData.Cost = cost;
 
             return this;
         }
 
         public CardBuilder Color(CardColor color)
         {
-            _cardData.Color = color;
-
-            return this;
-        }
-
-       
-
-        public CardBuilder Text(string text)
-        {
-            _rulesTextBuilder = new StringBuilder(text);
-
-            return this;
-        }
-        
-        public CardBuilder AddTextLine(string text)
-        {
-            _rulesTextBuilder.AppendLine(text);
+            _cardMetaData.Color = color;
 
             return this;
         }
 
         public CardBuilder Art(string link)
         {
-            _cardData.ImageUri = link;
+            _cardMetaData.ImageUri = link;
 
             return this;
         }
@@ -74,7 +61,7 @@ namespace Archetype.CardBuilder
         public CardBuilder Target<TTarget>(Func<TTarget, IGameState, bool> validateTarget=null)
             where TTarget : IGamePiece
         {
-            _card.Targets.Add(new Target<TTarget>(validateTarget));
+            _targets.Add(new Target<TTarget>(validateTarget));
 
             return this;
         }
@@ -86,8 +73,8 @@ namespace Archetype.CardBuilder
             where TT2 : IGamePiece
         {
             
-            _card.Targets.Add(new Target<TT1>(validateTarget1));
-            _card.Targets.Add(new Target<TT2>(validateTarget2));
+            _targets.Add(new Target<TT1>(validateTarget1));
+            _targets.Add(new Target<TT2>(validateTarget2));
 
             return this;
         }
@@ -101,9 +88,9 @@ namespace Archetype.CardBuilder
             where TT3 : IGamePiece
         {
             
-            _card.Targets.Add(new Target<TT1>(validateTarget1));
-            _card.Targets.Add(new Target<TT2>(validateTarget2));
-            _card.Targets.Add(new Target<TT3>(validateTarget3));
+            _targets.Add(new Target<TT1>(validateTarget1));
+            _targets.Add(new Target<TT2>(validateTarget2));
+            _targets.Add(new Target<TT3>(validateTarget3));
 
             return this;
         }
@@ -115,7 +102,7 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
             
-            _card.Effects.Add(cbc.Build());
+            _effects.Add(cbc.Build());
 
             return this;
         }
@@ -126,7 +113,7 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
             
-            _card.Effects.Add(cbc.Build());
+            _effects.Add(cbc.Build());
 
             return this;
         }
@@ -158,36 +145,18 @@ namespace Archetype.CardBuilder
             );
         }
 
-        public ICard Build()
+        public ICardProtoData Build()
         {
-            var targetCount = _card.Targets.Count;
-            
-            foreach (var effect in _card.Effects)
+            var targetCount = _targets.Count;
+
+            foreach (var effect in _cardProtoData.Effects.Where(effect => effect.TargetIndex >= targetCount))
             {
-                string textLine;
-
-                try
-                {
-                    textLine = effect.CallTextMethod(null, null);
-                }
-                catch
-                {
-                    textLine = "Text error: Additional state needed";
-                }
-                
-                AddTextLine(textLine);
-
-                if (effect.TargetIndex >= targetCount)
-                {
-                    throw new InvalidTargetIndexException(effect.TargetIndex, targetCount);
-                }
+                throw new InvalidTargetIndexException(effect.TargetIndex, targetCount);
             }
-
-            _cardData.RulesText = _rulesTextBuilder.ToString();
             
-            Console.WriteLine($"Creating card {_cardData.Name}");
+            Console.WriteLine($"Creating card {_cardProtoData.MetaData.Name}");
 
-            return _card;
+            return _cardProtoData;
         }
     }
 }

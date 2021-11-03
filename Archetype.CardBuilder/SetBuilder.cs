@@ -8,11 +8,11 @@ namespace Archetype.CardBuilder
     public class SetBuilder : IBuilder<ICardSet>
     {
 
-        private CardSet _setData;
+        private readonly ICardSet _setData;
 
         private SetBuilder(string name)
         {
-            _setData = new CardSet
+            _setData = new CardSet()
             {
                 Name = name
             };

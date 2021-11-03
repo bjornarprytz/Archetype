@@ -58,7 +58,7 @@ namespace Archetype.Server
                         .Name("Slap heal")
                         .Black()
                         .Cost(4)
-                        .Target<IEnemy>()
+                        .Target<IUnit>()
                         .Attack(5, 0)
                         .Effect<int>(
                             resolveEffect: (state) =>
@@ -74,8 +74,8 @@ namespace Archetype.Server
                         .Green()
                         .Name("Resource slap")
                         .Cost(3)
-                        .Target<IEnemy>()
-                        .Effect<IEnemy, int>(
+                        .Target<IUnit>()
+                        .Effect<IUnit, int>(
                             targetIndex: 0,
                             resolveEffect: (enemy, state) => enemy.Attack(state.Player.Resources),
                             rulesText: (enemy, state) => $"Deal {state.Player.Resources}")

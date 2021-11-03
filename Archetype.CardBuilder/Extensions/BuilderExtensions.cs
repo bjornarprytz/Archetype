@@ -38,7 +38,7 @@ namespace Archetype.CardBuilder.Extensions
             where TBuilder : CardBuilder
         {
             return builder
-                .EffectBuilder<IEnemy, int>(provider => 
+                .EffectBuilder<IUnit, int>(provider => 
                     provider
                         .TargetIndex(targetIndex)
                         .Resolve((target, state) => target.Attack(strength))
@@ -50,7 +50,7 @@ namespace Archetype.CardBuilder.Extensions
             where TBuilder : CardBuilder
         {
             return builder
-                .EffectBuilder<IEnemy, int>(provider => 
+                .EffectBuilder<IUnit, int>(provider => 
                     provider
                         .TargetIndex(targetIndex)
                         .Resolve((target, state) => target.Heal(strength))

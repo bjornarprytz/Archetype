@@ -61,8 +61,10 @@ namespace Archetype.Game.Actions
             if (targets.Any(t => t == null))
                 return "Some targets are null";
 
-            if (targets.Count != card.Targets.Count)
-                return $"Mismatching number of targets {targets.Count} != {card.Targets.Count}";
+            var targetCount = card.Targets.Count();
+            
+            if (targets.Count != targetCount)
+                return $"Mismatching number of targets {targets.Count} != {targetCount}";
             
             foreach (var (targetData, chosenTarget) in card.Targets.Zip(targets))
             {

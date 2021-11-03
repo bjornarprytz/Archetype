@@ -1,17 +1,18 @@
 using System.Collections.Generic;
+using Archetype.Core;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
     public class CardSet : ICardSet
     {
-        private readonly List<ICard> _cards = new();
+        private List<ICardProtoData> _cards = new ();
 
         public string Name { get; set; }
-        public IEnumerable<ICard> Cards => _cards;
-
-        public void AddCard(ICard card)
+        public IEnumerable<ICardProtoData> Cards { get; }
+        public void AddCard(ICardProtoData cardData)
         {
-            _cards.Add(card);
+            _cards.Add(cardData);
         }
     }
 }

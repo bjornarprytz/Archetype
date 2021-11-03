@@ -1,22 +1,24 @@
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Server.Extensions;
 
 namespace Archetype.Server
 {
     public class GameState : IGameState
     {
-        private ICardSet _set;
+        private ICardPool _pool;
         private readonly IPlayer _player;
         private readonly IBoard _board;
 
         private Dictionary<long, IGamePiece> _gamePieces = new();
 
-        public GameState(ICardSet set)
+        public GameState(ICardPool pool)
         {
-            _set = set;
-            _player = new Player(new Hand(set.Cards.First()), new DiscardPile());
+            _pool = pool;
+            _player = new Player(new Hand(pool.Cards.First().CreateInstance()), new DiscardPile());
             _board = new Board();
             
         }
@@ -45,6 +47,7 @@ namespace Archetype.Server
         public long OwnerId => Id;
         public int Resources { get; set; }
         public long Id { get; }
+        public IDeck Deck { get; }
         public IHand Hand => _hand;
         public IDiscardPile DiscardPile => _discardPile;
     }

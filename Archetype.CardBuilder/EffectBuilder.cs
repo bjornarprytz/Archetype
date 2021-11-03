@@ -1,5 +1,4 @@
 using System;
-using Archetype.Core;
 using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Metadata;
 using Archetype.Game.Payloads.Pieces;
@@ -9,7 +8,7 @@ namespace Archetype.CardBuilder
     public class EffectBuilder<TTarget, TResult> : IBuilder<IEffect>
         where TTarget : IGamePiece
     {
-        private Effect<TTarget, TResult> _effect;
+        private readonly Effect<TTarget, TResult> _effect;
 
         public EffectBuilder()
         {

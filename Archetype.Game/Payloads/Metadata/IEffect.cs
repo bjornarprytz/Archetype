@@ -11,7 +11,5 @@ namespace Archetype.Game.Payloads.Metadata
         
         public object CallResolveMethod(IList<IGamePiece> availableTargets, IGameState gameState);
         public string CallTextMethod(IList<IGamePiece> gamePiece, IGameState gameState);
-
-        EffectData CreateReadOnlyData();
     }
 }

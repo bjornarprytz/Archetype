@@ -25,12 +25,7 @@ namespace Archetype.Server.Schema
 
         public GameStateData GetGameState()
         {
-            var player  = new PlayerData
-            {
-                Resources = _gameState.Player.Resources,
-                DiscardPile = _gameState.Player.DiscardPile.Cards.Select(c => c.CreateReadonlyData()).ToList(),
-                Hand = _gameState.Player.Hand.Cards.Select(c => c.CreateReadonlyData()).ToList()
-            }; 
+            var player  = new PlayerData(); 
         
         
             var gameState = new GameStateData { Player = player };

@@ -54,18 +54,6 @@ namespace Archetype.Game.Payloads.Metadata
 
             return RulesText(target, gameState);
         }
-
-        public EffectData CreateReadOnlyData()
-        {
-            return new EffectData
-            {
-                ResolutionFunctionName = nameof(Resolve),
-                RulesTextFunctionName = nameof(RulesText),
-                ResultType = typeof(TResult),
-                TargetType = typeof(TTarget),
-                TargetIndex = TargetIndex
-            };
-        }
     }
     
     public class Effect<TResult> : IEffect
@@ -108,19 +96,6 @@ namespace Archetype.Game.Payloads.Metadata
         public string CallTextMethod(IList<IGamePiece> availableTargets, IGameState gameState)
         {
             return RulesText(gameState);
-        }
-
-        public EffectData CreateReadOnlyData()
-        {
-            return new EffectData
-            {
-                ResolutionFunctionName = nameof(Resolve),
-                RulesTextFunctionName = nameof(RulesText),
-                ResultType = typeof(TResult),
-                TargetType = default,
-                TargetIndex = TargetIndex,
-            };
-
         }
     }
 }

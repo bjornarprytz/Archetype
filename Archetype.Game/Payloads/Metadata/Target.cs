@@ -27,21 +27,14 @@ namespace Archetype.Game.Payloads.Metadata
             } 
             set => _validate = value;
         }
-        
+
+        public Type TargetType => typeof(TTarget);
+
         public bool CallTargetValidationMethod(IGamePiece gamePiece, IGameState gameState)
         {
             dynamic dynGamePiece = gamePiece;
 
             return Validate(dynGamePiece, gameState);
-        }
-
-        public TargetData CreateReadOnlyData()
-        {
-            return new TargetData
-            {
-                TargetType = typeof(TTarget),
-                ValidationFunctionName = nameof(Validate)
-            };
         }
     }
 }
