@@ -1,6 +1,6 @@
-using Archetype.Core;
+using Archetype.Core.Data.Simple;
 
-namespace Archetype.Game.Payloads.Metadata
+namespace Archetype.Core.Data.Composite
 {
     public class CardMetaData
     {

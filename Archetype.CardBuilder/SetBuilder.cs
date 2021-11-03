@@ -1,7 +1,8 @@
-﻿using Archetype.Core;
-using System;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using Archetype.CardBuilder.Factory;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.CardBuilder
 {
@@ -9,10 +10,11 @@ namespace Archetype.CardBuilder
     {
 
         private readonly ICardSet _setData;
+        private readonly List<ICardProtoData> _cards = new();
 
         private SetBuilder(string name)
         {
-            _setData = new CardSet()
+            _setData = new CardSet(_cards)
             {
                 Name = name
             };
@@ -29,14 +31,14 @@ namespace Archetype.CardBuilder
 
             builderProvider(cbc);
 
-            _setData.AddCard(cbc.Build());
+            _cards.Add(cbc.Build());
 
             return this;
         }
 
         public ICardSet Build()
         {
-            Console.WriteLine($"Created set with {_setData.Cards.Count()} cards");
+            Console.WriteLine($"Created set with {_cards.Count} cards");
 
             return _setData;
         }

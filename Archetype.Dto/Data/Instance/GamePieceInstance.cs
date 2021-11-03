@@ -1,8 +1,10 @@
+using System;
+
 namespace Archetype.Core.Data.Instance
 {
     public abstract class GamePieceInstance
     {
-        public long Id { get; set; }
-        public long OwnerId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OwnerId { get; set; }
     }
 }

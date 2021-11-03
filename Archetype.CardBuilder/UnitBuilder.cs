@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Archetype.Core.Enemy;
-using Archetype.Game.Payloads.Metadata;
+using Archetype.CardBuilder.Factory;
+using Archetype.Core.Data.Composite;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.CardBuilder

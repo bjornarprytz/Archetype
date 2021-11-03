@@ -1,4 +1,4 @@
-namespace Archetype.Game.Payloads.Metadata
+namespace Archetype.Core.Data.Composite
 {
     public class UnitMetaData
     {

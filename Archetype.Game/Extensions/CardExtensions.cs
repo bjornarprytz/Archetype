@@ -1,5 +1,5 @@
 using System.Linq;
-using Archetype.Game.Payloads.Metadata;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Extensions

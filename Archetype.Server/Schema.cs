@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Core;
-using Archetype.Core.Data.Composite;
+using Archetype.Core.Data.Instance;
 using Archetype.Game.Actions;
 using Archetype.Game.Payloads;
 using HotChocolate;
@@ -12,7 +9,7 @@ using HotChocolate.Subscriptions;
 using HotChocolate.Types;
 using MediatR;
 
-namespace Archetype.Server.Schema
+namespace Archetype.Server
 {
     public class Queries
     {

@@ -1,10 +1,18 @@
 using System;
 using System.Collections.Generic;
-using Archetype.Game.Payloads.Metadata;
-using Archetype.Game.Payloads.Proto;
+using Archetype.Core.Data.Composite;
 
-namespace Archetype.Core.Enemy
+namespace Archetype.Game.Payloads.Proto
 {
+    public interface IUnitProtoData
+    {
+        Guid Id { get; }
+        
+        int Health { get; }
+        UnitMetaData MetaData { get; }
+        IEnumerable<ICardProtoData> Cards { get; }
+    }
+    
     public class UnitProtoData : IUnitProtoData
     {
         private readonly List<ICardProtoData> _cards;
@@ -17,7 +25,7 @@ namespace Archetype.Core.Enemy
         }
 
         public Guid Id { get; }
-        public int Health { get; set; }
+        public int Health { get; }
         public UnitMetaData MetaData { get; }
         public IEnumerable<ICardProtoData> Cards => _cards;
     }

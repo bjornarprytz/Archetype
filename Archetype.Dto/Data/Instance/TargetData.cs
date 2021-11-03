@@ -1,6 +1,6 @@
 using System;
 
-namespace Archetype.Core
+namespace Archetype.Core.Data.Instance
 {
     public class TargetData
     {

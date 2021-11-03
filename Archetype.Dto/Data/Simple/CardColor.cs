@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Archetype.Core
+﻿namespace Archetype.Core.Data.Simple
 { 
     public enum CardColor
     {

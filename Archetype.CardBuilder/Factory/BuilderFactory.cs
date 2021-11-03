@@ -1,7 +1,6 @@
-﻿using Archetype.Core;
-using Archetype.Game.Payloads.Pieces;
+﻿using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.CardBuilder
+namespace Archetype.CardBuilder.Factory
 {
     public class BuilderFactory
     {

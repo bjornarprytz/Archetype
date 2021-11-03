@@ -1,30 +1,23 @@
 ﻿using System;
 using System.Linq;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 using Newtonsoft.Json;
 
-namespace Archetype.Game.Payloads.Metadata
+namespace Archetype.Game.Payloads.Proto
 {
+    public interface IEffect
+    {
+        int TargetIndex { get; }
+        
+        public object ResolveContext(ICardResolutionContext context);
+        public string CallTextMethod(ICardResolutionContext context);
+    }
+    
     public class Effect<TTarget, TResult> : IEffect 
         where TTarget : IGamePiece
     {
-        
         private Func<IEffectResolutionContext<TTarget>, string> _rulesText;
-
-        public Effect() { }
-        
-        public Effect(
-            int targetIndex,
-            Func<IEffectResolutionContext<TTarget>, TResult> effectFunc,
-            Func<IEffectResolutionContext<TTarget>, string> rulesTextFunc = null
-            )
-        {
-            rulesTextFunc ??= _ => string.Empty;
-            
-            Resolve = effectFunc;
-            RulesText = rulesTextFunc;
-            TargetIndex = targetIndex;
-        }
 
         [JsonIgnore] public Func<IEffectResolutionContext<TTarget>, TResult> Resolve { get; set; }
 
@@ -58,19 +51,6 @@ namespace Archetype.Game.Payloads.Metadata
     public class Effect<TResult> : IEffect
     {
         private Func<IEffectResolutionContext, string> _rulesText;
-
-        public Effect() { }
-        
-        public Effect(
-            Func<IEffectResolutionContext, TResult> effectFunc,
-            Func<IEffectResolutionContext, string> rulesTextFunc = null
-        )
-        {
-            rulesTextFunc ??= _ => string.Empty;
-            
-            Resolve = effectFunc;
-            RulesText = rulesTextFunc;
-        }
 
         [JsonIgnore] public Func<IEffectResolutionContext, TResult> Resolve { get; set; }
 

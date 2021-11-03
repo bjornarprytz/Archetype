@@ -4,7 +4,6 @@ using Archetype.CardBuilder.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Pieces;
-using Archetype.Server.Schema;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -60,7 +59,7 @@ namespace Archetype.Server
                         .Effect<int>(
                             resolveEffect: context =>
                             {
-                                context.GameState.Player.Hand.Cards.ForEach((card, i) => card.AffectSomehow(i));
+                                context.GameState.Player.Hand.Contents.ForEach((card, i) => card.AffectSomehow(i));
                                 return 0;
                             },
                             rulesText: (state) => $"Affect all cards in player's hand somehow")
@@ -99,10 +98,10 @@ namespace Archetype.Server
                         .Blue()
                         .Name("Slap all")
                         .Cost(1)
-                        .Effect<int>(
+                        .Effect(
                             resolveEffect: context =>
                             {
-                                context.GameState.Player.Hand.Cards.ForEach((card, i) => card.AffectSomehow(i));
+                                context.GameState.Player.Hand.Contents.ForEach((card, i) => card.AffectSomehow(i));
                                 return 0;
                             },
                             rulesText: (state) => $"Affect all cards in player's hand somehow")

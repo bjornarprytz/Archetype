@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Archetype.Core.Data.Composite
+namespace Archetype.Core.Data.Instance
 {
     public class MapData
     {

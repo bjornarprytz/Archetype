@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Archetype.Core.Data.Instance;
 
-namespace Archetype.Core.Data.Composite
+namespace Archetype.Core.Data.Instance
 {
     public class PlayerData
     {

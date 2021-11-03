@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Archetype.Core.Data.Instance;
 
-namespace Archetype.Core
+namespace Archetype.Core.Data.Instance
 {
     public class SetData
     {

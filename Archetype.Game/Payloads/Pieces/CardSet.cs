@@ -4,15 +4,22 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    public interface ICardSet
+    {
+        string Name { get; set; }
+        IEnumerable<ICardProtoData> Cards { get; }
+    }
+    
     public class CardSet : ICardSet
     {
-        private List<ICardProtoData> _cards = new ();
+        private readonly List<ICardProtoData> _cards;
+
+        public CardSet(List<ICardProtoData> cards)
+        {
+            _cards = cards;
+        }
 
         public string Name { get; set; }
-        public IEnumerable<ICardProtoData> Cards { get; }
-        public void AddCard(ICardProtoData cardData)
-        {
-            _cards.Add(cardData);
-        }
+        public IEnumerable<ICardProtoData> Cards => _cards;
     }
 }

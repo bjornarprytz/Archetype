@@ -5,6 +5,12 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    public interface ICardPool
+    {
+        ICardProtoData this[Guid guid] { get; }
+        IEnumerable<ICardProtoData> Cards { get; }
+    }
+    
     public class CardPool : ICardPool
     {
         private readonly Dictionary<Guid, ICardProtoData> _cards = new();

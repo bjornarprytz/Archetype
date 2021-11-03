@@ -1,6 +1,7 @@
 using System;
-using Archetype.Game.Payloads.Metadata;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.CardBuilder
 {

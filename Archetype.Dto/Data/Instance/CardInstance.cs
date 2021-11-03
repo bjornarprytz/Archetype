@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Archetype.Game.Payloads.Metadata;
+using Archetype.Core.Data.Composite;
 
 namespace Archetype.Core.Data.Instance
 {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Aqua.TypeExtensions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads;
-using Archetype.Game.Payloads.Metadata;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 using MediatR;
 

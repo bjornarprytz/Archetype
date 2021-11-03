@@ -1,7 +1,20 @@
 using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.Game.Payloads.Metadata
+namespace Archetype.Game.Payloads.Context
 {
+    public interface IEffectResolutionContext<out TTarget> : IEffectResolutionContext
+        where TTarget : IGamePiece
+    {
+        TTarget Target { get; }
+    }
+
+    public interface IEffectResolutionContext
+    {
+        ICardResolutionContext CardResolutionContext { get; }
+
+        IGameState GameState => CardResolutionContext.GameState;
+    }
+    
     public class EffectResolutionContext<TTarget> : EffectResolutionContext, IEffectResolutionContext<TTarget> 
         where TTarget : IGamePiece
     {

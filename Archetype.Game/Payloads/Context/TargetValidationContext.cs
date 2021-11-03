@@ -1,6 +1,6 @@
 using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.Game.Payloads.Metadata
+namespace Archetype.Game.Payloads.Context
 {
     public interface ITargetValidationContext<out TTarget>
         where TTarget : IGamePiece

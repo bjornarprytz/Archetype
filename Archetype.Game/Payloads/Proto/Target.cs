@@ -1,10 +1,16 @@
 using System;
-using Archetype.Core;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 using Newtonsoft.Json;
 
-namespace Archetype.Game.Payloads.Metadata
+namespace Archetype.Game.Payloads.Proto
 {
+    public interface ITarget
+    {
+        Type TargetType { get; }
+        bool ValidateContext(ITargetValidationContext context);
+    }
+    
     public class Target<TTarget> : ITarget
         where TTarget : IGamePiece
     {
