@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Aqua.TypeExtensions;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Metadata;
 using Archetype.Game.Payloads.Pieces;
 using MediatR;
 
@@ -61,23 +63,14 @@ namespace Archetype.Game.Actions
             if (targets.Any(t => t == null))
                 return "Some targets are null";
 
-            var targetCount = card.Targets.Count();
-            
-            if (targets.Count != targetCount)
-                return $"Mismatching number of targets {targets.Count} != {targetCount}";
-            
-            foreach (var (targetData, chosenTarget) in card.Targets.Zip(targets))
-            {
-                if (targetData.CallTargetValidationMethod(chosenTarget, _gameState));
-                    return "Some targets are illegal";
-            }
+            var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player, targets);
+
+            if (card.ValidateTargets(cardResolutionContext))
+                return "Invalid targets";
 
             _gameState.Player.Resources -= card.Cost;
-            
-            foreach (var effect in card.Effects)
-            {
-                effect.CallResolveMethod(targets, _gameState);
-            }
+
+            card.Resolve(cardResolutionContext);
             
             return "Resolves."; // Success
         }

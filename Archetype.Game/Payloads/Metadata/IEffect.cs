@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Archetype.Core;
+﻿using System.Collections.Generic;
 using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Metadata
@@ -9,7 +7,7 @@ namespace Archetype.Game.Payloads.Metadata
     {
         int TargetIndex { get; }
         
-        public object CallResolveMethod(IList<IGamePiece> availableTargets, IGameState gameState);
-        public string CallTextMethod(IList<IGamePiece> gamePiece, IGameState gameState);
+        public object ResolveContext(ICardResolutionContext context);
+        public string CallTextMethod(ICardResolutionContext context);
     }
 }

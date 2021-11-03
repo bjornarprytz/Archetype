@@ -41,7 +41,7 @@ namespace Archetype.CardBuilder.Extensions
                 .EffectBuilder<IUnit, int>(provider => 
                     provider
                         .TargetIndex(targetIndex)
-                        .Resolve((target, state) => target.Attack(strength))
+                        .Resolve(context => context.Target.Attack(strength))
                         .Text($"Deal {strength}")
                     ) as TBuilder;
         }
@@ -53,7 +53,7 @@ namespace Archetype.CardBuilder.Extensions
                 .EffectBuilder<IUnit, int>(provider => 
                     provider
                         .TargetIndex(targetIndex)
-                        .Resolve((target, state) => target.Heal(strength))
+                        .Resolve(context => context.Target.Heal(strength))
                         .Text($"Heal {strength}")
                 ) as TBuilder;
         }

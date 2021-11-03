@@ -8,21 +8,21 @@ namespace Archetype.Game.Payloads.Metadata
     public class Target<TTarget> : ITarget
         where TTarget : IGamePiece
     {
-        private Func<TTarget, IGameState, bool> _validate;
+        private Func<ITargetValidationContext<TTarget>, bool> _validate;
         
-        public Target(Func<TTarget, IGameState, bool> validationFunc=null)
+        public Target(Func<ITargetValidationContext<TTarget>, bool> validationFunc=null)
         {
-            validationFunc ??= (_, _) => true;
+            validationFunc ??= _ => true;
 
             _validate = validationFunc;
         }
         
         [JsonIgnore]
-        public Func<TTarget, IGameState, bool> Validate
+        public Func<ITargetValidationContext<TTarget>, bool> Validate
         {
             get
             {
-                _validate ??= (_, _) => true;
+                _validate ??= _ => true;
                 return _validate;
             } 
             set => _validate = value;
@@ -30,11 +30,10 @@ namespace Archetype.Game.Payloads.Metadata
 
         public Type TargetType => typeof(TTarget);
 
-        public bool CallTargetValidationMethod(IGamePiece gamePiece, IGameState gameState)
+        public bool ValidateContext(ITargetValidationContext context)
         {
-            dynamic dynGamePiece = gamePiece;
-
-            return Validate(dynGamePiece, gameState);
+            return context.Target is TTarget target 
+                   && Validate(new TargetValidationContext<TTarget>(context.GameState, target));
         }
     }
 }

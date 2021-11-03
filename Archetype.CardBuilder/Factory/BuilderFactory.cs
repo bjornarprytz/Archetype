@@ -5,7 +5,6 @@ namespace Archetype.CardBuilder
 {
     public class BuilderFactory
     {
-
         public static CardBuilder CardBuilder()
         {
             return new CardBuilder();

@@ -2,8 +2,8 @@
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    public interface IBoard
+    public interface IMap
     {
-        IEnumerable<IZone> Zones { get; }
+        IEnumerable<IMapNode> Zones { get; }
     }
 }

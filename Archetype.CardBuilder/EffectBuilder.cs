@@ -1,5 +1,4 @@
 using System;
-using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Metadata;
 using Archetype.Game.Payloads.Pieces;
 
@@ -22,14 +21,14 @@ namespace Archetype.CardBuilder
             return this;
         }
         
-        public EffectBuilder<TTarget, TResult> Resolve(Func<TTarget, IGameState, TResult> func)
+        public EffectBuilder<TTarget, TResult> Resolve(Func<IEffectResolutionContext<TTarget>, TResult> func)
         {
             _effect.Resolve = func;
 
             return this;
         }
         
-        public EffectBuilder<TTarget, TResult> Text(Func<TTarget, IGameState, string> func)
+        public EffectBuilder<TTarget, TResult> Text(Func<IEffectResolutionContext<TTarget>, string> func)
         {
             _effect.RulesText = func;
 
@@ -38,7 +37,7 @@ namespace Archetype.CardBuilder
         
         public EffectBuilder<TTarget, TResult> Text(string text)
         {
-            _effect.RulesText = (_, _) => text;
+            _effect.RulesText = _ => text;
 
             return this;
         }
@@ -60,14 +59,14 @@ namespace Archetype.CardBuilder
             _effect = new Effect<TResult>();
         }
         
-        public EffectBuilder<TResult> Resolve(Func<IGameState, TResult> func)
+        public EffectBuilder<TResult> Resolve(Func<IEffectResolutionContext, TResult> func)
         {
             _effect.Resolve = func;
 
             return this;
         }
         
-        public EffectBuilder<TResult> Text(Func<IGameState, string> func)
+        public EffectBuilder<TResult> Text(Func<IEffectResolutionContext, string> func)
         {
             _effect.RulesText = func;
 

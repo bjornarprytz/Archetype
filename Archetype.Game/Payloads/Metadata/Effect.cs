@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using Archetype.Core;
+using System.Linq;
 using Archetype.Game.Payloads.Pieces;
 using Newtonsoft.Json;
 
@@ -10,61 +9,61 @@ namespace Archetype.Game.Payloads.Metadata
         where TTarget : IGamePiece
     {
         
-        private Func<TTarget, IGameState, string> _rulesText;
+        private Func<IEffectResolutionContext<TTarget>, string> _rulesText;
 
         public Effect() { }
         
         public Effect(
             int targetIndex,
-            Func<TTarget, IGameState, TResult> effectFunc,
-            Func<TTarget, IGameState, string> rulesTextFunc = null
+            Func<IEffectResolutionContext<TTarget>, TResult> effectFunc,
+            Func<IEffectResolutionContext<TTarget>, string> rulesTextFunc = null
             )
         {
-            rulesTextFunc ??= (_, _) => string.Empty;
+            rulesTextFunc ??= _ => string.Empty;
             
             Resolve = effectFunc;
             RulesText = rulesTextFunc;
             TargetIndex = targetIndex;
         }
 
-        [JsonIgnore] public Func<TTarget, IGameState, TResult> Resolve { get; set; }
+        [JsonIgnore] public Func<IEffectResolutionContext<TTarget>, TResult> Resolve { get; set; }
 
         [JsonIgnore]
-        public Func<TTarget, IGameState, string> RulesText
+        public Func<IEffectResolutionContext<TTarget>, string> RulesText
         {
             get
             {
-                _rulesText ??= (_, _) => string.Empty;
+                _rulesText ??= _ => string.Empty;
                 return _rulesText;
             }
             set => _rulesText = value;
         }
 
         public int TargetIndex { get; set; }
-        public object CallResolveMethod(IList<IGamePiece> availableTargets, IGameState gameState)
+        public object ResolveContext(ICardResolutionContext context)
         {
-            dynamic target = availableTargets[TargetIndex];
+            dynamic target = context.Targets.ElementAt(TargetIndex);
             
-            return Resolve(target, gameState);
+            return Resolve(new EffectResolutionContext<TTarget>(context, target));
         }
 
-        public string CallTextMethod(IList<IGamePiece> availableTargets, IGameState gameState)
+        public string CallTextMethod(ICardResolutionContext context)
         {
-            dynamic target = availableTargets[TargetIndex];
+            dynamic target = context.Targets.ElementAt(TargetIndex);
 
-            return RulesText(target, gameState);
+            return RulesText(new EffectResolutionContext<TTarget>(context, target));
         }
     }
     
     public class Effect<TResult> : IEffect
     {
-        private Func<IGameState, string> _rulesText;
+        private Func<IEffectResolutionContext, string> _rulesText;
 
         public Effect() { }
         
         public Effect(
-            Func<IGameState, TResult> effectFunc,
-            Func<IGameState, string> rulesTextFunc = null
+            Func<IEffectResolutionContext, TResult> effectFunc,
+            Func<IEffectResolutionContext, string> rulesTextFunc = null
         )
         {
             rulesTextFunc ??= _ => string.Empty;
@@ -73,10 +72,10 @@ namespace Archetype.Game.Payloads.Metadata
             RulesText = rulesTextFunc;
         }
 
-        [JsonIgnore] public Func<IGameState, TResult> Resolve { get; set; }
+        [JsonIgnore] public Func<IEffectResolutionContext, TResult> Resolve { get; set; }
 
         [JsonIgnore]
-        public Func<IGameState, string> RulesText
+        public Func<IEffectResolutionContext, string> RulesText
         {
             get
             {
@@ -88,14 +87,14 @@ namespace Archetype.Game.Payloads.Metadata
 
         public int TargetIndex => -1;
 
-        public object CallResolveMethod(IList<IGamePiece> availableTargets, IGameState gameState)
+        public object ResolveContext(ICardResolutionContext context)
         {
-            return Resolve(gameState);
+            return Resolve(new EffectResolutionContext(context));
         }
         
-        public string CallTextMethod(IList<IGamePiece> availableTargets, IGameState gameState)
+        public string CallTextMethod(ICardResolutionContext context)
         {
-            return RulesText(gameState);
+            return RulesText(new EffectResolutionContext(context));
         }
     }
 }

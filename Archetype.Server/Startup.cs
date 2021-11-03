@@ -20,9 +20,6 @@ namespace Archetype.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(_ => BuildDummySet());
-            services.AddSingleton<IGameState, GameState>();
-            
             // Add GraphQL Services
             services
                 .AddMediatR(typeof(PlayCardAction).Assembly)
@@ -61,9 +58,9 @@ namespace Archetype.Server
                         .Target<IUnit>()
                         .Attack(5, 0)
                         .Effect<int>(
-                            resolveEffect: (state) =>
+                            resolveEffect: context =>
                             {
-                                state.Player.Hand.Cards.ForEach((card, i) => card.AffectSomehow(i));
+                                context.GameState.Player.Hand.Cards.ForEach((card, i) => card.AffectSomehow(i));
                                 return 0;
                             },
                             rulesText: (state) => $"Affect all cards in player's hand somehow")
@@ -77,8 +74,8 @@ namespace Archetype.Server
                         .Target<IUnit>()
                         .Effect<IUnit, int>(
                             targetIndex: 0,
-                            resolveEffect: (enemy, state) => enemy.Attack(state.Player.Resources),
-                            rulesText: (enemy, state) => $"Deal {state.Player.Resources}")
+                            resolveEffect: context => context.Target.Attack(context.GameState.Player.Resources),
+                            rulesText: context => $"Deal {context.GameState.Player.Resources}")
                         .Art("other")
                 )
                 .Card(builder =>
@@ -86,15 +83,15 @@ namespace Archetype.Server
                         .Red()
                         .Name("Slap cards")
                         .Cost(1)
-                        .Target<IZone>()
-                        .Effect<IZone, int>(
+                        .Target<IZone<ICard>>()
+                        .Effect<IZone<ICard>, int>(
                             targetIndex: 0,
-                            resolveEffect: (zone, state) =>
+                            resolveEffect: context =>
                             {
-                                zone.Cards.ForEach((card, i) => card.AffectSomehow(i));
+                                context.Target.Contents.ForEach((card, i) => card.AffectSomehow(i));
                                 return 0;
                             },
-                            rulesText: (zone, state) => $"Deal {state.Player.Resources}")
+                            rulesText: context => $"Deal {context.GameState.Player.Resources}")
                         .Art("other")
                 )
                 .Card(builder =>
@@ -103,9 +100,9 @@ namespace Archetype.Server
                         .Name("Slap all")
                         .Cost(1)
                         .Effect<int>(
-                            resolveEffect: (state) =>
+                            resolveEffect: context =>
                             {
-                                state.Player.Hand.Cards.ForEach((card, i) => card.AffectSomehow(i));
+                                context.GameState.Player.Hand.Cards.ForEach((card, i) => card.AffectSomehow(i));
                                 return 0;
                             },
                             rulesText: (state) => $"Affect all cards in player's hand somehow")

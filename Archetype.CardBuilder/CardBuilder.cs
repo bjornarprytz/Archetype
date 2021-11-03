@@ -58,7 +58,7 @@ namespace Archetype.CardBuilder
             return this;
         }
 
-        public CardBuilder Target<TTarget>(Func<TTarget, IGameState, bool> validateTarget=null)
+        public CardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget=null)
             where TTarget : IGamePiece
         {
             _targets.Add(new Target<TTarget>(validateTarget));
@@ -66,8 +66,8 @@ namespace Archetype.CardBuilder
             return this;
         }
         public CardBuilder Targets<TT1, TT2>(
-            Func<TT1, IGameState, bool> validateTarget1=null, 
-            Func<TT2, IGameState, bool> validateTarget2=null
+            Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
+            Func<ITargetValidationContext<TT2>, bool> validateTarget2=null
         )
             where TT1 : IGamePiece
             where TT2 : IGamePiece
@@ -79,9 +79,9 @@ namespace Archetype.CardBuilder
             return this;
         }
         public CardBuilder Targets<TT1, TT2, TT3>(
-            Func<TT1, IGameState, bool> validateTarget1=null, 
-            Func<TT2, IGameState, bool> validateTarget2=null, 
-            Func<TT3, IGameState, bool> validateTarget3=null 
+            Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
+            Func<ITargetValidationContext<TT2>, bool> validateTarget2=null, 
+            Func<ITargetValidationContext<TT3>, bool> validateTarget3=null 
             )
             where TT1 : IGamePiece
             where TT2 : IGamePiece
@@ -107,7 +107,7 @@ namespace Archetype.CardBuilder
             return this;
         }
         
-        public CardBuilder EffectBuilder<TResult>(Action<EffectBuilder<TResult>> builderProvider)
+        public CardBuilder Effect<TResult>(Action<EffectBuilder<TResult>> builderProvider)
         {
             var cbc = BuilderFactory.EffectBuilder<TResult>(); // Input template data here
 
@@ -120,8 +120,8 @@ namespace Archetype.CardBuilder
         
         public CardBuilder Effect<TTarget, TResult>(
             int targetIndex,
-            Func<TTarget, IGameState, TResult> resolveEffect,
-            Func<TTarget, IGameState, string> rulesText=null
+            Func<IEffectResolutionContext<TTarget>, TResult> resolveEffect,
+            Func<IEffectResolutionContext<TTarget>, string> rulesText=null
             )
             where  TTarget : IGamePiece
         {
@@ -129,16 +129,16 @@ namespace Archetype.CardBuilder
                 provider
                     .TargetIndex(targetIndex)
                     .Resolve(resolveEffect)
-                    .Text(rulesText ?? ((_, _) => string.Empty) )
+                    .Text(rulesText ?? (_ => string.Empty) )
                 );
         }
         
         public CardBuilder Effect<TResult>(
-            Func<IGameState, TResult> resolveEffect,
-            Func<IGameState, string> rulesText=null
+            Func<IEffectResolutionContext, TResult> resolveEffect,
+            Func<IEffectResolutionContext, string> rulesText=null
         )
         {
-            return EffectBuilder<TResult>(provider => 
+            return Effect<TResult>(provider => 
                 provider
                     .Resolve(resolveEffect)
                     .Text(rulesText ?? (_ => string.Empty) )

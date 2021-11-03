@@ -31,7 +31,7 @@ namespace Archetype.Server.Extensions
         {
             // TODO: take context into consideration
 
-            return card.Effects.Select(e => e.CallTextMethod(null, null))
+            return card.Effects.Select(e => e.CallTextMethod(null))
                 .Aggregate(((s, s1) => s + s1));
         }
     }

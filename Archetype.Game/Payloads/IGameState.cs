@@ -9,7 +9,7 @@ namespace Archetype.Game.Payloads
         IGamePiece GetGamePiece(long id);
         
         IPlayer Player { get; }
-        IBoard Map { get; }
+        IMap Map { get; }
         
     }
 }

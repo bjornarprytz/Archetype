@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Archetype.Core;
 using Archetype.Game.Payloads.Metadata;
 using Archetype.Game.Payloads.Proto;
 
@@ -8,19 +7,22 @@ namespace Archetype.Game.Payloads.Pieces
 {
     public class Card : ICard
     {
-        public Card(ICardProtoData protoData)
+        public Card(long id, ICardProtoData protoData, IGamePiece owner, IZone currentZone)
         {
             ProtoData = protoData;
+            Id = id;
+            Owner = owner;
+            CurrentZone = currentZone;
         }
         
         public ICardProtoData ProtoData { get; }
         
         public IEnumerable<ITarget> Targets => ProtoData.Targets;
         public IEnumerable<IEffect> Effects => ProtoData.Effects;
-
-        public IZone CurrentZone { get; } 
-        public long OwnerId { get; }
+        
         public long Id { get; }
+        public IGamePiece Owner { get; }
+        public IZone CurrentZone { get; } 
 
         public int Cost => ProtoData.Cost;
 
