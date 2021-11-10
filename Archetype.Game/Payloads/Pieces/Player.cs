@@ -1,10 +1,10 @@
 ﻿
 using System;
-using System.Runtime.CompilerServices;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    public interface IPlayer : IGamePiece
+    public interface IPlayer : IGameAtom
     {
         IDeck Deck { get; }
         IHand Hand { get; }
@@ -14,9 +14,9 @@ namespace Archetype.Game.Payloads.Pieces
         int Mill(int strength);
     }
     
-    public class Player : GamePiece, IPlayer
+    public class Player : Atom, IPlayer
     {
-        public Player() : base(null) // Would use "this" here, but cannot
+        public Player()
         {
             Deck = new Deck(this);
             Hand = new Hand(this);

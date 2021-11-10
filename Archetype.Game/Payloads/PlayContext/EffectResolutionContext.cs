@@ -1,10 +1,11 @@
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.Context
+namespace Archetype.Game.Payloads.PlayContext
 {
     public interface IEffectResolutionContext<out TTarget> : IEffectResolutionContext
-        where TTarget : IGamePiece
+        where TTarget : IGameAtom
     {
         TTarget Target { get; }
     }
@@ -17,7 +18,7 @@ namespace Archetype.Game.Payloads.Context
     }
     
     public class EffectResolutionContext<TTarget> : EffectResolutionContext, IEffectResolutionContext<TTarget> 
-        where TTarget : IGamePiece
+        where TTarget : IGameAtom
     {
         public EffectResolutionContext(ICardResolutionContext cardResolutionContext, TTarget target) : base(cardResolutionContext)
         {

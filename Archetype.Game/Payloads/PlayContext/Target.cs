@@ -1,9 +1,9 @@
 using System;
-using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
 
-namespace Archetype.Game.Payloads.Proto
+namespace Archetype.Game.Payloads.PlayContext
 {
     public interface ITarget
     {
@@ -12,7 +12,7 @@ namespace Archetype.Game.Payloads.Proto
     }
     
     public class Target<TTarget> : ITarget
-        where TTarget : IGamePiece
+        where TTarget : IGameAtom
     {
         private Func<ITargetValidationContext<TTarget>, bool> _validate;
         

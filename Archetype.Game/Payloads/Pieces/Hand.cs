@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Archetype.Game.Payloads.Infrastructure;
+﻿using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
@@ -8,15 +7,11 @@ namespace Archetype.Game.Payloads.Pieces
     {
     }
 
-    public class Hand : GamePiece, IHand
+    public class Hand : Zone<ICard>, IHand
     {
-        private readonly List<ICard> _cards = new();
-        
-        public Hand(IGamePiece owner) : base(owner)
+        public Hand(IGameAtom owner) : base(owner)
         {
             
         }
-
-        public IEnumerable<ICard> Contents => _cards;
     }
 }

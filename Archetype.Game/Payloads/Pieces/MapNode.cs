@@ -1,19 +1,44 @@
+using System;
 using System.Collections.Generic;
+using Aqua.TypeExtensions;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    public interface IMapNode : IZone // Add generic type here?
+    public interface IMapNode : IZone<IUnit>
     {
         IEnumerable<IMapNode> Neighbours { get; }
+
+        void AddNeighbour(IMapNode node);
+        void RemoveNeighbour(IMapNode node);
     }
     
-    public class MapNode : GamePiece, IMapNode
+    public class MapNode : Zone<IUnit>, IMapNode
     {
-        public MapNode(IGamePiece owner) : base(owner) // Owner may not make much sense here, depending on the game design
+        private readonly Dictionary<Guid, IMapNode> _neighbours = new();
+        public MapNode(IGameAtom owner=default) : base(owner)
         {
         }
+        
+        public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
 
-        public IEnumerable<IMapNode> Neighbours { get; }
+        public void AddNeighbour(IMapNode node)
+        {
+            if (_neighbours.ContainsKey(node.Guid))
+                return;
+            
+            _neighbours.Add(node.Guid, node);
+            node.AddNeighbour(this);
+        }
+
+        public void RemoveNeighbour(IMapNode node)
+        {
+            if (!_neighbours.ContainsKey(node.Guid))
+                return;
+
+            _neighbours.Remove(node.Guid);
+            node.RemoveNeighbour(this);
+        }
     }
 }

@@ -3,7 +3,7 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Builder.Extensions
 {
-    public static class BuilderExtensions
+    public static class CardBuilderExtensions
     {
         public static TBuilder Red<TBuilder>(this TBuilder builder)
             where TBuilder : CardBuilder

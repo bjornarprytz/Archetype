@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Builder.Factory;
-using Archetype.Dto.Composite;
 using Archetype.Dto.Simple;
-using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
@@ -14,26 +13,24 @@ namespace Archetype.Builder
     {
         private readonly CardProtoData _cardProtoData;
 
-        private readonly CardMetaData _cardMetaData = new();
-
         private readonly List<ITarget> _targets = new();
         private readonly List<IEffect> _effects = new();
 
         internal CardBuilder()
         {
-            _cardProtoData = new CardProtoData(Guid.NewGuid(), _cardMetaData, _targets, _effects);
+            _cardProtoData = new CardProtoData(Guid.NewGuid(), _targets, _effects);
         }
 
         public CardBuilder Name(string name)
         {
-            _cardMetaData.Name = name;
+            _cardProtoData.MetaData = _cardProtoData.MetaData with { Name = name };
 
             return this;
         }
 
         public CardBuilder Rarity(CardRarity rarity)
         {
-            _cardMetaData.Rarity = rarity;
+            _cardProtoData.MetaData = _cardProtoData.MetaData with { Rarity = rarity };
 
             return this;
         }
@@ -47,20 +44,20 @@ namespace Archetype.Builder
 
         public CardBuilder Color(CardColor color)
         {
-            _cardMetaData.Color = color;
+            _cardProtoData.MetaData = _cardProtoData.MetaData with { Color = color };
 
             return this;
         }
 
         public CardBuilder Art(string link)
         {
-            _cardMetaData.ImageUri = link;
+            _cardProtoData.MetaData = _cardProtoData.MetaData with { ImageUri = link };
 
             return this;
         }
 
         public CardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget=null)
-            where TTarget : IGamePiece
+            where TTarget : IGameAtom
         {
             _targets.Add(new Target<TTarget>(validateTarget));
 
@@ -70,8 +67,8 @@ namespace Archetype.Builder
             Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
             Func<ITargetValidationContext<TT2>, bool> validateTarget2=null
         )
-            where TT1 : IGamePiece
-            where TT2 : IGamePiece
+            where TT1 : IGameAtom
+            where TT2 : IGameAtom
         {
             
             _targets.Add(new Target<TT1>(validateTarget1));
@@ -84,9 +81,9 @@ namespace Archetype.Builder
             Func<ITargetValidationContext<TT2>, bool> validateTarget2=null, 
             Func<ITargetValidationContext<TT3>, bool> validateTarget3=null 
             )
-            where TT1 : IGamePiece
-            where TT2 : IGamePiece
-            where TT3 : IGamePiece
+            where TT1 : IGameAtom
+            where TT2 : IGameAtom
+            where TT3 : IGameAtom
         {
             
             _targets.Add(new Target<TT1>(validateTarget1));
@@ -97,7 +94,7 @@ namespace Archetype.Builder
         }
         
         public CardBuilder EffectBuilder<TTarget, TResult>(Action<EffectBuilder<TTarget, TResult>> builderProvider)
-            where  TTarget : IGamePiece
+            where  TTarget : IGameAtom
         {
             var cbc = BuilderFactory.EffectBuilder<TTarget, TResult>(); // Input template data here
 
@@ -124,7 +121,7 @@ namespace Archetype.Builder
             Func<IEffectResolutionContext<TTarget>, TResult> resolveEffect,
             Func<IEffectResolutionContext<TTarget>, string> rulesText=null
             )
-            where  TTarget : IGamePiece
+            where  TTarget : IGameAtom
         {
             return EffectBuilder<TTarget, TResult>(provider => 
                 provider

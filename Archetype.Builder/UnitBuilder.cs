@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Archetype.Builder.Factory;
-using Archetype.Dto.Composite;
+using Archetype.Dto.MetaData;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
@@ -10,12 +10,11 @@ namespace Archetype.Builder
     {
         private readonly UnitProtoData _unitProtoData;
 
-        private readonly UnitMetaData _metaData = new();
         private readonly List<ICardProtoData> _cards = new();
         
         public UnitBuilder()
         {
-            _unitProtoData = new UnitProtoData(Guid.NewGuid(), _metaData, _cards);
+            _unitProtoData = new UnitProtoData(Guid.NewGuid(), _cards);
         }
         
         public UnitBuilder Card <TResult>(Action<CardBuilder> builderProvider)

@@ -1,6 +1,7 @@
 using System.Linq;
 using Archetype.Dto.Instance;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Server.Extensions
@@ -12,7 +13,7 @@ namespace Archetype.Server.Extensions
             return new CardInstance
             {
                 Cost = card.Cost,
-                MetaData = card.ProtoData.MetaData,
+                MetaData = card.MetaData,
                 RulesText = card.GenerateRulesText(),
                 Targets = card.Targets.Select(t => t.CreateDto()).ToList()
             };

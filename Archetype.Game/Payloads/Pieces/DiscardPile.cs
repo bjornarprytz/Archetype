@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Archetype.Game.Payloads.Infrastructure;
+﻿using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
@@ -9,26 +8,13 @@ namespace Archetype.Game.Payloads.Pieces
         void Exhume(ICard card);
     }
     
-    public class DiscardPile : GamePiece, IDiscardPile
+    public class DiscardPile : Zone<ICard>, IDiscardPile
     {
-        private readonly List<ICard> _cards = new();
-        
-        public DiscardPile(IGamePiece owner) : base(owner)
+        public DiscardPile(IGameAtom owner) : base(owner)
         {
         }
 
-        public IEnumerable<ICard> Contents => _cards;
-        
-        public void Bury(ICard card)
-        {
-            _cards.Add(card);
-
-            card.CurrentZone = this;
-        }
-
-        public void Exhume(ICard card)
-        {
-            _cards.Remove(card);
-        }
+        public void Bury(ICard card) => AddPiece(card);
+        public void Exhume(ICard card) => RemovePiece(card);
     }
 }

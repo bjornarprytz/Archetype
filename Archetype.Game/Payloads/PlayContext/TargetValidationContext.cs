@@ -1,10 +1,11 @@
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.Context
+namespace Archetype.Game.Payloads.PlayContext
 {
     public interface ITargetValidationContext<out TTarget>
-        where TTarget : IGamePiece
+        where TTarget : IGameAtom
     {
         TTarget Target { get; }
         IGameState GameState { get; }
@@ -12,12 +13,12 @@ namespace Archetype.Game.Payloads.Context
     
     public interface ITargetValidationContext
     {
-        IGamePiece Target { get; }
+        IGameAtom Target { get; }
         IGameState GameState { get; }
     }
 
     public class TargetValidationContext<TTarget> : ITargetValidationContext<TTarget> 
-        where TTarget : IGamePiece
+        where TTarget : IGameAtom
     {
         public TargetValidationContext(IGameState gameState, TTarget target)
         {
@@ -31,13 +32,13 @@ namespace Archetype.Game.Payloads.Context
     
     public class TargetValidationContext : ITargetValidationContext
     {
-        public TargetValidationContext(IGameState gameState, IGamePiece target)
+        public TargetValidationContext(IGameState gameState, IGameAtom target)
         {
             GameState = gameState;
             Target = target;
         }
         
-        public IGamePiece Target { get; }
+        public IGameAtom Target { get; }
         public IGameState GameState { get; }
     }
 }

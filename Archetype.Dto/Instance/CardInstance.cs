@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Archetype.Dto.Composite;
+using Archetype.Dto.MetaData;
 
 namespace Archetype.Dto.Instance
 {

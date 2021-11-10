@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
@@ -13,19 +15,19 @@ namespace Archetype.Game.Payloads.Pieces
         void PutCardOnBottom(ICard card);
     }
     
-    public class Deck : GamePiece, IDeck
+    public class Deck : Zone<ICard>, IDeck
     {
         private readonly Stack<ICard> _cards = new();
 
-        public Deck(IGamePiece owner) : base(owner)
-        {
-        }
+        public Deck(IGameAtom owner) : base(owner) { }
 
-        public IEnumerable<ICard> Contents => _cards;
-        
         public ICard Draw()
         {
-            return _cards.Pop();
+            var card = _cards.Pop();
+            
+            RemovePiece(card);
+
+            return card;
         }
 
         public void Shuffle()
@@ -43,6 +45,8 @@ namespace Archetype.Game.Payloads.Pieces
         public void PutCardOnTop(ICard newCard)
         {
             _cards.Push(newCard);
+            
+            AddPiece(newCard);
         }
 
         public void PutCardOnBottom(ICard newCard)
@@ -55,6 +59,8 @@ namespace Archetype.Game.Payloads.Pieces
             {
                 _cards.Push(card);
             }
+            
+            AddPiece(newCard);
         }
     }
 }

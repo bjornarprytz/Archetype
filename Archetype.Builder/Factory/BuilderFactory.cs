@@ -1,4 +1,5 @@
 ﻿using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Factory
 {
@@ -10,7 +11,7 @@ namespace Archetype.Builder.Factory
         }
         
         public static EffectBuilder<TTarget, TResult> EffectBuilder<TTarget, TResult>()
-            where TTarget : IGamePiece
+            where TTarget : IGameAtom
         {
             return new EffectBuilder<TTarget, TResult>();
         }

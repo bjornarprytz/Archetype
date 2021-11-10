@@ -1,24 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
     public interface IMap
     {
-        IEnumerable<IMapNode> Zones { get; }
+        IEnumerable<IMapNode> Nodes { get; }
     }
 
     public class Map : IMap
     {
-        private readonly List<IMapNode> _zones;
+        private readonly List<IMapNode> _nodes;
 
-        public Map(IEnumerable<IMapNode> zones)
+        public Map(IMapProtoData protoData)
         {
-            _zones = zones.ToList();
+            _nodes = protoData.Nodes.ToList();
         }
-
-
-        public IEnumerable<IMapNode> Zones => _zones;
+        
+        public IEnumerable<IMapNode> Nodes => _nodes;
     }
 }

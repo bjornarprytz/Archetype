@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
 
-namespace Archetype.Game.Payloads.Proto
+namespace Archetype.Game.Payloads.PlayContext
 {
     public interface IEffect
     {
@@ -15,7 +15,7 @@ namespace Archetype.Game.Payloads.Proto
     }
     
     public class Effect<TTarget, TResult> : IEffect 
-        where TTarget : IGamePiece
+        where TTarget : IGameAtom
     {
         private Func<IEffectResolutionContext<TTarget>, string> _rulesText;
 

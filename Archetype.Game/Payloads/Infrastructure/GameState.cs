@@ -1,5 +1,6 @@
 ﻿using System;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
@@ -7,7 +8,7 @@ namespace Archetype.Game.Payloads.Infrastructure
     {
         bool IsPayerTurn { get; set; }
         
-        IGamePiece GetGamePiece(Guid guid);
+        IGameAtom GetGamePiece(Guid guid);
         
         IPlayer Player { get; }
         IMap Map { get; }
@@ -23,7 +24,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         }
         
         public bool IsPayerTurn { get; set; }
-        public IGamePiece GetGamePiece(Guid guid)
+        public IGameAtom GetGamePiece(Guid guid)
         {
             throw new NotImplementedException();
         }

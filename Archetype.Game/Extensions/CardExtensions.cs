@@ -1,6 +1,6 @@
 using System.Linq;
-using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.PlayContext;
 
 namespace Archetype.Game.Extensions
 {
