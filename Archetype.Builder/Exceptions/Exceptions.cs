@@ -15,14 +15,6 @@ namespace Archetype.Builder
         public override string Message { get; }
     }
     
-    public class MissingResolutionFunctionException : Exception
-    {
-        public MissingResolutionFunctionException()
-        {
-            
-            Message = $"Effect is missing a resolve function";
-        }
-
-        public override string Message { get; }
-    }
+    public class MissingResolutionFunctionException : Exception { }
+    public class DisconnectedNodesException : Exception { }
 }

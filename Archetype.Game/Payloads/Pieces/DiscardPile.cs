@@ -1,4 +1,5 @@
-﻿using Archetype.Game.Payloads.Pieces.Base;
+﻿using System;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
@@ -12,6 +13,8 @@ namespace Archetype.Game.Payloads.Pieces
     {
         public DiscardPile(IGameAtom owner) : base(owner)
         {
+            if (owner == null)
+                throw new ArgumentException("DiscardPile needs an owner", nameof(owner));
         }
 
         public void Bury(ICard card) => AddPiece(card);

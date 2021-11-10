@@ -20,5 +20,20 @@ namespace Archetype.Builder.Factory
         {
             return new EffectBuilder<TResult>();
         }
+        
+        public static NodeBuilder NodeBuilder()
+        {
+            return new NodeBuilder();
+        }
+
+        public static MapBuilder MapBuilder()
+        {
+            return new MapBuilder();
+        }
+
+        public static UnitBuilder UnitBuilder()
+        {
+            return new UnitBuilder();
+        }
     }
 }
