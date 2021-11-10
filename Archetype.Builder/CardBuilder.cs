@@ -18,7 +18,7 @@ namespace Archetype.Builder
 
         internal CardBuilder()
         {
-            _cardProtoData = new CardProtoData(Guid.NewGuid(), _targets, _effects);
+            _cardProtoData = new CardProtoData(_targets, _effects);
         }
 
         public CardBuilder Name(string name)

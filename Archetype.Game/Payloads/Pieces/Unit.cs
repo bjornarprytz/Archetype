@@ -1,3 +1,5 @@
+using System;
+using Archetype.Dto.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.Proto;
 
@@ -5,9 +7,11 @@ namespace Archetype.Game.Payloads.Pieces
 {
     public interface IUnit : IGameAtom, IZoned<IUnit>
     {
-        IUnitProtoData ProtoData { get; }
+        Guid ProtoGuid { get; }
         IDeck Deck { get; }
+        UnitMetaData MetaData { get; }
         
+        int MaxHealth { get; }
         int Health { get; }
         
         int Attack(int strength);
@@ -18,29 +22,40 @@ namespace Archetype.Game.Payloads.Pieces
     {
         public Unit(IUnitProtoData protoData, IGameAtom owner) : base(owner)
         {
-            ProtoData = protoData;
+            ProtoGuid = protoData.Guid;
             Deck = new Deck(this);
 
-            Health = ProtoData.Health;
+            Health = MaxHealth = protoData.Health;
+            MetaData = protoData.MetaData;
         }
 
-        public IUnitProtoData ProtoData { get; }
+        public Guid ProtoGuid { get; }
         public IDeck Deck { get; }
+        public UnitMetaData MetaData { get; }
 
+        public int MaxHealth { get; }
         public int Health { get; private set; }
 
         public int Attack(int strength)
         {
-            Health -= strength;
+            var potentialDamage = Health;
 
-            return strength;
+            var actualDamage = Math.Min(potentialDamage, strength);
+            
+            Health -= actualDamage;
+
+            return actualDamage;
         }
 
         public int Heal(int strength)
         {
-            Health += strength;
+            var potentialHeal = MaxHealth - Health;
 
-            return strength;
+            var actualHeal = Math.Min(potentialHeal, strength);
+            
+            Health += actualHeal;
+
+            return actualHeal;
         }
     }
 }

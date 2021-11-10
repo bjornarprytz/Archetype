@@ -14,7 +14,7 @@ namespace Archetype.Builder
         
         public UnitBuilder()
         {
-            _unitProtoData = new UnitProtoData(Guid.NewGuid(), _cards);
+            _unitProtoData = new UnitProtoData(_cards);
         }
         
         public UnitBuilder Card <TResult>(Action<CardBuilder> builderProvider)

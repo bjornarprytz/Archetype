@@ -20,7 +20,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
         public void AddCard(ICardProtoData card)
         {
-            _cards.Add(card.Id, card);
+            _cards.Add(card.Guid, card);
         }
     }
 }

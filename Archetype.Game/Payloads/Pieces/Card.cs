@@ -10,6 +10,7 @@ namespace Archetype.Game.Payloads.Pieces
 {
     public interface ICard : IGameAtom, IZoned<ICard>
     {
+        Guid ProtoGuid { get; }
         CardMetaData MetaData { get; }
         int Cost { get; }
         void AffectSomehow(int x);
@@ -25,6 +26,7 @@ namespace Archetype.Game.Payloads.Pieces
 
         public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
         {
+            ProtoGuid = protoData.Guid;
             _targets = protoData.Targets.ToList();
             _effects = protoData.Effects.ToList();
             MetaData = protoData.MetaData;
@@ -32,6 +34,7 @@ namespace Archetype.Game.Payloads.Pieces
         }
 
         public int Cost { get; }
+        public Guid ProtoGuid { get; }
         public CardMetaData MetaData { get; }
         public IEnumerable<ITarget> Targets => _targets;
         public IEnumerable<IEffect> Effects => _effects;

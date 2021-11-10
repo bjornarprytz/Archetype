@@ -7,7 +7,7 @@ namespace Archetype.Game.Payloads.Proto
 {
     public interface ICardProtoData
     {
-        Guid Id { get; }
+        Guid Guid { get; }
         
         int Cost { get; }
         CardMetaData MetaData { get; }
@@ -20,14 +20,14 @@ namespace Archetype.Game.Payloads.Proto
         private readonly List<ITarget> _targets;
         private readonly List<IEffect> _effects;
         
-        public CardProtoData(Guid id, List<ITarget> targets, List<IEffect> effects)
+        public CardProtoData(List<ITarget> targets, List<IEffect> effects)
         {
-            Id = id;
+            Guid = Guid.NewGuid();
             _targets = targets;
             _effects = effects;
         }
 
-        public Guid Id { get; }
+        public Guid Guid { get; }
         public int Cost { get; set; }
         public CardMetaData MetaData { get; set; }
         public IEnumerable<ITarget> Targets => _targets;
