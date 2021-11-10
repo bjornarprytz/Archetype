@@ -1,4 +1,4 @@
-namespace Archetype.Core.Data.Composite
+namespace Archetype.Dto.Composite
 {
     public class UnitMetaData
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Archetype.Core.Data.Composite;
+using Archetype.Dto.Composite;
 
-namespace Archetype.Core.Data.Instance
+namespace Archetype.Dto.Instance
 {
     public class CardInstance : GamePieceInstance
     {

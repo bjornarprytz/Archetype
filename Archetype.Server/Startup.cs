@@ -3,6 +3,7 @@ using Archetype.CardBuilder;
 using Archetype.CardBuilder.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -19,9 +20,10 @@ namespace Archetype.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add GraphQL Services
             services
                 .AddMediatR(typeof(PlayCardAction).Assembly)
+                .AddSingleton((_ => BuildDummySet()))
+                .AddSingleton<IGameState, GameState>()
                 .AddGraphQLServer()
                 .AddQueryType<Queries>()
                 .AddMutationType<Mutations>()

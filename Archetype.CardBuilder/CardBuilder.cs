@@ -1,11 +1,9 @@
-﻿using Archetype.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.CardBuilder.Factory;
-using Archetype.Core.Data.Composite;
-using Archetype.Core.Data.Simple;
-using Archetype.Game.Payloads;
+using Archetype.Dto.Composite;
+using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;

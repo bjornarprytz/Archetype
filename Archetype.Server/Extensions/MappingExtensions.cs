@@ -1,6 +1,5 @@
 using System.Linq;
-using Archetype.Core;
-using Archetype.Core.Data.Instance;
+using Archetype.Dto.Instance;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Archetype.Core.Data.Composite;
+using Archetype.Dto.Composite;
 
 namespace Archetype.Game.Payloads.Proto
 {

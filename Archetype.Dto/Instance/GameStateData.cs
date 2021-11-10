@@ -1,4 +1,4 @@
-namespace Archetype.Core.Data.Instance
+namespace Archetype.Dto.Instance
 {
     public class GameStateData
     {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.CardBuilder

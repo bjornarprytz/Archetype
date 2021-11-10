@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.Game.Payloads.Pieces
+namespace Archetype.Game.Payloads.Infrastructure
 {
     public interface IMap
     {
@@ -11,9 +13,9 @@ namespace Archetype.Game.Payloads.Pieces
     {
         private readonly List<IMapNode> _zones;
 
-        public Map(List<IMapNode> zones)
+        public Map(IEnumerable<IMapNode> zones)
         {
-            _zones = zones;
+            _zones = zones.ToList();
         }
 
 

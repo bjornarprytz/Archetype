@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Infrastructure;
 
 namespace Archetype.Game.Payloads.Pieces
 {

@@ -1,6 +1,6 @@
-using Archetype.Core.Data.Simple;
+using Archetype.Dto.Simple;
 
-namespace Archetype.Core.Data.Composite
+namespace Archetype.Dto.Composite
 {
     public class CardMetaData
     {

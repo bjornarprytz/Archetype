@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Core;
 using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Infrastructure;
 using MediatR;
 
 namespace Archetype.Game.Actions

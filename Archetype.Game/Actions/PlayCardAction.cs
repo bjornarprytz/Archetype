@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Aqua.TypeExtensions;
 using Archetype.Game.Extensions;
-using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using MediatR;
 
@@ -13,25 +13,25 @@ namespace Archetype.Game.Actions
 {
     public class PlayCardAction : IRequest<string>
     {
-        public long CardId { get; }
-        public IEnumerable<long> TargetsIds { get; }
+        public Guid CardGuid { get; }
+        public IEnumerable<Guid> TargetsGuids { get; }
 
-        public PlayCardAction(long cardId, IEnumerable<long> targetsIds)
+        public PlayCardAction(Guid cardGuid, IEnumerable<Guid> targetsGuids)
         {
-            CardId = cardId;
-            TargetsIds = targetsIds;
+            CardGuid = cardGuid;
+            TargetsGuids = targetsGuids;
         }
         
-        public PlayCardAction(long cardId, params long[] targetsIds)
+        public PlayCardAction(Guid cardGuid, params Guid[] targetsGuids)
         {
-            CardId = cardId;
-            TargetsIds = targetsIds;
+            CardGuid = cardGuid;
+            TargetsGuids = targetsGuids;
         }
         
-        public PlayCardAction(long cardId)
+        public PlayCardAction(Guid cardGuid)
         {
-            CardId = cardId;
-            TargetsIds = Enumerable.Empty<long>();
+            CardGuid = cardGuid;
+            TargetsGuids = Enumerable.Empty<Guid>();
         }
     }
     
@@ -49,7 +49,7 @@ namespace Archetype.Game.Actions
             if (!_gameState.IsPayerTurn)
                 return "Not player's turn";
 
-            if (_gameState.GetGamePiece(request.CardId) is not ICard card)
+            if (_gameState.GetGamePiece(request.CardGuid) is not ICard card)
                 return "GamePiece is not a card";
 
             if (card.CurrentZone != _gameState.Player.Hand)
@@ -58,7 +58,7 @@ namespace Archetype.Game.Actions
             if (card.Cost > _gameState.Player.Resources)
                 return "Can't pay cost";
             
-            var targets = request.TargetsIds.Select(_gameState.GetGamePiece).ToList();
+            var targets = request.TargetsGuids.Select(guid => _gameState.GetGamePiece(guid)).ToList();
 
             if (targets.Any(t => t == null))
                 return "Some targets are null";

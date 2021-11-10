@@ -1,4 +1,4 @@
-﻿namespace Archetype.Core.Data.Simple
+﻿namespace Archetype.Dto.Simple
 { 
     public enum CardColor
     {

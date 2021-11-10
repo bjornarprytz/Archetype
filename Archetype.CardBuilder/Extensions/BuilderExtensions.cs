@@ -1,8 +1,4 @@
-using System;
-using System.ComponentModel;
-using System.Linq.Expressions;
-using Archetype.Core;
-using Archetype.Core.Data.Simple;
+using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.CardBuilder.Extensions

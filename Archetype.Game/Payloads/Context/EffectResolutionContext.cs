@@ -1,3 +1,4 @@
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Context

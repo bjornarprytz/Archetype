@@ -30,7 +30,7 @@ namespace Archetype.Game.Payloads.Pieces
         public int Mill(int strength)
         {
             if (strength < 0)
-                throw new ArgumentException("Cannot mill negative cards");
+                throw new ArgumentException($"Cannot mill a negative number ({strength}) of cards");
             
             for (var i=0; i < strength; i++)
             {

@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Archetype.Core;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Game.Payloads.Pieces
+namespace Archetype.Game.Payloads.Infrastructure
 {
     public interface ICardPool
     {

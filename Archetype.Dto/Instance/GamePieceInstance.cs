@@ -1,6 +1,6 @@
 using System;
 
-namespace Archetype.Core.Data.Instance
+namespace Archetype.Dto.Instance
 {
     public abstract class GamePieceInstance
     {

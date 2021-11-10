@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Core.Data.Instance;
+using Archetype.Dto.Instance;
 using Archetype.Game.Actions;
 using Archetype.Game.Payloads;
+using Archetype.Game.Payloads.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
 using HotChocolate.Types;
@@ -61,7 +63,7 @@ namespace Archetype.Server
         }
 
         public record PlayCardPayload(string Message);
-        public record PlayCardInput(long CardId, IEnumerable<long> TargetIds);
+        public record PlayCardInput(Guid CardId, IEnumerable<Guid> TargetIds);
     }
     
     public class Subscriptions
