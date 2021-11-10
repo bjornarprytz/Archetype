@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Archetype.CardBuilder.Factory;
+using Archetype.Builder.Factory;
 using Archetype.Dto.Composite;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.CardBuilder
+namespace Archetype.Builder
 {
     public class UnitBuilder : IBuilder<IUnitProtoData>
     {

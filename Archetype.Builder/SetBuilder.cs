@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Archetype.CardBuilder.Factory;
+using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.CardBuilder
+namespace Archetype.Builder
 {
     public class SetBuilder : IBuilder<ICardSet>
     {

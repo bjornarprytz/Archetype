@@ -1,6 +1,6 @@
 ﻿using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.CardBuilder.Factory
+namespace Archetype.Builder.Factory
 {
     public class BuilderFactory
     {

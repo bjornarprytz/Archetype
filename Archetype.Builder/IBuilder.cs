@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Archetype.CardBuilder
+namespace Archetype.Builder
 {
     public interface IBuilder<out T>
     {

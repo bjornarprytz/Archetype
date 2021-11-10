@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Archetype.CardBuilder\Archetype.CardBuilder.csproj" />
+    <ProjectReference Include="..\Archetype.Builder\Archetype.Builder.csproj" />
     <ProjectReference Include="..\Archetype.Game\Archetype.Game.csproj" />
   </ItemGroup>
 

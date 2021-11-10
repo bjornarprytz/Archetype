@@ -1,6 +1,6 @@
 using Aqua.EnumerableExtensions;
-using Archetype.CardBuilder;
-using Archetype.CardBuilder.Extensions;
+using Archetype.Builder;
+using Archetype.Builder.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Infrastructure;

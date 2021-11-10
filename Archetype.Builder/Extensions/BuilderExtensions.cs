@@ -1,7 +1,7 @@
 using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.CardBuilder.Extensions
+namespace Archetype.Builder.Extensions
 {
     public static class BuilderExtensions
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Runtime.InteropServices.ComTypes;
 
-namespace Archetype.CardBuilder
+namespace Archetype.Builder
 {
     public class InvalidTargetIndexException : Exception
     {

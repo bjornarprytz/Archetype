@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Archetype.Dto", "Archetype.Dto\Archetype.Dto.csproj", "{E2959340-254C-4ED0-A4D7-1118F7081317}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Archetype.CardBuilder", "Archetype.CardBuilder\Archetype.CardBuilder.csproj", "{79A0A536-A37F-4C58-BE96-BDC8CD7A5069}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Archetype.Builder", "Archetype.Builder\Archetype.Builder.csproj", "{79A0A536-A37F-4C58-BE96-BDC8CD7A5069}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Game", "Archetype.Game\Archetype.Game.csproj", "{01D04719-34F4-4C36-B6ED-E19DFAD0E121}"
 EndProject

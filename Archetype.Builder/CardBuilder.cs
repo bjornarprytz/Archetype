@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archetype.CardBuilder.Factory;
+using Archetype.Builder.Factory;
 using Archetype.Dto.Composite;
 using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.CardBuilder
+namespace Archetype.Builder
 {
     public class CardBuilder : IBuilder<ICardProtoData>
     {

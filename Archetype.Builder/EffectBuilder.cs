@@ -3,7 +3,7 @@ using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.CardBuilder
+namespace Archetype.Builder
 {
     public class EffectBuilder<TTarget, TResult> : IBuilder<IEffect>
         where TTarget : IGamePiece
