@@ -1,9 +1,7 @@
-using System;
-
 namespace Archetype.Dto.Instance
 {
     public class TargetData
     {
-        public Type TargetType { get; set; }
+        public string TargetType { get; set; }
     }
 }

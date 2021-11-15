@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Aqua.EnumerableExtensions;
 using Archetype.Builder;
 using Archetype.Builder.Extensions;
@@ -5,6 +6,7 @@ using Archetype.Game.Actions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.Proto;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,7 +25,7 @@ namespace Archetype.Server
             services
                 .AddMediatR(typeof(PlayCardAction).Assembly)
                 .AddSingleton((_ => BuildDummySet()))
-                .AddSingleton<IGameState, GameState>()
+                .AddSingleton<IGameState>(_ => new GameState(new Map(new MapProtoData(new List<IMapNode>())), new Player()))
                 .AddGraphQLServer()
                 .AddQueryType<Queries>()
                 .AddMutationType<Mutations>()

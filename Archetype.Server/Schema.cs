@@ -25,12 +25,11 @@ namespace Archetype.Server
         public GameStateData GetGameState()
         {
             var player  = new PlayerData(); 
-        
-        
+            
             var gameState = new GameStateData { Player = player };
         
             return gameState;
-        } 
+        }
     }
     
     public class Mutations

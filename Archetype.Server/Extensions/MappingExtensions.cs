@@ -23,7 +23,7 @@ namespace Archetype.Server.Extensions
         {
             return new TargetData
             {
-                TargetType = target.TargetType
+                TargetType = target.TargetType.Name
             };
         }
 
