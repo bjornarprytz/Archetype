@@ -1,0 +1,24 @@
+query GetGameState {
+    gameState{
+        player
+        {
+            resources,
+            deck{
+                metaData{
+                    name
+                }
+            }
+        },
+        map{
+            nodes{
+                neighbours{
+                    cards{
+                        metaData{
+                            name
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

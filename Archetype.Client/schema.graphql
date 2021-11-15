@@ -1,0 +1,100 @@
+﻿schema {
+  query: Queries
+  mutation: Mutations
+  subscription: Subscriptions
+}
+
+type Queries {
+  gameState: GameStateData!
+}
+
+type Mutations {
+  playCard(playCardInput: PlayCardInput!): PlayCardPayload!
+}
+
+type Subscriptions {
+  onCardPlayed: PlayCardPayload!
+}
+
+input PlayCardInput {
+  cardId: UUID!
+  targetIds: [UUID!]!
+}
+
+type PlayCardPayload {
+  message: String!
+}
+
+type GameStateData {
+  isPlayerTurn: Boolean!
+  player: PlayerData
+  map: MapData
+}
+
+type MapData {
+  nodes: [MapNodeData]
+}
+
+type PlayerData {
+  resources: Int!
+  hand: [CardInstance]
+  discardPile: [CardInstance]
+  deck: [CardInstance]
+}
+
+scalar UUID
+
+type CardInstance {
+  cost: Int!
+  metaData: CardMetaData
+  rulesText: String
+  targets: [TargetData]
+  id: UUID!
+  ownerId: UUID!
+}
+
+type MapNodeData {
+  cards: [CardInstance]
+  enemies: [UnitInstance]
+  neighbours: [MapNodeData]
+  id: UUID!
+  ownerId: UUID!
+}
+
+type TargetData {
+  targetType: String
+}
+
+type CardMetaData {
+  name: String
+  rarity: CardRarity!
+  color: CardColor!
+  imageUri: String
+}
+
+type UnitInstance {
+  metaData: UnitMetaData
+  cards: [CardInstance]
+  id: UUID!
+  ownerId: UUID!
+}
+
+type UnitMetaData {
+  name: String
+  imageUri: String
+}
+
+enum CardColor {
+  WHITE
+  BLUE
+  BLACK
+  RED
+  GREEN
+}
+
+enum CardRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  MYTHIC
+}
