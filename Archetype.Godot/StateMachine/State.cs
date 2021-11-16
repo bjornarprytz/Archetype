@@ -20,7 +20,7 @@ namespace Archetype.Godot.StateMachine
 
     public abstract class State<T> : IState<T>
     {
-        private bool isInitiated;
+        private bool _isInitiated;
 
         protected CompositeDisposable StateActiveLifetime { get; private set; }
         private readonly Subject<IStateTransition> _onTransition = new();
@@ -28,10 +28,10 @@ namespace Archetype.Godot.StateMachine
 
         public void Init(T model)
         {
-            if (isInitiated)
+            if (_isInitiated)
                 throw new Exception($"Double initialization of State {typeof(T)}");
             
-            isInitiated = true;
+            _isInitiated = true;
             
             Model = model ?? throw new ArgumentException(nameof(model));
         }

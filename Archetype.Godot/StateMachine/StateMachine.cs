@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Disposables;
 using Archetype.Godot.Card;
 using Archetype.Godot.Extensions;
@@ -8,7 +7,13 @@ using Godot;
 
 namespace Archetype.Godot.StateMachine
 {
-	public abstract class StateMachine<T> : Node
+	public interface IStateMachine<in T>
+	{
+		void Inject(T model);
+		IState<T> CurrentState { get; }
+	}
+	
+	public abstract class StateMachine<T> : Node, IStateMachine<T>
 	{
 		private CompositeDisposable _stateLifetime;
 		private readonly Dictionary<Type, IState<T>> _states = new();

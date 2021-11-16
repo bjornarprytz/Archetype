@@ -10,6 +10,7 @@ namespace Archetype.Godot.Card
 			
 			AddState<IdleState>();
 			AddState<HighlightState>();
+			AddState<TargetingState>();
 		}
 	}
 }
