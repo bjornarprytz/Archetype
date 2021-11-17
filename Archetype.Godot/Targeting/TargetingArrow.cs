@@ -1,20 +1,36 @@
+using System;
+using System.Reactive.Subjects;
 using Godot;
 
 namespace Archetype.Godot.Targeting
 {
 	public class TargetingArrow : Line2D, ITargetingArrow
 	{
-		public void Activate()
+		private readonly Subject<ITargetable> _onTarget = new();
+
+		public IObservable<ITargetable> OnTarget => _onTarget;
+		
+		public override void _Ready()
 		{
-			ClearPoints();
+			base._Ready();
 			
 			AddPoint(Vector2.Zero);
 			AddPoint(Vector2.Zero);
 		}
 
-		public void Deactivate()
+		public override void _Input(InputEvent @event)
 		{
-			ClearPoints();
+			base._Input(@event);
+			
+			switch (@event)
+			{
+				case InputEventMouseButton { Pressed: false }:
+					TryTarget();
+					break;
+				case InputEventMouseMotion mm:
+					SetPointPosition(1, mm.Position);
+					break;
+			}
 		}
 
 		public void SetAnchor(Vector2 anchorPos)
@@ -22,17 +38,18 @@ namespace Archetype.Godot.Targeting
 			SetPointPosition(0, anchorPos);
 		}
 
-		public void ChangePosition(Vector2 newPos)
-		{
-			SetPointPosition(1, newPos);
-		}
-
-		public Node GetTarget()
+		private void TryTarget()
 		{
 			var spaceState = GetWorld2d().DirectSpaceState;
-			var result = spaceState.IntersectRay(Vector2.Zero, Points[1]);
+			var result = spaceState.IntersectPoint(Points[1], collideWithAreas: true);
 
-			return null; // TODO: Return something real
+			if (result == null 
+				|| result.Count == 0 
+				|| result[0] is not ITargetable targetable) return;
+
+			_onTarget.OnNext(targetable);
 		}
+
+		
 	}
 }

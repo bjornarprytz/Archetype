@@ -1,69 +1,71 @@
 using System;
 using System.Reactive;
 using System.Reactive.Subjects;
-using Archetype.Godot.StateMachine;
 using Godot;
-using Archetype.Godot.Extensions;
 using Archetype.Godot.Targeting;
 
 namespace Archetype.Godot.Card
 {
 	public class CardNode : Area2D, ICard
 	{
-		private IStateMachine<ICard> _stateMachine;
+		private PackedScene _sceneTargetingArrow;
+		
+		private readonly CardStateManager _stateManager;
 		private readonly Subject<bool> _onHovered = new();
 		private readonly Subject<Unit> _onClick = new();
+		private readonly Subject<IPlayCardContext> _onPlay = new();
 		
-		public IObservable<bool> OnHovered => _onHovered;
+		public IObservable<bool> OnHover => _onHovered;
 		public IObservable<Unit> OnClick => _onClick;
-		public Vector2 AnchorPosition { get; } = Vector2.Zero;
+		public IObservable<IPlayCardContext> OnPlay => _onPlay;
 		public Area2D TargetNode => this;
 		public ITargetingArrow TargetingArrow { get; private set; }
+
+
+		public CardNode()
+		{
+			_stateManager = new CardStateManager(this);
+		}
 		
 		public override void _Ready()
 		{
 			base._Ready();
-			_stateMachine = this.GetRequiredChild<StateMachine<ICard>>(); // TODO: Add these as scenes instead
-			_stateMachine.Inject(this);
-			TargetingArrow = this.GetRequiredChild<TargetingArrow>(); // TODO: Add these as scenes instead
+			
+			AddChild(_stateManager);
+			
+			Connect(Signals.CollisionObject2D.InputEvent, this, nameof(OnInputEvent));
+			Connect(Signals.CollisionObject2D.MouseEntered, this, nameof(OnMouseEntered));
+			Connect(Signals.CollisionObject2D.MouseExited, this, nameof(OnMouseExited));
 		}
-
-		public void HighlightOn()
-		{
-			GD.Print("Highlight ON!");
-		}
-
-		public void HighlightOff()
-		{
-			GD.Print("Highlight OFF!");
-		}
-
-		
 
 		public override void _ExitTree()
 		{
 			_onHovered?.Dispose();
+			_onClick?.Dispose();
+			_onPlay?.Dispose();
 		}
 		
-		private void _on_Area2D_input_event(object viewport, object @event, int shape_idx)
+		public void HandleTarget(ITargetable target)
+		{
+			_onPlay.OnNext(null); // TODO: Validate target and send good data instead
+		}
+
+		private void OnInputEvent(object viewport, object @event, int shape_idx)
 		{
 			if (@event is InputEventMouseButton { Pressed: true })
 			{
 				_onClick.OnNext(Unit.Default);
 			}
 		}
-
-		private void _on_Area2D_mouse_entered()
+		
+		private void OnMouseEntered()
 		{
 			_onHovered.OnNext(true);
 		}
 
-		private void _on_Area2D_mouse_exited()
+		private void OnMouseExited()
 		{
 			_onHovered.OnNext(false);
 		}
-
-		
-		
 	}
 }

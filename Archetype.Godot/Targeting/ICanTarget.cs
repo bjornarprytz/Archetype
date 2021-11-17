@@ -1,19 +1,17 @@
+using System;
+using Archetype.Godot.UXState;
 using Godot;
 
 namespace Archetype.Godot.Targeting
 {
-    public interface ICanTarget
+    public interface ICanTarget : IClickable
     {
         ITargetingArrow TargetingArrow { get; }
+        void HandleTarget(ITargetable target);
     }
     
     public interface ITargetingArrow
     {
-        void Activate();
-        void Deactivate();
-        void SetAnchor(Vector2 anchorPos);
-        void ChangePosition(Vector2 newPos);
-
-        Node GetTarget();
+        IObservable<ITargetable> OnTarget { get; }
     }
 }

@@ -9,18 +9,24 @@ namespace Archetype.Godot.StateMachine
 {
 	public interface IStateMachine<in T>
 	{
-		void Inject(T model);
 		IState<T> CurrentState { get; }
 	}
 	
 	public abstract class StateMachine<T> : Node, IStateMachine<T>
 	{
+		private readonly T _model;
 		private CompositeDisposable _stateLifetime;
 		private readonly Dictionary<Type, IState<T>> _states = new();
 		private Type _initialState;
-		
+
+
 		public IState<T> CurrentState { get; private set; }
 
+		protected StateMachine(T model)
+		{
+			_model = model;
+		}
+		
 		protected void AddState<TState>()
 			where TState : IState<T>, new()
 		{
@@ -29,14 +35,14 @@ namespace Archetype.Godot.StateMachine
 			_states.Add(typeof(TState), new TState());
 		}
 
-		public void Inject(T model)
+		public override void _Ready()
 		{
 			if (_initialState is null)
 				throw new Exception("No state to initialise StateMachine with");
 				
 			foreach (var state in _states.Values)
 			{
-				state.Init(model);
+				state.Init(_model);
 				
 			}
 			
