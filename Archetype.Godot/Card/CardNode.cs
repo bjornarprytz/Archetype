@@ -1,5 +1,4 @@
 using System;
-using System.Reactive;
 using System.Reactive.Subjects;
 using Godot;
 using Archetype.Godot.Targeting;
@@ -12,14 +11,13 @@ namespace Archetype.Godot.Card
 		
 		private readonly CardStateManager _stateManager;
 		private readonly Subject<bool> _onHovered = new();
-		private readonly Subject<Unit> _onClick = new();
+		private readonly Subject<InputEventMouseButton> _onClick = new();
 		private readonly Subject<IPlayCardContext> _onPlay = new();
 		
 		public IObservable<bool> OnHover => _onHovered;
-		public IObservable<Unit> OnClick => _onClick;
+		public IObservable<InputEventMouseButton> OnClick => _onClick;
 		public IObservable<IPlayCardContext> OnPlay => _onPlay;
 		public Area2D TargetNode => this;
-		public ITargetingArrow TargetingArrow { get; private set; }
 
 
 		public CardNode()
@@ -52,9 +50,9 @@ namespace Archetype.Godot.Card
 
 		private void OnInputEvent(object viewport, object @event, int shape_idx)
 		{
-			if (@event is InputEventMouseButton { Pressed: true })
+			if (@event is InputEventMouseButton mb)
 			{
-				_onClick.OnNext(Unit.Default);
+				_onClick.OnNext(mb);
 			}
 		}
 		

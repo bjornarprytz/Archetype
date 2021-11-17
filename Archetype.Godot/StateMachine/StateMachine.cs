@@ -1,50 +1,41 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
+using System.Reactive.Subjects;
 using Archetype.Godot.Card;
 using Archetype.Godot.Extensions;
 using Godot;
 
 namespace Archetype.Godot.StateMachine
 {
-	public interface IStateMachine<in T>
+	public interface IStateMachine
 	{
-		IState<T> CurrentState { get; }
+		IState CurrentState { get; }
+		IObservable<IState> OnTransition { get; }
 	}
 	
-	public abstract class StateMachine<T> : Node, IStateMachine<T>
+	public abstract class StateMachine : Node, IStateMachine
 	{
-		private readonly T _model;
 		private CompositeDisposable _stateLifetime;
-		private readonly Dictionary<Type, IState<T>> _states = new();
+		private readonly Dictionary<Type, IState> _states = new();
+		private readonly Subject<IState> _onTransition = new(); 
 		private Type _initialState;
-
-
-		public IState<T> CurrentState { get; private set; }
-
-		protected StateMachine(T model)
-		{
-			_model = model;
-		}
 		
-		protected void AddState<TState>()
-			where TState : IState<T>, new()
+		public IState CurrentState { get; private set; }
+		public IObservable<IState> OnTransition => _onTransition;
+
+		protected void AddState<TState>(TState state)
+			where TState : IState
 		{
 			_initialState ??= typeof(TState);
 
-			_states.Add(typeof(TState), new TState());
+			_states.Add(typeof(TState), state);
 		}
 
 		public override void _Ready()
 		{
 			if (_initialState is null)
 				throw new Exception("No state to initialise StateMachine with");
-				
-			foreach (var state in _states.Values)
-			{
-				state.Init(_model);
-				
-			}
 			
 			ChangeState(Transition<ICard>.To(_initialState));
 		}
@@ -64,6 +55,7 @@ namespace Archetype.Godot.StateMachine
 		public override void _ExitTree()
 		{
 			_stateLifetime?.Dispose();
+			_onTransition?.Dispose();
 		}
 		
 		private void ChangeState(IStateTransition transition)
@@ -78,6 +70,8 @@ namespace Archetype.Godot.StateMachine
 			CurrentState.OnTransition
 				.Subscribe(ChangeState)
 				.DisposeWith(_stateLifetime);
+			
+			_onTransition.OnNext(CurrentState);
 		}
 	}
 }

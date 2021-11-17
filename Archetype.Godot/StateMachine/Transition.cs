@@ -7,8 +7,8 @@ namespace Archetype.Godot.StateMachine
         Type To { get; }
     }
 
-    public class StateTransition<TTo, TState> : IStateTransition
-        where TTo : IState<TState>
+    public class StateTransition<TTo> : IStateTransition
+        where TTo : IState
     {
         public Type To => typeof(TTo);
     }
@@ -29,10 +29,10 @@ namespace Archetype.Godot.StateMachine
             return new StateTransition(transitionType);
         }
 
-        public static StateTransition<TTo, T> To<TTo>()
-            where TTo : IState<T>
+        public static StateTransition<TTo> To<TTo>()
+            where TTo : IState
         {
-            return new StateTransition<TTo, T>();
+            return new StateTransition<TTo>();
         }
     }
 }

@@ -6,12 +6,6 @@ namespace Archetype.Godot.Targeting
 {
     public interface ICanTarget : IClickable
     {
-        ITargetingArrow TargetingArrow { get; }
         void HandleTarget(ITargetable target);
-    }
-    
-    public interface ITargetingArrow
-    {
-        IObservable<ITargetable> OnTarget { get; }
     }
 }
