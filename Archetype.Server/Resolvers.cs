@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,8 +98,6 @@ namespace Archetype.Server
             descriptor.Description("A card in the game");
 
             descriptor.Implements<InterfaceType<ICard>>();
-
-            //descriptor.Field(card => card.Targets).Type<ListType<InterfaceType<ITarget>>>();
         }
         
         private class Resolvers
@@ -112,10 +111,6 @@ namespace Archetype.Server
         protected override void Configure(IObjectTypeDescriptor<ITarget> descriptor)
         {
             descriptor.Description("A target of some type");
-
-            descriptor
-                .Field(target => target.TargetType)
-                .ResolveWith<Resolvers>(resolvers => resolvers.GetTypeName(default!));
             
             descriptor
                 .Field(target => target.ValidateContext(default!))
@@ -124,7 +119,7 @@ namespace Archetype.Server
         
         private class Resolvers
         {
-            public string GetTypeName(ITarget target) => target.TargetType.Name;
+            public string GetTypeName(Type targetType) => targetType.Name;
         }
     }
     

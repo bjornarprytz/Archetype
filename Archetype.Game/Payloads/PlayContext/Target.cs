@@ -6,6 +6,7 @@ namespace Archetype.Game.Payloads.PlayContext
 {
     public interface ITarget
     {
+        string TargetTypeName => TargetType.Name; // This needs to be more parsable (take into consideration generic parameters etc.)
         Type TargetType { get; }
         bool ValidateContext(ITargetValidationContext context);
     }
