@@ -16,30 +16,25 @@ namespace Archetype.Server
     public class Queries
     {
         private readonly IGameState _gameState;
+        private readonly ICardPool _cardPool;
 
-        public Queries(IGameState gameState)
+        public Queries(IGameState gameState, ICardPool cardPool)
         {
             _gameState = gameState;
+            _cardPool = cardPool;
         }
 
-        public GameStateData GetGameState()
-        {
-            var player  = new PlayerData(); 
-            
-            var gameState = new GameStateData { Player = player };
-        
-            return gameState;
-        }
+        public IGameState GetGameState() => _gameState;
+
+        public ICardPool GetCardPool() => _cardPool;
     }
     
     public class Mutations
     {
-        private readonly IGameState _gameState;
         private readonly IMediator _mediator;
 
-        public Mutations(IMediator mediator, IGameState gameState)
+        public Mutations(IMediator mediator)
         {
-            _gameState = gameState;
             _mediator = mediator;
         }
 

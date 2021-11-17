@@ -2,9 +2,8 @@
 
 namespace Archetype.Dto.Instance
 {
-    public class SetData
+    public class CardPoolData
     {
-        public string Name { get; set; }
         public List<CardInstance> Cards { get; set; } = new();
     }
 

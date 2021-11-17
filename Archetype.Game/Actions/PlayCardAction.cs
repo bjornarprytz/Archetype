@@ -15,7 +15,7 @@ namespace Archetype.Game.Actions
     {
         public Guid CardGuid { get; }
         public IEnumerable<Guid> TargetsGuids { get; }
-
+        
         public PlayCardAction(Guid cardGuid, IEnumerable<Guid> targetsGuids)
         {
             CardGuid = cardGuid;

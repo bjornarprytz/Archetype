@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Archetype.Builder.Factory;
+using Archetype.Dto.MetaData;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
@@ -27,7 +28,7 @@ namespace Archetype.Builder
 
         public SetBuilder Card(Action<CardBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.CardBuilder(); // Input template data here
+            var cbc = BuilderFactory.CardBuilder(new CardMetaData { SetName = _setData.Name });
 
             builderProvider(cbc);
 

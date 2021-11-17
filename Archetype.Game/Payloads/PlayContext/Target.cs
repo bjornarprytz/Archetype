@@ -1,5 +1,4 @@
 using System;
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
 
@@ -15,13 +14,6 @@ namespace Archetype.Game.Payloads.PlayContext
         where TTarget : IGameAtom
     {
         private Func<ITargetValidationContext<TTarget>, bool> _validate;
-        
-        public Target(Func<ITargetValidationContext<TTarget>, bool> validationFunc=null)
-        {
-            validationFunc ??= _ => true;
-
-            _validate = validationFunc;
-        }
         
         [JsonIgnore]
         public Func<ITargetValidationContext<TTarget>, bool> Validate

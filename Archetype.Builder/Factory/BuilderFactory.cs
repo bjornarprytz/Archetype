@@ -1,13 +1,14 @@
-﻿using Archetype.Game.Payloads.Pieces;
+﻿using Archetype.Dto.MetaData;
+using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Factory
 {
     public class BuilderFactory
     {
-        public static CardBuilder CardBuilder()
+        public static CardBuilder CardBuilder(CardMetaData template=default)
         {
-            return new CardBuilder();
+            return new CardBuilder(template);
         }
         
         public static EffectBuilder<TTarget, TResult> EffectBuilder<TTarget, TResult>()

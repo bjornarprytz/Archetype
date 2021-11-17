@@ -2,7 +2,6 @@ using System.Linq;
 using Archetype.Dto.Instance;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.PlayContext;
-using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Server.Extensions
 {

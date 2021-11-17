@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Builder.Factory;
+using Archetype.Dto.MetaData;
 using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
@@ -16,9 +17,12 @@ namespace Archetype.Builder
         private readonly List<ITarget> _targets = new();
         private readonly List<IEffect> _effects = new();
 
-        internal CardBuilder()
+        internal CardBuilder(CardMetaData template)
         {
-            _cardProtoData = new CardProtoData(_targets, _effects);
+            _cardProtoData = new CardProtoData(_targets, _effects)
+            {
+                MetaData = template
+            };
         }
 
         public CardBuilder Name(string name)
@@ -59,7 +63,7 @@ namespace Archetype.Builder
         public CardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget=null)
             where TTarget : IGameAtom
         {
-            _targets.Add(new Target<TTarget>(validateTarget));
+            _targets.Add(new Target<TTarget> { Validate = validateTarget });
 
             return this;
         }
@@ -71,8 +75,8 @@ namespace Archetype.Builder
             where TT2 : IGameAtom
         {
             
-            _targets.Add(new Target<TT1>(validateTarget1));
-            _targets.Add(new Target<TT2>(validateTarget2));
+            _targets.Add(new Target<TT1> { Validate = validateTarget1 });
+            _targets.Add(new Target<TT2> { Validate = validateTarget2 });
 
             return this;
         }
@@ -86,9 +90,9 @@ namespace Archetype.Builder
             where TT3 : IGameAtom
         {
             
-            _targets.Add(new Target<TT1>(validateTarget1));
-            _targets.Add(new Target<TT2>(validateTarget2));
-            _targets.Add(new Target<TT3>(validateTarget3));
+            _targets.Add(new Target<TT1> { Validate = validateTarget1 });
+            _targets.Add(new Target<TT2> { Validate = validateTarget2 });
+            _targets.Add(new Target<TT3> { Validate = validateTarget3 });
 
             return this;
         }
