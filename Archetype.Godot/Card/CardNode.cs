@@ -9,10 +9,10 @@ namespace Archetype.Godot.Card
 {
 	public class CardNode : Area2D, ICard
 	{
-		private readonly CardStateManager _stateManager;
 		private readonly Subject<bool> _onHovered = new();
 		private readonly Subject<InputEventMouseButton> _onClick = new();
 		private readonly Subject<IPlayCardContext> _onPlay = new();
+		private CardStateManager _stateManager;
 		private IFullCardProtoData _protoData;
 		
 		public IObservable<bool> OnHover => _onHovered;
@@ -24,7 +24,7 @@ namespace Archetype.Godot.Card
 		{
 			_stateManager = new CardStateManager(this);
 		}
-
+		
 		public void Load(IFullCardProtoData protoData)
 		{
 			_protoData = protoData;
@@ -34,10 +34,10 @@ namespace Archetype.Godot.Card
 		{
 			base._Ready();
 			
-			
 			Connect(Signals.CollisionObject2D.InputEvent, this, nameof(OnInputEvent));
 			Connect(Signals.CollisionObject2D.MouseEntered, this, nameof(OnMouseEntered));
 			Connect(Signals.CollisionObject2D.MouseExited, this, nameof(OnMouseExited));
+
 
 			if (_protoData != null)
 			{
@@ -49,7 +49,9 @@ namespace Archetype.Godot.Card
 				cost.Text = _protoData.Cost.ToString();
 			}
 			
+			
 			AddChild(_stateManager);
+			_stateManager.Owner = this;
 		}
 
 		public override void _ExitTree()

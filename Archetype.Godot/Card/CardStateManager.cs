@@ -16,6 +16,8 @@ public class CardStateManager : Node
 	public override void _Ready()
 	{
 		AddChild(_highlightStateMachine);
+		_highlightStateMachine.Owner = this;
 		AddChild(_targetingStateMachine);
+		_targetingStateMachine.Owner = this;
 	}
 }

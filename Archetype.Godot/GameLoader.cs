@@ -36,6 +36,7 @@ public class GameLoader : Node
 			cardNode.MoveLocalX(i * 100);
 			
 			AddChild(cardNode);
+			cardNode.Owner = this;
 		}
 	}
 
