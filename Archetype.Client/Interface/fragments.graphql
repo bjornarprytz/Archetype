@@ -1,0 +1,115 @@
+fragment fullCardPool on ICardPool{
+    sets{
+        name
+        cards{
+            ...fullCardProtoData
+        }
+    }
+}
+
+fragment fullCardProtoData on ICardProtoData {
+    guid
+    cost
+    metaData{
+        ...fullMetaData
+    }
+    targets{
+        ...fullTarget
+    }
+    effects{
+        ...fullEffect
+    }
+}
+
+fragment fullGameState on IGameState {
+    isPayerTurn
+    player{
+        ...fullPlayer
+    }
+    map{
+        ...fullMap
+    }
+}
+
+fragment fullMap on IMap{
+    nodes{
+        ...fullMapNode    
+    }
+}
+fragment fullMapNode on IMapNode{
+    ...fullAtom
+    neighbours{
+        ...fullAtom
+    }
+}
+
+fragment fullPlayer on IPlayer{
+    ...fullAtom
+    deck{
+        ...fullDeck
+    }
+    hand{
+        ...fullHand
+    }
+    discardPile{
+        ...fullDiscard
+    }
+    resources
+}
+
+fragment fullCardZone on IZoneOfICard{
+    ...fullAtom
+    contents{
+        ...fullCard
+    }
+}
+
+fragment fullDeck on IDeck{
+    ...fullCardZone
+}
+
+fragment fullDiscard on IDiscardPile{
+    ...fullCardZone
+}
+
+fragment fullHand on IHand {
+    ...fullCardZone
+}
+
+fragment fullCard on ICard {
+    ...fullAtom
+    protoGuid
+    cost
+    metaData{
+        ...fullMetaData
+    }
+    targets {
+        ...fullTarget
+    }
+    effects{
+        ...fullEffect
+    }
+}
+
+fragment fullTarget on ITarget{
+    typeId
+}
+
+fragment fullEffect on IEffect{
+    targetIndex
+}
+
+fragment fullMetaData on CardMetaData {
+    name
+    setName
+    rarity
+    color
+    imageUri
+}
+
+fragment fullAtom on IGameAtom {
+    guid
+    owner {
+        ...fullAtom # might fail
+    }
+}

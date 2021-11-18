@@ -4,8 +4,209 @@
   subscription: Subscriptions
 }
 
+type GameState implements IGameState {
+  gamePiece(guid: UUID!): IGameAtom
+  isPayerTurn: Boolean!
+  player: IPlayer
+  map: IMap
+}
+
+type Player implements IPlayer & IGameAtom {
+  mill(strength: Int!): Int!
+  deck: IDeck
+  hand: IHand
+  discardPile: IDiscardPile
+  resources: Int!
+  guid: UUID!
+  owner: IGameAtom
+}
+
+type Map implements IMap {
+  nodes: [IMapNode]
+}
+
+type MapNode implements IMapNode & IGameAtom & IZoneOfIUnit {
+  typedPiece(guid: UUID!): IUnit
+  gamePiece(guid: UUID!): IGameAtom
+  neighbours: [IMapNode]
+  contents: [IUnit]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+type CardPool implements ICardPool {
+  cards: [ICardProtoData]
+  sets: [ICardSet]
+}
+
+type CardSet implements ICardSet {
+  name: String
+  cards: [ICardProtoData]
+}
+
+type Deck implements IDeck & IGameAtom & IZoneOfICard {
+  draw: ICard
+  typedPiece(guid: UUID!): ICard
+  gamePiece(guid: UUID!): IGameAtom
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+type Hand implements IHand & IGameAtom & IZoneOfICard {
+  typedPiece(guid: UUID!): ICard
+  gamePiece(guid: UUID!): IGameAtom
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+type DiscardPile implements IDiscardPile & IGameAtom & IZoneOfICard {
+  typedPiece(guid: UUID!): ICard
+  gamePiece(guid: UUID!): IGameAtom
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+type CardProtoData implements ICardProtoData {
+  guid: UUID!
+  cost: Int!
+  metaData: CardMetaData
+  targets: [ITarget]
+  effects: [IEffect]
+}
+
+"A unit in the game"
+type Unit implements IUnit & IGameAtom {
+  attack(strength: Int!): Int!
+  heal(strength: Int!): Int!
+  protoGuid: UUID!
+  deck: IDeck
+  metaData: UnitMetaData
+  maxHealth: Int!
+  health: Int!
+  currentZone: IZoneOfIUnit
+  guid: UUID!
+  owner: IGameAtom
+}
+
+"A card in the game"
+type Card implements ICard & IGameAtom {
+  cost: Int!
+  protoGuid: UUID!
+  metaData: CardMetaData
+  targets: [ITarget]
+  effects: [IEffect]
+  currentZone: IZoneOfICard
+  guid: UUID!
+  owner: IGameAtom
+}
+
+"A target of some type"
+type ITarget {
+  typeId: String
+}
+
+"An effect of a card"
+type IEffect {
+  targetIndex: Int!
+}
+
+interface IGameState {
+  gamePiece(guid: UUID!): IGameAtom
+  isPayerTurn: Boolean!
+  player: IPlayer
+  map: IMap
+}
+
+interface IPlayer {
+  mill(strength: Int!): Int!
+  deck: IDeck
+  hand: IHand
+  discardPile: IDiscardPile
+  resources: Int!
+  guid: UUID!
+  owner: IGameAtom
+}
+
+interface IMap {
+  nodes: [IMapNode]
+}
+
+interface IMapNode {
+  neighbours: [IMapNode]
+  typedPiece(guid: UUID!): IUnit
+  contents: [IUnit]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+interface ICardPool {
+  cards: [ICardProtoData]
+  sets: [ICardSet]
+}
+
+interface ICardSet {
+  name: String
+  cards: [ICardProtoData]
+}
+
+interface IDeck {
+  draw: ICard
+  typedPiece(guid: UUID!): ICard
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+interface IHand {
+  typedPiece(guid: UUID!): ICard
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+interface IDiscardPile {
+  typedPiece(guid: UUID!): ICard
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+interface ICardProtoData {
+  guid: UUID!
+  cost: Int!
+  metaData: CardMetaData
+  targets: [ITarget]
+  effects: [IEffect]
+}
+
+interface IUnit {
+  attack(strength: Int!): Int!
+  heal(strength: Int!): Int!
+  protoGuid: UUID!
+  deck: IDeck
+  metaData: UnitMetaData
+  maxHealth: Int!
+  health: Int!
+  guid: UUID!
+  owner: IGameAtom
+}
+
+interface ICard {
+  protoGuid: UUID!
+  metaData: CardMetaData
+  cost: Int!
+  targets: [ITarget]
+  effects: [IEffect]
+  guid: UUID!
+  owner: IGameAtom
+}
+
 type Queries {
-  gameState: GameStateData!
+  gameState: IGameState!
+  cardPool: ICardPool!
 }
 
 type Mutations {
@@ -16,71 +217,37 @@ type Subscriptions {
   onCardPlayed: PlayCardPayload!
 }
 
-input PlayCardInput {
-  cardId: UUID!
-  targetIds: [UUID!]!
-}
-
-type PlayCardPayload {
-  message: String!
-}
-
-type GameStateData {
-  isPlayerTurn: Boolean!
-  player: PlayerData
-  map: MapData
-}
-
-type MapData {
-  nodes: [MapNodeData]
-}
-
-type PlayerData {
-  resources: Int!
-  hand: [CardInstance]
-  discardPile: [CardInstance]
-  deck: [CardInstance]
+interface IGameAtom {
+  guid: UUID!
+  owner: IGameAtom
 }
 
 scalar UUID
 
-type CardInstance {
-  cost: Int!
-  metaData: CardMetaData
-  rulesText: String
-  targets: [TargetData]
-  id: UUID!
-  ownerId: UUID!
-}
-
-type MapNodeData {
-  cards: [CardInstance]
-  enemies: [UnitInstance]
-  neighbours: [MapNodeData]
-  id: UUID!
-  ownerId: UUID!
-}
-
-type TargetData {
-  targetType: String
-}
-
-type CardMetaData {
-  name: String
-  rarity: CardRarity!
-  color: CardColor!
-  imageUri: String
-}
-
-type UnitInstance {
-  metaData: UnitMetaData
-  cards: [CardInstance]
-  id: UUID!
-  ownerId: UUID!
+interface IZoneOfICard {
+  typedPiece(guid: UUID!): ICard
+  contents: [ICard]
+  guid: UUID!
+  owner: IGameAtom
 }
 
 type UnitMetaData {
   name: String
+  imageUri: String
+}
+
+interface IZoneOfIUnit {
+  typedPiece(guid: UUID!): IUnit
+  contents: [IUnit]
+  guid: UUID!
+  owner: IGameAtom
+}
+
+type CardMetaData {
+  name: String
+  setName: String
+  rarity: CardRarity!
+  color: CardColor!
   imageUri: String
 }
 
@@ -97,4 +264,13 @@ enum CardRarity {
   UNCOMMON
   RARE
   MYTHIC
+}
+
+input PlayCardInput {
+  cardId: UUID!
+  targetIds: [UUID!]!
+}
+
+type PlayCardPayload {
+  message: String!
 }

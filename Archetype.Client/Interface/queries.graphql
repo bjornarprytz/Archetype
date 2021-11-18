@@ -1,0 +1,11 @@
+query GetGameState {
+    gameState{
+        ...fullGameState
+    }
+}
+
+query GetCardPool {
+    cardPool{
+        ...fullCardPool
+    }
+}

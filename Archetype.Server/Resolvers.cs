@@ -50,6 +50,14 @@ namespace Archetype.Server
         }
     }
 
+    public class CardSetType : ObjectType<CardSet>
+    {
+        protected override void Configure(IObjectTypeDescriptor<CardSet> descriptor)
+        {
+            descriptor.Implements<InterfaceType<ICardSet>>();
+        }
+    }
+
     public class DeckType : ObjectType<Deck>
     {
         protected override void Configure(IObjectTypeDescriptor<Deck> descriptor)
