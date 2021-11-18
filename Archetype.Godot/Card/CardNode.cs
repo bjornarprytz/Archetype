@@ -1,5 +1,7 @@
 using System;
 using System.Reactive.Subjects;
+using Archetype.Client;
+using Archetype.Godot.Extensions;
 using Godot;
 using Archetype.Godot.Targeting;
 
@@ -7,33 +9,47 @@ namespace Archetype.Godot.Card
 {
 	public class CardNode : Area2D, ICard
 	{
-		private PackedScene _sceneTargetingArrow;
-		
 		private readonly CardStateManager _stateManager;
 		private readonly Subject<bool> _onHovered = new();
 		private readonly Subject<InputEventMouseButton> _onClick = new();
 		private readonly Subject<IPlayCardContext> _onPlay = new();
+		private IFullCardProtoData _protoData;
 		
 		public IObservable<bool> OnHover => _onHovered;
 		public IObservable<InputEventMouseButton> OnClick => _onClick;
 		public IObservable<IPlayCardContext> OnPlay => _onPlay;
 		public Area2D TargetNode => this;
 
-
 		public CardNode()
 		{
 			_stateManager = new CardStateManager(this);
+		}
+
+		public void Load(IFullCardProtoData protoData)
+		{
+			_protoData = protoData;
 		}
 		
 		public override void _Ready()
 		{
 			base._Ready();
 			
-			AddChild(_stateManager);
 			
 			Connect(Signals.CollisionObject2D.InputEvent, this, nameof(OnInputEvent));
 			Connect(Signals.CollisionObject2D.MouseEntered, this, nameof(OnMouseEntered));
 			Connect(Signals.CollisionObject2D.MouseExited, this, nameof(OnMouseExited));
+
+			if (_protoData != null)
+			{
+				var name = GetNode("CardName") as RichTextLabel;
+				name.Text = _protoData?.MetaData?.Name;
+				var color = GetNode("ColorRect") as ColorRect;
+				color.Color = _protoData.MetaData.Color.ToGodot();
+				var cost = GetNode("CardCost") as RichTextLabel;
+				cost.Text = _protoData.Cost.ToString();
+			}
+			
+			AddChild(_stateManager);
 		}
 
 		public override void _ExitTree()

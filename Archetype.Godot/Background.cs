@@ -7,15 +7,14 @@ public class Background : Control
 
 	private Viewport _viewport;
 	
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		_viewport = GetViewport();
 		
-		_viewport.Connect(Signals.Viewport.SizeChanged, this, nameof(WindowResize));
+		_viewport.Connect(Signals.Viewport.SizeChanged, this, nameof(OnWindowResize));
 	}
 
-	private void WindowResize()
+	private void OnWindowResize()
 	{
 		var currentSize = OS.WindowSize;
 

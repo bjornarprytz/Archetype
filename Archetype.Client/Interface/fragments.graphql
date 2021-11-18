@@ -110,6 +110,6 @@ fragment fullMetaData on CardMetaData {
 fragment fullAtom on IGameAtom {
     guid
     owner {
-        ...fullAtom # might fail
+        guid
     }
 }

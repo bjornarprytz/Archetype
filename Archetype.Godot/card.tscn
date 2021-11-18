@@ -17,3 +17,31 @@ texture = ExtResource( 1 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2( 103.5, 156.5 )
 shape = SubResource( 1 )
+
+[node name="CardName" type="RichTextLabel" parent="."]
+margin_left = 8.0
+margin_top = 6.0
+margin_right = 201.0
+margin_bottom = 34.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_left = 10.0
+margin_top = 44.0
+margin_right = 50.0
+margin_bottom = 84.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CardCost" type="RichTextLabel" parent="."]
+modulate = Color( 0, 0, 0, 1 )
+margin_left = 11.0
+margin_top = 44.0
+margin_right = 51.0
+margin_bottom = 84.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
