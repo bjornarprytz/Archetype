@@ -100,7 +100,7 @@ namespace Archetype.Builder
         public CardBuilder EffectBuilder<TTarget, TResult>(Action<EffectBuilder<TTarget, TResult>> builderProvider)
             where  TTarget : IGameAtom
         {
-            var cbc = BuilderFactory.EffectBuilder<TTarget, TResult>(); // Input template data here
+            var cbc = BuilderFactory.EffectBuilder<TTarget, TResult>();
 
             builderProvider(cbc);
             
@@ -111,7 +111,7 @@ namespace Archetype.Builder
         
         public CardBuilder Effect<TResult>(Action<EffectBuilder<TResult>> builderProvider)
         {
-            var cbc = BuilderFactory.EffectBuilder<TResult>(); // Input template data here
+            var cbc = BuilderFactory.EffectBuilder<TResult>();
 
             builderProvider(cbc);
             

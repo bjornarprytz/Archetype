@@ -5,6 +5,9 @@ using Archetype.Game.Payloads.PlayContext;
 
 namespace Archetype.Game.Payloads.Proto
 {
+    /*
+     * Represents the concept of a card. These should be singular, and is the base from which we create instances
+     */
     public interface ICardProtoData
     {
         Guid Guid { get; }

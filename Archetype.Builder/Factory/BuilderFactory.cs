@@ -1,11 +1,20 @@
 ﻿using Archetype.Dto.MetaData;
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Factory
 {
     public class BuilderFactory
     {
+
+        public static CardPoolBuilder CardPoolBuilder()
+        {
+            return new CardPoolBuilder();
+        }
+        
+        public static SetBuilder SetBuilder(string name)
+        {
+            return new SetBuilder(name);
+        }
         public static CardBuilder CardBuilder(CardMetaData template=default)
         {
             return new CardBuilder(template);

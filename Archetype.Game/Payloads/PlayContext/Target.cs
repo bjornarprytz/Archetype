@@ -1,4 +1,5 @@
 using System;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
 
@@ -6,7 +7,7 @@ namespace Archetype.Game.Payloads.PlayContext
 {
     public interface ITarget
     {
-        string TargetTypeName => TargetType.Name; // This needs to be more parsable (take into consideration generic parameters etc.)
+        string TypeId => TargetType.ReadableFullName();
         Type TargetType { get; }
         bool ValidateContext(ITargetValidationContext context);
     }
