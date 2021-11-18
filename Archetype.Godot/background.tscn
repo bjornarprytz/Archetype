@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://eternal-witness.png" type="Texture" id=1]
+[ext_resource path="res://Background.cs" type="Script" id=2]
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sprite" type="Sprite" parent="."]
+position = Vector2( 499.576, 441.743 )
+scale = Vector2( 6.30865, 6.30865 )
+texture = ExtResource( 1 )

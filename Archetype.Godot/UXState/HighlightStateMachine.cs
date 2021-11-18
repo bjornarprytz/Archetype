@@ -33,7 +33,7 @@ namespace Archetype.Godot.Card
 
 			protected override void HandleExit()
 			{
-            
+			
 			}
 
 		}
@@ -49,7 +49,7 @@ namespace Archetype.Godot.Card
 					.Where(state => !state)
 					.Subscribe(_ => TransitionTo<IdleState>())
 					.DisposeWith(StateActiveLifetime);
-            
+			
 				Model.Scale = Vector2.One * 1.1f; 
 			}
 
@@ -59,7 +59,7 @@ namespace Archetype.Godot.Card
 			}
 
 		}
-    
+	
 			
 	}
 }
