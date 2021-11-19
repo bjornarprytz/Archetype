@@ -6,7 +6,7 @@ namespace Archetype.Builder
     {
         private readonly MapNode _mapNode;
 
-        public NodeBuilder()
+        internal NodeBuilder()
         {
             _mapNode = new MapNode();
         }

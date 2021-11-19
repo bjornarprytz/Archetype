@@ -6,6 +6,8 @@ namespace Archetype.Game.Payloads.Pieces
 {
     public interface IPlayer : IGameAtom
     {
+        string Name { get; }
+        
         IDeck Deck { get; }
         IHand Hand { get; }
         IDiscardPile DiscardPile { get; }
@@ -23,6 +25,7 @@ namespace Archetype.Game.Payloads.Pieces
             DiscardPile = new DiscardPile(this);
         }
 
+        public string Name { get; }
         public IDeck Deck { get; }
         public IHand Hand { get; }
         public IDiscardPile DiscardPile { get; }

@@ -11,7 +11,7 @@ namespace Archetype.Builder
     {
         private readonly Effect<TTarget, TResult> _effect;
 
-        public EffectBuilder()
+        internal EffectBuilder()
         {
             _effect = new Effect<TTarget, TResult>();
         }

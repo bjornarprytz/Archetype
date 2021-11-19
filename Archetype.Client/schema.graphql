@@ -4,6 +4,7 @@
   subscription: Subscriptions
 }
 
+"The root object of actionable game state"
 type GameState implements IGameState {
   gamePiece(guid: UUID!): IGameAtom
   isPayerTurn: Boolean!
@@ -11,8 +12,10 @@ type GameState implements IGameState {
   map: IMap
 }
 
+"The player of the game"
 type Player implements IPlayer & IGameAtom {
   mill(strength: Int!): Int!
+  name: String
   deck: IDeck
   hand: IHand
   discardPile: IDiscardPile
@@ -21,10 +24,12 @@ type Player implements IPlayer & IGameAtom {
   owner: IGameAtom
 }
 
+"A graph of map nodes"
 type Map implements IMap {
   nodes: [IMapNode]
 }
 
+"A node on the map"
 type MapNode implements IMapNode & IGameAtom & IZoneOfIUnit {
   typedPiece(guid: UUID!): IUnit
   gamePiece(guid: UUID!): IGameAtom
@@ -34,16 +39,19 @@ type MapNode implements IMapNode & IGameAtom & IZoneOfIUnit {
   owner: IGameAtom
 }
 
+"Collection of all available card sets"
 type CardPool implements ICardPool {
   cards: [ICardProtoData]
   sets: [ICardSet]
 }
 
+"A set of card proto data which share some themes"
 type CardSet implements ICardSet {
   name: String
   cards: [ICardProtoData]
 }
 
+"A stack of cards which replenishes the player's hand"
 type Deck implements IDeck & IGameAtom & IZoneOfICard {
   draw: ICard
   typedPiece(guid: UUID!): ICard
@@ -53,6 +61,7 @@ type Deck implements IDeck & IGameAtom & IZoneOfICard {
   owner: IGameAtom
 }
 
+"A hand of cards, only visible to the owner"
 type Hand implements IHand & IGameAtom & IZoneOfICard {
   typedPiece(guid: UUID!): ICard
   gamePiece(guid: UUID!): IGameAtom
@@ -61,6 +70,7 @@ type Hand implements IHand & IGameAtom & IZoneOfICard {
   owner: IGameAtom
 }
 
+"Discard pile, where spent cards go"
 type DiscardPile implements IDiscardPile & IGameAtom & IZoneOfICard {
   typedPiece(guid: UUID!): ICard
   gamePiece(guid: UUID!): IGameAtom
@@ -69,6 +79,7 @@ type DiscardPile implements IDiscardPile & IGameAtom & IZoneOfICard {
   owner: IGameAtom
 }
 
+"Blueprint for creating card instances"
 type CardProtoData implements ICardProtoData {
   guid: UUID!
   cost: Int!
@@ -77,7 +88,7 @@ type CardProtoData implements ICardProtoData {
   effects: [IEffect]
 }
 
-"A unit in the game"
+"A unit instance"
 type Unit implements IUnit & IGameAtom {
   attack(strength: Int!): Int!
   heal(strength: Int!): Int!
@@ -91,8 +102,9 @@ type Unit implements IUnit & IGameAtom {
   owner: IGameAtom
 }
 
-"A card in the game"
+"A card instance"
 type Card implements ICard & IGameAtom {
+  reduceCost(x: Int!): Int!
   cost: Int!
   protoGuid: UUID!
   metaData: CardMetaData
@@ -103,12 +115,12 @@ type Card implements ICard & IGameAtom {
   owner: IGameAtom
 }
 
-"A target of some type"
+"The target of a card"
 type ITarget {
   typeId: String
 }
 
-"An effect of a card"
+"The core payload of a card, where mutation of game atoms happen"
 type IEffect {
   targetIndex: Int!
 }
@@ -122,6 +134,7 @@ interface IGameState {
 
 interface IPlayer {
   mill(strength: Int!): Int!
+  name: String
   deck: IDeck
   hand: IHand
   discardPile: IDiscardPile
@@ -195,6 +208,7 @@ interface IUnit {
 }
 
 interface ICard {
+  reduceCost(x: Int!): Int!
   protoGuid: UUID!
   metaData: CardMetaData
   cost: Int!
@@ -211,10 +225,12 @@ type Queries {
 
 type Mutations {
   playCard(playCardInput: PlayCardInput!): PlayCardPayload!
+  startGame(startGameInput: StartGameInput!): StartGamePayload!
 }
 
 type Subscriptions {
   onCardPlayed: PlayCardPayload!
+  onGameStarted: StartGamePayload!
 }
 
 interface IGameAtom {
@@ -264,6 +280,14 @@ enum CardRarity {
   UNCOMMON
   RARE
   MYTHIC
+}
+
+input StartGameInput {
+  protoCardIds: [UUID!]!
+}
+
+type StartGamePayload {
+  message: String!
 }
 
 input PlayCardInput {

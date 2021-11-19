@@ -13,7 +13,7 @@ namespace Archetype.Game.Payloads.Pieces
         Guid ProtoGuid { get; }
         CardMetaData MetaData { get; }
         int Cost { get; }
-        void AffectSomehow(int x);
+        int ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect> Effects { get; }
@@ -33,16 +33,20 @@ namespace Archetype.Game.Payloads.Pieces
             Cost = protoData.Cost;
         }
 
-        public int Cost { get; }
+        public int Cost { get; private set; }
         public Guid ProtoGuid { get; }
         public CardMetaData MetaData { get; }
         public IEnumerable<ITarget> Targets => _targets;
         public IEnumerable<IEffect> Effects => _effects;
         
 
-        public void AffectSomehow(int x)
+        public int ReduceCost(int x)
         {
-            Console.WriteLine($"Affecting card somehow! {x}");
+            Console.WriteLine($"Reducing cost by {x}!");
+
+            Cost -= x;
+
+            return x;
         }
     }
 }

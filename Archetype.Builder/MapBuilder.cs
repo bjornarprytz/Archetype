@@ -13,7 +13,7 @@ namespace Archetype.Builder
 
         private readonly IMapProtoData _mapProtoData;
         
-        public MapBuilder()
+        internal MapBuilder()
         {
             _mapProtoData = new MapProtoData(_nodes);
         }

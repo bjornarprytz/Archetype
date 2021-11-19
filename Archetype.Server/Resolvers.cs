@@ -15,6 +15,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<GameState> descriptor)
         {
+            descriptor.Description("The root object of actionable game state");
             descriptor.Implements<InterfaceType<IGameState>>();
         }
     }
@@ -23,6 +24,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<Player> descriptor)
         {
+            descriptor.Description("The player of the game");
             descriptor.Implements<InterfaceType<IPlayer>>();
         }
     }
@@ -30,6 +32,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<Map> descriptor)
         {
+            descriptor.Description("A graph of map nodes");
             descriptor.Implements<InterfaceType<IMap>>();
         }
     }
@@ -38,6 +41,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<MapNode> descriptor)
         {
+            descriptor.Description("A node on the map");
             descriptor.Implements<InterfaceType<IMapNode>>();
         }
     }
@@ -46,6 +50,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<CardPool> descriptor)
         {
+            descriptor.Description("Collection of all available card sets");
             descriptor.Implements<InterfaceType<ICardPool>>();
         }
     }
@@ -54,6 +59,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<CardSet> descriptor)
         {
+            descriptor.Description("A set of card proto data which share some themes");
             descriptor.Implements<InterfaceType<ICardSet>>();
         }
     }
@@ -62,6 +68,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<Deck> descriptor)
         {
+            descriptor.Description("A stack of cards which replenishes the player's hand");
             descriptor.Implements<InterfaceType<IDeck>>();
         }
     }
@@ -70,6 +77,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<Hand> descriptor)
         {
+            descriptor.Description("A hand of cards, only visible to the owner");
             descriptor.Implements<InterfaceType<IHand>>();
         }
     }
@@ -78,6 +86,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<DiscardPile> descriptor)
         {
+            descriptor.Description("Discard pile, where spent cards go");
             descriptor.Implements<InterfaceType<IDiscardPile>>();
         }
     }
@@ -86,6 +95,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<CardProtoData> descriptor)
         {
+            descriptor.Description("Blueprint for creating card instances");
             descriptor.Implements<InterfaceType<ICardProtoData>>();
         }
     }
@@ -94,7 +104,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<Unit> descriptor)
         {
-            descriptor.Description("A unit in the game");
+            descriptor.Description("A unit instance");
             descriptor.Implements<InterfaceType<IUnit>>();
         }
     }
@@ -103,7 +113,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<Card> descriptor)
         {
-            descriptor.Description("A card in the game");
+            descriptor.Description("A card instance");
 
             descriptor.Implements<InterfaceType<ICard>>();
         }
@@ -118,7 +128,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<ITarget> descriptor)
         {
-            descriptor.Description("A target of some type");
+            descriptor.Description("The target of a card");
             
             descriptor
                 .Field(target => target.ValidateContext(default!))
@@ -135,7 +145,7 @@ namespace Archetype.Server
     {
         protected override void Configure(IObjectTypeDescriptor<IEffect> descriptor)
         {
-            descriptor.Description("An effect of a card");
+            descriptor.Description("The core payload of a card, where mutation of game atoms happen");
 
             descriptor
                 .Field(effect => effect.ResolveContext(default!))

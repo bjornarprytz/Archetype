@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Dto.Instance;
 using Archetype.Game.Actions;
-using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
@@ -25,7 +23,6 @@ namespace Archetype.Server
         }
 
         public IGameState GetGameState() => _gameState;
-
         public ICardPool GetCardPool() => _cardPool;
     }
     
@@ -39,7 +36,6 @@ namespace Archetype.Server
         }
 
         public async Task<PlayCardPayload> PlayCard(
-            
             PlayCardInput playCardInput,
             [Service] ITopicEventSender eventSender,
             CancellationToken cancellationToken
@@ -58,19 +54,36 @@ namespace Archetype.Server
 
         public record PlayCardPayload(string Message);
         public record PlayCardInput(Guid CardId, IEnumerable<Guid> TargetIds);
+        
+        
+        public async Task<StartGamePayload> StartGame(
+            StartGameInput startGameInput,
+            [Service] ITopicEventSender eventSender,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await _mediator.Send(new StartGameAction(startGameInput.ProtoCardIds), cancellationToken);
+
+            var payload = new StartGamePayload("Game started!");
+
+            await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
+            
+            return payload;
+        }
+
+        public record StartGameInput(IEnumerable<Guid> ProtoCardIds);
+
+        public record StartGamePayload(string Message);
     }
     
     public class Subscriptions
     {
-        private readonly IGameState _gameState;
-
-        public Subscriptions(IGameState gameState)
-        {
-            _gameState = gameState;
-        }
-    
         [Subscribe]
         [Topic]
         public Mutations.PlayCardPayload OnCardPlayed([EventMessage] Mutations.PlayCardPayload playCardPayload) => playCardPayload;
+        
+        [Subscribe]
+        [Topic]
+        public Mutations.StartGamePayload OnGameStarted([EventMessage] Mutations.StartGamePayload startGamePayload) => startGamePayload;
     }
 }

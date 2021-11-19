@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>10</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Archetype.Builder\Archetype.Builder.csproj" />
+      <ProjectReference Include="..\Archetype.Game\Archetype.Game.csproj" />
+    </ItemGroup>
+
+</Project>

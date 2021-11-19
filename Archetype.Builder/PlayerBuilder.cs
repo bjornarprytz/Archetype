@@ -9,7 +9,7 @@ namespace Archetype.Builder
 
         private readonly PlayerProtoData _playerProtoData;
         
-        public PlayerBuilder()
+        internal PlayerBuilder()
         {
             _playerProtoData = new PlayerProtoData(_deckList);
         }

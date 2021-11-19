@@ -1,1 +1,5 @@
-# TODO: game actions
+mutation PlayCard($cardGuid: UUID!, $targets: [UUID!]! ) {
+    playCard(playCardInput: {cardId: $cardGuid, targetIds: $targets}){
+        message # TODO: Change this to a result type of some kind
+    }
+}

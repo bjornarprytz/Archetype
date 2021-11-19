@@ -1,11 +1,11 @@
 query GetGameState {
     gameState{
-        ...fullGameState
+        ...GameState
     }
 }
 
 query GetCardPool {
     cardPool{
-        ...fullCardPool
+        ...CardPool
     }
 }

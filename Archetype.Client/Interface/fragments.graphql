@@ -1,105 +1,105 @@
-fragment fullCardPool on ICardPool{
+fragment CardPool on ICardPool{
     sets{
         name
         cards{
-            ...fullCardProtoData
+            ...CardProtoData
         }
     }
 }
 
-fragment fullCardProtoData on ICardProtoData {
+fragment CardProtoData on ICardProtoData {
     guid
     cost
     metaData{
-        ...fullMetaData
+        ...MetaData
     }
     targets{
-        ...fullTarget
+        ...Target
     }
     effects{
-        ...fullEffect
+        ...Effect
     }
 }
 
-fragment fullGameState on IGameState {
+fragment GameState on IGameState {
     isPayerTurn
     player{
-        ...fullPlayer
+        ...Player
     }
     map{
-        ...fullMap
+        ...Map
     }
 }
 
-fragment fullMap on IMap{
+fragment Map on IMap{
     nodes{
-        ...fullMapNode    
+        ...MapNode    
     }
 }
-fragment fullMapNode on IMapNode{
-    ...fullAtom
+fragment MapNode on IMapNode{
+    ...Atom
     neighbours{
-        ...fullAtom
+        ...Atom
     }
 }
 
-fragment fullPlayer on IPlayer{
-    ...fullAtom
+fragment Player on IPlayer{
+    ...Atom
     deck{
-        ...fullDeck
+        ...Deck
     }
     hand{
-        ...fullHand
+        ...Hand
     }
     discardPile{
-        ...fullDiscard
+        ...Discard
     }
     resources
 }
 
-fragment fullCardZone on IZoneOfICard{
-    ...fullAtom
+fragment CardZone on IZoneOfICard{
+    ...Atom
     contents{
-        ...fullCard
+        ...Card
     }
 }
 
-fragment fullDeck on IDeck{
-    ...fullCardZone
+fragment Deck on IDeck{
+    ...CardZone
 }
 
-fragment fullDiscard on IDiscardPile{
-    ...fullCardZone
+fragment Discard on IDiscardPile{
+    ...CardZone
 }
 
-fragment fullHand on IHand {
-    ...fullCardZone
+fragment Hand on IHand {
+    ...CardZone
 }
 
-fragment fullCard on ICard {
-    ...fullAtom
+fragment Card on ICard {
+    ...Atom
     protoGuid
     cost
     metaData{
-        ...fullMetaData
+        ...MetaData
     }
     targets {
-        ...fullTarget
+        ...Target
     }
     effects{
-        ...fullEffect
+        ...Effect
     }
 }
 
-fragment fullTarget on ITarget{
+fragment Target on ITarget{
     typeId
 }
 
-fragment fullEffect on IEffect{
+fragment Effect on IEffect{
     targetIndex
 }
 
-fragment fullMetaData on CardMetaData {
+fragment MetaData on CardMetaData {
     name
     setName
     rarity
@@ -107,7 +107,7 @@ fragment fullMetaData on CardMetaData {
     imageUri
 }
 
-fragment fullAtom on IGameAtom {
+fragment Atom on IGameAtom {
     guid
     owner {
         guid

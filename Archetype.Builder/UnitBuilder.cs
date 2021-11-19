@@ -12,7 +12,7 @@ namespace Archetype.Builder
 
         private readonly List<ICardProtoData> _cards = new();
         
-        public UnitBuilder()
+        internal UnitBuilder()
         {
             _unitProtoData = new UnitProtoData(_cards);
         }
