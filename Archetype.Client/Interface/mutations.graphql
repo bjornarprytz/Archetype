@@ -3,3 +3,15 @@ mutation PlayCard($cardGuid: UUID!, $targets: [UUID!]! ) {
         message # TODO: Change this to a result type of some kind
     }
 }
+
+mutation EndTurn {
+    endTurn {
+        message
+    }
+}
+
+mutation StartGame($protoCardGuids: [UUID!]!) {
+    startGame(startGameInput: {protoCardIds: $protoCardGuids}){
+        message
+    }
+}

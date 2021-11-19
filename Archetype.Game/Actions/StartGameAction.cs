@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Payloads.Infrastructure;
@@ -9,7 +10,7 @@ using Unit = MediatR.Unit;
 
 namespace Archetype.Game.Actions
 {
-    public class StartGameAction : IRequest
+    public class StartGameAction : IRequest<string>
     {
         public IEnumerable<Guid> DeckList { get; }
 
@@ -19,7 +20,7 @@ namespace Archetype.Game.Actions
         }
     }
     
-    public class StartGameActionHandler : IRequestHandler<StartGameAction>
+    public class StartGameActionHandler : IRequestHandler<StartGameAction, string>
     {
         private readonly ICardPool _cardPool;
         private readonly IPlayer _player;
@@ -30,7 +31,7 @@ namespace Archetype.Game.Actions
             _player = player;
         }
         
-        public Task<Unit> Handle(StartGameAction request, CancellationToken cancellationToken)
+        public async Task<string> Handle(StartGameAction request, CancellationToken cancellationToken)
         {
             foreach (var guid in request.DeckList)
             {
@@ -38,8 +39,15 @@ namespace Archetype.Game.Actions
                 
                 _player.Deck.PutCardOnTop(new Card(protoCard, _player));
             }
+            
+            _player.Deck.Shuffle();
 
-            return Unit.Task;
+            if (_player.Deck.Contents.Count() < _player.MinDeckSize)
+                return "Deck is too small";
+            
+            _player.Draw(_player.MaxHandSize);
+            
+            return "GL HF!";
         }
     }
 }

@@ -7,7 +7,6 @@
 "The root object of actionable game state"
 type GameState implements IGameState {
   gamePiece(guid: UUID!): IGameAtom
-  isPayerTurn: Boolean!
   player: IPlayer
   map: IMap
 }
@@ -15,11 +14,14 @@ type GameState implements IGameState {
 "The player of the game"
 type Player implements IPlayer & IGameAtom {
   mill(strength: Int!): Int!
+  draw(strength: Int!): Int!
   name: String
+  maxHandSize: Int!
+  minDeckSize: Int!
+  resources: Int!
   deck: IDeck
   hand: IHand
   discardPile: IDiscardPile
-  resources: Int!
   guid: UUID!
   owner: IGameAtom
 }
@@ -127,18 +129,20 @@ type IEffect {
 
 interface IGameState {
   gamePiece(guid: UUID!): IGameAtom
-  isPayerTurn: Boolean!
   player: IPlayer
   map: IMap
 }
 
 interface IPlayer {
   mill(strength: Int!): Int!
+  draw(strength: Int!): Int!
   name: String
+  maxHandSize: Int!
+  minDeckSize: Int!
+  resources: Int!
   deck: IDeck
   hand: IHand
   discardPile: IDiscardPile
-  resources: Int!
   guid: UUID!
   owner: IGameAtom
 }
@@ -226,6 +230,7 @@ type Queries {
 type Mutations {
   playCard(playCardInput: PlayCardInput!): PlayCardPayload!
   startGame(startGameInput: StartGameInput!): StartGamePayload!
+  endTurn: EndTurnPayload!
 }
 
 type Subscriptions {
@@ -280,6 +285,10 @@ enum CardRarity {
   UNCOMMON
   RARE
   MYTHIC
+}
+
+type EndTurnPayload {
+  message: String!
 }
 
 input StartGameInput {

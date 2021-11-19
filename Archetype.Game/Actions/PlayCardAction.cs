@@ -46,9 +46,6 @@ namespace Archetype.Game.Actions
         
         public async Task<string> Handle(PlayCardAction request, CancellationToken cancellationToken)
         {
-            if (!_gameState.IsPayerTurn)
-                return "Not player's turn";
-
             if (_gameState.GetGamePiece(request.CardGuid) is not ICard card)
                 return "GamePiece is not a card";
 
@@ -57,6 +54,9 @@ namespace Archetype.Game.Actions
 
             if (card.Cost > _gameState.Player.Resources)
                 return "Can't pay cost";
+
+            if (card.Targets.Count() != request.TargetsGuids.Count())
+                return "Invalid number of targets";
             
             var targets = request.TargetsGuids.Select(guid => _gameState.GetGamePiece(guid)).ToList();
 
@@ -65,13 +65,17 @@ namespace Archetype.Game.Actions
 
             var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player, targets);
 
-            if (card.ValidateTargets(cardResolutionContext))
+            if (!card.ValidateTargets(cardResolutionContext))
                 return "Invalid targets";
 
             _gameState.Player.Resources -= card.Cost;
 
             card.Resolve(cardResolutionContext);
             
+            // TODO: Formalize a verb for moving a card from hand to discard pile (must be different from Discard, to avoid those triggers)
+            _gameState.Player.Hand.Remove(card);
+            _gameState.Player.DiscardPile.Bury(card);
+
             return "Resolves."; // Success
         }
     }

@@ -1,5 +1,5 @@
-﻿
-using System;
+﻿using System;
+using System.Linq;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
@@ -7,13 +7,16 @@ namespace Archetype.Game.Payloads.Pieces
     public interface IPlayer : IGameAtom
     {
         string Name { get; }
+        int MaxHandSize { get; }
+        int MinDeckSize { get; }
+        int Resources { get; set; }
         
         IDeck Deck { get; }
         IHand Hand { get; }
         IDiscardPile DiscardPile { get; }
-        int Resources { get; set; }
 
         int Mill(int strength);
+        int Draw(int strength);
     }
     
     public class Player : Atom, IPlayer
@@ -25,11 +28,13 @@ namespace Archetype.Game.Payloads.Pieces
             DiscardPile = new DiscardPile(this);
         }
 
-        public string Name { get; }
+        public string Name { get; } = "Test player";
+        public int MaxHandSize { get; } = 2;
+        public int MinDeckSize { get; } = 4;
+        public int Resources { get; set; } = 100;
         public IDeck Deck { get; }
         public IHand Hand { get; }
         public IDiscardPile DiscardPile { get; }
-        public int Resources { get; set; }
         public int Mill(int strength)
         {
             if (strength < 0)
@@ -42,6 +47,22 @@ namespace Archetype.Game.Payloads.Pieces
             }
 
             return strength;
+        }
+
+        public int Draw(int strength)
+        {
+            if (strength < 0)
+                throw new ArgumentException($"Cannot draw a negative number ({strength}) of cards");
+
+            var actualStrength = Math.Min(strength, Deck.Contents.Count());
+            
+            for (var i=0; i < actualStrength; i++)
+            {
+                var card = Deck.Draw();
+                Hand.Add(card);
+            }
+
+            return actualStrength;
         }
     }
 }

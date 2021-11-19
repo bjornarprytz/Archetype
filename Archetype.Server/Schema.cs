@@ -64,7 +64,7 @@ namespace Archetype.Server
         {
             var result = await _mediator.Send(new StartGameAction(startGameInput.ProtoCardIds), cancellationToken);
 
-            var payload = new StartGamePayload("Game started!");
+            var payload = new StartGamePayload(result);
 
             await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
             
@@ -72,8 +72,23 @@ namespace Archetype.Server
         }
 
         public record StartGameInput(IEnumerable<Guid> ProtoCardIds);
-
         public record StartGamePayload(string Message);
+        
+        public async Task<EndTurnPayload> EndTurn(
+            [Service] ITopicEventSender eventSender,
+            CancellationToken cancellationToken
+        )
+        {
+            var result = await _mediator.Send(new EndTurnAction(), cancellationToken);
+
+            var payload = new EndTurnPayload(result);
+
+            await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
+            
+            return payload;
+        }
+
+        public record EndTurnPayload(string Message);
     }
     
     public class Subscriptions

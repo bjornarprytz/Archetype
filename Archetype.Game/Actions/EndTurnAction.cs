@@ -6,9 +6,9 @@ using MediatR;
 
 namespace Archetype.Game.Actions
 {
-    public class EndTurnAction : IRequest { }
+    public class EndTurnAction : IRequest<string> { }
 
-    public class EndTurnActionHandler : IRequestHandler<EndTurnAction>
+    public class EndTurnActionHandler : IRequestHandler<EndTurnAction, string>
     {
         private readonly IGameState _gameState;
 
@@ -17,11 +17,11 @@ namespace Archetype.Game.Actions
             _gameState = gameState;
         }
         
-        public async Task<Unit> Handle(EndTurnAction request, CancellationToken cancellationToken)
+        public async Task<string> Handle(EndTurnAction request, CancellationToken cancellationToken)
         {
-            _gameState.IsPayerTurn = false;
+            // TODO: Execute enemy turn
 
-            return Unit.Value;
+            return "Enemy turn executed!";
         }
     }
 }

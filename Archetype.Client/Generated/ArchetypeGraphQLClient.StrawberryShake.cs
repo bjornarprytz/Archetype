@@ -203,6 +203,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The root object of actionable game state
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_GameState : global::System.IEquatable<GetGameState_GameState_GameState>, IGetGameState_GameState_GameState
     {
@@ -280,6 +283,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Player : global::System.IEquatable<GetGameState_GameState_Player_Player>, IGetGameState_GameState_Player_Player
     {
@@ -377,6 +383,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A graph of map nodes
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Map : global::System.IEquatable<GetGameState_GameState_Map_Map>, IGetGameState_GameState_Map_Map
     {
@@ -448,6 +457,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_Player : global::System.IEquatable<GetGameState_GameState_Player_Owner_Player>, IGetGameState_GameState_Player_Owner_Player
     {
@@ -509,6 +521,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Player_Owner_MapNode>, IGetGameState_GameState_Player_Owner_MapNode
     {
@@ -570,6 +585,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Player_Owner_Deck>, IGetGameState_GameState_Player_Owner_Deck
     {
@@ -631,6 +649,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Player_Owner_Hand>, IGetGameState_GameState_Player_Owner_Hand
     {
@@ -692,6 +713,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Player_Owner_DiscardPile>, IGetGameState_GameState_Player_Owner_DiscardPile
     {
@@ -754,7 +778,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Player_Owner_Unit>, IGetGameState_GameState_Player_Owner_Unit
@@ -818,7 +842,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Owner_Card : global::System.IEquatable<GetGameState_GameState_Player_Owner_Card>, IGetGameState_GameState_Player_Owner_Card
@@ -881,6 +905,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Deck : global::System.IEquatable<GetGameState_GameState_Player_Deck_Deck>, IGetGameState_GameState_Player_Deck_Deck
     {
@@ -964,6 +991,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Hand : global::System.IEquatable<GetGameState_GameState_Player_Hand_Hand>, IGetGameState_GameState_Player_Hand_Hand
     {
@@ -1047,6 +1077,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_DiscardPile : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_DiscardPile>, IGetGameState_GameState_Player_DiscardPile_DiscardPile
     {
@@ -1130,6 +1163,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_MapNode>, IGetGameState_GameState_Map_Nodes_MapNode
     {
@@ -1213,6 +1249,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_Player : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_Player>, IGetGameState_GameState_Player_Deck_Owner_Player
     {
@@ -1274,6 +1313,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_MapNode>, IGetGameState_GameState_Player_Deck_Owner_MapNode
     {
@@ -1335,6 +1377,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_Deck>, IGetGameState_GameState_Player_Deck_Owner_Deck
     {
@@ -1396,6 +1441,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_Hand>, IGetGameState_GameState_Player_Deck_Owner_Hand
     {
@@ -1457,6 +1505,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_DiscardPile>, IGetGameState_GameState_Player_Deck_Owner_DiscardPile
     {
@@ -1519,7 +1570,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_Unit>, IGetGameState_GameState_Player_Deck_Owner_Unit
@@ -1583,7 +1634,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Owner_Card : global::System.IEquatable<GetGameState_GameState_Player_Deck_Owner_Card>, IGetGameState_GameState_Player_Deck_Owner_Card
@@ -1647,7 +1698,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Card : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Card>, IGetGameState_GameState_Player_Deck_Contents_Card
@@ -1762,6 +1813,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_Player : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_Player>, IGetGameState_GameState_Player_Hand_Owner_Player
     {
@@ -1823,6 +1877,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_MapNode>, IGetGameState_GameState_Player_Hand_Owner_MapNode
     {
@@ -1884,6 +1941,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_Deck>, IGetGameState_GameState_Player_Hand_Owner_Deck
     {
@@ -1945,6 +2005,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_Hand>, IGetGameState_GameState_Player_Hand_Owner_Hand
     {
@@ -2006,6 +2069,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_DiscardPile>, IGetGameState_GameState_Player_Hand_Owner_DiscardPile
     {
@@ -2068,7 +2134,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_Unit>, IGetGameState_GameState_Player_Hand_Owner_Unit
@@ -2132,7 +2198,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Owner_Card : global::System.IEquatable<GetGameState_GameState_Player_Hand_Owner_Card>, IGetGameState_GameState_Player_Hand_Owner_Card
@@ -2196,7 +2262,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Hand_Contents_Card : global::System.IEquatable<GetGameState_GameState_Player_Hand_Contents_Card>, IGetGameState_GameState_Player_Hand_Contents_Card
@@ -2311,6 +2377,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_Player : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_Player>, IGetGameState_GameState_Player_DiscardPile_Owner_Player
     {
@@ -2372,6 +2441,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_MapNode>, IGetGameState_GameState_Player_DiscardPile_Owner_MapNode
     {
@@ -2433,6 +2505,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_Deck>, IGetGameState_GameState_Player_DiscardPile_Owner_Deck
     {
@@ -2494,6 +2569,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_Hand>, IGetGameState_GameState_Player_DiscardPile_Owner_Hand
     {
@@ -2555,6 +2633,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_DiscardPile>, IGetGameState_GameState_Player_DiscardPile_Owner_DiscardPile
     {
@@ -2617,7 +2698,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_Unit>, IGetGameState_GameState_Player_DiscardPile_Owner_Unit
@@ -2681,7 +2762,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Owner_Card : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Owner_Card>, IGetGameState_GameState_Player_DiscardPile_Owner_Card
@@ -2745,7 +2826,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_DiscardPile_Contents_Card : global::System.IEquatable<GetGameState_GameState_Player_DiscardPile_Contents_Card>, IGetGameState_GameState_Player_DiscardPile_Contents_Card
@@ -2860,6 +2941,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_Player : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_Player>, IGetGameState_GameState_Map_Nodes_Owner_Player
     {
@@ -2921,6 +3005,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_MapNode>, IGetGameState_GameState_Map_Nodes_Owner_MapNode
     {
@@ -2982,6 +3069,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_Deck>, IGetGameState_GameState_Map_Nodes_Owner_Deck
     {
@@ -3043,6 +3133,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_Hand>, IGetGameState_GameState_Map_Nodes_Owner_Hand
     {
@@ -3104,6 +3197,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_DiscardPile>, IGetGameState_GameState_Map_Nodes_Owner_DiscardPile
     {
@@ -3166,7 +3262,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_Unit>, IGetGameState_GameState_Map_Nodes_Owner_Unit
@@ -3230,7 +3326,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Owner_Card : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Owner_Card>, IGetGameState_GameState_Map_Nodes_Owner_Card
@@ -3293,6 +3389,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_MapNode>, IGetGameState_GameState_Map_Nodes_Neighbours_MapNode
     {
@@ -3362,6 +3461,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_Player : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_Player>, IGetGameState_GameState_Player_Deck_Contents_Owner_Player
     {
@@ -3423,6 +3525,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_MapNode>, IGetGameState_GameState_Player_Deck_Contents_Owner_MapNode
     {
@@ -3484,6 +3589,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_Deck>, IGetGameState_GameState_Player_Deck_Contents_Owner_Deck
     {
@@ -3545,6 +3653,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_Hand>, IGetGameState_GameState_Player_Deck_Contents_Owner_Hand
     {
@@ -3606,6 +3717,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_DiscardPile>, IGetGameState_GameState_Player_Deck_Contents_Owner_DiscardPile
     {
@@ -3668,7 +3782,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_Unit>, IGetGameState_GameState_Player_Deck_Contents_Owner_Unit
@@ -3732,7 +3846,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Owner_Card : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Owner_Card>, IGetGameState_GameState_Player_Deck_Contents_Owner_Card
@@ -3885,7 +3999,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Targets_ITarget : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Targets_ITarget>, IGetGameState_GameState_Player_Deck_Contents_Targets_ITarget
@@ -3953,7 +4067,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Deck_Contents_Effects_IEffect : global::System.IEquatable<GetGameState_GameState_Player_Deck_Contents_Effects_IEffect>, IGetGameState_GameState_Player_Deck_Contents_Effects_IEffect
@@ -4016,6 +4130,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Player
     {
@@ -4077,6 +4194,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode
     {
@@ -4138,6 +4258,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck
     {
@@ -4199,6 +4322,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand
     {
@@ -4260,6 +4386,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile
     {
@@ -4322,7 +4451,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit
@@ -4386,7 +4515,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Card
@@ -4470,6 +4599,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// The root object of actionable game state
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_GameState : IGetGameState_GameState
     {
@@ -4500,6 +4632,9 @@ namespace Archetype.Client
         public global::Archetype.Client.IGetGameState_GameState_Player_Owner? Owner { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Player : IGetGameState_GameState_Player, IAtom
     {
@@ -4516,6 +4651,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// A graph of map nodes
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Map : IGetGameState_GameState_Map
     {
@@ -4527,33 +4665,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_Player : IGetGameState_GameState_Player_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_MapNode : IGetGameState_GameState_Player_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_Deck : IGetGameState_GameState_Player_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_Hand : IGetGameState_GameState_Player_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_DiscardPile : IGetGameState_GameState_Player_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_Unit : IGetGameState_GameState_Player_Owner
@@ -4561,7 +4714,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Owner_Card : IGetGameState_GameState_Player_Owner
@@ -4584,6 +4737,9 @@ namespace Archetype.Client
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents?>? Contents { get; }
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Deck : IGetGameState_GameState_Player_Deck, ICardZone
     {
@@ -4599,6 +4755,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Hand : IGetGameState_GameState_Player_Hand, ICardZone
     {
@@ -4614,6 +4773,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_DiscardPile : IGetGameState_GameState_Player_DiscardPile, ICardZone
     {
@@ -4630,6 +4792,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_MapNode : IGetGameState_GameState_Map_Nodes, IAtom
     {
@@ -4641,33 +4806,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_Player : IGetGameState_GameState_Player_Deck_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_MapNode : IGetGameState_GameState_Player_Deck_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_Deck : IGetGameState_GameState_Player_Deck_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_Hand : IGetGameState_GameState_Player_Deck_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_DiscardPile : IGetGameState_GameState_Player_Deck_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_Unit : IGetGameState_GameState_Player_Deck_Owner
@@ -4675,7 +4855,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Owner_Card : IGetGameState_GameState_Player_Deck_Owner
@@ -4702,7 +4882,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Card : IGetGameState_GameState_Player_Deck_Contents, IAtom
@@ -4715,33 +4895,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_Player : IGetGameState_GameState_Player_Hand_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_MapNode : IGetGameState_GameState_Player_Hand_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_Deck : IGetGameState_GameState_Player_Hand_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_Hand : IGetGameState_GameState_Player_Hand_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_DiscardPile : IGetGameState_GameState_Player_Hand_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_Unit : IGetGameState_GameState_Player_Hand_Owner
@@ -4749,7 +4944,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Owner_Card : IGetGameState_GameState_Player_Hand_Owner
@@ -4762,7 +4957,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Hand_Contents_Card : IGetGameState_GameState_Player_Hand_Contents, IAtom
@@ -4775,33 +4970,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_Player : IGetGameState_GameState_Player_DiscardPile_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_MapNode : IGetGameState_GameState_Player_DiscardPile_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_Deck : IGetGameState_GameState_Player_DiscardPile_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_Hand : IGetGameState_GameState_Player_DiscardPile_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_DiscardPile : IGetGameState_GameState_Player_DiscardPile_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_Unit : IGetGameState_GameState_Player_DiscardPile_Owner
@@ -4809,7 +5019,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Owner_Card : IGetGameState_GameState_Player_DiscardPile_Owner
@@ -4822,7 +5032,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_DiscardPile_Contents_Card : IGetGameState_GameState_Player_DiscardPile_Contents, IAtom
@@ -4835,33 +5045,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_Player : IGetGameState_GameState_Map_Nodes_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_MapNode : IGetGameState_GameState_Map_Nodes_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_Deck : IGetGameState_GameState_Map_Nodes_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_Hand : IGetGameState_GameState_Map_Nodes_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_DiscardPile : IGetGameState_GameState_Map_Nodes_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_Unit : IGetGameState_GameState_Map_Nodes_Owner
@@ -4869,7 +5094,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Owner_Card : IGetGameState_GameState_Map_Nodes_Owner
@@ -4881,6 +5106,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_MapNode : IGetGameState_GameState_Map_Nodes_Neighbours, IAtom
     {
@@ -4892,33 +5120,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_Player : IGetGameState_GameState_Player_Deck_Contents_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_MapNode : IGetGameState_GameState_Player_Deck_Contents_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_Deck : IGetGameState_GameState_Player_Deck_Contents_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_Hand : IGetGameState_GameState_Player_Deck_Contents_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_DiscardPile : IGetGameState_GameState_Player_Deck_Contents_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_Unit : IGetGameState_GameState_Player_Deck_Contents_Owner
@@ -4926,7 +5169,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Owner_Card : IGetGameState_GameState_Player_Deck_Contents_Owner
@@ -4958,7 +5201,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface ITarget
@@ -4967,7 +5210,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Targets : ITarget
@@ -4975,7 +5218,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Targets_ITarget : IGetGameState_GameState_Player_Deck_Contents_Targets
@@ -4983,7 +5226,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IEffect
@@ -4992,7 +5235,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Effects : IEffect
@@ -5000,7 +5243,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Player_Deck_Contents_Effects_IEffect : IGetGameState_GameState_Player_Deck_Contents_Effects
@@ -5013,33 +5256,48 @@ namespace Archetype.Client
         public global::System.Guid Guid { get; }
     }
 
+    /// <summary>
+    /// The player of the game
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Player : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
     {
     }
 
+    /// <summary>
+    /// A node on the map
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
     {
     }
 
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
     {
     }
 
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
     {
     }
 
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
     {
     }
 
     /// <summary>
-    /// A unit in the game
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
@@ -5047,7 +5305,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A card in the game
+    /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Card : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
@@ -5115,6 +5373,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Collection of all available card sets
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetCardPool_CardPool_CardPool : global::System.IEquatable<GetCardPool_CardPool_CardPool>, IGetCardPool_CardPool_CardPool
     {
@@ -5186,6 +5447,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// A set of card proto data which share some themes
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetCardPool_CardPool_Sets_CardSet : global::System.IEquatable<GetCardPool_CardPool_Sets_CardSet>, IGetCardPool_CardPool_Sets_CardSet
     {
@@ -5265,6 +5529,9 @@ namespace Archetype.Client
         }
     }
 
+    /// <summary>
+    /// Blueprint for creating card instances
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetCardPool_CardPool_Sets_Cards_CardProtoData : global::System.IEquatable<GetCardPool_CardPool_Sets_Cards_CardProtoData>, IGetCardPool_CardPool_Sets_Cards_CardProtoData
     {
@@ -5456,7 +5723,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetCardPool_CardPool_Sets_Cards_Targets_ITarget : global::System.IEquatable<GetCardPool_CardPool_Sets_Cards_Targets_ITarget>, IGetCardPool_CardPool_Sets_Cards_Targets_ITarget
@@ -5524,7 +5791,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetCardPool_CardPool_Sets_Cards_Effects_IEffect : global::System.IEquatable<GetCardPool_CardPool_Sets_Cards_Effects_IEffect>, IGetCardPool_CardPool_Sets_Cards_Effects_IEffect
@@ -5604,6 +5871,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// Collection of all available card sets
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_CardPool : IGetCardPool_CardPool
     {
@@ -5617,6 +5887,9 @@ namespace Archetype.Client
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetCardPool_CardPool_Sets_Cards?>? Cards { get; }
     }
 
+    /// <summary>
+    /// A set of card proto data which share some themes
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_Sets_CardSet : IGetCardPool_CardPool_Sets
     {
@@ -5641,6 +5914,9 @@ namespace Archetype.Client
     {
     }
 
+    /// <summary>
+    /// Blueprint for creating card instances
+    /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_Sets_Cards_CardProtoData : IGetCardPool_CardPool_Sets_Cards
     {
@@ -5657,7 +5933,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_Sets_Cards_Targets : ITarget
@@ -5665,7 +5941,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A target of some type
+    /// The target of a card
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_Sets_Cards_Targets_ITarget : IGetCardPool_CardPool_Sets_Cards_Targets
@@ -5673,7 +5949,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_Sets_Cards_Effects : IEffect
@@ -5681,7 +5957,7 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// An effect of a card
+    /// The core payload of a card, where mutation of game atoms happen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetCardPool_CardPool_Sets_Cards_Effects_IEffect : IGetCardPool_CardPool_Sets_Cards_Effects
@@ -8215,12 +8491,14 @@ namespace Archetype.Client.State
         public global::System.String? Message { get; }
     }
 
+    ///<summary>The root object of actionable game state</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIGameStateData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>The root object of actionable game state</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GameStateData : IIGameStateData
     {
@@ -8241,18 +8519,21 @@ namespace Archetype.Client.State
         public global::Archetype.Client.State.IIMapData? Map { get; }
     }
 
+    ///<summary>The player of the game</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIPlayerData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>The player of the game</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIGameAtomData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>The player of the game</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class PlayerData : IIPlayerData, IIGameAtomData
     {
@@ -8282,12 +8563,14 @@ namespace Archetype.Client.State
         public global::System.Int32? Resources { get; }
     }
 
+    ///<summary>A graph of map nodes</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIMapData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A graph of map nodes</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class MapData : IIMapData
     {
@@ -8302,18 +8585,21 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIMapNodeData?>? Nodes { get; }
     }
 
+    ///<summary>A node on the map</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIMapNodeData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A node on the map</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIZoneOfIUnitData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A node on the map</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class MapNodeData : IIMapNodeData, IIGameAtomData, IIZoneOfIUnitData
     {
@@ -8334,18 +8620,21 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIMapNodeData?>? Neighbours { get; }
     }
 
+    ///<summary>A stack of cards which replenishes the player's hand</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIDeckData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A stack of cards which replenishes the player's hand</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIZoneOfICardData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A stack of cards which replenishes the player's hand</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class DeckData : IIDeckData, IIGameAtomData, IIZoneOfICardData
     {
@@ -8366,12 +8655,14 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IICardData?>? Contents { get; }
     }
 
+    ///<summary>A hand of cards, only visible to the owner</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIHandData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A hand of cards, only visible to the owner</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class HandData : IIHandData, IIGameAtomData, IIZoneOfICardData
     {
@@ -8392,12 +8683,14 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IICardData?>? Contents { get; }
     }
 
+    ///<summary>Discard pile, where spent cards go</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIDiscardPileData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>Discard pile, where spent cards go</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class DiscardPileData : IIDiscardPileData, IIGameAtomData, IIZoneOfICardData
     {
@@ -8418,14 +8711,14 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IICardData?>? Contents { get; }
     }
 
-    ///<summary>A unit in the game</summary>
+    ///<summary>A unit instance</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IIUnitData
     {
         global::System.String __typename { get; }
     }
 
-    ///<summary>A unit in the game</summary>
+    ///<summary>A unit instance</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class UnitData : IIUnitData, IIGameAtomData
     {
@@ -8440,14 +8733,14 @@ namespace Archetype.Client.State
         public global::System.Guid? Guid { get; }
     }
 
-    ///<summary>A card in the game</summary>
+    ///<summary>A card instance</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IICardData
     {
         global::System.String __typename { get; }
     }
 
-    ///<summary>A card in the game</summary>
+    ///<summary>A card instance</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class CardData : IICardData, IIGameAtomData
     {
@@ -8506,7 +8799,7 @@ namespace Archetype.Client.State
         public global::System.String? ImageUri { get; }
     }
 
-    ///<summary>A target of some type</summary>
+    ///<summary>The target of a card</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class ITargetData
     {
@@ -8521,7 +8814,7 @@ namespace Archetype.Client.State
         public global::System.String? TypeId { get; }
     }
 
-    ///<summary>An effect of a card</summary>
+    ///<summary>The core payload of a card, where mutation of game atoms happen</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class IEffectData
     {
@@ -8536,12 +8829,14 @@ namespace Archetype.Client.State
         public global::System.Int32? TargetIndex { get; }
     }
 
+    ///<summary>Collection of all available card sets</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IICardPoolData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>Collection of all available card sets</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class CardPoolData : IICardPoolData
     {
@@ -8556,12 +8851,14 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IICardSetData?>? Sets { get; }
     }
 
+    ///<summary>A set of card proto data which share some themes</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IICardSetData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>A set of card proto data which share some themes</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class CardSetData : IICardSetData
     {
@@ -8579,12 +8876,14 @@ namespace Archetype.Client.State
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IICardProtoDataData?>? Cards { get; }
     }
 
+    ///<summary>Blueprint for creating card instances</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial interface IICardProtoDataData
     {
         global::System.String __typename { get; }
     }
 
+    ///<summary>Blueprint for creating card instances</summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class CardProtoDataData : IICardProtoDataData
     {
