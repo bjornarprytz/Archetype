@@ -51,7 +51,7 @@ namespace Archetype.Design
                                 .Effect<IUnit, int>(
                                     targetIndex: 0,
                                     resolveEffect: context => context.Target.Attack(context.GameState.Player.Resources),
-                                    rulesText: context => $"Deal {context.GameState.Player.Resources}")
+                                    rulesText: context => $"Deal {context.Player.Resources}")
                                 .Art("other")
                         )
                         .Card(builder =>
@@ -67,7 +67,7 @@ namespace Archetype.Design
                                         context.Target.Contents.ForEach((card, i) => card.ReduceCost(i));
                                         return 0;
                                     },
-                                    rulesText: context => $"Deal {context.GameState.Player.Resources}")
+                                    rulesText: context => $"Deal {context.Player.Resources}")
                                 .Art("other")
                         )
                         .Card(builder =>

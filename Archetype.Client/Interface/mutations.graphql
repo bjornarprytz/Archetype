@@ -1,8 +1,16 @@
-mutation PlayCard($cardGuid: UUID!, $targets: [UUID!]! ) {
-    playCard(playCardInput: {cardId: $cardGuid, targetIds: $targets}){
-        message # TODO: Change this to a result type of some kind
+mutation StartGame($protoCardGuids: [UUID!]!) {
+    startGame(startGameInput: {protoCardIds: $protoCardGuids}){
+        message
     }
 }
+
+
+mutation PlayCard($cardGuid: UUID!, $targets: [UUID!]! ) {
+    playCard(playCardInput: {cardId: $cardGuid, targetIds: $targets}){
+        message
+    }
+}
+
 
 mutation EndTurn {
     endTurn {
@@ -10,8 +18,3 @@ mutation EndTurn {
     }
 }
 
-mutation StartGame($protoCardGuids: [UUID!]!) {
-    startGame(startGameInput: {protoCardIds: $protoCardGuids}){
-        message
-    }
-}

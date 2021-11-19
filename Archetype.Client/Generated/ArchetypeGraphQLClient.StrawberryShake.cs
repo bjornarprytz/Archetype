@@ -4,6 +4,145 @@
 namespace Archetype.Client
 {
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGameResult : global::System.IEquatable<StartGameResult>, IStartGameResult
+    {
+        public StartGameResult(global::Archetype.Client.IStartGame_StartGame startGame)
+        {
+            StartGame = startGame;
+        }
+
+        public global::Archetype.Client.IStartGame_StartGame StartGame { get; }
+
+        public virtual global::System.Boolean Equals(StartGameResult? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (StartGame.Equals(other.StartGame));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((StartGameResult)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * StartGame.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGame_StartGame_StartGamePayload : global::System.IEquatable<StartGame_StartGame_StartGamePayload>, IStartGame_StartGame_StartGamePayload
+    {
+        public StartGame_StartGame_StartGamePayload(global::System.String message)
+        {
+            Message = message;
+        }
+
+        public global::System.String Message { get; }
+
+        public virtual global::System.Boolean Equals(StartGame_StartGame_StartGamePayload? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Message.Equals(other.Message));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((StartGame_StartGame_StartGamePayload)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Message.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IStartGameResult
+    {
+        public global::Archetype.Client.IStartGame_StartGame StartGame { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IStartGame_StartGame
+    {
+        public global::System.String Message { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IStartGame_StartGame_StartGamePayload : IStartGame_StartGame
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class PlayCardResult : global::System.IEquatable<PlayCardResult>, IPlayCardResult
     {
         public PlayCardResult(global::Archetype.Client.IPlayCard_PlayCard playCard)
@@ -143,6 +282,145 @@ namespace Archetype.Client
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnResult : global::System.IEquatable<EndTurnResult>, IEndTurnResult
+    {
+        public EndTurnResult(global::Archetype.Client.IEndTurn_EndTurn endTurn)
+        {
+            EndTurn = endTurn;
+        }
+
+        public global::Archetype.Client.IEndTurn_EndTurn EndTurn { get; }
+
+        public virtual global::System.Boolean Equals(EndTurnResult? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (EndTurn.Equals(other.EndTurn));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((EndTurnResult)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * EndTurn.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurn_EndTurn_EndTurnPayload : global::System.IEquatable<EndTurn_EndTurn_EndTurnPayload>, IEndTurn_EndTurn_EndTurnPayload
+    {
+        public EndTurn_EndTurn_EndTurnPayload(global::System.String message)
+        {
+            Message = message;
+        }
+
+        public global::System.String Message { get; }
+
+        public virtual global::System.Boolean Equals(EndTurn_EndTurn_EndTurnPayload? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Message.Equals(other.Message));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((EndTurn_EndTurn_EndTurnPayload)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Message.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IEndTurnResult
+    {
+        public global::Archetype.Client.IEndTurn_EndTurn EndTurn { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IEndTurn_EndTurn
+    {
+        public global::System.String Message { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IEndTurn_EndTurn_EndTurnPayload : IEndTurn_EndTurn
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameStateResult : global::System.IEquatable<GetGameStateResult>, IGetGameStateResult
     {
         public GetGameStateResult(global::Archetype.Client.IGetGameState_GameState gameState)
@@ -209,14 +487,11 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_GameState : global::System.IEquatable<GetGameState_GameState_GameState>, IGetGameState_GameState_GameState
     {
-        public GetGameState_GameState_GameState(global::System.Boolean isPayerTurn, global::Archetype.Client.IGetGameState_GameState_Player? player, global::Archetype.Client.IGetGameState_GameState_Map? map)
+        public GetGameState_GameState_GameState(global::Archetype.Client.IGetGameState_GameState_Player? player, global::Archetype.Client.IGetGameState_GameState_Map? map)
         {
-            IsPayerTurn = isPayerTurn;
             Player = player;
             Map = map;
         }
-
-        public global::System.Boolean IsPayerTurn { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player? Player { get; }
 
@@ -239,7 +514,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return (IsPayerTurn == other.IsPayerTurn) && ((Player is null && other.Player is null) || Player != null && Player.Equals(other.Player)) && ((Map is null && other.Map is null) || Map != null && Map.Equals(other.Map));
+            return (((Player is null && other.Player is null) || Player != null && Player.Equals(other.Player))) && ((Map is null && other.Map is null) || Map != null && Map.Equals(other.Map));
         }
 
         public override global::System.Boolean Equals(global::System.Object? obj)
@@ -267,7 +542,6 @@ namespace Archetype.Client
             unchecked
             {
                 int hash = 5;
-                hash ^= 397 * IsPayerTurn.GetHashCode();
                 if (Player != null)
                 {
                     hash ^= 397 * Player.GetHashCode();
@@ -289,27 +563,36 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Player_Player : global::System.IEquatable<GetGameState_GameState_Player_Player>, IGetGameState_GameState_Player_Player
     {
-        public GetGameState_GameState_Player_Player(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::Archetype.Client.IGetGameState_GameState_Player_Deck? deck, global::Archetype.Client.IGetGameState_GameState_Player_Hand? hand, global::Archetype.Client.IGetGameState_GameState_Player_DiscardPile? discardPile, global::System.Int32 resources)
+        public GetGameState_GameState_Player_Player(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::System.String? name, global::System.Int32 maxHandSize, global::System.Int32 minDeckSize, global::System.Int32 resources, global::Archetype.Client.IGetGameState_GameState_Player_Deck? deck, global::Archetype.Client.IGetGameState_GameState_Player_Hand? hand, global::Archetype.Client.IGetGameState_GameState_Player_DiscardPile? discardPile)
         {
             Guid = guid;
             Owner = owner;
+            Name = name;
+            MaxHandSize = maxHandSize;
+            MinDeckSize = minDeckSize;
+            Resources = resources;
             Deck = deck;
             Hand = hand;
             DiscardPile = discardPile;
-            Resources = resources;
         }
 
         public global::System.Guid Guid { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_Owner? Owner { get; }
 
+        public global::System.String? Name { get; }
+
+        public global::System.Int32 MaxHandSize { get; }
+
+        public global::System.Int32 MinDeckSize { get; }
+
+        public global::System.Int32 Resources { get; }
+
         public global::Archetype.Client.IGetGameState_GameState_Player_Deck? Deck { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_Hand? Hand { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_DiscardPile? DiscardPile { get; }
-
-        public global::System.Int32 Resources { get; }
 
         public virtual global::System.Boolean Equals(GetGameState_GameState_Player_Player? other)
         {
@@ -328,7 +611,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && ((Deck is null && other.Deck is null) || Deck != null && Deck.Equals(other.Deck)) && ((Hand is null && other.Hand is null) || Hand != null && Hand.Equals(other.Hand)) && ((DiscardPile is null && other.DiscardPile is null) || DiscardPile != null && DiscardPile.Equals(other.DiscardPile)) && Resources == other.Resources;
+            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && ((Name is null && other.Name is null) || Name != null && Name.Equals(other.Name)) && MaxHandSize == other.MaxHandSize && MinDeckSize == other.MinDeckSize && Resources == other.Resources && ((Deck is null && other.Deck is null) || Deck != null && Deck.Equals(other.Deck)) && ((Hand is null && other.Hand is null) || Hand != null && Hand.Equals(other.Hand)) && ((DiscardPile is null && other.DiscardPile is null) || DiscardPile != null && DiscardPile.Equals(other.DiscardPile));
         }
 
         public override global::System.Boolean Equals(global::System.Object? obj)
@@ -362,6 +645,14 @@ namespace Archetype.Client
                     hash ^= 397 * Owner.GetHashCode();
                 }
 
+                if (Name != null)
+                {
+                    hash ^= 397 * Name.GetHashCode();
+                }
+
+                hash ^= 397 * MaxHandSize.GetHashCode();
+                hash ^= 397 * MinDeckSize.GetHashCode();
+                hash ^= 397 * Resources.GetHashCode();
                 if (Deck != null)
                 {
                     hash ^= 397 * Deck.GetHashCode();
@@ -377,7 +668,6 @@ namespace Archetype.Client
                     hash ^= 397 * DiscardPile.GetHashCode();
                 }
 
-                hash ^= 397 * Resources.GetHashCode();
                 return hash;
             }
         }
@@ -1169,16 +1459,19 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameState_GameState_Map_Nodes_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_MapNode>, IGetGameState_GameState_Map_Nodes_MapNode
     {
-        public GetGameState_GameState_Map_Nodes_MapNode(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Neighbours?>? neighbours)
+        public GetGameState_GameState_Map_Nodes_MapNode(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents?>? contents, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Neighbours?>? neighbours)
         {
             Guid = guid;
             Owner = owner;
+            Contents = contents;
             Neighbours = neighbours;
         }
 
         public global::System.Guid Guid { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_Owner? Owner { get; }
+
+        public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents?>? Contents { get; }
 
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Neighbours?>? Neighbours { get; }
 
@@ -1199,7 +1492,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && global::StrawberryShake.Helper.ComparisonHelper.SequenceEqual(Neighbours, other.Neighbours);
+            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && global::StrawberryShake.Helper.ComparisonHelper.SequenceEqual(Contents, other.Contents) && global::StrawberryShake.Helper.ComparisonHelper.SequenceEqual(Neighbours, other.Neighbours);
         }
 
         public override global::System.Boolean Equals(global::System.Object? obj)
@@ -1231,6 +1524,17 @@ namespace Archetype.Client
                 if (Owner != null)
                 {
                     hash ^= 397 * Owner.GetHashCode();
+                }
+
+                if (Contents != null)
+                {
+                    foreach (var Contents_elm in Contents)
+                    {
+                        if (Contents_elm != null)
+                        {
+                            hash ^= 397 * Contents_elm.GetHashCode();
+                        }
+                    }
                 }
 
                 if (Neighbours != null)
@@ -3390,20 +3694,109 @@ namespace Archetype.Client
     }
 
     /// <summary>
-    /// A node on the map
+    /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_MapNode>, IGetGameState_GameState_Map_Nodes_Neighbours_MapNode
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Unit : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Unit>, IGetGameState_GameState_Map_Nodes_Contents_Unit
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_MapNode(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner)
+        public GetGameState_GameState_Map_Nodes_Contents_Unit(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::System.Guid protoGuid, global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_Deck? deck, global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_MetaData? metaData)
         {
             Guid = guid;
             Owner = owner;
+            ProtoGuid = protoGuid;
+            Deck = deck;
+            MetaData = metaData;
         }
 
         public global::System.Guid Guid { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_Owner? Owner { get; }
+
+        public global::System.Guid ProtoGuid { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_Deck? Deck { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_MetaData? MetaData { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Unit? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && ProtoGuid.Equals(other.ProtoGuid) && ((Deck is null && other.Deck is null) || Deck != null && Deck.Equals(other.Deck)) && ((MetaData is null && other.MetaData is null) || MetaData != null && MetaData.Equals(other.MetaData));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Unit)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                if (Owner != null)
+                {
+                    hash ^= 397 * Owner.GetHashCode();
+                }
+
+                hash ^= 397 * ProtoGuid.GetHashCode();
+                if (Deck != null)
+                {
+                    hash ^= 397 * Deck.GetHashCode();
+                }
+
+                if (MetaData != null)
+                {
+                    hash ^= 397 * MetaData.GetHashCode();
+                }
+
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A node on the map
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Neighbours_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_MapNode>, IGetGameState_GameState_Map_Nodes_Neighbours_MapNode
+    {
+        public GetGameState_GameState_Map_Nodes_Neighbours_MapNode(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
 
         public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_MapNode? other)
         {
@@ -3422,7 +3815,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner));
+            return (Guid.Equals(other.Guid));
         }
 
         public override global::System.Boolean Equals(global::System.Object? obj)
@@ -3451,11 +3844,6 @@ namespace Archetype.Client
             {
                 int hash = 5;
                 hash ^= 397 * Guid.GetHashCode();
-                if (Owner != null)
-                {
-                    hash ^= 397 * Owner.GetHashCode();
-                }
-
                 return hash;
             }
         }
@@ -4134,16 +4522,16 @@ namespace Archetype.Client
     /// The player of the game
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Player
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_Player : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_Player>, IGetGameState_GameState_Map_Nodes_Contents_Owner_Player
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_Player(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_Player? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4180,7 +4568,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_Player)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_Player)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4198,16 +4586,16 @@ namespace Archetype.Client
     /// A node on the map
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_MapNode>, IGetGameState_GameState_Map_Nodes_Contents_Owner_MapNode
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_MapNode(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_MapNode? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4244,7 +4632,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_MapNode)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4262,16 +4650,16 @@ namespace Archetype.Client
     /// A stack of cards which replenishes the player's hand
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_Deck>, IGetGameState_GameState_Map_Nodes_Contents_Owner_Deck
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_Deck(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_Deck? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4308,7 +4696,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_Deck)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4326,16 +4714,16 @@ namespace Archetype.Client
     /// A hand of cards, only visible to the owner
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_Hand>, IGetGameState_GameState_Map_Nodes_Contents_Owner_Hand
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_Hand(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_Hand? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4372,7 +4760,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_Hand)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4390,16 +4778,16 @@ namespace Archetype.Client
     /// Discard pile, where spent cards go
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile>, IGetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4436,7 +4824,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4454,16 +4842,16 @@ namespace Archetype.Client
     /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_Unit>, IGetGameState_GameState_Map_Nodes_Contents_Owner_Unit
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_Unit(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_Unit? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4500,7 +4888,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_Unit)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4518,16 +4906,16 @@ namespace Archetype.Client
     /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public partial class GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card>, IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Card
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Owner_Card : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Owner_Card>, IGetGameState_GameState_Map_Nodes_Contents_Owner_Card
     {
-        public GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card(global::System.Guid guid)
+        public GetGameState_GameState_Map_Nodes_Contents_Owner_Card(global::System.Guid guid)
         {
             Guid = guid;
         }
 
         public global::System.Guid Guid { get; }
 
-        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card? other)
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Owner_Card? other)
         {
             if (ReferenceEquals(null, other))
             {
@@ -4564,7 +4952,7 @@ namespace Archetype.Client
                 return false;
             }
 
-            return Equals((GetGameState_GameState_Map_Nodes_Neighbours_Owner_Card)obj);
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Owner_Card)obj);
         }
 
         public override global::System.Int32 GetHashCode()
@@ -4573,6 +4961,729 @@ namespace Archetype.Client
             {
                 int hash = 5;
                 hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Deck : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Deck>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Deck
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Deck(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents?>? contents)
+        {
+            Guid = guid;
+            Owner = owner;
+            Contents = contents;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Player_Owner? Owner { get; }
+
+        public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents?>? Contents { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Deck? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && global::StrawberryShake.Helper.ComparisonHelper.SequenceEqual(Contents, other.Contents);
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Deck)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                if (Owner != null)
+                {
+                    hash ^= 397 * Owner.GetHashCode();
+                }
+
+                if (Contents != null)
+                {
+                    foreach (var Contents_elm in Contents)
+                    {
+                        if (Contents_elm != null)
+                        {
+                            hash ^= 397 * Contents_elm.GetHashCode();
+                        }
+                    }
+                }
+
+                return hash;
+            }
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData>, IGetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData(global::System.String? name, global::System.String? imageUri)
+        {
+            Name = name;
+            ImageUri = imageUri;
+        }
+
+        public global::System.String? Name { get; }
+
+        public global::System.String? ImageUri { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (((Name is null && other.Name is null) || Name != null && Name.Equals(other.Name))) && ((ImageUri is null && other.ImageUri is null) || ImageUri != null && ImageUri.Equals(other.ImageUri));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                if (Name != null)
+                {
+                    hash ^= 397 * Name.GetHashCode();
+                }
+
+                if (ImageUri != null)
+                {
+                    hash ^= 397 * ImageUri.GetHashCode();
+                }
+
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// The player of the game
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A node on the map
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A unit instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A card instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card(global::System.Guid guid)
+        {
+            Guid = guid;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid));
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                return hash;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A card instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class GetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card : global::System.IEquatable<GetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card>, IGetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card
+    {
+        public GetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card(global::System.Guid guid, global::Archetype.Client.IGetGameState_GameState_Player_Owner? owner, global::System.Guid protoGuid, global::System.Int32 cost, global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents_MetaData? metaData, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents_Targets?>? targets, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents_Effects?>? effects)
+        {
+            Guid = guid;
+            Owner = owner;
+            ProtoGuid = protoGuid;
+            Cost = cost;
+            MetaData = metaData;
+            Targets = targets;
+            Effects = effects;
+        }
+
+        public global::System.Guid Guid { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Player_Owner? Owner { get; }
+
+        public global::System.Guid ProtoGuid { get; }
+
+        public global::System.Int32 Cost { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents_MetaData? MetaData { get; }
+
+        public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents_Targets?>? Targets { get; }
+
+        public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Player_Deck_Contents_Effects?>? Effects { get; }
+
+        public virtual global::System.Boolean Equals(GetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (other.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return (Guid.Equals(other.Guid)) && ((Owner is null && other.Owner is null) || Owner != null && Owner.Equals(other.Owner)) && ProtoGuid.Equals(other.ProtoGuid) && Cost == other.Cost && ((MetaData is null && other.MetaData is null) || MetaData != null && MetaData.Equals(other.MetaData)) && global::StrawberryShake.Helper.ComparisonHelper.SequenceEqual(Targets, other.Targets) && global::StrawberryShake.Helper.ComparisonHelper.SequenceEqual(Effects, other.Effects);
+        }
+
+        public override global::System.Boolean Equals(global::System.Object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((GetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card)obj);
+        }
+
+        public override global::System.Int32 GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 5;
+                hash ^= 397 * Guid.GetHashCode();
+                if (Owner != null)
+                {
+                    hash ^= 397 * Owner.GetHashCode();
+                }
+
+                hash ^= 397 * ProtoGuid.GetHashCode();
+                hash ^= 397 * Cost.GetHashCode();
+                if (MetaData != null)
+                {
+                    hash ^= 397 * MetaData.GetHashCode();
+                }
+
+                if (Targets != null)
+                {
+                    foreach (var Targets_elm in Targets)
+                    {
+                        if (Targets_elm != null)
+                        {
+                            hash ^= 397 * Targets_elm.GetHashCode();
+                        }
+                    }
+                }
+
+                if (Effects != null)
+                {
+                    foreach (var Effects_elm in Effects)
+                    {
+                        if (Effects_elm != null)
+                        {
+                            hash ^= 397 * Effects_elm.GetHashCode();
+                        }
+                    }
+                }
+
                 return hash;
             }
         }
@@ -4587,8 +5698,6 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGameState
     {
-        public global::System.Boolean IsPayerTurn { get; }
-
         public global::Archetype.Client.IGetGameState_GameState_Player? Player { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Map? Map { get; }
@@ -4610,13 +5719,19 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IPlayer
     {
+        public global::System.String? Name { get; }
+
+        public global::System.Int32 MaxHandSize { get; }
+
+        public global::System.Int32 MinDeckSize { get; }
+
+        public global::System.Int32 Resources { get; }
+
         public global::Archetype.Client.IGetGameState_GameState_Player_Deck? Deck { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_Hand? Hand { get; }
 
         public global::Archetype.Client.IGetGameState_GameState_Player_DiscardPile? DiscardPile { get; }
-
-        public global::System.Int32 Resources { get; }
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
@@ -4792,11 +5907,17 @@ namespace Archetype.Client
     {
     }
 
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IUnitZone : IAtom
+    {
+        public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents?>? Contents { get; }
+    }
+
     /// <summary>
     /// A node on the map
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_MapNode : IGetGameState_GameState_Map_Nodes, IAtom
+    public interface IGetGameState_GameState_Map_Nodes_MapNode : IGetGameState_GameState_Map_Nodes, IUnitZone
     {
     }
 
@@ -5102,15 +6223,39 @@ namespace Archetype.Client
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IUnit
+    {
+        public global::System.Guid ProtoGuid { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_Deck? Deck { get; }
+
+        public global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_MetaData? MetaData { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents : IUnit
+    {
+    }
+
+    /// <summary>
+    /// A unit instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Unit : IGetGameState_GameState_Map_Nodes_Contents, IAtom
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IGetGameState_GameState_Map_Nodes_Neighbours
     {
+        public global::System.Guid Guid { get; }
     }
 
     /// <summary>
     /// A node on the map
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_MapNode : IGetGameState_GameState_Map_Nodes_Neighbours, IAtom
+    public interface IGetGameState_GameState_Map_Nodes_Neighbours_MapNode : IGetGameState_GameState_Map_Nodes_Neighbours
     {
     }
 
@@ -5177,7 +6322,7 @@ namespace Archetype.Client
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IMetaData
+    public interface ICardMetaData
     {
         public global::System.String? Name { get; }
 
@@ -5191,7 +6336,7 @@ namespace Archetype.Client
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Player_Deck_Contents_MetaData : IMetaData
+    public interface IGetGameState_GameState_Player_Deck_Contents_MetaData : ICardMetaData
     {
     }
 
@@ -5251,7 +6396,7 @@ namespace Archetype.Client
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
         public global::System.Guid Guid { get; }
     }
@@ -5260,7 +6405,7 @@ namespace Archetype.Client
     /// The player of the game
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Player : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_Player : IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
     }
 
@@ -5268,7 +6413,7 @@ namespace Archetype.Client
     /// A node on the map
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_MapNode : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_MapNode : IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
     }
 
@@ -5276,7 +6421,7 @@ namespace Archetype.Client
     /// A stack of cards which replenishes the player's hand
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Deck : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_Deck : IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
     }
 
@@ -5284,7 +6429,7 @@ namespace Archetype.Client
     /// A hand of cards, only visible to the owner
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Hand : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_Hand : IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
     }
 
@@ -5292,7 +6437,7 @@ namespace Archetype.Client
     /// Discard pile, where spent cards go
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_DiscardPile : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_DiscardPile : IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
     }
 
@@ -5300,7 +6445,7 @@ namespace Archetype.Client
     /// A unit instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Unit : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_Unit : IGetGameState_GameState_Map_Nodes_Contents_Owner
     {
     }
 
@@ -5308,7 +6453,113 @@ namespace Archetype.Client
     /// A card instance
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetGameState_GameState_Map_Nodes_Neighbours_Owner_Card : IGetGameState_GameState_Map_Nodes_Neighbours_Owner
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Owner_Card : IGetGameState_GameState_Map_Nodes_Contents_Owner
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck : IDeck
+    {
+    }
+
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Deck : IGetGameState_GameState_Map_Nodes_Contents_Deck, ICardZone
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IUnitMetaData
+    {
+        public global::System.String? Name { get; }
+
+        public global::System.String? ImageUri { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_MetaData : IUnitMetaData
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData : IGetGameState_GameState_Map_Nodes_Contents_MetaData
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+        public global::System.Guid Guid { get; }
+    }
+
+    /// <summary>
+    /// The player of the game
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Player : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    /// <summary>
+    /// A node on the map
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_MapNode : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    /// <summary>
+    /// A stack of cards which replenishes the player's hand
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Deck : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    /// <summary>
+    /// A hand of cards, only visible to the owner
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Hand : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    /// <summary>
+    /// Discard pile, where spent cards go
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_DiscardPile : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    /// <summary>
+    /// A unit instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Unit : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    /// <summary>
+    /// A card instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner_Card : IGetGameState_GameState_Map_Nodes_Contents_Deck_Owner
+    {
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Contents : ICard
+    {
+    }
+
+    /// <summary>
+    /// A card instance
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IGetGameState_GameState_Map_Nodes_Contents_Deck_Contents_Card : IGetGameState_GameState_Map_Nodes_Contents_Deck_Contents, IAtom
     {
     }
 
@@ -5923,7 +7174,7 @@ namespace Archetype.Client
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
-    public interface IGetCardPool_CardPool_Sets_Cards_MetaData : IMetaData
+    public interface IGetCardPool_CardPool_Sets_Cards_MetaData : ICardMetaData
     {
     }
 
@@ -6037,6 +7288,120 @@ namespace Archetype.Client
                 CardColor.Green => "GREEN",
                 _ => throw new global::StrawberryShake.GraphQLClientException()};
         }
+    }
+
+    /// <summary>
+    /// Represents the operation service of the StartGame GraphQL operation
+    /// <code>
+    /// mutation StartGame($protoCardGuids: [UUID!]!) {
+    ///   startGame(startGameInput: { protoCardIds: $protoCardGuids }) {
+    ///     __typename
+    ///     message
+    ///   }
+    /// }
+    /// </code>
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGameMutationDocument : global::StrawberryShake.IDocument
+    {
+        private StartGameMutationDocument()
+        {
+        }
+
+        public static StartGameMutationDocument Instance { get; } = new StartGameMutationDocument();
+        public global::StrawberryShake.OperationKind Kind => global::StrawberryShake.OperationKind.Mutation;
+        public global::System.ReadOnlySpan<global::System.Byte> Body => new global::System.Byte[]{0x6d, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x53, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x28, 0x24, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x43, 0x61, 0x72, 0x64, 0x47, 0x75, 0x69, 0x64, 0x73, 0x3a, 0x20, 0x5b, 0x55, 0x55, 0x49, 0x44, 0x21, 0x5d, 0x21, 0x29, 0x20, 0x7b, 0x20, 0x73, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x28, 0x73, 0x74, 0x61, 0x72, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x49, 0x6e, 0x70, 0x75, 0x74, 0x3a, 0x20, 0x7b, 0x20, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x43, 0x61, 0x72, 0x64, 0x49, 0x64, 0x73, 0x3a, 0x20, 0x24, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x43, 0x61, 0x72, 0x64, 0x47, 0x75, 0x69, 0x64, 0x73, 0x20, 0x7d, 0x29, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x20, 0x7d, 0x20, 0x7d};
+        public global::StrawberryShake.DocumentHash Hash { get; } = new global::StrawberryShake.DocumentHash("md5Hash", "e13e8a714d44ea44a47d79e9e3cb89ae");
+        public override global::System.String ToString()
+        {
+#if NETSTANDARD2_0
+        return global::System.Text.Encoding.UTF8.GetString(Body.ToArray());
+#else
+            return global::System.Text.Encoding.UTF8.GetString(Body);
+#endif
+        }
+    }
+
+    /// <summary>
+    /// Represents the operation service of the StartGame GraphQL operation
+    /// <code>
+    /// mutation StartGame($protoCardGuids: [UUID!]!) {
+    ///   startGame(startGameInput: { protoCardIds: $protoCardGuids }) {
+    ///     __typename
+    ///     message
+    ///   }
+    /// }
+    /// </code>
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGameMutation : global::Archetype.Client.IStartGameMutation
+    {
+        private readonly global::StrawberryShake.IOperationExecutor<IStartGameResult> _operationExecutor;
+        private readonly global::StrawberryShake.Serialization.IInputValueFormatter _uUIDFormatter;
+        public StartGameMutation(global::StrawberryShake.IOperationExecutor<IStartGameResult> operationExecutor, global::StrawberryShake.Serialization.ISerializerResolver serializerResolver)
+        {
+            _operationExecutor = operationExecutor ?? throw new global::System.ArgumentNullException(nameof(operationExecutor));
+            _uUIDFormatter = serializerResolver.GetInputValueFormatter("UUID");
+        }
+
+        global::System.Type global::StrawberryShake.IOperationRequestFactory.ResultType => typeof(IStartGameResult);
+        public async global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IStartGameResult>> ExecuteAsync(global::System.Collections.Generic.IReadOnlyList<global::System.Guid> protoCardGuids, global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            var request = CreateRequest(protoCardGuids);
+            return await _operationExecutor.ExecuteAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        public global::System.IObservable<global::StrawberryShake.IOperationResult<IStartGameResult>> Watch(global::System.Collections.Generic.IReadOnlyList<global::System.Guid> protoCardGuids, global::StrawberryShake.ExecutionStrategy? strategy = null)
+        {
+            var request = CreateRequest(protoCardGuids);
+            return _operationExecutor.Watch(request, strategy);
+        }
+
+        private global::StrawberryShake.OperationRequest CreateRequest(global::System.Collections.Generic.IReadOnlyList<global::System.Guid> protoCardGuids)
+        {
+            var variables = new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Object?>();
+            variables.Add("protoCardGuids", FormatProtoCardGuids(protoCardGuids));
+            return CreateRequest(variables);
+        }
+
+        private global::StrawberryShake.OperationRequest CreateRequest(global::System.Collections.Generic.IReadOnlyDictionary<global::System.String, global::System.Object?>? variables)
+        {
+            return new global::StrawberryShake.OperationRequest(id: StartGameMutationDocument.Instance.Hash.Value, name: "StartGame", document: StartGameMutationDocument.Instance, strategy: global::StrawberryShake.RequestStrategy.Default, variables: variables);
+        }
+
+        private global::System.Object? FormatProtoCardGuids(global::System.Collections.Generic.IReadOnlyList<global::System.Guid> value)
+        {
+            var value_list = new global::System.Collections.Generic.List<global::System.Object?>();
+            foreach (var value_elm in value)
+            {
+                value_list.Add(_uUIDFormatter.Format(value_elm));
+            }
+
+            return value_list;
+        }
+
+        global::StrawberryShake.OperationRequest global::StrawberryShake.IOperationRequestFactory.Create(global::System.Collections.Generic.IReadOnlyDictionary<global::System.String, global::System.Object?>? variables)
+        {
+            return CreateRequest(variables!);
+        }
+    }
+
+    /// <summary>
+    /// Represents the operation service of the StartGame GraphQL operation
+    /// <code>
+    /// mutation StartGame($protoCardGuids: [UUID!]!) {
+    ///   startGame(startGameInput: { protoCardIds: $protoCardGuids }) {
+    ///     __typename
+    ///     message
+    ///   }
+    /// }
+    /// </code>
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IStartGameMutation : global::StrawberryShake.IOperationRequestFactory
+    {
+        global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IStartGameResult>> ExecuteAsync(global::System.Collections.Generic.IReadOnlyList<global::System.Guid> protoCardGuids, global::System.Threading.CancellationToken cancellationToken = default);
+        global::System.IObservable<global::StrawberryShake.IOperationResult<IStartGameResult>> Watch(global::System.Collections.Generic.IReadOnlyList<global::System.Guid> protoCardGuids, global::StrawberryShake.ExecutionStrategy? strategy = null);
     }
 
     /// <summary>
@@ -6160,6 +7525,105 @@ namespace Archetype.Client
     }
 
     /// <summary>
+    /// Represents the operation service of the EndTurn GraphQL operation
+    /// <code>
+    /// mutation EndTurn {
+    ///   endTurn {
+    ///     __typename
+    ///     message
+    ///   }
+    /// }
+    /// </code>
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnMutationDocument : global::StrawberryShake.IDocument
+    {
+        private EndTurnMutationDocument()
+        {
+        }
+
+        public static EndTurnMutationDocument Instance { get; } = new EndTurnMutationDocument();
+        public global::StrawberryShake.OperationKind Kind => global::StrawberryShake.OperationKind.Mutation;
+        public global::System.ReadOnlySpan<global::System.Byte> Body => new global::System.Byte[]{0x6d, 0x75, 0x74, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x45, 0x6e, 0x64, 0x54, 0x75, 0x72, 0x6e, 0x20, 0x7b, 0x20, 0x65, 0x6e, 0x64, 0x54, 0x75, 0x72, 0x6e, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x20, 0x7d, 0x20, 0x7d};
+        public global::StrawberryShake.DocumentHash Hash { get; } = new global::StrawberryShake.DocumentHash("md5Hash", "96e961707ed9000ff18cd26ab807ee37");
+        public override global::System.String ToString()
+        {
+#if NETSTANDARD2_0
+        return global::System.Text.Encoding.UTF8.GetString(Body.ToArray());
+#else
+            return global::System.Text.Encoding.UTF8.GetString(Body);
+#endif
+        }
+    }
+
+    /// <summary>
+    /// Represents the operation service of the EndTurn GraphQL operation
+    /// <code>
+    /// mutation EndTurn {
+    ///   endTurn {
+    ///     __typename
+    ///     message
+    ///   }
+    /// }
+    /// </code>
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnMutation : global::Archetype.Client.IEndTurnMutation
+    {
+        private readonly global::StrawberryShake.IOperationExecutor<IEndTurnResult> _operationExecutor;
+        public EndTurnMutation(global::StrawberryShake.IOperationExecutor<IEndTurnResult> operationExecutor)
+        {
+            _operationExecutor = operationExecutor ?? throw new global::System.ArgumentNullException(nameof(operationExecutor));
+        }
+
+        global::System.Type global::StrawberryShake.IOperationRequestFactory.ResultType => typeof(IEndTurnResult);
+        public async global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IEndTurnResult>> ExecuteAsync(global::System.Threading.CancellationToken cancellationToken = default)
+        {
+            var request = CreateRequest();
+            return await _operationExecutor.ExecuteAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+
+        public global::System.IObservable<global::StrawberryShake.IOperationResult<IEndTurnResult>> Watch(global::StrawberryShake.ExecutionStrategy? strategy = null)
+        {
+            var request = CreateRequest();
+            return _operationExecutor.Watch(request, strategy);
+        }
+
+        private global::StrawberryShake.OperationRequest CreateRequest()
+        {
+            return CreateRequest(null);
+        }
+
+        private global::StrawberryShake.OperationRequest CreateRequest(global::System.Collections.Generic.IReadOnlyDictionary<global::System.String, global::System.Object?>? variables)
+        {
+            return new global::StrawberryShake.OperationRequest(id: EndTurnMutationDocument.Instance.Hash.Value, name: "EndTurn", document: EndTurnMutationDocument.Instance, strategy: global::StrawberryShake.RequestStrategy.Default);
+        }
+
+        global::StrawberryShake.OperationRequest global::StrawberryShake.IOperationRequestFactory.Create(global::System.Collections.Generic.IReadOnlyDictionary<global::System.String, global::System.Object?>? variables)
+        {
+            return CreateRequest();
+        }
+    }
+
+    /// <summary>
+    /// Represents the operation service of the EndTurn GraphQL operation
+    /// <code>
+    /// mutation EndTurn {
+    ///   endTurn {
+    ///     __typename
+    ///     message
+    ///   }
+    /// }
+    /// </code>
+    /// </summary>
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public interface IEndTurnMutation : global::StrawberryShake.IOperationRequestFactory
+    {
+        global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IEndTurnResult>> ExecuteAsync(global::System.Threading.CancellationToken cancellationToken = default);
+        global::System.IObservable<global::StrawberryShake.IOperationResult<IEndTurnResult>> Watch(global::StrawberryShake.ExecutionStrategy? strategy = null);
+    }
+
+    /// <summary>
     /// Represents the operation service of the GetGameState GraphQL operation
     /// <code>
     /// query GetGameState {
@@ -6170,7 +7634,6 @@ namespace Archetype.Client
     /// }
     /// 
     /// fragment GameState on IGameState {
-    ///   isPayerTurn
     ///   player {
     ///     __typename
     ///     ... Player
@@ -6183,6 +7646,10 @@ namespace Archetype.Client
     /// 
     /// fragment Player on IPlayer {
     ///   ... Atom
+    ///   name
+    ///   maxHandSize
+    ///   minDeckSize
+    ///   resources
     ///   deck {
     ///     __typename
     ///     ... Deck
@@ -6195,7 +7662,6 @@ namespace Archetype.Client
     ///     __typename
     ///     ... Discard
     ///   }
-    ///   resources
     /// }
     /// 
     /// fragment Atom on IGameAtom {
@@ -6224,7 +7690,7 @@ namespace Archetype.Client
     ///   cost
     ///   metaData {
     ///     __typename
-    ///     ... MetaData
+    ///     ... CardMetaData
     ///   }
     ///   targets {
     ///     __typename
@@ -6236,7 +7702,7 @@ namespace Archetype.Client
     ///   }
     /// }
     /// 
-    /// fragment MetaData on CardMetaData {
+    /// fragment CardMetaData on CardMetaData {
     ///   name
     ///   setName
     ///   rarity
@@ -6268,11 +7734,37 @@ namespace Archetype.Client
     /// }
     /// 
     /// fragment MapNode on IMapNode {
-    ///   ... Atom
+    ///   ... UnitZone
     ///   neighbours {
     ///     __typename
-    ///     ... Atom
+    ///     guid
     ///   }
+    /// }
+    /// 
+    /// fragment UnitZone on IZoneOfIUnit {
+    ///   ... Atom
+    ///   contents {
+    ///     __typename
+    ///     ... Unit
+    ///   }
+    /// }
+    /// 
+    /// fragment Unit on IUnit {
+    ///   ... Atom
+    ///   protoGuid
+    ///   deck {
+    ///     __typename
+    ///     ... Deck
+    ///   }
+    ///   metaData {
+    ///     __typename
+    ///     ... UnitMetaData
+    ///   }
+    /// }
+    /// 
+    /// fragment UnitMetaData on UnitMetaData {
+    ///   name
+    ///   imageUri
     /// }
     /// </code>
     /// </summary>
@@ -6285,8 +7777,8 @@ namespace Archetype.Client
 
         public static GetGameStateQueryDocument Instance { get; } = new GetGameStateQueryDocument();
         public global::StrawberryShake.OperationKind Kind => global::StrawberryShake.OperationKind.Query;
-        public global::System.ReadOnlySpan<global::System.Byte> Body => new global::System.Byte[]{0x71, 0x75, 0x65, 0x72, 0x79, 0x20, 0x47, 0x65, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7b, 0x20, 0x67, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7b, 0x20, 0x69, 0x73, 0x50, 0x61, 0x79, 0x65, 0x72, 0x54, 0x75, 0x72, 0x6e, 0x20, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x7d, 0x20, 0x6d, 0x61, 0x70, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x4d, 0x61, 0x70, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x64, 0x65, 0x63, 0x6b, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x7d, 0x20, 0x68, 0x61, 0x6e, 0x64, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x48, 0x61, 0x6e, 0x64, 0x20, 0x7d, 0x20, 0x64, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x50, 0x69, 0x6c, 0x65, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x44, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x20, 0x7d, 0x20, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x47, 0x61, 0x6d, 0x65, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x7b, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x5a, 0x6f, 0x6e, 0x65, 0x4f, 0x66, 0x49, 0x43, 0x61, 0x72, 0x64, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x43, 0x61, 0x72, 0x64, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x47, 0x75, 0x69, 0x64, 0x20, 0x63, 0x6f, 0x73, 0x74, 0x20, 0x6d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7d, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x73, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x20, 0x72, 0x61, 0x72, 0x69, 0x74, 0x79, 0x20, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x20, 0x69, 0x6d, 0x61, 0x67, 0x65, 0x55, 0x72, 0x69, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x79, 0x70, 0x65, 0x49, 0x64, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x48, 0x61, 0x6e, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x48, 0x61, 0x6e, 0x64, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x44, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x44, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x50, 0x69, 0x6c, 0x65, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x4d, 0x61, 0x70, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x4d, 0x61, 0x70, 0x20, 0x7b, 0x20, 0x6e, 0x6f, 0x64, 0x65, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x4d, 0x61, 0x70, 0x4e, 0x6f, 0x64, 0x65, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x4d, 0x61, 0x70, 0x4e, 0x6f, 0x64, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x4d, 0x61, 0x70, 0x4e, 0x6f, 0x64, 0x65, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x6e, 0x65, 0x69, 0x67, 0x68, 0x62, 0x6f, 0x75, 0x72, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x7d, 0x20, 0x7d};
-        public global::StrawberryShake.DocumentHash Hash { get; } = new global::StrawberryShake.DocumentHash("md5Hash", "4d387dd3fe72d9a8e9014a4c3a6b33c3");
+        public global::System.ReadOnlySpan<global::System.Byte> Body => new global::System.Byte[]{0x71, 0x75, 0x65, 0x72, 0x79, 0x20, 0x47, 0x65, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7b, 0x20, 0x67, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x20, 0x7b, 0x20, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x7d, 0x20, 0x6d, 0x61, 0x70, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x4d, 0x61, 0x70, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x6d, 0x61, 0x78, 0x48, 0x61, 0x6e, 0x64, 0x53, 0x69, 0x7a, 0x65, 0x20, 0x6d, 0x69, 0x6e, 0x44, 0x65, 0x63, 0x6b, 0x53, 0x69, 0x7a, 0x65, 0x20, 0x72, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x73, 0x20, 0x64, 0x65, 0x63, 0x6b, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x7d, 0x20, 0x68, 0x61, 0x6e, 0x64, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x48, 0x61, 0x6e, 0x64, 0x20, 0x7d, 0x20, 0x64, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x50, 0x69, 0x6c, 0x65, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x44, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x47, 0x61, 0x6d, 0x65, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x7b, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x5a, 0x6f, 0x6e, 0x65, 0x4f, 0x66, 0x49, 0x43, 0x61, 0x72, 0x64, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x43, 0x61, 0x72, 0x64, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x47, 0x75, 0x69, 0x64, 0x20, 0x63, 0x6f, 0x73, 0x74, 0x20, 0x6d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7d, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x73, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x20, 0x72, 0x61, 0x72, 0x69, 0x74, 0x79, 0x20, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x20, 0x69, 0x6d, 0x61, 0x67, 0x65, 0x55, 0x72, 0x69, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x79, 0x70, 0x65, 0x49, 0x64, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x48, 0x61, 0x6e, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x48, 0x61, 0x6e, 0x64, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x44, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x44, 0x69, 0x73, 0x63, 0x61, 0x72, 0x64, 0x50, 0x69, 0x6c, 0x65, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x4d, 0x61, 0x70, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x4d, 0x61, 0x70, 0x20, 0x7b, 0x20, 0x6e, 0x6f, 0x64, 0x65, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x4d, 0x61, 0x70, 0x4e, 0x6f, 0x64, 0x65, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x4d, 0x61, 0x70, 0x4e, 0x6f, 0x64, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x4d, 0x61, 0x70, 0x4e, 0x6f, 0x64, 0x65, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x6e, 0x65, 0x69, 0x67, 0x68, 0x62, 0x6f, 0x75, 0x72, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x5a, 0x6f, 0x6e, 0x65, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x5a, 0x6f, 0x6e, 0x65, 0x4f, 0x66, 0x49, 0x55, 0x6e, 0x69, 0x74, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x55, 0x6e, 0x69, 0x74, 0x20, 0x7b, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x41, 0x74, 0x6f, 0x6d, 0x20, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x47, 0x75, 0x69, 0x64, 0x20, 0x64, 0x65, 0x63, 0x6b, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x44, 0x65, 0x63, 0x6b, 0x20, 0x7d, 0x20, 0x6d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x55, 0x6e, 0x69, 0x74, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x69, 0x6d, 0x61, 0x67, 0x65, 0x55, 0x72, 0x69, 0x20, 0x7d};
+        public global::StrawberryShake.DocumentHash Hash { get; } = new global::StrawberryShake.DocumentHash("md5Hash", "6fa3ba57cdcae831ca222a84d0485eb8");
         public override global::System.String ToString()
         {
 #if NETSTANDARD2_0
@@ -6308,7 +7800,6 @@ namespace Archetype.Client
     /// }
     /// 
     /// fragment GameState on IGameState {
-    ///   isPayerTurn
     ///   player {
     ///     __typename
     ///     ... Player
@@ -6321,6 +7812,10 @@ namespace Archetype.Client
     /// 
     /// fragment Player on IPlayer {
     ///   ... Atom
+    ///   name
+    ///   maxHandSize
+    ///   minDeckSize
+    ///   resources
     ///   deck {
     ///     __typename
     ///     ... Deck
@@ -6333,7 +7828,6 @@ namespace Archetype.Client
     ///     __typename
     ///     ... Discard
     ///   }
-    ///   resources
     /// }
     /// 
     /// fragment Atom on IGameAtom {
@@ -6362,7 +7856,7 @@ namespace Archetype.Client
     ///   cost
     ///   metaData {
     ///     __typename
-    ///     ... MetaData
+    ///     ... CardMetaData
     ///   }
     ///   targets {
     ///     __typename
@@ -6374,7 +7868,7 @@ namespace Archetype.Client
     ///   }
     /// }
     /// 
-    /// fragment MetaData on CardMetaData {
+    /// fragment CardMetaData on CardMetaData {
     ///   name
     ///   setName
     ///   rarity
@@ -6406,11 +7900,37 @@ namespace Archetype.Client
     /// }
     /// 
     /// fragment MapNode on IMapNode {
-    ///   ... Atom
+    ///   ... UnitZone
     ///   neighbours {
     ///     __typename
-    ///     ... Atom
+    ///     guid
     ///   }
+    /// }
+    /// 
+    /// fragment UnitZone on IZoneOfIUnit {
+    ///   ... Atom
+    ///   contents {
+    ///     __typename
+    ///     ... Unit
+    ///   }
+    /// }
+    /// 
+    /// fragment Unit on IUnit {
+    ///   ... Atom
+    ///   protoGuid
+    ///   deck {
+    ///     __typename
+    ///     ... Deck
+    ///   }
+    ///   metaData {
+    ///     __typename
+    ///     ... UnitMetaData
+    ///   }
+    /// }
+    /// 
+    /// fragment UnitMetaData on UnitMetaData {
+    ///   name
+    ///   imageUri
     /// }
     /// </code>
     /// </summary>
@@ -6463,7 +7983,6 @@ namespace Archetype.Client
     /// }
     /// 
     /// fragment GameState on IGameState {
-    ///   isPayerTurn
     ///   player {
     ///     __typename
     ///     ... Player
@@ -6476,6 +7995,10 @@ namespace Archetype.Client
     /// 
     /// fragment Player on IPlayer {
     ///   ... Atom
+    ///   name
+    ///   maxHandSize
+    ///   minDeckSize
+    ///   resources
     ///   deck {
     ///     __typename
     ///     ... Deck
@@ -6488,7 +8011,6 @@ namespace Archetype.Client
     ///     __typename
     ///     ... Discard
     ///   }
-    ///   resources
     /// }
     /// 
     /// fragment Atom on IGameAtom {
@@ -6517,7 +8039,7 @@ namespace Archetype.Client
     ///   cost
     ///   metaData {
     ///     __typename
-    ///     ... MetaData
+    ///     ... CardMetaData
     ///   }
     ///   targets {
     ///     __typename
@@ -6529,7 +8051,7 @@ namespace Archetype.Client
     ///   }
     /// }
     /// 
-    /// fragment MetaData on CardMetaData {
+    /// fragment CardMetaData on CardMetaData {
     ///   name
     ///   setName
     ///   rarity
@@ -6561,11 +8083,37 @@ namespace Archetype.Client
     /// }
     /// 
     /// fragment MapNode on IMapNode {
-    ///   ... Atom
+    ///   ... UnitZone
     ///   neighbours {
     ///     __typename
-    ///     ... Atom
+    ///     guid
     ///   }
+    /// }
+    /// 
+    /// fragment UnitZone on IZoneOfIUnit {
+    ///   ... Atom
+    ///   contents {
+    ///     __typename
+    ///     ... Unit
+    ///   }
+    /// }
+    /// 
+    /// fragment Unit on IUnit {
+    ///   ... Atom
+    ///   protoGuid
+    ///   deck {
+    ///     __typename
+    ///     ... Deck
+    ///   }
+    ///   metaData {
+    ///     __typename
+    ///     ... UnitMetaData
+    ///   }
+    /// }
+    /// 
+    /// fragment UnitMetaData on UnitMetaData {
+    ///   name
+    ///   imageUri
     /// }
     /// </code>
     /// </summary>
@@ -6602,7 +8150,7 @@ namespace Archetype.Client
     ///   cost
     ///   metaData {
     ///     __typename
-    ///     ... MetaData
+    ///     ... CardMetaData
     ///   }
     ///   targets {
     ///     __typename
@@ -6614,7 +8162,7 @@ namespace Archetype.Client
     ///   }
     /// }
     /// 
-    /// fragment MetaData on CardMetaData {
+    /// fragment CardMetaData on CardMetaData {
     ///   name
     ///   setName
     ///   rarity
@@ -6640,8 +8188,8 @@ namespace Archetype.Client
 
         public static GetCardPoolQueryDocument Instance { get; } = new GetCardPoolQueryDocument();
         public global::StrawberryShake.OperationKind Kind => global::StrawberryShake.OperationKind.Query;
-        public global::System.ReadOnlySpan<global::System.Byte> Body => new global::System.Byte[]{0x71, 0x75, 0x65, 0x72, 0x79, 0x20, 0x47, 0x65, 0x74, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7b, 0x20, 0x63, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7b, 0x20, 0x73, 0x65, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x63, 0x61, 0x72, 0x64, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x43, 0x61, 0x72, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x63, 0x6f, 0x73, 0x74, 0x20, 0x6d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7d, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x73, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x20, 0x72, 0x61, 0x72, 0x69, 0x74, 0x79, 0x20, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x20, 0x69, 0x6d, 0x61, 0x67, 0x65, 0x55, 0x72, 0x69, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x79, 0x70, 0x65, 0x49, 0x64, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x20, 0x7d};
-        public global::StrawberryShake.DocumentHash Hash { get; } = new global::StrawberryShake.DocumentHash("md5Hash", "b5303811e8f565a3fd6bcd4acb5d11ae");
+        public global::System.ReadOnlySpan<global::System.Byte> Body => new global::System.Byte[]{0x71, 0x75, 0x65, 0x72, 0x79, 0x20, 0x47, 0x65, 0x74, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7b, 0x20, 0x63, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x43, 0x61, 0x72, 0x64, 0x50, 0x6f, 0x6f, 0x6c, 0x20, 0x7b, 0x20, 0x73, 0x65, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x63, 0x61, 0x72, 0x64, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x43, 0x61, 0x72, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x67, 0x75, 0x69, 0x64, 0x20, 0x63, 0x6f, 0x73, 0x74, 0x20, 0x6d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7d, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7d, 0x20, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x73, 0x20, 0x7b, 0x20, 0x5f, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x2e, 0x2e, 0x2e, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7d, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x6f, 0x6e, 0x20, 0x43, 0x61, 0x72, 0x64, 0x4d, 0x65, 0x74, 0x61, 0x44, 0x61, 0x74, 0x61, 0x20, 0x7b, 0x20, 0x6e, 0x61, 0x6d, 0x65, 0x20, 0x73, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x20, 0x72, 0x61, 0x72, 0x69, 0x74, 0x79, 0x20, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x20, 0x69, 0x6d, 0x61, 0x67, 0x65, 0x55, 0x72, 0x69, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x54, 0x61, 0x72, 0x67, 0x65, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x79, 0x70, 0x65, 0x49, 0x64, 0x20, 0x7d, 0x20, 0x66, 0x72, 0x61, 0x67, 0x6d, 0x65, 0x6e, 0x74, 0x20, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x6f, 0x6e, 0x20, 0x49, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x20, 0x7b, 0x20, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x20, 0x7d};
+        public global::StrawberryShake.DocumentHash Hash { get; } = new global::StrawberryShake.DocumentHash("md5Hash", "625189d14e46442403ee44277182da36");
         public override global::System.String ToString()
         {
 #if NETSTANDARD2_0
@@ -6678,7 +8226,7 @@ namespace Archetype.Client
     ///   cost
     ///   metaData {
     ///     __typename
-    ///     ... MetaData
+    ///     ... CardMetaData
     ///   }
     ///   targets {
     ///     __typename
@@ -6690,7 +8238,7 @@ namespace Archetype.Client
     ///   }
     /// }
     /// 
-    /// fragment MetaData on CardMetaData {
+    /// fragment CardMetaData on CardMetaData {
     ///   name
     ///   setName
     ///   rarity
@@ -6771,7 +8319,7 @@ namespace Archetype.Client
     ///   cost
     ///   metaData {
     ///     __typename
-    ///     ... MetaData
+    ///     ... CardMetaData
     ///   }
     ///   targets {
     ///     __typename
@@ -6783,7 +8331,7 @@ namespace Archetype.Client
     ///   }
     /// }
     /// 
-    /// fragment MetaData on CardMetaData {
+    /// fragment CardMetaData on CardMetaData {
     ///   name
     ///   setName
     ///   rarity
@@ -6813,18 +8361,24 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class ArchetypeGraphQLClient : global::Archetype.Client.IArchetypeGraphQLClient
     {
+        private readonly global::Archetype.Client.IStartGameMutation _startGame;
         private readonly global::Archetype.Client.IPlayCardMutation _playCard;
+        private readonly global::Archetype.Client.IEndTurnMutation _endTurn;
         private readonly global::Archetype.Client.IGetGameStateQuery _getGameState;
         private readonly global::Archetype.Client.IGetCardPoolQuery _getCardPool;
-        public ArchetypeGraphQLClient(global::Archetype.Client.IPlayCardMutation playCard, global::Archetype.Client.IGetGameStateQuery getGameState, global::Archetype.Client.IGetCardPoolQuery getCardPool)
+        public ArchetypeGraphQLClient(global::Archetype.Client.IStartGameMutation startGame, global::Archetype.Client.IPlayCardMutation playCard, global::Archetype.Client.IEndTurnMutation endTurn, global::Archetype.Client.IGetGameStateQuery getGameState, global::Archetype.Client.IGetCardPoolQuery getCardPool)
         {
+            _startGame = startGame ?? throw new global::System.ArgumentNullException(nameof(startGame));
             _playCard = playCard ?? throw new global::System.ArgumentNullException(nameof(playCard));
+            _endTurn = endTurn ?? throw new global::System.ArgumentNullException(nameof(endTurn));
             _getGameState = getGameState ?? throw new global::System.ArgumentNullException(nameof(getGameState));
             _getCardPool = getCardPool ?? throw new global::System.ArgumentNullException(nameof(getCardPool));
         }
 
         public static global::System.String ClientName => "ArchetypeGraphQLClient";
+        public global::Archetype.Client.IStartGameMutation StartGame => _startGame;
         public global::Archetype.Client.IPlayCardMutation PlayCard => _playCard;
+        public global::Archetype.Client.IEndTurnMutation EndTurn => _endTurn;
         public global::Archetype.Client.IGetGameStateQuery GetGameState => _getGameState;
         public global::Archetype.Client.IGetCardPoolQuery GetCardPool => _getCardPool;
     }
@@ -6835,7 +8389,11 @@ namespace Archetype.Client
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public interface IArchetypeGraphQLClient
     {
+        global::Archetype.Client.IStartGameMutation StartGame { get; }
+
         global::Archetype.Client.IPlayCardMutation PlayCard { get; }
+
+        global::Archetype.Client.IEndTurnMutation EndTurn { get; }
 
         global::Archetype.Client.IGetGameStateQuery GetGameState { get; }
 
@@ -6845,6 +8403,74 @@ namespace Archetype.Client
 
 namespace Archetype.Client.State
 {
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGameResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.StartGameResult>
+    {
+        private readonly global::StrawberryShake.IEntityStore _entityStore;
+        public StartGameResultFactory(global::StrawberryShake.IEntityStore entityStore)
+        {
+            _entityStore = entityStore ?? throw new global::System.ArgumentNullException(nameof(entityStore));
+        }
+
+        global::System.Type global::StrawberryShake.IOperationResultDataFactory.ResultType => typeof(global::Archetype.Client.IStartGameResult);
+        public StartGameResult Create(global::StrawberryShake.IOperationResultDataInfo dataInfo, global::StrawberryShake.IEntityStoreSnapshot? snapshot = null)
+        {
+            if (snapshot is null)
+            {
+                snapshot = _entityStore.CurrentSnapshot;
+            }
+
+            if (dataInfo is StartGameResultInfo info)
+            {
+                return new StartGameResult(MapNonNullableIStartGame_StartGame(info.StartGame, snapshot));
+            }
+
+            throw new global::System.ArgumentException("StartGameResultInfo expected.");
+        }
+
+        private global::Archetype.Client.IStartGame_StartGame MapNonNullableIStartGame_StartGame(global::Archetype.Client.State.StartGamePayloadData data, global::StrawberryShake.IEntityStoreSnapshot snapshot)
+        {
+            IStartGame_StartGame returnValue = default !;
+            if (data.__typename.Equals("StartGamePayload", global::System.StringComparison.Ordinal))
+            {
+                returnValue = new StartGame_StartGame_StartGamePayload(data.Message ?? throw new global::System.ArgumentNullException());
+            }
+            else
+            {
+                throw new global::System.NotSupportedException();
+            }
+
+            return returnValue;
+        }
+
+        global::System.Object global::StrawberryShake.IOperationResultDataFactory.Create(global::StrawberryShake.IOperationResultDataInfo dataInfo, global::StrawberryShake.IEntityStoreSnapshot? snapshot)
+        {
+            return Create(dataInfo, snapshot);
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGameResultInfo : global::StrawberryShake.IOperationResultDataInfo
+    {
+        private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
+        private readonly global::System.UInt64 _version;
+        public StartGameResultInfo(global::Archetype.Client.State.StartGamePayloadData startGame, global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> entityIds, global::System.UInt64 version)
+        {
+            StartGame = startGame;
+            _entityIds = entityIds ?? throw new global::System.ArgumentNullException(nameof(entityIds));
+            _version = version;
+        }
+
+        public global::Archetype.Client.State.StartGamePayloadData StartGame { get; }
+
+        public global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> EntityIds => _entityIds;
+        public global::System.UInt64 Version => _version;
+        public global::StrawberryShake.IOperationResultDataInfo WithVersion(global::System.UInt64 version)
+        {
+            return new StartGameResultInfo(StartGame, _entityIds, version);
+        }
+    }
+
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class PlayCardResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.PlayCardResult>
     {
@@ -6914,6 +8540,74 @@ namespace Archetype.Client.State
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.EndTurnResult>
+    {
+        private readonly global::StrawberryShake.IEntityStore _entityStore;
+        public EndTurnResultFactory(global::StrawberryShake.IEntityStore entityStore)
+        {
+            _entityStore = entityStore ?? throw new global::System.ArgumentNullException(nameof(entityStore));
+        }
+
+        global::System.Type global::StrawberryShake.IOperationResultDataFactory.ResultType => typeof(global::Archetype.Client.IEndTurnResult);
+        public EndTurnResult Create(global::StrawberryShake.IOperationResultDataInfo dataInfo, global::StrawberryShake.IEntityStoreSnapshot? snapshot = null)
+        {
+            if (snapshot is null)
+            {
+                snapshot = _entityStore.CurrentSnapshot;
+            }
+
+            if (dataInfo is EndTurnResultInfo info)
+            {
+                return new EndTurnResult(MapNonNullableIEndTurn_EndTurn(info.EndTurn, snapshot));
+            }
+
+            throw new global::System.ArgumentException("EndTurnResultInfo expected.");
+        }
+
+        private global::Archetype.Client.IEndTurn_EndTurn MapNonNullableIEndTurn_EndTurn(global::Archetype.Client.State.EndTurnPayloadData data, global::StrawberryShake.IEntityStoreSnapshot snapshot)
+        {
+            IEndTurn_EndTurn returnValue = default !;
+            if (data.__typename.Equals("EndTurnPayload", global::System.StringComparison.Ordinal))
+            {
+                returnValue = new EndTurn_EndTurn_EndTurnPayload(data.Message ?? throw new global::System.ArgumentNullException());
+            }
+            else
+            {
+                throw new global::System.NotSupportedException();
+            }
+
+            return returnValue;
+        }
+
+        global::System.Object global::StrawberryShake.IOperationResultDataFactory.Create(global::StrawberryShake.IOperationResultDataInfo dataInfo, global::StrawberryShake.IEntityStoreSnapshot? snapshot)
+        {
+            return Create(dataInfo, snapshot);
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnResultInfo : global::StrawberryShake.IOperationResultDataInfo
+    {
+        private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
+        private readonly global::System.UInt64 _version;
+        public EndTurnResultInfo(global::Archetype.Client.State.EndTurnPayloadData endTurn, global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> entityIds, global::System.UInt64 version)
+        {
+            EndTurn = endTurn;
+            _entityIds = entityIds ?? throw new global::System.ArgumentNullException(nameof(entityIds));
+            _version = version;
+        }
+
+        public global::Archetype.Client.State.EndTurnPayloadData EndTurn { get; }
+
+        public global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> EntityIds => _entityIds;
+        public global::System.UInt64 Version => _version;
+        public global::StrawberryShake.IOperationResultDataInfo WithVersion(global::System.UInt64 version)
+        {
+            return new EndTurnResultInfo(EndTurn, _entityIds, version);
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameStateResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.GetGameStateResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6943,12 +8637,7 @@ namespace Archetype.Client.State
             IGetGameState_GameState? returnValue;
             if (data is global::Archetype.Client.State.GameStateData gameState)
             {
-                if (!gameState.IsPayerTurn.HasValue)
-                {
-                    throw new global::System.ArgumentNullException();
-                }
-
-                returnValue = new global::Archetype.Client.GetGameState_GameState_GameState(gameState.IsPayerTurn!.Value, MapIGetGameState_GameState_Player(gameState.Player, snapshot), MapIGetGameState_GameState_Map(gameState.Map, snapshot));
+                returnValue = new global::Archetype.Client.GetGameState_GameState_GameState(MapIGetGameState_GameState_Player(gameState.Player, snapshot), MapIGetGameState_GameState_Map(gameState.Map, snapshot));
             }
             else
             {
@@ -6973,12 +8662,22 @@ namespace Archetype.Client.State
                     throw new global::System.ArgumentNullException();
                 }
 
+                if (!player.MaxHandSize.HasValue)
+                {
+                    throw new global::System.ArgumentNullException();
+                }
+
+                if (!player.MinDeckSize.HasValue)
+                {
+                    throw new global::System.ArgumentNullException();
+                }
+
                 if (!player.Resources.HasValue)
                 {
                     throw new global::System.ArgumentNullException();
                 }
 
-                returnValue = new global::Archetype.Client.GetGameState_GameState_Player_Player(player.Guid!.Value, MapIGetGameState_GameState_Player_Owner(player.Owner, snapshot), MapIGetGameState_GameState_Player_Deck(player.Deck, snapshot), MapIGetGameState_GameState_Player_Hand(player.Hand, snapshot), MapIGetGameState_GameState_Player_DiscardPile(player.DiscardPile, snapshot), player.Resources!.Value);
+                returnValue = new global::Archetype.Client.GetGameState_GameState_Player_Player(player.Guid!.Value, MapIGetGameState_GameState_Player_Owner(player.Owner, snapshot), player.Name, player.MaxHandSize!.Value, player.MinDeckSize!.Value, player.Resources!.Value, MapIGetGameState_GameState_Player_Deck(player.Deck, snapshot), MapIGetGameState_GameState_Player_Hand(player.Hand, snapshot), MapIGetGameState_GameState_Player_DiscardPile(player.DiscardPile, snapshot));
             }
             else
             {
@@ -7336,7 +9035,98 @@ namespace Archetype.Client.State
                     throw new global::System.ArgumentNullException();
                 }
 
-                returnValue = new global::Archetype.Client.GetGameState_GameState_Map_Nodes_MapNode(mapNode.Guid!.Value, MapIGetGameState_GameState_Player_Owner(mapNode.Owner, snapshot), MapIGetGameState_GameState_Map_Nodes_NeighboursArray(mapNode.Neighbours, snapshot));
+                returnValue = new global::Archetype.Client.GetGameState_GameState_Map_Nodes_MapNode(mapNode.Guid!.Value, MapIGetGameState_GameState_Player_Owner(mapNode.Owner, snapshot), MapIGetGameState_GameState_Map_Nodes_ContentsArray(mapNode.Contents, snapshot), MapIGetGameState_GameState_Map_Nodes_NeighboursArray(mapNode.Neighbours, snapshot));
+            }
+            else
+            {
+                throw new global::System.NotSupportedException();
+            }
+
+            return returnValue;
+        }
+
+        private global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents?>? MapIGetGameState_GameState_Map_Nodes_ContentsArray(global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIUnitData?>? list, global::StrawberryShake.IEntityStoreSnapshot snapshot)
+        {
+            if (list is null)
+            {
+                return null;
+            }
+
+            var iUnits = new global::System.Collections.Generic.List<global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents?>();
+            foreach (global::Archetype.Client.State.IIUnitData? child in list)
+            {
+                iUnits.Add(MapIGetGameState_GameState_Map_Nodes_Contents(child, snapshot));
+            }
+
+            return iUnits;
+        }
+
+        private global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents? MapIGetGameState_GameState_Map_Nodes_Contents(global::Archetype.Client.State.IIUnitData? data, global::StrawberryShake.IEntityStoreSnapshot snapshot)
+        {
+            if (data is null)
+            {
+                return null;
+            }
+
+            IGetGameState_GameState_Map_Nodes_Contents? returnValue;
+            if (data is global::Archetype.Client.State.UnitData unit)
+            {
+                if (!unit.Guid.HasValue)
+                {
+                    throw new global::System.ArgumentNullException();
+                }
+
+                if (!unit.ProtoGuid.HasValue)
+                {
+                    throw new global::System.ArgumentNullException();
+                }
+
+                returnValue = new global::Archetype.Client.GetGameState_GameState_Map_Nodes_Contents_Unit(unit.Guid!.Value, MapIGetGameState_GameState_Player_Owner(unit.Owner, snapshot), unit.ProtoGuid!.Value, MapIGetGameState_GameState_Map_Nodes_Contents_Deck(unit.Deck, snapshot), MapIGetGameState_GameState_Map_Nodes_Contents_MetaData(unit.MetaData, snapshot));
+            }
+            else
+            {
+                throw new global::System.NotSupportedException();
+            }
+
+            return returnValue;
+        }
+
+        private global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_Deck? MapIGetGameState_GameState_Map_Nodes_Contents_Deck(global::Archetype.Client.State.IIDeckData? data, global::StrawberryShake.IEntityStoreSnapshot snapshot)
+        {
+            if (data is null)
+            {
+                return null;
+            }
+
+            IGetGameState_GameState_Map_Nodes_Contents_Deck? returnValue;
+            if (data is global::Archetype.Client.State.DeckData deck)
+            {
+                if (!deck.Guid.HasValue)
+                {
+                    throw new global::System.ArgumentNullException();
+                }
+
+                returnValue = new global::Archetype.Client.GetGameState_GameState_Map_Nodes_Contents_Deck_Deck(deck.Guid!.Value, MapIGetGameState_GameState_Player_Owner(deck.Owner, snapshot), MapIGetGameState_GameState_Player_Deck_ContentsArray(deck.Contents, snapshot));
+            }
+            else
+            {
+                throw new global::System.NotSupportedException();
+            }
+
+            return returnValue;
+        }
+
+        private global::Archetype.Client.IGetGameState_GameState_Map_Nodes_Contents_MetaData? MapIGetGameState_GameState_Map_Nodes_Contents_MetaData(global::Archetype.Client.State.UnitMetaDataData? data, global::StrawberryShake.IEntityStoreSnapshot snapshot)
+        {
+            if (data is null)
+            {
+                return null;
+            }
+
+            IGetGameState_GameState_Map_Nodes_Contents_MetaData returnValue = default !;
+            if (data?.__typename.Equals("UnitMetaData", global::System.StringComparison.Ordinal) ?? false)
+            {
+                returnValue = new GetGameState_GameState_Map_Nodes_Contents_MetaData_UnitMetaData(data.Name, data.ImageUri);
             }
             else
             {
@@ -7377,7 +9167,7 @@ namespace Archetype.Client.State
                     throw new global::System.ArgumentNullException();
                 }
 
-                returnValue = new global::Archetype.Client.GetGameState_GameState_Map_Nodes_Neighbours_MapNode(mapNode.Guid!.Value, MapIGetGameState_GameState_Player_Owner(mapNode.Owner, snapshot));
+                returnValue = new global::Archetype.Client.GetGameState_GameState_Map_Nodes_Neighbours_MapNode(mapNode.Guid!.Value);
             }
             else
             {
@@ -7658,6 +9448,96 @@ namespace Archetype.Client.State
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGameBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IStartGameResult>
+    {
+        private readonly global::StrawberryShake.IEntityStore _entityStore;
+        private readonly global::StrawberryShake.IEntityIdSerializer _idSerializer;
+        private readonly global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IStartGameResult> _resultDataFactory;
+        private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::System.Guid> _uUIDParser;
+        private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::System.String> _stringParser;
+        public StartGameBuilder(global::StrawberryShake.IEntityStore entityStore, global::StrawberryShake.IEntityIdSerializer idSerializer, global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IStartGameResult> resultDataFactory, global::StrawberryShake.Serialization.ISerializerResolver serializerResolver)
+        {
+            _entityStore = entityStore ?? throw new global::System.ArgumentNullException(nameof(entityStore));
+            _idSerializer = idSerializer ?? throw new global::System.ArgumentNullException(nameof(idSerializer));
+            _resultDataFactory = resultDataFactory ?? throw new global::System.ArgumentNullException(nameof(resultDataFactory));
+            _uUIDParser = serializerResolver.GetLeafValueParser<global::System.String, global::System.Guid>("UUID") ?? throw new global::System.ArgumentException("No serializer for type `UUID` found.");
+            _stringParser = serializerResolver.GetLeafValueParser<global::System.String, global::System.String>("String") ?? throw new global::System.ArgumentException("No serializer for type `String` found.");
+        }
+
+        public global::StrawberryShake.IOperationResult<IStartGameResult> Build(global::StrawberryShake.Response<global::System.Text.Json.JsonDocument> response)
+        {
+            (IStartGameResult Result, StartGameResultInfo Info)? data = null;
+            global::System.Collections.Generic.IReadOnlyList<global::StrawberryShake.IClientError>? errors = null;
+            if (response.Exception is null)
+            {
+                try
+                {
+                    if (response.Body != null)
+                    {
+                        if (response.Body.RootElement.TryGetProperty("data", out global::System.Text.Json.JsonElement dataElement) && dataElement.ValueKind == global::System.Text.Json.JsonValueKind.Object)
+                        {
+                            data = BuildData(dataElement);
+                        }
+
+                        if (response.Body.RootElement.TryGetProperty("errors", out global::System.Text.Json.JsonElement errorsElement))
+                        {
+                            errors = global::StrawberryShake.Json.JsonErrorParser.ParseErrors(errorsElement);
+                        }
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    errors = new global::StrawberryShake.IClientError[]{new global::StrawberryShake.ClientError(ex.Message, exception: ex, extensions: new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Object?>{{"body", response.Body?.RootElement.ToString()}})};
+                }
+            }
+            else
+            {
+                errors = new global::StrawberryShake.IClientError[]{new global::StrawberryShake.ClientError(response.Exception.Message, exception: response.Exception, extensions: new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Object?>{{"body", response.Body?.RootElement.ToString()}})};
+            }
+
+            return new global::StrawberryShake.OperationResult<IStartGameResult>(data?.Result, data?.Info, _resultDataFactory, errors);
+        }
+
+        private (IStartGameResult, StartGameResultInfo) BuildData(global::System.Text.Json.JsonElement obj)
+        {
+            var entityIds = new global::System.Collections.Generic.HashSet<global::StrawberryShake.EntityId>();
+            global::StrawberryShake.IEntityStoreSnapshot snapshot = default !;
+            _entityStore.Update(session =>
+            {
+                snapshot = session.CurrentSnapshot;
+            });
+            var resultInfo = new StartGameResultInfo(DeserializeNonNullableIStartGame_StartGame(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "startGame")), entityIds, snapshot.Version);
+            return (_resultDataFactory.Create(resultInfo), resultInfo);
+        }
+
+        private global::Archetype.Client.State.StartGamePayloadData DeserializeNonNullableIStartGame_StartGame(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                throw new global::System.ArgumentNullException();
+            }
+
+            var typename = obj.Value.GetProperty("__typename").GetString();
+            if (typename?.Equals("StartGamePayload", global::System.StringComparison.Ordinal) ?? false)
+            {
+                return new global::Archetype.Client.State.StartGamePayloadData(typename, message: DeserializeNonNullableString(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "message")));
+            }
+
+            throw new global::System.NotSupportedException();
+        }
+
+        private global::System.String DeserializeNonNullableString(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                throw new global::System.ArgumentNullException();
+            }
+
+            return _stringParser.Parse(obj.Value.GetString()!);
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class PlayCardBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IPlayCardResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7748,6 +9628,94 @@ namespace Archetype.Client.State
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IEndTurnResult>
+    {
+        private readonly global::StrawberryShake.IEntityStore _entityStore;
+        private readonly global::StrawberryShake.IEntityIdSerializer _idSerializer;
+        private readonly global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IEndTurnResult> _resultDataFactory;
+        private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::System.String> _stringParser;
+        public EndTurnBuilder(global::StrawberryShake.IEntityStore entityStore, global::StrawberryShake.IEntityIdSerializer idSerializer, global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IEndTurnResult> resultDataFactory, global::StrawberryShake.Serialization.ISerializerResolver serializerResolver)
+        {
+            _entityStore = entityStore ?? throw new global::System.ArgumentNullException(nameof(entityStore));
+            _idSerializer = idSerializer ?? throw new global::System.ArgumentNullException(nameof(idSerializer));
+            _resultDataFactory = resultDataFactory ?? throw new global::System.ArgumentNullException(nameof(resultDataFactory));
+            _stringParser = serializerResolver.GetLeafValueParser<global::System.String, global::System.String>("String") ?? throw new global::System.ArgumentException("No serializer for type `String` found.");
+        }
+
+        public global::StrawberryShake.IOperationResult<IEndTurnResult> Build(global::StrawberryShake.Response<global::System.Text.Json.JsonDocument> response)
+        {
+            (IEndTurnResult Result, EndTurnResultInfo Info)? data = null;
+            global::System.Collections.Generic.IReadOnlyList<global::StrawberryShake.IClientError>? errors = null;
+            if (response.Exception is null)
+            {
+                try
+                {
+                    if (response.Body != null)
+                    {
+                        if (response.Body.RootElement.TryGetProperty("data", out global::System.Text.Json.JsonElement dataElement) && dataElement.ValueKind == global::System.Text.Json.JsonValueKind.Object)
+                        {
+                            data = BuildData(dataElement);
+                        }
+
+                        if (response.Body.RootElement.TryGetProperty("errors", out global::System.Text.Json.JsonElement errorsElement))
+                        {
+                            errors = global::StrawberryShake.Json.JsonErrorParser.ParseErrors(errorsElement);
+                        }
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    errors = new global::StrawberryShake.IClientError[]{new global::StrawberryShake.ClientError(ex.Message, exception: ex, extensions: new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Object?>{{"body", response.Body?.RootElement.ToString()}})};
+                }
+            }
+            else
+            {
+                errors = new global::StrawberryShake.IClientError[]{new global::StrawberryShake.ClientError(response.Exception.Message, exception: response.Exception, extensions: new global::System.Collections.Generic.Dictionary<global::System.String, global::System.Object?>{{"body", response.Body?.RootElement.ToString()}})};
+            }
+
+            return new global::StrawberryShake.OperationResult<IEndTurnResult>(data?.Result, data?.Info, _resultDataFactory, errors);
+        }
+
+        private (IEndTurnResult, EndTurnResultInfo) BuildData(global::System.Text.Json.JsonElement obj)
+        {
+            var entityIds = new global::System.Collections.Generic.HashSet<global::StrawberryShake.EntityId>();
+            global::StrawberryShake.IEntityStoreSnapshot snapshot = default !;
+            _entityStore.Update(session =>
+            {
+                snapshot = session.CurrentSnapshot;
+            });
+            var resultInfo = new EndTurnResultInfo(DeserializeNonNullableIEndTurn_EndTurn(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "endTurn")), entityIds, snapshot.Version);
+            return (_resultDataFactory.Create(resultInfo), resultInfo);
+        }
+
+        private global::Archetype.Client.State.EndTurnPayloadData DeserializeNonNullableIEndTurn_EndTurn(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                throw new global::System.ArgumentNullException();
+            }
+
+            var typename = obj.Value.GetProperty("__typename").GetString();
+            if (typename?.Equals("EndTurnPayload", global::System.StringComparison.Ordinal) ?? false)
+            {
+                return new global::Archetype.Client.State.EndTurnPayloadData(typename, message: DeserializeNonNullableString(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "message")));
+            }
+
+            throw new global::System.NotSupportedException();
+        }
+
+        private global::System.String DeserializeNonNullableString(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                throw new global::System.ArgumentNullException();
+            }
+
+            return _stringParser.Parse(obj.Value.GetString()!);
+        }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GetGameStateBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IGetGameStateResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7755,10 +9723,9 @@ namespace Archetype.Client.State
         private readonly global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IGetGameStateResult> _resultDataFactory;
         private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::Archetype.Client.CardRarity> _cardRarityParser;
         private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::Archetype.Client.CardColor> _cardColorParser;
-        private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.Boolean, global::System.Boolean> _booleanParser;
         private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::System.Guid> _uUIDParser;
-        private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.Int32, global::System.Int32> _intParser;
         private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, global::System.String> _stringParser;
+        private readonly global::StrawberryShake.Serialization.ILeafValueParser<global::System.Int32, global::System.Int32> _intParser;
         public GetGameStateBuilder(global::StrawberryShake.IEntityStore entityStore, global::StrawberryShake.IEntityIdSerializer idSerializer, global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IGetGameStateResult> resultDataFactory, global::StrawberryShake.Serialization.ISerializerResolver serializerResolver)
         {
             _entityStore = entityStore ?? throw new global::System.ArgumentNullException(nameof(entityStore));
@@ -7766,10 +9733,9 @@ namespace Archetype.Client.State
             _resultDataFactory = resultDataFactory ?? throw new global::System.ArgumentNullException(nameof(resultDataFactory));
             _cardRarityParser = serializerResolver.GetLeafValueParser<global::System.String, global::Archetype.Client.CardRarity>("CardRarity") ?? throw new global::System.ArgumentException("No serializer for type `CardRarity` found.");
             _cardColorParser = serializerResolver.GetLeafValueParser<global::System.String, global::Archetype.Client.CardColor>("CardColor") ?? throw new global::System.ArgumentException("No serializer for type `CardColor` found.");
-            _booleanParser = serializerResolver.GetLeafValueParser<global::System.Boolean, global::System.Boolean>("Boolean") ?? throw new global::System.ArgumentException("No serializer for type `Boolean` found.");
             _uUIDParser = serializerResolver.GetLeafValueParser<global::System.String, global::System.Guid>("UUID") ?? throw new global::System.ArgumentException("No serializer for type `UUID` found.");
-            _intParser = serializerResolver.GetLeafValueParser<global::System.Int32, global::System.Int32>("Int") ?? throw new global::System.ArgumentException("No serializer for type `Int` found.");
             _stringParser = serializerResolver.GetLeafValueParser<global::System.String, global::System.String>("String") ?? throw new global::System.ArgumentException("No serializer for type `String` found.");
+            _intParser = serializerResolver.GetLeafValueParser<global::System.Int32, global::System.Int32>("Int") ?? throw new global::System.ArgumentException("No serializer for type `Int` found.");
         }
 
         public global::StrawberryShake.IOperationResult<IGetGameStateResult> Build(global::StrawberryShake.Response<global::System.Text.Json.JsonDocument> response)
@@ -7828,20 +9794,10 @@ namespace Archetype.Client.State
             var typename = obj.Value.GetProperty("__typename").GetString();
             if (typename?.Equals("GameState", global::System.StringComparison.Ordinal) ?? false)
             {
-                return new global::Archetype.Client.State.GameStateData(typename, isPayerTurn: DeserializeNonNullableBoolean(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "isPayerTurn")), player: DeserializeIGetGameState_GameState_Player(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "player")), map: DeserializeIGetGameState_GameState_Map(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "map")));
+                return new global::Archetype.Client.State.GameStateData(typename, player: DeserializeIGetGameState_GameState_Player(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "player")), map: DeserializeIGetGameState_GameState_Map(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "map")));
             }
 
             throw new global::System.NotSupportedException();
-        }
-
-        private global::System.Boolean DeserializeNonNullableBoolean(global::System.Text.Json.JsonElement? obj)
-        {
-            if (!obj.HasValue)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            return _booleanParser.Parse(obj.Value.GetBoolean()!);
         }
 
         private global::Archetype.Client.State.IIPlayerData? DeserializeIGetGameState_GameState_Player(global::System.Text.Json.JsonElement? obj)
@@ -7854,7 +9810,7 @@ namespace Archetype.Client.State
             var typename = obj.Value.GetProperty("__typename").GetString();
             if (typename?.Equals("Player", global::System.StringComparison.Ordinal) ?? false)
             {
-                return new global::Archetype.Client.State.PlayerData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")), deck: DeserializeIGetGameState_GameState_Player_Deck(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "deck")), hand: DeserializeIGetGameState_GameState_Player_Hand(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "hand")), discardPile: DeserializeIGetGameState_GameState_Player_DiscardPile(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "discardPile")), resources: DeserializeNonNullableInt32(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "resources")));
+                return new global::Archetype.Client.State.PlayerData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")), name: DeserializeString(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "name")), maxHandSize: DeserializeNonNullableInt32(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "maxHandSize")), minDeckSize: DeserializeNonNullableInt32(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "minDeckSize")), resources: DeserializeNonNullableInt32(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "resources")), deck: DeserializeIGetGameState_GameState_Player_Deck(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "deck")), hand: DeserializeIGetGameState_GameState_Player_Hand(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "hand")), discardPile: DeserializeIGetGameState_GameState_Player_DiscardPile(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "discardPile")));
             }
 
             throw new global::System.NotSupportedException();
@@ -7916,6 +9872,26 @@ namespace Archetype.Client.State
             throw new global::System.NotSupportedException();
         }
 
+        private global::System.String? DeserializeString(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                return null;
+            }
+
+            return _stringParser.Parse(obj.Value.GetString()!);
+        }
+
+        private global::System.Int32 DeserializeNonNullableInt32(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                throw new global::System.ArgumentNullException();
+            }
+
+            return _intParser.Parse(obj.Value.GetInt32()!);
+        }
+
         private global::Archetype.Client.State.IIDeckData? DeserializeIGetGameState_GameState_Player_Deck(global::System.Text.Json.JsonElement? obj)
         {
             if (!obj.HasValue)
@@ -7964,16 +9940,6 @@ namespace Archetype.Client.State
             throw new global::System.NotSupportedException();
         }
 
-        private global::System.Int32 DeserializeNonNullableInt32(global::System.Text.Json.JsonElement? obj)
-        {
-            if (!obj.HasValue)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            return _intParser.Parse(obj.Value.GetInt32()!);
-        }
-
         private global::Archetype.Client.State.CardMetaDataData? DeserializeIGetGameState_GameState_Player_Deck_Contents_MetaData(global::System.Text.Json.JsonElement? obj)
         {
             if (!obj.HasValue)
@@ -7988,16 +9954,6 @@ namespace Archetype.Client.State
             }
 
             throw new global::System.NotSupportedException();
-        }
-
-        private global::System.String? DeserializeString(global::System.Text.Json.JsonElement? obj)
-        {
-            if (!obj.HasValue)
-            {
-                return null;
-            }
-
-            return _stringParser.Parse(obj.Value.GetString()!);
         }
 
         private global::Archetype.Client.CardRarity DeserializeNonNullableCardRarity(global::System.Text.Json.JsonElement? obj)
@@ -8158,7 +10114,71 @@ namespace Archetype.Client.State
             var typename = obj.Value.GetProperty("__typename").GetString();
             if (typename?.Equals("MapNode", global::System.StringComparison.Ordinal) ?? false)
             {
-                return new global::Archetype.Client.State.MapNodeData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")), neighbours: DeserializeIGetGameState_GameState_Map_Nodes_NeighboursArray(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "neighbours")));
+                return new global::Archetype.Client.State.MapNodeData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")), contents: DeserializeIGetGameState_GameState_Map_Nodes_ContentsArray(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "contents")), neighbours: DeserializeIGetGameState_GameState_Map_Nodes_NeighboursArray(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "neighbours")));
+            }
+
+            throw new global::System.NotSupportedException();
+        }
+
+        private global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIUnitData?>? DeserializeIGetGameState_GameState_Map_Nodes_ContentsArray(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                return null;
+            }
+
+            var iUnits = new global::System.Collections.Generic.List<global::Archetype.Client.State.IIUnitData?>();
+            foreach (global::System.Text.Json.JsonElement child in obj.Value.EnumerateArray())
+            {
+                iUnits.Add(DeserializeIGetGameState_GameState_Map_Nodes_Contents(child));
+            }
+
+            return iUnits;
+        }
+
+        private global::Archetype.Client.State.IIUnitData? DeserializeIGetGameState_GameState_Map_Nodes_Contents(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                return null;
+            }
+
+            var typename = obj.Value.GetProperty("__typename").GetString();
+            if (typename?.Equals("Unit", global::System.StringComparison.Ordinal) ?? false)
+            {
+                return new global::Archetype.Client.State.UnitData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")), protoGuid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "protoGuid")), deck: DeserializeIGetGameState_GameState_Map_Nodes_Contents_Deck(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "deck")), metaData: DeserializeIGetGameState_GameState_Map_Nodes_Contents_MetaData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "metaData")));
+            }
+
+            throw new global::System.NotSupportedException();
+        }
+
+        private global::Archetype.Client.State.IIDeckData? DeserializeIGetGameState_GameState_Map_Nodes_Contents_Deck(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                return null;
+            }
+
+            var typename = obj.Value.GetProperty("__typename").GetString();
+            if (typename?.Equals("Deck", global::System.StringComparison.Ordinal) ?? false)
+            {
+                return new global::Archetype.Client.State.DeckData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")), contents: DeserializeIGetGameState_GameState_Player_Deck_ContentsArray(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "contents")));
+            }
+
+            throw new global::System.NotSupportedException();
+        }
+
+        private global::Archetype.Client.State.UnitMetaDataData? DeserializeIGetGameState_GameState_Map_Nodes_Contents_MetaData(global::System.Text.Json.JsonElement? obj)
+        {
+            if (!obj.HasValue)
+            {
+                return null;
+            }
+
+            var typename = obj.Value.GetProperty("__typename").GetString();
+            if (typename?.Equals("UnitMetaData", global::System.StringComparison.Ordinal) ?? false)
+            {
+                return new global::Archetype.Client.State.UnitMetaDataData(typename, name: DeserializeString(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "name")), imageUri: DeserializeString(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "imageUri")));
             }
 
             throw new global::System.NotSupportedException();
@@ -8190,7 +10210,7 @@ namespace Archetype.Client.State
             var typename = obj.Value.GetProperty("__typename").GetString();
             if (typename?.Equals("MapNode", global::System.StringComparison.Ordinal) ?? false)
             {
-                return new global::Archetype.Client.State.MapNodeData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")), owner: DeserializeIIGameAtomData(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "owner")));
+                return new global::Archetype.Client.State.MapNodeData(typename, guid: DeserializeNonNullableGuid(global::StrawberryShake.Json.JsonElementExtensions.GetPropertyOrNull(obj, "guid")));
             }
 
             throw new global::System.NotSupportedException();
@@ -8478,9 +10498,37 @@ namespace Archetype.Client.State
     }
 
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class StartGamePayloadData
+    {
+        public StartGamePayloadData(global::System.String __typename, global::System.String? message = default !)
+        {
+            this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
+            Message = message;
+        }
+
+        public global::System.String __typename { get; }
+
+        public global::System.String? Message { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class PlayCardPayloadData
     {
         public PlayCardPayloadData(global::System.String __typename, global::System.String? message = default !)
+        {
+            this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
+            Message = message;
+        }
+
+        public global::System.String __typename { get; }
+
+        public global::System.String? Message { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class EndTurnPayloadData
+    {
+        public EndTurnPayloadData(global::System.String __typename, global::System.String? message = default !)
         {
             this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
             Message = message;
@@ -8502,17 +10550,14 @@ namespace Archetype.Client.State
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class GameStateData : IIGameStateData
     {
-        public GameStateData(global::System.String __typename, global::System.Boolean? isPayerTurn = default !, global::Archetype.Client.State.IIPlayerData? player = default !, global::Archetype.Client.State.IIMapData? map = default !)
+        public GameStateData(global::System.String __typename, global::Archetype.Client.State.IIPlayerData? player = default !, global::Archetype.Client.State.IIMapData? map = default !)
         {
             this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
-            IsPayerTurn = isPayerTurn;
             Player = player;
             Map = map;
         }
 
         public global::System.String __typename { get; }
-
-        public global::System.Boolean? IsPayerTurn { get; }
 
         public global::Archetype.Client.State.IIPlayerData? Player { get; }
 
@@ -8537,15 +10582,18 @@ namespace Archetype.Client.State
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class PlayerData : IIPlayerData, IIGameAtomData
     {
-        public PlayerData(global::System.String __typename, global::System.Guid? guid = default !, global::Archetype.Client.State.IIGameAtomData? owner = default !, global::Archetype.Client.State.IIDeckData? deck = default !, global::Archetype.Client.State.IIHandData? hand = default !, global::Archetype.Client.State.IIDiscardPileData? discardPile = default !, global::System.Int32? resources = default !)
+        public PlayerData(global::System.String __typename, global::System.Guid? guid = default !, global::Archetype.Client.State.IIGameAtomData? owner = default !, global::System.String? name = default !, global::System.Int32? maxHandSize = default !, global::System.Int32? minDeckSize = default !, global::System.Int32? resources = default !, global::Archetype.Client.State.IIDeckData? deck = default !, global::Archetype.Client.State.IIHandData? hand = default !, global::Archetype.Client.State.IIDiscardPileData? discardPile = default !)
         {
             this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
             Guid = guid;
             Owner = owner;
+            Name = name;
+            MaxHandSize = maxHandSize;
+            MinDeckSize = minDeckSize;
+            Resources = resources;
             Deck = deck;
             Hand = hand;
             DiscardPile = discardPile;
-            Resources = resources;
         }
 
         public global::System.String __typename { get; }
@@ -8554,13 +10602,19 @@ namespace Archetype.Client.State
 
         public global::Archetype.Client.State.IIGameAtomData? Owner { get; }
 
+        public global::System.String? Name { get; }
+
+        public global::System.Int32? MaxHandSize { get; }
+
+        public global::System.Int32? MinDeckSize { get; }
+
+        public global::System.Int32? Resources { get; }
+
         public global::Archetype.Client.State.IIDeckData? Deck { get; }
 
         public global::Archetype.Client.State.IIHandData? Hand { get; }
 
         public global::Archetype.Client.State.IIDiscardPileData? DiscardPile { get; }
-
-        public global::System.Int32? Resources { get; }
     }
 
     ///<summary>A graph of map nodes</summary>
@@ -8603,11 +10657,12 @@ namespace Archetype.Client.State
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class MapNodeData : IIMapNodeData, IIGameAtomData, IIZoneOfIUnitData
     {
-        public MapNodeData(global::System.String __typename, global::System.Guid? guid = default !, global::Archetype.Client.State.IIGameAtomData? owner = default !, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIMapNodeData?>? neighbours = default !)
+        public MapNodeData(global::System.String __typename, global::System.Guid? guid = default !, global::Archetype.Client.State.IIGameAtomData? owner = default !, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIUnitData?>? contents = default !, global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIMapNodeData?>? neighbours = default !)
         {
             this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
             Guid = guid;
             Owner = owner;
+            Contents = contents;
             Neighbours = neighbours;
         }
 
@@ -8616,6 +10671,8 @@ namespace Archetype.Client.State
         public global::System.Guid? Guid { get; }
 
         public global::Archetype.Client.State.IIGameAtomData? Owner { get; }
+
+        public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIUnitData?>? Contents { get; }
 
         public global::System.Collections.Generic.IReadOnlyList<global::Archetype.Client.State.IIMapNodeData?>? Neighbours { get; }
     }
@@ -8722,15 +10779,27 @@ namespace Archetype.Client.State
     [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
     public partial class UnitData : IIUnitData, IIGameAtomData
     {
-        public UnitData(global::System.String __typename, global::System.Guid? guid = default !)
+        public UnitData(global::System.String __typename, global::System.Guid? guid = default !, global::Archetype.Client.State.IIGameAtomData? owner = default !, global::System.Guid? protoGuid = default !, global::Archetype.Client.State.IIDeckData? deck = default !, global::Archetype.Client.State.UnitMetaDataData? metaData = default !)
         {
             this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
             Guid = guid;
+            Owner = owner;
+            ProtoGuid = protoGuid;
+            Deck = deck;
+            MetaData = metaData;
         }
 
         public global::System.String __typename { get; }
 
         public global::System.Guid? Guid { get; }
+
+        public global::Archetype.Client.State.IIGameAtomData? Owner { get; }
+
+        public global::System.Guid? ProtoGuid { get; }
+
+        public global::Archetype.Client.State.IIDeckData? Deck { get; }
+
+        public global::Archetype.Client.State.UnitMetaDataData? MetaData { get; }
     }
 
     ///<summary>A card instance</summary>
@@ -8827,6 +10896,23 @@ namespace Archetype.Client.State
         public global::System.String __typename { get; }
 
         public global::System.Int32? TargetIndex { get; }
+    }
+
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.2.2.0")]
+    public partial class UnitMetaDataData
+    {
+        public UnitMetaDataData(global::System.String __typename, global::System.String? name = default !, global::System.String? imageUri = default !)
+        {
+            this.__typename = __typename ?? throw new global::System.ArgumentNullException(nameof(__typename));
+            Name = name;
+            ImageUri = imageUri;
+        }
+
+        public global::System.String __typename { get; }
+
+        public global::System.String? Name { get; }
+
+        public global::System.String? ImageUri { get; }
     }
 
     ///<summary>Collection of all available card sets</summary>
@@ -8954,7 +11040,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 return new ClientServiceProvider(global::Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider(serviceCollection));
             });
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => new global::Archetype.Client.State.ArchetypeGraphQLClientStoreAccessor(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationStore>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IEntityStore>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IEntityIdSerializer>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::System.Collections.Generic.IEnumerable<global::StrawberryShake.IOperationRequestFactory>>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::System.Collections.Generic.IEnumerable<global::StrawberryShake.IOperationResultDataFactory>>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp))));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.StartGameMutation>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.PlayCardMutation>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.EndTurnMutation>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.GetGameStateQuery>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.GetCardPoolQuery>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.ArchetypeGraphQLClient>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<ClientServiceProvider>(sp)));
@@ -8990,6 +11078,13 @@ namespace Microsoft.Extensions.DependencyInjection
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.Serialization.ISerializer, global::StrawberryShake.Serialization.TimeSpanSerializer>(services);
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.Serialization.ISerializer, global::StrawberryShake.Serialization.JsonSerializer>(services);
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.Serialization.ISerializerResolver>(services, sp => new global::StrawberryShake.Serialization.SerializerResolver(global::System.Linq.Enumerable.Concat(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::System.Collections.Generic.IEnumerable<global::StrawberryShake.Serialization.ISerializer>>(parentServices), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::System.Collections.Generic.IEnumerable<global::StrawberryShake.Serialization.ISerializer>>(sp))));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IStartGameResult>, global::Archetype.Client.State.StartGameResultFactory>(services);
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IStartGameResult>>(sp));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationRequestFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.IStartGameMutation>(sp));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IStartGameResult>, global::Archetype.Client.State.StartGameBuilder>(services);
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationExecutor<global::Archetype.Client.IStartGameResult>>(services, sp => new global::StrawberryShake.OperationExecutor<global::System.Text.Json.JsonDocument, global::Archetype.Client.IStartGameResult>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.Transport.Http.IHttpConnection>(sp), () => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IStartGameResult>>(sp), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationStore>(sp), strategy));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::Archetype.Client.StartGameMutation>(services);
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::Archetype.Client.IStartGameMutation>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.StartGameMutation>(sp));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IPlayCardResult>, global::Archetype.Client.State.PlayCardResultFactory>(services);
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IPlayCardResult>>(sp));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationRequestFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.IPlayCardMutation>(sp));
@@ -8997,6 +11092,13 @@ namespace Microsoft.Extensions.DependencyInjection
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationExecutor<global::Archetype.Client.IPlayCardResult>>(services, sp => new global::StrawberryShake.OperationExecutor<global::System.Text.Json.JsonDocument, global::Archetype.Client.IPlayCardResult>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.Transport.Http.IHttpConnection>(sp), () => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IPlayCardResult>>(sp), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationStore>(sp), strategy));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::Archetype.Client.PlayCardMutation>(services);
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::Archetype.Client.IPlayCardMutation>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.PlayCardMutation>(sp));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IEndTurnResult>, global::Archetype.Client.State.EndTurnResultFactory>(services);
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IEndTurnResult>>(sp));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationRequestFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.IEndTurnMutation>(sp));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IEndTurnResult>, global::Archetype.Client.State.EndTurnBuilder>(services);
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationExecutor<global::Archetype.Client.IEndTurnResult>>(services, sp => new global::StrawberryShake.OperationExecutor<global::System.Text.Json.JsonDocument, global::Archetype.Client.IEndTurnResult>(global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.Transport.Http.IHttpConnection>(sp), () => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::Archetype.Client.IEndTurnResult>>(sp), global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationStore>(sp), strategy));
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::Archetype.Client.EndTurnMutation>(services);
+            global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::Archetype.Client.IEndTurnMutation>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.EndTurnMutation>(sp));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IGetGameStateResult>, global::Archetype.Client.State.GetGameStateResultFactory>(services);
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationResultDataFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::StrawberryShake.IOperationResultDataFactory<global::Archetype.Client.IGetGameStateResult>>(sp));
             global::Microsoft.Extensions.DependencyInjection.ServiceCollectionServiceExtensions.AddSingleton<global::StrawberryShake.IOperationRequestFactory>(services, sp => global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<global::Archetype.Client.IGetGameStateQuery>(sp));

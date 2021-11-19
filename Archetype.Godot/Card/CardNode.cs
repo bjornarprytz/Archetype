@@ -25,7 +25,7 @@ namespace Archetype.Godot.Card
 			_stateManager = new CardStateManager(this);
 		}
 		
-		public void Load(IFullCardProtoData protoData)
+		public void Load(ICardProtoData protoData)
 		{
 			_protoData = protoData;
 		}

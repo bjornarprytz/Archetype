@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
@@ -11,18 +12,19 @@ namespace Archetype.Game.Payloads.PlayContext
         int TargetIndex { get; }
         
         public object ResolveContext(ICardResolutionContext context);
-        public string CallTextMethod(ICardResolutionContext context);
+        public string CreateRulesText(IGameState gameState);
+        public string CreateRulesText();
     }
     
     public class Effect<TTarget, TResult> : IEffect 
         where TTarget : IGameAtom
     {
-        private Func<IEffectResolutionContext<TTarget>, string> _rulesText;
+        private Func<IGameState, string> _rulesText;
 
         [JsonIgnore] public Func<IEffectResolutionContext<TTarget>, TResult> Resolve { get; set; }
 
         [JsonIgnore]
-        public Func<IEffectResolutionContext<TTarget>, string> RulesText
+        public Func<IGameState, string> RulesText
         {
             get
             {
@@ -40,22 +42,25 @@ namespace Archetype.Game.Payloads.PlayContext
             return Resolve(new EffectResolutionContext<TTarget>(context, target));
         }
 
-        public string CallTextMethod(ICardResolutionContext context)
+        public string CreateRulesText(IGameState gameState)
         {
-            dynamic target = context.Targets.ElementAt(TargetIndex);
+            return RulesText(gameState);
+        }
 
-            return RulesText(new EffectResolutionContext<TTarget>(context, target));
+        public string CreateRulesText()
+        {
+            return RulesText(null);
         }
     }
     
     public class Effect<TResult> : IEffect
     {
-        private Func<IEffectResolutionContext, string> _rulesText;
+        private Func<IGameState, string> _rulesText;
 
         [JsonIgnore] public Func<IEffectResolutionContext, TResult> Resolve { get; set; }
 
         [JsonIgnore]
-        public Func<IEffectResolutionContext, string> RulesText
+        public Func<IGameState, string> RulesText
         {
             get
             {
@@ -72,9 +77,14 @@ namespace Archetype.Game.Payloads.PlayContext
             return Resolve(new EffectResolutionContext(context));
         }
         
-        public string CallTextMethod(ICardResolutionContext context)
+        public string CreateRulesText(IGameState gameState)
         {
-            return RulesText(new EffectResolutionContext(context));
+            return RulesText(gameState);
+        }
+
+        public string CreateRulesText()
+        {
+            return RulesText(null);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
@@ -30,7 +31,7 @@ namespace Archetype.Builder
             return this;
         }
         
-        public EffectBuilder<TTarget, TResult> Text(Func<IEffectResolutionContext<TTarget>, string> func)
+        public EffectBuilder<TTarget, TResult> Text(Func<IGameState, string> func)
         {
             _effect.RulesText = func;
 
@@ -68,7 +69,7 @@ namespace Archetype.Builder
             return this;
         }
         
-        public EffectBuilder<TResult> Text(Func<IEffectResolutionContext, string> func)
+        public EffectBuilder<TResult> Text(Func<IGameState, string> func)
         {
             _effect.RulesText = func;
 

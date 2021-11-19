@@ -4,6 +4,7 @@ using System.Linq;
 using Archetype.Builder.Factory;
 using Archetype.Dto.MetaData;
 using Archetype.Dto.Simple;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
@@ -123,7 +124,7 @@ namespace Archetype.Builder
         public CardBuilder Effect<TTarget, TResult>(
             int targetIndex,
             Func<IEffectResolutionContext<TTarget>, TResult> resolveEffect,
-            Func<IEffectResolutionContext<TTarget>, string> rulesText=null
+            Func<IGameState, string> rulesText=null
             )
             where  TTarget : IGameAtom
         {
@@ -137,7 +138,7 @@ namespace Archetype.Builder
         
         public CardBuilder Effect<TResult>(
             Func<IEffectResolutionContext, TResult> resolveEffect,
-            Func<IEffectResolutionContext, string> rulesText=null
+            Func<IGameState, string> rulesText=null
         )
         {
             return Effect<TResult>(provider => 

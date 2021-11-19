@@ -7,6 +7,8 @@ using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
+using Archetype.Server.Extensions;
+using HotChocolate;
 using HotChocolate.Types;
 
 namespace Archetype.Server
@@ -114,13 +116,19 @@ namespace Archetype.Server
         protected override void Configure(IObjectTypeDescriptor<Card> descriptor)
         {
             descriptor.Description("A card instance");
-
             descriptor.Implements<InterfaceType<ICard>>();
+
+            descriptor.Field("ContextRulesText")
+                .ResolveWith<Resolvers>(resolvers => resolvers.RulesTextWithContext(default!, default!));
+            
+            descriptor.Field("RulesText")
+                .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!));
         }
         
         private class Resolvers
         {
-            public IEnumerable<string> GetTargets(IEnumerable<ITarget> targets) => targets.Select(t => t.TargetType.Name);
+            public string RulesTextWithContext(Card card, [Service] IGameState gameState) => card.GenerateRulesText(gameState);
+            public string RulesText(Card card) => card.GenerateRulesText();
         }
     }
     
@@ -152,7 +160,7 @@ namespace Archetype.Server
                 .Ignore();
 
             descriptor
-                .Field(effect => effect.CallTextMethod(default!))
+                .Field(effect => effect.CreateRulesText(default!))
                 .Ignore();
         }
     }
