@@ -15,7 +15,7 @@ namespace Archetype.Builder
         public override string Message { get; }
     }
     
-    public class MissingResolutionFunctionException : Exception { }
+    public class MissingResolutionExpressionException : Exception { }
     public class DisconnectedNodesException : Exception { }
     public class MissingSetNameException : Exception { }
 }

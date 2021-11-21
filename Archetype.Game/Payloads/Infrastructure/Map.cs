@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
+    [Target("Map")]
     public interface IMap
     {
         IEnumerable<IMapNode> Nodes { get; }

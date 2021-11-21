@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Attributes;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Deck")]
     public interface IDeck : IZone<ICard>
     {
         ICard Draw();

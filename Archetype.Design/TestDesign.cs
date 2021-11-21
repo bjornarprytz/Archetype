@@ -3,7 +3,6 @@ using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Builder;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Proto;
@@ -20,10 +19,9 @@ namespace Archetype.Design
                     .Card(cardBuilder => cardBuilder
                         .Name("Cost reducer")
                         .Target<ICard>()
-                        .Effect<ICard, int>(
+                        .Effect<ICard>(
                             targetIndex: 0,
-                            resolveEffect: context => context.Target.ReduceCost(1),
-                            rulesText: context => "Reduce cost by 1")
+                            resolveEffect: context => context.Target.ReduceCost(1))
                         ))
                 .AddSet("TestSet", 
                     setProvider => setProvider
@@ -34,13 +32,7 @@ namespace Archetype.Design
                                 .Cost(4)
                                 .Target<IUnit>()
                                 .Attack(5, 0)
-                                .Effect<int>(
-                                    resolveEffect: context =>
-                                    {
-                                        context.GameState.Player.Hand.Contents.ForEach((card, i) => card.ReduceCost(i));
-                                        return 0;
-                                    },
-                                    rulesText: (state) => $"Affect all cards in player's hand somehow")
+                                .Effect(resolveEffect: context => context.GameState.Player.Hand.Contents.ForEach((card, i) => card.ReduceCost(i)))
                                 .Art("asd")
                         )
                         .Card(builder =>
@@ -48,10 +40,9 @@ namespace Archetype.Design
                                 .Name("Resource slap")
                                 .Cost(3)
                                 .Target<IUnit>()
-                                .Effect<IUnit, int>(
+                                .Effect<IUnit>(
                                     targetIndex: 0,
-                                    resolveEffect: context => context.Target.Attack(context.GameState.Player.Resources),
-                                    rulesText: context => $"Deal {context.Player.Resources}")
+                                    resolveEffect: context => context.Target.Attack(context.GameState.Player.Resources))
                                 .Art("other")
                         )
                         .Card(builder =>
@@ -60,14 +51,9 @@ namespace Archetype.Design
                                 .Name("Slap cards")
                                 .Cost(1)
                                 .Target<IZone<ICard>>()
-                                .Effect<IZone<ICard>, int>(
+                                .Effect<IZone<ICard>>(
                                     targetIndex: 0,
-                                    resolveEffect: context =>
-                                    {
-                                        context.Target.Contents.ForEach((card, i) => card.ReduceCost(i));
-                                        return 0;
-                                    },
-                                    rulesText: context => $"Deal {context.Player.Resources}")
+                                    resolveEffect: context => context.Target.Contents.ForEach((card, i) => card.ReduceCost(i)))
                                 .Art("other")
                         )
                         .Card(builder =>
@@ -76,12 +62,7 @@ namespace Archetype.Design
                                 .Name("Slap all")
                                 .Cost(1)
                                 .Effect(
-                                    resolveEffect: context =>
-                                    {
-                                        context.GameState.Player.Hand.Contents.ForEach((card, i) => card.ReduceCost(i));
-                                        return 0;
-                                    },
-                                    rulesText: (state) => $"Affect all cards in player's hand somehow")
+                                    resolveEffect: context => context.GameState.Player.Hand.Contents.ForEach((card, i) => card.ReduceCost(i)))
                                 .Art("other")
                         ))
                 .Build();

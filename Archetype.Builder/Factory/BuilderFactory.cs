@@ -20,15 +20,15 @@ namespace Archetype.Builder.Factory
             return new CardBuilder(template);
         }
         
-        public static EffectBuilder<TTarget, TResult> EffectBuilder<TTarget, TResult>()
+        public static EffectBuilder<TTarget> EffectBuilder<TTarget>()
             where TTarget : IGameAtom
         {
-            return new EffectBuilder<TTarget, TResult>();
+            return new EffectBuilder<TTarget>();
         }
         
-        public static EffectBuilder<TResult> EffectBuilder<TResult>()
+        public static EffectBuilder EffectBuilder()
         {
-            return new EffectBuilder<TResult>();
+            return new EffectBuilder();
         }
         
         public static NodeBuilder NodeBuilder()

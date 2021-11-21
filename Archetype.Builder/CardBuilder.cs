@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Archetype.Builder.Factory;
 using Archetype.Dto.MetaData;
 using Archetype.Dto.Simple;
@@ -98,10 +99,10 @@ namespace Archetype.Builder
             return this;
         }
         
-        public CardBuilder EffectBuilder<TTarget, TResult>(Action<EffectBuilder<TTarget, TResult>> builderProvider)
+        public CardBuilder EffectBuilder<TTarget>(Action<EffectBuilder<TTarget>> builderProvider)
             where  TTarget : IGameAtom
         {
-            var cbc = BuilderFactory.EffectBuilder<TTarget, TResult>();
+            var cbc = BuilderFactory.EffectBuilder<TTarget>();
 
             builderProvider(cbc);
             
@@ -110,9 +111,9 @@ namespace Archetype.Builder
             return this;
         }
         
-        public CardBuilder Effect<TResult>(Action<EffectBuilder<TResult>> builderProvider)
+        public CardBuilder Effect(Action<EffectBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.EffectBuilder<TResult>();
+            var cbc = BuilderFactory.EffectBuilder();
 
             builderProvider(cbc);
             
@@ -121,30 +122,26 @@ namespace Archetype.Builder
             return this;
         }
         
-        public CardBuilder Effect<TTarget, TResult>(
+        public CardBuilder Effect<TTarget>(
             int targetIndex,
-            Func<IEffectResolutionContext<TTarget>, TResult> resolveEffect,
-            Func<IGameState, string> rulesText=null
+            Expression<Action<IEffectResolutionContext<TTarget>>> resolveEffect
             )
             where  TTarget : IGameAtom
         {
-            return EffectBuilder<TTarget, TResult>(provider => 
+            return EffectBuilder<TTarget>(provider => 
                 provider
                     .TargetIndex(targetIndex)
                     .Resolve(resolveEffect)
-                    .Text(rulesText ?? (_ => string.Empty) )
                 );
         }
         
-        public CardBuilder Effect<TResult>(
-            Func<IEffectResolutionContext, TResult> resolveEffect,
-            Func<IGameState, string> rulesText=null
+        public CardBuilder Effect(
+            Expression<Action<IEffectResolutionContext>> resolveEffect
         )
         {
-            return Effect<TResult>(provider => 
+            return Effect(provider => 
                 provider
                     .Resolve(resolveEffect)
-                    .Text(rulesText ?? (_ => string.Empty) )
             );
         }
 

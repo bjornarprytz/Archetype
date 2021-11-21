@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
 
@@ -11,80 +12,97 @@ namespace Archetype.Game.Payloads.PlayContext
     {
         int TargetIndex { get; }
         
-        public object ResolveContext(ICardResolutionContext context);
-        public string CreateRulesText(IGameState gameState);
-        public string CreateRulesText();
+        void ResolveContext(ICardResolutionContext context);
+
+        string ContextSensitiveRulesText(IGameState gameState);
+        string PrintedRulesText();
     }
     
-    public class Effect<TTarget, TResult> : IEffect 
+    public class Effect<TTarget> : IEffect 
         where TTarget : IGameAtom
     {
-        private Func<IGameState, string> _rulesText;
-
-        [JsonIgnore] public Func<IEffectResolutionContext<TTarget>, TResult> Resolve { get; set; }
+        private Action<IEffectResolutionContext<TTarget>> _resolveBacking;
+        private Expression<Action<IEffectResolutionContext<TTarget>>> _resolveExpression;
 
         [JsonIgnore]
-        public Func<IGameState, string> RulesText
+        private Action<IEffectResolutionContext<TTarget>> Resolve
         {
             get
             {
-                _rulesText ??= _ => string.Empty;
-                return _rulesText;
+                _resolveBacking ??= ResolveExpression.Compile();
+                return _resolveBacking;
             }
-            set => _rulesText = value;
+        }
+
+        [JsonIgnore]
+        public Expression<Action<IEffectResolutionContext<TTarget>>> ResolveExpression
+        {
+            get => _resolveExpression;
+            set
+            {
+                _resolveExpression = value;
+                _resolveBacking = null; // Force re-compile
+            }
         }
 
         public int TargetIndex { get; set; }
-        public object ResolveContext(ICardResolutionContext context)
+        public void ResolveContext(ICardResolutionContext context)
         {
             dynamic target = context.Targets.ElementAt(TargetIndex);
             
-            return Resolve(new EffectResolutionContext<TTarget>(context, target));
+            Resolve(new EffectResolutionContext<TTarget>(context, target));
         }
 
-        public string CreateRulesText(IGameState gameState)
+        public string ContextSensitiveRulesText(IGameState gameState)
         {
-            return RulesText(gameState);
+            throw new NotImplementedException();
         }
 
-        public string CreateRulesText()
+        public string PrintedRulesText()
         {
-            return RulesText(null);
+            throw new NotImplementedException();
         }
     }
     
-    public class Effect<TResult> : IEffect
+    public class Effect : IEffect
     {
-        private Func<IGameState, string> _rulesText;
-
-        [JsonIgnore] public Func<IEffectResolutionContext, TResult> Resolve { get; set; }
+        private Action<IEffectResolutionContext> _resolveBacking;
+        private Expression<Action<IEffectResolutionContext>> _resolveExpression;
 
         [JsonIgnore]
-        public Func<IGameState, string> RulesText
+        private Action<IEffectResolutionContext> Resolve
         {
             get
             {
-                _rulesText ??= _ => string.Empty;
-                return _rulesText;
+                _resolveBacking ??= ResolveExpression.Compile();
+                return _resolveBacking;
             }
-            set => _rulesText = value;
         }
+
+        [JsonIgnore]
+        public Expression<Action<IEffectResolutionContext>> ResolveExpression
+        {
+            get => _resolveExpression;
+            set
+            {
+                _resolveExpression = value;
+                _resolveBacking = null; // Force re-compile
+            }
+        }
+
 
         public int TargetIndex => -1;
 
-        public object ResolveContext(ICardResolutionContext context)
+        public void ResolveContext(ICardResolutionContext context) => Resolve(new EffectResolutionContext(context));
+
+        public string ContextSensitiveRulesText(IGameState gameState)
         {
-            return Resolve(new EffectResolutionContext(context));
-        }
-        
-        public string CreateRulesText(IGameState gameState)
-        {
-            return RulesText(gameState);
+            return ResolveExpression.ContextSensitiveRulesText(gameState);
         }
 
-        public string CreateRulesText()
+        public string PrintedRulesText()
         {
-            return RulesText(null);
+            return ResolveExpression.PrintedRulesText();
         }
     }
 }

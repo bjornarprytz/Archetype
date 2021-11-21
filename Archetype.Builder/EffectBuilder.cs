@@ -1,91 +1,61 @@
 using System;
-using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
+using System.Linq.Expressions;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
-using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
 {
-    public class EffectBuilder<TTarget, TResult> : IBuilder<IEffect>
+    public class EffectBuilder<TTarget> : IBuilder<IEffect>
         where TTarget : IGameAtom
     {
-        private readonly Effect<TTarget, TResult> _effect;
+        private readonly Effect<TTarget> _effect;
 
         internal EffectBuilder()
         {
-            _effect = new Effect<TTarget, TResult>();
+            _effect = new Effect<TTarget>();
         }
         
-        public EffectBuilder<TTarget, TResult> TargetIndex(int i)
+        public EffectBuilder<TTarget> TargetIndex(int i)
         {
             _effect.TargetIndex = i;
 
             return this;
         }
         
-        public EffectBuilder<TTarget, TResult> Resolve(Func<IEffectResolutionContext<TTarget>, TResult> func)
+        public EffectBuilder<TTarget> Resolve(Expression<Action<IEffectResolutionContext<TTarget>>> expression)
         {
-            _effect.Resolve = func;
-
-            return this;
-        }
-        
-        public EffectBuilder<TTarget, TResult> Text(Func<IGameState, string> func)
-        {
-            _effect.RulesText = func;
-
-            return this;
-        }
-        
-        public EffectBuilder<TTarget, TResult> Text(string text)
-        {
-            _effect.RulesText = _ => text;
+            _effect.ResolveExpression = expression;
 
             return this;
         }
 
         public IEffect Build()
         {
-            if (_effect.Resolve == null) throw new MissingResolutionFunctionException();
+            if (_effect.ResolveExpression == null) throw new MissingResolutionExpressionException();
 
             return _effect;
         }
     }
 
-    public class EffectBuilder<TResult> : IBuilder<IEffect>
+    public class EffectBuilder : IBuilder<IEffect>
     {
-        private Effect<TResult> _effect;
+        private readonly Effect _effect;
         
         public EffectBuilder()
         {
-            _effect = new Effect<TResult>();
+            _effect = new Effect();
         }
         
-        public EffectBuilder<TResult> Resolve(Func<IEffectResolutionContext, TResult> func)
+        public EffectBuilder Resolve(Expression<Action<IEffectResolutionContext>> expression)
         {
-            _effect.Resolve = func;
-
-            return this;
-        }
-        
-        public EffectBuilder<TResult> Text(Func<IGameState, string> func)
-        {
-            _effect.RulesText = func;
-
-            return this;
-        }
-        
-        public EffectBuilder<TResult> Text(string text)
-        {
-            _effect.RulesText = _ => text;
+            _effect.ResolveExpression = expression;
 
             return this;
         }
 
         public IEffect Build()
         {
-            if (_effect.Resolve == null) throw new MissingResolutionFunctionException();
+            if (_effect.ResolveExpression == null) throw new MissingResolutionExpressionException();
 
             return _effect;
         }

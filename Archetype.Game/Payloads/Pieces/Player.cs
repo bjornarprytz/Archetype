@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Player")]
     public interface IPlayer : IGameAtom
     {
         string Name { get; }

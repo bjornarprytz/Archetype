@@ -1,10 +1,12 @@
 using System;
 using Archetype.Dto.MetaData;
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Unit")]
     public interface IUnit : IGameAtom, IZoned<IUnit>
     {
         Guid ProtoGuid { get; }
@@ -14,7 +16,9 @@ namespace Archetype.Game.Payloads.Pieces
         int MaxHealth { get; }
         int Health { get; }
         
+        [Verb("Attack")]
         int Attack(int strength);
+        [Verb("Heal")]
         int Heal(int strength);
     }
     

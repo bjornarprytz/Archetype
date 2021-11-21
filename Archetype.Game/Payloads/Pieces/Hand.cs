@@ -1,7 +1,9 @@
-﻿using Archetype.Game.Payloads.Pieces.Base;
+﻿using Archetype.Game.Attributes;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Hand")]
     public interface IHand  : IZone<ICard>
     {
         void Add(ICard card);

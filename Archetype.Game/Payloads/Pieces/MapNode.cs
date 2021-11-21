@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Aqua.TypeExtensions;
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Node")]
     public interface IMapNode : IZone<IUnit>
     {
         IEnumerable<IMapNode> Neighbours { get; }

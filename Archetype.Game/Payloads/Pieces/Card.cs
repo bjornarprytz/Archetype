@@ -1,18 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Archetype.Dto.MetaData;
+using Archetype.Game.Attributes;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Card")]
     public interface ICard : IGameAtom, IZoned<ICard>
     {
         Guid ProtoGuid { get; }
         CardMetaData MetaData { get; }
         int Cost { get; }
+        
+        [Verb("Reduce cost")]
         int ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
@@ -47,6 +53,18 @@ namespace Archetype.Game.Payloads.Pieces
             Cost -= x;
 
             return x;
+        }
+
+        public string GenerateRulesText(IGameState gameState)
+        {
+            var sb = new StringBuilder();
+            
+            foreach (var effect in _effects)
+            {
+                sb.Append(effect.ContextSensitiveRulesText(gameState));
+            }
+
+            return sb.ToString();
         }
     }
 }

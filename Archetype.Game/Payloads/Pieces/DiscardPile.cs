@@ -1,8 +1,10 @@
 ﻿using System;
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    [Target("Discard Pile")]
     public interface IDiscardPile : IZone<ICard>
     {
         void Bury(ICard card);

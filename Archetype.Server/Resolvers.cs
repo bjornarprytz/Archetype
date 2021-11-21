@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
@@ -122,13 +123,13 @@ namespace Archetype.Server
                 .ResolveWith<Resolvers>(resolvers => resolvers.RulesTextWithContext(default!, default!));
             
             descriptor.Field("RulesText")
-                .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!));
+                .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!, default!));
         }
         
         private class Resolvers
         {
             public string RulesTextWithContext(Card card, [Service] IGameState gameState) => card.GenerateRulesText(gameState);
-            public string RulesText(Card card) => card.GenerateRulesText();
+            public string RulesText(Card card, [Service] ICardPool cardPool) => cardPool[card.ProtoGuid].RulesText;
         }
     }
     
@@ -156,11 +157,7 @@ namespace Archetype.Server
             descriptor.Description("The core payload of a card, where mutation of game atoms happen");
 
             descriptor
-                .Field(effect => effect.ResolveContext(default!))
-                .Ignore();
-
-            descriptor
-                .Field(effect => effect.CreateRulesText(default!))
+                .Field(nameof(Effect.ResolveContext))
                 .Ignore();
         }
     }
