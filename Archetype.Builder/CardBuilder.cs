@@ -123,11 +123,17 @@ namespace Archetype.Builder
         }
         
         public CardBuilder Effect<TTarget>(
-            int targetIndex,
-            Expression<Action<IEffectResolutionContext<TTarget>>> resolveEffect
+            Expression<Action<IEffectResolutionContext<TTarget>>> resolveEffect,
+            int targetIndex=-1
             )
             where  TTarget : IGameAtom
         {
+            if (!_targets.Any(t => t.TargetType.IsAssignableTo(typeof(TTarget))))
+            {
+                _targets.Add(new Target<TTarget>());
+                targetIndex = _targets.Count - 1;
+            }
+            
             return EffectBuilder<TTarget>(provider => 
                 provider
                     .TargetIndex(targetIndex)

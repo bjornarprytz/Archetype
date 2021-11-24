@@ -53,8 +53,6 @@ namespace Archetype.Game.Payloads.Proto
 
         private string GenerateRulesText()
         {
-            // TODO: Take target "tags" into account.
-            
             var sb = new StringBuilder();
             
             foreach (var effect in _effects)

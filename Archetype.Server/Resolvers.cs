@@ -124,6 +124,9 @@ namespace Archetype.Server
             
             descriptor.Field("RulesText")
                 .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!, default!));
+
+            descriptor.Field(card => card.GenerateRulesText(default!))
+                .Ignore();
         }
         
         private class Resolvers
@@ -157,8 +160,13 @@ namespace Archetype.Server
             descriptor.Description("The core payload of a card, where mutation of game atoms happen");
 
             descriptor
-                .Field(nameof(Effect.ResolveContext))
+                .Field(nameof(IEffect.ResolveContext))
                 .Ignore();
+            
+            descriptor.Ignore(e => e.PrintedRulesText());
+
+            descriptor.Ignore(e => e.ContextSensitiveRulesText(default!));
+
         }
     }
     

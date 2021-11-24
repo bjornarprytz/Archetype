@@ -25,7 +25,7 @@ namespace Archetype.Game.Payloads.PlayContext
                 _validate ??= _ => true;
                 return _validate;
             } 
-            set => _validate = value;
+            init => _validate = value;
         }
 
         public Type TargetType => typeof(TTarget);

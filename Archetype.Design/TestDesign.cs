@@ -18,10 +18,7 @@ namespace Archetype.Design
                     .ChangeTemplate(t => t with { Rarity = CardRarity.Rare})
                     .Card(cardBuilder => cardBuilder
                         .Name("Cost reducer")
-                        .Target<ICard>()
-                        .Effect<ICard>(
-                            targetIndex: 0,
-                            resolveEffect: context => context.Target.ReduceCost(1))
+                        .Effect<ICard>(context => context.Target.ReduceCost(1))
                         ))
                 .AddSet("TestSet", 
                     setProvider => setProvider
@@ -30,39 +27,32 @@ namespace Archetype.Design
                             builder
                                 .Name("Slap heal")
                                 .Cost(4)
-                                .Target<IUnit>()
-                                .Attack(5, 0)
-                                .Effect(resolveEffect: context => context.GameState.Player.Hand.Contents.ForEach((card, i) => card.ReduceCost(i)))
+                                .Targets<IUnit, IUnit>()
+                                .Effect<IUnit>(context => context.Target.Attack(5), targetIndex:0)
+                                .Effect<IUnit>(context => context.Target.Heal(5), targetIndex:1)
                                 .Art("asd")
                         )
                         .Card(builder =>
                             builder
                                 .Name("Resource slap")
                                 .Cost(3)
-                                .Target<IUnit>()
-                                .Effect<IUnit>(
-                                    targetIndex: 0,
-                                    resolveEffect: context => context.Target.Attack(4))
+                                .Effect<IUnit>(context => context.Target.Attack(4))
                                 .Art("other")
                         )
                         .Card(builder =>
                             builder
                                 .Red()
-                                .Name("Slap cards")
+                                .Name("Slap units")
                                 .Cost(1)
-                                .Target<IZone<ICard>>()
-                                .Effect<IZone<ICard>>(
-                                    targetIndex: 0,
-                                    resolveEffect: context => context.Target.Contents.ForEach((card, i) => card.ReduceCost(i)))
+                                .Effect<IZone<IUnit>>(context => context.Target.Contents.ForEach(unit => unit.Attack(3)))
                                 .Art("other")
                         )
                         .Card(builder =>
                             builder
                                 .Blue()
-                                .Name("Slap all")
+                                .Name("Slap cards in hand")
                                 .Cost(1)
-                                .Effect(
-                                    resolveEffect: context => context.GameState.Player.Hand.Contents.ForEach((card, i) => card.ReduceCost(i)))
+                                .Effect(context => context.GameState.Player.Hand.Contents.ForEach(card => card.ReduceCost(1)))
                                 .Art("other")
                         ))
                 .Build();

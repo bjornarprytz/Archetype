@@ -95,8 +95,8 @@ namespace Archetype.Game.Extensions
 	    private static string DescribeAction<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
-		    if (mce.Object is not MemberExpression me)
-			    throw new MalformedEffectException("Targeted effect must call a method on an object. Are you using an extension method?");
+		    if (mce.Object is not Expression me || me is not ParameterExpression && me is not MemberExpression)
+			    throw new MalformedEffectException($"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
 
 		    var targetAttribute = me.GetRequiredTargetAttribute();
 
@@ -227,7 +227,7 @@ namespace Archetype.Game.Extensions
 
 		    if (innerExpression is not ParameterExpression p)
 		    {
-			    throw new MalformedEffectException($"Member expression must be rooted in a parameter");
+			    throw new MalformedEffectException($"Member expression {me} must be rooted in a parameter");
 		    }
 
 		    return p;
@@ -251,7 +251,7 @@ namespace Archetype.Game.Extensions
 		    return mce.Method.GetCustomAttribute<VerbAttribute>();
 	    }
 	    
-	    private static TargetAttribute GetRequiredTargetAttribute(this MemberExpression me)
+	    private static TargetAttribute GetRequiredTargetAttribute(this Expression me)
 	    {
 		    var targetAttr = me.Type.GetCustomAttribute<TargetAttribute>();
 
