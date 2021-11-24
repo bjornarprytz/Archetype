@@ -52,12 +52,6 @@ namespace Archetype.Godot.StateMachine
 			CurrentState?.HandleInput(@event);
 		}
 
-		public override void _ExitTree()
-		{
-			_stateLifetime?.Dispose();
-			_onTransition?.Dispose();
-		}
-		
 		private void ChangeState(IStateTransition transition)
 		{
 			_stateLifetime?.Dispose();

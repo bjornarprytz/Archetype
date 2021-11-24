@@ -5,7 +5,7 @@ using Godot;
 
 namespace Archetype.Godot.StateMachine
 {
-    public interface IState : IDisposable
+    public interface IState
     {
         void HandleInput(InputEvent inputEvent);
         void Update(float delta);
@@ -42,12 +42,6 @@ namespace Archetype.Godot.StateMachine
         public void Exit()
         {
             HandleExit();
-            StateActiveLifetime?.Dispose();
-        }
-
-        public void Dispose()
-        {
-            _onTransition?.Dispose();
             StateActiveLifetime?.Dispose();
         }
         

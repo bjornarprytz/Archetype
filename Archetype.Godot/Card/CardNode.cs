@@ -1,7 +1,9 @@
 using System;
+using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using Archetype.Client;
 using Archetype.Godot.Extensions;
+using Archetype.Godot.Infrastructure;
 using Godot;
 using Archetype.Godot.Targeting;
 
@@ -9,12 +11,14 @@ namespace Archetype.Godot.Card
 {
 	public class CardNode : Area2D, ICard
 	{
+		private CompositeDisposable _disposables = new ();
 		private readonly Subject<bool> _onHovered = new();
 		private readonly Subject<InputEventMouseButton> _onClick = new();
 		private readonly Subject<IPlayCardContext> _onPlay = new();
 		private CardStateManager _stateManager;
 		private ICardProtoData _protoData;
-		
+		private IArchetypeGraphQLClient _client;
+
 		public IObservable<bool> OnHover => _onHovered;
 		public IObservable<InputEventMouseButton> OnClick => _onClick;
 		public IObservable<IPlayCardContext> OnPlay => _onPlay;
@@ -56,12 +60,18 @@ namespace Archetype.Godot.Card
 			_stateManager.Owner = this;
 		}
 
-		public override void _ExitTree()
+		[Inject]
+		public void Construct(IArchetypeGraphQLClient client)
 		{
-			_onHovered?.Dispose();
-			_onClick?.Dispose();
-			_onPlay?.Dispose();
+			_client = client;
+
+			_client
+				.OnGameStarted
+				.Watch()
+				.Subscribe((result => GD.Print(result?.Data?.OnGameStarted.Message)))
+				.DisposeWith(_disposables);
 		}
+		
 		
 		public void HandleTarget(ITargetable target)
 		{
