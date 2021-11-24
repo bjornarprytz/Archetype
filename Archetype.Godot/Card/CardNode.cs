@@ -3,35 +3,44 @@ using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 using Archetype.Client;
 using Archetype.Godot.Extensions;
-using Archetype.Godot.Infrastructure;
 using Godot;
 using Archetype.Godot.Targeting;
+using Archetype.Godot.UXState;
 
 namespace Archetype.Godot.Card
 {
-	public class CardNode : Area2D, ICard
+	public interface ICardNode : IHoverable, ITargetable, ICanTarget
 	{
-		private CompositeDisposable _disposables = new ();
+	}
+	
+	public class CardNode : Area2D, ICardNode
+	{
+		private readonly CompositeDisposable _disposables = new ();
 		private readonly Subject<bool> _onHovered = new();
 		private readonly Subject<InputEventMouseButton> _onClick = new();
-		private readonly Subject<IPlayCardContext> _onPlay = new();
+		
 		private CardStateManager _stateManager;
-		private ICardProtoData _protoData;
+		private ICardProtoData _cardData;
 		private IArchetypeGraphQLClient _client;
 
 		public IObservable<bool> OnHover => _onHovered;
 		public IObservable<InputEventMouseButton> OnClick => _onClick;
-		public IObservable<IPlayCardContext> OnPlay => _onPlay;
+		
 		public Area2D TargetNode => this;
 
-		public CardNode()
+		
+		public void Construct(ICardProtoData cardData, IArchetypeGraphQLClient client)
 		{
 			_stateManager = new CardStateManager(this);
-		}
-		
-		public void Load(ICardProtoData protoData)
-		{
-			_protoData = protoData;
+			_cardData = cardData;
+			_client = client;
+			
+
+			_client //TODO: Subscribe to when this card changes instead
+				.OnGameStarted
+				.Watch()
+				.Subscribe((result => GD.Print(result?.Data?.OnGameStarted.Message)))
+				.DisposeWith(_disposables);
 		}
 		
 		public override void _Ready()
@@ -43,39 +52,23 @@ namespace Archetype.Godot.Card
 			Connect(Signals.CollisionObject2D.MouseExited, this, nameof(OnMouseExited));
 
 
-			if (_protoData != null)
-			{
-				var name = GetNode("CardName") as RichTextLabel;
-				name.Text = _protoData?.MetaData?.Name;
-				var color = GetNode("ColorRect") as ColorRect;
-				color.Color = _protoData.MetaData.Color.ToGodot();
-				var cost = GetNode("CardCost") as RichTextLabel;
-				cost.Text = _protoData.Cost.ToString();
-				var text = GetNode("RulesText") as RichTextLabel;
-				text.Text = _protoData.RulesText;
-			}
+			var name = GetNode("CardName") as RichTextLabel;
+			name.Text = _cardData?.MetaData?.Name;
+			var color = GetNode("ColorRect") as ColorRect;
+			color.Color = _cardData.MetaData.Color.ToGodot();
+			var cost = GetNode("CardCost") as RichTextLabel;
+			cost.Text = _cardData.Cost.ToString();
+			var text = GetNode("RulesText") as RichTextLabel;
+			text.Text = _cardData.RulesText;
 			
 			
 			AddChild(_stateManager);
-			_stateManager.Owner = this;
-		}
-
-		[Inject]
-		public void Construct(IArchetypeGraphQLClient client)
-		{
-			_client = client;
-
-			_client
-				.OnGameStarted
-				.Watch()
-				.Subscribe((result => GD.Print(result?.Data?.OnGameStarted.Message)))
-				.DisposeWith(_disposables);
 		}
 		
 		
 		public void HandleTarget(ITargetable target)
 		{
-			_onPlay.OnNext(null); // TODO: Validate target and send good data instead
+			// TODO: Play card here?
 		}
 
 		private void OnInputEvent(object viewport, object @event, int shape_idx)

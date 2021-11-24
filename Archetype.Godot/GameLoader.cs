@@ -1,24 +1,21 @@
 using Godot;
 using System.Linq;
 using Archetype.Client;
-using Archetype.Godot.Card;
 using Archetype.Godot.Infrastructure;
 using StrawberryShake;
 
 public class GameLoader : Node
 {
 	private IArchetypeGraphQLClient _client;
-	private PackedScene _cardScene;
 
-	public override void _Ready()
-	{
-		_cardScene = ResourceLoader.Load<PackedScene>("res://card.tscn");
-	}
+	private ICardFactory _cardFactory;
+	
 	
 	[Inject]
-	public async void Construct(IArchetypeGraphQLClient client)
+	public async void Construct(ICardFactory cardFactory, IArchetypeGraphQLClient client)
 	{
 		_client = client;
+		_cardFactory = cardFactory;
 		
 		var cardPool = await _client.GetCardPool.ExecuteAsync();
 		
@@ -28,11 +25,9 @@ public class GameLoader : Node
 
 		foreach (var (card, i) in cards.Select((c, idx) => (c, idx)))
 		{
-			var c = _cardScene.Instance();
+			var c = _cardFactory.CreateCard(card);
 			
 			AddChild(c);
-			
-			c.QueueFree();
 		}
 		
 		

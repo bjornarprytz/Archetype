@@ -37,7 +37,7 @@ namespace Archetype.Godot.StateMachine
 			if (_initialState is null)
 				throw new Exception("No state to initialise StateMachine with");
 			
-			ChangeState(Transition<ICard>.To(_initialState));
+			ChangeState(Transition<ICardNode>.To(_initialState));
 		}
 
 		public override void _Process(float delta)

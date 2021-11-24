@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Archetype.Godot.Extensions;
 using Archetype.Godot.Infrastructure;
+using Godot.Collections;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -13,6 +14,8 @@ public abstract class DIContainer : Node
 	private readonly IServiceCollection _container = new ServiceCollection();
 	private IServiceProvider _provider;
 
+	private Dictionary<string, PackedScene> _packedScenes = new();
+	
 	public override void _Ready()
 	{
 		Install(_container);
@@ -23,7 +26,7 @@ public abstract class DIContainer : Node
 			if (child.GetType().GetMethods().FirstOrDefault(m => m.GetCustomAttribute<InjectAttribute>() != null) is not MethodInfo methodInfo) 
 				continue;
 
-			var parameters = methodInfo.GetParameters().Select(p => ResolveService(p.ParameterType)).ToArray();
+			var parameters = methodInfo.GetParameters().Select(ResolveService).ToArray();
 
 			methodInfo.Invoke(child, parameters);
 		}
@@ -31,30 +34,14 @@ public abstract class DIContainer : Node
 	
 	protected abstract void Install(IServiceCollection container);
 
-	private object ResolveService(Type type)
+	private object ResolveService(ParameterInfo parameterInfo)
 	{
+		var type = parameterInfo.ParameterType;
+		
 		var service = _provider.GetService(type);
 
 		if (service != null) return service;
 		
-		var parent = GetClosestContainer();
-
-		if (parent is null)
-			throw new Exception($"Unable to resolve service of type {type}");
-
-		return parent.ResolveService(type);
-
-	}
-
-	private DIContainer GetClosestContainer()
-	{
-		var parent = GetParent()?.Owner;
-
-		while (parent is not null && parent is not DIContainer)
-		{
-			parent = parent.GetParent().Owner;
-		}
-		
-		return parent as DIContainer;
+		throw new Exception($"Unable to resolve service of type {type}");
 	}
 }
