@@ -58,10 +58,11 @@ namespace Archetype.Game.Payloads.Pieces
         public string GenerateRulesText(IGameState gameState)
         {
             var sb = new StringBuilder();
+            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, null);
             
             foreach (var effect in _effects)
             {
-                sb.Append(effect.ContextSensitiveRulesText(gameState));
+                sb.Append(effect.ContextSensitiveRulesText(cardResolutionContext));
             }
 
             return sb.ToString();

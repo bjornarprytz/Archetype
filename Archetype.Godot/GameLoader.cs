@@ -26,7 +26,7 @@ public class GameLoader : Node
 		
 		cardPool.EnsureNoErrors();
 
-		var cards = cardPool?.Data?.CardPool?.Sets?.SelectMany(set => set?.Cards).Cast<IFullCardProtoData>();
+		var cards = cardPool?.Data?.CardPool?.Sets?.SelectMany(set => set?.Cards).Cast<ICardProtoData>();
 
 		foreach (var (card, i) in cards.Select((c, idx) => (c, idx)))
 		{

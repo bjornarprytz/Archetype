@@ -13,7 +13,7 @@ namespace Archetype.Godot.Card
 		private readonly Subject<InputEventMouseButton> _onClick = new();
 		private readonly Subject<IPlayCardContext> _onPlay = new();
 		private CardStateManager _stateManager;
-		private IFullCardProtoData _protoData;
+		private ICardProtoData _protoData;
 		
 		public IObservable<bool> OnHover => _onHovered;
 		public IObservable<InputEventMouseButton> OnClick => _onClick;

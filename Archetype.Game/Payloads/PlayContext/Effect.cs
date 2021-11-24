@@ -14,7 +14,7 @@ namespace Archetype.Game.Payloads.PlayContext
         
         void ResolveContext(ICardResolutionContext context);
 
-        string ContextSensitiveRulesText(IGameState gameState);
+        string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext);
         string PrintedRulesText();
     }
     
@@ -53,14 +53,14 @@ namespace Archetype.Game.Payloads.PlayContext
             Resolve(new EffectResolutionContext<TTarget>(context, target));
         }
 
-        public string ContextSensitiveRulesText(IGameState gameState)
+        public string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext)
         {
-            throw new NotImplementedException();
+            return ResolveExpression.ContextSensitiveRulesText(new EffectResolutionContext<TTarget>(cardResolutionContext, default));
         }
 
         public string PrintedRulesText()
         {
-            throw new NotImplementedException();
+            return ResolveExpression.PrintedRulesText();
         }
     }
     
@@ -95,9 +95,9 @@ namespace Archetype.Game.Payloads.PlayContext
 
         public void ResolveContext(ICardResolutionContext context) => Resolve(new EffectResolutionContext(context));
 
-        public string ContextSensitiveRulesText(IGameState gameState)
+        public string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext)
         {
-            return ResolveExpression.ContextSensitiveRulesText(gameState);
+            return ResolveExpression.ContextSensitiveRulesText(new EffectResolutionContext(cardResolutionContext));
         }
 
         public string PrintedRulesText()

@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Aqua.EnumerableExtensions;
-using Aqua.TypeExtensions;
 using Archetype.Game.Attributes;
 using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.PlayContext;
@@ -15,7 +14,7 @@ namespace Archetype.Game.Extensions
 {
     public static class ExpressionExtensions
     {
-	    public static string PrintedRulesText<T>(this Expression<Action<IEffectResolutionContext>> exp)
+	    public static string PrintedRulesText<T>(this Expression<Action<T>> exp)
 			where T : IEffectResolutionContext
 		{
 			return exp
@@ -34,9 +33,8 @@ namespace Archetype.Game.Extensions
 	    private static MethodCallExpression GetMethodCall<T>(this Expression<Action<T>> exp)
 			where  T : IEffectResolutionContext
 	    {
-		    // Is -I-ReadonlyCollection fine to check here?
 		    if (exp is not LambdaExpression { Body: MethodCallExpression mce, Parameters: IReadOnlyCollection<ParameterExpression> parameters } 
-		        || !parameters.Single().Type.IsAssignableTo(typeof(T)))
+		        || !parameters.First().Type.IsAssignableTo(typeof(T)))
 		    {
 			    throw new MalformedEffectException("Expression must be a method call, which starts by accessing the resolution context");
 		    }
@@ -52,31 +50,59 @@ namespace Archetype.Game.Extensions
 			    return mce.DescribeForEach(context);
 		    }
 
-		    return mce.DescribeTarget(context);
+		    return mce.DescribeAction(context);
 	    }
 
+	    
+	    // c => c.World.Units.ForEach(a => a.Punch(4))
+	    // c => c.World.Units.Where(u => u.Health > 4).ForEach(a => a.Punch(4))
 	    private static string DescribeForEach<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
-		    if (mce.Arguments.FirstOrDefault() is not MemberExpression me)
-			    throw new MalformedEffectException(
-				    $"Cannot describe first argument of method {mce.Method.Name}, which has {mce.Arguments.Count} arguments");
-
-		    var pe = me.GetRequiredRootParameterExpression();
 		    
-		    var group = pe.Des
+		    var (me, lambda) = _getObjectAndLambda(mce);
+
+		    var @object = me.DescribeParameterPath(); // TODO: Do something special here since it's a collection?
+
+		    var verb = lambda.DescribeLambda(context);
+
+		    return $"{verb} {@object}";
+
+		    (MemberExpression, LambdaExpression) _getObjectAndLambda(MethodCallExpression exp)
+		    {
+			    // {argMe} can be either the lambda
+			    // |a => a.Punch(4)|
+			    // or a linq method
+			    // |c.World.Units.Where(u => u.Health > 4)|
+			    // In the latter case, the lambda |a=>a.Punch(4)| will be the second argument
+
+			    if (mce.Object is MemberExpression objMe && mce.Arguments.FirstOrDefault() is LambdaExpression objLambda)
+			    {
+				    return (objMe, objLambda);
+			    }
+			    
+			    if (mce.Arguments.FirstOrDefault() is MemberExpression argMe && mce.Arguments.Skip(1).FirstOrDefault() is LambdaExpression argLambda)
+			    {
+				    return (argMe, argLambda);
+			    }
+
+			    throw new MalformedEffectException($"Cannot parse ForEach on expression {mce}");
+		    }
 	    }
 	    
-	    private static string DescribeTarget<T>(this MethodCallExpression mce, T context)
+	    
+	    // c => c.Target.Punch(1)
+	    private static string DescribeAction<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
 		    if (mce.Object is not MemberExpression me)
-			    throw new MalformedEffectException("Targeted effect must call a method on an object");
+			    throw new MalformedEffectException("Targeted effect must call a method on an object. Are you using an extension method?");
 
-		    var @object = me.DescribeMember(context);
+		    var targetAttribute = me.GetRequiredTargetAttribute();
 
 		    var verbAttribute = mce.GetRequiredVerbAttribute();
 
+		    var @object = targetAttribute.Singular;
 		    var verb = verbAttribute.Name;
 
 		    return mce.Arguments.Count switch
@@ -88,6 +114,7 @@ namespace Archetype.Game.Extensions
 	    }
 
 	    private static string DescribeArgument<T>(this Expression exp, T context)
+		    where  T : IEffectResolutionContext
 	    {
 		    return (exp) switch
 		    {
@@ -98,17 +125,9 @@ namespace Archetype.Game.Extensions
 		    };
 	    }
 
-	    private static string DescribeMember<T>(this MemberExpression me, T gameState)
-		    where  T : IEffectResolutionContext
-	    {
-		    var targetAttr = me.GetRequiredTargetAttribute();
-
-		    // TODO: Describe path to the target (from the Context)
-		    
-			return targetAttr.Singular;
-	    }
-
+	    // e.g. the lambda of a linq method Count(|x => x.Health > 5|)
 	    private static string DescribeArgumentMethod<T>(this MethodCallExpression mce, T context)
+		    where  T : IEffectResolutionContext
 	    {
 		    if (mce.Arguments.FirstOrDefault() is not MemberExpression me)
 			    throw new MalformedEffectException(
@@ -116,9 +135,9 @@ namespace Archetype.Game.Extensions
 
 		    var pe = me.GetRequiredRootParameterExpression();
 
-		    if (context is not null)
+		    if (context is not null && pe.Type.IsAssignableTo(typeof(T)))
 		    {
-			    var expr = Expression.Lambda<Func<T, int>>(mce, false, pe); // TODO: account for args
+			    var expr = Expression.Lambda<Func<T, int>>(mce, false, pe);
 			    return expr.Compile().Invoke(context).ToString();			    
 		    }
 
@@ -135,17 +154,15 @@ namespace Archetype.Game.Extensions
 			    
 			    return $"{mce.Method.Name} where {qualifier}"; // Count where target.health is less than 2
 		    }
-		    
-		    // TODO: remember to describe linq args (binary expressions
 
-		    return "Under ocnstruntction";
+		    throw new MalformedEffectException($"Could not parse ArgumentMethod {mce}");
 	    }
 
 	    private static string DescribeProperty<T>(this MemberExpression me, T context)
 	    {
 		    var pe = me.GetRequiredRootParameterExpression();
 		    
-		    if (context is not null)
+		    if (context is not null && pe.Type.IsAssignableTo(typeof(T)))
 		    {
 			    var expr = Expression.Lambda<Func<T, int>>(me, false, pe); // TODO: account for args
 
@@ -156,32 +173,33 @@ namespace Archetype.Game.Extensions
 	    }
 
 	    private static string DescribeLambda<T>(this LambdaExpression lambda, T context)
+		    where  T : IEffectResolutionContext
 	    {
-		    if (lambda.Body is BinaryExpression b)
+		    return lambda.Body switch
 		    {
-			    return $"{b.Left.DescribeArgument(context)} is {b.NodeType} {b.Right.DescribeArgument(context)}";
-		    }
-		    else
-		    {
-			    return "[Indescribable lambda]";
-		    }
+			    BinaryExpression b =>
+				    $"{b.Left.DescribeArgument(context)} is {b.NodeType} {b.Right.DescribeArgument(context)}",
+			    MethodCallExpression mce => mce.DescribeAction(context)
+		    };
 	    }
 	    
+	    // c => c.Player.Hand.Cards would read (each Card in Hand) 
 	    private static string DescribeParameterPath(this MemberExpression me)
 	    {
 		    var sb = new StringBuilder();
 		
-		    var steps = new List<string>();
-
-		    steps.Add(me.GetRulesDescription());
+		    var steps = new List<string> { me.GetRulesDescription() };
 
 		    var innerExpression = me.Expression;
 
+		    var childExpression = me;
+		    
 		    while (innerExpression is MemberExpression innerMe)
 		    {
 			    steps.Add($"{innerMe.GetRulesDescription()}.");
 
-			    innerExpression = innerMe.Expression;
+			    innerExpression = innerMe.Expression;	// Hand
+			    childExpression = innerMe;				// Cards
 		    }
 
 		    if (innerExpression is ParameterExpression p)
@@ -249,6 +267,12 @@ namespace Archetype.Game.Extensions
 		    var rulesDescriptionAttr = me.Type.GetCustomAttribute<RulesDescriptionAttribute>();
 
 		    return rulesDescriptionAttr?.Word ?? me.Member.Name; // [me.Type.Name] could also make sense here (TODO: Iron this out)
+	    }
+
+
+	    private static bool MemberIsCollection(this MemberExpression me)
+	    {
+		    return me.Type.GetInterface(nameof(IEnumerable)) != null;
 	    }
     }
 }

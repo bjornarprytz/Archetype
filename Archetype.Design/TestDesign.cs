@@ -42,7 +42,7 @@ namespace Archetype.Design
                                 .Target<IUnit>()
                                 .Effect<IUnit>(
                                     targetIndex: 0,
-                                    resolveEffect: context => context.Target.Attack(context.GameState.Player.Resources))
+                                    resolveEffect: context => context.Target.Attack(4))
                                 .Art("other")
                         )
                         .Card(builder =>
