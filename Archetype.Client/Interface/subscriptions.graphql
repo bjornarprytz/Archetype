@@ -1,1 +1,19 @@
 # OnCardPlayed
+
+subscription OnCardPlayed{
+    onCardPlayed{
+        message
+    }
+}
+
+subscription OnGameStarted{
+    onGameStarted{
+        message
+    }
+}
+
+subscription OnTurnStarted{
+    onTurnStarted{
+        message
+    }
+}

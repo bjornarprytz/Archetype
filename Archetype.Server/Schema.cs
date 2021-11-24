@@ -74,21 +74,21 @@ namespace Archetype.Server
         public record StartGameInput(IEnumerable<Guid> ProtoCardIds);
         public record StartGamePayload(string Message);
         
-        public async Task<EndTurnPayload> EndTurn(
+        public async Task<TurnStartedPayload> EndTurn(
             [Service] ITopicEventSender eventSender,
             CancellationToken cancellationToken
         )
         {
-            var result = await _mediator.Send(new EndTurnAction(), cancellationToken);
+            var result = await _mediator.Send(new EndTurnAction(), cancellationToken); // Should resolve enemy turn
 
-            var payload = new EndTurnPayload(result);
+            var payload = new TurnStartedPayload(result);
 
-            await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
+            await eventSender.SendAsync(nameof(Subscriptions.OnTurnStarted), payload, cancellationToken);
             
             return payload;
         }
 
-        public record EndTurnPayload(string Message);
+        public record TurnStartedPayload(string Message);
     }
     
     public class Subscriptions
@@ -100,5 +100,9 @@ namespace Archetype.Server
         [Subscribe]
         [Topic]
         public Mutations.StartGamePayload OnGameStarted([EventMessage] Mutations.StartGamePayload startGamePayload) => startGamePayload;
+        
+        [Subscribe]
+        [Topic]
+        public Mutations.TurnStartedPayload OnTurnStarted([EventMessage] Mutations.TurnStartedPayload turnStartedPayload) => turnStartedPayload;
     }
 }

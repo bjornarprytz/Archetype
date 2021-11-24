@@ -47,6 +47,8 @@ namespace Archetype.Godot.Card
 				color.Color = _protoData.MetaData.Color.ToGodot();
 				var cost = GetNode("CardCost") as RichTextLabel;
 				cost.Text = _protoData.Cost.ToString();
+				var text = GetNode("RulesText") as RichTextLabel;
+				text.Text = _protoData.RulesText;
 			}
 			
 			

@@ -21,10 +21,13 @@
       <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="StrawberryShake.Core">
-      <Version>12.2.2-preview.10</Version>
+      <Version>12.3.2</Version>
     </PackageReference>
     <PackageReference Include="StrawberryShake.Transport.Http">
-      <Version>12.2.2-preview.10</Version>
+      <Version>12.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="StrawberryShake.Transport.WebSockets">
+      <Version>12.3.2</Version>
     </PackageReference>
     <PackageReference Include="System.Reactive">
       <Version>5.0.0</Version>

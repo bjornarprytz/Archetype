@@ -45,3 +45,12 @@ margin_bottom = 84.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="RulesText" type="RichTextLabel" parent="."]
+margin_left = 7.0
+margin_top = 93.0
+margin_right = 200.0
+margin_bottom = 292.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

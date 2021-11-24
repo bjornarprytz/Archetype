@@ -10,6 +10,7 @@ fragment CardPool on ICardPool{
 fragment CardProtoData on ICardProtoData {
     guid
     cost
+    rulesText
     metaData{
         ...CardMetaData
     }
@@ -85,10 +86,12 @@ fragment Hand on IHand {
     ...CardZone
 }
 
-fragment Card on ICard {
+fragment Card on Card {
     ...Atom
     protoGuid
     cost
+    rulesText
+    contextRulesText
     metaData{
         ...CardMetaData
     }

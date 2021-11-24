@@ -11,7 +11,7 @@
       "hashAlgorithm": "md5",
       "useSingleFile": true,
       "requestStrategy": "Default",
-      "outputDirectoryName": "Generated",
+      "outputDirectoryName": "NewGenerated",
       "noStore": false,
       "emitGeneratedCode": true,
       "razorComponents": false,

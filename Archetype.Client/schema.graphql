@@ -84,6 +84,7 @@ type DiscardPile implements IDiscardPile & IGameAtom & IZoneOfICard {
 "Blueprint for creating card instances"
 type CardProtoData implements ICardProtoData {
   guid: UUID!
+  rulesText: String
   cost: Int!
   metaData: CardMetaData
   targets: [ITarget]
@@ -106,6 +107,8 @@ type Unit implements IUnit & IGameAtom {
 
 "A card instance"
 type Card implements ICard & IGameAtom {
+  contextRulesText: String!
+  rulesText: String!
   reduceCost(x: Int!): Int!
   cost: Int!
   protoGuid: UUID!
@@ -193,6 +196,7 @@ interface IDiscardPile {
 
 interface ICardProtoData {
   guid: UUID!
+  rulesText: String
   cost: Int!
   metaData: CardMetaData
   targets: [ITarget]
@@ -230,12 +234,13 @@ type Queries {
 type Mutations {
   playCard(playCardInput: PlayCardInput!): PlayCardPayload!
   startGame(startGameInput: StartGameInput!): StartGamePayload!
-  endTurn: EndTurnPayload!
+  endTurn: TurnStartedPayload!
 }
 
 type Subscriptions {
   onCardPlayed: PlayCardPayload!
   onGameStarted: StartGamePayload!
+  onTurnStarted: TurnStartedPayload!
 }
 
 interface IGameAtom {
@@ -287,7 +292,7 @@ enum CardRarity {
   MYTHIC
 }
 
-type EndTurnPayload {
+type TurnStartedPayload {
   message: String!
 }
 

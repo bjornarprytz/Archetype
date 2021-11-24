@@ -119,10 +119,10 @@ namespace Archetype.Server
             descriptor.Description("A card instance");
             descriptor.Implements<InterfaceType<ICard>>();
 
-            descriptor.Field("ContextRulesText")
+            descriptor.Field("contextRulesText")
                 .ResolveWith<Resolvers>(resolvers => resolvers.RulesTextWithContext(default!, default!));
             
-            descriptor.Field("RulesText")
+            descriptor.Field("rulesText")
                 .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!, default!));
 
             descriptor.Field(card => card.GenerateRulesText(default!))
