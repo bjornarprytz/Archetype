@@ -1,41 +1,26 @@
 using System;
 using System.Reactive.Disposables;
-using System.Reactive.Subjects;
 using Archetype.Client;
 using Archetype.Godot.Extensions;
 using Godot;
 using Archetype.Godot.Targeting;
-using Archetype.Godot.UXState;
 
 namespace Archetype.Godot.Card
 {
-	public interface ICardNode : IHoverable, ITargetable, ICanTarget
-	{
-	}
-	
-	public class CardNode : Area2D, ICardNode
+	public class CardNode : Area2D
 	{
 		private readonly CompositeDisposable _disposables = new ();
-		private readonly Subject<bool> _onHovered = new();
-		private readonly Subject<InputEventMouseButton> _onClick = new();
 		
-		private CardStateManager _stateManager;
+		private CardStateMachine _stateMachine;
 		private ICardProtoData _cardData;
 		private IArchetypeGraphQLClient _client;
 
-		public IObservable<bool> OnHover => _onHovered;
-		public IObservable<InputEventMouseButton> OnClick => _onClick;
-		
-		public Area2D TargetNode => this;
-
-		
 		public void Construct(ICardProtoData cardData, IArchetypeGraphQLClient client)
 		{
-			_stateManager = new CardStateManager(this);
+			_stateMachine = new CardStateMachine(this);
 			_cardData = cardData;
 			_client = client;
 			
-
 			_client //TODO: Subscribe to when this card changes instead
 				.OnGameStarted
 				.Watch()
@@ -60,12 +45,18 @@ namespace Archetype.Godot.Card
 			cost.Text = _cardData.Cost.ToString();
 			var text = GetNode("RulesText") as RichTextLabel;
 			text.Text = _cardData.RulesText;
-			
-			
-			AddChild(_stateManager);
 		}
-		
-		
+
+		public override void _Input(InputEvent @event)
+		{
+			_stateMachine.HandleInput(@event);
+		}
+
+		public override void _Process(float delta)
+		{
+			_stateMachine.Process(delta);
+		}
+
 		public void HandleTarget(ITargetable target)
 		{
 			// TODO: Play card here?
@@ -73,20 +64,20 @@ namespace Archetype.Godot.Card
 
 		private void OnInputEvent(object viewport, object @event, int shape_idx)
 		{
-			if (@event is InputEventMouseButton mb)
+			if (@event is InputEventMouseButton { Pressed: true })
 			{
-				_onClick.OnNext(mb);
+				_stateMachine.MouseClick();
 			}
 		}
 		
 		private void OnMouseEntered()
 		{
-			_onHovered.OnNext(true);
+			_stateMachine.MouseEntered();
 		}
 
 		private void OnMouseExited()
 		{
-			_onHovered.OnNext(false);
+			_stateMachine.MouseExited();
 		}
 	}
 }

@@ -1,6 +1,6 @@
-using System;
-using System.Reactive.Subjects;
+using System.Collections.Generic;
 using Godot;
+using Godot.Collections;
 
 namespace Archetype.Godot.Targeting
 {
@@ -22,6 +22,27 @@ namespace Archetype.Godot.Targeting
 		public void PointTo(Vector2 target)
 		{
 			SetPointPosition(1, target);
+		}
+
+		public void Reset()
+		{
+			SetPointPosition(1, Vector2.Zero);
+		}
+		
+		public bool TryTarget(out ITargetable targetable)
+		{
+			targetable = null;
+			
+			var spaceState = GetWorld2d().DirectSpaceState;
+			var result = spaceState.IntersectPoint(GetPointPosition(1), collideWithAreas: true);
+
+			if (result == null 
+				|| result.Count == 0 
+				|| result[0] is not Dictionary d 
+				|| d["collider"] is not ITargetable t) return false;
+
+			targetable = t;
+			return true;
 		}
 	}
 }

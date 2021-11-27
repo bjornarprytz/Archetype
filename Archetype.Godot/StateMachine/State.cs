@@ -1,54 +1,21 @@
-using System;
-using System.Reactive.Disposables;
-using System.Reactive.Subjects;
 using Godot;
 
 namespace Archetype.Godot.StateMachine
 {
-    public interface IState
+    public interface IState<in T>
     {
-        void HandleInput(InputEvent inputEvent);
-        void Update(float delta);
-        IObservable<IStateTransition> OnTransition { get; }
+        void HandleInput(T model, InputEvent inputEvent);
+        void Process(T model, float delta);
 
-        void Enter();
-        void Exit();
+        void OnEnter(T model);
+        void OnExit(T model);
     }
-
-    public abstract class State<T> : IState
+    
+    public abstract class State<T> : IState<T>
     {
-        protected CompositeDisposable StateActiveLifetime { get; private set; }
-        private readonly Subject<IStateTransition> _onTransition = new();
-        protected T Model { get; }
-
-        protected State(T model)
-        {
-            Model = model ?? throw new ArgumentException(nameof(model));
-        }
-
-        public IObservable<IStateTransition> OnTransition => _onTransition;
-
-        public void Enter()
-        {
-            StateActiveLifetime = new CompositeDisposable();
-            HandleEnter();
-        }
-
-        public virtual void HandleInput(InputEvent inputEvent){}
-        public virtual void Update(float delta){}
-        protected abstract void HandleEnter();
-        protected abstract void HandleExit();
-        
-        public void Exit()
-        {
-            HandleExit();
-            StateActiveLifetime?.Dispose();
-        }
-        
-        protected void TransitionTo<TNextState>()
-            where TNextState : IState
-        {
-            _onTransition.OnNext(Transition<T>.To<TNextState>());
-        }
+        public virtual void HandleInput(T model, InputEvent inputEvent) {}
+        public virtual void Process(T model, float delta) {}
+        public virtual void OnEnter(T model) {}
+        public virtual void OnExit(T model) {}
     }
 }
