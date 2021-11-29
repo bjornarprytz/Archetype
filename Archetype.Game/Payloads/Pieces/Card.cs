@@ -18,7 +18,7 @@ namespace Archetype.Game.Payloads.Pieces
         CardMetaData MetaData { get; }
         int Cost { get; }
         
-        [Verb("Reduce cost")]
+        [Template("Reduce cost of {0}")]
         int ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
@@ -45,7 +45,7 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<ITarget> Targets => _targets;
         public IEnumerable<IEffect> Effects => _effects;
         
-
+        
         public int ReduceCost(int x)
         {
             Console.WriteLine($"Reducing cost by {x}!");

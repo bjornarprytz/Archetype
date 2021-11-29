@@ -1,5 +1,5 @@
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.PlayContext
@@ -13,7 +13,7 @@ namespace Archetype.Game.Payloads.PlayContext
     public interface IEffectResolutionContext
     {
         ICardResolutionContext CardResolutionContext { get; }
-
+        [Target("World")]
         IGameState GameState => CardResolutionContext.GameState;
     }
     

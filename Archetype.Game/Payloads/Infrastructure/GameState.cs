@@ -8,7 +8,6 @@ namespace Archetype.Game.Payloads.Infrastructure
     public interface IGameState
     {
         IGameAtom GetGamePiece(Guid guid);
-        
         IPlayer Player { get; }
         IMap Map { get; }
     }

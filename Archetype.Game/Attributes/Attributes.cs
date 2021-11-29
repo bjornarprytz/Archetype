@@ -1,17 +1,8 @@
 using System;
+using System.Linq;
 
 namespace Archetype.Game.Attributes
 {
-    internal class RulesDescriptionAttribute : Attribute
-    {
-        public string Word { get; }
-        
-        public RulesDescriptionAttribute(string word)
-        {
-            Word = word;
-        }
-    }
-    
     internal class TargetAttribute : Attribute
     {
         public string Singular { get; }
@@ -24,15 +15,25 @@ namespace Archetype.Game.Attributes
         }
     }
 
-    internal class VerbAttribute : Attribute{
-
-        public string Name {get;}
-        public string Preposition {get;}
-
-        public VerbAttribute(string name, string preposition=null)
+    internal class GroupAttribute : Attribute
+    {
+        public string Description { get; }
+        public GroupAttribute(string description)
         {
-            Name = name;
-            Preposition = preposition ?? "by";
+            Description = description;
+        }
+    }
+
+    internal class TemplateAttribute : Attribute{
+
+        public string Template {get;}
+        public int NParameters { get; }
+
+        public TemplateAttribute(string template)
+        {
+            Template = template;
+
+            NParameters = Template.Count(c => c == '{');
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -60,33 +59,25 @@ namespace Archetype.Game.Extensions
 		    where  T : IEffectResolutionContext
 	    {
 		    
-		    var (me, lambda) = _getObjectAndLambda(mce);
+		    var lambda = GetLambda();
+		    var group = GetGroup();
 
-		    var @object = me.DescribeParameterPath(); // TODO: Do something special here since it's a collection?
+		    return lambda.DescribeLambda(context, group);
 
-		    var verb = lambda.DescribeLambda(context);
-
-		    return $"{verb} {@object}";
-
-		    (MemberExpression, LambdaExpression) _getObjectAndLambda(MethodCallExpression exp)
+		    string GetGroup()
 		    {
-			    // {argMe} can be either the lambda
-			    // |a => a.Punch(4)|
-			    // or a linq method
-			    // |c.World.Units.Where(u => u.Health > 4)|
-			    // In the latter case, the lambda |a=>a.Punch(4)| will be the second argument
+			    if (mce.Arguments.FirstOrDefault() is not MethodCallExpression argMce)
+				    throw new MalformedEffectException("Group accessor must be a method call");
 
-			    if (mce.Object is MemberExpression objMe && mce.Arguments.FirstOrDefault() is LambdaExpression objLambda)
-			    {
-				    return (objMe, objLambda);
-			    }
+			    return argMce.Method.GetRequiredAttribute<GroupAttribute>().Description;
+		    }
+		    
+		    LambdaExpression GetLambda()
+		    {
+			    if (mce.Arguments.Skip(1).FirstOrDefault() is not LambdaExpression argLambda)
+					throw new MalformedEffectException($"Cannot parse ForEach on expression {mce}");
 			    
-			    if (mce.Arguments.FirstOrDefault() is MemberExpression argMe && mce.Arguments.Skip(1).FirstOrDefault() is LambdaExpression argLambda)
-			    {
-				    return (argMe, argLambda);
-			    }
-
-			    throw new MalformedEffectException($"Cannot parse ForEach on expression {mce}");
+			    return argLambda;
 		    }
 	    }
 	    
@@ -98,17 +89,17 @@ namespace Archetype.Game.Extensions
 		    if (mce.Object is not Expression me || me is not ParameterExpression && me is not MemberExpression)
 			    throw new MalformedEffectException($"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
 
-		    var targetAttribute = me.GetRequiredTargetAttribute();
+		    var targetAttribute = me.Type.GetRequiredAttribute<TargetAttribute>();
 
-		    var verbAttribute = mce.GetRequiredVerbAttribute();
+		    var templateAttr = mce.Method.GetRequiredAttribute<TemplateAttribute>();
 
 		    var @object = targetAttribute.Singular;
-		    var verb = verbAttribute.Name;
+		    var template = templateAttr.Template;
 
 		    return mce.Arguments.Count switch
 		    {
-			    0 => $"{verb} {@object}",
-			    1 => $"{verb} {@object} {verbAttribute.Preposition} {mce.Arguments.Single().DescribeArgument(context)}",
+			    0 => string.Format(template, @object),
+			    1 => string.Format(template, @object, mce.Arguments.Single().DescribeArgument(context)),
 			    _ => throw new MalformedEffectException($"Only methods with 1 or 0 arguments are supported. {mce.Method} has {mce.Arguments.Count}")
 		    };
 	    }
@@ -125,7 +116,6 @@ namespace Archetype.Game.Extensions
 		    };
 	    }
 
-	    // e.g. the lambda of a linq method Count(|x => x.Health > 5|)
 	    private static string DescribeArgumentMethod<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
@@ -141,18 +131,9 @@ namespace Archetype.Game.Extensions
 			    return expr.Compile().Invoke(context).ToString();			    
 		    }
 
-		    var verbAttr = mce.CheckVerbAttribute();
-
-		    if (verbAttr is not null)
-		    {
-				return $"{verbAttr.Name} {me.DescribeParameterPath()}";
-		    }
-
 		    if (mce.Method.ReturnType == typeof(int) && mce.Arguments.Skip(1).FirstOrDefault() is LambdaExpression lambda)
 		    {
-			    var qualifier = lambda.DescribeLambda(context);
-			    
-			    return $"{mce.Method.Name} where {qualifier}"; // Count where target.health is less than 2
+			    return lambda.ToString(); // TODO: Describe this better
 		    }
 
 		    throw new MalformedEffectException($"Could not parse ArgumentMethod {mce}");
@@ -164,31 +145,37 @@ namespace Archetype.Game.Extensions
 		    
 		    if (context is not null && pe.Type.IsAssignableTo(typeof(T)))
 		    {
-			    var expr = Expression.Lambda<Func<T, int>>(me, false, pe); // TODO: account for args
+			    var expr = Expression.Lambda<Func<T, int>>(me, false, pe);
 
 			    return expr.Compile().Invoke(context).ToString();
 		    }
 
-		    return me.DescribeParameterPath();
+		    return me.DescribeParameterPath(context);
 	    }
 
-	    private static string DescribeLambda<T>(this LambdaExpression lambda, T context)
+	    private static string DescribeLambda<T>(this LambdaExpression lambda, T context, string groupDescription)
 		    where  T : IEffectResolutionContext
 	    {
-		    return lambda.Body switch
+		    if (lambda.Body is not MethodCallExpression mce)
+			    throw new MalformedEffectException("Lambda body must call a method");
+		    
+		    var templateAttr = mce.Method.GetRequiredAttribute<TemplateAttribute>();
+
+		    var template = templateAttr.Template;
+
+		    return mce.Arguments.Count switch
 		    {
-			    BinaryExpression b =>
-				    $"{b.Left.DescribeArgument(context)} is {b.NodeType} {b.Right.DescribeArgument(context)}",
-			    MethodCallExpression mce => mce.DescribeAction(context)
+			    0 => string.Format(template, groupDescription),
+			    1 => string.Format(template, groupDescription, mce.Arguments.Single().DescribeArgument(context)),
+			    _ => throw new MalformedEffectException($"Only methods with 1 or 0 arguments are supported. {mce.Method} has {mce.Arguments.Count}")
 		    };
 	    }
 	    
-	    // c => c.Player.Hand.Cards would read (each Card in Hand) 
-	    private static string DescribeParameterPath(this MemberExpression me)
+	    private static string DescribeParameterPath<T>(this MemberExpression me, T context)
 	    {
 		    var sb = new StringBuilder();
 		
-		    var steps = new List<string> { me.GetRulesDescription() };
+		    var steps = new List<string> { me.Member.Name };
 
 		    var innerExpression = me.Expression;
 
@@ -196,7 +183,7 @@ namespace Archetype.Game.Extensions
 		    
 		    while (innerExpression is MemberExpression innerMe)
 		    {
-			    steps.Add($"{innerMe.GetRulesDescription()}.");
+			    steps.Add($"{innerMe.Member.Name}.");
 
 			    innerExpression = innerMe.Expression;	// Hand
 			    childExpression = innerMe;				// Cards
@@ -233,46 +220,16 @@ namespace Archetype.Game.Extensions
 		    return p;
 	    }
 
-	    private static VerbAttribute GetRequiredVerbAttribute(this MethodCallExpression mce)
+	    private static T GetRequiredAttribute<T>(this MemberInfo memberInfo)
+			where  T : Attribute
 	    {
-		    var methodAttr = mce.CheckVerbAttribute();
-
-		    if (methodAttr is null)
-		    {
-			    throw new MalformedEffectException(
-				    $"Method type {mce.Method} on type {mce.Object?.Type} should be decorated with {typeof(VerbAttribute)}");
-		    }
-
-		    return methodAttr;
-	    }
-	    
-	    private static VerbAttribute CheckVerbAttribute(this MethodCallExpression mce)
-	    {
-		    return mce.Method.GetCustomAttribute<VerbAttribute>();
-	    }
-	    
-	    private static TargetAttribute GetRequiredTargetAttribute(this Expression me)
-	    {
-		    var targetAttr = me.Type.GetCustomAttribute<TargetAttribute>();
+		    var targetAttr = memberInfo.GetCustomAttribute<T>();
 
 		    if (targetAttr is null)
 			    throw new MalformedEffectException(
-				    $"Target type {me.Type} should be decorated with {typeof(TargetAttribute)}");
+				    $"Member {memberInfo} should be decorated with {typeof(T)}");
 
 		    return targetAttr;
-	    }
-
-	    private static string GetRulesDescription(this MemberExpression me)
-	    {
-		    var rulesDescriptionAttr = me.Type.GetCustomAttribute<RulesDescriptionAttribute>();
-
-		    return rulesDescriptionAttr?.Word ?? me.Member.Name; // [me.Type.Name] could also make sense here (TODO: Iron this out)
-	    }
-
-
-	    private static bool MemberIsCollection(this MemberExpression me)
-	    {
-		    return me.Type.GetInterface(nameof(IEnumerable)) != null;
 	    }
     }
 }

@@ -5,6 +5,7 @@ using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Design
@@ -44,7 +45,7 @@ namespace Archetype.Design
                                 .Red()
                                 .Name("Slap units")
                                 .Cost(1)
-                                .Effect<IZone<IUnit>>(context => context.Target.Contents.ForEach(unit => unit.Attack(3)))
+                                .Effect<IZone<IUnit>>(context => context.UnitsInTargetZone().ForEach(unit => unit.Attack(3)))
                                 .Art("other")
                         )
                         .Card(builder =>
@@ -52,7 +53,7 @@ namespace Archetype.Design
                                 .Blue()
                                 .Name("Slap cards in hand")
                                 .Cost(1)
-                                .Effect(context => context.GameState.Player.Hand.Contents.ForEach(card => card.ReduceCost(1)))
+                                .Effect(context => context.CardsInPlayersHand().ForEach(card => card.ReduceCost(1)))
                                 .Art("other")
                         ))
                 .Build();

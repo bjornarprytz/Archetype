@@ -16,9 +16,9 @@ namespace Archetype.Game.Payloads.Pieces
         int MaxHealth { get; }
         int Health { get; }
         
-        [Verb("Attack")]
+        [Template("Deal {1} damage to {0}")]
         int Attack(int strength);
-        [Verb("Heal")]
+        [Template("Heal {0} by {1}")]
         int Heal(int strength);
     }
     

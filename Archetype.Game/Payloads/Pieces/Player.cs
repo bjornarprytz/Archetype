@@ -13,8 +13,11 @@ namespace Archetype.Game.Payloads.Pieces
         int MinDeckSize { get; }
         int Resources { get; set; }
         
+        [Target("Player's deck")]
         IDeck Deck { get; }
+        [Target("Player's hand")]
         IHand Hand { get; }
+        [Target("Player's discard pile")]
         IDiscardPile DiscardPile { get; }
 
         int Mill(int strength);
