@@ -65,14 +65,16 @@ namespace Archetype.Game.Actions
             if (targets.Any(t => t == null))
                 return "Some targets are null";
 
-            using (var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player, targets, _historyWriter))
+            using (var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player, targets))
             {
                 if (!card.ValidateTargets(cardResolutionContext))
                     return "Invalid targets";
 
                 _gameState.Player.Resources -= card.Cost;
 
-                cardResolutionContext.Resolve(card);
+                var result = cardResolutionContext.Resolve(card);
+                
+                _historyWriter.Append(card, cardResolutionContext, result);
             };
             
             // TODO: Formalize a verb for moving a card from hand to discard pile (must be different from Discard, to avoid those triggers)

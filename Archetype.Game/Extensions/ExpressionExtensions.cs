@@ -47,18 +47,18 @@ namespace Archetype.Game.Extensions
 	    private static string ParseMethodCall<T>(this MethodCallExpression mce, T context=default)
 		    where  T : IEffectResolutionContext
 	    {
-		    if (mce.Method.Name == nameof(EnumerableExtensions.ForEach))
+		    if (mce.Method.Name == nameof(ContextExtensions.TargetEach))
 		    {
-			    return mce.DescribeForEach(context);
+			    return mce.DescribeMultipleTargets(context);
 		    }
 
-		    return mce.DescribeAction(context);
+		    return mce.DescribeSingleTarget(context);
 	    }
 
 	    
 	    // c => c.World.Units.ForEach(a => a.Punch(4))
 	    // c => c.World.Units.Where(u => u.Health > 4).ForEach(a => a.Punch(4))
-	    private static string DescribeForEach<T>(this MethodCallExpression mce, T context)
+	    private static string DescribeMultipleTargets<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
 		    
@@ -86,7 +86,7 @@ namespace Archetype.Game.Extensions
 	    
 	    
 	    // c => c.Target.Punch(1)
-	    private static string DescribeAction<T>(this MethodCallExpression mce, T context)
+	    private static string DescribeSingleTarget<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
 		    if (mce.Object is not Expression me || me is not ParameterExpression && me is not MemberExpression)

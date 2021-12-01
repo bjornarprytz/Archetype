@@ -27,5 +27,20 @@ namespace Archetype.Game.Exceptions
         }
     }
     
-    public class ContextUnresolvedException : Exception { }
+    public class InvalidTargetChosenException : Exception
+    {
+        public InvalidTargetChosenException()
+        {
+            
+        }
+    }
+    public class TargetCountMismatchException : Exception
+    {
+        public override string Message { get; }
+
+        public TargetCountMismatchException(int expected, int actual)
+        {
+            Message = $"Expected {expected} targets, but got {actual} targets";
+        }
+    }
 }

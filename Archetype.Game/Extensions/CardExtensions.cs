@@ -1,4 +1,5 @@
 using System.Linq;
+using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.PlayContext;
 
@@ -11,12 +12,16 @@ namespace Archetype.Game.Extensions
             var targetCount = card.Targets.Count();
 
             if (context.Targets.Count() != targetCount)
-                return false;
+            {
+                throw new TargetCountMismatchException(targetCount, context.Targets.Count());
+            }
             
             foreach (var (targetData, chosenTarget) in card.Targets.Zip(context.Targets))
             {
                 if (!targetData.ValidateContext(new TargetValidationContext(context.GameState, chosenTarget)))
-                    return false;
+                {
+                    throw new InvalidTargetChosenException();
+                }
             }
 
             return true;

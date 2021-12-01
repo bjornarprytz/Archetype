@@ -59,7 +59,7 @@ namespace Archetype.Game.Payloads.Pieces
         public string GenerateRulesText(IGameState gameState)
         {
             var sb = new StringBuilder();
-            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, null, null); // TODO: Do something that prevents unnecessary null parameters
+            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, null); // TODO: Do something that prevents unnecessary null parameters
             
             foreach (var effect in _effects)
             {

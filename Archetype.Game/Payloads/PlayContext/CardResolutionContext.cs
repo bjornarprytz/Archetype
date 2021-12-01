@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Infrastructure;
@@ -18,51 +20,50 @@ namespace Archetype.Game.Payloads.PlayContext
         [Target("World")]
         IGameState GameState { get; }
         
+        ICardResult PartialResults { get; }
     }
 
     public interface ICardResolver
     {
         ICardResult Resolve(ICard card);
-    } 
+    }
     
     public class CardResolutionContext : ICardResolutionContext, ICardResolver
     {
         private bool _resolved;
-        private readonly IHistoryWriter _historyWriter;
         private readonly ICardResultCollector _result;
-        
-        public CardResolutionContext(IGameState gameState, IGameAtom caster, IEnumerable<IGameAtom> targets, IHistoryWriter historyWriter)
+        public CardResolutionContext(IGameState gameState, IGameAtom caster, IEnumerable<IGameAtom> targets)
         {
-            _historyWriter = historyWriter;
             GameState = gameState;
             Caster = caster;
             Targets = targets;
             _result = new CardResultCollector();
         }
-        
+
+        public ICardResult PartialResults => _result;
         public IGameState GameState { get; }
 
         public ICardResult Resolve(ICard card)
         {
-            if (_resolved) throw new ContextResolvedTwiceException(card, this);
-            _resolved = true;
+            if (_resolved)
+            {
+                throw new ContextResolvedTwiceException(card, this);
+            }
             
+            _resolved = true;
+
             foreach (var effect in card.Effects)
             {
                 _result.AddResult(effect.ResolveContext(this));
             }
-            
-            _historyWriter.AddEntry(card, this, _result);
 
             return _result;
         }
         
         public IGameAtom Caster { get; }
+
         public IEnumerable<IGameAtom> Targets { get; }
 
-        public void Dispose()
-        {
-            if (!_resolved) throw new ContextUnresolvedException();
-        }
+        void IDisposable.Dispose() { }
     }
 }
