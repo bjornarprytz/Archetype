@@ -11,7 +11,6 @@ namespace Archetype.Godot.Card
         private readonly CardNode _model;
         private readonly StateMachine<IState<CardNode>, Triggers> _stateMachine;
 
-        private IState<CardNode> _currentState;
 
         private readonly IdleState _idle = new();
         private readonly HighlightState _highlight = new();
@@ -20,8 +19,7 @@ namespace Archetype.Godot.Card
         public CardStateMachine(CardNode model)
         {
             _model = model;
-            _currentState = _idle;
-            _stateMachine = new StateMachine<IState<CardNode>, Triggers>(() => _currentState, s => _currentState = s);
+            _stateMachine = new StateMachine<IState<CardNode>, Triggers>(_idle);
 
             _stateMachine.OnTransitioned(state =>
             {
@@ -43,7 +41,7 @@ namespace Archetype.Godot.Card
         
         public void HandleInput(InputEvent inputEvent)
         {
-            _currentState.HandleInput(_model, inputEvent);
+            _stateMachine.State.HandleInput(_model, inputEvent);
 
             if (inputEvent is InputEventMouseButton { Pressed: false })
             {
@@ -53,7 +51,7 @@ namespace Archetype.Godot.Card
 
         public void Process(float delta)
         {
-            _currentState.Process(_model, delta);
+            _stateMachine.State.Process(_model, delta);
         }
 
         public void MouseEntered()

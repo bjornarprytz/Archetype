@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
@@ -38,5 +38,11 @@ namespace Archetype.Game.Extensions
             return context.Target.Deck.Contents;
         }
 
+
+        public static IEffectResult TargetEach<T>(this IEnumerable<T> source, Func<T, IEffectResult> func)
+            where T : IGameAtom
+        {
+            return new AggregatedEffectResult(source.Select(func).ToList());
+        } 
     }
 }

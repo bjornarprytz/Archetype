@@ -13,6 +13,9 @@ namespace Archetype.Game.Extensions
                 .AddSingleton<IGameState, GameState>()
                 .AddSingleton<IPlayer, Player>()
                 .AddSingleton<IMap, Map>()
+                .AddSingleton<History>()
+                .AddSingleton<IHistoryReader, History>(s => s.GetService<History>())
+                .AddSingleton<IHistoryWriter, History>(s => s.GetService<History>())
                 ;
 
             return serviceCollection;

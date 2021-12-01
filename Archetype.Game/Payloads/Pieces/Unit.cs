@@ -1,7 +1,9 @@
 using System;
 using Archetype.Dto.MetaData;
 using Archetype.Game.Attributes;
+using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
@@ -17,9 +19,9 @@ namespace Archetype.Game.Payloads.Pieces
         int Health { get; }
         
         [Template("Deal {1} damage to {0}")]
-        int Attack(int strength);
+        IEffectResult<IUnit> Attack(int strength);
         [Template("Heal {0} by {1}")]
-        int Heal(int strength);
+        IEffectResult<IUnit> Heal(int strength);
     }
     
     public class Unit : Piece<IUnit>, IUnit
@@ -40,7 +42,7 @@ namespace Archetype.Game.Payloads.Pieces
         public int MaxHealth { get; }
         public int Health { get; private set; }
 
-        public int Attack(int strength)
+        public IEffectResult<IUnit> Attack(int strength)
         {
             var potentialDamage = Health;
 
@@ -48,10 +50,10 @@ namespace Archetype.Game.Payloads.Pieces
             
             Health -= actualDamage;
 
-            return actualDamage;
+            return ResultFactory.Create(this, actualDamage);
         }
 
-        public int Heal(int strength)
+        public IEffectResult<IUnit> Heal(int strength)
         {
             var potentialHeal = MaxHealth - Health;
 
@@ -59,7 +61,7 @@ namespace Archetype.Game.Payloads.Pieces
             
             Health += actualHeal;
 
-            return actualHeal;
+            return ResultFactory.Create(this, actualHeal);
         }
     }
 }

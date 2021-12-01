@@ -21,13 +21,5 @@ namespace Archetype.Game.Extensions
 
             return true;
         }
-
-        public static void Resolve(this ICard card, ICardResolutionContext context)
-        {
-            foreach (var effect in card.Effects)
-            {
-                effect.ResolveContext(context);
-            }
-        }
     }
 }

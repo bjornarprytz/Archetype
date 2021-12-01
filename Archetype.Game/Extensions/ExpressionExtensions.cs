@@ -13,24 +13,27 @@ namespace Archetype.Game.Extensions
 {
     public static class ExpressionExtensions
     {
-	    public static string PrintedRulesText<T>(this Expression<Action<T>> exp)
+	    public static string PrintedRulesText<T, R>(this Expression<Func<T, R>> exp)
 			where T : IEffectResolutionContext
+			where R : IEffectResult
 		{
 			return exp
 				.GetMethodCall()
 				.ParseMethodCall<T>();
 		}
 	    
-	    public static string ContextSensitiveRulesText<T>(this Expression<Action<T>> exp, T context)
-			where T : IEffectResolutionContext
+	    public static string ContextSensitiveRulesText<T, R>(this Expression<Func<T, R>> exp, T context)
+		    where T : IEffectResolutionContext
+			where R : IEffectResult
 		{
 			return exp
 				.GetMethodCall()
 				.ParseMethodCall(context);
 		}
 
-	    private static MethodCallExpression GetMethodCall<T>(this Expression<Action<T>> exp)
-			where  T : IEffectResolutionContext
+	    private static MethodCallExpression GetMethodCall<T, R>(this Expression<Func<T, R>> exp)
+		    where T : IEffectResolutionContext
+		    where R : IEffectResult
 	    {
 		    if (exp is not LambdaExpression { Body: MethodCallExpression mce, Parameters: IReadOnlyCollection<ParameterExpression> parameters } 
 		        || !parameters.First().Type.IsAssignableTo(typeof(T)))

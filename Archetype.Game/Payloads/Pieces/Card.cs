@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Archetype.Dto.MetaData;
 using Archetype.Game.Attributes;
+using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
@@ -19,7 +20,7 @@ namespace Archetype.Game.Payloads.Pieces
         int Cost { get; }
         
         [Template("Reduce cost of {0}")]
-        int ReduceCost(int x);
+        IEffectResult<ICard> ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect> Effects { get; }
@@ -46,19 +47,19 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<IEffect> Effects => _effects;
         
         
-        public int ReduceCost(int x)
+        public IEffectResult<ICard> ReduceCost(int x)
         {
             Console.WriteLine($"Reducing cost by {x}!");
 
             Cost -= x;
 
-            return x;
+            return ResultFactory.Create(this, x);
         }
 
         public string GenerateRulesText(IGameState gameState)
         {
             var sb = new StringBuilder();
-            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, null);
+            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, null, null); // TODO: Do something that prevents unnecessary null parameters
             
             foreach (var effect in _effects)
             {

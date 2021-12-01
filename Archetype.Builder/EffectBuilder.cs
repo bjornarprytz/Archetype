@@ -22,7 +22,7 @@ namespace Archetype.Builder
             return this;
         }
         
-        public EffectBuilder<TTarget> Resolve(Expression<Action<IEffectResolutionContext<TTarget>>> expression)
+        public EffectBuilder<TTarget> Resolve(Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 
@@ -46,7 +46,7 @@ namespace Archetype.Builder
             _effect = new Effect();
         }
         
-        public EffectBuilder Resolve(Expression<Action<IEffectResolutionContext>> expression)
+        public EffectBuilder Resolve(Expression<Func<IEffectResolutionContext, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 

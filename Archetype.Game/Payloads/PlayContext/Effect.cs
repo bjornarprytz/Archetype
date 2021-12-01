@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using Archetype.Game.Extensions;
-using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 using Newtonsoft.Json;
 
@@ -12,7 +11,7 @@ namespace Archetype.Game.Payloads.PlayContext
     {
         int TargetIndex { get; }
         
-        void ResolveContext(ICardResolutionContext context);
+        IEffectResult ResolveContext(ICardResolutionContext context);
 
         string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext);
         string PrintedRulesText();
@@ -21,11 +20,11 @@ namespace Archetype.Game.Payloads.PlayContext
     public class Effect<TTarget> : IEffect 
         where TTarget : IGameAtom
     {
-        private Action<IEffectResolutionContext<TTarget>> _resolveBacking;
-        private Expression<Action<IEffectResolutionContext<TTarget>>> _resolveExpression;
+        private Func<IEffectResolutionContext<TTarget>, IEffectResult> _resolveBacking;
+        private Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> _resolveExpression;
 
         [JsonIgnore]
-        private Action<IEffectResolutionContext<TTarget>> Resolve
+        private Func<IEffectResolutionContext<TTarget>, IEffectResult> Resolve
         {
             get
             {
@@ -35,7 +34,7 @@ namespace Archetype.Game.Payloads.PlayContext
         }
 
         [JsonIgnore]
-        public Expression<Action<IEffectResolutionContext<TTarget>>> ResolveExpression
+        public Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> ResolveExpression
         {
             get => _resolveExpression;
             set
@@ -46,11 +45,11 @@ namespace Archetype.Game.Payloads.PlayContext
         }
 
         public int TargetIndex { get; set; }
-        public void ResolveContext(ICardResolutionContext context)
+        public IEffectResult ResolveContext(ICardResolutionContext context)
         {
             dynamic target = context.Targets.ElementAt(TargetIndex);
             
-            Resolve(new EffectResolutionContext<TTarget>(context, target));
+            return Resolve(new EffectResolutionContext<TTarget>(context, target));
         }
 
         public string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext)
@@ -66,11 +65,11 @@ namespace Archetype.Game.Payloads.PlayContext
     
     public class Effect : IEffect
     {
-        private Action<IEffectResolutionContext> _resolveBacking;
-        private Expression<Action<IEffectResolutionContext>> _resolveExpression;
+        private Func<IEffectResolutionContext, IEffectResult> _resolveBacking;
+        private Expression<Func<IEffectResolutionContext, IEffectResult>> _resolveExpression;
 
         [JsonIgnore]
-        private Action<IEffectResolutionContext> Resolve
+        private Func<IEffectResolutionContext, IEffectResult> Resolve
         {
             get
             {
@@ -80,7 +79,7 @@ namespace Archetype.Game.Payloads.PlayContext
         }
 
         [JsonIgnore]
-        public Expression<Action<IEffectResolutionContext>> ResolveExpression
+        public Expression<Func<IEffectResolutionContext, IEffectResult>> ResolveExpression
         {
             get => _resolveExpression;
             set
@@ -93,7 +92,7 @@ namespace Archetype.Game.Payloads.PlayContext
 
         public int TargetIndex => -1;
 
-        public void ResolveContext(ICardResolutionContext context) => Resolve(new EffectResolutionContext(context));
+        public IEffectResult ResolveContext(ICardResolutionContext context) => Resolve(new EffectResolutionContext(context));
 
         public string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext)
         {
