@@ -25,34 +25,53 @@ namespace Archetype.Game.Payloads.PlayContext
 
     public interface ICardResolver
     {
-        ICardResult Resolve(ICard card);
+        ICardResult Resolve();
+    }
+
+    public interface ITargetValidator
+    {
+        void CommitContext(ICard card, IEnumerable<IGameAtom> targets);
     }
     
-    public class CardResolutionContext : ICardResolutionContext, ICardResolver
+    public class CardResolutionContext : ICardResolutionContext, ICardResolver, ITargetValidator
     {
+        private ICard _card;
+        
         private bool _resolved;
         private readonly ICardResultCollector _result;
-        public CardResolutionContext(IGameState gameState, IGameAtom caster, IEnumerable<IGameAtom> targets)
+        public CardResolutionContext(IGameState gameState, IGameAtom caster)
         {
             GameState = gameState;
             Caster = caster;
-            Targets = targets;
             _result = new CardResultCollector();
         }
 
         public ICardResult PartialResults => _result;
         public IGameState GameState { get; }
+        public IGameAtom Caster { get; }
+        public IEnumerable<IGameAtom> Targets { get; private set; }
+    
 
-        public ICardResult Resolve(ICard card)
+        public ICardResult Resolve()
         {
             if (_resolved)
             {
-                throw new ContextResolvedTwiceException(card, this);
+                throw new ContextResolvedTwiceException(_card, this);
+            }
+            
+            if (_card is null)
+            {
+                throw new CardMissingFromResolutionException();
+            }
+
+            if (Targets is null)
+            {
+                throw new TargetsMissingFromResolutionException();
             }
             
             _resolved = true;
 
-            foreach (var effect in card.Effects)
+            foreach (var effect in _card.Effects)
             {
                 _result.AddResult(effect.ResolveContext(this));
             }
@@ -60,9 +79,28 @@ namespace Archetype.Game.Payloads.PlayContext
             return _result;
         }
         
-        public IGameAtom Caster { get; }
-
-        public IEnumerable<IGameAtom> Targets { get; }
+        public void CommitContext(ICard card, IEnumerable<IGameAtom> targets)
+        {
+            var chosenTargets = targets.ToList();
+            
+            var requiredTargetCount = card.Targets.Count();
+            
+            if (chosenTargets.Count != requiredTargetCount)
+            {
+                throw new TargetCountMismatchException(requiredTargetCount, chosenTargets.Count);
+            }
+            
+            foreach (var (targetData, chosenTarget) in card.Targets.Zip(chosenTargets))
+            {
+                if (!targetData.ValidateContext(new TargetValidationContext(GameState, chosenTarget)))
+                {
+                    throw new InvalidTargetChosenException();
+                }
+            }
+            
+            Targets = chosenTargets;
+            _card = card;
+        }
 
         void IDisposable.Dispose() { }
     }

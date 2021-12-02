@@ -16,6 +16,8 @@ namespace Archetype.Game.Exceptions
     }
 
     public class EffectResultMissingVerbException : Exception { }
+    public class CardMissingFromResolutionException : Exception { }
+    public class TargetsMissingFromResolutionException : Exception { }
     
     public class ContextResolvedTwiceException : Exception
     {

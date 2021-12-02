@@ -65,14 +65,13 @@ namespace Archetype.Game.Actions
             if (targets.Any(t => t == null))
                 return "Some targets are null";
 
-            using (var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player, targets))
+            using (var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player))
             {
-                if (!card.ValidateTargets(cardResolutionContext))
-                    return "Invalid targets";
+                cardResolutionContext.CommitContext(card, targets);
 
                 _gameState.Player.Resources -= card.Cost;
 
-                var result = cardResolutionContext.Resolve(card);
+                var result = cardResolutionContext.Resolve();
                 
                 _historyWriter.Append(card, cardResolutionContext, result);
             };
