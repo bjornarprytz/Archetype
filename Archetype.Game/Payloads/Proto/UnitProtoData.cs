@@ -8,7 +8,9 @@ namespace Archetype.Game.Payloads.Proto
     {
         Guid Guid { get; }
         
+        int Strength { get; }
         int Health { get; }
+        int Defense { get; }
         UnitMetaData MetaData { get; }
         IEnumerable<ICardProtoData> Cards { get; }
     }
@@ -24,7 +26,9 @@ namespace Archetype.Game.Payloads.Proto
         }
 
         public Guid Guid { get; }
+        public int Strength { get; set; }
         public int Health { get; set; }
+        public int Defense { get; set; }
         public UnitMetaData MetaData { get; set; }
         public IEnumerable<ICardProtoData> Cards => _cards;
     }

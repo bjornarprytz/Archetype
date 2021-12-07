@@ -16,35 +16,35 @@ namespace Archetype.Game.Extensions
             return new AggregatedEffectResult(source.Select(func).ToList());
         } 
         
-        [Group("Each Unit")]
+        [Group("each unit")]
         public static IEnumerable<IUnit> EachUnit<T>(this T context)
             where T : IEffectResolutionContext
         {
             return context.GameState.Map.Nodes.SelectMany(n => n.Contents);
         }
 
-        [Group("Each unit in target zone")]
+        [Group("each unit in target zone")]
         public static IEnumerable<IUnit> UnitsInTargetZone<T>(this T context)
             where T : IEffectResolutionContext<IZone<IUnit>>
         {
             return context.Target.Contents;
         }
         
-        [Group("Each card in the player's hand")]
+        [Group("each card in the player's hand")]
         public static IEnumerable<ICard> CardsInPlayersHand<T>(this T context)
             where T : IEffectResolutionContext
         {
             return context.GameState.Player.Hand.Contents;
         }
 
-        [Group("Each card in target unit's deck")]
+        [Group("each card in target unit's deck")]
         public static IEnumerable<ICard> CardsInTargetUnitsDeck<T>(this T context)
             where T : IEffectResolutionContext<IUnit>
         {
             return context.Target.Deck.Contents;
         }
 
-        [ContextFact("Equal to the damage dealt by this card")]
+        [ContextFact("equal to the damage dealt by this card")]
         public static int DamageDealt<T>(this T context)
             where T : IEffectResolutionContext
         {

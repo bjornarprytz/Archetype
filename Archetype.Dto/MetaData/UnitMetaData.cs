@@ -4,5 +4,7 @@ namespace Archetype.Dto.MetaData
     {
         public string Name { get; init; }
         public string ImageUri { get; init; }
+        
+        public int Level { get; init; }
     }
 }

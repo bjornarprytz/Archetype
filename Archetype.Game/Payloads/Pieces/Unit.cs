@@ -32,6 +32,8 @@ namespace Archetype.Game.Payloads.Pieces
             Deck = new Deck(this);
 
             Health = MaxHealth = protoData.Health;
+            Defense = MaxDefense = protoData.Defense;
+            Strength = protoData.Strength;
             MetaData = protoData.MetaData;
         }
 
@@ -41,6 +43,11 @@ namespace Archetype.Game.Payloads.Pieces
 
         public int MaxHealth { get; }
         public int Health { get; private set; }
+        
+        public int MaxDefense { get; }
+        public int Defense { get; private set; }
+        
+        public int Strength { get; }
 
         public IEffectResult<IUnit> Attack(int strength)
         {
