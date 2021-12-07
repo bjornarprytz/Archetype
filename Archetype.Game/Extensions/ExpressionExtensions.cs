@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Aqua.EnumerableExtensions;
 using Archetype.Game.Attributes;
@@ -122,11 +123,11 @@ namespace Archetype.Game.Extensions
 	    private static string DescribeArgumentMethod<T>(this MethodCallExpression mce, T context)
 		    where  T : IEffectResolutionContext
 	    {
-		    if (mce.Arguments.FirstOrDefault() is not MemberExpression me)
+		    if (mce.Arguments.FirstOrDefault() is not Expression contextExpression)
 			    throw new MalformedEffectException(
 				    $"Cannot describe first argument of method {mce.Method.Name}, which has {mce.Arguments.Count} arguments");
 
-		    var pe = me.GetRequiredRootParameterExpression();
+		    var pe = contextExpression.GetRequiredRootParameterExpression();
 
 		    if (context is not null && pe.Type.IsAssignableTo(typeof(T)))
 		    {
@@ -134,12 +135,7 @@ namespace Archetype.Game.Extensions
 			    return expr.Compile().Invoke(context).ToString();			    
 		    }
 
-		    if (mce.Method.ReturnType == typeof(int) && mce.Arguments.Skip(1).FirstOrDefault() is LambdaExpression lambda)
-		    {
-			    return lambda.ToString(); // TODO: Describe this better
-		    }
-
-		    throw new MalformedEffectException($"Could not parse ArgumentMethod {mce}");
+		    return mce.Method.GetRequiredAttribute<ContextFactAttribute>().Description;
 	    }
 
 	    private static string DescribeProperty<T>(this MemberExpression me, T context)
@@ -207,17 +203,16 @@ namespace Archetype.Game.Extensions
 		    return sb.ToString();
 	    }
 
-	    private static ParameterExpression GetRequiredRootParameterExpression(this MemberExpression me)
+	    private static ParameterExpression GetRequiredRootParameterExpression(this Expression expression)
 	    {
-		    var innerExpression = me.Expression;
-		    while (innerExpression is MemberExpression innerMe)
+		    while (expression is MemberExpression innerMe)
 		    {
-			    innerExpression = innerMe.Expression;
+			    expression = innerMe.Expression;
 		    }
 
-		    if (innerExpression is not ParameterExpression p)
+		    if (expression is not ParameterExpression p)
 		    {
-			    throw new MalformedEffectException($"Member expression {me} must be rooted in a parameter");
+			    throw new MalformedEffectException($"Expression {expression} must be rooted in a parameter");
 		    }
 
 		    return p;

@@ -57,7 +57,7 @@ namespace Archetype.Game.Payloads.Proto
             
             foreach (var effect in _effects)
             {
-                sb.Append(effect.PrintedRulesText());
+                sb.AppendLine(effect.PrintedRulesText());
             }
 
             return sb.ToString();

@@ -30,7 +30,7 @@ namespace Archetype.Design
                                 .Cost(4)
                                 .Targets<IUnit, IUnit>()
                                 .Effect<IUnit>(context => context.Target.Attack(5), targetIndex:0)
-                                .Effect<IUnit>(context => context.Target.Heal(5), targetIndex:1)
+                                .Effect<IUnit>(context => context.Target.Heal(context.DamageDealt()), targetIndex:1)
                                 .Art("asd")
                         )
                         .Card(builder =>

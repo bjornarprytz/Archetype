@@ -63,7 +63,7 @@ namespace Archetype.Game.Payloads.Pieces
             
             foreach (var effect in _effects)
             {
-                sb.Append(effect.ContextSensitiveRulesText(cardResolutionContext));
+                sb.AppendLine(effect.ContextSensitiveRulesText(cardResolutionContext));
             }
 
             return sb.ToString();

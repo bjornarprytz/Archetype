@@ -24,8 +24,18 @@ namespace Archetype.Game.Attributes
         }
     }
 
-    internal class TemplateAttribute : Attribute{
+    internal class ContextFactAttribute : Attribute
+    {
+        public string Description { get; }
 
+        public ContextFactAttribute(string description)
+        {
+            Description = description;
+        }
+    }
+
+    internal class TemplateAttribute : Attribute
+    {
         public string Template {get;}
         public int NParameters { get; }
 
