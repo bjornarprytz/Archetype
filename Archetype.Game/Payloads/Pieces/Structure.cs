@@ -16,7 +16,6 @@ namespace Archetype.Game.Payloads.Pieces
         public Structure(IStructureProtoData protoData, IGameAtom owner) : base(protoData, owner)
         {
             MetaData = protoData.MetaData;
-
         }
 
         public StructureMetaData MetaData { get; }

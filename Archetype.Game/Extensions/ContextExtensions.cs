@@ -44,7 +44,7 @@ namespace Archetype.Game.Extensions
             return context.CardResolutionContext.PartialResults
                 .Results
                 .Where(result => result.Verb is nameof(IUnit.Attack))
-                .Select(r => (int) r.Result)
+                .Select(r => (int) r.Result) // TODO: Refactor Results to not have to rely on reflection so much
                 .Sum();
         }
     }

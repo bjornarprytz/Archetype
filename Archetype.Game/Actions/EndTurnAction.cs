@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
 using MediatR;
 
@@ -24,12 +26,30 @@ namespace Archetype.Game.Actions
             
             // All enemies
             // Move towards player HQ
+
+            // TODO: Replace this with phase structure, where each phase executes their 
             
-            // 2. Resolve Combat
+            foreach (var enemy in _gameState.Map.EachEnemyCreature())
+            {
+                // TODO: Move enemy towards player HQ
+            }
+
+            foreach (var node in _gameState.Map.Nodes)
+            {
+                // TODO: Resolve combat
+            }
             
-            // 3. Check GameOver? 
-            
-            // 4. Start of Turn: All buildings trigger
+            // TODO: Check game over 
+
+            foreach (var friendlyStructure in _gameState.Map.EachFriendlyStructure())
+            {
+                // TODO: Trigger effect    
+            }
+
+            foreach (var enemyStructure in _gameState.Map.EachEnemyStructure())
+            {
+                // TODO: Trigger effect
+            }
 
             return "Enemy turn executed!";
         }
