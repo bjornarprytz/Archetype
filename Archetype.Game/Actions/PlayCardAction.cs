@@ -38,12 +38,12 @@ namespace Archetype.Game.Actions
     public class PlayCardActionHandler : IRequestHandler<PlayCardAction, string>
     {
         private readonly IGameState _gameState;
-        private readonly IHistoryWriter _historyWriter;
+        private readonly ICardResolver _cardResolver;
 
-        public PlayCardActionHandler(IGameState gameState, IHistoryWriter historyWriter)
+        public PlayCardActionHandler(IGameState gameState, ICardResolver cardResolver)
         {
             _gameState = gameState;
-            _historyWriter = historyWriter;
+            _cardResolver = cardResolver;
         }
         
         public async Task<string> Handle(PlayCardAction request, CancellationToken cancellationToken)
@@ -65,20 +65,7 @@ namespace Archetype.Game.Actions
             if (targets.Any(t => t == null))
                 return "Some targets are null";
 
-            using (var cardResolutionContext = new CardResolutionContext(_gameState, _gameState.Player))
-            {
-                cardResolutionContext.CommitContext(card, targets);
-
-                _gameState.Player.Resources -= card.Cost;
-
-                var result = cardResolutionContext.Resolve();
-                
-                _historyWriter.Append(card, cardResolutionContext, result);
-            };
-            
-            // TODO: Formalize a verb for moving a card from hand to discard pile (must be different from Discard, to avoid those triggers)
-            _gameState.Player.Hand.Remove(card);
-            _gameState.Player.DiscardPile.Bury(card);
+            _cardResolver.Resolve(card, targets);
 
             return "Resolves."; // Success
         }

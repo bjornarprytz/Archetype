@@ -61,7 +61,8 @@ namespace Archetype.Game.Payloads.Pieces
         public string GenerateRulesText(IGameState gameState)
         {
             var sb = new StringBuilder();
-            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player);
+            // TODO: figure something out here, to give the best card text possible
+            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, new History()); 
             
             foreach (var effect in _effects)
             {

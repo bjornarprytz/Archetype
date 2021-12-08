@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
@@ -12,8 +13,8 @@ namespace Archetype.Game.Payloads.Context.Card
     
     public interface ICardResolutionContext : IDisposable
     {
-        [Target("Player")]
-        IGameAtom Caster { get; }
+        [Target("Caster")]
+        IPlayer Caster { get; }
         IEnumerable<IGameAtom> Targets { get; }
         
         [Target("World")]
@@ -22,63 +23,42 @@ namespace Archetype.Game.Payloads.Context.Card
         IResolution PartialResults { get; }
     }
 
-    public interface ICardResolver
+    public interface ICardResolver : ICardResolutionContext
     {
-        IResolution Resolve();
-    }
-
-    public interface ITargetValidator
-    {
-        void CommitContext(ICard card, IEnumerable<IGameAtom> targets);
+        void Resolve(ICard card, IEnumerable<IGameAtom> targets);
     }
     
-    public class CardResolutionContext : ICardResolutionContext, ICardResolver, ITargetValidator
+    public class CardResolutionContext : ICardResolver
     {
+        private readonly IHistoryWriter _historyWriter;
         private ICard _card;
         
         private bool _resolved;
         private readonly IResolutionCollector _result;
-        public CardResolutionContext(IGameState gameState, IGameAtom caster)
+        public CardResolutionContext(IGameState gameState, IPlayer player, IHistoryWriter historyWriter)
         {
+            _historyWriter = historyWriter;
             GameState = gameState;
-            Caster = caster;
+            Caster = player;
             _result = new ResolutionCollector();
         }
 
         public IResolution PartialResults => _result;
+
         public IGameState GameState { get; }
-        public IGameAtom Caster { get; }
+        public IPlayer Caster { get; }
         public IEnumerable<IGameAtom> Targets { get; private set; }
     
-
-        public IResolution Resolve()
+        public void Resolve(ICard card, IEnumerable<IGameAtom> targets)
         {
-            if (_resolved)
-            {
-                throw new ContextResolvedTwiceException(_card, this);
-            }
+            CommitContext(card, targets);
+
+            Caster.Resources -= card.Cost;
             
-            if (_card is null)
-            {
-                throw new CardMissingFromResolutionException();
-            }
-
-            if (Targets is null)
-            {
-                throw new TargetsMissingFromResolutionException();
-            }
-            
-            _resolved = true;
-
-            foreach (var effect in _card.Effects)
-            {
-                _result.AddResult(effect.ResolveContext(this));
-            }
-
-            return _result;
+            Resolve();
         }
         
-        public void CommitContext(ICard card, IEnumerable<IGameAtom> targets)
+        private void CommitContext(ICard card, IEnumerable<IGameAtom> targets)
         {
             var chosenTargets = targets.ToList();
             
@@ -100,6 +80,27 @@ namespace Archetype.Game.Payloads.Context.Card
             Targets = chosenTargets;
             _card = card;
         }
+
+        private void Resolve()
+        {
+            if (_resolved)
+            {
+                throw new ContextResolvedTwiceException(_card, this);
+            }
+            
+            _resolved = true;
+
+            foreach (var effect in _card.Effects)
+            {
+                _result.AddResult(effect.ResolveContext(this));
+            }
+
+            _result.AddResult(_card.MoveTo(Caster.DiscardPile));
+            
+            _historyWriter.Append(_card, this, _result);
+        }
+        
+        
 
         void IDisposable.Dispose() { }
     }
