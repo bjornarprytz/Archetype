@@ -6,7 +6,17 @@ namespace Archetype.Game.Extensions
 {
     public static class AtomExtensions
     {
-        public static bool IsFriendly(this IGameAtom atom)
+        public static bool IsFriendly(this IGameAtom atom) => atom.TopOwner() is IPlayer;
+
+        public static bool IsEnemy(this IGameAtom atom) => !atom.IsFriendly();
+
+        public static bool IsFriendOf(this IGameAtom atom, IGameAtom other)
+        {
+            return atom.TopOwner() == other.TopOwner();
+        }
+        public static bool IsEnemyOf(this IGameAtom atom, IGameAtom other) => !atom.IsFriendOf(other);
+        
+        public static IGameAtom TopOwner(this IGameAtom atom)
         {
             var owner = atom.Owner;
             
@@ -15,9 +25,7 @@ namespace Archetype.Game.Extensions
                 owner = owner.Owner;
             }
 
-            return owner is IPlayer;
+            return owner;
         }
-
-        public static bool IsEnemy(this IGameAtom atom) => !atom.IsFriendly();
     }
 }

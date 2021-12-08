@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Archetype.Game.Exceptions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
@@ -11,7 +12,7 @@ using MediatR;
 
 namespace Archetype.Game.Actions
 {
-    public class PlayCardAction : IRequest<string>
+    public class PlayCardAction : IRequest
     {
         public Guid CardGuid { get; }
         public IEnumerable<Guid> TargetsGuids { get; }
@@ -35,7 +36,7 @@ namespace Archetype.Game.Actions
         }
     }
     
-    public class PlayCardActionHandler : IRequestHandler<PlayCardAction, string>
+    public class PlayCardActionHandler : IRequestHandler<PlayCardAction>
     {
         private readonly IGameState _gameState;
         private readonly ICardResolver _cardResolver;
@@ -46,28 +47,31 @@ namespace Archetype.Game.Actions
             _cardResolver = cardResolver;
         }
         
-        public async Task<string> Handle(PlayCardAction request, CancellationToken cancellationToken)
+        public Task<Unit> Handle(PlayCardAction request, CancellationToken cancellationToken)
         {
             if (_gameState.GetGamePiece(request.CardGuid) is not ICard card)
-                return "GamePiece is not a card";
+                throw new PlayCardActionException("GamePiece is not a card");
 
             if (card.CurrentZone != _gameState.Player.Hand)
-                return "Card is not in hand";
+                throw new PlayCardActionException("Card is not in hand");
 
             if (card.Cost > _gameState.Player.Resources)
-                return "Can't pay cost";
+                throw new PlayCardActionException("Can't pay cost");
 
             if (card.Targets.Count() != request.TargetsGuids.Count())
-                return "Invalid number of targets";
+                throw new PlayCardActionException("Invalid number of targets");
             
             var targets = request.TargetsGuids.Select(guid => _gameState.GetGamePiece(guid)).ToList();
 
             if (targets.Any(t => t == null))
-                return "Some targets are null";
+                throw new PlayCardActionException("Some targets are null");
 
-            _cardResolver.Resolve(card, targets);
+            
+            
+            _cardResolver.Resolve(card, targets); // TODO: Make this awaitable?
 
-            return "Resolves."; // Success
+
+            return Unit.Task;
         }
     }
 }

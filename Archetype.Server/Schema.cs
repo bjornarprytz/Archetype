@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Actions;
+using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
@@ -42,17 +43,19 @@ namespace Archetype.Server
             )
         {
             var (cardId, targetIds) = playCardInput;
+    
+            // TODO: Put errors (exceptions) into the schema (example: https://youtu.be/3_4nt2QQSeE?t=4064)
             
-            var result = await _mediator.Send(new PlayCardAction(cardId, targetIds), cancellationToken);
+            await _mediator.Send(new PlayCardAction(cardId, targetIds), cancellationToken);
 
-            var payload = new PlayCardPayload(result);
+            var payload = new PlayCardPayload();
 
             await eventSender.SendAsync(nameof(Subscriptions.OnCardPlayed), payload, cancellationToken);
             
             return payload;
         }
 
-        public record PlayCardPayload(string Message);
+        public record PlayCardPayload;
         public record PlayCardInput(Guid CardId, IEnumerable<Guid> TargetIds);
         
         

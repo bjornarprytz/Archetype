@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
@@ -23,12 +22,12 @@ namespace Archetype.Game.Payloads.Context.Card
         IResolution PartialResults { get; }
     }
 
-    public interface ICardResolver : ICardResolutionContext
+    public interface ICardResolver
     {
         void Resolve(ICard card, IEnumerable<IGameAtom> targets);
     }
     
-    public class CardResolutionContext : ICardResolver
+    public class CardResolutionContext : ICardResolver, ICardResolutionContext
     {
         private readonly IHistoryWriter _historyWriter;
         private ICard _card;

@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Context.Phase;
 using Archetype.Game.Payloads.Infrastructure;
 using MediatR;
 
@@ -11,11 +12,12 @@ namespace Archetype.Game.Actions
 
     public class EndTurnActionHandler : IRequestHandler<EndTurnAction, string>
     {
+        private readonly IMovePhaseResolver _movePhase;
         private readonly IGameState _gameState;
 
-        public EndTurnActionHandler(IGameState gameState)
+        public EndTurnActionHandler(IMovePhaseResolver movePhase)
         {
-            _gameState = gameState;
+            _movePhase = movePhase;
         }
         
         public async Task<string> Handle(EndTurnAction request, CancellationToken cancellationToken)
@@ -29,11 +31,10 @@ namespace Archetype.Game.Actions
 
             // TODO: Replace this with phase structure, where each phase executes their 
             
-            foreach (var enemy in _gameState.Map.EachEnemyCreature())
-            {
-                // TODO: Move enemy towards player HQ
-            }
+            _movePhase.Resolve();
 
+            
+            
             foreach (var node in _gameState.Map.Nodes)
             {
                 // TODO: Resolve combat

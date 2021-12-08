@@ -45,4 +45,24 @@ namespace Archetype.Game.Exceptions
             Message = $"Expected {expected} targets, but got {actual} targets";
         }
     }
+
+    public class PlayCardActionException : Exception
+    {
+        public override string Message { get; }
+
+        public PlayCardActionException(string message)
+        {
+            Message = message;
+        }
+    }
+
+    public class MovePhaseException : Exception
+    {
+        public override string Message { get; }
+
+        public MovePhaseException(string message)
+        {
+            Message = message;
+        }
+    }
 }

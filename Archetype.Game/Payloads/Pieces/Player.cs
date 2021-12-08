@@ -13,6 +13,8 @@ namespace Archetype.Game.Payloads.Pieces
         int MinDeckSize { get; }
         int Resources { get; set; }
         
+        IStructure HeadQuarters { get; }
+        
         [Target("Player's deck")]
         IDeck Deck { get; }
         [Target("Player's hand")]
@@ -37,6 +39,7 @@ namespace Archetype.Game.Payloads.Pieces
         public int MaxHandSize { get; } = 2;
         public int MinDeckSize { get; } = 4;
         public int Resources { get; set; } = 100;
+        public IStructure HeadQuarters { get; } // TODO: Figure out how to place this
         public IDeck Deck { get; }
         public IHand Hand { get; }
         public IDiscardPile DiscardPile { get; }
