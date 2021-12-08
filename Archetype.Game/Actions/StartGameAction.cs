@@ -24,11 +24,13 @@ namespace Archetype.Game.Actions
     {
         private readonly ICardPool _cardPool;
         private readonly IPlayer _player;
+        private readonly IMap _map;
 
-        public StartGameActionHandler(ICardPool cardPool, IPlayer player)
+        public StartGameActionHandler(ICardPool cardPool, IPlayer player, IMap map)
         {
             _cardPool = cardPool;
             _player = player;
+            _map = map;
         }
         
         public async Task<string> Handle(StartGameAction request, CancellationToken cancellationToken)
@@ -47,6 +49,8 @@ namespace Archetype.Game.Actions
             
             _player.Draw(_player.MaxHandSize);
             
+            
+
             return "GL HF!";
         }
     }

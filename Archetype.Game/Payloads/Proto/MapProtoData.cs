@@ -10,9 +10,9 @@ namespace Archetype.Game.Payloads.Proto
     
     public class MapProtoData : IMapProtoData
     {
-        private readonly List<IMapNode> _nodes;
+        private readonly List<IMutableMapNode> _nodes;
 
-        public MapProtoData(List<IMapNode> nodes)
+        public MapProtoData(List<IMutableMapNode> nodes)
         {
             _nodes = nodes;
         }

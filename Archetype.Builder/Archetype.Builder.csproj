@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Archetype.Dto\Archetype.Dto.csproj" />
     <ProjectReference Include="..\Archetype.Game\Archetype.Game.csproj" />
   </ItemGroup>
 

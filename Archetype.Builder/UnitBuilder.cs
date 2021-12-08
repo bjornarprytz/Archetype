@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Proto;
-using MediatR;
 
 namespace Archetype.Builder
 {

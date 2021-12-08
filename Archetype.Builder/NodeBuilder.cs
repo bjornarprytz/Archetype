@@ -2,7 +2,7 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Builder
 {
-    public class NodeBuilder : IBuilder<IMapNode>
+    public class NodeBuilder : IBuilder<IMutableMapNode>
     {
         private readonly MapNode _mapNode;
 
@@ -11,7 +11,7 @@ namespace Archetype.Builder
             _mapNode = new MapNode();
         }
 
-        public IMapNode Build()
+        public IMutableMapNode Build()
         {
             return _mapNode;
         }

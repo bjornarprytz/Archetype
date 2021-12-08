@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json.Serialization;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Pieces.Base;
-using Newtonsoft.Json;
 
 namespace Archetype.Game.Payloads.PlayContext
 {

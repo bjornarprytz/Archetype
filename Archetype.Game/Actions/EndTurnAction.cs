@@ -19,7 +19,16 @@ namespace Archetype.Game.Actions
         
         public async Task<string> Handle(EndTurnAction request, CancellationToken cancellationToken)
         {
-            // TODO: Execute enemy turn
+            // This action signals that the player main phase is done
+            
+            // 1. Move
+            
+            // All enemies
+            // Move towards player HQ
+            
+            // 2. Resolve Combat
+            
+            // 3. Player Draws a card and starts turn 
 
             return "Enemy turn executed!";
         }

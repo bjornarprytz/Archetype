@@ -9,7 +9,7 @@ namespace Archetype.Builder
 {
     public class MapBuilder : IBuilder<IMapProtoData>
     {
-        private readonly List<IMapNode> _nodes = new();
+        private readonly List<IMutableMapNode> _nodes = new();
 
         private readonly IMapProtoData _mapProtoData;
         
@@ -53,7 +53,7 @@ namespace Archetype.Builder
         
         public IMapProtoData Build()
         {
-            if (_nodes.Any(node => node.Neighbours.IsEmpty()))
+            if (_nodes.Count > 1 && _nodes.Any(node => node.Neighbours.IsEmpty()))
                 throw new DisconnectedNodesException();
             
             return _mapProtoData;

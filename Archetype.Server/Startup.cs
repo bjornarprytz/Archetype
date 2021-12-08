@@ -1,8 +1,4 @@
 using System.Collections.Generic;
-using Aqua.EnumerableExtensions;
-using Archetype.Builder;
-using Archetype.Builder.Extensions;
-using Archetype.Builder.Factory;
 using Archetype.Design.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Extensions;
