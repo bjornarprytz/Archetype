@@ -1,3 +1,4 @@
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.Proto;
@@ -5,6 +6,7 @@ using Archetype.Game.Payloads.Proto;
 namespace Archetype.Game.Payloads.Pieces
 {
 
+    [Target("Creature")]
     public interface ICreature : IUnit
     {
         CreatureMetaData MetaData { get; }

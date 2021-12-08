@@ -36,7 +36,7 @@ namespace Archetype.Design
                             builder
                                 .Name("Resource slap")
                                 .Cost(3)
-                                .Effect<IUnit>(context => context.Target.Attack(4))
+                                .Effect<ICreature>(context => context.Target.Attack(4))
                                 .Art("other")
                         )
                         .Card(builder =>
