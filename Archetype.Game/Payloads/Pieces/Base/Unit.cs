@@ -20,9 +20,9 @@ namespace Archetype.Game.Payloads.Pieces.Base
         int Defense { get; }
         
         [Template("Deal {1} damage to {0}")]
-        IEffectResult<IUnit> Attack(int strength);
+        IEffectResult<IUnit, int> Attack(int strength);
         [Template("Heal {0} by {1}")]
-        IEffectResult<IUnit> Heal(int strength);
+        IEffectResult<IUnit, int> Heal(int strength);
     }
     
     public abstract class Unit : Piece<IUnit>, IUnit
@@ -43,7 +43,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
         public int MaxDefense { get; }
         public int Defense { get; private set; }
 
-        public IEffectResult<IUnit> Attack(int strength)
+        public IEffectResult<IUnit, int> Attack(int strength)
         {
             var potentialDamage = Health;
 
@@ -54,7 +54,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
             return ResultFactory.Create(this, actualDamage);
         }
 
-        public IEffectResult<IUnit> Heal(int strength)
+        public IEffectResult<IUnit, int> Heal(int strength)
         {
             var potentialHeal = MaxHealth - Health;
 

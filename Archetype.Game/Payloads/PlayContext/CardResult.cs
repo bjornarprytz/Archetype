@@ -8,66 +8,82 @@ namespace Archetype.Game.Payloads.PlayContext
     public interface ICardResult
     {
         IReadOnlyList<IEffectResult> Results { get; }
-        IReadOnlyDictionary<string, int> VerbTotal { get; }
     }
 
-    public interface ICardResultCollector : ICardResult
+    public interface ICardResultCollector: ICardResult
     {
         void AddResult(IEffectResult effectResult);
     }
 
     public interface IEffectResult
     {
-        IEnumerable<IGameAtom> Targets { get; }
+        bool IsNull { get; }
+        IEnumerable<IGameAtom> AllAffected { get; }
         string Verb { get; }
-        int Result { get; } // Is this the right result type? Probably
+        object Result { get; }
     }
 
-    public interface IEffectResult<out T> : IEffectResult 
-        where T : IGameAtom
+    public interface IEffectResult<out T> : IEffectResult
     {
-        T Target { get; }
+        new T Result { get; }
     }
 
-    public record AggregatedEffectResult : IEffectResult
+    public interface IEffectResult<out TTarget, out TResult> : IEffectResult<TResult>
+        where TTarget : class, IGameAtom
     {
-        internal AggregatedEffectResult(ICollection<IEffectResult> results)
+        TTarget Affected { get; }
+    }
+
+    public record AggregatedEffectResult<TResult> : IEffectResult<IEnumerable<TResult>>
+    {
+        internal AggregatedEffectResult(ICollection<IEffectResult<TResult>> results)
         {
-            Targets = results.SelectMany(r => r.Targets).ToList();
-            Verb = results.FirstOrDefault()?.Verb ?? throw new EffectResultMissingVerbException();
-            Result = results.Sum(r => r.Result);
+            var nonNullResults = results.Where(r => !r.IsNull).ToList();
+            
+            AllAffected = nonNullResults.SelectMany(r => r.AllAffected).ToList();
+            Verb = nonNullResults.FirstOrDefault()?.Verb ?? throw new EffectResultMissingVerbException();
+            Result = nonNullResults.Select(r => r.Result);
         }
-        
-        public IEnumerable<IGameAtom> Targets { get; }
+
+        public bool IsNull => false;
+        public IEnumerable<IGameAtom> AllAffected { get; }
         public string Verb { get; }
-        public int Result { get; }
+        object IEffectResult.Result => Result;
+
+        public IEnumerable<TResult> Result { get; }
     }
 
-    internal record EffectResult(string Verb, int Result) : IEffectResult
+    internal record NullResult<T>(string Verb)
+        : EffectResult<T>(Verb, default);
+
+    internal record NullResult<TAffected, T>(TAffected Affected, string Verb)
+        : EffectResult<TAffected, T>(Affected, Verb, default) where TAffected : class, IGameAtom;
+    
+    internal record EffectResult<T>(string Verb, T Result) : IEffectResult<T>
     {
-        public IEnumerable<IGameAtom> Targets => Enumerable.Empty<IGameAtom>();
+        public bool IsNull => Result is not null;
+        public IEnumerable<IGameAtom> AllAffected => Enumerable.Empty<IGameAtom>();
+        
+        object IEffectResult.Result => Result;
     }
 
-    internal record EffectResult<T>(T Target, string Verb, int Result) : IEffectResult<T> where T : IGameAtom
+    internal record EffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result) 
+        : IEffectResult<TAffected, TResult> where TAffected : class, IGameAtom
     {
-        public IEnumerable<IGameAtom> Targets => new[] { Target as IGameAtom };
+        public bool IsNull => Result is not null;
+        public IEnumerable<IGameAtom> AllAffected => new[] { Affected };
+        object IEffectResult.Result => Result;
     }
 
     public class CardResultCollector : ICardResultCollector
     {
         private readonly List<IEffectResult> _results = new ();
-        private readonly Dictionary<string, int> _verbTotal = new ();
         
         public IReadOnlyList<IEffectResult> Results => _results;
-
-        public IReadOnlyDictionary<string, int> VerbTotal => _verbTotal;
 
         public void AddResult(IEffectResult effectResult)
         {
             _results.Add(effectResult);
-
-            var currentTotal = _verbTotal[effectResult.Verb];
-            _verbTotal[effectResult.Verb] = currentTotal + effectResult.Result;
         }
     }
 }

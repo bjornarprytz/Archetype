@@ -10,10 +10,10 @@ namespace Archetype.Game.Extensions
 {
     public static class ContextExtensions
     {
-        public static IEffectResult TargetEach<T>(this IEnumerable<T> source, Func<T, IEffectResult> func)
-            where T : IGameAtom
+        public static IEffectResult TargetEach<TTarget, TResult>(this IEnumerable<TTarget> source, Func<TTarget, IEffectResult<TResult>> func)
+            where TTarget : IGameAtom
         {
-            return new AggregatedEffectResult(source.Select(func).ToList());
+            return new AggregatedEffectResult<TResult>(source.Select(func).ToList());
         } 
         
         [Group("each unit")]
@@ -41,7 +41,11 @@ namespace Archetype.Game.Extensions
         public static int DamageDealt<T>(this T context)
             where T : IEffectResolutionContext
         {
-            return context.CardResolutionContext.PartialResults.VerbTotal[nameof(IUnit.Attack)];
+            return context.CardResolutionContext.PartialResults
+                .Results
+                .Where(result => result.Verb is nameof(IUnit.Attack))
+                .Select(r => (int) r.Result)
+                .Sum();
         }
     }
 }

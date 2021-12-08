@@ -20,7 +20,7 @@ namespace Archetype.Game.Payloads.Pieces
         int Cost { get; }
         
         [Template("Reduce cost of {0}")]
-        IEffectResult<ICard> ReduceCost(int x);
+        IEffectResult<ICard, int> ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect> Effects { get; }
@@ -47,7 +47,7 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<IEffect> Effects => _effects;
         
         
-        public IEffectResult<ICard> ReduceCost(int x)
+        public IEffectResult<ICard, int> ReduceCost(int x)
         {
             Console.WriteLine($"Reducing cost by {x}!");
 

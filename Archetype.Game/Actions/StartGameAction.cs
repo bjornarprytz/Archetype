@@ -49,7 +49,7 @@ namespace Archetype.Game.Actions
             
             _player.Draw(_player.MaxHandSize);
             
-            
+            // TODO: Set up map positions as well? HQ for instance.
 
             return "GL HF!";
         }

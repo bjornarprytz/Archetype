@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Game.Payloads;
 using Archetype.Game.Payloads.Infrastructure;
 using MediatR;
 
@@ -28,7 +27,9 @@ namespace Archetype.Game.Actions
             
             // 2. Resolve Combat
             
-            // 3. Player Draws a card and starts turn 
+            // 3. Check GameOver? 
+            
+            // 4. Start of Turn: All buildings trigger
 
             return "Enemy turn executed!";
         }
