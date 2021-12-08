@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Archetype.Game.Payloads.MetaData;
 
 namespace Archetype.Game.Payloads.Proto
@@ -7,31 +6,49 @@ namespace Archetype.Game.Payloads.Proto
     public interface IUnitProtoData
     {
         Guid Guid { get; }
-        
-        int Movement { get; }
-        int Strength { get; }
         int Health { get; }
         int Defense { get; }
-        UnitMetaData MetaData { get; }
-        IEnumerable<ICardProtoData> Cards { get; }
+        
+        UnitMetaData BaseMetaData { get; }
     }
     
-    public class UnitProtoData : IUnitProtoData
+    public interface ICreatureProtoData : IUnitProtoData
     {
-        private readonly List<ICardProtoData> _cards;
+        int Movement { get; }
+        int Strength { get; }
 
-        public UnitProtoData(List<ICardProtoData> cards)
-        {
-            Guid = Guid.NewGuid();
-            _cards = cards;
-        }
+        CreatureMetaData MetaData { get; }
+    }
 
-        public Guid Guid { get; }
+    public interface IStructureProtoData : IUnitProtoData
+    {
+        StructureMetaData MetaData { get; }
+    }
+    
+    public class CreatureProtoData : UnitProtoData, ICreatureProtoData
+    {
         public int Movement { get; set; }
         public int Strength { get; set; }
+        public CreatureMetaData MetaData { get; set; }
+        public override UnitMetaData BaseMetaData => MetaData;
+    }
+
+    public class StructureProtoData : UnitProtoData, IStructureProtoData
+    {
+        public StructureMetaData MetaData { get; set; }
+        public override UnitMetaData BaseMetaData => MetaData;
+    }
+    
+    public abstract class UnitProtoData : IUnitProtoData
+    {
+        protected UnitProtoData()
+        {
+            Guid = Guid.NewGuid();
+        }
+        
+        public Guid Guid { get; }
         public int Health { get; set; }
         public int Defense { get; set; }
-        public UnitMetaData MetaData { get; set; }
-        public IEnumerable<ICardProtoData> Cards => _cards;
+        public abstract UnitMetaData BaseMetaData { get; }
     }
 }

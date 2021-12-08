@@ -2,21 +2,22 @@ using System;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.MetaData;
-using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Game.Payloads.Pieces
+namespace Archetype.Game.Payloads.Pieces.Base
 {
     [Target("Unit")]
     public interface IUnit : IGameAtom, IZoned<IUnit>
     {
         Guid ProtoGuid { get; }
-        IDeck Deck { get; }
-        UnitMetaData MetaData { get; }
+        UnitMetaData BaseMetaData { get; }
         
         int MaxHealth { get; }
         int Health { get; }
+        
+        int MaxDefense { get; }
+        int Defense { get; }
         
         [Template("Deal {1} damage to {0}")]
         IEffectResult<IUnit> Attack(int strength);
@@ -24,30 +25,23 @@ namespace Archetype.Game.Payloads.Pieces
         IEffectResult<IUnit> Heal(int strength);
     }
     
-    public class Unit : Piece<IUnit>, IUnit
+    public abstract class Unit : Piece<IUnit>, IUnit
     {
-        public Unit(IUnitProtoData protoData, IGameAtom owner) : base(owner)
+        protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(owner)
         {
             ProtoGuid = protoData.Guid;
-            Deck = new Deck(this);
 
             Health = MaxHealth = protoData.Health;
             Defense = MaxDefense = protoData.Defense;
-            Strength = protoData.Strength;
-            MetaData = protoData.MetaData;
         }
 
         public Guid ProtoGuid { get; }
-        public IDeck Deck { get; }
-        public UnitMetaData MetaData { get; }
-
+        public abstract UnitMetaData BaseMetaData { get; }
         public int MaxHealth { get; }
         public int Health { get; private set; }
         
         public int MaxDefense { get; }
         public int Defense { get; private set; }
-        
-        public int Strength { get; }
 
         public IEffectResult<IUnit> Attack(int strength)
         {

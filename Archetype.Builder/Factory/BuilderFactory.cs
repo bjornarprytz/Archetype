@@ -41,9 +41,9 @@ namespace Archetype.Builder.Factory
             return new MapBuilder();
         }
 
-        public static UnitBuilder UnitBuilder()
+        public static CreatureBuilder UnitBuilder()
         {
-            return new UnitBuilder();
+            return new CreatureBuilder();
         }
     }
 }

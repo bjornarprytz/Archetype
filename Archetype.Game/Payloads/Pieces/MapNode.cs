@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Aqua.TypeExtensions;
 using Archetype.Game.Attributes;
-using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
@@ -17,6 +15,8 @@ namespace Archetype.Game.Payloads.Pieces
     {
         void AddNeighbour(IMutableMapNode node);
         void RemoveNeighbour(IMutableMapNode node);
+
+        void AddStructure(IStructure structure);
     }
     
     public class MapNode : Zone<IUnit>, IMutableMapNode
@@ -43,5 +43,7 @@ namespace Archetype.Game.Payloads.Pieces
             _neighbours.Remove(node.Guid);
             node.RemoveNeighbour(this);
         }
+
+        public void AddStructure(IStructure structure) => AddPiece(structure);
     }
 }

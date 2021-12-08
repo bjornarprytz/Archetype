@@ -37,13 +37,6 @@ namespace Archetype.Game.Extensions
             return context.GameState.Player.Hand.Contents;
         }
 
-        [Group("each card in target unit's deck")]
-        public static IEnumerable<ICard> CardsInTargetUnitsDeck<T>(this T context)
-            where T : IEffectResolutionContext<IUnit>
-        {
-            return context.Target.Deck.Contents;
-        }
-
         [ContextFact("equal to the damage dealt by this card")]
         public static int DamageDealt<T>(this T context)
             where T : IEffectResolutionContext

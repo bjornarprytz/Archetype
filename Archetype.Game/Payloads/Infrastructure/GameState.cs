@@ -28,12 +28,12 @@ namespace Archetype.Game.Payloads.Infrastructure
                 return Player;
             }
 
+            // TODO: Gotta find a better way to organize my game atoms
             return Player.Hand.GetGamePiece(guid)
                    ?? Player.DiscardPile.GetGamePiece(guid)
                    ?? Player.Deck.GetGamePiece(guid)
                    ?? Map.Nodes.FirstOrDefault(node => node.Guid == guid)
-                   ?? Map.Nodes.Select(node => node.GetGamePiece(guid)).FirstOrDefault()
-                   ?? Map.Nodes.SelectMany(node => node.Contents.Select(unit => unit.Deck.GetGamePiece(guid))).FirstOrDefault();
+                   ?? Map.Nodes.Select(node => node.GetGamePiece(guid)).FirstOrDefault();
         }
 
         public IPlayer Player { get; }
