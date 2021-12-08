@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Archetype.Builder.Factory;
-using Archetype.Dto.MetaData;
+using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 

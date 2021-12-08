@@ -1,7 +1,7 @@
 using System;
-using Archetype.Dto.MetaData;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
+using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Archetype.Builder.Factory;
-using Archetype.Dto.MetaData;
 using Archetype.Game.Payloads.Proto;
 using MediatR;
 
@@ -29,6 +28,13 @@ namespace Archetype.Builder
             return this;
         }
 
+        public UnitBuilder Movement(int movement)
+        {
+            _unitProtoData.Movement = movement;
+            
+            return this;
+        }
+        
         public UnitBuilder Strength(int strength)
         {
             _unitProtoData.Strength = strength;

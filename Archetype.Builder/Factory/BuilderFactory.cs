@@ -1,4 +1,4 @@
-﻿using Archetype.Dto.MetaData;
+﻿using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Factory

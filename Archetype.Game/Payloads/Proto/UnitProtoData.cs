@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Archetype.Dto.MetaData;
+using Archetype.Game.Payloads.MetaData;
 
 namespace Archetype.Game.Payloads.Proto
 {
@@ -8,6 +8,7 @@ namespace Archetype.Game.Payloads.Proto
     {
         Guid Guid { get; }
         
+        int Movement { get; }
         int Strength { get; }
         int Health { get; }
         int Defense { get; }
@@ -26,6 +27,7 @@ namespace Archetype.Game.Payloads.Proto
         }
 
         public Guid Guid { get; }
+        public int Movement { get; set; }
         public int Strength { get; set; }
         public int Health { get; set; }
         public int Defense { get; set; }

@@ -1,11 +1,11 @@
 ﻿using Aqua.EnumerableExtensions;
-using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Primitives;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Design

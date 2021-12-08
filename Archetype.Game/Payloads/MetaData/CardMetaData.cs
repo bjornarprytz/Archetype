@@ -1,6 +1,6 @@
-using Archetype.Dto.Simple;
+using Archetype.Game.Payloads.Primitives;
 
-namespace Archetype.Dto.MetaData
+namespace Archetype.Game.Payloads.MetaData
 {
     public record CardMetaData
     {

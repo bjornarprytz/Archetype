@@ -4,8 +4,6 @@ using Archetype.Builder;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Design.Extensions;
-using Archetype.Dto.MetaData;
-using Archetype.Dto.Simple;
 using Archetype.Game.Actions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;

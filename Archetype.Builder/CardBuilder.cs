@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Archetype.Builder.Factory;
-using Archetype.Dto.MetaData;
-using Archetype.Dto.Simple;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.PlayContext;
+using Archetype.Game.Payloads.Primitives;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder

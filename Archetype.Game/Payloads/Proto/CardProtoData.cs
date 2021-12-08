@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Archetype.Dto.MetaData;
+using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.PlayContext;
 
 namespace Archetype.Game.Payloads.Proto

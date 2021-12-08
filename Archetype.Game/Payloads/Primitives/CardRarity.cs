@@ -1,4 +1,4 @@
-﻿namespace Archetype.Dto.Simple
+﻿namespace Archetype.Game.Payloads.Primitives
 {
     public enum CardRarity
     {
