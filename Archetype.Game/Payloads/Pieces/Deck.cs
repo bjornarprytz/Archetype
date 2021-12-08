@@ -10,7 +10,7 @@ namespace Archetype.Game.Payloads.Pieces
     [Target("Deck")]
     public interface IDeck : IZone<ICard>
     {
-        ICard Draw();
+        ICard PopCard();
         void Shuffle();
         void PutCardOnTop(ICard card);
         void PutCardOnBottom(ICard card);
@@ -22,11 +22,9 @@ namespace Archetype.Game.Payloads.Pieces
 
         public Deck(IGameAtom owner) : base(owner) { }
 
-        public ICard Draw()
+        public ICard PopCard()
         {
             var card = _cards.Pop();
-            
-            RemovePiece(card);
 
             return card;
         }
@@ -46,8 +44,8 @@ namespace Archetype.Game.Payloads.Pieces
         public void PutCardOnTop(ICard newCard)
         {
             _cards.Push(newCard);
-            
-            AddPiece(newCard);
+
+            newCard.MoveTo(this);
         }
 
         public void PutCardOnBottom(ICard newCard)
@@ -60,8 +58,8 @@ namespace Archetype.Game.Payloads.Pieces
             {
                 _cards.Push(card);
             }
-            
-            AddPiece(newCard);
+
+            newCard.MoveTo(this);
         }
     }
 }

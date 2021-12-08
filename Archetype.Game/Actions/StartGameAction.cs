@@ -53,6 +53,8 @@ namespace Archetype.Game.Actions
             if (hqPlacement is null)
                 throw new StartGameException($"HQ placed in non existent area ({request.HQPlacement}");
 
+            headQuarter.MoveTo(hqPlacement);
+            
             foreach (var guid in request.DeckList)
             {
                 var card = _protoPool.CreateCard(guid, _player);

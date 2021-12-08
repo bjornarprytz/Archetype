@@ -64,5 +64,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
 
             return ResultFactory.Create(this, actualHeal);
         }
+
+        protected override IUnit Self => this;
     }
 }

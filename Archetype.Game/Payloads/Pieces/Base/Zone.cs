@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Threading;
+using Archetype.Game.Exceptions;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
@@ -8,16 +11,18 @@ namespace Archetype.Game.Payloads.Pieces.Base
         IGameAtom GetGamePiece(Guid guid);
     }
 
-    public interface IZone<out T> : IZone
+    public interface IZone<T> : IZone
         where T : IGameAtom, IZoned<T>
     {
         IEnumerable<T> Contents { get; }
 
         T GetTypedPiece(Guid guid);
+
+        void _Place(T atom); // TODO: Hide this method to avoid misuse (use IZoned.MoveTo instead)
     }
 
     public abstract class Zone<TContents> : Atom, IZone<TContents>
-        where TContents : IGameAtom, IZoned<TContents>
+        where TContents : IZoned<TContents>
     {
         private readonly Dictionary<Guid, TContents> _contents = new();
         
@@ -35,17 +40,23 @@ namespace Archetype.Game.Payloads.Pieces.Base
             return _contents[guid];
         }
         
-        protected void AddPiece(TContents gamePiece)
+        public void _Place(TContents atom)
         {
-            _contents.Add(gamePiece.Guid, gamePiece);
-            gamePiece.CurrentZone = this;
+            if (atom.CurrentZone != this)
+                throw new ZonePlacementException(this,
+                    $"{nameof(atom.CurrentZone)} should be set before {nameof(_Place)} is called");
+            
+            _contents.Add(atom.Guid, atom);
 
+            atom.Transition
+                .Where(t => t.From == this && t.To == this)
+                .Take(1)
+                .Subscribe(HandleZoneTransition);
         }
 
-        protected void RemovePiece(TContents gamePiece)
+        private void HandleZoneTransition(ZoneTransition<TContents> zoneTransition)
         {
-            gamePiece.CurrentZone = default;
-            _contents.Remove(gamePiece.Guid);
+            _contents.Remove(zoneTransition.Who.Guid);
         }
     }
 }

@@ -71,5 +71,7 @@ namespace Archetype.Game.Payloads.Pieces
 
             return sb.ToString();
         }
+
+        protected override ICard Self => this;
     }
 }

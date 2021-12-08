@@ -82,16 +82,16 @@ namespace Archetype.Server
             CancellationToken cancellationToken
         )
         {
-            var result = await _mediator.Send(new EndTurnAction(), cancellationToken); // Should resolve enemy turn
+            await _mediator.Send(new EndTurnAction(), cancellationToken);
 
-            var payload = new TurnStartedPayload(result);
+            var payload = new TurnStartedPayload();
 
             await eventSender.SendAsync(nameof(Subscriptions.OnTurnStarted), payload, cancellationToken);
             
             return payload;
         }
 
-        public record TurnStartedPayload(string Message);
+        public record TurnStartedPayload();
     }
     
     public class Subscriptions

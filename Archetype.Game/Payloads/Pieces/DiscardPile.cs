@@ -7,8 +7,6 @@ namespace Archetype.Game.Payloads.Pieces
     [Target("Discard Pile")]
     public interface IDiscardPile : IZone<ICard>
     {
-        void Bury(ICard card);
-        void Exhume(ICard card);
     }
     
     public class DiscardPile : Zone<ICard>, IDiscardPile
@@ -19,7 +17,9 @@ namespace Archetype.Game.Payloads.Pieces
                 throw new ArgumentException("DiscardPile needs an owner", nameof(owner));
         }
 
-        public void Bury(ICard card) => AddPiece(card);
-        public void Exhume(ICard card) => RemovePiece(card);
+        public void Bury(ICard card)
+        {
+            card.MoveTo(this);
+        }
     }
 }

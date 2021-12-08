@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Exceptions
 {
@@ -18,6 +19,16 @@ namespace Archetype.Game.Exceptions
     public class EffectResultMissingVerbException : Exception { }
     public class CardMissingFromResolutionException : Exception { }
     public class TargetsMissingFromResolutionException : Exception { }
+
+    public class ZonePlacementException : Exception
+    {
+        public override string Message { get; }
+
+        public ZonePlacementException(IZone zone, string details)
+        {
+            Message = $"Invalid placement in zone {zone} due to: {details}";
+        }
+    }
     
     public class ContextResolvedTwiceException : Exception
     {

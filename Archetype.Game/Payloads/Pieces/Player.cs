@@ -50,8 +50,8 @@ namespace Archetype.Game.Payloads.Pieces
             
             for (var i=0; i < strength; i++)
             {
-                var card = Deck.Draw();
-                DiscardPile.Bury(card);
+                var card = Deck.PopCard();
+                card.MoveTo(DiscardPile);
             }
 
             return strength;
@@ -66,7 +66,7 @@ namespace Archetype.Game.Payloads.Pieces
             
             for (var i=0; i < actualStrength; i++)
             {
-                var card = Deck.Draw();
+                var card = Deck.PopCard();
                 Hand.Add(card);
             }
 

@@ -1,3 +1,4 @@
+using System;
 using Archetype.Game.Payloads.Context;
 
 namespace Archetype.Game.Payloads.Pieces.Base
@@ -5,9 +6,11 @@ namespace Archetype.Game.Payloads.Pieces.Base
     public interface IZoned<T> : IGameAtom
         where  T : IGameAtom, IZoned<T>
     {
-        // TODO: Expose Observable ZoneTransition here
-        public IZone<T> CurrentZone { get; set; }
+        IObservable<ZoneTransition<T>> Transition { get; }
+        public IZone<T> CurrentZone { get; }
 
-        IEffectResult<IZoned<T>, IZone<T>> MoveTo(IZone<T> zone);
+        IEffectResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone);
     }
+    
+    public record ZoneTransition<T>(IZone<T> From, IZone<T> To, IZoned<T> Who) where T : IZoned<T>;
 }
