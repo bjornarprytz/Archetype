@@ -41,9 +41,14 @@ namespace Archetype.Builder.Factory
             return new MapBuilder();
         }
 
-        public static CreatureBuilder UnitBuilder()
+        public static CreatureBuilder CreatureBuilder(CreatureMetaData template=default)
         {
-            return new CreatureBuilder();
+            return new CreatureBuilder(template);
+        }
+        
+        public static StructureBuilder StructureBuilder(StructureMetaData template=default)
+        {
+            return new StructureBuilder(template);
         }
     }
 }

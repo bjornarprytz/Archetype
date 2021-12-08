@@ -1,3 +1,4 @@
+using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
@@ -6,9 +7,12 @@ namespace Archetype.Builder
     {
         private readonly CreatureProtoData _creatureProtoData;
        
-        internal CreatureBuilder()
+        internal CreatureBuilder(CreatureMetaData template)
         {
-            _creatureProtoData = new CreatureProtoData();
+            _creatureProtoData = new CreatureProtoData()
+            {
+                MetaData = template
+            };
         }
 
         public CreatureBuilder Movement(int movement)

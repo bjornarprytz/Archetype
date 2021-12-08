@@ -1,4 +1,5 @@
 
+using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
@@ -7,9 +8,12 @@ namespace Archetype.Builder
     {
         private readonly StructureProtoData _structureProtoData;
         
-        internal StructureBuilder()
+        internal StructureBuilder(StructureMetaData template)
         {
-            _structureProtoData = new StructureProtoData();
+            _structureProtoData = new StructureProtoData()
+            {
+                MetaData = template
+            };
         }
 
         

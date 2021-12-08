@@ -15,16 +15,16 @@ namespace Archetype.Server
     public class Queries
     {
         private readonly IGameState _gameState;
-        private readonly ICardPool _cardPool;
+        private readonly IProtoPool _protoPool;
 
-        public Queries(IGameState gameState, ICardPool cardPool)
+        public Queries(IGameState gameState, IProtoPool protoPool)
         {
             _gameState = gameState;
-            _cardPool = cardPool;
+            _protoPool = protoPool;
         }
 
         public IGameState GetGameState() => _gameState;
-        public ICardPool GetCardPool() => _cardPool;
+        public IProtoPool GetCardPool() => _protoPool;
     }
     
     public class Mutations
@@ -65,17 +65,17 @@ namespace Archetype.Server
             CancellationToken cancellationToken
         )
         {
-            var result = await _mediator.Send(new StartGameAction(startGameInput.ProtoCardIds), cancellationToken);
+            await _mediator.Send(new StartGameAction(startGameInput.ProtoCardIds, startGameInput.HqStructureId, startGameInput.HqLocationId), cancellationToken);
 
-            var payload = new StartGamePayload(result);
+            var payload = new StartGamePayload();
 
             await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
             
             return payload;
         }
 
-        public record StartGameInput(IEnumerable<Guid> ProtoCardIds);
-        public record StartGamePayload(string Message);
+        public record StartGameInput(IEnumerable<Guid> ProtoCardIds, Guid HqStructureId, Guid HqLocationId);
+        public record StartGamePayload();
         
         public async Task<TurnStartedPayload> EndTurn(
             [Service] ITopicEventSender eventSender,

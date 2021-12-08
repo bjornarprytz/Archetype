@@ -1,9 +1,20 @@
 namespace Archetype.Game.Payloads.MetaData
 {
-    public record StructureMetaData(string Name, string ImageUri, int Level) 
-        : UnitMetaData(Name, ImageUri, Level);
-    public record CreatureMetaData(string Name, string ImageUri, int Level) 
-        : UnitMetaData(Name, ImageUri, Level);
+    public record StructureMetaData : UnitMetaData
+    {
+        
+    }
 
-    public record UnitMetaData(string Name, string ImageUri, int Level);
+    public record CreatureMetaData : UnitMetaData
+    {
+        
+    }
+
+    public record UnitMetaData
+    {
+        public string SetName { get; init; }
+        public string Name { get; init; }
+        public string ImageUri { get; init; }
+        public int Level { get; init; }
+    }
 }

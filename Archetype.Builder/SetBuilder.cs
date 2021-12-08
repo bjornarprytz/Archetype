@@ -9,48 +9,52 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
 {
-    public class SetBuilder : IBuilder<ICardSet>
+    public class SetBuilder : IBuilder<ISet>
     {
 
-        private readonly ICardSet _setData;
+        private readonly ISet _setData;
         private readonly Dictionary<Guid, ICardProtoData> _cards = new();
+        private readonly Dictionary<Guid, ICreatureProtoData> _creatures = new();
+        private readonly Dictionary<Guid, IStructureProtoData> _structures = new();
 
-        private CardMetaData _template = new();
+        private CardMetaData _cardTemplate = new();
+        private StructureMetaData _structureTemplate = new();
+        private CreatureMetaData _creatureTemplate = new();
 
         internal SetBuilder(string name)
         {
-            _template = _template with { SetName = name };
+            _cardTemplate = _cardTemplate with { SetName = name };
             
-            _setData = new CardSet(_cards)
+            _setData = new Set(_cards, _creatures, _structures)
             {
                 Name = name
             };
         }
 
-        public SetBuilder SetTemplate(CardMetaData newTemplate)
+        public SetBuilder ChangeCardTemplate(Func<CardMetaData, CardMetaData> changeFunc)
         {
-            _template = newTemplate with { SetName = _setData.Name };
+            _cardTemplate = changeFunc(_cardTemplate) with { SetName = _setData.Name };
 
             return this;
         }
-
-        public SetBuilder ChangeTemplate(Func<CardMetaData, CardMetaData> changeFunc)
+        
+        public SetBuilder ChangeCreatureTemplate(Func<CreatureMetaData, CreatureMetaData> changeFunc)
         {
-            _template = changeFunc(_template) with { SetName = _setData.Name };
+            _creatureTemplate = changeFunc(_creatureTemplate) with { SetName = _setData.Name };
 
             return this;
         }
-
-        public SetBuilder ClearTemplate()
+        
+        public SetBuilder ChangeStructureTemplate(Func<StructureMetaData, StructureMetaData> changeFunc)
         {
-            _template = new CardMetaData { SetName = _setData.Name };
+            _structureTemplate = changeFunc(_structureTemplate) with { SetName = _setData.Name };
 
             return this;
         }
 
         public SetBuilder Card(Action<CardBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.CardBuilder(_template);
+            var cbc = BuilderFactory.CardBuilder(_cardTemplate);
 
             builderProvider(cbc);
 
@@ -61,7 +65,33 @@ namespace Archetype.Builder
             return this;
         }
 
-        public ICardSet Build()
+        public SetBuilder Creature(Action<CreatureBuilder> builderProvider)
+        {
+            var cbc = BuilderFactory.CreatureBuilder(_creatureTemplate);
+
+            builderProvider(cbc);
+
+            var creature = cbc.Build();
+            
+            _creatures.Add(creature.Guid, creature);
+
+            return this;
+        }
+        
+        public SetBuilder Structure(Action<StructureBuilder> builderProvider)
+        {
+            var cbc = BuilderFactory.StructureBuilder(_structureTemplate);
+
+            builderProvider(cbc);
+
+            var structure = cbc.Build();
+            
+            _structures.Add(structure.Guid, structure);
+
+            return this;
+        }
+
+        public ISet Build()
         {
             if (_setData.Name.IsMissing())
                 throw new MissingSetNameException();

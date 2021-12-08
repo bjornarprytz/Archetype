@@ -46,16 +46,26 @@ namespace Archetype.Game.Exceptions
         }
     }
 
-    public class PlayCardActionException : Exception
+    public class PlayCardException : Exception
     {
         public override string Message { get; }
 
-        public PlayCardActionException(string message)
+        public PlayCardException(string message)
         {
             Message = message;
         }
     }
 
+    public class StartGameException : Exception
+    {
+        public override string Message { get; }
+
+        public StartGameException(string message)
+        {
+            Message = message;
+        }
+    }
+    
     public class MovePhaseException : Exception
     {
         public override string Message { get; }

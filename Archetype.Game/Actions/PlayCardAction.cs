@@ -50,21 +50,21 @@ namespace Archetype.Game.Actions
         public Task<Unit> Handle(PlayCardAction request, CancellationToken cancellationToken)
         {
             if (_gameState.GetGamePiece(request.CardGuid) is not ICard card)
-                throw new PlayCardActionException("GamePiece is not a card");
+                throw new PlayCardException("GamePiece is not a card");
 
             if (card.CurrentZone != _gameState.Player.Hand)
-                throw new PlayCardActionException("Card is not in hand");
+                throw new PlayCardException("Card is not in hand");
 
             if (card.Cost > _gameState.Player.Resources)
-                throw new PlayCardActionException("Can't pay cost");
+                throw new PlayCardException("Can't pay cost");
 
             if (card.Targets.Count() != request.TargetsGuids.Count())
-                throw new PlayCardActionException("Invalid number of targets");
+                throw new PlayCardException("Invalid number of targets");
             
             var targets = request.TargetsGuids.Select(guid => _gameState.GetGamePiece(guid)).ToList();
 
             if (targets.Any(t => t == null))
-                throw new PlayCardActionException("Some targets are null");
+                throw new PlayCardException("Some targets are null");
 
             
             

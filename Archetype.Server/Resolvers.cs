@@ -50,21 +50,21 @@ namespace Archetype.Server
         }
     }
 
-    public class CardPoolType : ObjectType<CardPool>
+    public class CardPoolType : ObjectType<ProtoPool>
     {
-        protected override void Configure(IObjectTypeDescriptor<CardPool> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<ProtoPool> descriptor)
         {
             descriptor.Description("Collection of all available card sets");
-            descriptor.Implements<InterfaceType<ICardPool>>();
+            descriptor.Implements<InterfaceType<IProtoPool>>();
         }
     }
 
-    public class CardSetType : ObjectType<CardSet>
+    public class CardSetType : ObjectType<Set>
     {
-        protected override void Configure(IObjectTypeDescriptor<CardSet> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<Set> descriptor)
         {
             descriptor.Description("A set of card proto data which share some themes");
-            descriptor.Implements<InterfaceType<ICardSet>>();
+            descriptor.Implements<InterfaceType<ISet>>();
         }
     }
 
@@ -133,7 +133,7 @@ namespace Archetype.Server
         private class Resolvers
         {
             public string RulesTextWithContext(Card card, [Service] IGameState gameState) => card.GenerateRulesText(gameState);
-            public string RulesText(Card card, [Service] ICardPool cardPool) => cardPool[card.ProtoGuid].RulesText;
+            public string RulesText(Card card, [Service] IProtoPool protoPool) => protoPool.GetCard(card.ProtoGuid).RulesText;
         }
     }
     

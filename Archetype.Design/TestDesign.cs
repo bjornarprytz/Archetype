@@ -11,18 +11,18 @@ namespace Archetype.Design
 {
     public static class TestDesign
     {
-        public static ICardPool BuildCardPool()
+        public static IProtoPool BuildCardPool()
         {
             return BuilderFactory.CardPoolBuilder()
                 .AddSet("All rares", builder => builder
-                    .ChangeTemplate(t => t with { Rarity = CardRarity.Rare})
+                    .ChangeCardTemplate(t => t with { Rarity = CardRarity.Rare})
                     .Card(cardBuilder => cardBuilder
                         .Name("Cost reducer")
                         .Effect<ICard>(context => context.Target.ReduceCost(1))
                         ))
                 .AddSet("TestSet", 
                     setProvider => setProvider
-                        .ChangeTemplate(t => t with { Color = CardColor.Black })
+                        .ChangeCardTemplate(t => t with { Color = CardColor.Black })
                         .Card(builder =>
                             builder
                                 .Name("Slap heal")
