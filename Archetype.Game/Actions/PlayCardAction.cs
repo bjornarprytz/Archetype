@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.PlayContext;
 using MediatR;
 
 namespace Archetype.Game.Actions

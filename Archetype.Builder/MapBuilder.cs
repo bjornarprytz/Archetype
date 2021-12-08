@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Builder.Exceptions;
+using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;

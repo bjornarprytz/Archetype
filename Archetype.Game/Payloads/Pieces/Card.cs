@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Card;
+using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Game.Payloads.PlayContext;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces

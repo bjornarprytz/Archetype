@@ -1,8 +1,7 @@
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.PlayContext
+namespace Archetype.Game.Payloads.Context.Card
 {
     public interface ITargetValidationContext<out TTarget>
         where TTarget : IGameAtom

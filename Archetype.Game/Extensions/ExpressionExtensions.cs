@@ -8,7 +8,8 @@ using System.Text;
 using Aqua.EnumerableExtensions;
 using Archetype.Game.Attributes;
 using Archetype.Game.Exceptions;
-using Archetype.Game.Payloads.PlayContext;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Effect;
 
 namespace Archetype.Game.Extensions
 {

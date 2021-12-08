@@ -1,7 +1,6 @@
 using System;
-using System.Collections;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Exceptions
 {
     public class InvalidTargetIndexException : Exception
     {

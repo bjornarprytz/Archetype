@@ -3,14 +3,14 @@ using System.Linq;
 using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.PlayContext
+namespace Archetype.Game.Payloads.Context
 {
-    public interface ICardResult
+    public interface IResolution
     {
-        IReadOnlyList<IEffectResult> Results { get; }
+        IEnumerable<IEffectResult> Results { get; }
     }
 
-    public interface ICardResultCollector: ICardResult
+    public interface IResolutionCollector: IResolution
     {
         void AddResult(IEffectResult effectResult);
     }
@@ -75,11 +75,11 @@ namespace Archetype.Game.Payloads.PlayContext
         object IEffectResult.Result => Result;
     }
 
-    public class CardResultCollector : ICardResultCollector
+    public class ResolutionCollector : IResolutionCollector
     {
         private readonly List<IEffectResult> _results = new ();
         
-        public IReadOnlyList<IEffectResult> Results => _results;
+        public IEnumerable<IEffectResult> Results => _results;
 
         public void AddResult(IEffectResult effectResult)
         {

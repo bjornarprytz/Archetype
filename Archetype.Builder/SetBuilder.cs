@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Archetype.Builder.Exceptions;
+using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces;

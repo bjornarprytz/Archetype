@@ -1,7 +1,9 @@
 using System;
 using System.Linq.Expressions;
+using Archetype.Builder.Exceptions;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Game.Payloads.PlayContext;
 
 namespace Archetype.Builder
 {

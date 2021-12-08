@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Game.Payloads.PlayContext;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
@@ -15,7 +16,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IHistoryWriter
     {
-        void Append(ICard card, ICardResolutionContext context, ICardResult result);
+        void Append(ICard card, ICardResolutionContext context, IResolution result);
     }
 
     public interface IHistoryEntry
@@ -23,7 +24,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         ICard Card { get; }
         IGameAtom Caster { get; }
         IEnumerable<IGameAtom> Targets { get; }
-        ICardResult Result { get; }
+        IResolution Result { get; }
     }
     
     public class History : IHistoryReader, IHistoryWriter
@@ -37,7 +38,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IReadOnlyDictionary<ICard, IList<IHistoryEntry>> EntriesByCardInstance => _entriesByCardInstance;
 
 
-        public void Append(ICard card, ICardResolutionContext context, ICardResult result)
+        public void Append(ICard card, ICardResolutionContext context, IResolution result)
         {
             var newEntry = new Entry
             {
@@ -59,7 +60,7 @@ namespace Archetype.Game.Payloads.Infrastructure
             public ICard Card { get; init; }
             public IGameAtom Caster { get; init; }
             public IEnumerable<IGameAtom> Targets { get; init; }
-            public ICardResult Result { get; init; }
+            public IResolution Result { get; init; }
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.PlayContext
+namespace Archetype.Game.Payloads.Context.Card
 {
     public interface ITarget
     {

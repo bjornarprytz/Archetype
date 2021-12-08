@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
@@ -8,7 +7,7 @@ using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.PlayContext
+namespace Archetype.Game.Payloads.Context.Card
 {
     
     public interface ICardResolutionContext : IDisposable
@@ -20,12 +19,12 @@ namespace Archetype.Game.Payloads.PlayContext
         [Target("World")]
         IGameState GameState { get; }
         
-        ICardResult PartialResults { get; }
+        IResolution PartialResults { get; }
     }
 
     public interface ICardResolver
     {
-        ICardResult Resolve();
+        IResolution Resolve();
     }
 
     public interface ITargetValidator
@@ -38,21 +37,21 @@ namespace Archetype.Game.Payloads.PlayContext
         private ICard _card;
         
         private bool _resolved;
-        private readonly ICardResultCollector _result;
+        private readonly IResolutionCollector _result;
         public CardResolutionContext(IGameState gameState, IGameAtom caster)
         {
             GameState = gameState;
             Caster = caster;
-            _result = new CardResultCollector();
+            _result = new ResolutionCollector();
         }
 
-        public ICardResult PartialResults => _result;
+        public IResolution PartialResults => _result;
         public IGameState GameState { get; }
         public IGameAtom Caster { get; }
         public IEnumerable<IGameAtom> Targets { get; private set; }
     
 
-        public ICardResult Resolve()
+        public IResolution Resolve()
         {
             if (_resolved)
             {

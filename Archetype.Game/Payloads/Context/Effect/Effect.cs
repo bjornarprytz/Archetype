@@ -3,9 +3,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json.Serialization;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.PlayContext
+namespace Archetype.Game.Payloads.Context.Effect
 {
     public interface IEffect
     {

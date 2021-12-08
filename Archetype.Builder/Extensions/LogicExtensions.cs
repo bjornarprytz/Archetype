@@ -1,8 +1,7 @@
-using System;
 using System.Collections;
 using Aqua.EnumerableExtensions;
 
-namespace Archetype.Builder.Factory
+namespace Archetype.Builder.Extensions
 {
     public static class LogicExtensions
     {

@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Game.Payloads.PlayContext;
 
 namespace Archetype.Game.Extensions
 {

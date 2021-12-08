@@ -1,8 +1,9 @@
 using Archetype.Game.Attributes;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Game.Payloads.PlayContext
+namespace Archetype.Game.Payloads.Context.Effect
 {
     public interface IEffectResolutionContext<out TTarget> : IEffectResolutionContext
         where TTarget : IGameAtom

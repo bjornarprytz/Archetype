@@ -1,4 +1,4 @@
-using Archetype.Game.Payloads.PlayContext;
+using Archetype.Game.Payloads.Context;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
