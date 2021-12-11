@@ -31,7 +31,7 @@ namespace Archetype.Game.Payloads.Context.Trigger
         {
             var results = new ResolutionCollector();
 
-            using var context = new TriggerContext(_gameState, results, source);
+            var context = new TriggerContext(_gameState, results, source);
 
             foreach (var effect in source.Effects)
             {
@@ -40,21 +40,11 @@ namespace Archetype.Game.Payloads.Context.Trigger
             
             _historyWriter.Append(results);
         }
-        
-        private class TriggerContext : ITriggerContext<TSource>
-        {
-            public TriggerContext(IGameState gameState, IResolution partialResults, TSource source)
-            {
-                GameState = gameState;
-                PartialResults = partialResults;
-                Source = source;
-            }
 
-            public IGameState GameState { get; }
-            public IResolution PartialResults { get; }
-            public TSource Source { get; }
-        
-            public void Dispose() { }
-        }
+        private record TriggerContext(
+                IGameState GameState, 
+                IResolution PartialResults, 
+                TSource Source)
+            : ITriggerContext<TSource>;
     }
 }

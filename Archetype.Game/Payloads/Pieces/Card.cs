@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,7 +37,7 @@ namespace Archetype.Game.Payloads.Pieces
         public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
         {
             ProtoGuid = protoData.Guid;
-            _targets = protoData.Targets.ToList(); // TODO: Maybe just point to the protoData?
+            _targets = protoData.Targets.ToList(); // TODO: Maybe just point to the protoData targets/effects?
             _effects = protoData.Effects.ToList();
             MetaData = protoData.MetaData;
             Cost = protoData.Cost;
@@ -61,8 +62,8 @@ namespace Archetype.Game.Payloads.Pieces
         public string GenerateRulesText(IGameState gameState)
         {
             var sb = new StringBuilder();
-            // TODO: figure something out here, to give the best card text possible
-            var cardResolutionContext = new CardContext(gameState, gameState.Player, new History()); 
+            
+            var cardResolutionContext = new MinimalContext(gameState, gameState.Player); 
             
             foreach (var effect in _effects)
             {
@@ -73,5 +74,11 @@ namespace Archetype.Game.Payloads.Pieces
         }
 
         protected override ICard Self => this;
+
+        private record MinimalContext(IGameState GameState, IPlayer Caster) : ICardContext
+        {
+            public IEnumerable<IGameAtom> Targets => Enumerable.Empty<IGameAtom>();
+            public IResolution PartialResults { get; } = new ResolutionCollector();
+        }
     }
 }

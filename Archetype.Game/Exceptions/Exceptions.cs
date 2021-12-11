@@ -34,9 +34,9 @@ namespace Archetype.Game.Exceptions
     {
         public override string Message { get; }
 
-        public ContextResolvedTwiceException(ICard card, CardContext cardContext)
+        public ContextResolvedTwiceException(ICard card, CardResolver cardResolver)
         {
-            Message = $"Trying to resolve {card.MetaData.Name} on a context which has already been resolved {cardContext}";
+            Message = $"Trying to resolve {card.MetaData.Name} on a context which has already been resolved {cardResolver}";
         }
     }
     

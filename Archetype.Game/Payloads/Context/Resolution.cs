@@ -7,7 +7,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context
 {
-    public interface IResolutionContext : IDisposable
+    public interface IResolutionContext
     {
         IGameState GameState { get; }
         IResolution PartialResults { get; }
