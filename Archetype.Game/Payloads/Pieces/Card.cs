@@ -25,13 +25,13 @@ namespace Archetype.Game.Payloads.Pieces
         IEffectResult<ICard, int> ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
-        IEnumerable<IEffect> Effects { get; }
+        IEnumerable<IEffect<ICardContext>> Effects { get; }
     }
     
     public class Card : Piece<ICard>, ICard
     {
         private readonly List<ITarget> _targets;
-        private readonly List<IEffect> _effects;
+        private readonly List<IEffect<ICardContext>> _effects;
 
         public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
         {
@@ -46,7 +46,7 @@ namespace Archetype.Game.Payloads.Pieces
         public Guid ProtoGuid { get; }
         public CardMetaData MetaData { get; }
         public IEnumerable<ITarget> Targets => _targets;
-        public IEnumerable<IEffect> Effects => _effects;
+        public IEnumerable<IEffect<ICardContext>> Effects => _effects;
         
         
         public IEffectResult<ICard, int> ReduceCost(int x)
@@ -62,7 +62,7 @@ namespace Archetype.Game.Payloads.Pieces
         {
             var sb = new StringBuilder();
             // TODO: figure something out here, to give the best card text possible
-            var cardResolutionContext = new CardResolutionContext(gameState, gameState.Player, new History()); 
+            var cardResolutionContext = new CardContext(gameState, gameState.Player, new History()); 
             
             foreach (var effect in _effects)
             {

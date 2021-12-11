@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Aqua.EnumerableExtensions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.MetaData;
@@ -11,6 +12,11 @@ namespace Archetype.Game.Extensions
 {
     public static class MapExtensions
     {
+
+        public static IEnumerable<IUnit> EachUnit(this IMap map)
+        {
+            return map.Nodes.SelectMany(node => node.Contents);
+        }
         public static IEnumerable<ICreature> EachEnemyCreature(this IMap map)
         {
             return map.Nodes.SelectMany(Enemies<ICreature>);

@@ -1,16 +1,22 @@
 
+using System.Collections.Generic;
+using Archetype.Game.Payloads.Context.Effect;
+using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.MetaData;
+using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
 {
     public class StructureBuilder : IBuilder<IStructureProtoData>
     {
+        private readonly List<IEffect<ITriggerContext<IStructure>>> _effects = new();
+
         private readonly StructureProtoData _structureProtoData;
         
         internal StructureBuilder(StructureMetaData template)
         {
-            _structureProtoData = new StructureProtoData()
+            _structureProtoData = new StructureProtoData(_effects)
             {
                 MetaData = template
             };

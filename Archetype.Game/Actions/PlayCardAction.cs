@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Exceptions;
-using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;

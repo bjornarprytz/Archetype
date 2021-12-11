@@ -10,15 +10,18 @@ namespace Archetype.Game.Payloads.Context.Effect
 {
     public interface IEffect
     {
-        int TargetIndex { get; }
-        
-        IEffectResult ResolveContext(ICardResolutionContext context);
-
-        string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext);
         string PrintedRulesText();
     }
     
-    public class Effect<TTarget> : IEffect 
+    public interface IEffect<in TContext> : IEffect
+        where TContext : IResolutionContext
+    {
+        IEffectResult ResolveContext(TContext context);
+        string ContextSensitiveRulesText(TContext cardResolutionContext);
+        
+    }
+    
+    public class Effect<TTarget> : IEffect<ICardContext>
         where TTarget : IGameAtom
     {
         private Func<IEffectResolutionContext<TTarget>, IEffectResult> _resolveBacking;
@@ -44,18 +47,18 @@ namespace Archetype.Game.Payloads.Context.Effect
                 _resolveBacking = null; // Force re-compile
             }
         }
-
+        
         public int TargetIndex { get; set; }
-        public IEffectResult ResolveContext(ICardResolutionContext context)
+        public IEffectResult ResolveContext(ICardContext context)
         {
             dynamic target = context.Targets.ElementAt(TargetIndex);
             
             return Resolve(new EffectResolutionContext<TTarget>(context, target));
         }
 
-        public string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext)
+        public string ContextSensitiveRulesText(ICardContext cardContext)
         {
-            return ResolveExpression.ContextSensitiveRulesText(new EffectResolutionContext<TTarget>(cardResolutionContext, default));
+            return ResolveExpression.ContextSensitiveRulesText(new EffectResolutionContext<TTarget>(cardContext, default));
         }
 
         public string PrintedRulesText()
@@ -64,7 +67,7 @@ namespace Archetype.Game.Payloads.Context.Effect
         }
     }
     
-    public class Effect : IEffect
+    public class Effect : IEffect<ICardContext>
     {
         private Func<IEffectResolutionContext, IEffectResult> _resolveBacking;
         private Expression<Func<IEffectResolutionContext, IEffectResult>> _resolveExpression;
@@ -90,14 +93,11 @@ namespace Archetype.Game.Payloads.Context.Effect
             }
         }
 
+        public IEffectResult ResolveContext(ICardContext context) => Resolve(new EffectResolutionContext(context));
 
-        public int TargetIndex => -1;
-
-        public IEffectResult ResolveContext(ICardResolutionContext context) => Resolve(new EffectResolutionContext(context));
-
-        public string ContextSensitiveRulesText(ICardResolutionContext cardResolutionContext)
+        public string ContextSensitiveRulesText(ICardContext cardContext)
         {
-            return ResolveExpression.ContextSensitiveRulesText(new EffectResolutionContext(cardResolutionContext));
+            return ResolveExpression.ContextSensitiveRulesText(new EffectResolutionContext(cardContext));
         }
 
         public string PrintedRulesText()

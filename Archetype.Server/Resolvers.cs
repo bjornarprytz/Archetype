@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Infrastructure;
@@ -154,14 +155,14 @@ namespace Archetype.Server
         }
     }
     
-    public class EffectType : ObjectType<IEffect>
+    public class EffectType<T> : ObjectType<IEffect<T>> where T : IResolutionContext // TODO: Might have to skip open generics on this one if problems arise
     {
-        protected override void Configure(IObjectTypeDescriptor<IEffect> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IEffect<T>> descriptor)
         {
             descriptor.Description("The core payload of a card, where mutation of game atoms happen");
 
             descriptor
-                .Field(nameof(IEffect.ResolveContext))
+                .Field(nameof(IEffect<T>.ResolveContext))
                 .Ignore();
             
             descriptor.Ignore(e => e.PrintedRulesText());

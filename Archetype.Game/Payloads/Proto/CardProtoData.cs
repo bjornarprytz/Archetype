@@ -19,16 +19,16 @@ namespace Archetype.Game.Payloads.Proto
         int Cost { get; }
         CardMetaData MetaData { get; }
         IEnumerable<ITarget> Targets { get; }
-        IEnumerable<IEffect> Effects { get; }
+        IEnumerable<IEffect<ICardContext>> Effects { get; }
     }
     
     public class CardProtoData : ICardProtoData
     {
         private readonly List<ITarget> _targets;
-        private readonly List<IEffect> _effects;
+        private readonly List<IEffect<ICardContext>> _effects;
         private string _rulesText;
 
-        public CardProtoData(List<ITarget> targets, List<IEffect> effects)
+        public CardProtoData(List<ITarget> targets, List<IEffect<ICardContext>> effects)
         {
             Guid = Guid.NewGuid();
             _targets = targets;
@@ -50,7 +50,7 @@ namespace Archetype.Game.Payloads.Proto
         public int Cost { get; set; }
         public CardMetaData MetaData { get; set; }
         public IEnumerable<ITarget> Targets => _targets;
-        public IEnumerable<IEffect> Effects => _effects;
+        public IEnumerable<IEffect<ICardContext>> Effects => _effects;
 
         private string GenerateRulesText()
         {

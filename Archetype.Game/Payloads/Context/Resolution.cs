@@ -1,10 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Exceptions;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context
 {
+    public interface IResolutionContext : IDisposable
+    {
+        IGameState GameState { get; }
+        IResolution PartialResults { get; }
+    }
+    
     public interface IResolution
     {
         IEnumerable<IEffectResult> Results { get; }

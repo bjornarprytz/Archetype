@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using Archetype.Game.Payloads.Context.Effect;
+using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.MetaData;
+using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Proto
 {
@@ -23,6 +27,8 @@ namespace Archetype.Game.Payloads.Proto
     public interface IStructureProtoData : IUnitProtoData
     {
         StructureMetaData MetaData { get; }
+        
+        IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects { get; }
     }
     
     public class CreatureProtoData : UnitProtoData, ICreatureProtoData
@@ -35,8 +41,16 @@ namespace Archetype.Game.Payloads.Proto
 
     public class StructureProtoData : UnitProtoData, IStructureProtoData
     {
+        private readonly List<IEffect<ITriggerContext<IStructure>>> _effects;
+
+        public StructureProtoData(List<IEffect<ITriggerContext<IStructure>>> effects)
+        {
+            _effects = effects;
+        }
+        
         public StructureMetaData MetaData { get; set; }
         public override UnitMetaData BaseMetaData => MetaData;
+        public IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects => _effects;
     }
     
     public abstract class UnitProtoData : IUnitProtoData

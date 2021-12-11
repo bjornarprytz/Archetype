@@ -19,9 +19,9 @@ namespace Archetype.Game.Extensions
         
         [Group("each unit")]
         public static IEnumerable<IUnit> EachUnit<T>(this T context)
-            where T : IEffectResolutionContext
+            where T : IResolutionContext
         {
-            return context.GameState.Map.Nodes.SelectMany(n => n.Contents);
+            return context.GameState.Map.EachUnit();
         }
 
         [Group("each unit in target zone")]
@@ -33,16 +33,16 @@ namespace Archetype.Game.Extensions
         
         [Group("each card in the player's hand")]
         public static IEnumerable<ICard> CardsInPlayersHand<T>(this T context)
-            where T : IEffectResolutionContext
+            where T : IResolutionContext
         {
             return context.GameState.Player.Hand.Contents;
         }
 
         [ContextFact("equal to the damage dealt by this card")]
         public static int DamageDealt<T>(this T context)
-            where T : IEffectResolutionContext
+            where T : IResolutionContext
         {
-            return context.CardResolutionContext.PartialResults
+            return context.PartialResults
                 .Results
                 .Where(result => result.Verb is nameof(IUnit.Attack))
                 .Select(r => (int) r.Result) // TODO: Refactor Results to not have to rely on reflection so much

@@ -16,7 +16,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IHistoryWriter
     {
-        void Append(ICard card, ICardResolutionContext context, IResolution result);
+        void Append(ICard card, ICardContext context, IResolution result);
         void Append(IResolution result);
     }
 
@@ -43,7 +43,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IReadOnlyDictionary<ICard, IList<ICardEntry>> CardEntriesByInstance => _entriesByCardInstance;
 
 
-        public void Append(ICard card, ICardResolutionContext context, IResolution result)
+        public void Append(ICard card, ICardContext context, IResolution result)
         {
             var newEntry = new CardEntry
             {

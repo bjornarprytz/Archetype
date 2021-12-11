@@ -10,27 +10,26 @@ namespace Archetype.Game.Actions
     public class EndTurnActionHandler : IRequestHandler<EndTurnAction>
     {
         private readonly IMovePhaseResolver _movePhase;
+        private readonly ICombatPhaseResolver _combatPhase;
+        private readonly IUpkeepPhaseResolver _upkeepPhase;
 
-        public EndTurnActionHandler(IMovePhaseResolver movePhase)
+        public EndTurnActionHandler(
+            IMovePhaseResolver movePhase,
+            ICombatPhaseResolver combatPhase,
+            IUpkeepPhaseResolver upkeepPhase)
         {
             _movePhase = movePhase;
+            _combatPhase = combatPhase;
+            _upkeepPhase = upkeepPhase;
         }
         
         public Task<Unit> Handle(EndTurnAction request, CancellationToken cancellationToken)
         {
-            // This action signals that the player main phase is done
-            
-            // 1. Move
-            
-            // All enemies
-            // Move towards player HQ
-
             _movePhase.Resolve();
-
-            // combatResolver
-            // check game over?
-            // trigger structures (friendly, then enemy?)
-
+            _combatPhase.Resolve();
+            // TODO: check game over?
+            _upkeepPhase.Resolve();
+            // TODO: check game over?
             return Unit.Task;
         }
     }

@@ -1,4 +1,3 @@
-using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
@@ -11,17 +10,14 @@ namespace Archetype.Game.Payloads.Context.Effect
         TTarget Target { get; }
     }
 
-    public interface IEffectResolutionContext
+    public interface IEffectResolutionContext : IResolutionContext
     {
-        ICardResolutionContext CardResolutionContext { get; }
-        [Target("World")]
-        IGameState GameState => CardResolutionContext.GameState;
     }
     
     public class EffectResolutionContext<TTarget> : EffectResolutionContext, IEffectResolutionContext<TTarget> 
         where TTarget : IGameAtom
     {
-        public EffectResolutionContext(ICardResolutionContext cardResolutionContext, TTarget target) : base(cardResolutionContext)
+        public EffectResolutionContext(ICardContext cardContext, TTarget target) : base(cardContext)
         {
             Target = target;
         }
@@ -30,11 +26,15 @@ namespace Archetype.Game.Payloads.Context.Effect
     
     public class EffectResolutionContext : IEffectResolutionContext
     {
-        public EffectResolutionContext(ICardResolutionContext cardResolutionContext)
+        private readonly ICardContext _cardContext;
+
+        public EffectResolutionContext(ICardContext cardContext)
         {
-            CardResolutionContext = cardResolutionContext;
+            _cardContext = cardContext;
         }
-        
-        public ICardResolutionContext CardResolutionContext { get; }
+
+        public IGameState GameState => _cardContext.GameState;
+        public IResolution PartialResults => _cardContext.PartialResults;
+        public void Dispose() { }
     }
 }

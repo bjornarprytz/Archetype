@@ -7,7 +7,7 @@ namespace Archetype.Game.Extensions
 {
     public static class CardExtensions
     {
-        public static bool ValidateTargets(this ICard card, ICardResolutionContext context)
+        public static bool ValidateTargets(this ICard card, ICardContext context)
         {
             var targetCount = card.Targets.Count();
 

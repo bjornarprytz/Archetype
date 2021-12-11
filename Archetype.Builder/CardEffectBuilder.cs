@@ -2,36 +2,37 @@ using System;
 using System.Linq.Expressions;
 using Archetype.Builder.Exceptions;
 using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder
 {
-    public class EffectBuilder<TTarget> : IBuilder<IEffect>
+    public class CardEffectBuilder<TTarget> : IBuilder<IEffect<ICardContext>>
         where TTarget : IGameAtom
     {
         private readonly Effect<TTarget> _effect;
 
-        internal EffectBuilder()
+        internal CardEffectBuilder()
         {
             _effect = new Effect<TTarget>();
         }
         
-        public EffectBuilder<TTarget> TargetIndex(int i)
+        public CardEffectBuilder<TTarget> TargetIndex(int i)
         {
             _effect.TargetIndex = i;
 
             return this;
         }
         
-        public EffectBuilder<TTarget> Resolve(Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> expression)
+        public CardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 
             return this;
         }
 
-        public IEffect Build()
+        public IEffect<ICardContext> Build()
         {
             if (_effect.ResolveExpression == null) throw new MissingResolutionExpressionException();
 
@@ -39,23 +40,23 @@ namespace Archetype.Builder
         }
     }
 
-    public class EffectBuilder : IBuilder<IEffect>
+    public class CardEffectBuilder : IBuilder<IEffect<ICardContext>>
     {
         private readonly Effect _effect;
         
-        public EffectBuilder()
+        public CardEffectBuilder()
         {
             _effect = new Effect();
         }
         
-        public EffectBuilder Resolve(Expression<Func<IEffectResolutionContext, IEffectResult>> expression)
+        public CardEffectBuilder Resolve(Expression<Func<IEffectResolutionContext, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 
             return this;
         }
 
-        public IEffect Build()
+        public IEffect<ICardContext> Build()
         {
             if (_effect.ResolveExpression == null) throw new MissingResolutionExpressionException();
 

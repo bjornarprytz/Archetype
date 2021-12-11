@@ -9,17 +9,11 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    
-    public interface ICardResolutionContext : IDisposable
+    public interface ICardContext : IResolutionContext
     {
         [Target("Caster")]
         IPlayer Caster { get; }
         IEnumerable<IGameAtom> Targets { get; }
-        
-        [Target("World")]
-        IGameState GameState { get; }
-        
-        IResolution PartialResults { get; }
     }
 
     public interface ICardResolver
@@ -27,14 +21,14 @@ namespace Archetype.Game.Payloads.Context.Card
         void Resolve(ICard card, IEnumerable<IGameAtom> targets);
     }
     
-    public class CardResolutionContext : ICardResolver, ICardResolutionContext
+    public class CardContext : ICardResolver, ICardContext
     {
         private readonly IHistoryWriter _historyWriter;
         private ICard _card;
         
         private bool _resolved;
         private readonly IResolutionCollector _result;
-        public CardResolutionContext(IGameState gameState, IPlayer player, IHistoryWriter historyWriter)
+        public CardContext(IGameState gameState, IPlayer player, IHistoryWriter historyWriter)
         {
             _historyWriter = historyWriter;
             GameState = gameState;
@@ -98,9 +92,8 @@ namespace Archetype.Game.Payloads.Context.Card
             
             _historyWriter.Append(_card, this, _result);
         }
-        
-        
 
-        void IDisposable.Dispose() { }
+
+        public void Dispose() { }
     }
 }

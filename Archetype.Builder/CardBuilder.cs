@@ -20,7 +20,7 @@ namespace Archetype.Builder
         private readonly CardProtoData _cardProtoData;
 
         private readonly List<ITarget> _targets = new();
-        private readonly List<IEffect> _effects = new();
+        private readonly List<IEffect<ICardContext>> _effects = new();
 
         internal CardBuilder(CardMetaData template)
         {
@@ -102,7 +102,7 @@ namespace Archetype.Builder
             return this;
         }
         
-        public CardBuilder EffectBuilder<TTarget>(Action<EffectBuilder<TTarget>> builderProvider)
+        public CardBuilder EffectBuilder<TTarget>(Action<CardEffectBuilder<TTarget>> builderProvider)
             where  TTarget : IGameAtom
         {
             var cbc = BuilderFactory.EffectBuilder<TTarget>();
@@ -114,7 +114,7 @@ namespace Archetype.Builder
             return this;
         }
         
-        public CardBuilder Effect(Action<EffectBuilder> builderProvider)
+        public CardBuilder Effect(Action<CardEffectBuilder> builderProvider)
         {
             var cbc = BuilderFactory.EffectBuilder();
 
@@ -156,13 +156,6 @@ namespace Archetype.Builder
 
         public ICardProtoData Build()
         {
-            var targetCount = _targets.Count;
-
-            foreach (var effect in _cardProtoData.Effects.Where(effect => effect.TargetIndex >= targetCount))
-            {
-                throw new InvalidTargetIndexException(effect.TargetIndex, targetCount);
-            }
-            
             Console.WriteLine($"Creating card {_cardProtoData.MetaData.Name}");
 
             return _cardProtoData;
