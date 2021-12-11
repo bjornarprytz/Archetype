@@ -23,6 +23,11 @@ namespace Archetype.Game.Payloads.Pieces.Base
         IEffectResult<IUnit, int> Attack(int strength);
         [Template("Heal {0} by {1}")]
         IEffectResult<IUnit, int> Heal(int strength);
+
+        [Template("Kill {0}")]
+        IEffectResult<IUnit, int> Kill();
+
+
     }
     
     public abstract class Unit : Piece<IUnit>, IUnit
@@ -63,6 +68,15 @@ namespace Archetype.Game.Payloads.Pieces.Base
             Health += actualHeal;
 
             return ResultFactory.Create(this, actualHeal);
+        }
+
+        public IEffectResult<IUnit, int> Kill()
+        {
+            var previousHealth = Health;
+            
+            Health = 0;
+
+            return ResultFactory.Create(this, previousHealth);
         }
 
         protected override IUnit Self => this;

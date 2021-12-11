@@ -1,4 +1,5 @@
-﻿using Archetype.Game.Payloads.Infrastructure;
+﻿using Aqua.EnumerableExtensions;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Builder.Extensions;

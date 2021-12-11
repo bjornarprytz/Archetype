@@ -23,5 +23,10 @@ namespace Archetype.Game.Extensions
 
             return array;
         }
+        
+        public static bool IsEmpty<T>(this IEnumerable<T> items)
+        {
+            return !items.Any();
+        }
     }
 }

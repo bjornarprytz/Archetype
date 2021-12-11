@@ -36,7 +36,7 @@ namespace Archetype.Game.Payloads.Pieces
         public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
         {
             ProtoGuid = protoData.Guid;
-            _targets = protoData.Targets.ToList();
+            _targets = protoData.Targets.ToList(); // TODO: Maybe just point to the protoData?
             _effects = protoData.Effects.ToList();
             MetaData = protoData.MetaData;
             Cost = protoData.Cost;

@@ -16,7 +16,7 @@ namespace Archetype.Game.Factory
         {
             return new EffectResult<TResult>(callerMemberName, result);
         }
-        
+
         public static IEffectResult<TResult> Null<TResult>([CallerMemberName] string callerMemberName=default)
         {
             return new NullResult<TResult>(callerMemberName);

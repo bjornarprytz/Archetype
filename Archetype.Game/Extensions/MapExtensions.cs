@@ -13,32 +13,32 @@ namespace Archetype.Game.Extensions
     {
         public static IEnumerable<ICreature> EachEnemyCreature(this IMap map)
         {
-            return map.Nodes.SelectMany(Enemy<ICreature>);
+            return map.Nodes.SelectMany(Enemies<ICreature>);
         }
         
         public static IEnumerable<ICreature> EachFriendlyCreature(this IMap map)
         {
-            return map.Nodes.SelectMany(Friendly<ICreature>);
+            return map.Nodes.SelectMany(Friendlies<ICreature>);
         }
-        
+
         public static IEnumerable<IStructure> EachFriendlyStructure(this IMap map)
         {
-            return map.Nodes.SelectMany(Friendly<IStructure>);
+            return map.Nodes.SelectMany(Friendlies<IStructure>);
         }
         
         public static IEnumerable<IStructure> EachEnemyStructure(this IMap map)
         {
-            return map.Nodes.SelectMany(Enemy<IStructure>);
+            return map.Nodes.SelectMany(Enemies<IStructure>);
         }
 
-        public static IEnumerable<T> Friendly<T>(this IMapNode node)
+        public static IEnumerable<T> Friendlies<T>(this IMapNode node)
             where T : IUnit
         {
             return node.Contents.OfType<T>()
                 .Where(c => c.IsFriendly());
         }
         
-        public static IEnumerable<T> Enemy<T>(this IMapNode node)
+        public static IEnumerable<T> Enemies<T>(this IMapNode node)
             where T : IUnit
         {
             return node.Contents.OfType<T>()
@@ -52,8 +52,13 @@ namespace Archetype.Game.Extensions
 
             return node.Contents.OfType<T>().Where(t => t.TopOwner() != myTopOwner);
         }
+
+        public static IEnumerable<ICreature> EachCreature(this IMapNode node)
+        {
+            return node.Contents.OfType<ICreature>();
+        }
         
-        public static bool IsContested(this IMapNode node)
+        private static bool IsContested(this IMapNode node)
         {
             return node.Contents.Any(c => c.IsEnemyOf(node));
         }
@@ -62,7 +67,7 @@ namespace Archetype.Game.Extensions
         {
             return node.EnemiesOf<IUnit>(attacker).Sum(defender => defender.Defense);
         }
-        
+
         public static IReadOnlyDictionary<IMapNode, IMapNode> CalculateShortestPaths(this IMapNode targetNode)
         {
             var dict = new Dictionary<IMapNode, IMapNode> { { targetNode, targetNode } };
@@ -89,6 +94,11 @@ namespace Archetype.Game.Extensions
                     UpdateNeighbours(neighbour);
                 }
             }
+        }
+        
+        public static IEnumerable<IMapNode> ContestedNodes(this IMap map)
+        {
+            return map.Nodes.Where(node => node.IsContested());
         }
     }
 }

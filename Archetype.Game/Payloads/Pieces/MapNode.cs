@@ -9,6 +9,8 @@ namespace Archetype.Game.Payloads.Pieces
     public interface IMapNode : IZone<IUnit>
     {
         IEnumerable<IMapNode> Neighbours { get; }
+        
+        IGraveyard Graveyard { get; }
     }
 
     public interface IMutableMapNode : IMapNode
@@ -20,9 +22,14 @@ namespace Archetype.Game.Payloads.Pieces
     public class MapNode : Zone<IUnit>, IMutableMapNode
     {
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
-        public MapNode(IGameAtom owner=default) : base(owner) { }
+
+        public MapNode(IGameAtom owner = default) : base(owner)
+        {
+            Graveyard = new Graveyard(owner);
+        }
         
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
+        public IGraveyard Graveyard { get; }
 
         public void AddNeighbour(IMutableMapNode node)
         {

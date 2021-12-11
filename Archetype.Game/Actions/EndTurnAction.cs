@@ -1,6 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Game.Payloads.Context.Phase;
+using Archetype.Game.Payloads.Context.Phases;
 using MediatR;
 
 namespace Archetype.Game.Actions
