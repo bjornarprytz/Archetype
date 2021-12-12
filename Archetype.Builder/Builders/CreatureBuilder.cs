@@ -1,8 +1,8 @@
-using Archetype.Builder.Base;
+using Archetype.Builder.Builders.Base;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class CreatureBuilder : ProtoBuilder<ICreatureProtoData>
     {

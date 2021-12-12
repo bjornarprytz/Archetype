@@ -4,7 +4,7 @@ using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class CardPoolBuilder : IBuilder<IProtoPool>
     {

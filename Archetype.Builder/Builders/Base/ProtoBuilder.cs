@@ -2,7 +2,7 @@ using Archetype.Builder.Exceptions;
 using Archetype.Builder.Extensions;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Builder.Base
+namespace Archetype.Builder.Builders.Base
 {
     public abstract class ProtoBuilder<T> : IBuilder<T>
         where T : IProtoData

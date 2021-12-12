@@ -7,7 +7,7 @@ using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class SetBuilder : IBuilder<ISet>
     {

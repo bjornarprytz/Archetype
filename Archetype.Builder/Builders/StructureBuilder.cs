@@ -1,13 +1,12 @@
-
 using System.Collections.Generic;
-using Archetype.Builder.Base;
+using Archetype.Builder.Builders.Base;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class StructureBuilder : ProtoBuilder<IStructureProtoData>
     {

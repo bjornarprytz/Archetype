@@ -7,7 +7,7 @@ using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class MapBuilder : IBuilder<IMapProtoData>
     {

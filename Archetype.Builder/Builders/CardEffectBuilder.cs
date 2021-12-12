@@ -6,7 +6,7 @@ using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Pieces.Base;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class CardEffectBuilder<TTarget> : IBuilder<IEffect<ICardContext>>
         where TTarget : IGameAtom

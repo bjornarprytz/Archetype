@@ -1,6 +1,6 @@
 using Archetype.Game.Payloads.Pieces;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class NodeBuilder : IBuilder<IMutableMapNode>
     {

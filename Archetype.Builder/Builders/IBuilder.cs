@@ -1,4 +1,4 @@
-﻿namespace Archetype.Builder
+﻿namespace Archetype.Builder.Builders
 {
     public interface IBuilder<out T>
     {

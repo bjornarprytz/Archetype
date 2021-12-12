@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Archetype.Game.Payloads.Proto;
 
-namespace Archetype.Builder
+namespace Archetype.Builder.Builders
 {
     public class PlayerBuilder : IBuilder<IPlayerProtoData>
     {
