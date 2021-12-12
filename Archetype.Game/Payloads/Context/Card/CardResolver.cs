@@ -21,13 +21,11 @@ namespace Archetype.Game.Payloads.Context.Card
     public class CardResolver : ICardResolver
     {
         private readonly IGameState _gameState;
-        private readonly IPlayer _player;
         private readonly IHistoryWriter _historyWriter;
         
-        public CardResolver(IGameState gameState, IPlayer player, IHistoryWriter historyWriter)
+        public CardResolver(IGameState gameState, IHistoryWriter historyWriter)
         {
             _gameState = gameState;
-            _player = player;
             _historyWriter = historyWriter;
         }
     
@@ -35,7 +33,7 @@ namespace Archetype.Game.Payloads.Context.Card
         {
             var results = new ResolutionCollector();
 
-            playArgs.ValidateTargets(_gameState);
+            playArgs.ValidateTargets(_gameState); // TODO: This should probably be done elsewhere, or by a separate service
             
             playArgs.Player.Resources -= playArgs.Card.Cost; // TODO: Make this more expressive? (e.g. pay costs in different ways)
 
@@ -46,31 +44,9 @@ namespace Archetype.Game.Payloads.Context.Card
                 results.AddResult(effect.ResolveContext(context));
             }
 
-            results.AddResult(playArgs.Card.MoveTo(_player.DiscardPile));
+            results.AddResult(playArgs.Card.MoveTo(playArgs.Whence.DiscardPile));
             
             _historyWriter.Append(context, results);
-        }
-        
-        private IEnumerable<IGameAtom> ValidateTargets(ICard card, IEnumerable<IGameAtom> targets)
-        {
-            var chosenTargets = targets.ToList();
-            
-            var requiredTargetCount = card.Targets.Count();
-            
-            if (chosenTargets.Count != requiredTargetCount)
-            {
-                throw new TargetCountMismatchException(requiredTargetCount, chosenTargets.Count);
-            }
-            
-            foreach (var (targetData, chosenTarget) in card.Targets.Zip(chosenTargets))
-            {
-                if (!targetData.ValidateContext(new TargetValidationContext(_gameState, chosenTarget)))
-                {
-                    throw new InvalidTargetChosenException();
-                }
-            }
-            
-            return chosenTargets;
         }
 
         private record CardContext(
