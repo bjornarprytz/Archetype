@@ -14,71 +14,112 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder.Builders
 {
-    public class CardBuilder : ProtoBuilder<ICardProtoData>
+    public interface ICardBuilder : IBuilder<ICardProtoData>
     {
+        ICardBuilder MetaData(CardMetaData metaData);
+        ICardBuilder Name(string name);
+        ICardBuilder Rarity(CardRarity rarity);
+        ICardBuilder Cost(int cost);
+        ICardBuilder Range(int range);
+        ICardBuilder Color(CardColor color);
+        ICardBuilder Art(string link);
+
+        ICardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget = null)
+            where TTarget : IGameAtom;
+
+        ICardBuilder Targets<TT1, TT2>(
+            Func<ITargetValidationContext<TT1>, bool> validateTarget1 = null,
+            Func<ITargetValidationContext<TT2>, bool> validateTarget2 = null
+        )
+            where TT1 : IGameAtom
+            where TT2 : IGameAtom;
+
+        ICardBuilder Targets<TT1, TT2, TT3>(
+            Func<ITargetValidationContext<TT1>, bool> validateTarget1 = null,
+            Func<ITargetValidationContext<TT2>, bool> validateTarget2 = null,
+            Func<ITargetValidationContext<TT3>, bool> validateTarget3 = null
+        )
+            where TT1 : IGameAtom
+            where TT2 : IGameAtom
+            where TT3 : IGameAtom;
+
+        ICardBuilder EffectBuilder<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider) where TTarget : IGameAtom;
+        ICardBuilder Effect(Action<ICardEffectBuilder> builderProvider);
+        ICardBuilder Effect<TTarget>(Expression<Func<IEffectContext<TTarget>, IEffectResult>> resolveEffect, int targetIndex = -1) where TTarget : IGameAtom;
+        ICardBuilder Effect(Expression<Func<IEffectContext, IEffectResult>> resolveEffect);
+    }
+
+    public class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
+    {
+        private readonly IBuilderFactory _builderFactory;
         private readonly CardProtoData _cardProtoData;
 
         private readonly List<ITarget> _targets = new();
         private readonly List<IEffect<ICardContext>> _effects = new();
 
-        internal CardBuilder(CardMetaData template)
+        public CardBuilder(IBuilderFactory builderFactory)
         {
-            _cardProtoData = new CardProtoData(_targets, _effects)
-            {
-                MetaData = template
-            };
+            _builderFactory = builderFactory;
+            _cardProtoData = new CardProtoData(_targets, _effects);
         }
 
-        public CardBuilder Name(string name)
+        public ICardBuilder MetaData(CardMetaData metaData)
+        {
+            _cardProtoData.MetaData = metaData;
+
+            return this;
+        }
+
+        public ICardBuilder Name(string name)
         {
             _cardProtoData.Name = name;
 
             return this;
         }
 
-        public CardBuilder Rarity(CardRarity rarity)
+        public ICardBuilder Rarity(CardRarity rarity)
         {
             _cardProtoData.MetaData = _cardProtoData.MetaData with { Rarity = rarity };
 
             return this;
         }
 
-        public CardBuilder Cost(int cost)
+        public ICardBuilder Cost(int cost)
         {
             _cardProtoData.Cost = cost;
 
             return this;
         }
         
-        public CardBuilder Range(int range)
+        public ICardBuilder Range(int range)
         {
             _cardProtoData.Range = range;
 
             return this;
         }
 
-        public CardBuilder Color(CardColor color)
+        public ICardBuilder Color(CardColor color)
         {
             _cardProtoData.MetaData = _cardProtoData.MetaData with { Color = color };
 
             return this;
         }
 
-        public CardBuilder Art(string link)
+        public ICardBuilder Art(string link)
         {
             _cardProtoData.MetaData = _cardProtoData.MetaData with { ImageUri = link };
 
             return this;
         }
 
-        public CardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget=null)
+        public ICardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget=null)
             where TTarget : IGameAtom
         {
             _targets.Add(new Target<TTarget> { Validate = validateTarget });
 
             return this;
         }
-        public CardBuilder Targets<TT1, TT2>(
+        public ICardBuilder Targets<TT1, TT2>(
             Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
             Func<ITargetValidationContext<TT2>, bool> validateTarget2=null
         )
@@ -91,7 +132,7 @@ namespace Archetype.Builder.Builders
 
             return this;
         }
-        public CardBuilder Targets<TT1, TT2, TT3>(
+        public ICardBuilder Targets<TT1, TT2, TT3>(
             Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
             Func<ITargetValidationContext<TT2>, bool> validateTarget2=null, 
             Func<ITargetValidationContext<TT3>, bool> validateTarget3=null 
@@ -107,11 +148,11 @@ namespace Archetype.Builder.Builders
 
             return this;
         }
-        
-        public CardBuilder EffectBuilder<TTarget>(Action<CardEffectBuilder<TTarget>> builderProvider)
+
+        public ICardBuilder EffectBuilder<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider)
             where  TTarget : IGameAtom
         {
-            var cbc = BuilderFactory.EffectBuilder<TTarget>();
+            var cbc = _builderFactory.Create<ICardEffectBuilder<TTarget>>();
 
             builderProvider(cbc);
             
@@ -120,9 +161,9 @@ namespace Archetype.Builder.Builders
             return this;
         }
         
-        public CardBuilder Effect(Action<CardEffectBuilder> builderProvider)
+        public ICardBuilder Effect(Action<ICardEffectBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.EffectBuilder();
+            var cbc = _builderFactory.Create<ICardEffectBuilder>();
 
             builderProvider(cbc);
             
@@ -131,7 +172,7 @@ namespace Archetype.Builder.Builders
             return this;
         }
         
-        public CardBuilder Effect<TTarget>(
+        public ICardBuilder Effect<TTarget>(
             Expression<Func<IEffectContext<TTarget>, IEffectResult>> resolveEffect,
             int targetIndex=-1
             )
@@ -150,7 +191,7 @@ namespace Archetype.Builder.Builders
                 );
         }
         
-        public CardBuilder Effect(
+        public ICardBuilder Effect(
             Expression<Func<IEffectContext, IEffectResult>> resolveEffect
         )
         {

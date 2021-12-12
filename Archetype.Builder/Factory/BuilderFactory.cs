@@ -1,17 +1,32 @@
-﻿using Archetype.Builder.Builders;
+﻿using System;
+using Archetype.Builder.Builders;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Factory
 {
-    public class BuilderFactory
+    public interface IBuilderFactory
     {
+        T Create<T>() where T : class, IBuilder;
 
-        public static CardPoolBuilder CardPoolBuilder()
+    }
+    
+    public class BuilderFactory : IBuilderFactory
+    {
+        private readonly IServiceProvider _serviceProvider;
+
+        public BuilderFactory(IServiceProvider serviceProvider)
         {
-            return new CardPoolBuilder();
+            _serviceProvider = serviceProvider;
         }
         
+        public T Create<T>() where T : class, IBuilder
+        {
+            return _serviceProvider.GetService(typeof(T)) as T;
+        }
+        /*
+         * 
         public static SetBuilder SetBuilder(string name)
         {
             return new SetBuilder(name);
@@ -32,9 +47,9 @@ namespace Archetype.Builder.Factory
             return new CardEffectBuilder();
         }
         
-        public static NodeBuilder NodeBuilder()
+        public static NodeBuilder NodeBuilder(Func<IInstanceFactory> getInstanceFactory)
         {
-            return new NodeBuilder();
+            return new NodeBuilder(getInstanceFactory);
         }
 
         public static MapBuilder MapBuilder()
@@ -51,5 +66,8 @@ namespace Archetype.Builder.Factory
         {
             return new StructureBuilder(template);
         }
+         */
+
+        
     }
 }

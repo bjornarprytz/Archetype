@@ -1,3 +1,4 @@
+using Archetype.Builder.Builders;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Design.Extensions
@@ -8,8 +9,8 @@ namespace Archetype.Design.Extensions
         {
 
             serviceCollection
-                .AddSingleton(_ => TestDesign.BuildMap())
-                .AddSingleton(_ => TestDesign.BuildCardPool());
+                .AddSingleton(sp => TestDesign.BuildMap(sp.GetRequiredService<IMapBuilder>()))
+                .AddSingleton(sp => TestDesign.BuildCardPool(sp.GetRequiredService<IPoolBuilder>()));
 
 
             return serviceCollection;

@@ -1,4 +1,5 @@
 using System;
+using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Context;
 
 namespace Archetype.Game.Payloads.Pieces.Base
@@ -9,6 +10,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
         IObservable<ZoneTransition<T>> Transition { get; }
         public IZone<T> CurrentZone { get; }
 
+        [Template("Move {0} to {1}")]
         IEffectResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone);
     }
     

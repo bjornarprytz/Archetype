@@ -5,11 +5,11 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Context.Phases
 {
-    public class MovePhaseResolver : PhaseResolver, IMovePhaseResolver
+    public class MovePhase : PhaseResolver, IMovePhaseResolver
     {
         private readonly IGameState _gameState;
 
-        public MovePhaseResolver(IGameState gameState, IHistoryWriter historyWriter) : base(historyWriter)
+        public MovePhase(IGameState gameState, IHistoryWriter historyWriter) : base(historyWriter)
         {
             _gameState = gameState;
         }

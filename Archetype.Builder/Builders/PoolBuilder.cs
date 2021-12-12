@@ -6,19 +6,29 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Builder.Builders
 {
-    public class CardPoolBuilder : IBuilder<IProtoPool>
+    public interface IPoolBuilder : IBuilder<IProtoPool>
     {
+        IPoolBuilder AddSet(string name, Action<ISetBuilder> builderProvider);
+    }
+    
+    public class PoolBuilder : IPoolBuilder
+    {
+        private readonly IBuilderFactory _builderFactory;
         private readonly ProtoPool _protoPool;
         private readonly List<ISet> _sets = new ();
         
-        internal CardPoolBuilder()
+        public PoolBuilder(IBuilderFactory builderFactory)
         {
+            _builderFactory = builderFactory;
             _protoPool = new ProtoPool(_sets);
         }
 
-        public CardPoolBuilder AddSet(string name, Action<SetBuilder> builderProvider)
+        public IPoolBuilder AddSet(string name, Action<ISetBuilder> builderProvider)
         {
-            var setBuilder = BuilderFactory.SetBuilder(name);
+            var setBuilder = 
+                _builderFactory
+                    .Create<ISetBuilder>()
+                    .Name(name);
 
             builderProvider(setBuilder);
             

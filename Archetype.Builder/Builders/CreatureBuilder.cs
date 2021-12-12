@@ -4,61 +4,77 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder.Builders
 {
-    public class CreatureBuilder : ProtoBuilder<ICreatureProtoData>
+    public interface ICreatureBuilder : IBuilder<ICreatureProtoData>
+    {
+        ICreatureBuilder MetaData(CreatureMetaData metaData);
+        ICreatureBuilder Movement(int movement);
+        ICreatureBuilder Strength(int strength);
+        ICreatureBuilder Health(int health);
+        ICreatureBuilder Defense(int defense);
+        ICreatureBuilder Name(string name);
+        ICreatureBuilder Art(string uri);
+        ICreatureBuilder Level(int level);
+    }
+
+    public class CreatureBuilder : ProtoBuilder<ICreatureProtoData>, ICreatureBuilder
     {
         private readonly CreatureProtoData _creatureProtoData;
-       
-        internal CreatureBuilder(CreatureMetaData template)
+
+        public CreatureBuilder()
         {
-            _creatureProtoData = new CreatureProtoData()
-            {
-                MetaData = template
-            };
+            _creatureProtoData = new CreatureProtoData();
         }
 
-        public CreatureBuilder Movement(int movement)
+        public ICreatureBuilder MetaData(CreatureMetaData metaData)
+        {
+            _creatureProtoData.MetaData = metaData;
+
+            return this;
+        }
+
+        public ICreatureBuilder Movement(int movement)
         {
             _creatureProtoData.Movement = movement;
-            
-            return this;
-        }
-        
-        public CreatureBuilder Strength(int strength)
-        {
-            _creatureProtoData.Strength = strength;
-            
+
             return this;
         }
 
-        public CreatureBuilder Health(int health)
+        public ICreatureBuilder Strength(int strength)
+        {
+            _creatureProtoData.Strength = strength;
+
+            return this;
+        }
+
+        public ICreatureBuilder Health(int health)
         {
             _creatureProtoData.Health = health;
 
             return this;
         }
 
-        public CreatureBuilder Defense(int defense)
+        public ICreatureBuilder Defense(int defense)
         {
             _creatureProtoData.Defense = defense;
 
             return this;
         }
-        
-        public CreatureBuilder Name(string name)
+
+        public ICreatureBuilder Name(string name)
         {
             _creatureProtoData.Name = name;
 
             return this;
         }
 
-        public CreatureBuilder Art(string uri)
+        public ICreatureBuilder Art(string uri)
         {
             _creatureProtoData.MetaData = _creatureProtoData.MetaData with { ImageUri = uri };
 
             return this;
         }
 
-        public CreatureBuilder Level(int level)
+        public ICreatureBuilder Level(int level)
         {
             _creatureProtoData.MetaData = _creatureProtoData.MetaData with { Level = level };
 
@@ -67,7 +83,6 @@ namespace Archetype.Builder.Builders
 
         protected override ICreatureProtoData BuildInternal()
         {
-
             return _creatureProtoData;
         }
     }

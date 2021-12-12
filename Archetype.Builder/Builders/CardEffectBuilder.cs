@@ -8,24 +8,36 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Builders
 {
-    public class CardEffectBuilder<TTarget> : IBuilder<IEffect<ICardContext>>
+    public interface ICardEffectBuilder : IBuilder<IEffect<ICardContext>>
+    {
+        public ICardEffectBuilder Resolve(Expression<Func<IEffectContext, IEffectResult>> expression);
+    }
+
+    public interface ICardEffectBuilder<TTarget> : IBuilder<IEffect<ICardContext>>
+        where TTarget : IGameAtom
+    {
+        ICardEffectBuilder<TTarget> TargetIndex(int i);
+        ICardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectContext<TTarget>, IEffectResult>> expression);
+    }
+
+    public class CardEffectBuilder<TTarget> : ICardEffectBuilder<TTarget>
         where TTarget : IGameAtom
     {
         private readonly Effect<TTarget> _effect;
 
-        internal CardEffectBuilder()
+        public CardEffectBuilder()
         {
             _effect = new Effect<TTarget>();
         }
         
-        public CardEffectBuilder<TTarget> TargetIndex(int i)
+        public ICardEffectBuilder<TTarget> TargetIndex(int i)
         {
             _effect.TargetIndex = i;
 
             return this;
         }
         
-        public CardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectContext<TTarget>, IEffectResult>> expression)
+        public ICardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectContext<TTarget>, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 
@@ -40,7 +52,7 @@ namespace Archetype.Builder.Builders
         }
     }
 
-    public class CardEffectBuilder : IBuilder<IEffect<ICardContext>>
+    public class CardEffectBuilder : ICardEffectBuilder
     {
         private readonly Effect _effect;
         
@@ -49,7 +61,7 @@ namespace Archetype.Builder.Builders
             _effect = new Effect();
         }
         
-        public CardEffectBuilder Resolve(Expression<Func<IEffectContext, IEffectResult>> expression)
+        public ICardEffectBuilder Resolve(Expression<Func<IEffectContext, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 

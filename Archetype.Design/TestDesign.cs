@@ -1,4 +1,5 @@
-﻿using Archetype.Game.Payloads.Infrastructure;
+﻿using Archetype.Builder.Builders;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Builder.Extensions;
@@ -11,9 +12,9 @@ namespace Archetype.Design
 {
     public static class TestDesign
     {
-        public static IProtoPool BuildCardPool()
+        public static IProtoPool BuildCardPool(IPoolBuilder poolBuilder)
         {
-            return BuilderFactory.CardPoolBuilder()
+            return poolBuilder
                 .AddSet("All rares", builder => builder
                     .ChangeCardTemplate(t => t with { Rarity = CardRarity.Rare})
                     .Card(cardBuilder => cardBuilder
@@ -22,7 +23,14 @@ namespace Archetype.Design
                         )
                     .Card(cardBuilder => cardBuilder
                         .Name("Health dealer")
-                        .Effect<IUnit>(context => context.Target.Attack(context.Target.Health))))
+                        .Effect<IUnit>(context => context.Target.Attack(context.Target.Health)))
+                    .Creature(creatureBuilder => creatureBuilder
+                        .Name("Ghoul")
+                        .Strength(1)
+                        .Health(2))
+                    .Card(cardBuilder => cardBuilder
+                        .Name("Create Unit")
+                        .Effect<IMapNode>(context => context.InstanceFactory.CreateCreature("Ghoul", context.Source).MoveTo(context.Target))))
                 .AddSet("TestSet", 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })
@@ -61,9 +69,9 @@ namespace Archetype.Design
                 .Build();
         }
 
-        public static IMapProtoData BuildMap()
+        public static IMapProtoData BuildMap(IMapBuilder mapBuilder)
         {
-            return BuilderFactory.MapBuilder()
+            return mapBuilder
                 .Nodes(3)
                 .Connect(0,2)
                 .Connect(2,1)

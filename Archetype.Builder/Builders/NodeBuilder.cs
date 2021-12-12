@@ -1,14 +1,20 @@
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Builder.Builders
 {
-    public class NodeBuilder : IBuilder<IMutableMapNode>
+    public interface INodeBuilder : IBuilder<IMutableMapNode>
+    {
+        
+    }
+    
+    public class NodeBuilder : INodeBuilder
     {
         private readonly MapNode _mapNode;
 
-        internal NodeBuilder()
+        public NodeBuilder(IInstanceFactory getInstanceFactory)
         {
-            _mapNode = new MapNode(default);
+            _mapNode = new MapNode(default, getInstanceFactory);
         }
 
         public IMutableMapNode Build()

@@ -9,8 +9,20 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder.Builders
 {
-    public class SetBuilder : IBuilder<ISet>
+    public interface ISetBuilder : IBuilder<ISet>
     {
+        ISetBuilder Name(string name);
+        public ISetBuilder ChangeCardTemplate(Func<CardMetaData, CardMetaData> changeFunc);
+        public ISetBuilder ChangeCreatureTemplate(Func<CreatureMetaData, CreatureMetaData> changeFunc);
+        public ISetBuilder ChangeStructureTemplate(Func<StructureMetaData, StructureMetaData> changeFunc);
+        public ISetBuilder Card(Action<ICardBuilder> builderProvider);
+        public ISetBuilder Creature(Action<ICreatureBuilder> builderProvider);
+        public ISetBuilder Structure(Action<IStructureBuilder> builderProvider);
+    }
+
+    public class SetBuilder : ISetBuilder
+    {
+        private readonly IBuilderFactory _builderFactory;
 
         private readonly ISet _setData;
         private readonly Dictionary<string, ICardProtoData> _cards = new();
@@ -21,40 +33,53 @@ namespace Archetype.Builder.Builders
         private StructureMetaData _structureTemplate = new();
         private CreatureMetaData _creatureTemplate = new();
 
-        internal SetBuilder(string name)
+        public SetBuilder(IBuilderFactory builderFactory)
         {
-            _cardTemplate = _cardTemplate with { SetName = name };
-            
-            _setData = new Set(_cards, _creatures, _structures)
-            {
-                Name = name
-            };
+            _builderFactory = builderFactory;
+            _setData = new Set(_cards, _creatures, _structures);
         }
 
-        public SetBuilder ChangeCardTemplate(Func<CardMetaData, CardMetaData> changeFunc)
+        public ISetBuilder Name(string name)
+        {
+            _setData.Name = name;
+
+            _cardTemplate = _cardTemplate with { SetName = name };
+            _structureTemplate = _structureTemplate with { SetName = name };
+            _creatureTemplate = _creatureTemplate with { SetName = name };
+
+            return this;
+        }
+
+        public ISetBuilder ChangeCardTemplate(Func<CardMetaData, CardMetaData> changeFunc)
         {
             _cardTemplate = changeFunc(_cardTemplate) with { SetName = _setData.Name };
 
             return this;
         }
         
-        public SetBuilder ChangeCreatureTemplate(Func<CreatureMetaData, CreatureMetaData> changeFunc)
+        public ISetBuilder ChangeCreatureTemplate(Func<CreatureMetaData, CreatureMetaData> changeFunc)
         {
             _creatureTemplate = changeFunc(_creatureTemplate) with { SetName = _setData.Name };
 
             return this;
         }
         
-        public SetBuilder ChangeStructureTemplate(Func<StructureMetaData, StructureMetaData> changeFunc)
+        public ISetBuilder ChangeStructureTemplate(Func<StructureMetaData, StructureMetaData> changeFunc)
         {
             _structureTemplate = changeFunc(_structureTemplate) with { SetName = _setData.Name };
 
             return this;
         }
 
-        public SetBuilder Card(Action<CardBuilder> builderProvider)
+        public ISetBuilder Card(Action<ICardBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.CardBuilder(_cardTemplate);
+            if (_setData.Name.IsMissing())
+                throw new InvalidOperationException("Set name before building cards.");
+
+            var cbc = 
+                _builderFactory
+                    .Create<ICardBuilder>()
+                    .MetaData(_cardTemplate);
 
             builderProvider(cbc);
 
@@ -65,9 +90,15 @@ namespace Archetype.Builder.Builders
             return this;
         }
 
-        public SetBuilder Creature(Action<CreatureBuilder> builderProvider)
+        public ISetBuilder Creature(Action<ICreatureBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.CreatureBuilder(_creatureTemplate);
+            if (_setData.Name.IsMissing())
+                throw new InvalidOperationException("Set name before building creatures.");
+            
+            var cbc = 
+                _builderFactory
+                    .Create<ICreatureBuilder>()
+                    .MetaData(_creatureTemplate);
 
             builderProvider(cbc);
 
@@ -78,9 +109,15 @@ namespace Archetype.Builder.Builders
             return this;
         }
         
-        public SetBuilder Structure(Action<StructureBuilder> builderProvider)
+        public ISetBuilder Structure(Action<IStructureBuilder> builderProvider)
         {
-            var cbc = BuilderFactory.StructureBuilder(_structureTemplate);
+            if (_setData.Name.IsMissing())
+                throw new InvalidOperationException("Set name before building structures.");
+            
+            var cbc = 
+                _builderFactory
+                    .Create<IStructureBuilder>()
+                    .MetaData(_structureTemplate);
 
             builderProvider(cbc);
 

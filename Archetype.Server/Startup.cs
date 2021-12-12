@@ -1,3 +1,4 @@
+using Archetype.Builder.Extensions;
 using Archetype.Design.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Extensions;
@@ -19,8 +20,9 @@ namespace Archetype.Server
         {
             services
                 .AddMediatR( configuration => configuration.AsSingleton(),  typeof(PlayCardAction).Assembly)
+                .AddBuilders()
                 .AddDesign()
-                .AddArchetypeGameState()
+                .AddArchetype()
                 .AddGraphQLServer()
 
                 .AddQueryType<Queries>()

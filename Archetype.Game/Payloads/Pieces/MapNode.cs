@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Archetype.Game.Attributes;
+using Archetype.Game.Factory;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
@@ -12,6 +15,11 @@ namespace Archetype.Game.Payloads.Pieces
         
         IGraveyard Graveyard { get; }
         IDiscardPile DiscardPile { get; }
+
+        [Template("Create {1} at {0}")]
+        IEffectResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
+        [Template("Create {1} at {0}")]
+        IEffectResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
     }
 
     public interface IMutableMapNode : IMapNode
@@ -22,10 +30,12 @@ namespace Archetype.Game.Payloads.Pieces
     
     public class MapNode : Zone<IUnit>, IMutableMapNode
     {
+        private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
 
-        public MapNode(IGameAtom owner) : base(owner)
+        public MapNode(IGameAtom owner, IInstanceFactory instanceFactory) : base(owner)
         {
+            _instanceFactory = instanceFactory;
             DiscardPile = new DiscardPile(this);
             Graveyard = new Graveyard(this);
         }
@@ -33,6 +43,23 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
         public IDiscardPile DiscardPile { get; }
+        public IEffectResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner)
+        {
+            var creature = _instanceFactory.CreateCreature(name, owner); 
+            
+            creature.MoveTo(this);
+
+            return ResultFactory.Create(this, creature);
+        }
+
+        public IEffectResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner)
+        {
+            var creature = _instanceFactory.CreateStructure(name, owner); 
+            
+            creature.MoveTo(this);
+
+            return ResultFactory.Create(this, creature);
+        }
 
         public void AddNeighbour(IMutableMapNode node)
         {

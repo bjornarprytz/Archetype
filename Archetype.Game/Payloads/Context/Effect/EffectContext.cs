@@ -14,6 +14,8 @@ namespace Archetype.Game.Payloads.Context.Effect
 
     public interface IEffectContext : IResolutionContext
     {
+        IInstanceFactory InstanceFactory { get; }
+        IGameAtom Source { get; }
     }
     
     public class EffectContext<TTarget> : EffectContext, IEffectContext<TTarget> 
@@ -37,6 +39,8 @@ namespace Archetype.Game.Payloads.Context.Effect
 
         public IGameState GameState => _cardContext.GameState;
         public IResolution PartialResults => _cardContext.PartialResults;
-        public void Dispose() { }
+        
+        public IInstanceFactory InstanceFactory => _cardContext.InstanceFactory;
+        public IGameAtom Source => _cardContext.PlayArgs?.Player;
     }
 }

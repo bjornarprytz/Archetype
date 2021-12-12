@@ -9,20 +9,29 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder.Builders
 {
-    public class MapBuilder : IBuilder<IMapProtoData>
+    public interface IMapBuilder : IBuilder<IMapProtoData>
     {
+        public IMapBuilder Node(Action<INodeBuilder> builderProvider);
+        public IMapBuilder Nodes(int numberOfNodes);
+        public IMapBuilder Connect(int n1, int n2);
+    }
+
+    public class MapBuilder : IMapBuilder
+    {
+        private readonly IBuilderFactory _builderFactory;
         private readonly List<IMutableMapNode> _nodes = new();
 
         private readonly IMapProtoData _mapProtoData;
         
-        internal MapBuilder()
+        public MapBuilder(IBuilderFactory builderFactory)
         {
+            _builderFactory = builderFactory;
             _mapProtoData = new MapProtoData(_nodes);
         }
 
-        public MapBuilder Node(Action<NodeBuilder> builderProvider)
+        public IMapBuilder Node(Action<INodeBuilder> builderProvider)
         {
-            var builder = BuilderFactory.NodeBuilder();
+            var builder = _builderFactory.Create<INodeBuilder>();
 
             builderProvider(builder);
             
@@ -31,11 +40,11 @@ namespace Archetype.Builder.Builders
             return this;
         }
 
-        public MapBuilder Nodes(int numberOfNodes)
+        public IMapBuilder Nodes(int numberOfNodes)
         {
             for (var i = 0; i < numberOfNodes; i++)
             {
-                var builder = BuilderFactory.NodeBuilder();
+                var builder = _builderFactory.Create<INodeBuilder>();
                 
                 _nodes.Add(builder.Build());
             }
@@ -43,7 +52,7 @@ namespace Archetype.Builder.Builders
             return this;
         }
 
-        public MapBuilder Connect(int n1, int n2)
+        public IMapBuilder Connect(int n1, int n2)
         {
             var node1 = _nodes.ElementAt(n1);
             var node2 = _nodes.ElementAt(n2);

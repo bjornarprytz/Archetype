@@ -5,30 +5,25 @@ namespace Archetype.Builder.Extensions
 {
     public static class CardBuilderExtensions
     {
-        public static TBuilder Red<TBuilder>(this TBuilder builder)
-            where TBuilder : CardBuilder
+        public static ICardBuilder Red(this ICardBuilder builder)
         {
-            return builder.Color(CardColor.Red) as TBuilder; 
+            return builder.Color(CardColor.Red); 
         }
-        public static TBuilder White<TBuilder>(this TBuilder builder)
-            where TBuilder : CardBuilder
+        public static ICardBuilder White(this ICardBuilder builder)
         {
-            return builder.Color(CardColor.White) as TBuilder; 
+            return builder.Color(CardColor.White); 
         }
-        public static TBuilder Black<TBuilder>(this TBuilder builder)
-            where TBuilder : CardBuilder
+        public static ICardBuilder Black(this ICardBuilder builder)
         {
-            return builder.Color(CardColor.Black) as TBuilder; 
+            return builder.Color(CardColor.Black);
         }
-        public static TBuilder Green<TBuilder>(this TBuilder builder)
-            where TBuilder : CardBuilder
+        public static ICardBuilder Green(this ICardBuilder builder)
         {
-            return builder.Color(CardColor.Green) as TBuilder; 
+            return builder.Color(CardColor.Green); 
         }
-        public static TBuilder Blue<TBuilder>(this TBuilder builder)
-            where TBuilder : CardBuilder
+        public static ICardBuilder Blue(this ICardBuilder builder)
         {
-            return builder.Color(CardColor.Blue) as TBuilder; 
+            return builder.Color(CardColor.Blue); 
         }
     }
 }

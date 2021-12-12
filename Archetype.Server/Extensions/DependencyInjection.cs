@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Server.Extensions
 {
-    public static class DependencyInjectionExtensions
+    public static class DependencyInjection
     {
         public static IRequestExecutorBuilder AddLocalTypes(this IRequestExecutorBuilder builder, Assembly assembly)
         {
