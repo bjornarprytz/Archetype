@@ -25,7 +25,7 @@ namespace Archetype.Builder
             return this;
         }
         
-        public CardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> expression)
+        public CardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectContext<TTarget>, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 
@@ -49,7 +49,7 @@ namespace Archetype.Builder
             _effect = new Effect();
         }
         
-        public CardEffectBuilder Resolve(Expression<Func<IEffectResolutionContext, IEffectResult>> expression)
+        public CardEffectBuilder Resolve(Expression<Func<IEffectContext, IEffectResult>> expression)
         {
             _effect.ResolveExpression = expression;
 

@@ -23,6 +23,16 @@ namespace Archetype.Game.Attributes
             Description = description;
         }
     }
+    
+    internal class ContextPropertyAttribute : Attribute
+    {
+        public string Description { get; }
+
+        public ContextPropertyAttribute(string description)
+        {
+            Description = description;
+        }
+    }
 
     internal class ContextFactAttribute : Attribute
     {

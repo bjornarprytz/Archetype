@@ -126,7 +126,7 @@ namespace Archetype.Builder
         }
         
         public CardBuilder Effect<TTarget>(
-            Expression<Func<IEffectResolutionContext<TTarget>, IEffectResult>> resolveEffect,
+            Expression<Func<IEffectContext<TTarget>, IEffectResult>> resolveEffect,
             int targetIndex=-1
             )
             where  TTarget : IGameAtom
@@ -145,7 +145,7 @@ namespace Archetype.Builder
         }
         
         public CardBuilder Effect(
-            Expression<Func<IEffectResolutionContext, IEffectResult>> resolveEffect
+            Expression<Func<IEffectContext, IEffectResult>> resolveEffect
         )
         {
             return Effect(provider => 

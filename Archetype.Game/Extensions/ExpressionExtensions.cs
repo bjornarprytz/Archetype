@@ -16,7 +16,7 @@ namespace Archetype.Game.Extensions
     public static class ExpressionExtensions
     {
 	    public static string PrintedRulesText<T, R>(this Expression<Func<T, R>> exp)
-			where T : IEffectResolutionContext
+			where T : IEffectContext
 			where R : IEffectResult
 		{
 			return exp
@@ -25,7 +25,7 @@ namespace Archetype.Game.Extensions
 		}
 	    
 	    public static string ContextSensitiveRulesText<T, R>(this Expression<Func<T, R>> exp, T context)
-		    where T : IEffectResolutionContext
+		    where T : IEffectContext
 			where R : IEffectResult
 		{
 			return exp
@@ -34,7 +34,7 @@ namespace Archetype.Game.Extensions
 		}
 
 	    private static MethodCallExpression GetMethodCall<T, R>(this Expression<Func<T, R>> exp)
-		    where T : IEffectResolutionContext
+		    where T : IEffectContext
 		    where R : IEffectResult
 	    {
 		    if (exp is not LambdaExpression { Body: MethodCallExpression mce, Parameters: IReadOnlyCollection<ParameterExpression> parameters } 
@@ -47,7 +47,7 @@ namespace Archetype.Game.Extensions
 	    }
 
 	    private static string ParseMethodCall<T>(this MethodCallExpression mce, T context=default)
-		    where  T : IEffectResolutionContext
+		    where  T : IEffectContext
 	    {
 		    if (mce.Method.Name == nameof(ContextExtensions.TargetEach))
 		    {
@@ -61,7 +61,7 @@ namespace Archetype.Game.Extensions
 	    // c => c.World.Units.ForEach(a => a.Punch(4))
 	    // c => c.World.Units.Where(u => u.Health > 4).ForEach(a => a.Punch(4))
 	    private static string DescribeMultipleTargets<T>(this MethodCallExpression mce, T context)
-		    where  T : IEffectResolutionContext
+		    where  T : IEffectContext
 	    {
 		    
 		    var lambda = GetLambda();
@@ -89,7 +89,7 @@ namespace Archetype.Game.Extensions
 	    
 	    // c => c.Target.Punch(1)
 	    private static string DescribeSingleTarget<T>(this MethodCallExpression mce, T context)
-		    where  T : IEffectResolutionContext
+		    where  T : IEffectContext
 	    {
 		    if (mce.Object is not Expression me || me is not ParameterExpression && me is not MemberExpression)
 			    throw new MalformedEffectException($"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
@@ -110,7 +110,7 @@ namespace Archetype.Game.Extensions
 	    }
 
 	    private static string DescribeArgument<T>(this Expression exp, T context)
-		    where  T : IEffectResolutionContext
+		    where  T : IEffectContext
 	    {
 		    return (exp) switch
 		    {
@@ -122,7 +122,7 @@ namespace Archetype.Game.Extensions
 	    }
 
 	    private static string DescribeArgumentMethod<T>(this MethodCallExpression mce, T context)
-		    where  T : IEffectResolutionContext
+		    where  T : IEffectContext
 	    {
 		    if (mce.Arguments.FirstOrDefault() is not Expression contextExpression)
 			    throw new MalformedEffectException(
@@ -150,11 +150,11 @@ namespace Archetype.Game.Extensions
 			    return expr.Compile().Invoke(context).ToString();
 		    }
 
-		    return me.DescribeParameterPath(context);
+		    return me.DescribeParameterPath();
 	    }
 
 	    private static string DescribeLambda<T>(this LambdaExpression lambda, T context, string groupDescription)
-		    where  T : IEffectResolutionContext
+		    where  T : IEffectContext
 	    {
 		    if (lambda.Body is not MethodCallExpression mce)
 			    throw new MalformedEffectException("Lambda body must call a method");
@@ -171,37 +171,18 @@ namespace Archetype.Game.Extensions
 		    };
 	    }
 	    
-	    private static string DescribeParameterPath<T>(this MemberExpression me, T context)
+	    private static string DescribeParameterPath(this MemberExpression me)
 	    {
-		    var sb = new StringBuilder();
-		
-		    var steps = new List<string> { me.Member.Name };
+		    var propertyName = me.Member.Name;
 
-		    var innerExpression = me.Expression;
-
-		    var childExpression = me;
-		    
-		    while (innerExpression is MemberExpression innerMe)
+		    var targetDescription = me.Expression switch
 		    {
-			    steps.Add($"{innerMe.Member.Name}.");
+			    MemberExpression memberExpression => $"target {memberExpression.Type.GetRequiredAttribute<TargetAttribute>().Singular}",
+			    MethodCallExpression methodCallExpression => methodCallExpression.Method.GetRequiredAttribute<ContextPropertyAttribute>().Description,
+			    _ => throw new ArgumentOutOfRangeException()
+		    };
 
-			    innerExpression = innerMe.Expression;	// Hand
-			    childExpression = innerMe;				// Cards
-		    }
-
-		    if (innerExpression is ParameterExpression p)
-		    {
-			    steps.Add($"{p}."); // TODO: Check that this looks good
-		    }
-
-		    steps.Reverse();
-
-		    foreach (var step in steps)
-		    {
-			    sb.Append(step);
-		    }
-
-		    return sb.ToString();
+		    return $"{propertyName} of {targetDescription}";
 	    }
 
 	    private static ParameterExpression GetRequiredRootParameterExpression(this Expression expression)

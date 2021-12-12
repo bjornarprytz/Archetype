@@ -15,7 +15,7 @@ namespace Archetype.Game.Extensions
             where TTarget : IGameAtom
         {
             return new AggregatedEffectResult<TResult>(source.Select(func).ToList());
-        } 
+        }
         
         [Group("each unit")]
         public static IEnumerable<IUnit> EachUnit<T>(this T context)
@@ -26,7 +26,7 @@ namespace Archetype.Game.Extensions
 
         [Group("each unit in target zone")]
         public static IEnumerable<IUnit> UnitsInTargetZone<T>(this T context)
-            where T : IEffectResolutionContext<IZone<IUnit>>
+            where T : IEffectContext<IZone<IUnit>>
         {
             return context.Target.Contents;
         }

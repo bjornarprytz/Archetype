@@ -20,7 +20,10 @@ namespace Archetype.Design
                     .Card(cardBuilder => cardBuilder
                         .Name("Cost reducer")
                         .Effect<ICard>(context => context.Target.ReduceCost(1))
-                        ))
+                        )
+                    .Card(cardBuilder => cardBuilder
+                        .Name("Health dealer")
+                        .Effect<IUnit>(context => context.Target.Attack(context.Target.Health))))
                 .AddSet("TestSet", 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })
