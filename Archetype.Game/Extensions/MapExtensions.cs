@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
@@ -96,6 +97,25 @@ namespace Archetype.Game.Extensions
                     UpdateNeighbours(neighbour);
                 }
             }
+        }
+
+        public static int DistanceTo(this IMapNode node, IMapNode other)
+        {
+            var pathsToOther = other.CalculateShortestPaths();
+
+            var steps = 0;
+
+            var current = node;
+
+            while (current is not null && current != other)
+            {
+                current = pathsToOther[current];
+                steps++;
+            }
+
+            return current is null
+                ? -1
+                : steps;
         }
         
         public static IEnumerable<IMapNode> ContestedNodes(this IMap map)

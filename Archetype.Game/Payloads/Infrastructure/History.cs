@@ -27,9 +27,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface ICardEntry : IHistoryEntry
     {
-        ICard Card { get; init; }
-        IPlayer Caster { get; init; }
-        IEnumerable<IGameAtom> Targets { get; }
+        ICardContext Context { get; }
     }
     
     public class History : IHistoryReader, IHistoryWriter
@@ -45,17 +43,12 @@ namespace Archetype.Game.Payloads.Infrastructure
 
         public void Append(ICardContext context, IResolution result)
         {
-            var card = context.PlayArgs.Card;
-
-            var newEntry = new CardEntry
-            {
-                Card = card,
-                Caster = context.PlayArgs.Player,
-                Targets = context.PlayArgs.Targets,
-                Result = result
-            };
+            var newEntry = new CardEntry(context, result);
             
             _entries.Add(newEntry);
+            
+            var card = context.PlayArgs.Card;
+            
             (_entriesByProtoGuid[card.ProtoGuid] ??= new List<ICardEntry>()).Add(newEntry);
             (_entriesByCardInstance[card] ??= new List<ICardEntry>()).Add(newEntry);
         }
@@ -65,15 +58,7 @@ namespace Archetype.Game.Payloads.Infrastructure
             _entries.Add(new Entry(result));
         }
 
-        private record CardEntry : ICardEntry
-        {
-            internal CardEntry() { }
-            public ICard Card { get; init; }
-            public IPlayer Caster { get; init; }
-            public IEnumerable<IGameAtom> Targets { get; init; }
-            public IResolution Result { get; init; }
-        }
-
+        private record CardEntry(ICardContext Context, IResolution Result) : ICardEntry;
         private record Entry(IResolution Result)  : IHistoryEntry;
     }
 }

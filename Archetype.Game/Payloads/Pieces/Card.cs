@@ -21,6 +21,8 @@ namespace Archetype.Game.Payloads.Pieces
         CardMetaData MetaData { get; }
         int Cost { get; }
         
+        int Range { get; }
+        
         [Template("Reduce cost of {0}")]
         IEffectResult<ICard, int> ReduceCost(int x);
         
@@ -40,9 +42,11 @@ namespace Archetype.Game.Payloads.Pieces
             _effects = protoData.Effects.ToList();
             MetaData = protoData.MetaData;
             Cost = protoData.Cost;
+            Range = protoData.Range;
         }
 
         public int Cost { get; private set; }
+        public int Range { get; private set; }
         public Guid ProtoGuid { get; }
         public CardMetaData MetaData { get; }
         public IEnumerable<ITarget> Targets => _targets;

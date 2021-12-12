@@ -1,7 +1,10 @@
+using System;
 using System.Linq;
 using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
@@ -19,6 +22,14 @@ namespace Archetype.Game.Extensions
             
             foreach (var (targetData, chosenTarget) in requiredTargets.Zip(chosenTargets))
             {
+                if (chosenTarget is IUnit { CurrentZone: IMapNode node }
+                    && node.DistanceTo(cardArgs.Whence) is var distance and > -1 
+                    && distance > cardArgs.Card.Range)
+                {
+                    throw new InvalidOperationException(
+                        $"Target is too far from whence. Card Range: {cardArgs.Card.Range}, Distance: {distance}");
+                }
+                
                 if (!targetData.ValidateContext(new TargetValidationContext(gameState, chosenTarget)))
                 {
                     throw new InvalidTargetChosenException();

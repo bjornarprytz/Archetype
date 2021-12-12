@@ -48,6 +48,13 @@ namespace Archetype.Builder
 
             return this;
         }
+        
+        public CardBuilder Range(int range)
+        {
+            _cardProtoData.Range = range;
+
+            return this;
+        }
 
         public CardBuilder Color(CardColor color)
         {

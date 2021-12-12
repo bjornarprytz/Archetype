@@ -13,6 +13,7 @@ namespace Archetype.Game.Payloads.Proto
     {
         string RulesText { get; }
         int Cost { get; }
+        int Range { get; }
         CardMetaData MetaData { get; }
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect<ICardContext>> Effects { get; }
@@ -41,6 +42,7 @@ namespace Archetype.Game.Payloads.Proto
         } 
 
         public int Cost { get; set; }
+        public int Range { get; set; }
         public CardMetaData MetaData { get; set; }
         public IEnumerable<ITarget> Targets => _targets;
         public IEnumerable<IEffect<ICardContext>> Effects => _effects;
