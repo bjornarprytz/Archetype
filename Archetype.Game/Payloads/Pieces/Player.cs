@@ -8,7 +8,6 @@ namespace Archetype.Game.Payloads.Pieces
     [Target("Player")]
     public interface IPlayer : IGameAtom
     {
-        string Name { get; }
         int MaxHandSize { get; }
         int MinDeckSize { get; }
         int Resources { get; set; }
@@ -30,8 +29,6 @@ namespace Archetype.Game.Payloads.Pieces
             Deck = new Deck(this);
             Hand = new Hand(this);
         }
-
-        public string Name { get; } = "Test player";
         public int MaxHandSize { get; } = 2;
         public int MinDeckSize { get; } = 4;
         public int Resources { get; set; } = 100;

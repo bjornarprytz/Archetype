@@ -30,7 +30,7 @@ namespace Archetype.Design
                         .Health(2))
                     .Card(cardBuilder => cardBuilder
                         .Name("Create Unit")
-                        .Effect<IMapNode>(context => context.InstanceFactory.CreateCreature("Ghoul", context.Source).MoveTo(context.Target))))
+                        .Effect<IMapNode>(context => context.Target.CreateCreature("Ghoul", context.Source))))
                 .AddSet("TestSet", 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })

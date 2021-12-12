@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using Archetype.Game.Attributes;
 using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Context;
@@ -98,12 +99,14 @@ namespace Archetype.Game.Extensions
 		    var @object = targetAttribute.Singular;
 		    var template = templateAttr.Template;
 
-		    return mce.Arguments.Count switch
-		    {
-			    0 => string.Format(template, @object),
-			    1 => string.Format(template, @object, mce.Arguments.Single().DescribeArgument(context)),
-			    _ => throw new MalformedEffectException($"Only methods with 1 or 0 arguments are supported. {mce.Method} has {mce.Arguments.Count}")
-		    };
+		    var templateArgs = new List<string>() { @object };
+		    
+		    templateArgs.AddRange(mce.Arguments.Select(arg => arg.DescribeArgument(context)));
+
+		    if (templateArgs.Count != templateAttr.NParameters)
+			    throw new InvalidOperationException($"Mismatch between arguments and template inputs{templateAttr.Template} {templateArgs.Count} - {templateAttr.NParameters}");
+		    
+		    return string.Format(template, templateArgs.ToArray());
 	    }
 
 	    private static string DescribeArgument<T>(this Expression exp, T context)
@@ -160,23 +163,28 @@ namespace Archetype.Game.Extensions
 
 		    var template = templateAttr.Template;
 
-		    return mce.Arguments.Count switch
-		    {
-			    0 => string.Format(template, groupDescription),
-			    1 => string.Format(template, groupDescription, mce.Arguments.Single().DescribeArgument(context)),
-			    _ => throw new MalformedEffectException($"Only methods with 1 or 0 arguments are supported. {mce.Method} has {mce.Arguments.Count}")
-		    };
+		    var templateArgs = new List<string>() { groupDescription };
+		    
+		    templateArgs.AddRange(mce.Arguments.Select(arg => arg.DescribeArgument(context)));
+		    
+		    if (templateArgs.Count != templateAttr.NParameters)
+			    throw new InvalidOperationException($"Mismatch between arguments and template inputs{templateAttr.Template} {templateArgs.Count} - {templateAttr.NParameters}");
+
+		    return string.Format(template, templateArgs.ToArray());
 	    }
 	    
 	    private static string DescribeParameterPath(this MemberExpression me)
 	    {
+		    // TODO: This needs more work when creating creatures
+		    
 		    var propertyName = me.Member.Name;
 
 		    var targetDescription = me.Expression switch
 		    {
+			    ParameterExpression parameterExpression => me.Member.GetRequiredAttribute<TargetAttribute>().Singular,
 			    MemberExpression memberExpression => $"target {memberExpression.Type.GetRequiredAttribute<TargetAttribute>().Singular}",
-			    MethodCallExpression methodCallExpression => methodCallExpression.Method.GetRequiredAttribute<ContextPropertyAttribute>().Description,
-			    _ => throw new ArgumentOutOfRangeException()
+			    MethodCallExpression methodCallExpression =>  methodCallExpression.Method.GetRequiredAttribute<ContextPropertyAttribute>().Description,
+			    _ => throw new ArgumentException($"Indescribable expression {me.Expression}")
 		    };
 
 		    return $"{propertyName} of {targetDescription}";

@@ -16,9 +16,9 @@ namespace Archetype.Game.Payloads.Pieces
         IGraveyard Graveyard { get; }
         IDiscardPile DiscardPile { get; }
 
-        [Template("Create {1} at {0}")]
+        [Template("Create {1} at {0}, owned by {2}")]
         IEffectResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
-        [Template("Create {1} at {0}")]
+        [Template("Create {1} at {0}, owned by {2}")]
         IEffectResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
     }
 

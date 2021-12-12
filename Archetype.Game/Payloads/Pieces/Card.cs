@@ -22,7 +22,7 @@ namespace Archetype.Game.Payloads.Pieces
         
         int Range { get; }
         
-        [Template("Reduce cost of {0}")]
+        [Template("Reduce cost of {0} by {1}")]
         IEffectResult<ICard, int> ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
