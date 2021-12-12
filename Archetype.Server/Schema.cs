@@ -42,11 +42,11 @@ namespace Archetype.Server
             CancellationToken cancellationToken
             )
         {
-            var (cardId, targetIds) = playCardInput;
+            var (cardId, nodeId, targetIds) = playCardInput;
     
             // TODO: Put errors (exceptions) into the schema (example: https://youtu.be/3_4nt2QQSeE?t=4064)
             
-            await _mediator.Send(new PlayCardAction(cardId, targetIds), cancellationToken);
+            await _mediator.Send(new PlayCardAction(cardId, nodeId, targetIds), cancellationToken);
 
             var payload = new PlayCardPayload();
 
@@ -56,7 +56,7 @@ namespace Archetype.Server
         }
 
         public record PlayCardPayload;
-        public record PlayCardInput(Guid CardId, IEnumerable<Guid> TargetIds);
+        public record PlayCardInput(Guid CardId, Guid MapNodeGuid, IEnumerable<Guid> TargetIds);
         
         
         public async Task<StartGamePayload> StartGame(

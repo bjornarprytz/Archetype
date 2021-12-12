@@ -16,7 +16,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IHistoryWriter
     {
-        void Append(ICard card, ICardContext context, IResolution result);
+        void Append(ICardContext context, IResolution result); // TODO: Simplify here: Use a generic context istead
         void Append(IResolution result);
     }
 
@@ -43,13 +43,15 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IReadOnlyDictionary<ICard, IList<ICardEntry>> CardEntriesByInstance => _entriesByCardInstance;
 
 
-        public void Append(ICard card, ICardContext context, IResolution result)
+        public void Append(ICardContext context, IResolution result)
         {
+            var card = context.PlayArgs.Card;
+
             var newEntry = new CardEntry
             {
                 Card = card,
-                Caster = context.Caster,
-                Targets = context.Targets,
+                Caster = context.PlayArgs.Player,
+                Targets = context.PlayArgs.Targets,
                 Result = result
             };
             

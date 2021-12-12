@@ -1,8 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Exceptions;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
@@ -11,13 +10,12 @@ namespace Archetype.Game.Payloads.Context.Card
 {
     public interface ICardResolver
     {
-        void Resolve(ICard card, IEnumerable<IGameAtom> targets);
+        void Resolve(ICardPlayArgs playArgs);
     }
     
     public interface ICardContext : IResolutionContext
     {
-        IPlayer Caster { get; }
-        IEnumerable<IGameAtom> Targets { get; }
+        ICardPlayArgs PlayArgs { get; }
     }
 
     public class CardResolver : ICardResolver
@@ -33,26 +31,24 @@ namespace Archetype.Game.Payloads.Context.Card
             _historyWriter = historyWriter;
         }
     
-        public void Resolve(ICard card, IEnumerable<IGameAtom> targets)
+        public void Resolve(ICardPlayArgs playArgs)
         {
-            // TODO: Cleanup in here
-            
             var results = new ResolutionCollector();
-            
-            var validTargets = ValidateTargets(card, targets);  
 
-            _player.Resources -= card.Cost; // TODO: Make this more expressive?
-
-            var context = new CardContext(_gameState, validTargets, _player, results);
+            playArgs.ValidateTargets(_gameState);
             
-            foreach (var effect in card.Effects)
+            playArgs.Player.Resources -= playArgs.Card.Cost; // TODO: Make this more expressive? (e.g. pay costs in different ways)
+
+            var context = new CardContext(_gameState, playArgs, results);
+            
+            foreach (var effect in playArgs.Card.Effects)
             {
                 results.AddResult(effect.ResolveContext(context));
             }
 
-            results.AddResult(card.MoveTo(_player.DiscardPile));
+            results.AddResult(playArgs.Card.MoveTo(_player.DiscardPile));
             
-            _historyWriter.Append(card, context, results);
+            _historyWriter.Append(context, results);
         }
         
         private IEnumerable<IGameAtom> ValidateTargets(ICard card, IEnumerable<IGameAtom> targets)
@@ -79,8 +75,7 @@ namespace Archetype.Game.Payloads.Context.Card
 
         private record CardContext(
                 IGameState GameState,
-                IEnumerable<IGameAtom> Targets,
-                IPlayer Caster,
+                ICardPlayArgs PlayArgs,
                 IResolution PartialResults)
             : ICardContext;
     }

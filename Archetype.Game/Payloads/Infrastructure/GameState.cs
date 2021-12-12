@@ -7,7 +7,6 @@ namespace Archetype.Game.Payloads.Infrastructure
 {
     public interface IGameState
     {
-        IGameAtom GetGamePiece(Guid guid);
         IPlayer Player { get; }
         IMap Map { get; }
         IHistoryReader HistoryReader { get; }
@@ -20,20 +19,6 @@ namespace Archetype.Game.Payloads.Infrastructure
             Map = map;
             Player = player;
             HistoryReader = historyReader;
-        }
-        public IGameAtom GetGamePiece(Guid guid)
-        {
-            if (Player.Guid == guid)
-            {
-                return Player;
-            }
-
-            // TODO: Gotta find a better way to organize my game atoms
-            return Player.Hand.GetGamePiece(guid)
-                   ?? Player.DiscardPile.GetGamePiece(guid)
-                   ?? Player.Deck.GetGamePiece(guid)
-                   ?? Map.Nodes.FirstOrDefault(node => node.Guid == guid)
-                   ?? Map.Nodes.Select(node => node.GetGamePiece(guid)).FirstOrDefault();
         }
 
         public IPlayer Player { get; }

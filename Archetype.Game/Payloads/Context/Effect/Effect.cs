@@ -51,7 +51,7 @@ namespace Archetype.Game.Payloads.Context.Effect
         public int TargetIndex { get; set; }
         public IEffectResult ResolveContext(ICardContext context)
         {
-            dynamic target = context.Targets.ElementAt(TargetIndex);
+            dynamic target = context.PlayArgs.Targets.ElementAt(TargetIndex);
             
             return Resolve(new EffectResolutionContext<TTarget>(context, target));
         }

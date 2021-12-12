@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -63,7 +62,7 @@ namespace Archetype.Game.Payloads.Pieces
         {
             var sb = new StringBuilder();
             
-            var cardResolutionContext = new MinimalContext(gameState, gameState.Player); 
+            var cardResolutionContext = new MinimalContext(gameState ); 
             
             foreach (var effect in _effects)
             {
@@ -75,10 +74,10 @@ namespace Archetype.Game.Payloads.Pieces
 
         protected override ICard Self => this;
 
-        private record MinimalContext(IGameState GameState, IPlayer Caster) : ICardContext
+        private record MinimalContext(IGameState GameState) : ICardContext
         {
-            public IEnumerable<IGameAtom> Targets => Enumerable.Empty<IGameAtom>();
             public IResolution PartialResults { get; } = new ResolutionCollector();
+            public ICardPlayArgs PlayArgs => default;
         }
     }
 }
