@@ -1,10 +1,5 @@
-using System.Collections.Generic;
-using System.Linq;
-using Archetype.Game.Exceptions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;

@@ -1,4 +1,3 @@
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Primitives;
 
 namespace Archetype.Builder.Extensions

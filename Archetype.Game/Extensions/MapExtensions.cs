@@ -1,10 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
-using Aqua.EnumerableExtensions;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Extensions;

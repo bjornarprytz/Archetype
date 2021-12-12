@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Actions;
-using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;

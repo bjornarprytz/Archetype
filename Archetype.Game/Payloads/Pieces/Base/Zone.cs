@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Threading;
 using Archetype.Game.Exceptions;
 
 namespace Archetype.Game.Payloads.Pieces.Base

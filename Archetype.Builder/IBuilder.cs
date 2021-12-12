@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Archetype.Builder
+﻿namespace Archetype.Builder
 {
     public interface IBuilder<out T>
     {

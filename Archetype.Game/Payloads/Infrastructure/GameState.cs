@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
+﻿using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;

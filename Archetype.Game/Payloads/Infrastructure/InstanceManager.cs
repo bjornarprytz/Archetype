@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Aqua.EnumerableExtensions;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
