@@ -15,5 +15,6 @@ namespace Archetype.Builder.Exceptions
     
     public class MissingResolutionExpressionException : Exception { }
     public class DisconnectedNodesException : Exception { }
-    public class MissingSetNameException : Exception { }
+
+    public class MissingNameException : Exception { }
 }

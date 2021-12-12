@@ -24,10 +24,10 @@ namespace Archetype.Game.Payloads.Pieces
     {
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
 
-        public MapNode(IGameAtom owner = default) : base(owner)
+        public MapNode(IGameAtom owner) : base(owner)
         {
-            DiscardPile = new DiscardPile(owner);
-            Graveyard = new Graveyard(owner);
+            DiscardPile = new DiscardPile(this);
+            Graveyard = new Graveyard(this);
         }
         
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;

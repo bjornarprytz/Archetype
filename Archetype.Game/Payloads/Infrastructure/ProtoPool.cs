@@ -13,9 +13,9 @@ namespace Archetype.Game.Payloads.Infrastructure
         IEnumerable<ICreatureProtoData> Creatures { get; }
         IEnumerable<IStructureProtoData> Structures { get; }
 
-        public ICardProtoData GetCard(Guid guid);
-        public ICreatureProtoData GetCreature(Guid guid);
-        public IStructureProtoData GetStructure(Guid guid);
+        public ICardProtoData GetCard(string name);
+        public ICreatureProtoData GetCreature(string name);
+        public IStructureProtoData GetStructure(string name);
     }
     
     public class ProtoPool : IProtoPool
@@ -31,19 +31,19 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IEnumerable<ICreatureProtoData> Creatures => _sets.SelectMany(set => set.Creatures.Values);
         public IEnumerable<IStructureProtoData> Structures => _sets.SelectMany(set => set.Structures.Values);
         public IEnumerable<ISet> Sets => _sets;
-        public ICardProtoData GetCard(Guid guid)
+        public ICardProtoData GetCard(string name)
         {
-            return _sets.Where(set => set.Cards[guid] != null).Select(set => set.Cards[guid]).FirstOrDefault();
+            return _sets.Where(set => set.Cards[name] != null).Select(set => set.Cards[name]).FirstOrDefault();
         }
 
-        public ICreatureProtoData GetCreature(Guid guid)
+        public ICreatureProtoData GetCreature(string name)
         {
-            return _sets.Where(set => set.Creatures[guid] != null).Select(set => set.Creatures[guid]).FirstOrDefault();
+            return _sets.Where(set => set.Creatures[name] != null).Select(set => set.Creatures[name]).FirstOrDefault();
         }
 
-        public IStructureProtoData GetStructure(Guid guid)
+        public IStructureProtoData GetStructure(string name)
         {
-            return _sets.Where(set => set.Structures[guid] != null).Select(set => set.Structures[guid]).FirstOrDefault();
+            return _sets.Where(set => set.Structures[name] != null).Select(set => set.Structures[name]).FirstOrDefault();
         }
     }
 }

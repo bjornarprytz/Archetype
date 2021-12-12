@@ -4,7 +4,6 @@ namespace Archetype.Game.Payloads.MetaData
 {
     public record CardMetaData
     {
-        public string Name { get; init; }
         public string SetName { get; init; }
         public CardRarity Rarity {get; init; }
         public CardColor Color {get; init; }

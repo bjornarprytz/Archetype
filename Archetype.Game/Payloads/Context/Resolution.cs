@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Exceptions;
@@ -48,7 +49,7 @@ namespace Archetype.Game.Payloads.Context
             var nonNullResults = results.Where(r => !r.IsNull).ToList();
             
             AllAffected = nonNullResults.SelectMany(r => r.AllAffected).ToList();
-            Verb = nonNullResults.FirstOrDefault()?.Verb ?? throw new EffectResultMissingVerbException();
+            Verb = nonNullResults.FirstOrDefault()?.Verb ?? throw new ArgumentException("Effect result missing Verb.");
             Result = nonNullResults.Select(r => r.Result);
         }
 

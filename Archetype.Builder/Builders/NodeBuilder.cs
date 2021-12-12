@@ -8,7 +8,7 @@ namespace Archetype.Builder
 
         internal NodeBuilder()
         {
-            _mapNode = new MapNode();
+            _mapNode = new MapNode(default);
         }
 
         public IMutableMapNode Build()

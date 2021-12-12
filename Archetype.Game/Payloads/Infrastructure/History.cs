@@ -10,7 +10,7 @@ namespace Archetype.Game.Payloads.Infrastructure
     public interface IHistoryReader
     {
         IReadOnlyList<IHistoryEntry> Entries { get; }
-        IReadOnlyDictionary<Guid, IList<ICardEntry>> CardEntriesByProtoGuid { get; }
+        IReadOnlyDictionary<string, IList<ICardEntry>> CardEntriesByProtoGuid { get; }
         IReadOnlyDictionary<ICard, IList<ICardEntry>> CardEntriesByInstance { get; }
     }
 
@@ -33,11 +33,11 @@ namespace Archetype.Game.Payloads.Infrastructure
     public class History : IHistoryReader, IHistoryWriter
     {
         private readonly List<IHistoryEntry> _entries = new();
-        private readonly Dictionary<Guid, IList<ICardEntry>> _entriesByProtoGuid = new();
+        private readonly Dictionary<string, IList<ICardEntry>> _entriesByProtoGuid = new();
         private readonly Dictionary<ICard, IList<ICardEntry>> _entriesByCardInstance = new();
 
         public IReadOnlyList<IHistoryEntry> Entries => _entries;
-        public IReadOnlyDictionary<Guid, IList<ICardEntry>> CardEntriesByProtoGuid => _entriesByProtoGuid;
+        public IReadOnlyDictionary<string, IList<ICardEntry>> CardEntriesByProtoGuid => _entriesByProtoGuid;
         public IReadOnlyDictionary<ICard, IList<ICardEntry>> CardEntriesByInstance => _entriesByCardInstance;
 
 
@@ -49,7 +49,7 @@ namespace Archetype.Game.Payloads.Infrastructure
             
             var card = context.PlayArgs.Card;
             
-            (_entriesByProtoGuid[card.ProtoGuid] ??= new List<ICardEntry>()).Add(newEntry);
+            (_entriesByProtoGuid[card.Name] ??= new List<ICardEntry>()).Add(newEntry);
             (_entriesByCardInstance[card] ??= new List<ICardEntry>()).Add(newEntry);
         }
 

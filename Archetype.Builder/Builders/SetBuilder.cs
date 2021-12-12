@@ -13,9 +13,9 @@ namespace Archetype.Builder
     {
 
         private readonly ISet _setData;
-        private readonly Dictionary<Guid, ICardProtoData> _cards = new();
-        private readonly Dictionary<Guid, ICreatureProtoData> _creatures = new();
-        private readonly Dictionary<Guid, IStructureProtoData> _structures = new();
+        private readonly Dictionary<string, ICardProtoData> _cards = new();
+        private readonly Dictionary<string, ICreatureProtoData> _creatures = new();
+        private readonly Dictionary<string, IStructureProtoData> _structures = new();
 
         private CardMetaData _cardTemplate = new();
         private StructureMetaData _structureTemplate = new();
@@ -60,7 +60,7 @@ namespace Archetype.Builder
 
             var card = cbc.Build();
             
-            _cards.Add(card.Guid, card);
+            _cards.Add(card.Name, card);
 
             return this;
         }
@@ -73,7 +73,7 @@ namespace Archetype.Builder
 
             var creature = cbc.Build();
             
-            _creatures.Add(creature.Guid, creature);
+            _creatures.Add(creature.Name, creature);
 
             return this;
         }
@@ -86,7 +86,7 @@ namespace Archetype.Builder
 
             var structure = cbc.Build();
             
-            _structures.Add(structure.Guid, structure);
+            _structures.Add(structure.Name, structure);
 
             return this;
         }
@@ -94,7 +94,7 @@ namespace Archetype.Builder
         public ISet Build()
         {
             if (_setData.Name.IsMissing())
-                throw new MissingSetNameException();
+                throw new MissingNameException();
             
             Console.WriteLine($"Created set {_setData.Name} with {_cards.Count} cards");
 

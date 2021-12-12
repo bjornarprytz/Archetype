@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using Archetype.Builder.Base;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.MetaData;
@@ -8,7 +9,7 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
 {
-    public class StructureBuilder : IBuilder<IStructureProtoData>
+    public class StructureBuilder : ProtoBuilder<IStructureProtoData>
     {
         private readonly List<IEffect<ITriggerContext<IStructure>>> _effects = new();
 
@@ -39,7 +40,7 @@ namespace Archetype.Builder
         
         public StructureBuilder Name(string name)
         {
-            _structureProtoData.MetaData = _structureProtoData.MetaData with { Name = name };
+            _structureProtoData.Name = name;
 
             return this;
         }
@@ -57,9 +58,8 @@ namespace Archetype.Builder
 
             return this;
         }
-        
 
-        public IStructureProtoData Build()
+        protected override IStructureProtoData BuildInternal()
         {
             return _structureProtoData;
         }

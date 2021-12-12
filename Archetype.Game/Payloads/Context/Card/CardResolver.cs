@@ -11,17 +11,20 @@ namespace Archetype.Game.Payloads.Context.Card
     public interface ICardContext : IResolutionContext
     {
         ICardPlayArgs PlayArgs { get; }
+        IInstanceFactory InstanceFactory { get; }
     }
 
     public class CardResolver : ICardResolver
     {
         private readonly IGameState _gameState;
         private readonly IHistoryWriter _historyWriter;
-        
-        public CardResolver(IGameState gameState, IHistoryWriter historyWriter)
+        private readonly IInstanceFactory _instanceFactory;
+
+        public CardResolver(IGameState gameState, IHistoryWriter historyWriter, IInstanceFactory instanceFactory)
         {
             _gameState = gameState;
             _historyWriter = historyWriter;
+            _instanceFactory = instanceFactory;
         }
     
         public void Resolve(ICardPlayArgs playArgs)
@@ -32,7 +35,7 @@ namespace Archetype.Game.Payloads.Context.Card
             
             playArgs.Player.Resources -= playArgs.Card.Cost; // TODO: Make this more expressive? (e.g. pay costs in different ways)
 
-            var context = new CardContext(_gameState, playArgs, results);
+            var context = new CardContext(_gameState, _instanceFactory, playArgs, results);
             
             foreach (var effect in playArgs.Card.Effects)
             {
@@ -46,8 +49,11 @@ namespace Archetype.Game.Payloads.Context.Card
 
         private record CardContext(
                 IGameState GameState,
+                IInstanceFactory InstanceFactory,
                 ICardPlayArgs PlayArgs,
                 IResolution PartialResults)
-            : ICardContext;
+            : ICardContext
+        {
+        }
     }
 }

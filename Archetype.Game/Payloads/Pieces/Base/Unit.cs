@@ -8,9 +8,8 @@ using Archetype.Game.Payloads.Proto;
 namespace Archetype.Game.Payloads.Pieces.Base
 {
     [Target("Unit")]
-    public interface IUnit : IGameAtom, IZoned<IUnit>
+    public interface IUnit : IZoned<IUnit>
     {
-        Guid ProtoGuid { get; }
         UnitMetaData BaseMetaData { get; }
         
         int MaxHealth { get; }
@@ -34,13 +33,11 @@ namespace Archetype.Game.Payloads.Pieces.Base
     {
         protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(owner)
         {
-            ProtoGuid = protoData.Guid;
-
+            Name = protoData.Name;
             Health = MaxHealth = protoData.Health;
             Defense = MaxDefense = protoData.Defense;
         }
 
-        public Guid ProtoGuid { get; }
         public abstract UnitMetaData BaseMetaData { get; }
         public int MaxHealth { get; }
         public int Health { get; private set; }

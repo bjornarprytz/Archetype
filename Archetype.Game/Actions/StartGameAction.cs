@@ -13,15 +13,15 @@ namespace Archetype.Game.Actions
 {
     public class StartGameAction : IRequest
     {
-        public IEnumerable<Guid> DeckList { get; }
+        public IEnumerable<string> DeckList { get; }
         
-        public Guid HQStructureGuid { get; }
+        public string HQStructureName { get; }
         public Guid HQPlacement { get; }
 
-        public StartGameAction(IEnumerable<Guid> deckList, Guid hqStructureGuid, Guid hqPlacement)
+        public StartGameAction(IEnumerable<string> deckList, string hqStructureName, Guid hqPlacement)
         {
             DeckList = deckList;
-            HQStructureGuid = hqStructureGuid;
+            HQStructureName = hqStructureName;
             HQPlacement = hqPlacement;
         }
     }
@@ -43,7 +43,7 @@ namespace Archetype.Game.Actions
         
         public Task<Unit> Handle(StartGameAction request, CancellationToken cancellationToken)
         {
-            var headQuarter = _instanceFactory.CreateStructure(request.HQStructureGuid, _player);
+            var headQuarter = _instanceFactory.CreateStructure(request.HQStructureName, _player);
             var hqPlacement = _instanceFinder.FindAtom<IMapNode>(request.HQPlacement);
 
             headQuarter.MoveTo(hqPlacement);

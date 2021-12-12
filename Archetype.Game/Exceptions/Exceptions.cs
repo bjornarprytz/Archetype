@@ -16,8 +16,6 @@ namespace Archetype.Game.Exceptions
     }
 
     public class EffectResultMissingVerbException : Exception { }
-    public class CardMissingFromResolutionException : Exception { }
-    public class TargetsMissingFromResolutionException : Exception { }
 
     public class ZonePlacementException : Exception
     {
@@ -26,16 +24,6 @@ namespace Archetype.Game.Exceptions
         public ZonePlacementException(IZone zone, string details)
         {
             Message = $"Invalid placement in zone {zone} due to: {details}";
-        }
-    }
-    
-    public class ContextResolvedTwiceException : Exception
-    {
-        public override string Message { get; }
-
-        public ContextResolvedTwiceException(ICard card, CardResolver cardResolver)
-        {
-            Message = $"Trying to resolve {card.MetaData.Name} on a context which has already been resolved {cardResolver}";
         }
     }
     
@@ -56,31 +44,11 @@ namespace Archetype.Game.Exceptions
         }
     }
 
-    public class PlayCardException : Exception
-    {
-        public override string Message { get; }
-
-        public PlayCardException(string message)
-        {
-            Message = message;
-        }
-    }
-
     public class StartGameException : Exception
     {
         public override string Message { get; }
 
         public StartGameException(string message)
-        {
-            Message = message;
-        }
-    }
-    
-    public class MovePhaseException : Exception
-    {
-        public override string Message { get; }
-
-        public MovePhaseException(string message)
         {
             Message = message;
         }

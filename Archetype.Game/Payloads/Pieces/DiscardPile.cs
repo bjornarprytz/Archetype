@@ -9,10 +9,6 @@ namespace Archetype.Game.Payloads.Pieces
     
     public class DiscardPile : Zone<ICard>, IDiscardPile
     {
-        public DiscardPile(IGameAtom owner) : base(owner)
-        {
-            if (owner == null)
-                throw new ArgumentException("DiscardPile needs an owner", nameof(owner));
-        }
+        public DiscardPile(IGameAtom owner) : base(owner) { }
     }
 }

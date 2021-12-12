@@ -17,7 +17,6 @@ namespace Archetype.Game.Payloads.Pieces
     [Target("Card")]
     public interface ICard : IGameAtom, IZoned<ICard>
     {
-        Guid ProtoGuid { get; }
         CardMetaData MetaData { get; }
         int Cost { get; }
         
@@ -37,7 +36,7 @@ namespace Archetype.Game.Payloads.Pieces
 
         public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
         {
-            ProtoGuid = protoData.Guid;
+            Name = protoData.Name;
             _targets = protoData.Targets.ToList(); // TODO: Maybe just point to the protoData targets/effects?
             _effects = protoData.Effects.ToList();
             MetaData = protoData.MetaData;
@@ -47,7 +46,6 @@ namespace Archetype.Game.Payloads.Pieces
 
         public int Cost { get; private set; }
         public int Range { get; private set; }
-        public Guid ProtoGuid { get; }
         public CardMetaData MetaData { get; }
         public IEnumerable<ITarget> Targets => _targets;
         public IEnumerable<IEffect<ICardContext>> Effects => _effects;
@@ -82,6 +80,7 @@ namespace Archetype.Game.Payloads.Pieces
         {
             public IResolution PartialResults { get; } = new ResolutionCollector();
             public ICardPlayArgs PlayArgs => default;
+            public IInstanceFactory InstanceFactory => default;
         }
     }
 }

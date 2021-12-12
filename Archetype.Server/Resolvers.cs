@@ -129,7 +129,7 @@ namespace Archetype.Server
         private class Resolvers
         {
             public string RulesTextWithContext(Card card, [Service] IGameState gameState) => card.GenerateRulesText(gameState);
-            public string RulesText(Card card, [Service] IProtoPool protoPool) => protoPool.GetCard(card.ProtoGuid).RulesText;
+            public string RulesText(Card card, [Service] IProtoPool protoPool) => protoPool.GetCard(card.Name).RulesText;
         }
     }
     

@@ -1,9 +1,10 @@
+using Archetype.Builder.Base;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
 {
-    public class CreatureBuilder : IBuilder<ICreatureProtoData>
+    public class CreatureBuilder : ProtoBuilder<ICreatureProtoData>
     {
         private readonly CreatureProtoData _creatureProtoData;
        
@@ -45,7 +46,7 @@ namespace Archetype.Builder
         
         public CreatureBuilder Name(string name)
         {
-            _creatureProtoData.MetaData = _creatureProtoData.MetaData with { Name = name };
+            _creatureProtoData.Name = name;
 
             return this;
         }
@@ -63,9 +64,10 @@ namespace Archetype.Builder
 
             return this;
         }
-        
-        public ICreatureProtoData Build()
+
+        protected override ICreatureProtoData BuildInternal()
         {
+
             return _creatureProtoData;
         }
     }

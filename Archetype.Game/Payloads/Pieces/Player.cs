@@ -19,10 +19,7 @@ namespace Archetype.Game.Payloads.Pieces
         IDeck Deck { get; }
         [Target("Player's hand")]
         IHand Hand { get; }
-        [Target("Player's discard pile")]
-        IDiscardPile DiscardPile { get; }
-
-        int Mill(int strength);
+        
         int Draw(int strength);
     }
     
@@ -32,7 +29,6 @@ namespace Archetype.Game.Payloads.Pieces
         {
             Deck = new Deck(this);
             Hand = new Hand(this);
-            DiscardPile = new DiscardPile(this);
         }
 
         public string Name { get; } = "Test player";
@@ -42,20 +38,6 @@ namespace Archetype.Game.Payloads.Pieces
         public IStructure HeadQuarters { get; } // TODO: Figure out how to place this
         public IDeck Deck { get; }
         public IHand Hand { get; }
-        public IDiscardPile DiscardPile { get; }
-        public int Mill(int strength)
-        {
-            if (strength < 0)
-                throw new ArgumentException($"Cannot mill a negative number ({strength}) of cards");
-            
-            for (var i=0; i < strength; i++)
-            {
-                var card = Deck.PopCard();
-                card.MoveTo(DiscardPile);
-            }
-
-            return strength;
-        }
 
         public int Draw(int strength)
         {
@@ -67,7 +49,7 @@ namespace Archetype.Game.Payloads.Pieces
             for (var i=0; i < actualStrength; i++)
             {
                 var card = Deck.PopCard();
-                Hand.Add(card);
+                card.MoveTo(Hand);
             }
 
             return actualStrength;

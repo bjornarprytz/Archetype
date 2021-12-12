@@ -64,7 +64,7 @@ namespace Archetype.Server
             CancellationToken cancellationToken
         )
         {
-            await _mediator.Send(new StartGameAction(startGameInput.ProtoCardIds, startGameInput.HqStructureId, startGameInput.HqLocationId), cancellationToken);
+            await _mediator.Send(new StartGameAction(startGameInput.CardNames, startGameInput.HqStructureName, startGameInput.HqLocationId), cancellationToken);
 
             var payload = new StartGamePayload();
 
@@ -73,7 +73,7 @@ namespace Archetype.Server
             return payload;
         }
 
-        public record StartGameInput(IEnumerable<Guid> ProtoCardIds, Guid HqStructureId, Guid HqLocationId);
+        public record StartGameInput(IEnumerable<string> CardNames, string HqStructureName, Guid HqLocationId);
         public record StartGamePayload();
         
         public async Task<TurnStartedPayload> EndTurn(

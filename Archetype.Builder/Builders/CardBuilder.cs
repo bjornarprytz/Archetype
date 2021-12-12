@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Archetype.Builder.Base;
+using Archetype.Builder.Exceptions;
 using Archetype.Builder.Factory;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
@@ -13,7 +16,7 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder
 {
-    public class CardBuilder : IBuilder<ICardProtoData>
+    public class CardBuilder : ProtoBuilder<ICardProtoData>
     {
         private readonly CardProtoData _cardProtoData;
 
@@ -30,7 +33,7 @@ namespace Archetype.Builder
 
         public CardBuilder Name(string name)
         {
-            _cardProtoData.MetaData = _cardProtoData.MetaData with { Name = name };
+            _cardProtoData.Name = name;
 
             return this;
         }
@@ -159,9 +162,9 @@ namespace Archetype.Builder
             );
         }
 
-        public ICardProtoData Build()
+        protected override ICardProtoData BuildInternal()
         {
-            Console.WriteLine($"Creating card {_cardProtoData.MetaData.Name}");
+            Console.WriteLine($"Creating card {_cardProtoData.Name}");
 
             return _cardProtoData;
         }

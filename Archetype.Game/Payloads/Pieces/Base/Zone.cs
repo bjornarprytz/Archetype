@@ -25,7 +25,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
     {
         private readonly Dictionary<Guid, TContents> _contents = new();
         
-        protected Zone(IGameAtom owner=default) : base(owner) { }
+        protected Zone(IGameAtom owner) : base(owner) { }
         
         public IEnumerable<TContents> Contents => _contents.Values;
         
@@ -57,5 +57,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
         {
             _contents.Remove(zoneTransition.Who.Guid);
         }
+
+        
     }
 }
