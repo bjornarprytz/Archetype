@@ -11,6 +11,7 @@ namespace Archetype.Game.Payloads.Pieces
         IEnumerable<IMapNode> Neighbours { get; }
         
         IGraveyard Graveyard { get; }
+        IDiscardPile DiscardPile { get; }
     }
 
     public interface IMutableMapNode : IMapNode
@@ -25,11 +26,13 @@ namespace Archetype.Game.Payloads.Pieces
 
         public MapNode(IGameAtom owner = default) : base(owner)
         {
+            DiscardPile = new DiscardPile(owner);
             Graveyard = new Graveyard(owner);
         }
         
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
+        public IDiscardPile DiscardPile { get; }
 
         public void AddNeighbour(IMutableMapNode node)
         {

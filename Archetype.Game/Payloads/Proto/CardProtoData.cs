@@ -11,10 +11,8 @@ namespace Archetype.Game.Payloads.Proto
     /*
      * Represents the concept of a card. These should be singular, and is the base from which we create instances
      */
-    public interface ICardProtoData
+    public interface ICardProtoData : IProtoData
     {
-        Guid Guid { get; }
-        
         string RulesText { get; }
         int Cost { get; }
         CardMetaData MetaData { get; }
@@ -22,7 +20,7 @@ namespace Archetype.Game.Payloads.Proto
         IEnumerable<IEffect<ICardContext>> Effects { get; }
     }
     
-    public class CardProtoData : ICardProtoData
+    public class CardProtoData : ProtoData, ICardProtoData
     {
         private readonly List<ITarget> _targets;
         private readonly List<IEffect<ICardContext>> _effects;
@@ -30,12 +28,9 @@ namespace Archetype.Game.Payloads.Proto
 
         public CardProtoData(List<ITarget> targets, List<IEffect<ICardContext>> effects)
         {
-            Guid = Guid.NewGuid();
             _targets = targets;
             _effects = effects;
         }
-
-        public Guid Guid { get; }
 
         public string RulesText
         {

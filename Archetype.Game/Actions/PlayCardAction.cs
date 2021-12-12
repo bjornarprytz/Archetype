@@ -37,38 +37,21 @@ namespace Archetype.Game.Actions
     
     public class PlayCardActionHandler : IRequestHandler<PlayCardAction>
     {
-        private readonly IGameState _gameState;
         private readonly ICardResolver _cardResolver;
+        private readonly IInstanceFinder _instanceFinder;
 
-        public PlayCardActionHandler(IGameState gameState, ICardResolver cardResolver)
+        public PlayCardActionHandler(ICardResolver cardResolver, IInstanceFinder instanceFinder)
         {
-            _gameState = gameState;
             _cardResolver = cardResolver;
+            _instanceFinder = instanceFinder;
         }
         
         public Task<Unit> Handle(PlayCardAction request, CancellationToken cancellationToken)
         {
-            if (_gameState.GetGamePiece(request.CardGuid) is not ICard card)
-                throw new PlayCardException("GamePiece is not a card");
+            var card = _instanceFinder.FindAtom<ICard>(request.CardGuid);
+            var targets = request.TargetsGuids.Select(_instanceFinder.FindAtom);
 
-            if (card.CurrentZone != _gameState.Player.Hand)
-                throw new PlayCardException("Card is not in hand");
-
-            if (card.Cost > _gameState.Player.Resources)
-                throw new PlayCardException("Can't pay cost");
-
-            if (card.Targets.Count() != request.TargetsGuids.Count())
-                throw new PlayCardException("Invalid number of targets");
-            
-            var targets = request.TargetsGuids.Select(guid => _gameState.GetGamePiece(guid)).ToList();
-
-            if (targets.Any(t => t == null))
-                throw new PlayCardException("Some targets are null");
-
-            
-            
-            _cardResolver.Resolve(card, targets); // TODO: Make this awaitable?
-
+            _cardResolver.Resolve(card, targets);
 
             return Unit.Task;
         }

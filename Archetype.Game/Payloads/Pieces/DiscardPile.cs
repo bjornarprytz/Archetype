@@ -5,9 +5,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 namespace Archetype.Game.Payloads.Pieces
 {
     [Target("Discard Pile")]
-    public interface IDiscardPile : IZone<ICard>
-    {
-    }
+    public interface IDiscardPile : IZone<ICard> { }
     
     public class DiscardPile : Zone<ICard>, IDiscardPile
     {
@@ -15,11 +13,6 @@ namespace Archetype.Game.Payloads.Pieces
         {
             if (owner == null)
                 throw new ArgumentException("DiscardPile needs an owner", nameof(owner));
-        }
-
-        public void Bury(ICard card)
-        {
-            card.MoveTo(this);
         }
     }
 }

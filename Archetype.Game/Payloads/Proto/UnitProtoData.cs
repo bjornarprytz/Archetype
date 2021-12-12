@@ -7,9 +7,8 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IUnitProtoData
+    public interface IUnitProtoData : IProtoData
     {
-        Guid Guid { get; }
         int Health { get; }
         int Defense { get; }
         
@@ -53,14 +52,8 @@ namespace Archetype.Game.Payloads.Proto
         public IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects => _effects;
     }
     
-    public abstract class UnitProtoData : IUnitProtoData
+    public abstract class UnitProtoData : ProtoData, IUnitProtoData
     {
-        protected UnitProtoData()
-        {
-            Guid = Guid.NewGuid();
-        }
-        
-        public Guid Guid { get; }
         public int Health { get; set; }
         public int Defense { get; set; }
         public abstract UnitMetaData BaseMetaData { get; }

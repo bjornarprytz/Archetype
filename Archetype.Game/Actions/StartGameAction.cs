@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Exceptions;
-using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using MediatR;
@@ -29,38 +28,29 @@ namespace Archetype.Game.Actions
     
     public class StartGameActionHandler : IRequestHandler<StartGameAction>
     {
-        private readonly IProtoPool _protoPool;
         private readonly IPlayer _player;
         private readonly IMap _map;
+        private readonly IInstanceFactory _instanceFactory;
+        private readonly IInstanceFinder _instanceFinder;
 
-        public StartGameActionHandler(IProtoPool protoPool, IPlayer player, IMap map)
+        public StartGameActionHandler(IPlayer player, IMap map, IInstanceFactory instanceFactory, IInstanceFinder instanceFinder)
         {
-            _protoPool = protoPool;
             _player = player;
             _map = map;
+            _instanceFactory = instanceFactory;
+            _instanceFinder = instanceFinder;
         }
         
         public Task<Unit> Handle(StartGameAction request, CancellationToken cancellationToken)
         {
-            var headQuarter = _protoPool.CreateStructure(request.HQStructureGuid, _player);
-
-            if (headQuarter is null)
-                throw new StartGameException($"HQ is of non-existent structure ({request.HQStructureGuid}");
-                
-            
-            var hqPlacement = _map.Nodes.FirstOrDefault(n => n.Guid == request.HQPlacement);
-
-            if (hqPlacement is null)
-                throw new StartGameException($"HQ placed in non existent area ({request.HQPlacement}");
+            var headQuarter = _instanceFactory.CreateStructure(request.HQStructureGuid, _player);
+            var hqPlacement = _instanceFinder.FindAtom<IMapNode>(request.HQPlacement);
 
             headQuarter.MoveTo(hqPlacement);
             
             foreach (var guid in request.DeckList)
             {
-                var card = _protoPool.CreateCard(guid, _player);
-
-                if (card is null)
-                    throw new StartGameException($"Deck contains non-existent card ({guid})");
+                var card = _instanceFactory.CreateCard(guid, _player);
                 
                 _player.Deck.PutCardOnTop(card);
             }
@@ -71,8 +61,6 @@ namespace Archetype.Game.Actions
                 throw new StartGameException("Deck is too small");
             
             _player.Draw(_player.MaxHandSize);
-            
-            // TODO: Set up map positions as well? HQ for instance.
 
             return Unit.Task;
         }

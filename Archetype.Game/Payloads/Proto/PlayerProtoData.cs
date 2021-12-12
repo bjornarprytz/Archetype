@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IPlayerProtoData
+    public interface IPlayerProtoData : IProtoData
     {
         IEnumerable<ICardProtoData> DeckList { get; }
         
     }
     
-    public class PlayerProtoData : IPlayerProtoData
+    public class PlayerProtoData : ProtoData, IPlayerProtoData
     {
         private readonly List<ICardProtoData> _deckList;
 
