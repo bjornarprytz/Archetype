@@ -12,24 +12,46 @@ namespace Archetype.Server.Extensions
     {
         public static IRequestExecutorBuilder AddLocalTypes(this IRequestExecutorBuilder builder, Assembly assembly)
         {
-            foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(ObjectType<>)))
+            var nTypes = 0;
+            
+            foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(Archetype<>)))
             {
                 builder.AddType(objectType);
+                nTypes++;
             }
 
+            foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(InterfaceType<>)))
+            {
+                builder.AddType(objectType);
+                nTypes++;
+            }
 
+            foreach (var unionType in assembly.GetAllTypesImplementing<UnionType>())
+            {
+                builder.AddType(unionType);
+                nTypes++;
+            }
+
+            Console.WriteLine($"Added {nTypes} types total");
+            
             return builder;
+        }
+        
+        private static IEnumerable<Type> GetAllTypesImplementing<T>(this Assembly assembly)
+        {
+            return assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(T)));
         }
         
         private static IEnumerable<Type> GetAllTypesImplementingOpenGenericType(this Assembly assembly, Type openGenericType) // TODO: Unscrew this function
         {
-            return assembly.GetTypes().SelectMany(type => type.GetInterfaces(), (x, z) => new { x, z })
-                .Select(t => new { t, y = t.x.BaseType })
-                .Where(t =>
-                    (t.y is { IsGenericType: true } &&
-                     openGenericType.IsAssignableFrom(t.y.GetGenericTypeDefinition())) || (t.t.z.IsGenericType &&
-                        openGenericType.IsAssignableFrom(t.t.z.GetGenericTypeDefinition())))
-                .Select(t => t.t.x);
+            return from x in assembly.GetTypes()
+                let y = x.BaseType
+                where !x.IsAbstract && !x.IsInterface &&
+                      y != null && y.IsGenericType &&
+                      y.GetGenericTypeDefinition() == openGenericType
+                select x;
+
         }
     }
 }

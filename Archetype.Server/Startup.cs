@@ -2,6 +2,7 @@ using Archetype.Builder.Extensions;
 using Archetype.Design.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Server.Extensions;
 using HotChocolate.Subscriptions;
 using MediatR;
@@ -27,6 +28,8 @@ namespace Archetype.Server
                 .AddGraphQLServer()
                 .AddMutationConventions()
                 .RegisterService<ITopicEventSender>()
+                .RegisterService<IGameState>()
+                .RegisterService<IProtoPool>()
 
                 .AddQueryType<Queries>()
                 .AddMutationType<Mutations>()
