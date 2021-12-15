@@ -1,48 +1,51 @@
-﻿using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text.Json.Serialization;
-using Archetype.Game.Extensions;
+﻿using System.Linq;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect
 {
-    public class CardEffect<TTarget> : Effect<IEffectContext<TTarget>, IResult>, IEffect<ICardContext>
+    public class CardEffect<TTarget> : Effect<IEffectContext<TTarget>, IResult, ICardContext>
         where TTarget : IGameAtom
     {
         public int TargetIndex { get; set; }
-        public IResult ResolveContext(ICardContext context) // TODO: Take Effect context here and caller handles context creation
+        
+        protected override IEffectContext<TTarget> DeriveContext(ICardContext parentContext)
         {
-            dynamic target = context.PlayArgs.Targets.ElementAt(TargetIndex);
-            
-            return Resolve(new EffectContext<TTarget>(context, target));
-        }
+            dynamic target = parentContext.PlayArgs.Targets.ElementAt(TargetIndex);
 
-        public string ContextSensitiveRulesText(ICardContext cardContext)
-        {
-            return ResolveExpression.ContextSensitiveRulesText(new EffectContext<TTarget>(cardContext, default));
+            return new CardEffectContext(parentContext, target);
         }
-
-        public string PrintedRulesText()
+        
+        private record CardEffectContext : Context, IEffectContext<TTarget>
         {
-            return ResolveExpression.PrintedRulesText();
+            public CardEffectContext(ICardContext cardContext, TTarget target)
+                : base(
+                    cardContext.GameState,
+                    cardContext.PartialResults,
+                    cardContext.Owner)
+            {
+                Target = target;
+            }
+
+            public TTarget Target { get; }
         }
     }
     
-    public class CardEffect : Effect<IContext, IResult>, IEffect<ICardContext>
+    public class CardEffect : Effect<IContext, IResult, ICardContext>
     {
-        public IResult ResolveContext(ICardContext context) => Resolve(new EffectContext(context));
-
-        public string ContextSensitiveRulesText(ICardContext cardContext)
+        protected override IContext DeriveContext(ICardContext parentContext)
         {
-            return ResolveExpression.ContextSensitiveRulesText(new EffectContext(cardContext));
+            return new CardEffectContext(parentContext);
         }
 
-        public string PrintedRulesText()
+        private record CardEffectContext : Context
         {
-            return ResolveExpression.PrintedRulesText();
+            public CardEffectContext(ICardContext cardContext)
+                : base(
+                    cardContext.GameState,
+                    cardContext.PartialResults,
+                    cardContext.Owner) { }
         }
     }
 }

@@ -65,11 +65,11 @@ namespace Archetype.Game.Payloads.Pieces
         {
             var sb = new StringBuilder();
             
-            var cardResolutionContext = new MinimalContext(gameState ); 
+            var context = new MinimalContext(gameState, gameState.Player); 
             
             foreach (var effect in _effects)
             {
-                sb.AppendLine(effect.ContextSensitiveRulesText(cardResolutionContext));
+                sb.AppendLine(effect.ContextRulesText(context));
             }
 
             return sb.ToString();
@@ -77,11 +77,9 @@ namespace Archetype.Game.Payloads.Pieces
 
         protected override ICard Self => this;
 
-        private record MinimalContext(IGameState GameState) : ICardContext
+        private record MinimalContext(IGameState GameState, IGameAtom Owner) : IContext
         {
             public IResolution PartialResults { get; } = new ResolutionCollector();
-            public ICardPlayArgs PlayArgs => default;
-            public IGameAtom Owner => default;
         }
     }
 }

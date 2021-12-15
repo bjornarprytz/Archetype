@@ -44,7 +44,7 @@ namespace Archetype.Game.Payloads.Context.Card
             
             _historyWriter.Append(context, results);
         }
-
+        
         private record CardContext(
                 IGameState GameState,
                 ICardPlayArgs PlayArgs,
