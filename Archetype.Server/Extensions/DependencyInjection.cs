@@ -13,7 +13,7 @@ namespace Archetype.Server.Extensions
         public static IRequestExecutorBuilder AddLocalTypes(this IRequestExecutorBuilder builder, Assembly assembly)
         {
             var nTypes = 0;
-            
+
             foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(Archetype<>)))
             {
                 builder.AddType(objectType);

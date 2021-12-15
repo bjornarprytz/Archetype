@@ -20,6 +20,7 @@ namespace Archetype.Game.Payloads.Pieces
         IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
         [Template("Create {1} at {0}, owned by {2}")]
         IResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
+ 
     }
 
     public interface IMutableMapNode : IMapNode

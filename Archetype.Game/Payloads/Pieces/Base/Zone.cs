@@ -15,8 +15,6 @@ namespace Archetype.Game.Payloads.Pieces.Base
     {
         IEnumerable<T> Contents { get; }
 
-        T GetTypedPiece(Guid guid);
-
         void _Place(T atom); // TODO: Hide this method to avoid misuse (use IZoned.MoveTo instead)
     }
 

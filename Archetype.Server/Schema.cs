@@ -47,14 +47,14 @@ namespace Archetype.Server
             
             await _mediator.Send(new PlayCardAction(cardId, nodeId, targetIds), cancellationToken);
 
-            var payload = new PlayCardPayload();
+            var payload = new PlayCardPayload($"Card played (Id: {cardId})");
 
             await eventSender.SendAsync(nameof(Subscriptions.OnCardPlayed), payload, cancellationToken);
             
             return payload;
         }
 
-        public record PlayCardPayload;
+        public record PlayCardPayload(string Message);
         public record PlayCardInput(Guid CardId, Guid MapNodeGuid, IEnumerable<Guid> TargetIds);
         
         
@@ -66,7 +66,7 @@ namespace Archetype.Server
         {
             await _mediator.Send(new StartGameAction(startGameInput.CardNames, startGameInput.HqStructureName, startGameInput.HqLocationId), cancellationToken);
 
-            var payload = new StartGamePayload();
+            var payload = new StartGamePayload("Game Started!");
 
             await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
             
@@ -74,7 +74,7 @@ namespace Archetype.Server
         }
 
         public record StartGameInput(IEnumerable<string> CardNames, string HqStructureName, Guid HqLocationId);
-        public record StartGamePayload();
+        public record StartGamePayload(string Message);
         
         public async Task<TurnStartedPayload> EndTurn(
             ITopicEventSender eventSender,
@@ -83,14 +83,14 @@ namespace Archetype.Server
         {
             await _mediator.Send(new EndTurnAction(), cancellationToken);
 
-            var payload = new TurnStartedPayload();
+            var payload = new TurnStartedPayload("Turn Started :)");
 
             await eventSender.SendAsync(nameof(Subscriptions.OnTurnStarted), payload, cancellationToken);
             
             return payload;
         }
 
-        public record TurnStartedPayload();
+        public record TurnStartedPayload(string Message);
     }
     
     public class Subscriptions

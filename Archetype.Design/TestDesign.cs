@@ -28,9 +28,13 @@ namespace Archetype.Design
                         .Name("Ghoul")
                         .Strength(1)
                         .Health(2))
+                    /*
+                     * 
                     .Card(cardBuilder => cardBuilder
                         .Name("Create Unit")
-                        .Effect<IMapNode>(context => context.Target.CreateCreature("Ghoul", context.Owner))))
+                        .Effect<IMapNode>(context => context.Target.CreateCreature("Ghoul", context.Owner)))
+                     */
+                )
                 .AddSet("TestSet", 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })
