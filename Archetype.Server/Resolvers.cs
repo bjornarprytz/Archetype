@@ -43,6 +43,14 @@ namespace Archetype.Server
         {
             descriptor.Description("A node on the map");
             descriptor.Implements<InterfaceType<IMapNode>>();
+
+            descriptor
+                .Field(node => node.CreateCreature(default!, default!))
+                .Ignore();
+            
+            descriptor
+                .Field(node => node.CreateStructure(default!, default!))
+                .Ignore();
         }
     }
 
@@ -99,13 +107,41 @@ namespace Archetype.Server
             descriptor.Implements<InterfaceType<ICardProtoData>>();
         }
     }
-    
-    public class UnitType : ObjectType<Unit>
+    public class StructureProtoDataType : ObjectType<StructureProtoData>
     {
-        protected override void Configure(IObjectTypeDescriptor<Unit> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<StructureProtoData> descriptor)
         {
-            descriptor.Description("A unit instance");
-            descriptor.Implements<InterfaceType<IUnit>>();
+            descriptor.Description("Blueprint for creating a Structure instance");
+            descriptor.Implements<InterfaceType<IStructureProtoData>>();
+        }
+    }
+    
+    public class CreatureProtoDataType : ObjectType<CreatureProtoData>
+    {
+        protected override void Configure(IObjectTypeDescriptor<CreatureProtoData> descriptor)
+        {
+            descriptor.Description("Blueprint for creating a Creature instance");
+            descriptor.Implements<InterfaceType<ICreatureProtoData>>();
+        }
+    }
+    
+    
+
+    public class StructureType : ObjectType<Structure>
+    {
+        protected override void Configure(IObjectTypeDescriptor<Structure> descriptor)
+        {
+            descriptor.Description("An instance of a Structure");
+            descriptor.Implements<InterfaceType<IStructure>>();
+        }
+    }
+    
+    public class CreatureType : ObjectType<Creature>
+    {
+        protected override void Configure(IObjectTypeDescriptor<Creature> descriptor)
+        {
+            descriptor.Description("An instance of a Creature");
+            descriptor.Implements<InterfaceType<ICreature>>();
         }
     }
     
@@ -150,20 +186,28 @@ namespace Archetype.Server
         }
     }
     
-    public class EffectType<T> : ObjectType<IEffect<T>> where T : IResolutionContext // TODO: Might have to skip open generics on this one if problems arise
+    public class CardEffectType : ObjectType<CardEffect>
     {
-        protected override void Configure(IObjectTypeDescriptor<IEffect<T>> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<CardEffect> descriptor)
         {
             descriptor.Description("The core payload of a card, where mutation of game atoms happen");
 
             descriptor
-                .Field(nameof(IEffect<T>.ResolveContext))
+                .Field(nameof(CardEffect.ResolveContext))
                 .Ignore();
             
             descriptor.Ignore(e => e.PrintedRulesText());
 
             descriptor.Ignore(e => e.ContextSensitiveRulesText(default!));
 
+        }
+    }
+
+    public class StructureUpkeepEffectType : ObjectType<TriggerEffect<IStructure>>
+    {
+        protected override void Configure(IObjectTypeDescriptor<TriggerEffect<IStructure>> descriptor)
+        {
+            descriptor.Description("The core payload of upkeep effects of Structures");
         }
     }
     

@@ -37,7 +37,7 @@ namespace Archetype.Server
 
         public async Task<PlayCardPayload> PlayCard(
             PlayCardInput playCardInput,
-            [Service] ITopicEventSender eventSender,
+            ITopicEventSender eventSender,
             CancellationToken cancellationToken
             )
         {
@@ -60,7 +60,7 @@ namespace Archetype.Server
         
         public async Task<StartGamePayload> StartGame(
             StartGameInput startGameInput,
-            [Service] ITopicEventSender eventSender,
+            ITopicEventSender eventSender,
             CancellationToken cancellationToken
         )
         {
@@ -77,7 +77,7 @@ namespace Archetype.Server
         public record StartGamePayload();
         
         public async Task<TurnStartedPayload> EndTurn(
-            [Service] ITopicEventSender eventSender,
+            ITopicEventSender eventSender,
             CancellationToken cancellationToken
         )
         {

@@ -19,12 +19,12 @@ namespace Archetype.Game.Payloads.Pieces.Base
         int Defense { get; }
         
         [Template("Deal {1} damage to {0}")]
-        IEffectResult<IUnit, int> Attack(int strength);
+        IResult<IUnit, int> Attack(int strength);
         [Template("Heal {0} by {1}")]
-        IEffectResult<IUnit, int> Heal(int strength);
+        IResult<IUnit, int> Heal(int strength);
 
         [Template("Kill {0}")]
-        IEffectResult<IUnit, int> Kill();
+        IResult<IUnit, int> Kill();
 
 
     }
@@ -45,7 +45,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
         public int MaxDefense { get; }
         public int Defense { get; private set; }
 
-        public IEffectResult<IUnit, int> Attack(int strength)
+        public IResult<IUnit, int> Attack(int strength)
         {
             var potentialDamage = Health;
 
@@ -56,7 +56,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
             return ResultFactory.Create(this, actualDamage);
         }
 
-        public IEffectResult<IUnit, int> Heal(int strength)
+        public IResult<IUnit, int> Heal(int strength)
         {
             var potentialHeal = MaxHealth - Health;
 
@@ -67,7 +67,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
             return ResultFactory.Create(this, actualHeal);
         }
 
-        public IEffectResult<IUnit, int> Kill()
+        public IResult<IUnit, int> Kill()
         {
             var previousHealth = Health;
             

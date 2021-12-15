@@ -1,3 +1,4 @@
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
@@ -9,7 +10,7 @@ namespace Archetype.Game.Payloads.Context.Trigger
         void Resolve(TSource source);
     }
     
-    public interface ITriggerContext<out TSource> : IResolutionContext
+    public interface ITriggerContext<out TSource> : IContext
         where TSource : IGameAtom
     {
         TSource Source { get; }
@@ -31,7 +32,7 @@ namespace Archetype.Game.Payloads.Context.Trigger
         {
             var results = new ResolutionCollector();
 
-            var context = new TriggerContext(_gameState, results, source);
+            var context = new TriggerContext(_gameState, results, source, source.TopOwner());
 
             foreach (var effect in source.Effects)
             {
@@ -44,7 +45,8 @@ namespace Archetype.Game.Payloads.Context.Trigger
         private record TriggerContext(
                 IGameState GameState, 
                 IResolution PartialResults, 
-                TSource Source)
+                TSource Source,
+                IGameAtom Owner)
             : ITriggerContext<TSource>;
     }
 }

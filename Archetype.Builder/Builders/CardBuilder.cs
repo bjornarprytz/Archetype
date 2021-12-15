@@ -7,6 +7,7 @@ using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
+using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.Primitives;
@@ -45,8 +46,8 @@ namespace Archetype.Builder.Builders
 
         ICardBuilder EffectBuilder<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider) where TTarget : IGameAtom;
         ICardBuilder Effect(Action<ICardEffectBuilder> builderProvider);
-        ICardBuilder Effect<TTarget>(Expression<Func<IEffectContext<TTarget>, IEffectResult>> resolveEffect, int targetIndex = -1) where TTarget : IGameAtom;
-        ICardBuilder Effect(Expression<Func<IEffectContext, IEffectResult>> resolveEffect);
+        ICardBuilder Effect<TTarget>(Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect, int targetIndex = -1) where TTarget : IGameAtom;
+        ICardBuilder Effect(Expression<Func<IContext, IResult>> resolveEffect);
     }
 
     public class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
@@ -173,7 +174,7 @@ namespace Archetype.Builder.Builders
         }
         
         public ICardBuilder Effect<TTarget>(
-            Expression<Func<IEffectContext<TTarget>, IEffectResult>> resolveEffect,
+            Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect,
             int targetIndex=-1
             )
             where  TTarget : IGameAtom
@@ -192,7 +193,7 @@ namespace Archetype.Builder.Builders
         }
         
         public ICardBuilder Effect(
-            Expression<Func<IEffectContext, IEffectResult>> resolveEffect
+            Expression<Func<IContext, IResult>> resolveEffect
         )
         {
             return Effect(provider => 

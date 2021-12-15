@@ -2,6 +2,7 @@
 using System.Text;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
+using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.MetaData;
 
 namespace Archetype.Game.Payloads.Proto

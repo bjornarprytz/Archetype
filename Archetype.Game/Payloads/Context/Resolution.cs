@@ -1,29 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context
 {
-    public interface IResolutionContext
+    public interface IContext
     {
         IGameState GameState { get; }
         IResolution PartialResults { get; }
+        IGameAtom Owner { get; }
     }
     
     public interface IResolution
     {
-        IEnumerable<IEffectResult> Results { get; }
+        IEnumerable<IResult> Results { get; }
     }
 
     public interface IResolutionCollector: IResolution
     {
-        void AddResult(IEffectResult effectResult);
+        void AddResult(IResult effectResult);
     }
 
-    public interface IEffectResult
+    public interface IResult
     {
         bool IsNull { get; }
         IEnumerable<IGameAtom> AllAffected { get; }
@@ -31,20 +31,20 @@ namespace Archetype.Game.Payloads.Context
         object Result { get; }
     }
 
-    public interface IEffectResult<out T> : IEffectResult
+    public interface IResult<out T> : IResult
     {
         new T Result { get; }
     }
 
-    public interface IEffectResult<out TTarget, out TResult> : IEffectResult<TResult>
+    public interface IResult<out TTarget, out TResult> : IResult<TResult>
         where TTarget : class, IGameAtom
     {
         TTarget Affected { get; }
     }
 
-    public record AggregatedEffectResult<TResult> : IEffectResult<IEnumerable<TResult>>
+    public record AggregatedEffectResult<TResult> : IResult<IEnumerable<TResult>>
     {
-        internal AggregatedEffectResult(ICollection<IEffectResult<TResult>> results)
+        internal AggregatedEffectResult(IEnumerable<IResult<TResult>> results)
         {
             var nonNullResults = results.Where(r => !r.IsNull).ToList();
             
@@ -56,7 +56,7 @@ namespace Archetype.Game.Payloads.Context
         public bool IsNull => false;
         public IEnumerable<IGameAtom> AllAffected { get; }
         public string Verb { get; }
-        object IEffectResult.Result => Result;
+        object IResult.Result => Result;
 
         public IEnumerable<TResult> Result { get; }
     }
@@ -67,29 +67,29 @@ namespace Archetype.Game.Payloads.Context
     internal record NullResult<TAffected, T>(TAffected Affected, string Verb)
         : EffectResult<TAffected, T>(Affected, Verb, default) where TAffected : class, IGameAtom;
     
-    internal record EffectResult<T>(string Verb, T Result) : IEffectResult<T>
+    internal record EffectResult<T>(string Verb, T Result) : IResult<T>
     {
         public bool IsNull => Result is not null;
         public IEnumerable<IGameAtom> AllAffected => Enumerable.Empty<IGameAtom>();
         
-        object IEffectResult.Result => Result;
+        object IResult.Result => Result;
     }
 
     internal record EffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result) 
-        : IEffectResult<TAffected, TResult> where TAffected : class, IGameAtom
+        : IResult<TAffected, TResult> where TAffected : class, IGameAtom
     {
         public bool IsNull => Result is not null;
         public IEnumerable<IGameAtom> AllAffected => new[] { Affected };
-        object IEffectResult.Result => Result;
+        object IResult.Result => Result;
     }
 
     public class ResolutionCollector : IResolutionCollector
     {
-        private readonly List<IEffectResult> _results = new ();
+        private readonly List<IResult> _results = new ();
         
-        public IEnumerable<IEffectResult> Results => _results;
+        public IEnumerable<IResult> Results => _results;
 
-        public void AddResult(IEffectResult effectResult)
+        public void AddResult(IResult effectResult)
         {
             _results.Add(effectResult);
         }

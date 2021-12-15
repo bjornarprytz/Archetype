@@ -17,9 +17,9 @@ namespace Archetype.Game.Payloads.Pieces
         IDiscardPile DiscardPile { get; }
 
         [Template("Create {1} at {0}, owned by {2}")]
-        IEffectResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
+        IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
         [Template("Create {1} at {0}, owned by {2}")]
-        IEffectResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
+        IResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
     }
 
     public interface IMutableMapNode : IMapNode
@@ -43,7 +43,7 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
         public IDiscardPile DiscardPile { get; }
-        public IEffectResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner)
+        public IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner)
         {
             var creature = _instanceFactory.CreateCreature(name, owner); 
             
@@ -52,7 +52,7 @@ namespace Archetype.Game.Payloads.Pieces
             return ResultFactory.Create(this, creature);
         }
 
-        public IEffectResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner)
+        public IResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner)
         {
             var creature = _instanceFactory.CreateStructure(name, owner); 
             

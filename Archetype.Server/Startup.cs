@@ -3,6 +3,7 @@ using Archetype.Design.Extensions;
 using Archetype.Game.Actions;
 using Archetype.Game.Extensions;
 using Archetype.Server.Extensions;
+using HotChocolate.Subscriptions;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,6 +25,8 @@ namespace Archetype.Server
                 .AddDesign()
                 .AddArchetype()
                 .AddGraphQLServer()
+                .AddMutationConventions()
+                .RegisterService<ITopicEventSender>()
 
                 .AddQueryType<Queries>()
                 .AddMutationType<Mutations>()

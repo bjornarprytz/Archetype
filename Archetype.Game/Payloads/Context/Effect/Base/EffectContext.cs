@@ -5,17 +5,11 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect
 {
-    public interface IEffectContext<out TTarget> : IEffectContext
+    public interface IEffectContext<out TTarget> : IContext
         where TTarget : IGameAtom
     {
         [Target("Target")]
         TTarget Target { get; }
-    }
-
-    public interface IEffectContext : IResolutionContext
-    {
-        [Target("Owner")]
-        IGameAtom Source { get; }
     }
     
     public class EffectContext<TTarget> : EffectContext, IEffectContext<TTarget> 
@@ -28,7 +22,7 @@ namespace Archetype.Game.Payloads.Context.Effect
         public TTarget Target { get; }
     }
     
-    public class EffectContext : IEffectContext
+    public class EffectContext : IContext
     {
         private readonly ICardContext _cardContext;
 
@@ -39,6 +33,7 @@ namespace Archetype.Game.Payloads.Context.Effect
 
         public IGameState GameState => _cardContext.GameState;
         public IResolution PartialResults => _cardContext.PartialResults;
+        public IGameAtom Owner => _cardContext.Owner;
         public IGameAtom Source => _cardContext.PlayArgs?.Player;
     }
 }

@@ -8,7 +8,7 @@ namespace Archetype.Game.Extensions
 {
     public static class CombatExtensions
     {
-        public static IEnumerable<IEffectResult> ResolveCombat(this IMapNode node)
+        public static IEnumerable<IResult> ResolveCombat(this IMapNode node)
         {
             var enemies = node.Enemies<ICreature>();
             var friendlies = node.Friendlies<ICreature>();
@@ -16,7 +16,7 @@ namespace Archetype.Game.Extensions
             var enemyTargets = node.Enemies<IUnit>().ToList();
             var friendlyTargets = node.Friendlies<IUnit>().ToList();
 
-            var results = new List<IEffectResult>();
+            var results = new List<IResult>();
 
             results.AddRange(
                 enemies.GroupFight(friendlyTargets));
@@ -26,9 +26,9 @@ namespace Archetype.Game.Extensions
             return results;
         }
 
-        public static IEnumerable<IEffectResult> BuryTheDead(this IMapNode node)
+        public static IEnumerable<IResult> BuryTheDead(this IMapNode node)
         {
-            var results = new List<IEffectResult>();
+            var results = new List<IResult>();
             
             foreach (var deadCreature in node.EachCreature().Where(creature => creature.IsDead()))
             {
@@ -38,7 +38,7 @@ namespace Archetype.Game.Extensions
             return results;
         }
 
-        private static IEffectResult Fight(this ICreature creature, IUnit target)
+        private static IResult Fight(this ICreature creature, IUnit target)
         {
             return target.Attack(creature.Strength);
         }
@@ -59,10 +59,10 @@ namespace Archetype.Game.Extensions
         }
 
 
-        private static IEnumerable<IEffectResult> GroupFight(this IEnumerable<ICreature> attackers,
+        private static IEnumerable<IResult> GroupFight(this IEnumerable<ICreature> attackers,
             IList<IUnit> potentialTargets)
         {
-            var results = new List<IEffectResult>();
+            var results = new List<IResult>();
             
             foreach (var attacker in attackers)
             {

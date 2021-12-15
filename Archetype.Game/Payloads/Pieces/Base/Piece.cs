@@ -30,7 +30,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
             } 
         }
 
-        public IEffectResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone)
+        public IResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone)
         {
             if (zone == CurrentZone)
                 return ResultFactory.Null<IZoned<T>, ZoneTransition<T>>(this);

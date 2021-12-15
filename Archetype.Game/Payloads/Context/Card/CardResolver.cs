@@ -1,5 +1,6 @@
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
@@ -8,7 +9,7 @@ namespace Archetype.Game.Payloads.Context.Card
         void Resolve(ICardPlayArgs playArgs);
     }
     
-    public interface ICardContext : IResolutionContext
+    public interface ICardContext : IContext
     {
         ICardPlayArgs PlayArgs { get; }
     }
@@ -50,6 +51,7 @@ namespace Archetype.Game.Payloads.Context.Card
                 IResolution PartialResults)
             : ICardContext
         {
+            public IGameAtom Owner => PlayArgs.Player;
         }
     }
 }

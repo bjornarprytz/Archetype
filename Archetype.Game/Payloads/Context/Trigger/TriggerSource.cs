@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Archetype.Game.Payloads.Context.Effect;
+using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Trigger

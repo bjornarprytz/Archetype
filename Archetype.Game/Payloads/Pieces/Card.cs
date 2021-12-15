@@ -7,6 +7,7 @@ using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
+using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Pieces.Base;
@@ -23,7 +24,7 @@ namespace Archetype.Game.Payloads.Pieces
         int Range { get; }
         
         [Template("Reduce cost of {0} by {1}")]
-        IEffectResult<ICard, int> ReduceCost(int x);
+        IResult<ICard, int> ReduceCost(int x);
         
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect<ICardContext>> Effects { get; }
@@ -51,7 +52,7 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<IEffect<ICardContext>> Effects => _effects;
         
         
-        public IEffectResult<ICard, int> ReduceCost(int x)
+        public IResult<ICard, int> ReduceCost(int x)
         {
             Console.WriteLine($"Reducing cost by {x}!");
 
@@ -80,7 +81,7 @@ namespace Archetype.Game.Payloads.Pieces
         {
             public IResolution PartialResults { get; } = new ResolutionCollector();
             public ICardPlayArgs PlayArgs => default;
-            public IInstanceFactory InstanceFactory => default;
+            public IGameAtom Owner => default;
         }
     }
 }
