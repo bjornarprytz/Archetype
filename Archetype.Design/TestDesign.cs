@@ -14,6 +14,8 @@ namespace Archetype.Design
     {
         public static IProtoPool BuildCardPool(IPoolBuilder poolBuilder)
         {
+            return new ProtoPool(new List<ISet>());
+            
             return poolBuilder
                 .AddSet("All rares", builder => builder
                     .ChangeCardTemplate(t => t with { Rarity = CardRarity.Rare})
@@ -28,13 +30,9 @@ namespace Archetype.Design
                         .Name("Ghoul")
                         .Strength(1)
                         .Health(2))
-                    /*
-                     * 
                     .Card(cardBuilder => cardBuilder
                         .Name("Create Unit")
-                        .Effect<IMapNode>(context => context.Target.CreateCreature("Ghoul", context.Owner)))
-                     */
-                )
+                        .Effect<IMapNode>(context => context.Target.CreateCreature("Ghoul", context.Owner))))
                 .AddSet("TestSet", 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })
@@ -75,6 +73,8 @@ namespace Archetype.Design
 
         public static IMapProtoData BuildMap(IMapBuilder mapBuilder)
         {
+            return new MapProtoData(new List<IMutableMapNode>());
+            
             return mapBuilder
                 .Nodes(3)
                 .Connect(0,2)

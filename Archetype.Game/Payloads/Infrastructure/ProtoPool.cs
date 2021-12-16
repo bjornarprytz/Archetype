@@ -13,9 +13,9 @@ namespace Archetype.Game.Payloads.Infrastructure
         IEnumerable<ICreatureProtoData> Creatures { get; }
         IEnumerable<IStructureProtoData> Structures { get; }
 
-        public ICardProtoData GetCard(string name);
-        public ICreatureProtoData GetCreature(string name);
-        public IStructureProtoData GetStructure(string name);
+        ICardProtoData GetCard(string name);
+        ICreatureProtoData GetCreature(string name);
+        IStructureProtoData GetStructure(string name);
     }
     
     public class ProtoPool : IProtoPool

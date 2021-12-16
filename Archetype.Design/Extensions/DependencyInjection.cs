@@ -8,7 +8,7 @@ namespace Archetype.Design.Extensions
         public static IServiceCollection AddDesign(this IServiceCollection serviceCollection)
         {
 
-            serviceCollection
+            serviceCollection // TODO: Replace this with a different approach. It causes infinite recursion doing it like this xD
                 .AddSingleton(sp => TestDesign.BuildMap(sp.GetRequiredService<IMapBuilder>()))
                 .AddSingleton(sp => TestDesign.BuildCardPool(sp.GetRequiredService<IPoolBuilder>()));
 

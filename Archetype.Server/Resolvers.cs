@@ -1,8 +1,5 @@
 using System;
-using System.Security.Cryptography.X509Certificates;
 using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
@@ -26,10 +23,6 @@ namespace Archetype.Server
             base.Configure(descriptor);
             
             descriptor.Description("The root object of actionable game state");
-
-            descriptor.BindFieldsExplicitly();
-
-            descriptor.Field("Test").Type<StringType>().Resolve("hey");
 
             descriptor.Field(state => state.HistoryReader)
                 .Ignore(); // TODO: Do not ignore this
@@ -78,10 +71,7 @@ namespace Archetype.Server
             descriptor.Description("A node on the map");
             
             descriptor.Field(node => node.Contents)
-                .Type<ListType<UnitUnionType>>();
-
-            descriptor.Field(node => node.Neighbours)
-                .Ignore();// TODO: Don't ignore this
+                .Type<ListType<UnitUnion>>();
 
             descriptor
                 .Field(node => node.CreateCreature(default!, default!))
@@ -184,7 +174,7 @@ namespace Archetype.Server
         {
             base.Configure(descriptor);
             descriptor.Description("Blueprint for creating a Structure instance");
-            
+
             descriptor.Field(data => data.Effects)
                 .Ignore();
         }
@@ -198,7 +188,7 @@ namespace Archetype.Server
         }
     }
 
-    public class UnitUnionType : UnionType
+    public class UnitUnion : UnionType
     {
         protected override void Configure(IUnionTypeDescriptor descriptor)
         {
@@ -215,12 +205,12 @@ namespace Archetype.Server
         {
             base.Configure(descriptor);
             descriptor.Description("An instance of a Structure");
-
+            
             descriptor.Field(structure => structure.Effects)
                 .Ignore();
 
             descriptor.Field(structure => structure.CurrentZone)
-                .Type<StructureZoneType>();
+                .Type<StructureZoneUnion>();
             
             descriptor.Field(structure => structure.Transition)
                 .Ignore();
@@ -232,7 +222,7 @@ namespace Archetype.Server
                 .Ignore();
         }
 
-        public class StructureZoneType : UnionType
+        public class StructureZoneUnion : UnionType
         {
             protected override void Configure(IUnionTypeDescriptor descriptor)
             {
@@ -251,7 +241,7 @@ namespace Archetype.Server
             descriptor.Description("An instance of a Creature");
 
             descriptor.Field(creature => creature.CurrentZone)
-                .Type<CreatureZoneType>();
+                .Type<CreatureZoneUnion>();
             
             descriptor.Field(creature => creature.Transition)
                 .Ignore();
@@ -260,7 +250,7 @@ namespace Archetype.Server
                 .Ignore();
         }
         
-        public class CreatureZoneType : UnionType
+        public class CreatureZoneUnion : UnionType
         {
             protected override void Configure(IUnionTypeDescriptor descriptor)
             {
@@ -284,7 +274,7 @@ namespace Archetype.Server
                 .Ignore();
 
             descriptor.Field(card => card.CurrentZone)
-                .Type<CardZoneType>();
+                .Type<CardZoneUnion>();
 
             descriptor.Field(card => card.Transition)
                 .Ignore();
@@ -302,7 +292,7 @@ namespace Archetype.Server
                 .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!, default!));
         }
         
-        public class CardZoneType : UnionType
+        public class CardZoneUnion : UnionType
         {
             protected override void Configure(IUnionTypeDescriptor descriptor)
             {
