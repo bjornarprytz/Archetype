@@ -44,7 +44,7 @@ namespace Archetype.Builder.Builders
             where TT2 : IGameAtom
             where TT3 : IGameAtom;
 
-        ICardBuilder EffectBuilder<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider) where TTarget : IGameAtom;
+        ICardBuilder Effect<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider) where TTarget : IGameAtom;
         ICardBuilder Effect(Action<ICardEffectBuilder> builderProvider);
         ICardBuilder Effect<TTarget>(Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect, int targetIndex = -1) where TTarget : IGameAtom;
         ICardBuilder Effect(Expression<Func<IContext, IResult>> resolveEffect);
@@ -150,7 +150,7 @@ namespace Archetype.Builder.Builders
             return this;
         }
 
-        public ICardBuilder EffectBuilder<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider)
+        public ICardBuilder Effect<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider)
             where  TTarget : IGameAtom
         {
             var cbc = _builderFactory.Create<ICardEffectBuilder<TTarget>>();
@@ -185,7 +185,7 @@ namespace Archetype.Builder.Builders
                 targetIndex = _targets.Count - 1;
             }
             
-            return EffectBuilder<TTarget>(provider => 
+            return Effect<TTarget>(provider => 
                 provider
                     .TargetIndex(targetIndex)
                     .Resolve(resolveEffect)

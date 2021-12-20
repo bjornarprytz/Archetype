@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Game", "Archetype
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Server", "Archetype.Server\Archetype.Server.csproj", "{288DA2FC-F855-4C9A-B656-9AD3B88F659C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Client", "Archetype.Client\Archetype.Client.csproj", "{F7804ACA-ECCC-42A7-8B01-98E3AF492FBA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Design", "Archetype.Design\Archetype.Design.csproj", "{38F00067-75E7-4CC9-B66B-FA9014BB7592}"
 EndProject
 Global
@@ -31,10 +29,6 @@ Global
 		{288DA2FC-F855-4C9A-B656-9AD3B88F659C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{288DA2FC-F855-4C9A-B656-9AD3B88F659C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{288DA2FC-F855-4C9A-B656-9AD3B88F659C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F7804ACA-ECCC-42A7-8B01-98E3AF492FBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F7804ACA-ECCC-42A7-8B01-98E3AF492FBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F7804ACA-ECCC-42A7-8B01-98E3AF492FBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F7804ACA-ECCC-42A7-8B01-98E3AF492FBA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{38F00067-75E7-4CC9-B66B-FA9014BB7592}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{38F00067-75E7-4CC9-B66B-FA9014BB7592}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38F00067-75E7-4CC9-B66B-FA9014BB7592}.Release|Any CPU.ActiveCfg = Release|Any CPU

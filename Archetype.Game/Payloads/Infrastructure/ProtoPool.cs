@@ -8,6 +8,9 @@ namespace Archetype.Game.Payloads.Infrastructure
 {
     public interface IProtoPool
     {
+        void AddSet(ISet set);
+        
+        
         IEnumerable<ISet> Sets { get; }
         IEnumerable<ICardProtoData> Cards { get; }
         IEnumerable<ICreatureProtoData> Creatures { get; }
@@ -20,17 +23,18 @@ namespace Archetype.Game.Payloads.Infrastructure
     
     public class ProtoPool : IProtoPool
     {
-        private readonly List<ISet> _sets;
+        private readonly List<ISet> _sets = new();
         
-        public ProtoPool(List<ISet> sets)
+        public void AddSet(ISet set)
         {
-            _sets = sets;
+            _sets.Add(set);
         }
         
         public IEnumerable<ICardProtoData> Cards => _sets.SelectMany(set => set.Cards.Values);
         public IEnumerable<ICreatureProtoData> Creatures => _sets.SelectMany(set => set.Creatures.Values);
         public IEnumerable<IStructureProtoData> Structures => _sets.SelectMany(set => set.Structures.Values);
-        public IEnumerable<ISet> Sets => _sets;
+
+        public IEnumerable<ISet> Sets => _sets ;
         public ICardProtoData GetCard(string name)
         {
             return _sets.Where(set => set.Cards[name] != null).Select(set => set.Cards[name]).FirstOrDefault();

@@ -1,4 +1,3 @@
-using Archetype.Builder.Builders;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Design.Extensions
@@ -7,12 +6,8 @@ namespace Archetype.Design.Extensions
     {
         public static IServiceCollection AddDesign(this IServiceCollection serviceCollection)
         {
-
-            serviceCollection // TODO: Replace this with a different approach. It causes infinite recursion doing it like this xD
-                .AddSingleton(sp => TestDesign.BuildMap(sp.GetRequiredService<IMapBuilder>()))
-                .AddSingleton(sp => TestDesign.BuildCardPool(sp.GetRequiredService<IPoolBuilder>()));
-
-
+            serviceCollection.AddSingleton<IDesign, TestDesign>();
+            
             return serviceCollection;
         }
     }

@@ -23,7 +23,6 @@ namespace Archetype.Builder.Extensions
             serviceCollection.AddTransient(typeof(ICardEffectBuilder<>), typeof(CardEffectBuilder<>));
             serviceCollection.AddTransient<IMapBuilder, MapBuilder>();
             serviceCollection.AddTransient<INodeBuilder, NodeBuilder>();
-            serviceCollection.AddTransient<IPoolBuilder, PoolBuilder>();
             serviceCollection.AddTransient<ISetBuilder, SetBuilder>();
             
             return serviceCollection;

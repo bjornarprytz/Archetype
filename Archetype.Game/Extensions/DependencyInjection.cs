@@ -13,6 +13,7 @@ namespace Archetype.Game.Extensions
         public static IServiceCollection AddArchetype(this IServiceCollection serviceCollection)
         {
             return serviceCollection
+                    .AddSingleton<IProtoPool, ProtoPool>()
                     .AddSingleton<IGameState, GameState>()
                     .AddSingleton<IPlayer, Player>()
                     .AddSingleton<IMap, Map>()

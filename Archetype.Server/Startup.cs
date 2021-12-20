@@ -23,8 +23,8 @@ namespace Archetype.Server
             services
                 .AddMediatR( configuration => configuration.AsSingleton(),  typeof(PlayCardAction).Assembly)
                 .AddBuilders()
-                .AddDesign()
                 .AddArchetype()
+                .AddDesign()
                 .AddGraphQLServer()
                 .AddMutationConventions()
                 .RegisterService<ITopicEventSender>()
@@ -35,7 +35,8 @@ namespace Archetype.Server
                 .AddMutationType<Mutations>()
                 .AddSubscriptionType<Subscriptions>()
                 .AddInMemorySubscriptions()
-                .AddLocalTypes(typeof(CardType).Assembly);
+                .AddLocalTypes(typeof(CardType).Assembly)
+                ;
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
