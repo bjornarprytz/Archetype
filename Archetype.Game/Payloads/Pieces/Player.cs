@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
+using Archetype.Game.Factory;
+using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
@@ -9,7 +14,6 @@ namespace Archetype.Game.Payloads.Pieces
     public interface IPlayer : IGameAtom
     {
         int MaxHandSize { get; }
-        int MinDeckSize { get; }
         int Resources { get; set; }
         
         IStructure HeadQuarters { get; }
@@ -18,30 +22,28 @@ namespace Archetype.Game.Payloads.Pieces
         IDeck Deck { get; }
         [Target("Player's hand")]
         IHand Hand { get; }
-
-        void SetHeadquarters(IStructure newHq);
         
         int Draw(int strength); // TODO: Return a result like the other game actions
     }
     
     public class Player : Atom, IPlayer
     {
-        public Player()
+        private readonly IPlayerData _protoData;
+
+        public Player(IPlayerData protoData)
         {
+            _protoData = protoData;
+
+            Resources = _protoData.StartingResources;
+            
             Deck = new Deck(this);
             Hand = new Hand(this);
         }
-        public int MaxHandSize { get; } = 2;
-        public int MinDeckSize { get; } = 4; // TODO: GEt this from somewhere else
-        public int Resources { get; set; } = 100;
+        public int MaxHandSize => _protoData.MaxHandSize;
+        public int Resources { get; set; }
         public IStructure HeadQuarters { get; private set; }
         public IDeck Deck { get; }
         public IHand Hand { get; }
-
-        public void SetHeadquarters(IStructure newHq)
-        {
-            HeadQuarters = newHq;
-        }
 
         public int Draw(int strength)
         {

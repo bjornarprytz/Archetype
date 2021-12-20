@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Aqua.EnumerableExtensions;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
@@ -14,8 +15,11 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IInstanceFactory
     {
+        ICard CreateCard(ICardProtoData cardData, IGameAtom owner);
         ICard CreateCard(string name, IGameAtom owner);
+        IStructure CreateStructure(IStructureProtoData structureData, IGameAtom owner);
         IStructure CreateStructure(string name, IGameAtom owner);
+        ICreature CreateCreature(ICreatureProtoData creatureData, IGameAtom owner);
         ICreature CreateCreature(string name, IGameAtom owner);
     }
     
@@ -55,18 +59,32 @@ namespace Archetype.Game.Payloads.Infrastructure
             return atom;
         }
 
+        public ICard CreateCard(ICardProtoData cardData, IGameAtom owner)
+        {
+            var card = new Card(cardData, owner);
+
+            AddAtom(card);
+            
+            return card;
+        }
+
         public ICard CreateCard(string name, IGameAtom owner)
         {
             var protoData = _protoPool.GetCard(name);
 
             if (protoData is null)
                 throw new InvalidOperationException($"Could not find a {typeof(ICard)} named {name} in the pool");
-            
-            var card = new Card(protoData, owner);
 
-            AddAtom(card);
+            return CreateCard(protoData, owner);
+        }
+
+        public IStructure CreateStructure(IStructureProtoData structureData, IGameAtom owner)
+        {
+            var structure = new Structure(structureData, owner);
+
+            AddAtom(structure);
             
-            return card;
+            return structure;
         }
 
         public IStructure CreateStructure(string name, IGameAtom owner)
@@ -75,12 +93,17 @@ namespace Archetype.Game.Payloads.Infrastructure
 
             if (protoData is null)
                 throw new InvalidOperationException($"Could not find a a {typeof(IStructure)} named {name} in the pool");
-            
-            var structure = new Structure(protoData, owner);
 
-            AddAtom(structure);
-            
-            return structure;
+            return CreateStructure(protoData, owner);
+        }
+
+        public ICreature CreateCreature(ICreatureProtoData creatureData, IGameAtom owner)
+        {
+            var creature = new Creature(creatureData, owner);
+
+            AddAtom(creature);
+
+            return creature;
         }
 
         public ICreature CreateCreature(string name, IGameAtom owner)
@@ -89,12 +112,8 @@ namespace Archetype.Game.Payloads.Infrastructure
 
             if (protoData is null)
                 throw new InvalidOperationException($"Could not find a {typeof(ICreature)} named {name} in the pool");
-            
-            var creature = new Creature(protoData, owner);
 
-            AddAtom(creature);
-
-            return creature;
+            return CreateCreature(protoData, owner);
         }
 
         private void RegisterKnownGameState()

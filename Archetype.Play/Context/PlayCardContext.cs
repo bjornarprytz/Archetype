@@ -8,8 +8,6 @@ namespace Archetype.Play.Context;
 
 public interface IPlayCardContext
 {
-    void Init(ICard card); // TODO: Refactor this to prevent misuse (multiple inits)
-    
     IEnumerable<ITarget> RequiredTargets { get; }
     IGameState GameState { get; }
 
@@ -30,7 +28,7 @@ internal class PlayCardContext : IPlayCardContext
         GameState = gameState;
     }
     
-    public void Init(ICard card)
+    internal void Init(ICard card)
     {
         if (_player.Resources < card.Cost)
             throw new InvalidOperationException("Player cannot afford to play card");
