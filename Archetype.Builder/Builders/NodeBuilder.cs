@@ -1,3 +1,4 @@
+using Archetype.Builder.Builders.Base;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
 

@@ -18,8 +18,10 @@ namespace Archetype.Game.Payloads.Pieces
         IDeck Deck { get; }
         [Target("Player's hand")]
         IHand Hand { get; }
+
+        void SetHeadquarters(IStructure newHq);
         
-        int Draw(int strength);
+        int Draw(int strength); // TODO: Return a result like the other game actions
     }
     
     public class Player : Atom, IPlayer
@@ -30,11 +32,16 @@ namespace Archetype.Game.Payloads.Pieces
             Hand = new Hand(this);
         }
         public int MaxHandSize { get; } = 2;
-        public int MinDeckSize { get; } = 4;
+        public int MinDeckSize { get; } = 4; // TODO: GEt this from somewhere else
         public int Resources { get; set; } = 100;
-        public IStructure HeadQuarters { get; } // TODO: Figure out how to place this
+        public IStructure HeadQuarters { get; private set; }
         public IDeck Deck { get; }
         public IHand Hand { get; }
+
+        public void SetHeadquarters(IStructure newHq)
+        {
+            HeadQuarters = newHq;
+        }
 
         public int Draw(int strength)
         {

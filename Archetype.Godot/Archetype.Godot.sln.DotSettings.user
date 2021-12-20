@@ -1,6 +1,7 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=E_003A_005Csource_005Crepos_005CArchetype_005CArchetype_002EClient_005Cbin_005CDebug_005Cnetstandard2_002E0_005CArchetype_002EClient_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=E_003A_005Csource_005Crepos_005CArchetype_005CArchetype_002EClient_005Cbin_005CDebug_005Cnetstandard2_002E1_005CArchetype_002EClient_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=E_003A_005Csource_005Crepos_005CArchetype_005CArchetype_002EGame_005Cbin_005CRelease_005Cnetstandard2_002E0_005CArchetype_002EGame_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="E:\source\repos\Archetype\Archetype.Client\bin\Debug\netstandard2.1\Archetype.Client.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

@@ -19,13 +19,13 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<IMap, Map>()
                     .AddSingleton<IHistoryReader, IHistoryWriter, History>()
                     .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()
+                    .AddSingleton<ICardResolver, CardResolver>()
+                    .AddSingleton(typeof(ITriggerResolver<>), typeof(TriggerResolver<>))
                     
-                    .AddTransient<IMovePhaseResolver, MovePhase>()
-                    .AddTransient<ICombatPhaseResolver, CombatPhase>()
-                    .AddTransient<IUpkeepPhaseResolver, UpkeepPhase>()
-
-                    .AddTransient<ICardResolver, CardResolver>()
-                    .AddTransient(typeof(ITriggerResolver<>), typeof(TriggerResolver<>))
+                    .AddSingleton<IMovePhaseResolver, MovePhase>()
+                    .AddSingleton<ICombatPhaseResolver, CombatPhase>()
+                    .AddSingleton<IUpkeepPhaseResolver, UpkeepPhase>()
+                    .AddSingleton<ISpawnPhaseResolver, SpawnPhase>()
                 ;
         }
 

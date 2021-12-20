@@ -54,6 +54,10 @@ namespace Archetype.Design
                         .Name("Ghoul")
                         .Strength(1)
                         .Health(2))
+                    .Structure(structureBuilder => structureBuilder
+                        .Name("House")
+                        .Defense(1)
+                        .Health(1))
                     .Card(cardBuilder => cardBuilder
                         .Name("Create Unit")
                         .Range(0)

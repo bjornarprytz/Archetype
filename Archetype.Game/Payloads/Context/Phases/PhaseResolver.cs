@@ -6,6 +6,7 @@ namespace Archetype.Game.Payloads.Context.Phases
     public interface IMovePhaseResolver : IPhaseResolver { }
     public interface ICombatPhaseResolver : IPhaseResolver {}
     public interface IUpkeepPhaseResolver : IPhaseResolver {}
+    public interface ISpawnPhaseResolver : IPhaseResolver {}
 
     public abstract class PhaseResolver : IPhaseResolver
     {

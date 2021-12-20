@@ -24,7 +24,6 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
         where TContext : IContext
     {
         IResult ResolveContext(TContext context);
-        // string ContextSensitiveRulesText(TContext cardResolutionContext); TODO: Make rules text based on full context
     }
 
     public abstract class Effect<TContext, TResult, TParentContext> : IEffect<TParentContext>

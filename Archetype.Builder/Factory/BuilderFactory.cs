@@ -1,5 +1,6 @@
 ﻿using System;
 using Archetype.Builder.Builders;
+using Archetype.Builder.Builders.Base;
 
 namespace Archetype.Builder.Factory
 {

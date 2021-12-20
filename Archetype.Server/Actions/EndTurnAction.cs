@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Archetype.Game.Payloads.Context.Phases;
 using MediatR;
 
-namespace Archetype.Game.Actions
+namespace Archetype.Server.Actions
 {
     public class EndTurnAction : IRequest { }
 

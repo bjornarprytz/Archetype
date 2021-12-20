@@ -9,7 +9,7 @@ using Archetype.Game.Payloads.Pieces;
 using MediatR;
 using Unit = MediatR.Unit;
 
-namespace Archetype.Game.Actions
+namespace Archetype.Server.Actions
 {
     public class StartGameAction : IRequest
     {
@@ -33,7 +33,11 @@ namespace Archetype.Game.Actions
         private readonly IInstanceFactory _instanceFactory;
         private readonly IInstanceFinder _instanceFinder;
 
-        public StartGameActionHandler(IPlayer player, IMap map, IInstanceFactory instanceFactory, IInstanceFinder instanceFinder)
+        public StartGameActionHandler(
+            IPlayer player, 
+            IMap map, 
+            IInstanceFactory instanceFactory, 
+            IInstanceFinder instanceFinder)
         {
             _player = player;
             _map = map;

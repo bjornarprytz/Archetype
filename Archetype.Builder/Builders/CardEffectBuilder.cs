@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;

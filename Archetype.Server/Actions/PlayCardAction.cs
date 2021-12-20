@@ -10,7 +10,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 using MediatR;
 using Unit = MediatR.Unit;
 
-namespace Archetype.Game.Actions
+namespace Archetype.Server.Actions
 {
     public class PlayCardAction : IRequest
     {

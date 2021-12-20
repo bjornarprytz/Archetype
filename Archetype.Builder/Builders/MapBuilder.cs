@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;

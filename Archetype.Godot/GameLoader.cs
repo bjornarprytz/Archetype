@@ -1,12 +1,8 @@
 using Godot;
-using System.Linq;
-using Archetype.Client;
 using Archetype.Godot.Infrastructure;
-using StrawberryShake;
 
 public class GameLoader : Node
 {
-	private IArchetypeGraphQLClient _client;
 
 	private ICardFactory _cardFactory;
 	
