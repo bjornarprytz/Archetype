@@ -75,6 +75,8 @@ internal class PlayCardContext : IPlayCardContext
         if (!ValidateArgs(whence, targets))
             throw new InvalidOperationException("Invalid args");
         
+        _player.Resources -= _card.Cost;
+        
         _cardResolver.Resolve(new PlayCardArgs(_player, _card!, whence, targets!));
     }
 

@@ -2,7 +2,6 @@ using Archetype.Builder.Extensions;
 using Archetype.Design.Extensions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Server.Actions;
 using Archetype.Server.Extensions;
 using HotChocolate.Subscriptions;
 using MediatR;
@@ -21,7 +20,6 @@ namespace Archetype.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddMediatR( configuration => configuration.AsSingleton(),  typeof(PlayCardAction).Assembly)
                 .AddBuilders()
                 .AddArchetype()
                 .AddDesign()

@@ -1,7 +1,5 @@
-using System;
 using System.Reactive.Disposables;
-using Archetype.Client;
-using Archetype.Godot.Extensions;
+using Archetype.Game.Payloads.Pieces;
 using Godot;
 using Archetype.Godot.Targeting;
 
@@ -12,20 +10,14 @@ namespace Archetype.Godot.Card
 		private readonly CompositeDisposable _disposables = new ();
 		
 		private CardStateMachine _stateMachine;
-		private ICardProtoData _cardData;
-		private IArchetypeGraphQLClient _client;
-
-		public void Construct(ICardProtoData cardData, IArchetypeGraphQLClient client)
+		private ICard _cardData;
+		
+		public void Construct(ICard cardData)
 		{
 			_stateMachine = new CardStateMachine(this);
 			_cardData = cardData;
-			_client = client;
-			
-			_client //TODO: Subscribe to when this card changes instead
-				.OnGameStarted
-				.Watch()
-				.Subscribe((result => GD.Print(result?.Data?.OnGameStarted.Message)))
-				.DisposeWith(_disposables);
+
+			// TODO: SUbscribe to changes in the card
 		}
 		
 		public override void _Ready()
@@ -35,16 +27,6 @@ namespace Archetype.Godot.Card
 			Connect(Signals.CollisionObject2D.InputEvent, this, nameof(OnInputEvent));
 			Connect(Signals.CollisionObject2D.MouseEntered, this, nameof(OnMouseEntered));
 			Connect(Signals.CollisionObject2D.MouseExited, this, nameof(OnMouseExited));
-
-
-			var name = GetNode("CardName") as RichTextLabel;
-			name.Text = _cardData?.MetaData?.Name;
-			var color = GetNode("ColorRect") as ColorRect;
-			color.Color = _cardData.MetaData.Color.ToGodot();
-			var cost = GetNode("CardCost") as RichTextLabel;
-			cost.Text = _cardData.Cost.ToString();
-			var text = GetNode("RulesText") as RichTextLabel;
-			text.Text = _cardData.RulesText;
 		}
 
 		public override void _Input(InputEvent @event)

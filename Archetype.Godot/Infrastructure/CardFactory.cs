@@ -1,4 +1,5 @@
-using Archetype.Client;
+
+using Archetype.Game.Payloads.Pieces;
 using Archetype.Godot.Card;
 using Godot;
 
@@ -6,26 +7,24 @@ namespace Archetype.Godot.Infrastructure
 {
     public interface ICardFactory
     {
-        CardNode CreateCard(ICardProtoData card);
+        CardNode CreateCard(ICard card);
     }
     
     public class CardFactory : ICardFactory
     {
         private readonly PackedScene _cardScene;
-        private readonly IArchetypeGraphQLClient _client;
 
-        public CardFactory(IArchetypeGraphQLClient client)
+        public CardFactory()
         {
             _cardScene = ResourceLoader.Load<PackedScene>("res://card.tscn") 
                          ?? throw new MissingPackedSceneException("res://card.tscn");
-            _client = client;
         }
         
-        public CardNode CreateCard(ICardProtoData card)
+        public CardNode CreateCard(ICard card)
         {
             var cardNode = _cardScene.Instance() as CardNode;
             
-            cardNode!.Construct(card, _client);
+            cardNode!.Construct(card);
 
             return cardNode;
         }

@@ -1,6 +1,7 @@
 using Archetype.Game.Payloads.Context.Phases;
 using Archetype.Game.Payloads.Pieces;
 using Archetype.Play.Factory;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Play.Context;
 
@@ -13,6 +14,7 @@ public interface ITurnContext
 
 internal class TurnContext : ITurnContext
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly IMovePhaseResolver _movePhase;
     private readonly ICombatPhaseResolver _combatPhase;
     private readonly IUpkeepPhaseResolver _upkeepPhase;
@@ -23,6 +25,7 @@ internal class TurnContext : ITurnContext
     public IEnumerable<ICard> PlayableCards { get; }
 
     public TurnContext(
+        IServiceProvider serviceProvider,
         IPlayer player,
         IMovePhaseResolver movePhase,
         ICombatPhaseResolver combatPhase,
@@ -31,6 +34,7 @@ internal class TurnContext : ITurnContext
         IPlayCardContextFactory playContextFactory,
         IFactory<ITurnContext> turnContextFactory)
     {
+        _serviceProvider = serviceProvider;
         _movePhase = movePhase;
         _combatPhase = combatPhase;
         _upkeepPhase = upkeepPhase;
@@ -47,6 +51,9 @@ internal class TurnContext : ITurnContext
         if (!PlayableCards.Contains(card))
             throw new InvalidOperationException("Cannot cast that card");
 
+        using var scope = _serviceProvider.CreateScope();
+        
+        
         return _playContextFactory.Create(card);
     }
 

@@ -16,15 +16,15 @@ public interface IGameContext
 internal class GameContext : IGameContext
 {
     private readonly IFactory<ISetupContext> _setupContextFactory;
-    private readonly IFactory<IDeckBuilderContext> _deckbuilderContextFactory;
+    private readonly IFactory<IDeckBuilderContext> _deckBuilderContextFactory;
 
 
     public GameContext(
         IFactory<ISetupContext> setupContextFactory,
-        IFactory<IDeckBuilderContext> deckbuilderContextFactory)
+        IFactory<IDeckBuilderContext> deckBuilderContextFactory)
     {
         _setupContextFactory = setupContextFactory;
-        _deckbuilderContextFactory = deckbuilderContextFactory;
+        _deckBuilderContextFactory = deckBuilderContextFactory;
     }
     public ISetupContext Setup()
     {
@@ -33,6 +33,6 @@ internal class GameContext : IGameContext
 
     public IDeckBuilderContext BuildDeck()
     {
-        return _deckbuilderContextFactory.Create();
+        return _deckBuilderContextFactory.Create();
     }
 }

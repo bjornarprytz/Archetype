@@ -1,11 +1,12 @@
 using System;
-using Archetype.Client;
 using Godot;
 
 namespace Archetype.Godot.Extensions
 {
     public static class ConversionExtensions
     {
+        /*
+         * 
         public static Color ToGodot(this CardColor cardColor)
         {
             return (cardColor) switch
@@ -18,5 +19,6 @@ namespace Archetype.Godot.Extensions
                 _ => throw new ArgumentOutOfRangeException(nameof(cardColor), cardColor, null)
             };
         }
+         */
     }
 }

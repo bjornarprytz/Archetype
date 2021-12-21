@@ -30,10 +30,6 @@ namespace Archetype.Game.Payloads.Context.Card
         {
             var results = new ResolutionCollector();
 
-            playArgs.ValidateTargets(_gameState); // TODO: This should probably be done elsewhere, or by a separate service
-            
-            playArgs.Player.Resources -= playArgs.Card.Cost; // TODO: Make this more expressive? (e.g. pay costs in different ways)
-
             var context = new CardContext(_gameState, playArgs, results);
             
             foreach (var effect in playArgs.Card.Effects)

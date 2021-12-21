@@ -8,8 +8,10 @@ public class GameLoader : Node
 	
 	
 	[Inject]
-	public async void Construct(ICardFactory cardFactory, IArchetypeGraphQLClient client)
+	public async void Construct(ICardFactory cardFactory/*, IArchetypeGraphQLClient client*/)
 	{
+		/*
+		 * 
 		_client = client;
 		_cardFactory = cardFactory;
 		
@@ -26,6 +28,7 @@ public class GameLoader : Node
 			AddChild(c);
 		}
 		
+		 */
 		
 	}
 	
