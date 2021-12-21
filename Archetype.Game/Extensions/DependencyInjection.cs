@@ -4,6 +4,7 @@ using Archetype.Game.Payloads.Context.Phases;
 using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Proto;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Game.Extensions
@@ -16,6 +17,7 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<IProtoPool, ProtoPool>()
                     .AddSingleton<IGameState, GameState>()
                     .AddSingleton<IPlayer, Player>()
+                    .AddSingleton<IPlayerData, PlayerData>()
                     .AddSingleton<IMap, Map>()
                     .AddSingleton<IHistoryReader, IHistoryWriter, History>()
                     .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()

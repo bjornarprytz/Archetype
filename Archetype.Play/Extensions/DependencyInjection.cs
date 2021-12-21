@@ -12,7 +12,9 @@ public static class DependencyInjection
             .AddFactory<ITurnContext, TurnContext>()
             .AddFactory<IGameContext, GameContext>()
             .AddFactory<ISetupContext, SetupContext>()
-            .AddFactory<IPlayCardContext, PlayCardContext>()
+            .AddFactory<PlayCardContext, PlayCardContext>()
+            .AddFactory<IDeckBuilderContext, DeckBuilderContext>()
+            .AddSingleton<IPlayCardContextFactory, PlayCardContextFactory>()
             ;
         
         

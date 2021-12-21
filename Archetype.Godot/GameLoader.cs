@@ -1,5 +1,7 @@
+using System.Linq;
 using Godot;
 using Archetype.Godot.Infrastructure;
+using Archetype.Play;
 
 public class GameLoader : Node
 {
@@ -7,28 +9,22 @@ public class GameLoader : Node
 	private ICardFactory _cardFactory;
 	
 	
+	
 	[Inject]
-	public async void Construct(ICardFactory cardFactory/*, IArchetypeGraphQLClient client*/)
+	public void Construct(ICardFactory cardFactory)
 	{
-		/*
-		 * 
-		_client = client;
-		_cardFactory = cardFactory;
-		
-		var cardPool = await _client.GetCardPool.ExecuteAsync();
-		
-		cardPool.EnsureNoErrors();
+		var gameContext = Game.Create();
 
-		var cards = cardPool?.Data?.CardPool?.Sets?.SelectMany(set => set?.Cards).Cast<ICardProtoData>();
+		var setup = gameContext.Setup();
 
-		foreach (var (card, i) in cards.Select((c, idx) => (c, idx)))
-		{
-			var c = _cardFactory.CreateCard(card);
-			
-			AddChild(c);
-		}
+		var node = setup.Map.Nodes.First();
+
+		var turn = setup.Start(node);
+
+		var card = turn.PlayableCards.First();
+
+		var playCardContext = turn.PlayCard(card);
 		
-		 */
 		
 	}
 	

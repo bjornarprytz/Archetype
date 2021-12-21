@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Pieces.Base;
 

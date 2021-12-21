@@ -9,8 +9,12 @@ public interface IDeckBuilderContext
 {
     int MinDeckSize { get; }
     
+    IEnumerable<IStructureProtoData> AvailableStructures { get; }
+
     IEnumerable<ICardProtoData> AvailableCards { get; }
 
+    void PickHeadquarter(IStructureProtoData newHq);
+    
     void Commit(IEnumerable<ICardProtoData> choices);
 }
 
@@ -24,9 +28,14 @@ internal class DeckBuilderContext : IDeckBuilderContext
     }
 
     public int MinDeckSize => _playerData.MinDeckSize;
-
+    public IEnumerable<IStructureProtoData> AvailableStructures => _playerData.StructurePool;
     public IEnumerable<ICardProtoData> AvailableCards => _playerData.CardPool;
-    
+
+    public void PickHeadquarter(IStructureProtoData newHq)
+    {
+        _playerData.SetHeadQuarters(newHq);
+    }
+
     public void Commit(IEnumerable<ICardProtoData> choices)
     {
         var deck = choices.ToList();

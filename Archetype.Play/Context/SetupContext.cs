@@ -36,6 +36,8 @@ public class SetupContext : ISetupContext
     
     public ITurnContext Start(IMapNode hqPlacement)
     {
+        _player.SetHeadQuarters(_instanceFactory.CreateStructure(_playerData.Headquarters, _player));
+        
         _player.HeadQuarters.MoveTo(hqPlacement);
 
         foreach (var cardProtoData in _playerData.DeckList)

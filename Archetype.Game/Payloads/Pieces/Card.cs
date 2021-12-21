@@ -16,11 +16,10 @@ using Archetype.Game.Payloads.Proto;
 namespace Archetype.Game.Payloads.Pieces
 {
     [Target("Card")]
-    public interface ICard : IGameAtom, IZoned<ICard>
+    public interface ICard : IZoned<ICard>
     {
         CardMetaData MetaData { get; }
         int Cost { get; }
-        
         int Range { get; }
         
         [Template("Reduce cost of {0} by {1}")]

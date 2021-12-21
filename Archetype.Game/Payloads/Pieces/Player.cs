@@ -24,6 +24,8 @@ namespace Archetype.Game.Payloads.Pieces
         IHand Hand { get; }
         
         int Draw(int strength); // TODO: Return a result like the other game actions
+
+        IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure);
     }
     
     public class Player : Atom, IPlayer
@@ -59,6 +61,13 @@ namespace Archetype.Game.Payloads.Pieces
             }
 
             return actualStrength;
+        }
+
+        public IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure)
+        {
+            HeadQuarters = structure;
+            
+            return ResultFactory.Create(this, structure);
         }
     }
 }
