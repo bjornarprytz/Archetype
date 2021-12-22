@@ -9,19 +9,21 @@ namespace Archetype.Game.Payloads.Context
     public interface IContext
     {
         IGameState GameState { get; }
-        IResolution PartialResults { get; }
+        IResultsReader PartialResults { get; }
         IGameAtom Owner { get; }
     }
-    
-    public interface IResolution
+
+    public interface IResultsReader
     {
         IEnumerable<IResult> Results { get; }
     }
 
-    public interface IResolutionCollector: IResolution
+    public interface IResultsWriter
     {
         void AddResult(IResult effectResult);
     }
+
+    public interface IResultsReaderWriter : IResultsReader, IResultsWriter { }
 
     public interface IResult
     {
@@ -47,7 +49,7 @@ namespace Archetype.Game.Payloads.Context
         internal AggregatedEffectResult(IEnumerable<IResult<TResult>> results)
         {
             var nonNullResults = results.Where(r => !r.IsNull).ToList();
-            
+
             AllAffected = nonNullResults.SelectMany(r => r.AllAffected).ToList();
             Verb = nonNullResults.FirstOrDefault()?.Verb ?? throw new ArgumentException("Effect result missing Verb.");
             Result = nonNullResults.Select(r => r.Result);
@@ -66,16 +68,16 @@ namespace Archetype.Game.Payloads.Context
 
     internal record NullResult<TAffected, T>(TAffected Affected, string Verb)
         : EffectResult<TAffected, T>(Affected, Verb, default) where TAffected : class, IGameAtom;
-    
+
     internal record EffectResult<T>(string Verb, T Result) : IResult<T>
     {
         public bool IsNull => Result is not null;
         public IEnumerable<IGameAtom> AllAffected => Enumerable.Empty<IGameAtom>();
-        
+
         object IResult.Result => Result;
     }
 
-    internal record EffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result) 
+    internal record EffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result)
         : IResult<TAffected, TResult> where TAffected : class, IGameAtom
     {
         public bool IsNull => Result is not null;
@@ -83,10 +85,10 @@ namespace Archetype.Game.Payloads.Context
         object IResult.Result => Result;
     }
 
-    public class ResolutionCollector : IResolutionCollector
+    public class ResultsReaderWriter : IResultsReaderWriter, IResultsReader
     {
-        private readonly List<IResult> _results = new ();
-        
+        private readonly List<IResult> _results = new();
+
         public IEnumerable<IResult> Results => _results;
 
         public void AddResult(IResult effectResult)

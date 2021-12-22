@@ -78,7 +78,7 @@ namespace Archetype.Game.Payloads.Pieces
 
         private record MinimalContext(IGameState GameState, IGameAtom Owner) : IContext
         {
-            public IResolution PartialResults { get; } = new ResolutionCollector();
+            public IResultsReader PartialResults { get; } = new ResultsReaderWriter();
         }
     }
 }

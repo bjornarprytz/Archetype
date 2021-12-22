@@ -13,17 +13,17 @@ namespace Archetype.Game.Payloads.Context.Phases
         {
             _gameState = gameState;
         }
-        protected override IResolution ResolvePhase(IResolutionCollector resultsCollector)
+        protected override IResultsReader ResolvePhase(IResultsReaderWriter resultsReaderCollector)
         { 
             var shortestPaths = (_gameState.Player.HeadQuarters.CurrentZone as IMapNode).CalculateShortestPaths();
             
             foreach (var enemy in _gameState.Map.EachEnemyCreature())
             {
                 enemy.MoveAlong(shortestPaths, _gameState.Player.HeadQuarters.CurrentZone as IMapNode)
-                    .ForEach(resultsCollector.AddResult);
+                    .ForEach(resultsReaderCollector.AddResult);
             }
 
-            return resultsCollector;
+            return resultsReaderCollector;
         }
     }
 }

@@ -11,7 +11,7 @@ internal interface IPlayCardContextFactory
     IPlayCardContext Create(ICard card);
 }
 
-internal class PlayCardContextFactory : IPlayCardContextFactory
+internal class  PlayCardContextFactory : IPlayCardContextFactory
 {
     private readonly IFactory<PlayCardContext> _cardContextFactory;
 

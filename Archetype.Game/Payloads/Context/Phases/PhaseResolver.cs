@@ -19,9 +19,9 @@ namespace Archetype.Game.Payloads.Context.Phases
         
         public void Resolve()
         {
-            _historyWriter.Append(ResolvePhase(new ResolutionCollector()));
+            _historyWriter.Append(ResolvePhase(new ResultsReaderWriter()));
         }
 
-        protected abstract IResolution ResolvePhase(IResolutionCollector resultsCollector);
+        protected abstract IResultsReader ResolvePhase(IResultsReaderWriter resultsReaderCollector);
     }
 }

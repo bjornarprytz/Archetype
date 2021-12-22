@@ -16,13 +16,13 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IHistoryWriter
     {
-        void Append(ICardContext context, IResolution result); // TODO: Simplify here: Use a generic context istead
-        void Append(IResolution result);
+        void Append(ICardContext context, IResultsReader result); // TODO: Simplify here: Use a generic context istead
+        void Append(IResultsReader result);
     }
 
     public interface IHistoryEntry
     {
-        IResolution Result { get; }
+        IResultsReader Result { get; }
     }
 
     public interface ICardEntry : IHistoryEntry
@@ -41,7 +41,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IReadOnlyDictionary<ICard, IList<ICardEntry>> CardEntriesByInstance => _entriesByCardInstance;
 
 
-        public void Append(ICardContext context, IResolution result)
+        public void Append(ICardContext context, IResultsReader result)
         {
             var newEntry = new CardEntry(context, result);
             
@@ -53,12 +53,12 @@ namespace Archetype.Game.Payloads.Infrastructure
             (_entriesByCardInstance[card] ??= new List<ICardEntry>()).Add(newEntry);
         }
 
-        public void Append(IResolution result)
+        public void Append(IResultsReader result)
         {
             _entries.Add(new Entry(result));
         }
 
-        private record CardEntry(ICardContext Context, IResolution Result) : ICardEntry;
-        private record Entry(IResolution Result)  : IHistoryEntry;
+        private record CardEntry(ICardContext Context, IResultsReader Result) : ICardEntry;
+        private record Entry(IResultsReader Result)  : IHistoryEntry;
     }
 }

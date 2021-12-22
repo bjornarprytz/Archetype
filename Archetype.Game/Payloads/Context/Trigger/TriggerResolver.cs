@@ -38,7 +38,7 @@ namespace Archetype.Game.Payloads.Context.Trigger
         
         public void Resolve(TSource source)
         {
-            var results = new ResolutionCollector();
+            var results = new ResultsReaderWriter();
 
             var context = new TriggerContext(_gameState, results, source, source.TopOwner());
 
@@ -52,7 +52,7 @@ namespace Archetype.Game.Payloads.Context.Trigger
 
         private record TriggerContext(
                 IGameState GameState, 
-                IResolution PartialResults, 
+                IResultsReader PartialResults, 
                 TSource Source,
                 IGameAtom Owner)
             : ITriggerContext<TSource>;

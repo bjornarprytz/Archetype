@@ -17,7 +17,7 @@ namespace Archetype.Game.Payloads.Context.Phases
             _protoPool = protoPool;
         }
 
-        protected override IResolution ResolvePhase(IResolutionCollector resultsCollector)
+        protected override IResultsReader ResolvePhase(IResultsReaderWriter resultsReaderCollector)
         {
             var spawnedLevel = 0;
 
@@ -27,10 +27,10 @@ namespace Archetype.Game.Payloads.Context.Phases
 
                 spawnedLevel += creature.MetaData.Level + 1; // At least 1
 
-                resultsCollector.AddResult(_map.Nodes.Last().CreateCreature(creature.Name, default));
+                resultsReaderCollector.AddResult(_map.Nodes.Last().CreateCreature(creature.Name, default));
             }
 
-            return resultsCollector;
+            return resultsReaderCollector;
         }
     }
 }

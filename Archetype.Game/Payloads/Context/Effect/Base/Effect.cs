@@ -79,7 +79,7 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
 
         protected abstract TContext DeriveContext(TParentContext parentContext);
         
-        protected record Context(IGameState GameState, IResolution PartialResults, IGameAtom Owner) 
+        protected record Context(IGameState GameState, IResultsReader PartialResults, IGameAtom Owner) 
             : IContext;
     }
     

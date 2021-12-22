@@ -26,7 +26,7 @@ namespace Archetype.Game.Payloads.Context.Card
     
         public void Resolve(ICardPlayArgs playArgs)
         {
-            var results = new ResolutionCollector();
+            var results = new ResultsReaderWriter();
 
             var context = new CardContext(_gameState, playArgs, results);
             
@@ -43,7 +43,7 @@ namespace Archetype.Game.Payloads.Context.Card
         private record CardContext(
                 IGameState GameState,
                 ICardPlayArgs PlayArgs,
-                IResolution PartialResults)
+                IResultsReader PartialResults)
             : ICardContext
         {
             public IGameAtom Owner => PlayArgs.Player;

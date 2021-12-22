@@ -13,17 +13,17 @@ namespace Archetype.Game.Payloads.Context.Phases
             _gameState = gameState;
         }
 
-        protected override IResolution ResolvePhase(IResolutionCollector resultsCollector)
+        protected override IResultsReader ResolvePhase(IResultsReaderWriter resultsReaderCollector)
         {
             foreach (var contestedNode in _gameState.Map.ContestedNodes())
             {
                 contestedNode.ResolveCombat()
-                    .ForEach(resultsCollector.AddResult);
+                    .ForEach(resultsReaderCollector.AddResult);
                 contestedNode.BuryTheDead()
-                    .ForEach(resultsCollector.AddResult);
+                    .ForEach(resultsReaderCollector.AddResult);
             }
 
-            return resultsCollector;
+            return resultsReaderCollector;
         }
     }
 }

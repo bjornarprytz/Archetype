@@ -16,7 +16,7 @@ namespace Archetype.Game.Payloads.Context.Phases
             _triggerResolver = triggerResolver;
         }
 
-        protected override IResolution ResolvePhase(IResolutionCollector resultsCollector)
+        protected override IResultsReader ResolvePhase(IResultsReaderWriter resultsReaderCollector)
         {
             foreach (var friendlyStructure in _gameState.Map.EachFriendlyStructure())
             {
@@ -29,7 +29,7 @@ namespace Archetype.Game.Payloads.Context.Phases
             }
 
 
-            return resultsCollector; 
+            return resultsReaderCollector; 
         }
     }
 }
