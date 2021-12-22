@@ -7,7 +7,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
-    public static class MapExtensions
+    internal static class MapExtensions
     {
 
         public static IEnumerable<IUnit> EachUnit(this IMap map)

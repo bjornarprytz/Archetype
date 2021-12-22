@@ -6,26 +6,26 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context
 {
-    public interface IContext
+    internal interface IContext
     {
         IGameState GameState { get; }
         IResultsReader PartialResults { get; }
         IGameAtom Owner { get; }
     }
 
-    public interface IResultsReader
+    internal interface IResultsReader
     {
         IEnumerable<IResult> Results { get; }
     }
 
-    public interface IResultsWriter
+    internal interface IResultsWriter
     {
         void AddResult(IResult effectResult);
     }
 
-    public interface IResultsReaderWriter : IResultsReader, IResultsWriter { }
+    internal interface IResultsReaderWriter : IResultsReader, IResultsWriter { }
 
-    public interface IResult
+    internal interface IResult
     {
         bool IsNull { get; }
         IEnumerable<IGameAtom> AllAffected { get; }
@@ -33,18 +33,18 @@ namespace Archetype.Game.Payloads.Context
         object Result { get; }
     }
 
-    public interface IResult<out T> : IResult
+    internal interface IResult<out T> : IResult
     {
         new T Result { get; }
     }
 
-    public interface IResult<out TTarget, out TResult> : IResult<TResult>
+    internal interface IResult<out TTarget, out TResult> : IResult<TResult>
         where TTarget : class, IGameAtom
     {
         TTarget Affected { get; }
     }
 
-    public record AggregatedEffectResult<TResult> : IResult<IEnumerable<TResult>>
+    internal record AggregatedEffectResult<TResult> : IResult<IEnumerable<TResult>>
     {
         internal AggregatedEffectResult(IEnumerable<IResult<TResult>> results)
         {
@@ -85,7 +85,7 @@ namespace Archetype.Game.Payloads.Context
         object IResult.Result => Result;
     }
 
-    public class ResultsReaderWriter : IResultsReaderWriter, IResultsReader
+    internal class ResultsReaderWriter : IResultsReaderWriter, IResultsReader
     {
         private readonly List<IResult> _results = new();
 

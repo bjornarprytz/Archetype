@@ -5,7 +5,7 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Context.Phases
 {
-    public class MovePhase : PhaseResolver, IMovePhaseResolver
+    internal class MovePhase : PhaseResolver, IMovePhaseResolver
     {
         private readonly IGameState _gameState;
 

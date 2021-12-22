@@ -3,10 +3,15 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    public interface IHandFront : IZoneFront
+    {
+        
+    }
+    
     [Target("Hand")]
-    public interface IHand  : IZone<ICard> { }
+    internal interface IHand  : IZone<ICard>, IHandFront { }
 
-    public class Hand : Zone<ICard>, IHand
+    internal class Hand : Zone<ICard>, IHand
     {
         public Hand(IGameAtom owner) : base(owner) { }
     }

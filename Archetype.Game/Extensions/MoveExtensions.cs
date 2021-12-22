@@ -5,7 +5,7 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Extensions
 {
-    public static class MoveExtensions
+    internal static class MoveExtensions
     {
         public static IEnumerable<IResult> MoveAlong(this ICreature creature, IReadOnlyDictionary<IMapNode, IMapNode> path, IMapNode target)
         {

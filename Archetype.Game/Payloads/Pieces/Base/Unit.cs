@@ -7,8 +7,7 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
-    [Target("Unit")]
-    public interface IUnit : IZoned<IUnit>
+    public interface IUnitFront : IZonedFront
     {
         UnitMetaData BaseMetaData { get; }
         
@@ -17,7 +16,11 @@ namespace Archetype.Game.Payloads.Pieces.Base
         
         int MaxDefense { get; }
         int Defense { get; }
-        
+    }
+    
+    [Target("Unit")]
+    internal interface IUnit : IZoned<IUnit>, IUnitFront
+    {
         [Template("Deal {1} damage to {0}")]
         IResult<IUnit, int> Attack(int strength);
         [Template("Heal {0} by {1}")]
@@ -25,11 +28,9 @@ namespace Archetype.Game.Payloads.Pieces.Base
 
         [Template("Kill {0}")]
         IResult<IUnit, int> Kill();
-
-
     }
     
-    public abstract class Unit : Piece<IUnit>, IUnit
+    internal abstract class Unit : Piece<IUnit>, IUnit
     {
         protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(owner)
         {

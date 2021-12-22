@@ -10,13 +10,19 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    [Target("Structure")]
-    public interface IStructure : IUnit, ITriggerSource<IStructure>
+    public interface IStructureFront
     {
         StructureMetaData MetaData { get; }
+        
     }
     
-    public class Structure : Unit, IStructure
+    [Target("Structure")]
+    internal interface IStructure : IUnit, ITriggerSource<IStructure>, IStructureFront
+    {
+        
+    }
+    
+    internal class Structure : Unit, IStructure
     {
         private readonly List<IEffect<ITriggerContext<IStructure>>> _effects;
         

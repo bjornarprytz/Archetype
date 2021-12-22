@@ -3,7 +3,7 @@ using Archetype.Game.Payloads.Infrastructure;
 
 namespace Archetype.Game.Payloads.Context.Phases
 {
-    public class SpawnPhase : PhaseResolver, ISpawnPhaseResolver
+    internal class SpawnPhase : PhaseResolver, ISpawnPhaseResolver
     {
         private readonly IMap _map;
         private readonly IProtoPool _protoPool;

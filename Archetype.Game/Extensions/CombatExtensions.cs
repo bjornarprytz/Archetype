@@ -6,7 +6,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
-    public static class CombatExtensions
+    internal static class CombatExtensions
     {
         public static IEnumerable<IResult> ResolveCombat(this IMapNode node)
         {

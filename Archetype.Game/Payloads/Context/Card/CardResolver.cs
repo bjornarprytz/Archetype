@@ -3,17 +3,17 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    public interface ICardResolver
+    internal interface ICardResolver
     {
         void Resolve(ICardPlayArgs playArgs);
     }
     
-    public interface ICardContext : IContext
+    internal interface ICardContext : IContext
     {
         ICardPlayArgs PlayArgs { get; }
     }
 
-    public class CardResolver : ICardResolver
+    internal class CardResolver : ICardResolver
     {
         private readonly IGameState _gameState;
         private readonly IHistoryWriter _historyWriter;

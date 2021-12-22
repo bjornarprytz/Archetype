@@ -5,7 +5,7 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Context.Phases
 {
-    public class UpkeepPhase : PhaseResolver, IUpkeepPhaseResolver
+    internal class UpkeepPhase : PhaseResolver, IUpkeepPhaseResolver
     {
         private readonly IGameState _gameState;
         private readonly ITriggerResolver<IStructure> _triggerResolver;

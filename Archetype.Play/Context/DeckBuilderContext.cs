@@ -9,13 +9,13 @@ public interface IDeckBuilderContext
 {
     int MinDeckSize { get; }
     
-    IEnumerable<IStructureProtoData> AvailableStructures { get; }
+    IEnumerable<IStructureProtoDataFront> AvailableStructures { get; }
 
-    IEnumerable<ICardProtoData> AvailableCards { get; }
+    IEnumerable<ICardProtoDataFront> AvailableCards { get; }
 
-    void PickHeadquarter(IStructureProtoData newHq);
+    void PickHeadquarter(IStructureProtoDataFront newHq);
     
-    void Commit(IEnumerable<ICardProtoData> choices);
+    void Commit(IEnumerable<ICardProtoDataFront> choices);
 }
 
 internal class DeckBuilderContext : IDeckBuilderContext

@@ -2,7 +2,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
-    public static class UnitExtensions
+    internal static class UnitExtensions
     {
         public static bool IsDead(this IUnit unit) => unit.Health <= 0;
     }

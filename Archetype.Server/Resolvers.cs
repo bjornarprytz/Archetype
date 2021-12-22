@@ -16,22 +16,19 @@ namespace Archetype.Server
             base.Configure(descriptor);
         }
     }
-    public class GameStateType : Archetype<IGameState>
+    public class GameStateType : Archetype<IGameStateFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IGameState> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IGameStateFront> descriptor)
         {
             base.Configure(descriptor);
             
             descriptor.Description("The root object of actionable game state");
-
-            descriptor.Field(state => state.HistoryReader)
-                .Ignore(); // TODO: Do not ignore this
         }
     }
 
-    public class AtomType : Archetype<IGameAtom>
+    public class AtomType : Archetype<IGameAtomFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IGameAtom> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IGameAtomFront> descriptor)
         {
             base.Configure(descriptor);
             
@@ -39,22 +36,19 @@ namespace Archetype.Server
         }
     }
     
-    public class PlayerType : Archetype<IPlayer>
+    public class PlayerType : Archetype<IPlayerFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IPlayer> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IPlayerFront> descriptor)
         {
             base.Configure(descriptor);
             
             descriptor.Description("The player of the game");
-
-            descriptor.Field(player => player.Draw(default!))
-                .Ignore();
         }
     }
     
-    public class MapType : Archetype<IMap>
+    public class MapType : Archetype<IMapFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IMap> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IMapFront> descriptor)
         {
             base.Configure(descriptor);
             
@@ -62,59 +56,39 @@ namespace Archetype.Server
         }
     }
 
-    public class MapNodeType : Archetype<IMapNode>
+    public class MapNodeType : Archetype<IMapNodeFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IMapNode> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IMapNodeFront> descriptor)
         {
             base.Configure(descriptor);
 
             descriptor.Description("A node on the map");
-            
-            descriptor.Field(node => node.Contents)
-                .Type<ListType<UnitUnion>>();
-
-            descriptor
-                .Field(node => node.CreateCreature(default!, default!))
-                .Ignore();
-            
-            descriptor
-                .Field(node => node.CreateStructure(default!, default!))
-                .Ignore();
-
-            descriptor.Field(node => node.GetGamePiece(default!))
-                .Ignore();
         }
     }
 
-    public class GraveyardType : Archetype<IGraveyard>
+    public class GraveyardType : Archetype<IGraveyardFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IGraveyard> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IGraveyardFront> descriptor)
         {
             base.Configure(descriptor);
 
             descriptor.Description("A graveyard that contains dead creatures");
-            
-            descriptor.Field(graveyard =>  graveyard.Contents)
-                .Type<ListType<CreatureType>>();
         }
     }
     
-    public class DiscardPileType : Archetype<IDiscardPile>
+    public class DiscardPileType : Archetype<IDiscardPileFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IDiscardPile> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IDiscardPileFront> descriptor)
         {
             base.Configure(descriptor);
 
             descriptor.Description("Discard pile, where spent cards go");
-
-            descriptor.Field(pile => pile.Contents)
-                .Type<ListType<CardType>>();
         }
     }
 
-    public class PoolType : Archetype<IProtoPool>
+    public class PoolType : Archetype<IProtoPoolFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IProtoPool> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IProtoPoolFront> descriptor)
         {
             base.Configure(descriptor);
 
@@ -122,9 +96,9 @@ namespace Archetype.Server
         }
     }
 
-    public class SetType : Archetype<ISet>
+    public class SetType : Archetype<ISetFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<ISet> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<ISetFront> descriptor)
         {
             base.Configure(descriptor);
 
@@ -132,9 +106,9 @@ namespace Archetype.Server
         }
     }
 
-    public class DeckType : Archetype<IDeck>
+    public class DeckType : Archetype<IDeckFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IDeck> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IDeckFront> descriptor)
         {
             base.Configure(descriptor);
 
@@ -142,47 +116,37 @@ namespace Archetype.Server
         }
     }
     
-    public class HandType : Archetype<IHand>
+    public class HandType : Archetype<IHandFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IHand> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IHandFront> descriptor)
         {
             base.Configure(descriptor);
 
             descriptor.Description("A hand of cards, only visible to the owner");
-            
-            descriptor.Field(graveyard =>  graveyard.Contents)
-                .Type<ListType<CardType>>();
         }
     }
 
-    public class CardProtoDataType : Archetype<ICardProtoData>
+    public class CardProtoDataType : Archetype<ICardProtoDataFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<ICardProtoData> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<ICardProtoDataFront> descriptor)
         {
             base.Configure(descriptor);
            
             descriptor.Description("Blueprint for creating card instances");
-            
-            descriptor.Field(data => data.Effects)
-                .Ignore();
-
         }
     }
-    public class StructureProtoDataType : Archetype<IStructureProtoData>
+    public class StructureProtoDataType : Archetype<IStructureProtoDataFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IStructureProtoData> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IStructureProtoDataFront> descriptor)
         {
             base.Configure(descriptor);
             descriptor.Description("Blueprint for creating a Structure instance");
-
-            descriptor.Field(data => data.Effects)
-                .Ignore();
         }
     }
     
-    public class CreatureProtoDataType : Archetype<ICreatureProtoData>
+    public class CreatureProtoDataType : Archetype<ICreatureProtoDataFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<ICreatureProtoData> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<ICreatureProtoDataFront> descriptor)
         {
             descriptor.Description("Blueprint for creating a Creature instance");
         }
@@ -199,27 +163,12 @@ namespace Archetype.Server
         }
     }
     
-    public class StructureType : Archetype<IStructure>
+    public class StructureType : Archetype<IStructureFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<IStructure> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<IStructureFront> descriptor)
         {
             base.Configure(descriptor);
             descriptor.Description("An instance of a Structure");
-            
-            descriptor.Field(structure => structure.Effects)
-                .Ignore();
-
-            descriptor.Field(structure => structure.CurrentZone)
-                .Type<StructureZoneUnion>();
-            
-            descriptor.Field(structure => structure.Transition)
-                .Ignore();
-            
-            descriptor.Field(structure => structure.MoveTo(default!))
-                .Ignore();
-
-            descriptor.Field(structure => structure.Kill())
-                .Ignore();
         }
 
         public class StructureZoneUnion : UnionType
@@ -233,21 +182,15 @@ namespace Archetype.Server
         }
     }
 
-    public class CreatureType : Archetype<ICreature>
+    public class CreatureType : Archetype<ICreatureFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<ICreature> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<ICreatureFront> descriptor)
         {
             base.Configure(descriptor);
             descriptor.Description("An instance of a Creature");
 
             descriptor.Field(creature => creature.CurrentZone)
                 .Type<CreatureZoneUnion>();
-            
-            descriptor.Field(creature => creature.Transition)
-                .Ignore();
-
-            descriptor.Field(creature => creature.MoveTo(default!))
-                .Ignore();
         }
         
         public class CreatureZoneUnion : UnionType
@@ -262,29 +205,17 @@ namespace Archetype.Server
         }
     }
     
-    public class CardType : Archetype<ICard>
+    public class CardType : Archetype<ICardFront>
     {
-        protected override void Configure(IObjectTypeDescriptor<ICard> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<ICardFront> descriptor)
         {
             base.Configure(descriptor);
             
             descriptor.Description("A card instance");
 
-            descriptor.Field(card => card.Effects)
-                .Ignore();
-
             descriptor.Field(card => card.CurrentZone)
                 .Type<CardZoneUnion>();
 
-            descriptor.Field(card => card.Transition)
-                .Ignore();
-            
-            descriptor.Field(card => card.MoveTo(default!))
-                .Ignore();
-
-            descriptor.Field(card => card.ReduceCost(default!))
-                .Ignore();
-            
             descriptor.Field("contextRulesText")
                 .ResolveWith<Resolvers>(resolvers => resolvers.RulesTextWithContext(default!, default!));
             
@@ -306,7 +237,7 @@ namespace Archetype.Server
         
         private class Resolvers
         {
-            public string RulesTextWithContext(Card card, IGameState gameState) => card.GenerateRulesText(gameState);
+            public string RulesTextWithContext(Card card, IGameStateFront gameState) => card.GenerateRulesText(gameState); // TODO: Decision time: How should I solve this? History Reader needs to be public first, then the whole gamestate can be readonly
             public string RulesText(Card card, IProtoPool protoPool) => protoPool.GetCard(card.Name).RulesText;
         }
     }

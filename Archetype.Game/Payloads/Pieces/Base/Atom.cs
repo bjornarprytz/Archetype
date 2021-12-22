@@ -2,16 +2,19 @@ using System;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
-    public interface IGameAtom
+    public interface IGameAtomFront
+    {
+        Guid Guid { get; }
+    }
+    
+    internal interface IGameAtom : IGameAtomFront
     {
         string Name { get; }
-        Guid Guid { get; }
         IGameAtom Owner { get; }
     }
 
-    public abstract class Atom : IGameAtom
+    internal abstract class Atom : IGameAtom
     {
-
         protected Atom(IGameAtom owner=default)
         {
             Guid = Guid.NewGuid();

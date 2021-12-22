@@ -8,7 +8,7 @@ namespace Archetype.Play.Factory;
 
 internal interface IPlayCardContextFactory
 {
-    IPlayCardContext Create(ICard card);
+    IPlayCardContext Create(ICardFront card);
 }
 
 internal class  PlayCardContextFactory : IPlayCardContextFactory
@@ -20,7 +20,7 @@ internal class  PlayCardContextFactory : IPlayCardContextFactory
         _cardContextFactory = cardContextFactory;
     }
     
-    public IPlayCardContext Create(ICard card)
+    public IPlayCardContext Create(ICardFront card)
     {
         var cardContext = _cardContextFactory.Create();
         

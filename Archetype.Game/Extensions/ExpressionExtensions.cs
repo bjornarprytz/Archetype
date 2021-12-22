@@ -11,7 +11,7 @@ using Archetype.Game.Payloads.Context.Effect;
 
 namespace Archetype.Game.Extensions
 {
-    public static class ExpressionExtensions
+	internal static class ExpressionExtensions
     {
 	    public static string PrintedRulesText<T, R>(this Expression<Func<T, R>> exp)
 			where T : IContext

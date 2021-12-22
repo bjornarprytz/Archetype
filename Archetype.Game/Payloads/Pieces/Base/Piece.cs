@@ -5,7 +5,7 @@ using Archetype.Game.Payloads.Context;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
-    public abstract class Piece<T> : Atom, IZoned<T>
+    internal abstract class Piece<T> : Atom, IZoned<T>
         where T : class, IGameAtom, IZoned<T>
     {
         private readonly Subject<ZoneTransition<T>> _onTransition = new();
@@ -45,5 +45,6 @@ namespace Archetype.Game.Payloads.Pieces.Base
         }
 
         protected abstract T Self { get; }
+        IZoneFront IZonedFront.CurrentZone => CurrentZone;
     }
 }

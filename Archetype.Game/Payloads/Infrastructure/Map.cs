@@ -5,15 +5,20 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    [Target("Map")]
-    public interface IMap
+    public interface IMapFront
     {
-        IEnumerable<IMapNode> Nodes { get; }
+        IEnumerable<IMapNodeFront> Nodes { get; }
+    }
+    
+    [Target("Map")]
+    internal interface IMap : IMapFront
+    {
+        new IEnumerable<IMapNode> Nodes { get; } 
 
         void Generate(IMapProtoData protoData);
     }
 
-    public class Map : IMap
+    internal class Map : IMap
     {
         private readonly List<IMapNode> _nodes = new();
 
@@ -22,5 +27,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         {
             _nodes.AddRange(protoData.Nodes);
         }
+
+        IEnumerable<IMapNodeFront> IMapFront.Nodes => Nodes;
     }
 }

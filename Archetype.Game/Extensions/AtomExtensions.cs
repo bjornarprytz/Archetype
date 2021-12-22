@@ -4,7 +4,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
-    public static class AtomExtensions
+    internal static class AtomExtensions
     {
         public static bool IsFriendly(this IGameAtom atom) => atom.TopOwner() is IPlayer;
 

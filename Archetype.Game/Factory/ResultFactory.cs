@@ -4,7 +4,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Factory
 {
-    public static class ResultFactory
+    internal static class ResultFactory
     {
         public static IResult<TAffected, TResult> Create<TAffected, TResult>(TAffected affected, TResult result, [CallerMemberName] string callerMemberName=default)
             where TAffected : class, IGameAtom

@@ -1,18 +1,24 @@
-using System;
 using System.Collections.Generic;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    public interface ISet
+    public interface ISetFront
     {
         string Name { get; set; }
-        IReadOnlyDictionary<string, ICardProtoData> Cards { get; }
-        IReadOnlyDictionary<string, ICreatureProtoData> Creatures { get; }
-        IReadOnlyDictionary<string, IStructureProtoData> Structures { get; }
+        IEnumerable<ICardProtoDataFront> Cards { get; }
+        IEnumerable<ICreatureProtoDataFront> Creatures { get; }
+        IEnumerable<IStructureProtoDataFront> Structures { get; }
     }
     
-    public class Set : ISet
+    internal interface ISet : ISetFront
+    {
+        new IReadOnlyDictionary<string, ICardProtoData> Cards { get; }
+        new IReadOnlyDictionary<string, ICreatureProtoData> Creatures { get; }
+        new IReadOnlyDictionary<string, IStructureProtoData> Structures { get; }
+    }
+    
+    internal class Set : ISet
     {
         private readonly Dictionary<string, ICardProtoData> _cards;
         private readonly Dictionary<string, ICreatureProtoData> _creatures;
@@ -30,8 +36,14 @@ namespace Archetype.Game.Payloads.Pieces
         }
 
         public string Name { get; set; }
+        
         public IReadOnlyDictionary<string, ICardProtoData> Cards => _cards;
         public IReadOnlyDictionary<string, ICreatureProtoData> Creatures => _creatures;
         public IReadOnlyDictionary<string, IStructureProtoData> Structures => _structures;
+
+        IEnumerable<ICreatureProtoDataFront> ISetFront.Creatures => _creatures.Values;
+        IEnumerable<IStructureProtoDataFront> ISetFront.Structures => _structures.Values;
+        IEnumerable<ICardProtoDataFront> ISetFront.Cards => _cards.Values;
+
     }
 }

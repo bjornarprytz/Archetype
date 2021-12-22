@@ -5,16 +5,20 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-
-    [Target("Creature")]
-    public interface ICreature : IUnit
+    public interface ICreatureFront : IUnitFront
     {
         CreatureMetaData MetaData { get; }
         int Strength { get; }
         int Movement { get; }
     }
+
+    [Target("Creature")]
+    internal interface ICreature : IUnit, ICreatureFront
+    {
+        
+    }
     
-    public class Creature : Unit, ICreature
+    internal class Creature : Unit, ICreature
     {
         public Creature(ICreatureProtoData protoData, IGameAtom owner) : base(protoData, owner)
         {

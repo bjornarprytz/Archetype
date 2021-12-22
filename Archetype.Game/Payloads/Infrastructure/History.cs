@@ -7,30 +7,30 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IHistoryReader
+    internal interface IHistoryReader
     {
         IReadOnlyList<IHistoryEntry> Entries { get; }
         IReadOnlyDictionary<string, IList<ICardEntry>> CardEntriesByProtoGuid { get; }
         IReadOnlyDictionary<ICard, IList<ICardEntry>> CardEntriesByInstance { get; }
     }
 
-    public interface IHistoryWriter
+    internal interface IHistoryWriter
     {
         void Append(ICardContext context, IResultsReader result); // TODO: Simplify here: Use a generic context istead
         void Append(IResultsReader result);
     }
 
-    public interface IHistoryEntry
+    internal interface IHistoryEntry
     {
         IResultsReader Result { get; }
     }
 
-    public interface ICardEntry : IHistoryEntry
+    internal interface ICardEntry : IHistoryEntry
     {
         ICardContext Context { get; }
     }
     
-    public class History : IHistoryReader, IHistoryWriter
+    internal class History : IHistoryReader, IHistoryWriter
     {
         private readonly List<IHistoryEntry> _entries = new();
         private readonly Dictionary<string, IList<ICardEntry>> _entriesByProtoGuid = new();

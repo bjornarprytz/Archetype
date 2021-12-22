@@ -2,14 +2,20 @@
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IGameState
+    public interface IGameStateFront
     {
-        IPlayer Player { get; }
-        IMap Map { get; }
+        IPlayerFront Player { get; }
+        IMapFront Map { get; }
+    }
+    
+    internal interface IGameState : IGameStateFront
+    {
+        new IPlayer Player { get; }
+        new IMap Map { get; }
         IHistoryReader HistoryReader { get; }
     }
     
-    public class GameState : IGameState
+    internal class GameState : IGameState
     {
         public GameState(IMap map, IPlayer player, IHistoryReader historyReader)
         {
@@ -19,6 +25,9 @@ namespace Archetype.Game.Payloads.Infrastructure
         }
 
         public IPlayer Player { get; }
+        IMapFront IGameStateFront.Map => Map;
+        IPlayerFront IGameStateFront.Player => Player;
+
         public IMap Map { get; }
         public IHistoryReader HistoryReader { get; }
     }

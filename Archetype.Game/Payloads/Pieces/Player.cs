@@ -10,25 +10,32 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    [Target("Player")]
-    public interface IPlayer : IGameAtom
+    public interface IPlayerFront
     {
         int MaxHandSize { get; }
         int Resources { get; set; }
+        IStructureFront HeadQuarters { get; }
+        IDeckFront Deck { get; }
+        IHandFront Hand { get; }
         
-        IStructure HeadQuarters { get; }
+    }
+    
+    [Target("Player")]
+    internal interface IPlayer : IGameAtom, IPlayerFront
+    {
+        new IStructure HeadQuarters { get; }
         
         [Target("Player's deck")]
-        IDeck Deck { get; }
+        new IDeck Deck { get; }
         [Target("Player's hand")]
-        IHand Hand { get; }
+        new IHand Hand { get; }
         
         int Draw(int strength); // TODO: Return a result like the other game actions
 
         IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure);
     }
     
-    public class Player : Atom, IPlayer
+    internal class Player : Atom, IPlayer
     {
         private readonly IPlayerData _protoData;
 
@@ -44,6 +51,10 @@ namespace Archetype.Game.Payloads.Pieces
         public int MaxHandSize => _protoData.MaxHandSize;
         public int Resources { get; set; }
         public IStructure HeadQuarters { get; private set; }
+        IDeckFront IPlayerFront.Deck => Deck;
+        IHandFront IPlayerFront.Hand => Hand;
+        IStructureFront IPlayerFront.HeadQuarters => HeadQuarters;
+
         public IDeck Deck { get; }
         public IHand Hand { get; }
 

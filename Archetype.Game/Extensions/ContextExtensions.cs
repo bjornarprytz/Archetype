@@ -10,7 +10,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
-    public static class ContextExtensions
+    internal static class ContextExtensions
     {
         public static IResult TargetEach<TTarget, TResult>(this IEnumerable<TTarget> source, Func<TTarget, IResult<TResult>> func)
             where TTarget : IGameAtom

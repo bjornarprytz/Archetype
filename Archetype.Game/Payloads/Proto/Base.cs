@@ -2,12 +2,12 @@ using System;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IProtoData
+    internal interface IProtoData
     {
         string Name { get; }
     }
 
-    public abstract class ProtoData : IProtoData
+    internal abstract class ProtoData : IProtoData
     {
         public string Name { get; set; }
     }

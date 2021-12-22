@@ -6,7 +6,6 @@ using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.MetaData;
@@ -15,21 +14,25 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    [Target("Card")]
-    public interface ICard : IZoned<ICard>
+    public interface ICardFront : IZonedFront
     {
         CardMetaData MetaData { get; }
         int Cost { get; }
         int Range { get; }
-        
-        [Template("Reduce cost of {0} by {1}")]
-        IResult<ICard, int> ReduceCost(int x);
-        
-        IEnumerable<ITarget> Targets { get; }
-        IEnumerable<IEffect<ICardContext>> Effects { get; }
+        IEnumerable<ITargetFront> Targets { get; }
     }
     
-    public class Card : Piece<ICard>, ICard
+    
+    [Target("Card")]
+    internal interface ICard : IZoned<ICard>, ICardFront
+    {
+        [Template("Reduce cost of {0} by {1}")]
+        IResult<ICard, int> ReduceCost(int x);
+        IEnumerable<IEffect<ICardContext>> Effects { get; }
+        new IEnumerable<ITarget> Targets { get; }
+    }
+    
+    internal class Card : Piece<ICard>, ICard
     {
         private readonly List<ITarget> _targets;
         private readonly List<IEffect<ICardContext>> _effects;
@@ -46,8 +49,10 @@ namespace Archetype.Game.Payloads.Pieces
 
         public int Cost { get; private set; }
         public int Range { get; private set; }
-        public CardMetaData MetaData { get; }
+        IEnumerable<ITargetFront> ICardFront.Targets => Targets;
         public IEnumerable<ITarget> Targets => _targets;
+
+        public CardMetaData MetaData { get; }
         public IEnumerable<IEffect<ICardContext>> Effects => _effects;
         
         

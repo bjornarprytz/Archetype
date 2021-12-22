@@ -21,7 +21,7 @@ namespace Archetype.Game.Exceptions
     {
         public override string Message { get; }
 
-        public ZonePlacementException(IZone zone, string details)
+        internal ZonePlacementException(IZone zone, string details)
         {
             Message = $"Invalid placement in zone {zone} due to: {details}";
         }

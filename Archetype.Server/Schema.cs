@@ -13,17 +13,17 @@ namespace Archetype.Server
 {
     public class Queries
     {
-        private readonly IGameState _gameState;
-        private readonly IProtoPool _protoPool;
+        private readonly IGameStateFront _gameState;
+        private readonly IProtoPoolFront _protoPool;
 
-        public Queries(IGameState gameState, IProtoPool protoPool)
+        public Queries(IGameStateFront gameState, IProtoPoolFront protoPool)
         {
             _gameState = gameState;
             _protoPool = protoPool;
         }
 
-        public IGameState GetGameState() => _gameState;
-        public IProtoPool GetCardPool() => _protoPool;
+        public IGameStateFront GetGameState() => _gameState;
+        public IProtoPoolFront GetCardPool() => _protoPool;
     }
     
     public class Mutations

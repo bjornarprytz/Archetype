@@ -7,20 +7,21 @@ using Archetype.Game.Payloads.MetaData;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    /*
-     * Represents the concept of a card. These should be singular, and is the base from which we create instances
-     */
-    public interface ICardProtoData : IProtoData
+    public interface ICardProtoDataFront
     {
         string RulesText { get; }
         int Cost { get; }
         int Range { get; }
         CardMetaData MetaData { get; }
+    }
+
+    internal interface ICardProtoData : IProtoData, ICardProtoDataFront
+    {
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect<ICardContext>> Effects { get; }
     }
-    
-    public class CardProtoData : ProtoData, ICardProtoData
+
+    internal class CardProtoData : ProtoData, ICardProtoData
     {
         private readonly List<ITarget> _targets;
         private readonly List<IEffect<ICardContext>> _effects;
@@ -39,8 +40,8 @@ namespace Archetype.Game.Payloads.Proto
                 _rulesText ??= GenerateRulesText();
 
                 return _rulesText;
-            }  
-        } 
+            }
+        }
 
         public int Cost { get; set; }
         public int Range { get; set; }
@@ -51,7 +52,7 @@ namespace Archetype.Game.Payloads.Proto
         private string GenerateRulesText()
         {
             var sb = new StringBuilder();
-            
+
             foreach (var effect in _effects)
             {
                 sb.AppendLine(effect.PrintedRulesText());

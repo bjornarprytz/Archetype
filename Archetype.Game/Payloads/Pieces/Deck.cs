@@ -6,8 +6,13 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    public interface IDeckFront : IZoneFront
+    {
+        int NumberOfCards { get; }
+    }
+    
     [Target("Deck")]
-    public interface IDeck : IZone<ICard>
+    internal interface IDeck : IZone<ICard>, IDeckFront
     {
         ICard PopCard();
         void Shuffle();
@@ -15,7 +20,7 @@ namespace Archetype.Game.Payloads.Pieces
         void PutCardOnBottom(ICard card);
     }
     
-    public class Deck : Zone<ICard>, IDeck
+    internal class Deck : Zone<ICard>, IDeck
     {
         private readonly Stack<ICard> _cards = new();
 
@@ -60,5 +65,7 @@ namespace Archetype.Game.Payloads.Pieces
 
             newCard.MoveTo(this);
         }
+
+        public int NumberOfCards => Contents.Count();
     }
 }

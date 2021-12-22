@@ -4,7 +4,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    public interface ICardPlayArgs
+    internal interface ICardPlayArgs
     {
         IPlayer Player { get; }
         ICard Card { get; }

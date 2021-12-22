@@ -6,25 +6,25 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Trigger
 {
-    public interface ITriggerResolver<in TSource>
+    internal interface ITriggerResolver<in TSource>
         where TSource : IGameAtom, ITriggerSource<TSource>
     {
         void Resolve(TSource source);
     }
     
-    public interface ITriggerContext<out TSource> : IContext
+    internal interface ITriggerContext<out TSource> : IContext
         where TSource : IGameAtom
     {
         TSource Source { get; }
     }
     
-    public interface ITriggerSource<in TSource>
+    internal interface ITriggerSource<in TSource>
         where TSource : IGameAtom
     {
         IEnumerable<IEffect<ITriggerContext<TSource>>> Effects { get; }
     }
     
-    public class TriggerResolver<TSource> : ITriggerResolver<TSource> 
+    internal class TriggerResolver<TSource> : ITriggerResolver<TSource> 
         where TSource : IGameAtom, ITriggerSource<TSource>
     {
         private readonly IGameState _gameState;

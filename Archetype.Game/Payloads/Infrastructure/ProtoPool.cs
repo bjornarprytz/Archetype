@@ -6,12 +6,17 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IProtoPool
+    public interface IProtoPoolFront
+    {
+        IEnumerable<ISetFront> Sets { get; }
+    }
+    
+    internal interface IProtoPool : IProtoPoolFront
     {
         void AddSet(ISet set);
         
         
-        IEnumerable<ISet> Sets { get; }
+        new IEnumerable<ISet> Sets { get; }
         IEnumerable<ICardProtoData> Cards { get; }
         IEnumerable<ICreatureProtoData> Creatures { get; }
         IEnumerable<IStructureProtoData> Structures { get; }
@@ -21,7 +26,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         IStructureProtoData GetStructure(string name);
     }
     
-    public class ProtoPool : IProtoPool
+    internal class ProtoPool : IProtoPool
     {
         private readonly List<ISet> _sets = new();
         
@@ -49,5 +54,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         {
             return _sets.Where(set => set.Structures[name] != null).Select(set => set.Structures[name]).FirstOrDefault();
         }
+
+        IEnumerable<ISetFront> IProtoPoolFront.Sets => Sets;
     }
 }

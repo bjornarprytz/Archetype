@@ -4,7 +4,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect
 {
-    public class TriggerEffect<TSource> : Effect<ITriggerContext<TSource>, IResult>
+    internal class TriggerEffect<TSource> : Effect<ITriggerContext<TSource>, IResult>
         where TSource : IGameAtom
     {
     }

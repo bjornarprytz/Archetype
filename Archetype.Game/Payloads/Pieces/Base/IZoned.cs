@@ -4,15 +4,20 @@ using Archetype.Game.Payloads.Context;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
-    public interface IZoned<T> : IGameAtom
+    public interface IZonedFront
+    {
+        IZoneFront CurrentZone { get; }
+    }
+    
+    internal interface IZoned<T> : IGameAtom, IZonedFront
         where  T : IGameAtom, IZoned<T>
     {
         IObservable<ZoneTransition<T>> Transition { get; }
-        public IZone<T> CurrentZone { get; }
+        new IZone<T> CurrentZone { get; }
 
         [Template("Move {0} to {1}")]
         IResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone);
     }
     
-    public record ZoneTransition<T>(IZone<T> From, IZone<T> To, IZoned<T> Who) where T : IZoned<T>;
+    internal record ZoneTransition<T>(IZone<T> From, IZone<T> To, IZoned<T> Who) where T : IZoned<T>;
 }

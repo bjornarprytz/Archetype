@@ -7,26 +7,26 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect.Base
 {
-    public interface IEffectContext<out TTarget> : IContext
+    internal interface IEffectContext<out TTarget> : IContext
         where TTarget : IGameAtom
     {
         [Target("Target")]
         TTarget Target { get; }
     }
     
-    public interface IEffect
+    internal interface IEffect
     {
         string PrintedRulesText();
         string ContextRulesText(IContext context);
     }
     
-    public interface IEffect<in TContext> : IEffect
+    internal interface IEffect<in TContext> : IEffect
         where TContext : IContext
     {
         IResult ResolveContext(TContext context);
     }
 
-    public abstract class Effect<TContext, TResult, TParentContext> : IEffect<TParentContext>
+    internal abstract class Effect<TContext, TResult, TParentContext> : IEffect<TParentContext>
         where TContext : IContext
         where TResult : IResult
         where TParentContext : IContext
@@ -83,7 +83,7 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
             : IContext;
     }
     
-    public abstract class Effect<TContext, TResult> : Effect<TContext, TResult, TContext>
+    internal abstract class Effect<TContext, TResult> : Effect<TContext, TResult, TContext>
         where TContext : IContext
         where TResult : IResult
     {

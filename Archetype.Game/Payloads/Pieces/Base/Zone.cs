@@ -1,28 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using Archetype.Game.Exceptions;
 
 namespace Archetype.Game.Payloads.Pieces.Base
 {
-    public interface IZone : IGameAtom
+    public interface IZoneFront : IGameAtomFront
+    {
+        IEnumerable<IGameAtomFront> Contents { get; }
+    }
+    
+    internal interface IZone : IGameAtom, IZoneFront
     {
         IGameAtom GetGamePiece(Guid guid);
     }
 
-    public interface IZone<T> : IZone
+    internal interface IZone<T> : IZone
         where T : IGameAtom, IZoned<T>
     {
-        IEnumerable<T> Contents { get; }
+        new IEnumerable<T> Contents { get; }
 
         void _Place(T atom); // TODO: Hide this method to avoid misuse (use IZoned.MoveTo instead)
     }
 
-    public abstract class Zone<TContents> : Atom, IZone<TContents>
+    internal abstract class Zone<TContents> : Atom, IZone<TContents>
         where TContents : IZoned<TContents>
     {
         private readonly Dictionary<Guid, TContents> _contents = new();
-        
+
         protected Zone(IGameAtom owner) : base(owner) { }
         
         public IEnumerable<TContents> Contents => _contents.Values;
@@ -56,6 +62,7 @@ namespace Archetype.Game.Payloads.Pieces.Base
             _contents.Remove(zoneTransition.Who.Guid);
         }
 
-        
+
+        IEnumerable<IGameAtomFront> IZoneFront.Contents => _contents.Values.OfType<IGameAtomFront>();
     }
 }

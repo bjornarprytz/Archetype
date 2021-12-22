@@ -4,7 +4,7 @@ using Archetype.Game.Payloads.Infrastructure;
 
 namespace Archetype.Game.Payloads.Context.Phases
 {
-    public class CombatPhase : PhaseResolver, ICombatPhaseResolver
+    internal class CombatPhase : PhaseResolver, ICombatPhaseResolver
     {
         private readonly IGameState _gameState;
 

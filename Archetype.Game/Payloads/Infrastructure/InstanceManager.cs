@@ -7,13 +7,13 @@ using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IInstanceFinder
+    internal interface IInstanceFinder
     {
         T FindAtom<T>(Guid instanceGuid) where T : IGameAtom;
         IGameAtom FindAtom(Guid instanceGuid);
     }
 
-    public interface IInstanceFactory
+    internal interface IInstanceFactory
     {
         ICard CreateCard(ICardProtoData cardData, IGameAtom owner);
         ICard CreateCard(string name, IGameAtom owner);
@@ -23,7 +23,7 @@ namespace Archetype.Game.Payloads.Infrastructure
         ICreature CreateCreature(string name, IGameAtom owner);
     }
     
-    public class InstanceManager : IInstanceFinder, IInstanceFactory
+    internal class InstanceManager : IInstanceFinder, IInstanceFactory
     {
         private readonly IGameState _gameState;
         private readonly IProtoPool _protoPool;

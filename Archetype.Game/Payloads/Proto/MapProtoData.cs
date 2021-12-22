@@ -3,12 +3,12 @@ using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IMapProtoData : IProtoData
+    internal interface IMapProtoData : IProtoData
     {
         IEnumerable<IMapNode> Nodes { get; }
     }
     
-    public class MapProtoData : ProtoData, IMapProtoData
+    internal class MapProtoData : ProtoData, IMapProtoData
     {
         private readonly List<IMutableMapNode> _nodes;
 

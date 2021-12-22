@@ -1,14 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
+    public interface IDiscardPileFront : IZoneFront
+    {
+        IEnumerable<ICardFront> Cards { get; }
+    }
+
     [Target("Discard Pile")]
-    public interface IDiscardPile : IZone<ICard> { }
+    internal interface IDiscardPile : IZone<ICard>, IDiscardPileFront
+    { }
     
-    public class DiscardPile : Zone<ICard>, IDiscardPile
+    internal class DiscardPile : Zone<ICard>, IDiscardPile
     {
         public DiscardPile(IGameAtom owner) : base(owner) { }
+
+        public IEnumerable<ICardFront> Cards => Contents;
     }
 }

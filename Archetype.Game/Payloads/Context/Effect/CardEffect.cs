@@ -5,7 +5,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect
 {
-    public class CardEffect<TTarget> : Effect<IEffectContext<TTarget>, IResult, ICardContext>
+    internal class CardEffect<TTarget> : Effect<IEffectContext<TTarget>, IResult, ICardContext>
         where TTarget : IGameAtom
     {
         public int TargetIndex { get; set; }
@@ -32,7 +32,7 @@ namespace Archetype.Game.Payloads.Context.Effect
         }
     }
     
-    public class CardEffect : Effect<IContext, IResult, ICardContext>
+    internal class CardEffect : Effect<IContext, IResult, ICardContext>
     {
         protected override IContext DeriveContext(ICardContext parentContext)
         {

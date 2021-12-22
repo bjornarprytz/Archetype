@@ -5,14 +5,18 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    public interface ITarget
+    public interface ITargetFront
     {
-        string TypeId => TargetType.ReadableFullName();
+        string TypeId { get; }
+    }
+        
+    internal interface ITarget : ITargetFront
+    {
         Type TargetType { get; }
         bool ValidateContext(ITargetValidationContext context);
     }
     
-    public class Target<TTarget> : ITarget
+    internal class Target<TTarget> : ITarget
         where TTarget : IGameAtom
     {
         private Func<ITargetValidationContext<TTarget>, bool> _validate;
@@ -35,5 +39,7 @@ namespace Archetype.Game.Payloads.Context.Card
             return context.Target is TTarget target 
                    && Validate(new TargetValidationContext<TTarget>(context.GameState, target));
         }
+
+        public string TypeId => TargetType.ReadableFullName();
     }
 }

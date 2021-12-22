@@ -8,7 +8,7 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {
-    public static class CardExtensions
+    internal static class CardExtensions
     {
         public static void ValidateTargets(this ICardPlayArgs cardArgs, IGameState gameState)
         {

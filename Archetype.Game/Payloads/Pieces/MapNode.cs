@@ -8,13 +8,20 @@ using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Pieces
 {
-    [Target("Node")]
-    public interface IMapNode : IZone<IUnit>
+    public interface IMapNodeFront : IZoneFront
     {
-        IEnumerable<IMapNode> Neighbours { get; }
+        IEnumerable<IMapNodeFront> Neighbours { get; }
         
-        IGraveyard Graveyard { get; }
-        IDiscardPile DiscardPile { get; }
+        IGraveyardFront Graveyard { get; }
+        IDiscardPileFront DiscardPile { get; }
+    }
+    
+    [Target("Node")]
+    internal interface IMapNode : IZone<IUnit>, IMapNodeFront
+    {
+        new IEnumerable<IMapNode> Neighbours { get; }
+        new IGraveyard Graveyard { get; }
+        new IDiscardPile DiscardPile { get; }
 
         [Template("Create {1} at {0}, owned by {2}")]
         IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
@@ -23,13 +30,13 @@ namespace Archetype.Game.Payloads.Pieces
  
     }
 
-    public interface IMutableMapNode : IMapNode
+    internal interface IMutableMapNode : IMapNode
     {
         void AddNeighbour(IMutableMapNode node);
         void RemoveNeighbour(IMutableMapNode node);
     }
     
-    public class MapNode : Zone<IUnit>, IMutableMapNode
+    internal class MapNode : Zone<IUnit>, IMutableMapNode
     {
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
@@ -44,6 +51,9 @@ namespace Archetype.Game.Payloads.Pieces
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
         public IDiscardPile DiscardPile { get; }
+        IEnumerable<IMapNodeFront> IMapNodeFront.Neighbours => Neighbours;
+        IGraveyardFront IMapNodeFront.Graveyard => Graveyard;
+        IDiscardPileFront IMapNodeFront.DiscardPile => DiscardPile;
         public IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner)
         {
             var creature = _instanceFactory.CreateCreature(name, owner); 
