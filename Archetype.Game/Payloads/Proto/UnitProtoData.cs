@@ -9,7 +9,7 @@ using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IUnitProtoData : IProtoData, IUnitProtoDataFront { }
+    public interface IUnitProtoData : IUnitProtoDataFront { }
 
     public interface ICreatureProtoData : IUnitProtoData, ICreatureProtoDataFront { }
 

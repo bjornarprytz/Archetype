@@ -8,7 +8,7 @@ using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface ICardProtoData : IProtoData, ICardProtoDataFront
+    public interface ICardProtoData : ICardProtoDataFront
     {
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect<ICardContext>> Effects { get; }

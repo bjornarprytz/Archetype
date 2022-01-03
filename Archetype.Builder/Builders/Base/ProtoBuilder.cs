@@ -1,11 +1,12 @@
 using Archetype.Builder.Exceptions;
 using Archetype.Builder.Extensions;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View.Proto;
 
 namespace Archetype.Builder.Builders.Base
 {
     public abstract class ProtoBuilder<T> : IBuilder<T>
-        where T : IProtoData
+        where T : IProtoDataFront
     {
         protected ProtoBuilder() { }
         

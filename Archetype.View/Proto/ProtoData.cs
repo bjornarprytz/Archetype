@@ -2,7 +2,12 @@ using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.View.Proto;
 
-public interface ICardProtoDataFront
+public interface IProtoDataFront
+{
+    string Name { get; }
+}
+
+public interface ICardProtoDataFront : IProtoDataFront
 {
     string RulesText { get; }
     int Cost { get; }
@@ -10,14 +15,14 @@ public interface ICardProtoDataFront
     CardMetaData MetaData { get; }
 }
 
-public interface IUnitProtoDataFront
+public interface IUnitProtoDataFront : IProtoDataFront
 {
     int Health { get; }
     int Defense { get; }
         
     UnitMetaData BaseMetaData { get; }
 }
-public interface ICreatureProtoDataFront
+public interface ICreatureProtoDataFront : IProtoDataFront
 {
     string RulesText { get; }
     int Movement { get; }
@@ -26,7 +31,7 @@ public interface ICreatureProtoDataFront
     CreatureMetaData MetaData { get; }
 }
 
-public interface IStructureProtoDataFront
+public interface IStructureProtoDataFront : IProtoDataFront
 {
     StructureMetaData MetaData { get; }
     string RulesText { get; }

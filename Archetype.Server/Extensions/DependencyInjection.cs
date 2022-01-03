@@ -14,21 +14,24 @@ namespace Archetype.Server.Extensions
         {
             var nTypes = 0;
 
-            foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(Archetype<>)))
+            foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(ObjectType<>)))
             {
                 builder.AddType(objectType);
+                Console.WriteLine(objectType.Name);
                 nTypes++;
             }
 
             foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(InterfaceType<>)))
             {
                 builder.AddType(objectType);
+                Console.WriteLine(objectType.Name);
                 nTypes++;
             }
 
             foreach (var unionType in assembly.GetAllTypesImplementing<UnionType>())
             {
                 builder.AddType(unionType);
+                Console.WriteLine(unionType.Name);
                 nTypes++;
             }
 
@@ -40,18 +43,32 @@ namespace Archetype.Server.Extensions
         private static IEnumerable<Type> GetAllTypesImplementing<T>(this Assembly assembly)
         {
             return assembly.GetTypes()
-                .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(T)));
+                .Where(t => t.IsConcrete() && t.IsSubclassOf(typeof(T)));
         }
         
-        private static IEnumerable<Type> GetAllTypesImplementingOpenGenericType(this Assembly assembly, Type openGenericType) // TODO: Unscrew this function
+        private static IEnumerable<Type> GetAllTypesImplementingOpenGenericType(this Assembly assembly, Type openGenericType)
         {
-            return from x in assembly.GetTypes()
-                let y = x.BaseType
-                where !x.IsAbstract && !x.IsInterface &&
-                      y != null && y.IsGenericType &&
-                      y.GetGenericTypeDefinition() == openGenericType
-                select x;
+            return assembly
+                .GetTypes()
+                .Where(IsConcrete)
+                .Where(t => t.InheritsOpenGeneric(openGenericType));
+        }
 
+        private static bool IsConcrete(this Type type) => !type.IsAbstract && !type.IsInterface;
+        
+        private static bool InheritsOpenGeneric(this Type type, Type openGenericType)
+        {
+            var baseType = type.BaseType;
+
+            while (baseType != null)
+            {
+                if (baseType is { IsGenericType: true } && baseType.GetGenericTypeDefinition() == openGenericType)
+                    return true;
+                
+                baseType = baseType.BaseType;
+            }
+
+            return false;
         }
     }
 }

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms
@@ -40,7 +42,8 @@ namespace Archetype.Game.Payloads.Atoms
             DiscardPile = new DiscardPile(this);
             Graveyard = new Graveyard(this);
         }
-        
+
+        public IEnumerable<IUnitFront> Units => Contents;
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
         public IDiscardPile DiscardPile { get; }

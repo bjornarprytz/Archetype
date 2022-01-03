@@ -6,7 +6,6 @@ using Archetype.Design.Extensions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
-using Archetype.Game.Payloads.Proto;
 using Archetype.View.Primitives;
 
 namespace Archetype.Design

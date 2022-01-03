@@ -1,13 +1,10 @@
 using System;
+using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IProtoData
-    {
-        string Name { get; }
-    }
 
-    public abstract class ProtoData : IProtoData
+    public abstract class ProtoData : IProtoDataFront
     {
         public string Name { get; set; }
     }
