@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Server.Actions;
+using Archetype.View;
+using Archetype.View.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
 using HotChocolate.Types;

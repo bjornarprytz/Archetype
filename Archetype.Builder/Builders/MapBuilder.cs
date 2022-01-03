@@ -5,7 +5,7 @@ using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder.Builders
@@ -17,7 +17,7 @@ namespace Archetype.Builder.Builders
         public IMapBuilder Connect(int n1, int n2);
     }
 
-    public class MapBuilder : IMapBuilder
+    internal class MapBuilder : IMapBuilder
     {
         private readonly IBuilderFactory _builderFactory;
         private readonly List<IMutableMapNode> _nodes = new();

@@ -4,14 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Factory;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.MetaData;
-using Archetype.Game.Payloads.Pieces.Base;
-using Archetype.Game.Payloads.Primitives;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View.Atoms.MetaData;
+using Archetype.View.Primitives;
 
 namespace Archetype.Builder.Builders
 {
@@ -50,7 +49,7 @@ namespace Archetype.Builder.Builders
         ICardBuilder Effect(Expression<Func<IContext, IResult>> resolveEffect);
     }
 
-    public class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
+    internal class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
     {
         private readonly IBuilderFactory _builderFactory;
         private readonly CardProtoData _cardProtoData;

@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using Aqua.EnumerableExtensions;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.Atoms;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    internal interface IInstanceFinder
+    public interface IInstanceFinder
     {
         T FindAtom<T>(Guid instanceGuid) where T : IGameAtom;
         IGameAtom FindAtom(Guid instanceGuid);
     }
 
-    internal interface IInstanceFactory
+    public interface IInstanceFactory
     {
         ICard CreateCard(ICardProtoData cardData, IGameAtom owner);
         ICard CreateCard(string name, IGameAtom owner);

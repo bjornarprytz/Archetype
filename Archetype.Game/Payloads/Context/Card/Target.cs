@@ -1,22 +1,19 @@
 using System;
 using System.Text.Json.Serialization;
 using Archetype.Game.Extensions;
-using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.Atoms.Base;
+using Archetype.View;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    public interface ITargetFront
-    {
-        string TypeId { get; }
-    }
-        
-    internal interface ITarget : ITargetFront
+    public interface ITarget : ITargetFront
     {
         Type TargetType { get; }
         bool ValidateContext(ITargetValidationContext context);
     }
-    
-    internal class Target<TTarget> : ITarget
+
+    public class Target<TTarget> : ITarget
         where TTarget : IGameAtom
     {
         private Func<ITargetValidationContext<TTarget>, bool> _validate;

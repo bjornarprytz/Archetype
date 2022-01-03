@@ -1,6 +1,6 @@
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Context.Trigger;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect
 {

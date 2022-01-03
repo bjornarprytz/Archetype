@@ -12,7 +12,7 @@ namespace Archetype.Game.Extensions
             
             var sb = new StringBuilder();
 
-            sb.Append(type.Name.Substring(0, type.Name.IndexOf('`')));
+            sb.Append(type.Name[..type.Name.IndexOf('`')]);
 
             sb.Append('<');
 

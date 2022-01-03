@@ -1,6 +1,6 @@
 using Archetype.Builder.Builders.Base;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
 
 namespace Archetype.Builder.Builders
 {
@@ -9,7 +9,7 @@ namespace Archetype.Builder.Builders
         
     }
     
-    public class NodeBuilder : INodeBuilder
+    internal class NodeBuilder : INodeBuilder
     {
         private readonly MapNode _mapNode;
 

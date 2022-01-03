@@ -1,13 +1,13 @@
 ﻿using Archetype.Builder.Builders;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Design.Extensions;
 using Archetype.Game.Extensions;
-using Archetype.Game.Payloads.Primitives;
+using Archetype.Game.Payloads.Atoms;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View.Primitives;
 
 namespace Archetype.Design
 {

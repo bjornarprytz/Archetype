@@ -1,16 +1,16 @@
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    internal interface ITargetValidationContext<out TTarget>
+    public interface ITargetValidationContext<out TTarget>
         where TTarget : IGameAtom
     {
         TTarget Target { get; }
         IGameState GameState { get; }
     }
-    
-    internal interface ITargetValidationContext
+
+    public interface ITargetValidationContext
     {
         IGameAtom Target { get; }
         IGameState GameState { get; }

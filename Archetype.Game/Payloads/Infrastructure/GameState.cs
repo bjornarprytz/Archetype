@@ -1,14 +1,13 @@
-﻿using Archetype.Game.Payloads.Pieces;
+﻿using Archetype.Game.Payloads.Atoms;
+using Archetype.View;
+using Archetype.View.Atoms;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IGameStateFront
-    {
-        IPlayerFront Player { get; }
-        IMapFront Map { get; }
-    }
     
-    internal interface IGameState : IGameStateFront
+
+    public interface IGameState : IGameStateFront
     {
         new IPlayer Player { get; }
         new IMap Map { get; }

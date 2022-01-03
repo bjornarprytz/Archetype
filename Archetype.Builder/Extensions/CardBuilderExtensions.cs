@@ -1,5 +1,5 @@
 using Archetype.Builder.Builders;
-using Archetype.Game.Payloads.Primitives;
+using Archetype.View.Primitives;
 
 namespace Archetype.Builder.Extensions
 {

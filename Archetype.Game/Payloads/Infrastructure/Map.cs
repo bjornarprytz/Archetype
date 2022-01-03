@@ -1,17 +1,15 @@
 ﻿using System.Collections.Generic;
 using Archetype.Game.Attributes;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View;
+using Archetype.View.Atoms.Zones;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IMapFront
-    {
-        IEnumerable<IMapNodeFront> Nodes { get; }
-    }
-    
     [Target("Map")]
-    internal interface IMap : IMapFront
+    public interface IMap : IMapFront
     {
         new IEnumerable<IMapNode> Nodes { get; } 
 

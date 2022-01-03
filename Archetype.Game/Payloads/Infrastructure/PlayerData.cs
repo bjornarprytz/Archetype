@@ -1,23 +1,14 @@
 using System.Collections.Generic;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Proto;
+using Archetype.View.Proto;
 
-namespace Archetype.Game.Payloads.Proto
+namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IPlayerDataFront
-    {
-        int StartingResources { get; } 
-        int MaxHandSize { get; }
-        int MinDeckSize { get; }
-        
-        IStructureProtoDataFront Headquarters { get; }
-        IEnumerable<IStructureProtoDataFront> StructurePool { get; }
-        IEnumerable<ICardProtoDataFront> CardPool { get; }
-        IEnumerable<ICardProtoDataFront> DeckList { get; }
-    }
     
-    internal interface IPlayerData : IPlayerDataFront
+
+    public interface IPlayerData : IPlayerDataFront
     {
         new IStructureProtoData Headquarters { get; }
         new IEnumerable<IStructureProtoData> StructurePool { get; }

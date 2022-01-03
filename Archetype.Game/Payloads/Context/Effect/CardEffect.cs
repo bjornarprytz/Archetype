@@ -1,11 +1,11 @@
 ﻿using System.Linq;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect
 {
-    internal class CardEffect<TTarget> : Effect<IEffectContext<TTarget>, IResult, ICardContext>
+    public class CardEffect<TTarget> : Effect<IEffectContext<TTarget>, IResult, ICardContext>
         where TTarget : IGameAtom
     {
         public int TargetIndex { get; set; }
@@ -31,8 +31,8 @@ namespace Archetype.Game.Payloads.Context.Effect
             public TTarget Target { get; }
         }
     }
-    
-    internal class CardEffect : Effect<IContext, IResult, ICardContext>
+
+    public class CardEffect : Effect<IContext, IResult, ICardContext>
     {
         protected override IContext DeriveContext(ICardContext parentContext)
         {

@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using Archetype.Game.Exceptions;
+using Archetype.Game.Payloads.Atoms;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Extensions
 {

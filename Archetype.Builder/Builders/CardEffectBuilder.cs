@@ -2,11 +2,11 @@ using System;
 using System.Linq.Expressions;
 using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Builder.Builders
 {
@@ -22,7 +22,7 @@ namespace Archetype.Builder.Builders
         ICardEffectBuilder<TTarget> Resolve(Expression<Func<IEffectContext<TTarget>, IResult>> expression);
     }
 
-    public class CardEffectBuilder<TTarget> : ICardEffectBuilder<TTarget>
+    internal class CardEffectBuilder<TTarget> : ICardEffectBuilder<TTarget>
         where TTarget : IGameAtom
     {
         private readonly CardEffect<TTarget> _cardEffect;
@@ -54,7 +54,7 @@ namespace Archetype.Builder.Builders
         }
     }
 
-    public class CardEffectBuilder : ICardEffectBuilder
+    internal class CardEffectBuilder : ICardEffectBuilder
     {
         private readonly CardEffect _cardEffect;
         

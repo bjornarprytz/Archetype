@@ -1,27 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.MetaData;
+using Archetype.View;
+using Archetype.View.Atoms.MetaData;
+using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface ICardProtoDataFront
-    {
-        string RulesText { get; }
-        int Cost { get; }
-        int Range { get; }
-        CardMetaData MetaData { get; }
-    }
-
-    internal interface ICardProtoData : IProtoData, ICardProtoDataFront
+    public interface ICardProtoData : IProtoData, ICardProtoDataFront
     {
         IEnumerable<ITarget> Targets { get; }
         IEnumerable<IEffect<ICardContext>> Effects { get; }
     }
 
-    internal class CardProtoData : ProtoData, ICardProtoData
+    public class CardProtoData : ProtoData, ICardProtoData
     {
         private readonly List<ITarget> _targets;
         private readonly List<IEffect<ICardContext>> _effects;

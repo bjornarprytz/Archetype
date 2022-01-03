@@ -2,31 +2,31 @@ using System;
 using System.Linq.Expressions;
 using Archetype.Game.Attributes;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Effect.Base
 {
-    internal interface IEffectContext<out TTarget> : IContext
+    public interface IEffectContext<out TTarget> : IContext
         where TTarget : IGameAtom
     {
         [Target("Target")]
         TTarget Target { get; }
     }
-    
-    internal interface IEffect
+
+    public interface IEffect
     {
         string PrintedRulesText();
         string ContextRulesText(IContext context);
     }
-    
-    internal interface IEffect<in TContext> : IEffect
+
+    public interface IEffect<in TContext> : IEffect
         where TContext : IContext
     {
         IResult ResolveContext(TContext context);
     }
 
-    internal abstract class Effect<TContext, TResult, TParentContext> : IEffect<TParentContext>
+    public abstract class Effect<TContext, TResult, TParentContext> : IEffect<TParentContext>
         where TContext : IContext
         where TResult : IResult
         where TParentContext : IContext

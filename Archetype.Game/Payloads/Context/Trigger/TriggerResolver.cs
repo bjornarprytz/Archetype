@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Archetype.Game.Extensions;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Trigger
 {
@@ -11,14 +11,14 @@ namespace Archetype.Game.Payloads.Context.Trigger
     {
         void Resolve(TSource source);
     }
-    
-    internal interface ITriggerContext<out TSource> : IContext
+
+    public interface ITriggerContext<out TSource> : IContext
         where TSource : IGameAtom
     {
         TSource Source { get; }
     }
-    
-    internal interface ITriggerSource<in TSource>
+
+    public interface ITriggerSource<in TSource>
         where TSource : IGameAtom
     {
         IEnumerable<IEffect<ITriggerContext<TSource>>> Effects { get; }

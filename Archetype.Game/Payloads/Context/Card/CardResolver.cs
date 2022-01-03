@@ -1,14 +1,14 @@
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context.Card
 {
-    internal interface ICardResolver
+    public interface ICardResolver
     {
         void Resolve(ICardPlayArgs playArgs);
     }
-    
-    internal interface ICardContext : IContext
+
+    public interface ICardContext : IContext
     {
         ICardPlayArgs PlayArgs { get; }
     }

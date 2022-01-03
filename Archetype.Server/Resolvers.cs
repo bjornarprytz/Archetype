@@ -1,9 +1,12 @@
 using System;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View;
+using Archetype.View.Atoms;
+using Archetype.View.Atoms.Zones;
+using Archetype.View.Infrastructure;
+using Archetype.View.Proto;
 using HotChocolate.Types;
 
 namespace Archetype.Server
@@ -215,12 +218,6 @@ namespace Archetype.Server
 
             descriptor.Field(card => card.CurrentZone)
                 .Type<CardZoneUnion>();
-
-            descriptor.Field("contextRulesText")
-                .ResolveWith<Resolvers>(resolvers => resolvers.RulesTextWithContext(default!, default!));
-            
-            descriptor.Field("rulesText")
-                .ResolveWith<Resolvers>(resolvers => resolvers.RulesText(default!, default!));
         }
         
         public class CardZoneUnion : UnionType
@@ -233,12 +230,6 @@ namespace Archetype.Server
                 descriptor.Type<HandType>();
                 descriptor.Type<DeckType>();
             }
-        }
-        
-        private class Resolvers
-        {
-            public string RulesTextWithContext(Card card, IGameStateFront gameState) => card.GenerateRulesText(gameState); // TODO: Decision time: How should I solve this? History Reader needs to be public first, then the whole gamestate can be readonly
-            public string RulesText(Card card, IProtoPool protoPool) => protoPool.GetCard(card.Name).RulesText;
         }
     }
     

@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    public interface IProtoPoolFront
-    {
-        IEnumerable<ISetFront> Sets { get; }
-    }
-    
-    internal interface IProtoPool : IProtoPoolFront
+    public interface IProtoPool : IProtoPoolFront
     {
         void AddSet(ISet set);
         

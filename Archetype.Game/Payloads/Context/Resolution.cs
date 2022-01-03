@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Context
 {
-    internal interface IContext
+    public interface IContext
     {
         IGameState GameState { get; }
         IResultsReader PartialResults { get; }
         IGameAtom Owner { get; }
     }
 
-    internal interface IResultsReader
+    public interface IResultsReader
     {
         IEnumerable<IResult> Results { get; }
     }
@@ -25,7 +25,7 @@ namespace Archetype.Game.Payloads.Context
 
     internal interface IResultsReaderWriter : IResultsReader, IResultsWriter { }
 
-    internal interface IResult
+    public interface IResult
     {
         bool IsNull { get; }
         IEnumerable<IGameAtom> AllAffected { get; }
@@ -33,12 +33,12 @@ namespace Archetype.Game.Payloads.Context
         object Result { get; }
     }
 
-    internal interface IResult<out T> : IResult
+    public interface IResult<out T> : IResult
     {
         new T Result { get; }
     }
 
-    internal interface IResult<out TTarget, out TResult> : IResult<TResult>
+    public interface IResult<out TTarget, out TResult> : IResult<TResult>
         where TTarget : class, IGameAtom
     {
         TTarget Affected { get; }

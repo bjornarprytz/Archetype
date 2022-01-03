@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Atoms;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    internal interface IMapProtoData : IProtoData
+    public interface IMapProtoData : IProtoData
     {
         IEnumerable<IMapNode> Nodes { get; }
     }
-    
-    internal class MapProtoData : ProtoData, IMapProtoData
+
+    public class MapProtoData : ProtoData, IMapProtoData
     {
         private readonly List<IMutableMapNode> _nodes;
 

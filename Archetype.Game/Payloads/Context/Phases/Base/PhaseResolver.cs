@@ -1,12 +1,16 @@
 using Archetype.Game.Payloads.Infrastructure;
 
-namespace Archetype.Game.Payloads.Context.Phases
+namespace Archetype.Game.Payloads.Context.Phases.Base
 {
-    internal interface IPhaseResolver { void Resolve(); }
-    internal interface IMovePhaseResolver : IPhaseResolver { }
-    internal interface ICombatPhaseResolver : IPhaseResolver {}
-    internal interface IUpkeepPhaseResolver : IPhaseResolver {}
-    internal interface ISpawnPhaseResolver : IPhaseResolver {}
+    public interface IPhaseResolver { void Resolve(); }
+
+    public interface IMovePhaseResolver : IPhaseResolver { }
+
+    public interface ICombatPhaseResolver : IPhaseResolver {}
+
+    public interface IUpkeepPhaseResolver : IPhaseResolver {}
+
+    public interface ISpawnPhaseResolver : IPhaseResolver {}
 
     internal abstract class PhaseResolver : IPhaseResolver
     {

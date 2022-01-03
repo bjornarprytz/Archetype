@@ -4,9 +4,9 @@ using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
 using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
-using Archetype.Game.Payloads.MetaData;
-using Archetype.Game.Payloads.Pieces;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.Builder.Builders
 {
@@ -21,7 +21,7 @@ namespace Archetype.Builder.Builders
         public ISetBuilder Structure(Action<IStructureBuilder> builderProvider);
     }
 
-    public class SetBuilder : ISetBuilder
+    internal class SetBuilder : ISetBuilder
     {
         private readonly IBuilderFactory _builderFactory;
 

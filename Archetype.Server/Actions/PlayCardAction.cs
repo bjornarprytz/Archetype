@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Archetype.Game.Payloads.Atoms;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 using MediatR;
 using Unit = MediatR.Unit;
 
@@ -26,7 +26,7 @@ namespace Archetype.Server.Actions
         }
     }
     
-    public class PlayCardActionHandler : IRequestHandler<PlayCardAction>
+    internal class PlayCardActionHandler : IRequestHandler<PlayCardAction>
     {
         private readonly IPlayer _player;
         private readonly ICardResolver _cardResolver;

@@ -1,6 +1,6 @@
 using Archetype.Builder.Builders.Base;
-using Archetype.Game.Payloads.MetaData;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.Builder.Builders
 {

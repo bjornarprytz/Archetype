@@ -1,4 +1,4 @@
-using Archetype.Game.Payloads.Pieces.Base;
+using Archetype.Game.Payloads.Atoms.Base;
 
 namespace Archetype.Game.Extensions
 {

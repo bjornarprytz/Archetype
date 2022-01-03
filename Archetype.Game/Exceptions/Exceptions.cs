@@ -1,7 +1,6 @@
 using System;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Exceptions
 {

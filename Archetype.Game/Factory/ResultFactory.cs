@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Factory
 {

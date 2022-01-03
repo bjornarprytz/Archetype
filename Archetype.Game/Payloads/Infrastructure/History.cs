@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Pieces;
-using Archetype.Game.Payloads.Pieces.Base;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    internal interface IHistoryReader
+    public interface IHistoryReader
     {
         IReadOnlyList<IHistoryEntry> Entries { get; }
         IReadOnlyDictionary<string, IList<ICardEntry>> CardEntriesByProtoGuid { get; }
@@ -20,12 +19,12 @@ namespace Archetype.Game.Payloads.Infrastructure
         void Append(IResultsReader result);
     }
 
-    internal interface IHistoryEntry
+    public interface IHistoryEntry
     {
         IResultsReader Result { get; }
     }
 
-    internal interface ICardEntry : IHistoryEntry
+    public interface ICardEntry : IHistoryEntry
     {
         ICardContext Context { get; }
     }

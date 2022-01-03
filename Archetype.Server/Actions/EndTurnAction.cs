@@ -1,13 +1,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Payloads.Context.Phases;
+using Archetype.Game.Payloads.Context.Phases.Base;
 using MediatR;
 
 namespace Archetype.Server.Actions
 {
     public class EndTurnAction : IRequest { }
 
-    public class EndTurnActionHandler : IRequestHandler<EndTurnAction>
+    internal class EndTurnActionHandler : IRequestHandler<EndTurnAction>
     {
         private readonly IMovePhaseResolver _movePhase;
         private readonly ICombatPhaseResolver _combatPhase;
