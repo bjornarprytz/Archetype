@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 
 namespace Archetype.Game.Extensions
 {
@@ -22,7 +23,25 @@ namespace Archetype.Game.Extensions
 
             return array;
         }
-        
+
+        public static IEnumerable<T> PickNUnique<T>(this IEnumerable<T> collection, int n)
+        {
+            if (n < 1)
+                throw new ArgumentException("n must be a non-zero positive int", nameof(n));
+
+            var pool = collection.ToList();
+
+            if (n > pool.Count)
+                throw new ArgumentException("n cannot be bigger than the size of the collection", nameof(n));
+
+            if (n == pool.Count)
+                return pool;
+
+            var newOrder = pool.Shuffle();
+
+            return newOrder.Take(n);
+        }
+
         public static bool IsEmpty<T>(this IEnumerable<T> items)
         {
             return !items.Any();

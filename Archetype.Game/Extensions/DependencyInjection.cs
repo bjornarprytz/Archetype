@@ -1,4 +1,6 @@
 
+using System;
+using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Phases;
@@ -6,6 +8,7 @@ using Archetype.Game.Payloads.Context.Phases.Base;
 using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Game.Payloads.Proto;
+using Archetype.View.Context;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Game.Extensions
@@ -22,6 +25,7 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<IMap, Map>()
                     .AddSingleton<IHistoryReader, IHistoryWriter, History>()
                     .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()
+                    
                     .AddSingleton<ICardResolver, CardResolver>()
                     .AddSingleton(typeof(ITriggerResolver<>), typeof(TriggerResolver<>))
                     
@@ -29,10 +33,11 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<ICombatPhaseResolver, CombatPhase>()
                     .AddSingleton<IUpkeepPhaseResolver, UpkeepPhase>()
                     .AddSingleton<ISpawnPhaseResolver, SpawnPhase>()
+                
+                    .AddFactory<ITurnContext, TurnContext>()
+                    .AddFactory<IUnarmedPlayCardContext, PlayCardContext>()
                 ;
         }
-
-        
 
         private static IServiceCollection AddSingleton<I1, I2, T>(this IServiceCollection serviceCollection)
             where T : class, I1, I2
@@ -45,6 +50,15 @@ namespace Archetype.Game.Extensions
                 .AddSingleton<I2, T>(s => s.GetService<T>());
         }
         
-        
+        private static IServiceCollection AddFactory<TService, TImplementation>(this IServiceCollection services) 
+            where TService : class
+            where TImplementation : class, TService
+        {
+            services.AddTransient<TService, TImplementation>();
+            services.AddSingleton<Func<TService>>(x => x.GetService<TService>);
+            services.AddSingleton<IFactory<TService>, Factory<TService>>();
+
+            return services;
+        }
     }
 }

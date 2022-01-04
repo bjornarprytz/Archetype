@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Server.Actions;
 using Archetype.View;
+using Archetype.View.Context;
 using Archetype.View.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
@@ -36,77 +37,27 @@ namespace Archetype.Server
         {
             _mediator = mediator;
         }
-
-        public async Task<PlayCardPayload> PlayCard(
-            PlayCardInput playCardInput,
-            ITopicEventSender eventSender,
-            CancellationToken cancellationToken
-            )
-        {
-            var (cardId, nodeId, targetIds) = playCardInput;
-    
-            // TODO: Put errors (exceptions) into the schema (example: https://youtu.be/3_4nt2QQSeE?t=4064)
-            
-            await _mediator.Send(new PlayCardAction(cardId, nodeId, targetIds), cancellationToken);
-
-            var payload = new PlayCardPayload($"Card played (Id: {cardId})");
-
-            await eventSender.SendAsync(nameof(Subscriptions.OnCardPlayed), payload, cancellationToken);
-            
-            return payload;
-        }
-
-        public record PlayCardPayload(string Message);
-        public record PlayCardInput(Guid CardId, Guid MapNodeGuid, IEnumerable<Guid> TargetIds);
-        
         
         public async Task<StartGamePayload> StartGame(
-            StartGameInput startGameInput,
             ITopicEventSender eventSender,
             CancellationToken cancellationToken
         )
         {
-            await _mediator.Send(new StartGameAction(startGameInput.CardNames, startGameInput.HqStructureName, startGameInput.HqLocationId), cancellationToken);
+            var context = await _mediator.Send(new StartGameAction(), cancellationToken);
 
-            var payload = new StartGamePayload("Game Started!");
+            var payload = new StartGamePayload(context);
 
             await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
             
             return payload;
         }
-
-        public record StartGameInput(IEnumerable<string> CardNames, string HqStructureName, Guid HqLocationId);
-        public record StartGamePayload(string Message);
-        
-        public async Task<TurnStartedPayload> EndTurn(
-            ITopicEventSender eventSender,
-            CancellationToken cancellationToken
-        )
-        {
-            await _mediator.Send(new EndTurnAction(), cancellationToken);
-
-            var payload = new TurnStartedPayload("Turn Started :)");
-
-            await eventSender.SendAsync(nameof(Subscriptions.OnTurnStarted), payload, cancellationToken);
-            
-            return payload;
-        }
-
-        public record TurnStartedPayload(string Message);
+        public record StartGamePayload(ITurnContext TurnContext);
     }
     
     public class Subscriptions
     {
         [Subscribe]
         [Topic]
-        public Mutations.PlayCardPayload OnCardPlayed([EventMessage] Mutations.PlayCardPayload playCardPayload) => playCardPayload;
-        
-        [Subscribe]
-        [Topic]
         public Mutations.StartGamePayload OnGameStarted([EventMessage] Mutations.StartGamePayload startGamePayload) => startGamePayload;
-        
-        [Subscribe]
-        [Topic]
-        public Mutations.TurnStartedPayload OnTurnStarted([EventMessage] Mutations.TurnStartedPayload turnStartedPayload) => turnStartedPayload;
     }
 }

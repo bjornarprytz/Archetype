@@ -2,6 +2,7 @@ using Archetype.Builder.Extensions;
 using Archetype.Design.Extensions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Server.Actions;
 using Archetype.Server.Extensions;
 using Archetype.Server.Schema;
 using HotChocolate.Subscriptions;
@@ -21,6 +22,7 @@ namespace Archetype.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services
+                .AddMediatR(typeof(StartGameAction).Assembly)
                 .AddBuilders()
                 .AddArchetype()
                 .AddDesign()

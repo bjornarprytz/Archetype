@@ -12,7 +12,7 @@ namespace Archetype.Design
 {
     public interface IDesign
     {
-        void Create();
+        void Create(); // TODO: This is placeholder. Don't just return void
     }
 
     public class TestDesign : IDesign
@@ -20,13 +20,15 @@ namespace Archetype.Design
         private readonly IProtoPool _protoPool;
         private readonly IBuilderFactory _builderFactory;
         private readonly IMap _map;
+        private readonly IPlayerData _playerData;
 
 
-        public TestDesign(IProtoPool protoPool, IBuilderFactory builderFactory, IMap map)
+        public TestDesign(IProtoPool protoPool, IBuilderFactory builderFactory, IMap map, IPlayerData playerData)
         {
             _protoPool = protoPool;
             _builderFactory = builderFactory;
             _map = map;
+            _playerData = playerData;
         }
 
 
@@ -34,6 +36,8 @@ namespace Archetype.Design
         {
             CreateSet();
             CreateMap();
+
+            _playerData.SubmitDeck(_protoPool.Cards.PickNUnique(5));
         }
         
         private void CreateSet()

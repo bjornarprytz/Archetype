@@ -8,7 +8,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 {
     
 
-    public interface IPlayerData : IPlayerDataFront
+    public interface IPlayerData : IPlayerDataFront // TODO: Revisit this whole design
     {
         new IStructureProtoData Headquarters { get; }
         new IEnumerable<IStructureProtoData> StructurePool { get; }
@@ -18,13 +18,16 @@ namespace Archetype.Game.Payloads.Infrastructure
         IResult<IStructureProtoData> SetHeadQuarters(IStructureProtoData newHq);
         IResult<ICardProtoData> AddToCardPool(ICardProtoData card);
         IResult<IStructureProtoData> AddToStructurePool(IStructureProtoData structure);
+
+        void SubmitDeck(IEnumerable<ICardProtoData> deckList);
     }
     
     internal class PlayerData : IPlayerData
     {
         private readonly List<ICardProtoData> _cardPool = new();
         private readonly List<IStructureProtoData> _structurePool = new();
-        
+        private readonly List<ICardProtoData> _deckList = new();
+
         public int StartingResources { get; } = 100;
         public int MaxHandSize { get; } = 2;
         public int MinDeckSize { get; } = 4;
@@ -39,8 +42,8 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IStructureProtoData Headquarters { get; set; }
         public IEnumerable<IStructureProtoData> StructurePool => _structurePool;
         public IEnumerable<ICardProtoData> CardPool => _cardPool;
-        public IEnumerable<ICardProtoData> DeckList { get; }
-
+        public IEnumerable<ICardProtoData> DeckList => _deckList;
+        
         public IResult<IStructureProtoData> SetHeadQuarters(IStructureProtoData newHq)
         {
             Headquarters = newHq;
@@ -60,6 +63,13 @@ namespace Archetype.Game.Payloads.Infrastructure
             _structurePool.Add(structure);
             
             return ResultFactory.Create(structure);
+        }
+
+        public void SubmitDeck(IEnumerable<ICardProtoData> deckList)
+        {
+            _deckList.Clear();
+            
+            _deckList.AddRange(deckList);
         }
     }
 }

@@ -20,6 +20,13 @@ namespace Archetype.Server.Extensions
                 Console.WriteLine(objectType.Name);
                 nTypes++;
             }
+            
+            foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(InputObjectType<>)))
+            {
+                builder.AddType(objectType);
+                Console.WriteLine(objectType.Name);
+                nTypes++;
+            }
 
             foreach (var objectType in assembly.GetAllTypesImplementingOpenGenericType(typeof(InterfaceType<>)))
             {
@@ -47,7 +54,7 @@ namespace Archetype.Server.Extensions
         }
         
         private static IEnumerable<Type> GetAllTypesImplementingOpenGenericType(this Assembly assembly, Type openGenericType)
-        {
+        { 
             return assembly
                 .GetTypes()
                 .Where(IsConcrete)
