@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Server.Actions;
-using Archetype.View;
-using Archetype.View.Context;
 using Archetype.View.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
@@ -31,27 +28,47 @@ namespace Archetype.Server
     
     public class Mutations
     {
-        private readonly IMediator _mediator;
-
-        public Mutations(IMediator mediator)
+        public Mutations()
         {
-            _mediator = mediator;
+            
         }
         
         public async Task<StartGamePayload> StartGame(
             ITopicEventSender eventSender,
+            [Service] IMediator mediator,
             CancellationToken cancellationToken
         )
         {
-            var context = await _mediator.Send(new StartGameAction(), cancellationToken);
+            await mediator.Send(new StartGameAction(), cancellationToken);
 
-            var payload = new StartGamePayload(context);
+            var payload = new StartGamePayload("Game started!");
 
             await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
             
             return payload;
         }
-        public record StartGamePayload(ITurnContext TurnContext);
+        public record StartGamePayload(string Message); // TODO: Placeholder value
+        
+        public async Task<PlayCardPayload> PlayCard(
+            PlayCardInput playCardInput,
+            ITopicEventSender eventSender,
+            [Service] IMediator mediator,
+            CancellationToken cancellationToken
+        )
+        {
+            var (cardGuid, whenceNodeGuid, targetGuids) = playCardInput;
+            
+            await mediator.Send(new PlayCardAction(cardGuid, whenceNodeGuid, targetGuids), cancellationToken);
+
+            var payload = new PlayCardPayload($"Card played ({cardGuid})");
+
+            await eventSender.SendAsync(nameof(Subscriptions.OnCardPlayed), payload, cancellationToken);
+            
+            return payload;
+        }
+
+        public record PlayCardInput(Guid CardGuid, Guid WhenceNodeGuid, IEnumerable<Guid> TargetGuids);
+        public record PlayCardPayload(string Message);// TODO: replace placeholder value 
     }
     
     public class Subscriptions
@@ -59,5 +76,9 @@ namespace Archetype.Server
         [Subscribe]
         [Topic]
         public Mutations.StartGamePayload OnGameStarted([EventMessage] Mutations.StartGamePayload startGamePayload) => startGamePayload;
+        
+        [Subscribe]
+        [Topic]
+        public Mutations.PlayCardPayload OnCardPlayed([EventMessage] Mutations.PlayCardPayload playCardPayload) => playCardPayload;
     }
 }

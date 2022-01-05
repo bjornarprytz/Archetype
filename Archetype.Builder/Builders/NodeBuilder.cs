@@ -4,7 +4,7 @@ using Archetype.Game.Payloads.Infrastructure;
 
 namespace Archetype.Builder.Builders
 {
-    public interface INodeBuilder : IBuilder<IMutableMapNode>
+    public interface INodeBuilder : IBuilder<IMutableMapNode> // TODO: This should create NodeProtoData, not instances
     {
         
     }

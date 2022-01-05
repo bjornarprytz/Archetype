@@ -6,7 +6,8 @@ namespace Archetype.Game.Payloads.Proto
 {
     public interface IMapProtoData : IProtoDataFront
     {
-        IEnumerable<IMapNode> Nodes { get; }
+        // TODO: These should be Connections and NodeProtoData, not actual nodes
+        IEnumerable<IMapNode> Nodes { get; } 
     }
 
     public class MapProtoData : ProtoData, IMapProtoData

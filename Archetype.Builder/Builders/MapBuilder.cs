@@ -19,20 +19,20 @@ namespace Archetype.Builder.Builders
 
     internal class MapBuilder : IMapBuilder
     {
-        private readonly IBuilderFactory _builderFactory;
+        private readonly IFactory<INodeBuilder> _nodeBuilderFactory;
         private readonly List<IMutableMapNode> _nodes = new();
 
         private readonly IMapProtoData _mapProtoData;
         
-        public MapBuilder(IBuilderFactory builderFactory)
+        public MapBuilder(IFactory<INodeBuilder> nodeBuilderFactory)
         {
-            _builderFactory = builderFactory;
+            _nodeBuilderFactory = nodeBuilderFactory;
             _mapProtoData = new MapProtoData(_nodes);
         }
 
         public IMapBuilder Node(Action<INodeBuilder> builderProvider)
         {
-            var builder = _builderFactory.Create<INodeBuilder>();
+            var builder = _nodeBuilderFactory.Create();
 
             builderProvider(builder);
             
@@ -45,7 +45,7 @@ namespace Archetype.Builder.Builders
         {
             for (var i = 0; i < numberOfNodes; i++)
             {
-                var builder = _builderFactory.Create<INodeBuilder>();
+                var builder = _nodeBuilderFactory.Create();
                 
                 _nodes.Add(builder.Build());
             }

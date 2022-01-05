@@ -5,8 +5,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
 {
     public interface IGameAtom : IGameAtomFront
     {
-        string Name { get; }
-        IGameAtom Owner { get; }
+        new IGameAtom Owner { get; }
     }
 
     public abstract class Atom : IGameAtom
@@ -18,7 +17,9 @@ namespace Archetype.Game.Payloads.Atoms.Base
         }
 
         public string Name { get; set; }
+
         public Guid Guid { get; }
         public IGameAtom Owner { get; }
+        IGameAtomFront IGameAtomFront.Owner => Owner;
     }
 }

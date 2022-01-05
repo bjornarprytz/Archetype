@@ -12,7 +12,7 @@ namespace Archetype.Builder.Builders
 {
     public interface ICardEffectBuilder : IBuilder<IEffect<ICardContext>>
     {
-        public ICardEffectBuilder Resolve(Expression<Func<IContext, IResult>> expression);
+        ICardEffectBuilder Resolve(Expression<Func<IContext, IResult>> expression);
     }
 
     public interface ICardEffectBuilder<TTarget> : IBuilder<IEffect<ICardContext>>

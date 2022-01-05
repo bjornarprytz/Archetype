@@ -6,11 +6,11 @@ namespace Archetype.Design.Extensions;
 
 public static class ProtoPoolExtensions
 {
-    public static IProtoPool AddSet(this IProtoPool protoPool, string name, IBuilderFactory builderFactory, Action<ISetBuilder> builder)
+    public static IProtoPool AddSet(this IProtoPool protoPool, string name, IFactory<ISetBuilder> setBuilderFactory, Action<ISetBuilder> builder)
     {
         var setBuilder = 
-            builderFactory
-                .Create<ISetBuilder>()
+            setBuilderFactory
+                .Create()
                 .Name(name);
 
         builder(setBuilder);

@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Archetype.Builder.Builders;
 using Archetype.Builder.Factory;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,18 +11,27 @@ namespace Archetype.Builder.Extensions
         {
             // TODO: Scan assembly for implementations instead
             
-            serviceCollection.AddSingleton<IBuilderFactory, BuilderFactory>();
+            serviceCollection
+                .AddFactory<ICardBuilder, CardBuilder>()
+                .AddFactory<IStructureBuilder, StructureBuilder>()
+                .AddFactory<ICreatureBuilder, CreatureBuilder>()
+                .AddFactory<ICardEffectBuilder, CardEffectBuilder>()
+                .AddFactory<IMapBuilder, MapBuilder>()
+                .AddFactory<INodeBuilder, NodeBuilder>()
+                .AddFactory<ISetBuilder, SetBuilder>();
 
-            serviceCollection.AddTransient<ICardBuilder, CardBuilder>();
-            serviceCollection.AddTransient<IStructureBuilder, StructureBuilder>();
-            serviceCollection.AddTransient<ICreatureBuilder, CreatureBuilder>();
-            serviceCollection.AddTransient<ICardEffectBuilder, CardEffectBuilder>();
-            serviceCollection.AddTransient(typeof(ICardEffectBuilder<>), typeof(CardEffectBuilder<>));
-            serviceCollection.AddTransient<IMapBuilder, MapBuilder>();
-            serviceCollection.AddTransient<INodeBuilder, NodeBuilder>();
-            serviceCollection.AddTransient<ISetBuilder, SetBuilder>();
-            
             return serviceCollection;
+        }
+        
+        private static IServiceCollection AddFactory<TService, TImplementation>(this IServiceCollection services) 
+            where TService : class
+            where TImplementation : class, TService
+        {
+            services.AddTransient<TService, TImplementation>();
+            services.AddSingleton<Func<TService>>(x => x.GetService<TService>);
+            services.AddSingleton<IFactory<TService>, Factory<TService>>();
+
+            return services;
         }
     }
 }

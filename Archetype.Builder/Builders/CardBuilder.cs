@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Archetype.Builder.Builders.Base;
+using Archetype.Builder.Exceptions;
 using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
+using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms.MetaData;
@@ -42,24 +44,20 @@ namespace Archetype.Builder.Builders
             where TT1 : IGameAtom
             where TT2 : IGameAtom
             where TT3 : IGameAtom;
-
-        ICardBuilder Effect<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider) where TTarget : IGameAtom;
-        ICardBuilder Effect(Action<ICardEffectBuilder> builderProvider);
+        
         ICardBuilder Effect<TTarget>(Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect, int targetIndex = -1) where TTarget : IGameAtom;
         ICardBuilder Effect(Expression<Func<IContext, IResult>> resolveEffect);
     }
 
     internal class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
     {
-        private readonly IBuilderFactory _builderFactory;
         private readonly CardProtoData _cardProtoData;
 
         private readonly List<ITarget> _targets = new();
         private readonly List<IEffect<ICardContext>> _effects = new();
 
-        public CardBuilder(IBuilderFactory builderFactory)
+        public CardBuilder()
         {
-            _builderFactory = builderFactory;
             _cardProtoData = new CardProtoData(_targets, _effects);
         }
 
@@ -148,29 +146,6 @@ namespace Archetype.Builder.Builders
 
             return this;
         }
-
-        public ICardBuilder Effect<TTarget>(Action<ICardEffectBuilder<TTarget>> builderProvider)
-            where  TTarget : IGameAtom
-        {
-            var cbc = _builderFactory.Create<ICardEffectBuilder<TTarget>>();
-
-            builderProvider(cbc);
-            
-            _effects.Add(cbc.Build());
-
-            return this;
-        }
-        
-        public ICardBuilder Effect(Action<ICardEffectBuilder> builderProvider)
-        {
-            var cbc = _builderFactory.Create<ICardEffectBuilder>();
-
-            builderProvider(cbc);
-            
-            _effects.Add(cbc.Build());
-
-            return this;
-        }
         
         public ICardBuilder Effect<TTarget>(
             Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect,
@@ -184,21 +159,25 @@ namespace Archetype.Builder.Builders
                 targetIndex = _targets.Count - 1;
             }
             
-            return Effect<TTarget>(provider => 
-                provider
-                    .TargetIndex(targetIndex)
-                    .Resolve(resolveEffect)
-                );
+            _effects.Add(new CardEffect<TTarget>
+            {
+                ResolveExpression = resolveEffect,
+                TargetIndex = targetIndex
+            });
+
+            return this;
         }
         
         public ICardBuilder Effect(
             Expression<Func<IContext, IResult>> resolveEffect
         )
         {
-            return Effect(provider => 
-                provider
-                    .Resolve(resolveEffect)
-            );
+            _effects.Add(new CardEffect
+            {
+                ResolveExpression = resolveEffect
+            });
+
+            return this;
         }
 
         protected override ICardProtoData BuildInternal()

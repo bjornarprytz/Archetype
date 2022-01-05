@@ -18,15 +18,22 @@ namespace Archetype.Design
     public class TestDesign : IDesign
     {
         private readonly IProtoPool _protoPool;
-        private readonly IBuilderFactory _builderFactory;
+        private readonly IFactory<ISetBuilder> _setBuilderFactory;
+        private readonly IFactory<IMapBuilder> _mapBuilderFactory;
         private readonly IMap _map;
         private readonly IPlayerData _playerData;
 
 
-        public TestDesign(IProtoPool protoPool, IBuilderFactory builderFactory, IMap map, IPlayerData playerData)
+        public TestDesign(
+            IProtoPool protoPool, 
+            IFactory<ISetBuilder> setBuilderFactory,
+            IFactory<IMapBuilder> mapBuilderFactory,
+            IMap map, 
+            IPlayerData playerData)
         {
             _protoPool = protoPool;
-            _builderFactory = builderFactory;
+            _setBuilderFactory = setBuilderFactory;
+            _mapBuilderFactory = mapBuilderFactory;
             _map = map;
             _playerData = playerData;
         }
@@ -43,7 +50,7 @@ namespace Archetype.Design
         private void CreateSet()
         {
             _protoPool
-                .AddSet("All rares", _builderFactory, builder => builder
+                .AddSet("All rares", _setBuilderFactory, builder => builder
                     .ChangeCardTemplate(t => t with { Rarity = CardRarity.Rare})
                     .Card(cardBuilder => cardBuilder
                         .Name("Cost reducer")
@@ -65,7 +72,7 @@ namespace Archetype.Design
                         .Name("Create Unit")
                         .Range(0)
                         .Effect<IMapNode>(context => context.Target.CreateCreature("Ghoul", context.Owner))))
-                .AddSet("TestSet", _builderFactory, 
+                .AddSet("TestSet", _setBuilderFactory, 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })
                         .Card(builder =>
@@ -109,7 +116,7 @@ namespace Archetype.Design
         private void CreateMap()
         {
             _map.Generate(
-                _builderFactory.Create<IMapBuilder>()
+                _mapBuilderFactory.Create()
                     .Nodes(3)
                     .Connect(0,2)
                     .Connect(2,1)

@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Design;
-using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.View.Context;
 using MediatR;
 using Unit = MediatR.Unit;
 
 namespace Archetype.Server.Actions
 {
-    public class StartGameAction : IRequest<ITurnContext>
+    public class StartGameAction : IRequest
     {
 
         public StartGameAction()
@@ -20,29 +16,26 @@ namespace Archetype.Server.Actions
         }
     }
     
-    public class StartGameActionHandler : IRequestHandler<StartGameAction, ITurnContext>
+    public class StartGameActionHandler : IRequestHandler<StartGameAction>
     {
         private readonly IDesign _design;
         private readonly IPlayer _player;
         private readonly IPlayerData _playerData;
-        private readonly IFactory<ITurnContext> _turnFactory;
         private readonly IInstanceFactory _instanceFactory;
 
         public StartGameActionHandler(
             IDesign design, 
             IPlayer player,
             IPlayerData playerData,
-            IFactory<ITurnContext> turnFactory,
             IInstanceFactory instanceFactory)
         {
             _design = design;
             _player = player;
             _playerData = playerData;
-            _turnFactory = turnFactory;
             _instanceFactory = instanceFactory;
         }
         
-        public async Task<ITurnContext> Handle(StartGameAction request, CancellationToken cancellationToken)
+        public Task<Unit> Handle(StartGameAction request, CancellationToken cancellationToken)
         {
             _design.Create();
             
@@ -57,7 +50,7 @@ namespace Archetype.Server.Actions
 
             _player.Draw(_player.MaxHandSize);
 
-            return _turnFactory.Create();
+            return Unit.Task;
         }
     }
 }

@@ -23,7 +23,9 @@ namespace Archetype.Builder.Builders
 
     internal class SetBuilder : ISetBuilder
     {
-        private readonly IBuilderFactory _builderFactory;
+        private readonly IFactory<IStructureBuilder> _structureBuilderFactory;
+        private readonly IFactory<ICreatureBuilder> _creatureBuilderFactory;
+        private readonly IFactory<ICardBuilder> _cardBuilderFactory;
 
         private readonly ISet _setData;
         private readonly Dictionary<string, ICardProtoData> _cards = new();
@@ -34,9 +36,15 @@ namespace Archetype.Builder.Builders
         private StructureMetaData _structureTemplate = new();
         private CreatureMetaData _creatureTemplate = new();
 
-        public SetBuilder(IBuilderFactory builderFactory)
+        public SetBuilder(
+            IFactory<IStructureBuilder> structureBuilderFactory,
+            IFactory<ICreatureBuilder> creatureBuilderFactory,
+            IFactory<ICardBuilder> cardBuilderFactory
+            )
         {
-            _builderFactory = builderFactory;
+            _structureBuilderFactory = structureBuilderFactory;
+            _creatureBuilderFactory = creatureBuilderFactory;
+            _cardBuilderFactory = cardBuilderFactory;
             _setData = new Set(_cards, _creatures, _structures);
         }
 
@@ -78,8 +86,8 @@ namespace Archetype.Builder.Builders
                 throw new InvalidOperationException("Set name before building cards.");
 
             var cbc = 
-                _builderFactory
-                    .Create<ICardBuilder>()
+                _cardBuilderFactory
+                    .Create()
                     .MetaData(_cardTemplate);
 
             builderProvider(cbc);
@@ -97,8 +105,8 @@ namespace Archetype.Builder.Builders
                 throw new InvalidOperationException("Set name before building creatures.");
             
             var cbc = 
-                _builderFactory
-                    .Create<ICreatureBuilder>()
+                _creatureBuilderFactory
+                    .Create()
                     .MetaData(_creatureTemplate);
 
             builderProvider(cbc);
@@ -116,8 +124,8 @@ namespace Archetype.Builder.Builders
                 throw new InvalidOperationException("Set name before building structures.");
             
             var cbc = 
-                _builderFactory
-                    .Create<IStructureBuilder>()
+                _structureBuilderFactory
+                    .Create()
                     .MetaData(_structureTemplate);
 
             builderProvider(cbc);
