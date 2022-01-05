@@ -1,24 +1,57 @@
 using System.Collections.Generic;
-using Archetype.Game.Payloads.Atoms;
 using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
 {
-    public interface IMapProtoData : IProtoDataFront
+    public interface IMapNodeProtoData : IMapNodeProtoDataFront
     {
-        // TODO: These should be Connections and NodeProtoData, not actual nodes
-        IEnumerable<IMapNode> Nodes { get; } 
+        new IEnumerable<IMapNodeProtoData> Neighbours { get; }
+
+        new int MaxStructures { get; set; }
+        void DuplexConnection(IMapNodeProtoData other);
+        void OneWayConnection(IMapNodeProtoData other);
+    }
+
+    public interface IMapProtoData : IMapProtoDataFront
+    {
+        new IEnumerable<IMapNodeProtoData> Nodes { get; }
     }
 
     public class MapProtoData : ProtoData, IMapProtoData
     {
-        private readonly List<IMutableMapNode> _nodes;
+        private readonly Dictionary<string, IMapNodeProtoData> _nodes;
 
-        public MapProtoData(List<IMutableMapNode> nodes)
+        public MapProtoData(Dictionary<string, IMapNodeProtoData> nodes)
         {
             _nodes = nodes;
         }
-        
-        public IEnumerable<IMapNode> Nodes => _nodes;
+
+
+        public IEnumerable<IMapNodeProtoData> Nodes => _nodes.Values;
+
+        IEnumerable<IMapNodeProtoDataFront> IMapProtoDataFront.Nodes => Nodes;
+    }
+
+    public class MapNodeProtoData : ProtoData, IMapNodeProtoData
+    {
+        private readonly List<IMapNodeProtoData> _neighbours = new();
+
+        public int MaxStructures { get; set; }
+        public IEnumerable<IMapNodeProtoData> Neighbours => _neighbours;
+        public void DuplexConnection(IMapNodeProtoData other)
+        {
+            OneWayConnection(other);
+            other.OneWayConnection(this);
+        }
+
+        public void OneWayConnection(IMapNodeProtoData other)
+        {
+            if (_neighbours.Contains(other))
+                return;
+            
+            _neighbours.Add(other);
+        }
+
+        IEnumerable<IMapNodeProtoDataFront> IMapNodeProtoDataFront.Neighbours => Neighbours;
     }
 }

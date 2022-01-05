@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
-using Archetype.View;
 using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Infrastructure
@@ -12,12 +11,11 @@ namespace Archetype.Game.Payloads.Infrastructure
     {
         void AddSet(ISet set);
         
-        
         new IEnumerable<ISet> Sets { get; }
         IEnumerable<ICardProtoData> Cards { get; }
         IEnumerable<ICreatureProtoData> Creatures { get; }
         IEnumerable<IStructureProtoData> Structures { get; }
-
+        
         ICardProtoData GetCard(string name);
         ICreatureProtoData GetCreature(string name);
         IStructureProtoData GetStructure(string name);
@@ -26,12 +24,14 @@ namespace Archetype.Game.Payloads.Infrastructure
     internal class ProtoPool : IProtoPool
     {
         private readonly List<ISet> _sets = new();
+
+        private readonly List<IMapProtoData> _maps = new();
         
         public void AddSet(ISet set)
         {
             _sets.Add(set);
         }
-        
+
         public IEnumerable<ICardProtoData> Cards => _sets.SelectMany(set => set.Cards.Values);
         public IEnumerable<ICreatureProtoData> Creatures => _sets.SelectMany(set => set.Creatures.Values);
         public IEnumerable<IStructureProtoData> Structures => _sets.SelectMany(set => set.Structures.Values);
