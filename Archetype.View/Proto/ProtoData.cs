@@ -15,7 +15,6 @@ public interface IMapProtoDataFront : IProtoDataFront
 public interface IMapNodeProtoDataFront : IProtoDataFront
 {
     int MaxStructures { get; }
-    IEnumerable<IMapNodeProtoDataFront> Neighbours { get; }
 }
 
 public interface ICardProtoDataFront : IProtoDataFront

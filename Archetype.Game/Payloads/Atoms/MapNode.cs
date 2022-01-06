@@ -15,8 +15,6 @@ namespace Archetype.Game.Payloads.Atoms
     [Target("Node")]
     public interface IMapNode : IZone<IUnit>, IMapNodeFront
     {
-        int MaxStructures { get; }
-        
         new IEnumerable<IMapNode> Neighbours { get; }
         new IGraveyard Graveyard { get; }
         new IDiscardPile DiscardPile { get; }
@@ -25,18 +23,13 @@ namespace Archetype.Game.Payloads.Atoms
         IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
         [Template("Create {1} at {0}, owned by {2}")]
         IResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
- 
+
+        internal void AddNeighbour(IMapNode node);
+        internal void RemoveNeighbour(IMapNode node); 
     }
 
-    internal interface IMutableMapNode : IMapNode
+    internal class MapNode : Zone<IUnit>, IMapNode
     {
-        void AddNeighbour(IMutableMapNode node);
-        void RemoveNeighbour(IMutableMapNode node);
-    }
-
-    internal class MapNode : Zone<IUnit>, IMutableMapNode
-    {
-        private readonly IMapNodeProtoData _protoData;
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
 
@@ -44,7 +37,6 @@ namespace Archetype.Game.Payloads.Atoms
         {
             Name = protoData.Name;
             MaxStructures = protoData.MaxStructures;
-            _protoData = protoData;
             _instanceFactory = instanceFactory;
             DiscardPile = new DiscardPile(this);
             Graveyard = new Graveyard(this);
@@ -77,16 +69,16 @@ namespace Archetype.Game.Payloads.Atoms
             return ResultFactory.Create(this, creature);
         }
 
-        public void AddNeighbour(IMutableMapNode node)
+        void IMapNode.AddNeighbour(IMapNode node)
         {
             if (_neighbours.ContainsKey(node.Guid))
                 return;
-            
+        
             _neighbours.Add(node.Guid, node);
             node.AddNeighbour(this);
         }
 
-        public void RemoveNeighbour(IMutableMapNode node)
+        void IMapNode.RemoveNeighbour(IMapNode node)
         {
             if (!_neighbours.ContainsKey(node.Guid))
                 return;

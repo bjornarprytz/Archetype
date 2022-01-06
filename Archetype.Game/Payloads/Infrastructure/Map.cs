@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Context;
@@ -28,11 +29,22 @@ namespace Archetype.Game.Payloads.Infrastructure
         }
         
         public IEnumerable<IMapNode> Nodes => _nodes;
-        public void Generate(IMapProtoData protoData) // TODO: Solve this in another way. Probably using the instanceFactory etc. REMEMBER TO CONNECT THE NODES :) 
+        public void Generate(IMapProtoData protoData)  
         {
+            var nodes = 
+                protoData.Nodes
+                    .Select(nodeProtoData => _instanceFactory.CreateMapNode(nodeProtoData, null))
+                    .ToArray();
+
+            foreach (var (node, i) in nodes.Select(((node, i) => (node, i))))
+            {
+                foreach (var neighbourIndex in protoData.Connections[i])
+                {
+                    node.AddNeighbour(nodes[neighbourIndex]);
+                }
+            }
             
-            
-            _nodes.AddRange(protoData.Nodes);
+            _nodes.AddRange(nodes);
         }
 
         IEnumerable<IMapNodeFront> IMapFront.Nodes => Nodes;

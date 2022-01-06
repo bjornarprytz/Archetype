@@ -123,8 +123,8 @@ namespace Archetype.Design
                         builder.Name("Tromsø"))
                     .Node(builder => 
                         builder.Name("Daln"))
-                    .Connect("Kvaløya","Tromsø")
-                    .Connect("Tromsø","Daln")
+                    .Connect(0,1)
+                    .Connect(1,2)
                     .Build());
 
         }

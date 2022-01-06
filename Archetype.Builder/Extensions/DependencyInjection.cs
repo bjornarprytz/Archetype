@@ -13,7 +13,6 @@ namespace Archetype.Builder.Extensions
                 .AddFactory<ICardBuilder, CardBuilder>()
                 .AddFactory<IStructureBuilder, StructureBuilder>()
                 .AddFactory<ICreatureBuilder, CreatureBuilder>()
-                .AddFactory<ICardEffectBuilder, CardEffectBuilder>()
                 .AddFactory<IMapBuilder, MapBuilder>()
                 .AddFactory<INodeBuilder, NodeBuilder>()
                 .AddFactory<ISetBuilder, SetBuilder>();

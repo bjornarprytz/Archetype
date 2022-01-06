@@ -17,7 +17,6 @@ namespace Archetype.Game.Payloads.Infrastructure
     {
         // TODO: Create something like this: T CreateInstance<T>(string name, IGameAtom owner, Action<T> initFunc=null) where T : IGameAtom;
         IMapNode CreateMapNode(IMapNodeProtoData mapNodeData, IGameAtom owner);
-        IMapNode CreateMapNode(string name, IGameAtom owner);
         ICard CreateCard(ICardProtoData cardData, IGameAtom owner);
         ICard CreateCard(string name, IGameAtom owner);
         IStructure CreateStructure(IStructureProtoData structureData, IGameAtom owner);
@@ -69,16 +68,6 @@ namespace Archetype.Game.Payloads.Infrastructure
             AddAtom(mapNode);
 
             return mapNode;
-        }
-
-        public IMapNode CreateMapNode(string name, IGameAtom owner)
-        {
-            var protoData = _protoPool.GetMapNode(name); // TODO: Figure out how to "store" map nodes. ProtoData seems over-complicated
-
-            if (protoData is null)
-                throw new InvalidOperationException($"Could not find a {typeof(ICard)} named {name} in the pool");
-
-            return CreateMapNode(protoData, owner);
         }
 
         public ICard CreateCard(ICardProtoData cardData, IGameAtom owner)
