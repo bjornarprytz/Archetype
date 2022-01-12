@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Archetype.Builder.Builders.Base;
+using Archetype.Builder.Exceptions;
+using Archetype.Builder.Extensions;
 using Archetype.Builder.Factory;
 using Archetype.Game.Payloads.Proto;
 
@@ -9,26 +12,24 @@ namespace Archetype.Builder.Builders
 {
     public interface IMapBuilder : IBuilder<IMapProtoData>
     {
-        IMapBuilder Node(Action<INodeBuilder> builderProvider);
+        // TODO: Make this interface nice for building nodes and neighbours. Remember; Nodes have names, which should be unique
         
-        IMapBuilder Connect(int n1, int n2); 
-        IMapBuilder Connect(string n1, string n2);
+        public IMapBuilder Node(Action<INodeBuilder> builderProvider);
+        
+        public IMapBuilder Connect(string n1, string n2);
     }
 
     internal class MapBuilder : ProtoBuilder<IMapProtoData>, IMapBuilder
     {
         private readonly IFactory<INodeBuilder> _nodeBuilderFactory;
-        private readonly List<IMapNodeProtoData> _nodes = new();
-
-        private readonly Dictionary<int, List<int>> _connections = new();
-        private readonly Dictionary<int, IReadOnlyList<int>> _finalConnections = new();
+        private readonly Dictionary<string, IMapNodeProtoData> _nodes = new();
 
         private readonly IMapProtoData _mapProtoData;
         
         public MapBuilder(IFactory<INodeBuilder> nodeBuilderFactory)
         {
             _nodeBuilderFactory = nodeBuilderFactory;
-            _mapProtoData = new MapProtoData(_nodes, _finalConnections);
+            _mapProtoData = new MapProtoData(_nodes);
         }
 
         public IMapBuilder Node(Action<INodeBuilder> builderProvider)
@@ -37,48 +38,27 @@ namespace Archetype.Builder.Builders
 
             builderProvider(builder);
 
-            _nodes.Add(builder.Build());
-
-            return this;
-        }
-
-        public IMapBuilder Connect(int n1, int n2)
-        {
-            if (n1 == n2)
-                throw new ArgumentException("Can't connect a node to itself");
+            var node = builder.Build();
             
-            (_connections[n1] ??= new List<int>()).Add(n2);
+            _nodes.Add(node.Name, node);
 
             return this;
         }
 
         public IMapBuilder Connect(string n1, string n2)
         {
-            var node1 = _nodes.FirstOrDefault(n => n.Name == n1);
-            var node2 = _nodes.FirstOrDefault(n => n.Name == n2);
+            var node1 = _nodes[n1];
+            var node2 = _nodes[n2];
             
-            var index1 = _nodes.IndexOf(node1);
-            var index2 = _nodes.IndexOf(node2);
+            node1.DuplexConnection(node2);
 
-            return Connect(index1, index2);
+            return this;
         }
-
+        
         protected override IMapProtoData BuildInternal()
         {
-            foreach (var (nodeIndex, connections) in _connections)
-            {
-                if (nodeIndex > _nodes.Count)
-                    continue;
-                
-                var neighbours = connections
-                    .Distinct()
-                    .Where(idx => idx <= _nodes.Count)
-                    .ToList(); 
-                
-                _finalConnections[nodeIndex] = neighbours;
-            }
-            
-            _connections.Clear();
+            if (_nodes.Count > 1 && _nodes.Values.Any(node => node.Neighbours.IsEmpty()))
+                throw new DisconnectedNodesException();
             
             return _mapProtoData;
         }
