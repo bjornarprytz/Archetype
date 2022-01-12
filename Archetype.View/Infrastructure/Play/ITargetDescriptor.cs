@@ -1,6 +1,7 @@
 namespace Archetype.View.Infrastructure;
 
-public interface ITargetFront
-{ 
+public interface ITargetDescriptor
+{
+    Type TargetType { get; }
     string TypeId { get; }
 }

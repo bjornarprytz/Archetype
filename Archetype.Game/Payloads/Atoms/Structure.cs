@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Atoms.Base;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.MetaData;
@@ -11,14 +11,14 @@ using Archetype.View.Atoms.MetaData;
 namespace Archetype.Game.Payloads.Atoms
 {
     [Target("Structure")]
-    public interface IStructure : IUnit, ITriggerSource<IStructure>, IStructureFront
+    public interface IStructure : IUnit, IStructureFront, IEffectProvider
     {
         
     }
 
     internal class Structure : Unit, IStructure
     {
-        private readonly List<IEffect<ITriggerContext<IStructure>>> _effects;
+        private readonly List<IEffect> _effects;
         
         public Structure(IStructureProtoData protoData, IGameAtom owner) : base(protoData, owner)
         {
@@ -27,7 +27,7 @@ namespace Archetype.Game.Payloads.Atoms
         }
 
         public StructureMetaData MetaData { get; }
-        public IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects => _effects;
+        public IEnumerable<IEffect> Effects => _effects;
 
         public override UnitMetaData BaseMetaData => MetaData;
     }

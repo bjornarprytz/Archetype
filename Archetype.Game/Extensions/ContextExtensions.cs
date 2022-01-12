@@ -5,8 +5,10 @@ using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
+using Archetype.View.Atoms;
 
 namespace Archetype.Game.Extensions
 {
@@ -19,32 +21,41 @@ namespace Archetype.Game.Extensions
         }
         
         [Group("each unit")]
-        public static IEnumerable<IUnit> EachUnit<T>(this T context)
-            where T : IContext
+        public static IEnumerable<IUnit> EachUnit(this IContext context)
         {
             return context.GameState.Map.EachUnit();
         }
 
         [Group("each unit in target zone")]
-        public static IEnumerable<IUnit> UnitsInTargetZone<T>(this T context)
-            where T : IEffectContext<IZone<IUnit>>
+        public static IEnumerable<IUnit> UnitsInTargetZone(this IContext context)
         {
-            return context.Target.Contents;
+            return context.Target<IZone<IUnit>>().Contents;
         }
         
         [Group("each card in the player's hand")]
-        public static IEnumerable<ICard> CardsInPlayersHand<T>(this T context)
-            where T : IContext
+        public static IEnumerable<ICard> CardsInPlayersHand(this IContext context)
         {
             return context.GameState.Player.Hand.Contents;
         }
 
-        [ContextFact("equal to the damage dealt by this card")]
+        [ContextProperty("owner")]
+        public static IGameAtom Owner(this IContext context)
+        {
+            return context.Source.Owner;
+        }
+        
+        public static T Target<T>(this IContext context)
+            where T : IGameAtom
+        {
+            return context.TargetProvider.GetTarget<T>();
+        }
+
+        [ContextFact("equal to the total damage dealt")]
         public static int DamageDealt<T>(this T context)
             where T : IContext
         {
-            return context.PartialResults
-                .Results
+            return context.History
+                .Entries.SelectMany(entry => entry.Result.Results)
                 .Where(result => result.Verb is nameof(IUnit.Attack))
                 .Select(r => (int) r.Result) // TODO: Refactor Results to not have to rely on reflection so much
                 .Sum();

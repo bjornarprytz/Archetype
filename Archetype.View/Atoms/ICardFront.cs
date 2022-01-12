@@ -6,8 +6,8 @@ namespace Archetype.View.Atoms;
 public interface ICardFront : IZonedFront, IGameAtomFront
 {
     CardMetaData MetaData { get; }
+    string RulesText { get; }
     int Cost { get; }
     int Range { get; }
-    string RulesText { get; } 
-    IEnumerable<ITargetFront> Targets { get; }
+    IEnumerable<ITargetDescriptor> Targets { get; }
 }

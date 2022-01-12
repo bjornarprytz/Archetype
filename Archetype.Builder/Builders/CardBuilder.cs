@@ -12,6 +12,7 @@ using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms.MetaData;
+using Archetype.View.Infrastructure;
 using Archetype.View.Primitives;
 
 namespace Archetype.Builder.Builders
@@ -26,26 +27,6 @@ namespace Archetype.Builder.Builders
         ICardBuilder Color(CardColor color);
         ICardBuilder Art(string link);
 
-        ICardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget = null)
-            where TTarget : IGameAtom;
-
-        ICardBuilder Targets<TT1, TT2>(
-            Func<ITargetValidationContext<TT1>, bool> validateTarget1 = null,
-            Func<ITargetValidationContext<TT2>, bool> validateTarget2 = null
-        )
-            where TT1 : IGameAtom
-            where TT2 : IGameAtom;
-
-        ICardBuilder Targets<TT1, TT2, TT3>(
-            Func<ITargetValidationContext<TT1>, bool> validateTarget1 = null,
-            Func<ITargetValidationContext<TT2>, bool> validateTarget2 = null,
-            Func<ITargetValidationContext<TT3>, bool> validateTarget3 = null
-        )
-            where TT1 : IGameAtom
-            where TT2 : IGameAtom
-            where TT3 : IGameAtom;
-        
-        ICardBuilder Effect<TTarget>(Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect, int targetIndex = -1) where TTarget : IGameAtom;
         ICardBuilder Effect(Expression<Func<IContext, IResult>> resolveEffect);
     }
 
@@ -53,8 +34,8 @@ namespace Archetype.Builder.Builders
     {
         private readonly CardProtoData _cardProtoData;
 
-        private readonly List<ITarget> _targets = new();
-        private readonly List<IEffect<ICardContext>> _effects = new();
+        private readonly List<ITargetDescriptor> _targets = new();
+        private readonly List<IEffect> _effects = new();
 
         public CardBuilder()
         {
@@ -109,70 +90,12 @@ namespace Archetype.Builder.Builders
 
             return this;
         }
-
-        public ICardBuilder Target<TTarget>(Func<ITargetValidationContext<TTarget>, bool> validateTarget=null)
-            where TTarget : IGameAtom
-        {
-            _targets.Add(new Target<TTarget> { Validate = validateTarget });
-
-            return this;
-        }
-        public ICardBuilder Targets<TT1, TT2>(
-            Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
-            Func<ITargetValidationContext<TT2>, bool> validateTarget2=null
-        )
-            where TT1 : IGameAtom
-            where TT2 : IGameAtom
-        {
-            
-            _targets.Add(new Target<TT1> { Validate = validateTarget1 });
-            _targets.Add(new Target<TT2> { Validate = validateTarget2 });
-
-            return this;
-        }
-        public ICardBuilder Targets<TT1, TT2, TT3>(
-            Func<ITargetValidationContext<TT1>, bool> validateTarget1=null, 
-            Func<ITargetValidationContext<TT2>, bool> validateTarget2=null, 
-            Func<ITargetValidationContext<TT3>, bool> validateTarget3=null 
-            )
-            where TT1 : IGameAtom
-            where TT2 : IGameAtom
-            where TT3 : IGameAtom
-        {
-            
-            _targets.Add(new Target<TT1> { Validate = validateTarget1 });
-            _targets.Add(new Target<TT2> { Validate = validateTarget2 });
-            _targets.Add(new Target<TT3> { Validate = validateTarget3 });
-
-            return this;
-        }
-        
-        public ICardBuilder Effect<TTarget>(
-            Expression<Func<IEffectContext<TTarget>, IResult>> resolveEffect,
-            int targetIndex=-1
-            )
-            where  TTarget : IGameAtom
-        {
-            if (!_targets.Any(t => t.TargetType.IsAssignableTo(typeof(TTarget))))
-            {
-                _targets.Add(new Target<TTarget>());
-                targetIndex = _targets.Count - 1;
-            }
-            
-            _effects.Add(new CardEffect<TTarget>
-            {
-                ResolveExpression = resolveEffect,
-                TargetIndex = targetIndex
-            });
-
-            return this;
-        }
         
         public ICardBuilder Effect(
             Expression<Func<IContext, IResult>> resolveEffect
         )
         {
-            _effects.Add(new CardEffect
+            _effects.Add(new Effect
             {
                 ResolveExpression = resolveEffect
             });

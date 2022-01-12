@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.View;
 using Archetype.View.Atoms.MetaData;
 using Archetype.View.Proto;
@@ -15,7 +14,7 @@ namespace Archetype.Game.Payloads.Proto
 
     public interface IStructureProtoData : IUnitProtoData, IStructureProtoDataFront
     {
-        IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects { get; }
+        IEnumerable<IEffect> Effects { get; }
     }
 
     public class CreatureProtoData : UnitProtoData, ICreatureProtoData
@@ -29,9 +28,9 @@ namespace Archetype.Game.Payloads.Proto
 
     public class StructureProtoData : UnitProtoData, IStructureProtoData
     {
-        private readonly List<IEffect<ITriggerContext<IStructure>>> _effects;
+        private readonly List<IEffect> _effects;
 
-        public StructureProtoData(List<IEffect<ITriggerContext<IStructure>>> effects)
+        public StructureProtoData(List<IEffect> effects)
         {
             _effects = effects;
         }
@@ -39,7 +38,7 @@ namespace Archetype.Game.Payloads.Proto
         public StructureMetaData MetaData { get; set; }
         public string RulesText => "TODO: Generate rules text for structures!";
         public override UnitMetaData BaseMetaData => MetaData;
-        public IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects => _effects;
+        public IEnumerable<IEffect> Effects => _effects;
     }
 
     public abstract class UnitProtoData : ProtoData, IUnitProtoData

@@ -1,16 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
 
 namespace Archetype.Game.Payloads.Context
 {
-    public interface IContext
+    public interface IContext<out TSource> : IContext
+        where TSource : IGameAtom
+    {
+        new TSource Source { get; }
+    }
+    
+    public interface IContext : IDisposable
     {
         IGameState GameState { get; }
-        IResultsReader PartialResults { get; }
-        IGameAtom Owner { get; }
+        IHistoryReader History { get; }
+        IGameAtom Source { get; }
+        IMapNode Whence { get; }
+        IEffectProvider EffectProvider { get; }
+        ITargetProvider TargetProvider { get; }
     }
 
     public interface IResultsReader

@@ -5,9 +5,9 @@ using HotChocolate.Types;
 namespace Archetype.Server.Schema;
 
 
-public class TargetType : ObjectType<ITargetFront>
+public class TargetType : ObjectType<ITargetDescriptor>
 {
-    protected override void Configure(IObjectTypeDescriptor<ITargetFront> descriptor)
+    protected override void Configure(IObjectTypeDescriptor<ITargetDescriptor> descriptor)
     {
         base.Configure(descriptor);
         

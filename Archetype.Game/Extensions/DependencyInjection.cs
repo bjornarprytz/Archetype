@@ -1,13 +1,9 @@
-
-using System;
-using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Phases;
 using Archetype.Game.Payloads.Context.Phases.Base;
-using Archetype.Game.Payloads.Context.Trigger;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms;
 using Archetype.View.Infrastructure;
 using Archetype.View.Proto;
@@ -28,8 +24,8 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<IHistoryReader, IHistoryWriter, History>()
                     .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()
                     
-                    .AddSingleton<ICardResolver, CardResolver>()
-                    .AddSingleton(typeof(ITriggerResolver<>), typeof(TriggerResolver<>))
+                    .AddSingleton<IContextResolver, ContextResolver>()
+                    .AddSingleton<IContextBinder, ContextBinder>()
                     
                     .AddSingleton<IMovePhaseResolver, MovePhase>()
                     .AddSingleton<ICombatPhaseResolver, CombatPhase>()

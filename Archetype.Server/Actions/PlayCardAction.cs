@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
+using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
 using MediatR;
@@ -28,59 +29,40 @@ public class PlayCardAction : IRequest
 
 public class PlayCardActionHandler : IRequestHandler<PlayCardAction>
 {
-    private readonly ICardResolver _cardResolver;
-    private readonly IInstanceFinder _instanceFinder;
-    private readonly IPlayer _player;
+    private readonly IContextBinder _contextBinder;
+    private readonly IContextResolver _contextResolver;
+    private readonly IHistoryWriter _historyWriter;
 
     public PlayCardActionHandler(
-        ICardResolver cardResolver, 
-        IInstanceFinder instanceFinder,
-        IPlayer player)
+        IContextBinder contextBinder,
+        IContextResolver contextResolver,
+        IHistoryWriter historyWriter)
     {
-        
-        _cardResolver = cardResolver;
-        _instanceFinder = instanceFinder;
-        _player = player;
+        _contextBinder = contextBinder;
+        _contextResolver = contextResolver;
+        _historyWriter = historyWriter;
     }
     
     
     public Task<Unit> Handle(PlayCardAction request, CancellationToken cancellationToken)
     {
-        var node = _instanceFinder.FindAtom<IMapNode>(request.WhenceNodeGuid);
-        var card = _instanceFinder.FindAtom<ICard>(request.CardGuid);
-        var targets = request.TargetGuids.Select(_instanceFinder.FindAtom);
+        using var context = _contextBinder.BindContext(new PlayCardArgs(request));
 
-        _cardResolver.Resolve(new PlayCardArgs(_player, card, node, targets));
-
+        _contextResolver.Resolve(context);
+        
         return Unit.Task;
     }
     
     private class PlayCardArgs : ICardPlayArgs
     {
-        public PlayCardArgs(IPlayer player, ICard card, IMapNode whence, IEnumerable<IGameAtom> targets)
+        public PlayCardArgs(PlayCardAction playCardAction)
         {
-            var chosenTargets = targets.ToList();
-            
-            var requiredTargetCount = card.Targets.Count();
-            
-            if (chosenTargets.Count != requiredTargetCount)
-            {
-                throw new ArgumentException($"Mismatching number of targets in card and arguments. Expected: {requiredTargetCount}, Actual: {chosenTargets.Count}");
-            }
-
-            if (player.Resources < card.Cost)
-                throw new InvalidOperationException(
-                    $"Player does not have enough resources. Cost: {card.Cost}, Actual: {player.Resources}");
-                
-            Player = player;
-            Card = card;
-            Whence = whence;
-            Targets = chosenTargets;
+            CardGuid = playCardAction.CardGuid;
+            WhenceGuid = playCardAction.WhenceNodeGuid;
+            TargetGuids = playCardAction.TargetGuids;
         }
-
-        public IPlayer Player { get; }
-        public ICard Card { get; }
-        public IMapNode Whence { get; }
-        public IEnumerable<IGameAtom> Targets { get; }
+        public Guid CardGuid { get; }
+        public Guid WhenceGuid { get; }
+        public IEnumerable<Guid> TargetGuids { get; }
     }
 }

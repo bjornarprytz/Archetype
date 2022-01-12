@@ -1,26 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.View;
 using Archetype.View.Atoms.MetaData;
+using Archetype.View.Infrastructure;
 using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
 {
     public interface ICardProtoData : ICardProtoDataFront
     {
-        IEnumerable<ITarget> Targets { get; }
-        IEnumerable<IEffect<ICardContext>> Effects { get; }
+        IEnumerable<ITargetDescriptor> Targets { get; }
+        IEnumerable<IEffect> Effects { get; }
     }
 
     public class CardProtoData : ProtoData, ICardProtoData
     {
-        private readonly List<ITarget> _targets;
-        private readonly List<IEffect<ICardContext>> _effects;
+        private readonly List<ITargetDescriptor> _targets;
+        private readonly List<IEffect> _effects;
         private string _rulesText;
 
-        public CardProtoData(List<ITarget> targets, List<IEffect<ICardContext>> effects)
+        public CardProtoData(List<ITargetDescriptor> targets, List<IEffect> effects)
         {
             _targets = targets;
             _effects = effects;
@@ -39,8 +38,8 @@ namespace Archetype.Game.Payloads.Proto
         public int Cost { get; set; }
         public int Range { get; set; }
         public CardMetaData MetaData { get; set; }
-        public IEnumerable<ITarget> Targets => _targets;
-        public IEnumerable<IEffect<ICardContext>> Effects => _effects;
+        public IEnumerable<ITargetDescriptor> Targets => _targets;
+        public IEnumerable<IEffect> Effects => _effects;
 
         private string GenerateRulesText()
         {
