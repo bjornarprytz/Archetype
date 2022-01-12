@@ -7,17 +7,6 @@ public interface IProtoDataFront
     string Name { get; }
 }
 
-public interface IMapProtoDataFront : IProtoDataFront
-{
-    IEnumerable<IMapNodeProtoDataFront> Nodes { get; }
-}
-
-public interface IMapNodeProtoDataFront : IProtoDataFront
-{
-    int MaxStructures { get; }
-    IEnumerable<IMapNodeProtoDataFront> Neighbours { get; }
-}
-
 public interface ICardProtoDataFront : IProtoDataFront
 {
     string RulesText { get; }

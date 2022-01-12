@@ -117,14 +117,9 @@ namespace Archetype.Design
         {
             _map.Generate(
                 _mapBuilderFactory.Create()
-                    .Node(builder => 
-                        builder.Name("Kvaløya"))
-                    .Node(builder => 
-                        builder.Name("Tromsø"))
-                    .Node(builder => 
-                        builder.Name("Daln"))
-                    .Connect("Kvaløya","Tromsø")
-                    .Connect("Tromsø","Daln")
+                    .Nodes(3)
+                    .Connect(0,2)
+                    .Connect(2,1)
                     .Build());
 
         }

@@ -20,7 +20,7 @@ namespace Archetype.Game.Payloads.Proto
 
     public class CreatureProtoData : UnitProtoData, ICreatureProtoData
     {
-        public string RulesText => "TODO: Generate rules text for creatures!"; // TODO
+        public string RulesText => "TODO: Generate rules text for creatures!";
         public int Movement { get; set; }
         public int Strength { get; set; }
         public CreatureMetaData MetaData { get; set; }
@@ -37,7 +37,7 @@ namespace Archetype.Game.Payloads.Proto
         }
         
         public StructureMetaData MetaData { get; set; }
-        public string RulesText => "TODO: Generate rules text for structures!"; // TODO
+        public string RulesText => "TODO: Generate rules text for structures!";
         public override UnitMetaData BaseMetaData => MetaData;
         public IEnumerable<IEffect<ITriggerContext<IStructure>>> Effects => _effects;
     }

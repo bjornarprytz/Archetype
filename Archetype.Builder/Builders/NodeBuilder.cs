@@ -1,45 +1,24 @@
-using System;
 using Archetype.Builder.Builders.Base;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Proto;
 
 namespace Archetype.Builder.Builders
 {
-    public interface INodeBuilder : IBuilder<IMapNodeProtoData>
+    public interface INodeBuilder : IBuilder<IMutableMapNode> // TODO: This should create NodeProtoData, not instances
     {
         
-        INodeBuilder Name(string name);
-        INodeBuilder MaxStructures(int i);
     }
     
-    internal class NodeBuilder : ProtoBuilder<IMapNodeProtoData>, INodeBuilder
+    internal class NodeBuilder : INodeBuilder
     {
-        private readonly MapNodeProtoData _mapNode;
+        private readonly MapNode _mapNode;
 
-        public NodeBuilder()
+        public NodeBuilder(IInstanceFactory getInstanceFactory)
         {
-            _mapNode = new MapNodeProtoData();
-        }
-        
-        public INodeBuilder MaxStructures(int i)
-        {
-            if (i < 0)
-                throw new ArgumentException("{nameof(IMapNodeProtoData.MaxStructures)} cannot be negative", nameof(i));
-            
-            _mapNode.MaxStructures = i;
-
-            return this;
-        }
-        
-        public INodeBuilder Name(string name)
-        {
-            _mapNode.Name = name;
-
-            return this;
+            _mapNode = new MapNode(default, getInstanceFactory);
         }
 
-        protected override IMapNodeProtoData BuildInternal()
+        public IMutableMapNode Build()
         {
             return _mapNode;
         }

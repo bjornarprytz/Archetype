@@ -9,6 +9,8 @@ namespace Archetype.Builder.Extensions
     {
         public static IServiceCollection AddBuilders(this IServiceCollection serviceCollection)
         {
+            // TODO: Scan assembly for implementations instead
+            
             serviceCollection
                 .AddFactory<ICardBuilder, CardBuilder>()
                 .AddFactory<IStructureBuilder, StructureBuilder>()

@@ -6,7 +6,6 @@ using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
 
@@ -15,8 +14,6 @@ namespace Archetype.Game.Payloads.Atoms
     [Target("Node")]
     public interface IMapNode : IZone<IUnit>, IMapNodeFront
     {
-        int MaxStructures { get; }
-        
         new IEnumerable<IMapNode> Neighbours { get; }
         new IGraveyard Graveyard { get; }
         new IDiscardPile DiscardPile { get; }
@@ -28,30 +25,24 @@ namespace Archetype.Game.Payloads.Atoms
  
     }
 
-    internal interface IMutableMapNode : IMapNode
+    public interface IMutableMapNode : IMapNode
     {
         void AddNeighbour(IMutableMapNode node);
         void RemoveNeighbour(IMutableMapNode node);
     }
 
-    internal class MapNode : Zone<IUnit>, IMutableMapNode
+    public class MapNode : Zone<IUnit>, IMutableMapNode
     {
-        private readonly IMapNodeProtoData _protoData;
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
 
-        public MapNode(IMapNodeProtoData protoData, IGameAtom owner, IInstanceFactory instanceFactory) : base(owner)
+        public MapNode(IGameAtom owner, IInstanceFactory instanceFactory) : base(owner)
         {
-            Name = protoData.Name;
-            MaxStructures = protoData.MaxStructures;
-            _protoData = protoData;
             _instanceFactory = instanceFactory;
             DiscardPile = new DiscardPile(this);
             Graveyard = new Graveyard(this);
         }
 
-        public int MaxStructures { get; }
-        
         public IEnumerable<IUnitFront> Units => Contents;
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
