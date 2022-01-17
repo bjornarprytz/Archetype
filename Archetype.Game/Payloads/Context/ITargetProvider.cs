@@ -12,7 +12,8 @@ namespace Archetype.Game.Payloads.Context;
 
 public interface ITargetProvider
 {
-    T GetTarget<T>() where T : IGameAtom; // TODO: Allow for multiple targets of same type
+    T GetTarget<T>() where T : IGameAtom;
+    T GetTarget<T>(int index) where T : IGameAtom;
 }
 
 internal class RangedTargetProvider : TargetProvider
@@ -61,13 +62,23 @@ internal class TargetProvider : ITargetProvider
 
     public T GetTarget<T>() where T : IGameAtom
     {
-        var target = (T)Targets[typeof(T)]?.FirstOrDefault(); // TODO: Allow for multiple targets of same type by indexing them
+        return GetTargetInternal<T>(0);
+    }
 
-        if (target is null)
+    public T GetTarget<T>(int index) where T : IGameAtom
+    {
+        return GetTargetInternal<T>(index);
+    }
+
+    private T GetTargetInternal<T>(int index)
+    {
+        var targetsOfTypeT = Targets[typeof(T)];
+
+        if (targetsOfTypeT is null || targetsOfTypeT.IsEmpty() || targetsOfTypeT.Count <= index)
         {
-            throw new Exception($"Can't provide target of type {typeof(T)}");
+            throw new Exception($"Can't provide target of type {typeof(T)} and index {index}");
         }
         
-        return target;
+        return (T) targetsOfTypeT[index];
     }
 }
