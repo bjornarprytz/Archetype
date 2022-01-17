@@ -20,8 +20,6 @@ namespace Archetype.Game.Payloads.Atoms
         ICardFront, 
         IEffectProvider
     {
-        new IEnumerable<IEffect> Effects { get; }
-        
         [Template("Reduce cost of {0} by {1}")]
         IResult<ICard, int> ReduceCost(int x);
     }
