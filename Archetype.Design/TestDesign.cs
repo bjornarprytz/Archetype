@@ -55,11 +55,11 @@ namespace Archetype.Design
                     .Card(cardBuilder => cardBuilder
                         .Name("Cost reducer")
                         .Range(1)
-                        .Effect(context => context.GetTarget<ICard>().ReduceCost(1)))
+                        .Effect(context => context.Target<ICard>().ReduceCost(1)))
                     .Card(cardBuilder => cardBuilder
                         .Name("Health dealer")
                         .Range(1)
-                        .Effect(context => context.GetTarget<IUnit>().Attack(context.GetTarget<IUnit>().Health)))
+                        .Effect(context => context.Target<IUnit>().Attack(context.Target<IUnit>().Health)))
                     .Creature(creatureBuilder => creatureBuilder
                         .Name("Ghoul")
                         .Strength(1)
@@ -71,7 +71,7 @@ namespace Archetype.Design
                     .Card(cardBuilder => cardBuilder
                         .Name("Create Unit")
                         .Range(0)
-                        .Effect(context => context.GetTarget<IMapNode>().CreateCreature("Ghoul", context.Owner()))))
+                        .Effect(context => context.Target<IMapNode>().CreateCreature("Ghoul", context.Owner()))))
                 .AddSet("TestSet", _setBuilderFactory, 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })
@@ -80,8 +80,8 @@ namespace Archetype.Design
                                 .Name("Slap heal")
                                 .Cost(4)
                                 .Range(0)
-                                .Effect(context => context.GetTarget<IUnit>().Attack(5))
-                                .Effect(context => context.GetTarget<IUnit>().Heal(context.DamageDealt()))
+                                .Effect(context => context.Target<IUnit>().Attack(5))
+                                .Effect(context => context.Target<IUnit>().Heal(context.DamageDealt()))
                                 .Art("asd")
                         )
                         .Card(builder =>
@@ -89,7 +89,7 @@ namespace Archetype.Design
                                 .Name("Resource slap")
                                 .Cost(3)
                                 .Range(1)
-                                .Effect(context => context.GetTarget<ICreature>().Attack(4))
+                                .Effect(context => context.Target<ICreature>().Attack(4))
                                 .Art("other")
                         )
                         .Card(builder =>
