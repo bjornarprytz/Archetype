@@ -10,7 +10,7 @@ using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Extensions;
 
-internal static class EffectExtensions
+public static class EffectExtensions
 {
     public static IEffectDescriptor CreateDescriptor<T, R>(this Expression<Func<T, R>> exp)
         where T : IContext
@@ -99,24 +99,24 @@ internal static class EffectExtensions
 
         var @object = targetAttribute.Singular;
 
-        var argumentDescriptors = mce.Arguments.Select(arg => arg.DescribeArgument(context));
+        var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
 
-        return new EffectDescriptor(@object, verbAttribute.Name, argumentDescriptors);
+        return new EffectDescriptor(@object, verbAttribute.Name, operands);
     }
 
-    private static IArgumentDescriptor DescribeArgument<T>(this Expression exp, T context)
+    private static IOperand ParseArgument<T>(this Expression exp, T context)
         where T : IContext
     {
         return (exp) switch
         {
-            ConstantExpression { Value: not null } c => new FullArgumentDescriptor(c.Value.ToString()),
-            MethodCallExpression m => m.DescribeArgumentMethod(context),
-            MemberExpression a => a.DescribeProperty(context),
+            ConstantExpression { Value: not null } c => new ImmediateOperand(c.Value.ToString()),
+            MethodCallExpression m => m.ParseArgumentMethod(context),
+            MemberExpression a => a.ParseProperty(context),
             _ => throw new MalformedEffectException($"Argument of unsupported type {exp}"),
         };
     }
 
-    private static IArgumentDescriptor DescribeArgumentMethod<T>(this MethodCallExpression mce, T context)
+    private static IOperand ParseArgumentMethod<T>(this MethodCallExpression mce, T context)
         where T : IContext
     {
         if (mce.Arguments.FirstOrDefault() is not Expression contextExpression)
@@ -128,13 +128,13 @@ internal static class EffectExtensions
         if (context is not null && pe.Type.IsAssignableTo(typeof(T)))
         {
             var expr = Expression.Lambda<Func<T, int>>(mce, false, pe);
-            return new FullArgumentDescriptor(expr.Compile().Invoke(context).ToString());
+            return new ImmediateOperand(expr.Compile().Invoke(context).ToString());
         }
-
-        return new PartialArgumentDescriptor(mce.Method.GetRequiredAttribute<ContextFactAttribute>().Description);
+        
+        return new ReferenceOperand("Context", mce.Method.GetRequiredAttribute<ContextFactAttribute>().Description);
     }
 
-    private static IArgumentDescriptor DescribeProperty<T>(this MemberExpression me, T context)
+    private static IOperand ParseProperty<T>(this MemberExpression me, T context)
     {
         var pe = me.GetRequiredRootParameterExpression();
 
@@ -142,7 +142,7 @@ internal static class EffectExtensions
         {
             var expr = Expression.Lambda<Func<T, int>>(me, false, pe);
 
-            return new PartialArgumentDescriptor(expr.Compile().Invoke(context).ToString());
+            return new ImmediateOperand(expr.Compile().Invoke(context).ToString());
         }
 
         return me.DescribeParameterPath();
@@ -156,12 +156,12 @@ internal static class EffectExtensions
 
         var verbAttribute = mce.Method.GetRequiredAttribute<VerbAttribute>();
 
-        var argumentDescriptors = mce.Arguments.Select(arg => arg.DescribeArgument(context));
+        var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
 
-        return new EffectDescriptor(groupDescription, verbAttribute.Name, argumentDescriptors);
+        return new EffectDescriptor(groupDescription, verbAttribute.Name, operands);
     }
 
-    private static IArgumentDescriptor DescribeParameterPath(this MemberExpression me)
+    private static IOperand DescribeParameterPath(this MemberExpression me)
     {
         var propertyName = me.Member.Name;
 
@@ -175,17 +175,25 @@ internal static class EffectExtensions
             _ => throw new ArgumentException($"Indescribable expression {me.Expression}")
         };
 
-        return new PartialArgumentDescriptor($"{propertyName} of {targetDescription}");
+        return new ReferenceOperand(targetDescription, propertyName);
     }
 
     private static ParameterExpression GetRequiredRootParameterExpression(this Expression expression)
     {
-        while (expression is MemberExpression innerMe)
+        var rootExpression = expression;
+        
+        while (rootExpression is MemberExpression innerMe)
         {
-            expression = innerMe.Expression;
+            rootExpression = innerMe.Expression;
         }
 
-        if (expression is not ParameterExpression p)
+        if (rootExpression is MethodCallExpression mce )
+        {
+            rootExpression = mce.Object                 // Method call
+                             ?? mce.Arguments.First();  // Extension method
+        }
+
+        if (rootExpression is not ParameterExpression p)
         {
             throw new MalformedEffectException($"Expression {expression} must be rooted in a parameter");
         }
@@ -206,15 +214,12 @@ internal static class EffectExtensions
     }
 
     private record EffectDescriptor
-        (string Affected, string Keyword, IEnumerable<IArgumentDescriptor> Arguments) : IEffectDescriptor;
+        (string Affected, string Keyword, IEnumerable<IOperand> Arguments) : IEffectDescriptor;
 
-    private record FullArgumentDescriptor(string Description) : IArgumentDescriptor
+    private record ImmediateOperand(string Value) : IOperand
     {
-        public bool NeedsMoreContext => false;
+        public string Reference => null;
     }
 
-    private record PartialArgumentDescriptor(string Description) : IArgumentDescriptor
-    {
-        public bool NeedsMoreContext => true;
-    }
+    private record ReferenceOperand(string Reference, string Value) : IOperand;
 }
