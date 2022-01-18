@@ -44,16 +44,13 @@ namespace Archetype.Game.Attributes
         }
     }
 
-    internal class TemplateAttribute : Attribute
+    internal class VerbAttribute : Attribute
     {
-        public string Template {get;}
-        public int NParameters { get; }
+        public string Name {get;}
 
-        public TemplateAttribute(string template)
+        public VerbAttribute(string name)
         {
-            Template = template;
-
-            NParameters = Template.Count(c => c == '{');
+            Name = name;
         }
     }
 }

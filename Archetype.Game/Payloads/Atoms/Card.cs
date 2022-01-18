@@ -20,19 +20,21 @@ namespace Archetype.Game.Payloads.Atoms
         ICardFront, 
         IEffectProvider
     {
-        [Template("Reduce cost of {0} by {1}")]
+        [Verb("Reduce cost of {0} by {1}")]
         IResult<ICard, int> ReduceCost(int x);
     }
 
     internal class Card : Piece<ICard>, ICard
     {
-        private readonly List<ITargetDescriptor> _targets;
+        private readonly List<ITargetDescriptor> _targetDescriptors;
+        private readonly List<IEffectDescriptor> _effectDescriptors;
         private readonly List<IEffect> _effects;
 
         public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
         {
             Name = protoData.Name;
-            _targets = protoData.Targets.ToList();
+            _targetDescriptors = protoData.TargetDescriptors.ToList();
+            _effectDescriptors = protoData.EffectDescriptors.ToList();
             _effects = protoData.Effects.ToList();
             MetaData = protoData.MetaData;
             Cost = protoData.Cost;
@@ -41,9 +43,10 @@ namespace Archetype.Game.Payloads.Atoms
 
         public int Cost { get; private set; }
         public int Range { get; private set; }
-        public string RulesText { get; } // TODO: Update this based on context
-        public IEnumerable<ITargetDescriptor> Targets => _targets;
-        
+        public IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors;
+        public IEnumerable<IEffectDescriptor> EffectDescriptors => _effectDescriptors;
+
+
         public CardMetaData MetaData { get; }
         public IEnumerable<IEffect> Effects => _effects;
         
@@ -55,18 +58,6 @@ namespace Archetype.Game.Payloads.Atoms
             Cost -= x;
 
             return ResultFactory.Create(this, x);
-        }
-
-        public string GenerateRulesText(IContext context)
-        {
-            var sb = new StringBuilder(); 
-            
-            foreach (var effect in _effects)
-            {
-                sb.AppendLine(effect.ContextRulesText(context));
-            }
-
-            return sb.ToString();
         }
 
         protected override ICard Self => this;

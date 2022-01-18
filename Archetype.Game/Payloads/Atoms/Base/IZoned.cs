@@ -11,7 +11,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
         IObservable<ZoneTransition<T>> Transition { get; }
         new IZone<T> CurrentZone { get; }
 
-        [Template("Move {0} to {1}")]
+        [Verb("Move {0} to {1}")]
         IResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone);
     }
 

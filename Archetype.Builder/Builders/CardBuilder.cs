@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
 using Archetype.Builder.Factory;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
@@ -106,6 +107,8 @@ namespace Archetype.Builder.Builders
         protected override ICardProtoData BuildInternal()
         {
             Console.WriteLine($"Creating card {_cardProtoData.Name}");
+
+            _cardProtoData.EffectDescriptors = _effects.Select(effect => effect.CreateDescription()).ToList();
 
             return _cardProtoData;
         }

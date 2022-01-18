@@ -4,13 +4,13 @@ using Archetype.Game.Attributes;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Context.Effect.Base
 {
     public interface IEffect
     {
-        string PrintedRulesText();
-        string ContextRulesText(IContext context);
+        IEffectDescriptor CreateDescription();
 
         IResult ResolveContext(IContext context);
     }
@@ -41,24 +41,14 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
             }
         }
 
-        public string PrintedRulesText()
+        public IEffectDescriptor CreateDescription()
         {
-            return ResolveExpression.PrintedRulesText();
-        }
-
-        public string ContextRulesText(IContext context)
-        {
-            return ResolveExpression.ContextSensitiveRulesText(context);
+            return ResolveExpression.CreateDescriptor();
         }
 
         public IResult ResolveContext(IContext context)
         {
             return Resolve(context);
-        }
-
-        public string ContextSensitiveRulesText(IContext parentContext)
-        {
-            return ResolveExpression.ContextSensitiveRulesText(parentContext);
         }
     }
 }

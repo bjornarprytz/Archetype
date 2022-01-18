@@ -1,4 +1,5 @@
 using Archetype.View.Atoms.MetaData;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.View.Proto;
 
@@ -9,10 +10,12 @@ public interface IProtoDataFront
 
 public interface ICardProtoDataFront : IProtoDataFront
 {
-    string RulesText { get; }
     int Cost { get; }
     int Range { get; }
     CardMetaData MetaData { get; }
+    
+    IEnumerable<ITargetDescriptor> TargetDescriptors { get; }
+    IEnumerable<IEffectDescriptor> EffectDescriptors { get; }
 }
 
 public interface IUnitProtoDataFront : IProtoDataFront
@@ -24,7 +27,6 @@ public interface IUnitProtoDataFront : IProtoDataFront
 }
 public interface ICreatureProtoDataFront : IProtoDataFront
 {
-    string RulesText { get; }
     int Movement { get; }
     int Strength { get; }
 
@@ -34,5 +36,5 @@ public interface ICreatureProtoDataFront : IProtoDataFront
 public interface IStructureProtoDataFront : IProtoDataFront
 {
     StructureMetaData MetaData { get; }
-    string RulesText { get; }
+    IEnumerable<IEffectDescriptor> EffectDescriptors { get; }
 }

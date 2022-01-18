@@ -38,7 +38,7 @@ internal class ContextBinder : IContextBinder
         var card = _instanceFinder.FindAtom<ICard>(args.CardGuid);
         var chosenTargets = args.TargetGuids.Select(_instanceFinder.FindAtom);
 
-        var targetProvider = new RangedTargetProvider(node, card.Range, card.Targets, chosenTargets);
+        var targetProvider = new RangedTargetProvider(node, card.Range, card.TargetDescriptors, chosenTargets);
         
         return new CardContext(_gameState, _historyReader, _historyWriter, node, targetProvider, card, card);
     }

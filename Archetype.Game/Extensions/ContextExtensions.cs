@@ -29,7 +29,7 @@ namespace Archetype.Game.Extensions
         [Group("each unit in target zone")]
         public static IEnumerable<IUnit> UnitsInTargetZone(this IContext context)
         {
-            return context.Target<IZone<IUnit>>().Contents;
+            return context.GetTarget<IZone<IUnit>>().Contents;
         }
         
         [Group("each card in the player's hand")]
@@ -44,7 +44,7 @@ namespace Archetype.Game.Extensions
             return context.Source.Owner;
         }
         
-        public static T Target<T>(this IContext context)
+        public static T GetTarget<T>(this IContext context)
             where T : IGameAtom
         {
             return context.TargetProvider.GetTarget<T>();

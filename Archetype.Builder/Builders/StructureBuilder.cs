@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using Archetype.Builder.Builders.Base;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Proto;
@@ -73,6 +75,8 @@ namespace Archetype.Builder.Builders
 
         protected override IStructureProtoData BuildInternal()
         {
+            _structureProtoData.EffectDescriptors = _effects.Select(effect => effect.CreateDescription()).ToList();
+            
             return _structureProtoData;
         }
     }

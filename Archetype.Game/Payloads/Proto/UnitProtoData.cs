@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using Archetype.Game.Payloads.Atoms;
-using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.View;
 using Archetype.View.Atoms.MetaData;
+using Archetype.View.Infrastructure;
 using Archetype.View.Proto;
 
 namespace Archetype.Game.Payloads.Proto
@@ -19,7 +17,6 @@ namespace Archetype.Game.Payloads.Proto
 
     public class CreatureProtoData : UnitProtoData, ICreatureProtoData
     {
-        public string RulesText => "TODO: Generate rules text for creatures!";
         public int Movement { get; set; }
         public int Strength { get; set; }
         public CreatureMetaData MetaData { get; set; }
@@ -36,7 +33,7 @@ namespace Archetype.Game.Payloads.Proto
         }
         
         public StructureMetaData MetaData { get; set; }
-        public string RulesText => "TODO: Generate rules text for structures!";
+        public IEnumerable<IEffectDescriptor> EffectDescriptors { get; set; }
         public override UnitMetaData BaseMetaData => MetaData;
         public IEnumerable<IEffect> Effects => _effects;
     }
