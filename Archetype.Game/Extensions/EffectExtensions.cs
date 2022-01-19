@@ -81,7 +81,7 @@ public static class EffectExtensions
 
         LambdaExpression GetLambda()
         {
-            if (mce.Arguments.Skip(1).FirstOrDefault() is not LambdaExpression argLambda)
+            if (mce.Arguments.SecondOrDefault() is not LambdaExpression argLambda)
                 throw new MalformedEffectException($"Cannot parse ForEach on expression {mce}");
 
             return argLambda;
@@ -174,7 +174,7 @@ public static class EffectExtensions
             
             case MethodCallExpression { Method.Name: nameof(ContextExtensions.Target) } targetCall:
             {
-                var targetIndex = targetCall.Arguments.FirstOrDefault() is ConstantExpression ce ? (int)ce.Value! : 0;
+                var targetIndex = targetCall.Arguments.SecondOrDefault() is ConstantExpression ce ? (int)ce.Value! : 0;
 
                 return new Operand(new TargetProperty(targetCall.Type, targetIndex, propertyPath));
             }

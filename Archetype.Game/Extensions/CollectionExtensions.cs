@@ -46,5 +46,10 @@ namespace Archetype.Game.Extensions
         {
             return !items.Any();
         }
+
+        public static T SecondOrDefault<T>(this IEnumerable<T> source)
+        {
+            return source.Skip(1).FirstOrDefault();
+        }
     }
 }

@@ -59,7 +59,7 @@ namespace Archetype.Design
                     .Card(cardBuilder => cardBuilder
                         .Name("Health dealer")
                         .Range(1)
-                        .Effect(context => context.Target<IUnit>().Attack(context.Target<IUnit>().Health)))
+                        .Effect(context => context.Target<IUnit>(0).Attack(context.Target<IUnit>(1).Health)))
                     .Creature(creatureBuilder => creatureBuilder
                         .Name("Ghoul")
                         .Strength(1)
