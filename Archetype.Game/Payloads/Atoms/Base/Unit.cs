@@ -11,12 +11,12 @@ namespace Archetype.Game.Payloads.Atoms.Base
     [Target("Unit")]
     public interface IUnit : IZoned<IUnit>, IUnitFront
     {
-        [Verb("Attack")]
+        [Keyword("Attack")]
         IResult<IUnit, int> Attack(int strength);
-        [Verb("Heal")]
+        [Keyword("Heal")]
         IResult<IUnit, int> Heal(int strength);
 
-        [Verb("Kill")]
+        [Keyword("Kill")]
         IResult<IUnit, int> Kill();
     }
 

@@ -20,7 +20,7 @@ namespace Archetype.Game.Payloads.Atoms
         ICardFront, 
         IEffectProvider
     {
-        [Verb("Reduce cost of {0} by {1}")]
+        [Keyword("Cheapen")]
         IResult<ICard, int> ReduceCost(int x);
     }
 

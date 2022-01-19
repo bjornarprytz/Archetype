@@ -33,18 +33,17 @@ namespace Archetype.Game.Extensions
         {
             return context.GameState.Player.Hand.Contents;
         }
-
-        [ContextProperty("owner")]
-        public static IGameAtom Owner(this IContext context)
-        {
-            return context.Source.Owner;
-        }
         
-        [ContextProperty("target")]
         public static T Target<T>(this IContext context)
             where T : IGameAtom
         {
             return context.TargetProvider.GetTarget<T>();
+        }
+        
+        public static T Target<T>(this IContext context, int index)
+            where T : IGameAtom
+        {
+            return context.TargetProvider.GetTarget<T>(index);
         }
 
         [ContextFact("equal to the total damage dealt")]

@@ -23,16 +23,6 @@ namespace Archetype.Game.Attributes
             Description = description;
         }
     }
-    
-    internal class ContextPropertyAttribute : Attribute
-    {
-        public string Description { get; }
-
-        public ContextPropertyAttribute(string description)
-        {
-            Description = description;
-        }
-    }
 
     internal class ContextFactAttribute : Attribute
     {
@@ -44,11 +34,11 @@ namespace Archetype.Game.Attributes
         }
     }
 
-    internal class VerbAttribute : Attribute
+    internal class KeywordAttribute : Attribute
     {
         public string Name {get;}
 
-        public VerbAttribute(string name)
+        public KeywordAttribute(string name)
         {
             Name = name;
         }

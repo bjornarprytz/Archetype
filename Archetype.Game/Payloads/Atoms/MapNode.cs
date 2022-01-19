@@ -18,9 +18,9 @@ namespace Archetype.Game.Payloads.Atoms
         new IGraveyard Graveyard { get; }
         new IDiscardPile DiscardPile { get; }
 
-        [Verb("Create {1} at {0}, owned by {2}")]
+        [Keyword("Spawn")]
         IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
-        [Verb("Create {1} at {0}, owned by {2}")]
+        [Keyword("Build")]
         IResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
  
     }
