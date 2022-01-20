@@ -10,7 +10,6 @@ using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Structure")]
     public interface IStructure : IUnit, IStructureFront, IEffectProvider
     {
         

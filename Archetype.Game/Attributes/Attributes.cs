@@ -3,27 +3,16 @@ using System.Linq;
 
 namespace Archetype.Game.Attributes
 {
-    internal class TargetAttribute : Attribute
+    internal class PropertyShortHandAttribute : Attribute
     {
-        public string Singular { get; }
-        public string Plural { get; }
+        public string Path { get; }
 
-        public TargetAttribute(string singular, string plural=null)
+        public PropertyShortHandAttribute(string path)
         {
-            Singular = singular;
-            Plural = plural ?? $"{singular}s";
+            Path = path;
         }
     }
-
-    internal class GroupAttribute : Attribute
-    {
-        public string Description { get; }
-        public GroupAttribute(string description)
-        {
-            Description = description;
-        }
-    }
-
+    
     internal class ContextFactAttribute : Attribute
     {
         public string Description { get; }

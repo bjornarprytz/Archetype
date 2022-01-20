@@ -6,7 +6,6 @@ using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Creature")]
     public interface ICreature : IUnit, ICreatureFront
     {
         

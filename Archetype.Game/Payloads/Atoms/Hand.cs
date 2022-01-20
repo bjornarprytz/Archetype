@@ -6,7 +6,6 @@ using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Hand")]
     public interface IHand  : IZone<ICard>, IHandFront { }
 
     public class Hand : Zone<ICard>, IHand

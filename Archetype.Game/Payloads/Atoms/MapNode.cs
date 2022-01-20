@@ -11,7 +11,6 @@ using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Node")]
     public interface IMapNode : IZone<IUnit>, IMapNodeFront
     {
         new IEnumerable<IMapNode> Neighbours { get; }

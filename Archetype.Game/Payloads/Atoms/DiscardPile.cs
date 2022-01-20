@@ -6,7 +6,6 @@ using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Discard Pile")]
     public interface IDiscardPile : IZone<ICard>, IDiscardPileFront
     { }
     

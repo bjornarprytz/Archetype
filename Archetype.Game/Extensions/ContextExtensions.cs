@@ -16,22 +16,10 @@ namespace Archetype.Game.Extensions
             return new AggregatedEffectResult<TResult>(source.Select(func).ToList());
         }
         
-        [Group("each unit")]
+        [PropertyShortHand("GameState.Map.EachUnit")]
         public static IEnumerable<IUnit> EachUnit(this IContext context)
         {
             return context.GameState.Map.EachUnit();
-        }
-
-        [Group("each unit in target zone")]
-        public static IEnumerable<IUnit> UnitsInTargetZone(this IContext context)
-        {
-            return context.Target<IZone<IUnit>>().Contents;
-        }
-        
-        [Group("each card in the player's hand")]
-        public static IEnumerable<ICard> CardsInPlayersHand(this IContext context)
-        {
-            return context.GameState.Player.Hand.Contents;
         }
         
         public static T Target<T>(this IContext context)

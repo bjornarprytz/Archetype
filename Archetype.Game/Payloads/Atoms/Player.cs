@@ -10,14 +10,11 @@ using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Player")]
     public interface IPlayer : IGameAtom, IPlayerFront
     {
         new IStructure HeadQuarters { get; }
         
-        [Target("Player's deck")]
         new IDeck Deck { get; }
-        [Target("Player's hand")]
         new IHand Hand { get; }
         
         int Draw(int strength); // TODO: Return a result like the other game actions

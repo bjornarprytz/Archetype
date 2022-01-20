@@ -8,7 +8,6 @@ using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Infrastructure
 {
-    [Target("Map")]
     public interface IMap : IMapFront
     {
         new IEnumerable<IMapNode> Nodes { get; } 

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using Aqua.EnumerableExtensions;
 using Archetype.Game.Attributes;
 using Archetype.Game.Exceptions;
 using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Context.Card;
 using Archetype.View.Infrastructure;
 using OneOf;
 
@@ -67,18 +65,15 @@ public static class EffectExtensions
         where T : IContext
     {
         var lambda = GetLambda();
-        var group = GetGroup();
+        var affected = GetAffected();
 
-        return lambda.DescribeLambda(context, group);
+        return lambda.DescribeLambda(context, affected);
 
-        string GetGroup()
+        IAffected GetAffected()
         {
-            if (mce.Arguments.FirstOrDefault() is not MethodCallExpression argMce)
-                throw new MalformedEffectException("Group accessor must be a method call");
-
-            return argMce.Method.GetRequiredAttribute<GroupAttribute>().Description;
+            return mce.Arguments.First().ParseAffected();
         }
-
+        
         LambdaExpression GetLambda()
         {
             if (mce.Arguments.SecondOrDefault() is not LambdaExpression argLambda)
@@ -95,15 +90,13 @@ public static class EffectExtensions
             throw new MalformedEffectException(
                 $"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
 
-        var targetAttribute = me.Type.GetRequiredAttribute<TargetAttribute>();
+        var affected = me.ParseAffected();
 
         var verbAttribute = mce.Method.GetRequiredAttribute<KeywordAttribute>();
-
-        var @object = targetAttribute.Singular;
-
+        
         var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
 
-        return new EffectDescriptor(@object, verbAttribute.Name, operands);
+        return new EffectDescriptor(affected, verbAttribute.Name, operands);
     }
 
     private static IOperand ParseArgument<T>(this Expression exp, T context)
@@ -133,7 +126,7 @@ public static class EffectExtensions
             return new Operand(new ImmediateValue(expr.Compile().Invoke(context).ToString()));
         }
 
-        return mce.DescribeParameterPath();
+        return mce.ParseOperand();
     }
 
     private static IOperand ParseProperty<T>(this MemberExpression me, T context)
@@ -147,10 +140,10 @@ public static class EffectExtensions
             return new Operand(new ImmediateValue(expr.Compile().Invoke(context).ToString()));
         }
 
-        return me.DescribeParameterPath();
+        return me.ParseOperand();
     }
 
-    private static IEffectDescriptor DescribeLambda<T>(this LambdaExpression lambda, T context, string groupDescription)
+    private static IEffectDescriptor DescribeLambda<T>(this LambdaExpression lambda, T context, IAffected affected)
         where T : IContext
     {
         if (lambda.Body is not MethodCallExpression mce)
@@ -160,33 +153,50 @@ public static class EffectExtensions
 
         var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
 
-        return new EffectDescriptor(groupDescription, verbAttribute.Name, operands);
+        return new EffectDescriptor(affected, verbAttribute.Name, operands);
     }
 
-    private static IOperand DescribeParameterPath(this Expression expression)
+    private static IAffected ParseAffected(this Expression expression)
+    {
+        return new Affected(expression.ParseParameterPath());
+    }
+    
+    private static IOperand ParseOperand(this Expression expression)
+    {
+        return new Operand(expression.ParseParameterPath());
+    }
+
+    private static OneOf<IContextProperty, ITargetProperty, IAggregateProperty> ParseParameterPath(this Expression expression)
     {
         var (rootExpression, propertyPath) = RootExpressionAndPropertyPath();
 
         switch (rootExpression)
         {
             case ParameterExpression:
-                return new Operand(new ContextProperty(propertyPath));
+                return new ContextProperty(propertyPath);
             
             case MethodCallExpression { Method.Name: nameof(ContextExtensions.Target) } targetCall:
             {
                 var targetIndex = targetCall.Arguments.SecondOrDefault() is ConstantExpression ce ? (int)ce.Value! : 0;
 
-                return new Operand(new TargetProperty(targetCall.Type, targetIndex, propertyPath));
+                return new TargetProperty(targetCall.Type, targetIndex, propertyPath);
             }
             case MethodCallExpression mce:
-                return new Operand(
-                    new AggregateProperty(mce.Method.GetRequiredAttribute<ContextFactAttribute>().Description, propertyPath));
+                return new AggregateProperty(mce.Method.GetRequiredAttribute<ContextFactAttribute>().Description, propertyPath);
             default:
                 throw new ArgumentException($"Indescribable expression {expression}");
         }
 
         (Expression, string) RootExpressionAndPropertyPath()
         {
+            if (expression is MethodCallExpression { Method: { } methodInfo } )
+            {
+                if (methodInfo.GetCustomAttribute<PropertyShortHandAttribute>() is { Path: {} path } )
+                {
+                    return (expression, path); 
+                }
+            }
+            
             var stack = new Stack<string>();
 
             var parentExpression = expression;
@@ -245,10 +255,26 @@ public static class EffectExtensions
         return requiredAttribute;
     }
 
-    private record EffectDescriptor(string Affected, string Keyword, IEnumerable<IOperand> Arguments) : IEffectDescriptor;
+    private record EffectDescriptor(IAffected Affected, string Keyword, IEnumerable<IOperand> Arguments) : IEffectDescriptor;
 
     private record Operand : IOperand
     {
+        public Operand(IOneOf oneOf)
+        {
+            Value = oneOf.Value switch
+            {
+                IImmediateValue iv => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
+                    .FromT0(iv),
+                ITargetProperty tp => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
+                    .FromT1(tp),
+                IContextProperty cp => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
+                    .FromT2(cp),
+                IAggregateProperty ap => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
+                    .FromT3(ap),
+                _ => throw new ArgumentException($"Cannot parse operand of value type {oneOf.Value} "),
+            };
+        }
+        
         public Operand(IImmediateValue value)
         {
             Value = OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>.FromT0(value);
@@ -272,8 +298,36 @@ public static class EffectExtensions
         public OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty> Value { get; }
     }
 
+    private record Affected : IAffected
+    {
+        public Affected(IOneOf oneOf)
+        {
+            Description = oneOf.Value switch
+            {
+                ITargetProperty tp => OneOf<ITargetProperty, IContextProperty>
+                    .FromT0(tp),
+                IContextProperty cp => OneOf<ITargetProperty, IContextProperty>
+                    .FromT1(cp),
+                _ => throw new ArgumentException($"Cannot parse affected of value type {oneOf.Value} "),
+            };
+        }
+        
+        public Affected(ITargetProperty description)
+        {
+            Description = OneOf<ITargetProperty, IContextProperty>.FromT0(description);
+        }
+        
+        public Affected(IContextProperty description)
+        {
+            Description = OneOf<ITargetProperty, IContextProperty>.FromT1(description);
+        }
+        
+        public OneOf<ITargetProperty, IContextProperty> Description { get; }
+    }
+
     private record ImmediateValue(string Value) : IImmediateValue;
     private record TargetProperty(Type TargetType, int TargetIndex, string PropertyPath) : ITargetProperty;
     private record ContextProperty(string PropertyPath) : IContextProperty;
     private record AggregateProperty(string Description, string PropertyPath) : IAggregateProperty;
+
 }

@@ -7,9 +7,6 @@ using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    
-    
-    [Target("Deck")]
     public interface IDeck : IZone<ICard>, IDeckFront
     {
         ICard PopCard();

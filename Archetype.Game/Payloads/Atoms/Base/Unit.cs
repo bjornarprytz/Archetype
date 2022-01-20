@@ -8,7 +8,6 @@ using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.Game.Payloads.Atoms.Base
 {
-    [Target("Unit")]
     public interface IUnit : IZoned<IUnit>, IUnitFront
     {
         [Keyword("Attack")]

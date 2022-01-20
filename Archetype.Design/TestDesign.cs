@@ -98,7 +98,7 @@ namespace Archetype.Design
                                 .Name("Slap units")
                                 .Cost(1)
                                 .Range(1)
-                                .Effect(context => context.UnitsInTargetZone().TargetEach(unit => unit.Attack(3)))
+                                .Effect(context => context.Target<IZone<IUnit>>().Contents.TargetEach(unit => unit.Attack(3)))
                                 .Art("other")
                         )
                         .Card(builder =>
@@ -107,7 +107,7 @@ namespace Archetype.Design
                                 .Name("Slap cards in hand")
                                 .Cost(1)
                                 .Range(1)
-                                .Effect(context => context.CardsInPlayersHand().TargetEach(card => card.ReduceCost(1)))
+                                .Effect(context => context.GameState.Player.Hand.Contents.TargetEach(card => card.ReduceCost(1)))
                                 .Art("other")
                         ));
         }

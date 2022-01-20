@@ -14,7 +14,6 @@ using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Atoms
 {
-    [Target("Card")]
     public interface ICard : 
         IZoned<ICard>, 
         ICardFront, 
