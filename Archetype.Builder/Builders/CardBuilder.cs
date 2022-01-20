@@ -35,12 +35,11 @@ namespace Archetype.Builder.Builders
     {
         private readonly CardProtoData _cardProtoData;
 
-        private readonly List<ITargetDescriptor> _targets = new();
         private readonly List<IEffect> _effects = new();
 
         public CardBuilder()
         {
-            _cardProtoData = new CardProtoData(_targets, _effects);
+            _cardProtoData = new CardProtoData(_effects);
         }
 
         public ICardBuilder MetaData(CardMetaData metaData)
@@ -108,7 +107,7 @@ namespace Archetype.Builder.Builders
         {
             Console.WriteLine($"Creating card {_cardProtoData.Name}");
 
-            _cardProtoData.EffectDescriptors = _effects.Select(effect => effect.CreateDescription()).ToList();
+            _cardProtoData.GenerateDescriptors();
 
             return _cardProtoData;
         }

@@ -56,7 +56,7 @@ internal class TargetProvider : ITargetProvider
                 throw new InvalidTargetChosenException();
             }
             
-            (Targets[targetType] ??= new List<IGameAtom>()).Add(chosenTarget);
+            (Targets[targetType] ??= new List<IGameAtom>()).Add(chosenTarget); // TODO: FIx this behaviour (it throws key exception)
         }
     }
 

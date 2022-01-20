@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.View.Atoms.MetaData;
 using Archetype.View.Infrastructure;
@@ -13,20 +16,64 @@ namespace Archetype.Game.Payloads.Proto
 
     public class CardProtoData : ProtoData, ICardProtoData
     {
-        private readonly List<ITargetDescriptor> _targets; // TODO: Fill this
+        private readonly List<IEffectDescriptor> _effectDescriptors = new ();
+        private readonly List<ITargetDescriptor> _targetDescriptors = new (); 
+        
         private readonly List<IEffect> _effects;
 
-        public CardProtoData(List<ITargetDescriptor> targets, List<IEffect> effects)
+        public CardProtoData(List<IEffect> effects)
         {
-            _targets = targets;
             _effects = effects;
         }
         
         public int Cost { get; set; }
         public int Range { get; set; }
         public CardMetaData MetaData { get; set; }
-        public IEnumerable<ITargetDescriptor> TargetDescriptors => _targets;
-        public IEnumerable<IEffectDescriptor> EffectDescriptors { get; set; }
+        public IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors;
+        public IEnumerable<IEffectDescriptor> EffectDescriptors => _effectDescriptors;
         public IEnumerable<IEffect> Effects => _effects;
+
+        public void GenerateDescriptors()
+        {
+            _targetDescriptors.Clear();
+            _effectDescriptors.Clear();
+            
+            _effectDescriptors.AddRange(_effects.Select(effect => effect.CreateDescription()));
+
+            var targets =
+                _effectDescriptors.Select(descriptor => descriptor.Affected.Description.Value)
+                    .OfType<ITargetProperty>().ToList();
+
+            targets.AddRange(_effectDescriptors.SelectMany(descriptor => descriptor.Arguments)
+                .Select(operand => operand.Value.Value).OfType<ITargetProperty>());
+
+            var targetDescriptors = new Dictionary<Type, Dictionary<int, ITargetProperty>>();
+
+            foreach (var target in targets)
+            {
+                if (!targetDescriptors.TryGetValue(target.TargetType, out var perTypeTargetDescriptors))
+                {
+                    perTypeTargetDescriptors = new Dictionary<int, ITargetProperty>();
+                    targetDescriptors[target.TargetType] = perTypeTargetDescriptors;
+                }
+                
+                perTypeTargetDescriptors[target.TargetIndex] = target;
+            }
+
+            foreach (var target in targets)
+            {
+                var targetsOfType = targetDescriptors[target.TargetType]; 
+                
+                if (!targetsOfType.ContainsKey(target.TargetIndex))
+                {
+                    continue;
+                }
+                
+                _targetDescriptors.Add(new TargetDescriptor(target.TargetType));
+                targetsOfType.Remove(target.TargetIndex);
+            }
+        }
+
+        private record TargetDescriptor(Type TargetType) : ITargetDescriptor;
     }
 }
