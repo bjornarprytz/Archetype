@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.View.Atoms.MetaData;
@@ -51,13 +52,7 @@ namespace Archetype.Game.Payloads.Proto
 
             foreach (var target in targets)
             {
-                if (!targetDescriptors.TryGetValue(target.TargetType, out var perTypeTargetDescriptors))
-                {
-                    perTypeTargetDescriptors = new Dictionary<int, ITargetProperty>();
-                    targetDescriptors[target.TargetType] = perTypeTargetDescriptors;
-                }
-                
-                perTypeTargetDescriptors[target.TargetIndex] = target;
+                targetDescriptors.GetOrSet(target.TargetType)[target.TargetIndex] = target;
             }
 
             foreach (var target in targets)

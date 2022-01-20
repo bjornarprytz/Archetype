@@ -51,5 +51,16 @@ namespace Archetype.Game.Extensions
         {
             return source.Skip(1).FirstOrDefault();
         }
+
+        public static V GetOrSet<K, V>(this Dictionary<K, V> dictionary, K key)
+            where V : new()
+        {
+            if (dictionary.TryGetValue(key, out var value)) return value;
+            
+            value = new V();
+            dictionary[key] = value;
+
+            return value;
+        }
     }
 }
