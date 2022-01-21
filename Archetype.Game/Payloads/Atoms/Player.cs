@@ -17,7 +17,8 @@ namespace Archetype.Game.Payloads.Atoms
         new IDeck Deck { get; }
         new IHand Hand { get; }
         
-        int Draw(int strength); // TODO: Return a result like the other game actions
+        [Keyword("Draw")]
+        IResult<IPlayer, int> Draw(int strength);
 
         IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure);
     }
@@ -45,12 +46,9 @@ namespace Archetype.Game.Payloads.Atoms
         public IDeck Deck { get; }
         public IHand Hand { get; }
 
-        public int Draw(int strength)
+        public IResult<IPlayer, int> Draw(int strength)
         {
-            if (strength < 0)
-                throw new ArgumentException($"Cannot draw a negative number ({strength}) of cards");
-
-            var actualStrength = Math.Min(strength, Deck.Contents.Count());
+            var actualStrength = Math.Clamp(strength, 0, Deck.NumberOfCards);
             
             for (var i=0; i < actualStrength; i++)
             {
@@ -58,7 +56,7 @@ namespace Archetype.Game.Payloads.Atoms
                 card.MoveTo(Hand);
             }
 
-            return actualStrength;
+            return ResultFactory.Create(this, actualStrength);
         }
 
         public IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure)

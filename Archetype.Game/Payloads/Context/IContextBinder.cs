@@ -9,8 +9,6 @@ namespace Archetype.Game.Payloads.Context;
 public interface IContextBinder
 {
     IContext BindContext(ICardPlayArgs args);
-    
-    // TODO: bind other types of contexts too
 }
 
 internal class ContextBinder : IContextBinder
@@ -34,6 +32,7 @@ internal class ContextBinder : IContextBinder
     
     public IContext BindContext(ICardPlayArgs args)
     {
+        // TODO: Bind these in middleware instead (With attributed parameters)
         var node = _instanceFinder.FindAtom<IMapNode>(args.WhenceGuid);
         var card = _instanceFinder.FindAtom<ICard>(args.CardGuid);
         var chosenTargets = args.TargetGuids.Select(_instanceFinder.FindAtom);
