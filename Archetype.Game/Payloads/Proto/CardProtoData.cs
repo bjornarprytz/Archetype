@@ -5,6 +5,7 @@ using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.View.Atoms.MetaData;
+using Archetype.View.Extensions;
 using Archetype.View.Infrastructure;
 using Archetype.View.Proto;
 
@@ -45,7 +46,7 @@ namespace Archetype.Game.Payloads.Proto
                 _effectDescriptors.Select(descriptor => descriptor.Affected.Description.Value)
                     .OfType<ITargetProperty>().ToList();
 
-            targets.AddRange(_effectDescriptors.SelectMany(descriptor => descriptor.Arguments)
+            targets.AddRange(_effectDescriptors.SelectMany(descriptor => descriptor.Operands)
                 .Select(operand => operand.Value.Value).OfType<ITargetProperty>());
 
             var targetDescriptors = new Dictionary<Type, Dictionary<int, ITargetProperty>>();
@@ -69,6 +70,9 @@ namespace Archetype.Game.Payloads.Proto
             }
         }
 
-        private record TargetDescriptor(Type TargetType) : ITargetDescriptor;
+        private record TargetDescriptor(Type TargetType) : ITargetDescriptor
+        {
+            public string TypeId => TargetType.ReadableFullName();
+        }
     }
 }

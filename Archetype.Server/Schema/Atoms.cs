@@ -154,6 +154,7 @@ public abstract class AtomType<T> : ObjectType<T>
         base.Configure(descriptor);
 
         descriptor.Field(atom => atom.Guid);
+        descriptor.Field(atom => atom.Name);
     }
 }
 

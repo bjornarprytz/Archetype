@@ -1,7 +1,6 @@
-using System;
 using System.Text;
 
-namespace Archetype.Game.Extensions
+namespace Archetype.View.Extensions
 {
     public static class TypeExtensions
     {
