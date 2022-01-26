@@ -17,6 +17,8 @@ public class TargetType : ObjectType<ITargetDescriptor>
         descriptor.Description("Describes the target of an effect.");
         
         descriptor.Ignore(d => d.TargetType);
+
+        descriptor.IsOfType((context, result) => result is ITargetDescriptor);
     }
 }
 
@@ -80,44 +82,52 @@ public class OperandType : ObjectType<IOperand>
     }
 }
 
-public class ImmediateOperandValueType : ObjectType<ImmediateValue>
+public class ImmediateOperandValueType : ObjectType<IImmediateValue>
 {
-    protected override void Configure(IObjectTypeDescriptor<ImmediateValue> descriptor)
+    protected override void Configure(IObjectTypeDescriptor<IImmediateValue> descriptor)
     {
         base.Configure(descriptor);
 
         descriptor.Description("Immediate value");
+
+        descriptor.IsOfType((context, result) => result is IImmediateValue);
     }
 }
 
-public class TargetPropertyType : ObjectType<TargetProperty>
+public class TargetPropertyType : ObjectType<ITargetProperty>
 {
-    protected override void Configure(IObjectTypeDescriptor<TargetProperty> descriptor)
+    protected override void Configure(IObjectTypeDescriptor<ITargetProperty> descriptor)
     {
         base.Configure(descriptor);
 
         descriptor.Description("An accessor of a target, or one of its properties");
 
         descriptor.Ignore(d => d.TargetType);
+        
+        descriptor.IsOfType((context, result) => result is ITargetProperty);
     }
 }
 
-public class ContextPropertyType : ObjectType<ContextProperty>
+public class ContextPropertyType : ObjectType<IContextProperty>
 {
-    protected override void Configure(IObjectTypeDescriptor<ContextProperty> descriptor)
+    protected override void Configure(IObjectTypeDescriptor<IContextProperty> descriptor)
     {
         base.Configure(descriptor);
 
         descriptor.Description("An accessor of a context property");
+        
+        descriptor.IsOfType((context, result) => result is IContextProperty);
     }
 }
 
-public class AggregatePropertyType : ObjectType<AggregateProperty>
+public class AggregatePropertyType : ObjectType<IAggregateProperty>
 {
-    protected override void Configure(IObjectTypeDescriptor<AggregateProperty> descriptor)
+    protected override void Configure(IObjectTypeDescriptor<IAggregateProperty> descriptor)
     {
         base.Configure(descriptor);
         
         descriptor.Description("A property that is derived from some aggregate on the context");
+        
+        descriptor.IsOfType((context, result) => result is IAggregateProperty);
     }
 }

@@ -1,4 +1,5 @@
 
+using Archetype.Game.Payloads.Atoms;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
 
@@ -23,6 +24,8 @@ public class MapNodeType : AtomType<IMapNodeFront>
         base.Configure(descriptor);
 
         descriptor.Description("A node on the map");
+        
+        descriptor.IsOfType((context, result) => result is IMapNodeFront);
     }
 }
 
@@ -33,6 +36,8 @@ public class GraveyardType : AtomType<IGraveyardFront>
         base.Configure(descriptor);
 
         descriptor.Description("A graveyard that contains dead creatures");
+
+        descriptor.IsOfType((context, result) => result is IGraveyardFront);
     }
 }
 
@@ -43,6 +48,8 @@ public class DiscardPileType : AtomType<IDiscardPileFront>
         base.Configure(descriptor);
 
         descriptor.Description("Discard pile, where spent cards go");
+        
+        descriptor.IsOfType((context, result) => result is IDiscardPileFront);
     }
 }
 
@@ -53,6 +60,8 @@ public class DeckType : AtomType<IDeckFront>
         base.Configure(descriptor);
 
         descriptor.Description("A stack of cards which replenishes the player's hand");
+        
+        descriptor.IsOfType((context, result) => result is IDeckFront);
     }
 }
 
@@ -63,6 +72,8 @@ public class HandType : AtomType<IHandFront>
         base.Configure(descriptor);
 
         descriptor.Description("A hand of cards, only visible to the owner");
+        
+        descriptor.IsOfType((context, result) => result is IHandFront);
     }
 }
 
@@ -155,6 +166,8 @@ public abstract class AtomType<T> : ObjectType<T>
 
         descriptor.Field(atom => atom.Guid);
         descriptor.Field(atom => atom.Name);
+
+        descriptor.IsOfType((context, result) => result is T);
     }
 }
 
