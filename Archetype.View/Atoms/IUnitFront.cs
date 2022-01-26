@@ -2,7 +2,7 @@ using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.View.Atoms;
 
-public interface IUnitFront : IZonedFront, IGameAtomFront
+public interface IUnitFront : IPieceFront, IGameAtomFront
 {
     UnitMetaData BaseMetaData { get; }
         

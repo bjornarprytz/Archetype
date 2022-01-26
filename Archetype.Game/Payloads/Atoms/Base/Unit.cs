@@ -8,7 +8,7 @@ using Archetype.View.Atoms.MetaData;
 
 namespace Archetype.Game.Payloads.Atoms.Base
 {
-    public interface IUnit : IZoned<IUnit>, IUnitFront
+    public interface IUnit : IPiece<IUnit>, IUnitFront
     {
         [Keyword("Attack")]
         IResult<IUnit, int> Attack(int strength);
@@ -21,9 +21,8 @@ namespace Archetype.Game.Payloads.Atoms.Base
 
     public abstract class Unit : Piece<IUnit>, IUnit
     {
-        protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(owner)
+        protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(protoData.Name, owner)
         {
-            Name = protoData.Name;
             Health = MaxHealth = protoData.Health;
             Defense = MaxDefense = protoData.Defense;
         }

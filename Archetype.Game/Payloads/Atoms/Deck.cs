@@ -19,7 +19,7 @@ namespace Archetype.Game.Payloads.Atoms
     {
         private readonly Stack<ICard> _cards = new();
 
-        public Deck(IGameAtom owner) : base(owner) { }
+        public Deck(IGameAtom owner) : base(owner) {}
 
         public ICard PopCard()
         {

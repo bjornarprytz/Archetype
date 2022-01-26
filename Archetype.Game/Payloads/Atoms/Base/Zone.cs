@@ -14,7 +14,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
     }
 
     public interface IZone<T> : IZone
-        where T : IGameAtom, IZoned<T>
+        where T : IGameAtom, IPiece<T>
     {
         new IEnumerable<T> Contents { get; }
 
@@ -22,7 +22,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
     }
 
     public abstract class Zone<TContents> : Atom, IZone<TContents>
-        where TContents : IZoned<TContents>
+        where TContents : IPiece<TContents>
     {
         private readonly Dictionary<Guid, TContents> _contents = new();
 

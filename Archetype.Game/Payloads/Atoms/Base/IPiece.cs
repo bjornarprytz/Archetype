@@ -5,15 +5,15 @@ using Archetype.View.Atoms;
 
 namespace Archetype.Game.Payloads.Atoms.Base
 {
-    public interface IZoned<T> : IGameAtom, IZonedFront
-        where  T : IGameAtom, IZoned<T>
+    public interface IPiece<T> : IGameAtom, IPieceFront
+        where  T : IGameAtom, IPiece<T>
     {
         IObservable<ZoneTransition<T>> Transition { get; }
         new IZone<T> CurrentZone { get; }
 
         [Keyword("Move")]
-        IResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone);
+        IResult<IPiece<T>, ZoneTransition<T>> MoveTo(IZone<T> zone);
     }
 
-    public record ZoneTransition<T>(IZone<T> From, IZone<T> To, IZoned<T> Who) where T : IZoned<T>;
+    public record ZoneTransition<T>(IZone<T> From, IZone<T> To, IPiece<T> Who) where T : IPiece<T>;
 }

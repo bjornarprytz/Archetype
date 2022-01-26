@@ -1,5 +1,6 @@
 
 using Archetype.Game.Payloads.Atoms;
+using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
 
@@ -77,20 +78,7 @@ public class HandType : AtomType<IHandFront>
     }
 }
 
-
-
-public class UnitUnion : UnionType
-{
-    protected override void Configure(IUnionTypeDescriptor descriptor)
-    {
-        base.Configure(descriptor);
-
-        descriptor.Type<StructureType>();
-        descriptor.Type<CreatureType>();
-    }
-}
-
-public class StructureType : UnitType<IStructureFront>
+public class StructureType : UnitType<IStructureFront, StructureType.StructureZoneUnion>
 {
     protected override void Configure(IObjectTypeDescriptor<IStructureFront> descriptor)
     {
@@ -109,15 +97,12 @@ public class StructureType : UnitType<IStructureFront>
     }
 }
 
-public class CreatureType : UnitType<ICreatureFront>
+public class CreatureType : UnitType<ICreatureFront, CreatureType.CreatureZoneUnion>
 {
     protected override void Configure(IObjectTypeDescriptor<ICreatureFront> descriptor)
     {
         base.Configure(descriptor);
         descriptor.Description("An instance of a Creature");
-
-        descriptor.Field(creature => creature.CurrentZone)
-            .Type<CreatureZoneUnion>();
     }
     
     public class CreatureZoneUnion : UnionType
@@ -132,16 +117,13 @@ public class CreatureType : UnitType<ICreatureFront>
     }
 }
 
-public class CardType : AtomType<ICardFront>
+public class CardType : PieceType<ICardFront, CardType.CardZoneUnion>
 {
     protected override void Configure(IObjectTypeDescriptor<ICardFront> descriptor)
     {
         base.Configure(descriptor);
         
         descriptor.Description("A card instance");
-
-        descriptor.Field(card => card.CurrentZone)
-            .Type<CardZoneUnion>();
     }
     
     public class CardZoneUnion : UnionType
@@ -157,22 +139,9 @@ public class CardType : AtomType<ICardFront>
     }
 }
 
-public abstract class AtomType<T> : ObjectType<T>
-    where T : IGameAtomFront
-{
-    protected override void Configure(IObjectTypeDescriptor<T> descriptor)
-    {
-        base.Configure(descriptor);
-
-        descriptor.Field(atom => atom.Guid);
-        descriptor.Field(atom => atom.Name);
-
-        descriptor.IsOfType((context, result) => result is T);
-    }
-}
-
-public abstract class UnitType<T> : AtomType<T>
+public abstract class UnitType<T, TZone> : PieceType<T, TZone>
     where T : IUnitFront
+    where TZone : UnionType
 {
     protected override void Configure(IObjectTypeDescriptor<T> descriptor)
     {
@@ -185,3 +154,32 @@ public abstract class UnitType<T> : AtomType<T>
         descriptor.Field(t => t.Defense);
     }
 }
+
+public abstract class PieceType<T, TZone> : AtomType<T>
+    where T : IPieceFront
+    where TZone : UnionType
+{
+    protected override void Configure(IObjectTypeDescriptor<T> descriptor)
+    {
+        base.Configure(descriptor);
+
+        descriptor.Field(atom => atom.Name);
+
+        descriptor.Field(piece => piece.CurrentZone)
+            .Type<TZone>();
+    }
+}
+
+
+public abstract class AtomType<T> : ObjectType<T>
+    where T : IGameAtomFront
+{
+    protected override void Configure(IObjectTypeDescriptor<T> descriptor)
+    {
+        base.Configure(descriptor);
+
+        descriptor.Field(atom => atom.Guid);
+    }
+}
+
+

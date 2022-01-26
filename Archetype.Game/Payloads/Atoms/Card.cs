@@ -15,7 +15,7 @@ using Archetype.View.Infrastructure;
 namespace Archetype.Game.Payloads.Atoms
 {
     public interface ICard : 
-        IZoned<ICard>, 
+        IPiece<ICard>, 
         ICardFront, 
         IEffectProvider
     {
@@ -29,9 +29,8 @@ namespace Archetype.Game.Payloads.Atoms
         private readonly List<IEffectDescriptor> _effectDescriptors;
         private readonly List<IEffect> _effects;
 
-        public Card(ICardProtoData protoData, IGameAtom owner) : base(owner)
+        public Card(ICardProtoData protoData, IGameAtom owner) : base(protoData.Name, owner)
         {
-            Name = protoData.Name;
             _targetDescriptors = protoData.TargetDescriptors.ToList();
             _effectDescriptors = protoData.EffectDescriptors.ToList();
             _effects = protoData.Effects.ToList();

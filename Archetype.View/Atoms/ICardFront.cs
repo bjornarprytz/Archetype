@@ -3,7 +3,7 @@ using Archetype.View.Infrastructure;
 
 namespace Archetype.View.Atoms;
 
-public interface ICardFront : IZonedFront, IGameAtomFront
+public interface ICardFront : IPieceFront, IGameAtomFront
 {
     CardMetaData MetaData { get; }
     int Cost { get; }

@@ -16,8 +16,6 @@ namespace Archetype.Game.Payloads.Atoms.Base
             Owner = owner ??= this;
         }
 
-        public string Name { get; set; }
-
         public Guid Guid { get; }
         public IGameAtom Owner { get; }
         IGameAtomFront IGameAtomFront.Owner => Owner;

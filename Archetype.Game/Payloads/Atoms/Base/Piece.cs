@@ -7,13 +7,19 @@ using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Payloads.Atoms.Base
 {
-    public abstract class Piece<T> : Atom, IZoned<T>
-        where T : class, IGameAtom, IZoned<T>
+    public abstract class Piece<T> : Atom, IPiece<T>
+        where T : class, IGameAtom, IPiece<T>
     {
         private readonly Subject<ZoneTransition<T>> _onTransition = new();
         private IZone<T> _currentZone;
-        protected Piece(IGameAtom owner) : base(owner) { }
 
+        protected Piece(string name, IGameAtom owner) : base(owner)
+        {
+            Name = name;
+        }
+
+        public string Name { get; }
+        
         public IObservable<ZoneTransition<T>> Transition => _onTransition;
 
         public IZone<T> CurrentZone
@@ -32,10 +38,10 @@ namespace Archetype.Game.Payloads.Atoms.Base
             } 
         }
 
-        public IResult<IZoned<T>, ZoneTransition<T>> MoveTo(IZone<T> zone)
+        public IResult<IPiece<T>, ZoneTransition<T>> MoveTo(IZone<T> zone)
         {
             if (zone == CurrentZone)
-                return ResultFactory.Null<IZoned<T>, ZoneTransition<T>>(this);
+                return ResultFactory.Null<IPiece<T>, ZoneTransition<T>>(this);
 
             var prevZone = CurrentZone;
             
@@ -47,6 +53,6 @@ namespace Archetype.Game.Payloads.Atoms.Base
         }
 
         protected abstract T Self { get; }
-        IZoneFront IZonedFront.CurrentZone => CurrentZone;
+        IZoneFront IPieceFront.CurrentZone => CurrentZone;
     }
 }
