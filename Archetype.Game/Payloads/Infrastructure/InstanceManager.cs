@@ -15,6 +15,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IInstanceFactory
     {
+        IMapNode CreateMapNode(IMapNodeProtoData nodeData, IGameAtom owner);
         ICard CreateCard(ICardProtoData cardData, IGameAtom owner);
         ICard CreateCard(string name, IGameAtom owner);
         IStructure CreateStructure(IStructureProtoData structureData, IGameAtom owner);
@@ -57,6 +58,15 @@ namespace Archetype.Game.Payloads.Infrastructure
                 throw new InvalidOperationException($"Atom with guid {instanceGuid} could not be found");
             
             return atom;
+        }
+
+        public IMapNode CreateMapNode(IMapNodeProtoData nodeData, IGameAtom owner)
+        {
+            var node = new MapNode(owner, this);
+
+            AddAtom(node);
+
+            return node;
         }
 
         public ICard CreateCard(ICardProtoData cardData, IGameAtom owner)

@@ -14,7 +14,6 @@ namespace Archetype.Builder.Extensions
                 .AddFactory<IStructureBuilder, StructureBuilder>()
                 .AddFactory<ICreatureBuilder, CreatureBuilder>()
                 .AddFactory<IMapBuilder, MapBuilder>()
-                .AddFactory<INodeBuilder, NodeBuilder>()
                 .AddFactory<ISetBuilder, SetBuilder>();
 
             return serviceCollection;

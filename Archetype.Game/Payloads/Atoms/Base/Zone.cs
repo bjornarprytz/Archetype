@@ -46,9 +46,11 @@ namespace Archetype.Game.Payloads.Atoms.Base
                 throw new ZonePlacementException(this,
                     $"{nameof(atom.CurrentZone)} should be set before {nameof(_Place)} is called");
             
+            
+            
             _contents.Add(atom.Guid, atom);
 
-            atom.Transition
+            atom.Transition // TODO: Simplify this; The transition is not always being caught properly 
                 .Where(t => t.From == this && t.To == this)
                 .Take(1)
                 .Subscribe(HandleZoneTransition);

@@ -90,7 +90,7 @@ namespace Archetype.Game.Payloads.Context
     internal record EffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result)
         : IResult<TAffected, TResult> where TAffected : class, IGameAtom
     {
-        public bool IsNull => Result is not null;
+        public bool IsNull => Result is null;
         public IEnumerable<IGameAtom> AllAffected => new[] { Affected };
         object IResult.Result => Result;
     }

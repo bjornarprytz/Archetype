@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
@@ -12,7 +13,7 @@ namespace Archetype.Game.Payloads.Infrastructure
     {
         new IEnumerable<IMapNode> Nodes { get; } 
 
-        void Generate(IMapProtoData protoData);
+        void AddNodes(IEnumerable<IMapNode> nodes);
     }
 
     internal class Map : IMap
@@ -20,9 +21,9 @@ namespace Archetype.Game.Payloads.Infrastructure
         private readonly List<IMapNode> _nodes = new();
 
         public IEnumerable<IMapNode> Nodes => _nodes;
-        public void Generate(IMapProtoData protoData)
+        public void AddNodes(IEnumerable<IMapNode> nodes)
         {
-            _nodes.AddRange(protoData.Nodes);
+            _nodes.AddRange(nodes);
         }
 
         IEnumerable<IMapNodeFront> IMapFront.Nodes => Nodes;

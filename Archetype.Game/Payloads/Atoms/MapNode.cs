@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
@@ -21,16 +20,13 @@ namespace Archetype.Game.Payloads.Atoms
         IResult<IMapNode, ICreature> CreateCreature(string name, IGameAtom owner);
         [Keyword("Build")]
         IResult<IMapNode, IStructure> CreateStructure(string name, IGameAtom owner);
- 
+
+        [Keyword("Connect")]
+        IResult<IMapNode, IMapNode> ConnectTo(IMapNode other);
+
     }
 
-    public interface IMutableMapNode : IMapNode
-    {
-        void AddNeighbour(IMutableMapNode node);
-        void RemoveNeighbour(IMutableMapNode node);
-    }
-
-    public class MapNode : Zone<IUnit>, IMutableMapNode
+    public class MapNode : Zone<IUnit>, IMapNode
     {
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
@@ -41,7 +37,7 @@ namespace Archetype.Game.Payloads.Atoms
             DiscardPile = new DiscardPile(this);
             Graveyard = new Graveyard(this);
         }
-
+        
         public IEnumerable<IUnitFront> Units => Contents;
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
@@ -67,22 +63,15 @@ namespace Archetype.Game.Payloads.Atoms
             return ResultFactory.Create(this, creature);
         }
 
-        public void AddNeighbour(IMutableMapNode node)
+        public IResult<IMapNode, IMapNode> ConnectTo(IMapNode other)
         {
-            if (_neighbours.ContainsKey(node.Guid))
-                return;
+            if (_neighbours.ContainsKey(other.Guid))
+                return ResultFactory.Null<IMapNode, IMapNode>(this);
             
-            _neighbours.Add(node.Guid, node);
-            node.AddNeighbour(this);
-        }
+            _neighbours.Add(other.Guid, other);
+            other.ConnectTo(this);
 
-        public void RemoveNeighbour(IMutableMapNode node)
-        {
-            if (!_neighbours.ContainsKey(node.Guid))
-                return;
-
-            _neighbours.Remove(node.Guid);
-            node.RemoveNeighbour(this);
+            return ResultFactory.Create(this, other);
         }
     }
 }

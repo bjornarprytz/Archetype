@@ -1,53 +1,39 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Aqua.EnumerableExtensions;
 using Archetype.Builder.Builders.Base;
 using Archetype.Builder.Exceptions;
-using Archetype.Builder.Extensions;
-using Archetype.Builder.Factory;
-using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Proto;
+using Archetype.Game.Extensions;
 
 namespace Archetype.Builder.Builders
 {
     public interface IMapBuilder : IBuilder<IMapProtoData>
     {
-        public IMapBuilder Node(Action<INodeBuilder> builderProvider);
         public IMapBuilder Nodes(int numberOfNodes);
         public IMapBuilder Connect(int n1, int n2);
     }
 
     internal class MapBuilder : IMapBuilder
     {
-        private readonly IFactory<INodeBuilder> _nodeBuilderFactory;
-        private readonly List<IMutableMapNode> _nodes = new();
+        private readonly List<IMapNodeProtoData> _nodes = new();
 
         private readonly IMapProtoData _mapProtoData;
-        
-        public MapBuilder(IFactory<INodeBuilder> nodeBuilderFactory)
+
+        private readonly Dictionary<int, List<int>> _connections = new();
+
+        public MapBuilder()
         {
-            _nodeBuilderFactory = nodeBuilderFactory;
             _mapProtoData = new MapProtoData(_nodes);
-        }
-
-        public IMapBuilder Node(Action<INodeBuilder> builderProvider)
-        {
-            var builder = _nodeBuilderFactory.Create();
-
-            builderProvider(builder);
-            
-            _nodes.Add(builder.Build());
-
-            return this;
         }
 
         public IMapBuilder Nodes(int numberOfNodes)
         {
             for (var i = 0; i < numberOfNodes; i++)
             {
-                var builder = _nodeBuilderFactory.Create();
+                var node = new MapNodeProtoData(i, _connections.GetOrSet(i));
                 
-                _nodes.Add(builder.Build());
+                _nodes.Add(node);
             }
 
             return this;
@@ -55,17 +41,18 @@ namespace Archetype.Builder.Builders
 
         public IMapBuilder Connect(int n1, int n2)
         {
-            var node1 = _nodes.ElementAt(n1);
-            var node2 = _nodes.ElementAt(n2);
+            if (n1 == n2)
+                return this;
             
-            node1.AddNeighbour(node2);
+            _connections
+                .GetOrSet(n1).Add(n2);
 
             return this;
         }
         
         public IMapProtoData Build()
         {
-            if (_nodes.Count > 1 && _nodes.Any(node => node.Neighbours.IsEmpty()))
+            if (_nodes.Count == 1 || _nodes.Any(node => _connections.All((conns => conns.Key != node.Id && conns.Value.All(id => id != node.Id)))))
                 throw new DisconnectedNodesException();
             
             return _mapProtoData;

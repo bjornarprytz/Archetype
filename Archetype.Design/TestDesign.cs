@@ -6,6 +6,7 @@ using Archetype.Design.Extensions;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
+using Archetype.Game.Payloads.Proto;
 using Archetype.View.Primitives;
 
 namespace Archetype.Design
@@ -18,6 +19,7 @@ namespace Archetype.Design
     public class TestDesign : IDesign
     {
         private readonly IProtoPool _protoPool;
+        private readonly IInstanceFactory _instanceFactory;
         private readonly IFactory<ISetBuilder> _setBuilderFactory;
         private readonly IFactory<IMapBuilder> _mapBuilderFactory;
         private readonly IMap _map;
@@ -25,13 +27,15 @@ namespace Archetype.Design
 
 
         public TestDesign(
-            IProtoPool protoPool, 
+            IProtoPool protoPool,
+            IInstanceFactory instanceFactory,
             IFactory<ISetBuilder> setBuilderFactory,
             IFactory<IMapBuilder> mapBuilderFactory,
-            IMap map, 
+            IMap map,
             IPlayerData playerData)
         {
             _protoPool = protoPool;
+            _instanceFactory = instanceFactory;
             _setBuilderFactory = setBuilderFactory;
             _mapBuilderFactory = mapBuilderFactory;
             _map = map;
@@ -114,13 +118,30 @@ namespace Archetype.Design
 
         private void CreateMap()
         {
-            _map.Generate(
+            _map.AddNodes(Generate(
                 _mapBuilderFactory.Create()
                     .Nodes(3)
                     .Connect(0,2)
                     .Connect(2,1)
-                    .Build());
+                    .Build()));
 
+        }
+
+        private IEnumerable<IMapNode> Generate(IMapProtoData protoData)
+        {
+            var protoDatas = protoData.Nodes.ToArray();
+            
+            var mapNodes = protoData.Nodes.Select(protoData => _instanceFactory.CreateMapNode(protoData, null)).ToArray();
+
+            foreach (var (mapNode, i) in mapNodes.Select((node, i) => (node, i)))
+            {
+                foreach (var neighbour in protoDatas[i].Connections)
+                {
+                    mapNode.ConnectTo(mapNodes[neighbour]); // TODO: History log this?
+                }
+            }
+
+            return mapNodes;
         }
     }
     
