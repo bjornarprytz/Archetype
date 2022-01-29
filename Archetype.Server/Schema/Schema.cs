@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Server.Actions;
+using Archetype.View.Atoms;
+using Archetype.View.Events;
 using Archetype.View.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
@@ -53,14 +58,15 @@ namespace Archetype.Server
             PlayCardInput playCardInput,
             ITopicEventSender eventSender,
             [Service] IMediator mediator,
+            [Service] IMutationObserver mutationObserver, // TODO: Factory this instead?
             CancellationToken cancellationToken
         )
         {
             var (cardGuid, whenceNodeGuid, targetGuids) = playCardInput;
-            
+
             await mediator.Send(new PlayCardAction(cardGuid, whenceNodeGuid, targetGuids), cancellationToken);
 
-            var payload = new PlayCardPayload($"Card played ({cardGuid})");
+            var payload = new PlayCardPayload(mutationObserver.Events.ToList());
 
             await eventSender.SendAsync(nameof(Subscriptions.OnCardPlayed), payload, cancellationToken);
             
@@ -68,7 +74,12 @@ namespace Archetype.Server
         }
 
         public record PlayCardInput(Guid CardGuid, Guid WhenceNodeGuid, IEnumerable<Guid> TargetGuids);
-        public record PlayCardPayload(string Message);// TODO: replace placeholder value 
+        public record PlayCardPayload(IEnumerable<IAtomMutation> Events);// TODO: replace placeholder value
+
+        private record Mut(ICardFront Atom) : IAtomMutation<ICardFront>
+        {
+            IGameAtomFront IAtomMutation.Atom => Atom;
+        }
     }
     
     public class Subscriptions

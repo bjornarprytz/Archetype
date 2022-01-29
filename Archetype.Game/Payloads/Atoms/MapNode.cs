@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive.Subjects;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
@@ -7,11 +8,13 @@ using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
+using Archetype.View.Events;
 
 namespace Archetype.Game.Payloads.Atoms
 {
     public interface IMapNode : IZone<IUnit>, IMapNodeFront
     {
+        new IObservable<IAtomMutation<IMapNode>> OnMutation { get; }
         new IEnumerable<IMapNode> Neighbours { get; }
         new IGraveyard Graveyard { get; }
         new IDiscardPile DiscardPile { get; }
@@ -30,6 +33,7 @@ namespace Archetype.Game.Payloads.Atoms
     {
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
+        private readonly Subject<IAtomMutation<IMapNode>> _mutation = new();
 
         public MapNode(IGameAtom owner, IInstanceFactory instanceFactory) : base(owner)
         {
@@ -39,6 +43,9 @@ namespace Archetype.Game.Payloads.Atoms
         }
         
         public IEnumerable<IUnitFront> Units => Contents;
+
+        IObservable<IAtomMutation<IMapNode>> IMapNode.OnMutation => _mutation;
+        public override IObservable<IAtomMutation> OnMutation => _mutation;
         public IEnumerable<IMapNode> Neighbours => _neighbours.Values;
         public IGraveyard Graveyard { get; }
         public IDiscardPile DiscardPile { get; }

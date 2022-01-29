@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Aqua.EnumerableExtensions;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
@@ -9,6 +10,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 {
     public interface IInstanceFinder
     {
+        IEnumerable<T> GetAll<T>() where T : IGameAtom;
         T FindAtom<T>(Guid instanceGuid) where T : IGameAtom;
         IGameAtom FindAtom(Guid instanceGuid);
     }
@@ -37,6 +39,11 @@ namespace Archetype.Game.Payloads.Infrastructure
             _protoPool = protoPool;
 
             RegisterKnownGameState();
+        }
+
+        public IEnumerable<T> GetAll<T>() where T : IGameAtom
+        {
+            return _atoms.Values.OfType<T>();
         }
 
         public T FindAtom<T>(Guid instanceGuid) where T : IGameAtom

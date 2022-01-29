@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
@@ -10,7 +11,9 @@ using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.MetaData;
+using Archetype.View.Events;
 using Archetype.View.Infrastructure;
+using Unit = System.Reactive.Unit;
 
 namespace Archetype.Game.Payloads.Atoms
 {
@@ -47,14 +50,15 @@ namespace Archetype.Game.Payloads.Atoms
 
         public CardMetaData MetaData { get; }
         public IEnumerable<IEffect> Effects => _effects;
-        
-        
+
         public IResult<ICard, int> ReduceCost(int x)
         {
             Console.WriteLine($"Reducing cost by {x}!");
 
             Cost -= x;
 
+            Mutation.OnNext(new AtomMutation<ICard>(this));
+            
             return ResultFactory.Create(this, x);
         }
 

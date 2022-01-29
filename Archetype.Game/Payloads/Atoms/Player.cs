@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Subjects;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
@@ -7,11 +8,14 @@ using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
+using Archetype.View.Events;
 
 namespace Archetype.Game.Payloads.Atoms
 {
     public interface IPlayer : IGameAtom, IPlayerFront
     {
+        new IObservable<IAtomMutation<IPlayer>> OnMutation { get; }
+        
         new IStructure HeadQuarters { get; }
         
         new IDeck Deck { get; }
@@ -26,6 +30,8 @@ namespace Archetype.Game.Payloads.Atoms
     internal class Player : Atom, IPlayer
     {
         private readonly IPlayerData _protoData;
+        private int _resources;
+        private readonly Subject<IAtomMutation<IPlayer>> _mutation = new();
 
         public Player(IPlayerData protoData)
         {
@@ -37,7 +43,23 @@ namespace Archetype.Game.Payloads.Atoms
             Hand = new Hand(this);
         }
         public int MaxHandSize => _protoData.MaxHandSize;
-        public int Resources { get; set; }
+
+        public int Resources
+        {
+            get => _resources;
+            set
+            {
+                if (_resources == value)
+                    return;
+                
+                _resources = value;
+                _mutation.OnNext(new AtomMutation<IPlayer>(this));
+            }
+        }
+
+        IObservable<IAtomMutation<IPlayer>> IPlayer.OnMutation => _mutation;
+        public override IObservable<IAtomMutation> OnMutation => _mutation;
+
         public IStructure HeadQuarters { get; private set; }
         IDeckFront IPlayerFront.Deck => Deck;
         IHandFront IPlayerFront.Hand => Hand;
@@ -65,5 +87,7 @@ namespace Archetype.Game.Payloads.Atoms
             
             return ResultFactory.Create(this, structure);
         }
+
+        
     }
 }

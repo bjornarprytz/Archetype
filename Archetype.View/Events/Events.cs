@@ -2,14 +2,19 @@ using Archetype.View.Atoms;
 
 namespace Archetype.View.Events;
 
-public interface IAtomMutation<out T>
+
+public interface IAtomMutation
+{
+    IGameAtomFront Atom { get; }
+}
+public interface IAtomMutation<out T> : IAtomMutation
     where T : IGameAtomFront
 {
-    T Atom { get; }
+    new T Atom { get; }
 }
 
-public interface IAtomCreated<out T>
+public record AtomMutation<T>(T Atom) : IAtomMutation<T> // TODO: Do more with this (detail which field changed?)
     where T : IGameAtomFront
 {
-    T Atom { get; }
+    IGameAtomFront IAtomMutation.Atom => Atom;
 }
