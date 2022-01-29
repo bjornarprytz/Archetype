@@ -48,8 +48,8 @@ namespace Archetype.Server
             }
 
             app
-                .UseWebSockets()
                 .UseRouting()
+                .UseWebSockets()
                 .UseEndpoints(endpoints =>
                 {
                     endpoints.MapGraphQL();
