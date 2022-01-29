@@ -10,18 +10,15 @@ namespace Archetype.Game.Payloads.Context.Phases
     {
         private readonly IGameState _gameState;
         private readonly IContextResolver _contextResolver;
-        private readonly IContextBinder _contextBinder;
 
         public UpkeepPhase(
             IGameState gameState, 
             IHistoryWriter historyWriter, 
-            IContextResolver contextResolver,
-            IContextBinder contextBinder
+            IContextResolver contextResolver
             ) : base(historyWriter)
         {
             _gameState = gameState;
             _contextResolver = contextResolver;
-            _contextBinder = contextBinder;
         }
 
         protected override IResultsReader ResolvePhase(IResultsReaderWriter resultsReaderCollector)

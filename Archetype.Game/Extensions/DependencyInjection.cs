@@ -25,7 +25,8 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()
                     
                     .AddSingleton<IContextResolver, ContextResolver>()
-                    .AddSingleton<IContextBinder, ContextBinder>()
+                    
+                    .AddSingleton<IContextFactory<ICardPlayArgs>, CardContextFactory>()
                     
                     .AddSingleton<IMovePhaseResolver, MovePhase>()
                     .AddSingleton<ICombatPhaseResolver, CombatPhase>()

@@ -13,40 +13,25 @@ using Unit = MediatR.Unit;
 
 namespace Archetype.Server.Actions;
 
-public class PlayCardAction : IRequest
-{
-    public PlayCardAction(Guid cardGuid, Guid whenceNodeGuid, IEnumerable<Guid> targetGuids)
-    {
-        CardGuid = cardGuid;
-        WhenceNodeGuid = whenceNodeGuid;
-        TargetGuids = targetGuids;
-    }
-
-    public Guid CardGuid { get; set; }
-    public Guid WhenceNodeGuid { get; }
-    public IEnumerable<Guid> TargetGuids { get; }
-}
+public record PlayCardAction(Guid CardGuid, Guid WhenceNodeGuid, IEnumerable<Guid> TargetGuids) : IRequest;
 
 public class PlayCardActionHandler : IRequestHandler<PlayCardAction>
 {
-    private readonly IContextBinder _contextBinder;
+    private readonly IContextFactory<ICardPlayArgs> _cardContextFactory;
     private readonly IContextResolver _contextResolver;
-    private readonly IHistoryWriter _historyWriter;
 
     public PlayCardActionHandler(
-        IContextBinder contextBinder,
-        IContextResolver contextResolver,
-        IHistoryWriter historyWriter)
+        IContextFactory<ICardPlayArgs> cardContextFactory,
+        IContextResolver contextResolver)
     {
-        _contextBinder = contextBinder;
+        _cardContextFactory = cardContextFactory;
         _contextResolver = contextResolver;
-        _historyWriter = historyWriter;
     }
     
     
     public Task<Unit> Handle(PlayCardAction request, CancellationToken cancellationToken)
     {
-        using var context = _contextBinder.BindContext(new PlayCardArgs(request));
+        using var context = _cardContextFactory.BindContext(new PlayCardArgs(request));
 
         _contextResolver.Resolve(context);
         
