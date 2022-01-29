@@ -163,8 +163,7 @@ public abstract class PieceType<T, TZone> : AtomType<T>
     {
         base.Configure(descriptor);
 
-        descriptor.Field(atom => atom.Name);
-
+        descriptor.Field(piece => piece.Name);
         descriptor.Field(piece => piece.CurrentZone)
             .Type<TZone>();
     }
@@ -179,6 +178,8 @@ public abstract class AtomType<T> : ObjectType<T>
         base.Configure(descriptor);
 
         descriptor.Field(atom => atom.Guid);
+
+        descriptor.IsOfType((context, result) => result is T);
     }
 }
 
