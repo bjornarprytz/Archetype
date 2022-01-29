@@ -22,9 +22,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
             if (zone == CurrentZone)
                 return ResultFactory.Null<IPiece<T>, IZone<T>>(this);
 
-            var prevZone = CurrentZone;
-            
-            prevZone?.Remove(Self);
+            CurrentZone?.Remove(Self);
             CurrentZone = zone;
             CurrentZone?.Add(Self);
 

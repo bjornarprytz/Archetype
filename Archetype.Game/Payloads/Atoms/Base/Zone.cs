@@ -15,23 +15,23 @@ namespace Archetype.Game.Payloads.Atoms.Base
         void Remove(T piece);
     }
 
-    internal abstract class Zone<TContents> : Atom, IZone<TContents>
-        where TContents : IPiece
+    internal abstract class Zone<T> : Atom, IZone<T>
+        where T : IPiece
     {
-        private readonly Dictionary<Guid, TContents> _contents = new();
+        private readonly Dictionary<Guid, T> _contents = new();
 
         protected Zone(IGameAtom owner) : base(owner) { }
         
-        public IEnumerable<TContents> Contents => _contents.Values;
+        public IEnumerable<T> Contents => _contents.Values;
 
         IEnumerable<IGameAtomFront> IZoneFront.Contents => _contents.Values.OfType<IGameAtomFront>();
         
-        public void Add(TContents piece)
+        public void Add(T piece)
         {
             _contents.Add(piece.Guid, piece);
         }
 
-        public void Remove(TContents piece)
+        public void Remove(T piece)
         {
             _contents.Remove(piece.Guid);
         }
