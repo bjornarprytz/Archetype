@@ -26,7 +26,7 @@ namespace Archetype.Game.Payloads.Atoms
 
     }
 
-    public class MapNode : Zone<IUnit>, IMapNode
+    internal class MapNode : Zone<IUnit>, IMapNode
     {
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();

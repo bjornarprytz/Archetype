@@ -19,7 +19,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
         IResult<IUnit, int> Kill();
     }
 
-    public abstract class Unit : Piece<IUnit>, IUnit
+    internal abstract class Unit : Piece<IUnit>, IUnit
     {
         protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(protoData.Name, owner)
         {

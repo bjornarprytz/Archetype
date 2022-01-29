@@ -1,6 +1,7 @@
 using System;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context.Card;
+using Archetype.View.Atoms.Zones;
 
 namespace Archetype.Game.Exceptions
 {
@@ -20,7 +21,7 @@ namespace Archetype.Game.Exceptions
     {
         public override string Message { get; }
 
-        internal ZonePlacementException(IZone zone, string details)
+        internal ZonePlacementException(IZoneFront zone, string details)
         {
             Message = $"Invalid placement in zone {zone} due to: {details}";
         }

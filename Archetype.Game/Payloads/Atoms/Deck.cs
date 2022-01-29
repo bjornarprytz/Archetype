@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Archetype.Game.Attributes;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.View.Atoms.Zones;
@@ -15,7 +14,7 @@ namespace Archetype.Game.Payloads.Atoms
         void PutCardOnBottom(ICard card);
     }
 
-    public class Deck : Zone<ICard>, IDeck
+    internal class Deck : Zone<ICard>, IDeck
     {
         private readonly Stack<ICard> _cards = new();
 

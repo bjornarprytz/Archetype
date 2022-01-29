@@ -8,7 +8,7 @@ namespace Archetype.Game.Payloads.Atoms
 {
     public interface IHand  : IZone<ICard>, IHandFront { }
 
-    public class Hand : Zone<ICard>, IHand
+    internal class Hand : Zone<ICard>, IHand
     {
         public Hand(IGameAtom owner) : base(owner) { }
         public IEnumerable<ICardFront> Cards => Contents;
