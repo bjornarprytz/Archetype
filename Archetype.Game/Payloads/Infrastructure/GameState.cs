@@ -1,8 +1,6 @@
-﻿using System;
-using Archetype.Game.Payloads.Atoms;
+﻿using Archetype.Game.Payloads.Atoms;
 using Archetype.View;
 using Archetype.View.Atoms;
-using Archetype.View.Events;
 using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Infrastructure
@@ -22,9 +20,9 @@ namespace Archetype.Game.Payloads.Infrastructure
         }
 
         public IPlayer Player { get; }
-        public IMap Map { get; }
-        IPlayerFront IGameStateFront.Player => Player;
         IMapFront IGameStateFront.Map => Map;
+        IPlayerFront IGameStateFront.Player => Player;
 
+        public IMap Map { get; }
     }
 }

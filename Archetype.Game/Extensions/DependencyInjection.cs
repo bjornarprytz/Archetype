@@ -24,8 +24,6 @@ namespace Archetype.Game.Extensions
                     .AddSingleton<IHistoryReader, IHistoryWriter, History>()
                     .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()
                     
-                    .AddTransient<IMutationObserver, MutationObserver>()
-                    
                     .AddSingleton<IContextResolver, ContextResolver>()
                     
                     .AddSingleton<IContextFactory<ICardPlayArgs>, CardContextFactory>()

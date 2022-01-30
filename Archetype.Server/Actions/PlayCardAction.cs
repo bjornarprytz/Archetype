@@ -8,8 +8,8 @@ using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Context.Card;
 using Archetype.Game.Payloads.Infrastructure;
-using Archetype.View.Atoms;
 using MediatR;
+using Unit = MediatR.Unit;
 
 namespace Archetype.Server.Actions;
 
@@ -42,7 +42,9 @@ public class PlayCardActionHandler : IRequestHandler<PlayCardAction>
     {
         public PlayCardArgs(PlayCardAction playCardAction)
         {
-            (CardGuid, WhenceGuid, TargetGuids) = playCardAction;
+            CardGuid = playCardAction.CardGuid;
+            WhenceGuid = playCardAction.WhenceNodeGuid;
+            TargetGuids = playCardAction.TargetGuids;
         }
         public Guid CardGuid { get; }
         public Guid WhenceGuid { get; }

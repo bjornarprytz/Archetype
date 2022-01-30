@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Subjects;
 using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.View.Atoms.Zones;
-using Archetype.View.Events;
 
 namespace Archetype.Game.Payloads.Atoms
 {
     public interface IDeck : IZone<ICard>, IDeckFront
     {
-        new IObservable<IAtomMutation<IDeck>> OnMutation { get; }
         ICard PopCard();
         void Shuffle();
         void PutCardOnTop(ICard card);
@@ -21,12 +17,8 @@ namespace Archetype.Game.Payloads.Atoms
     internal class Deck : Zone<ICard>, IDeck
     {
         private readonly Stack<ICard> _cards = new();
-        private readonly Subject<IAtomMutation<IDeck>> _mutation = new();
 
         public Deck(IGameAtom owner) : base(owner) {}
-
-        public override IObservable<IAtomMutation> OnMutation => _mutation;
-        IObservable<IAtomMutation<IDeck>> IDeck.OnMutation => _mutation;
 
         public ICard PopCard()
         {
@@ -69,6 +61,5 @@ namespace Archetype.Game.Payloads.Atoms
         }
 
         public int NumberOfCards => Contents.Count();
-        
     }
 }
