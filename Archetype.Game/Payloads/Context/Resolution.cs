@@ -4,6 +4,8 @@ using System.Linq;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
+using Archetype.View.Atoms;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Context
 {
@@ -35,13 +37,7 @@ namespace Archetype.Game.Payloads.Context
 
     internal interface IResultsReaderWriter : IResultsReader, IResultsWriter { }
 
-    public interface IResult
-    {
-        bool IsNull { get; }
-        IEnumerable<IGameAtom> AllAffected { get; }
-        string Verb { get; }
-        object Result { get; }
-    }
+    
 
     public interface IResult<out T> : IResult
     {
@@ -66,7 +62,7 @@ namespace Archetype.Game.Payloads.Context
         }
 
         public bool IsNull => false;
-        public IEnumerable<IGameAtom> AllAffected { get; }
+        public IEnumerable<IGameAtomFront> AllAffected { get; }
         public string Verb { get; }
         object IResult.Result => Result;
 
@@ -82,7 +78,7 @@ namespace Archetype.Game.Payloads.Context
     internal record EffectResult<T>(string Verb, T Result) : IResult<T>
     {
         public bool IsNull => Result is not null;
-        public IEnumerable<IGameAtom> AllAffected => Enumerable.Empty<IGameAtom>();
+        public IEnumerable<IGameAtomFront> AllAffected => Enumerable.Empty<IGameAtomFront>();
 
         object IResult.Result => Result;
     }
@@ -91,7 +87,7 @@ namespace Archetype.Game.Payloads.Context
         : IResult<TAffected, TResult> where TAffected : class, IGameAtom
     {
         public bool IsNull => Result is null;
-        public IEnumerable<IGameAtom> AllAffected => new[] { Affected };
+        public IEnumerable<IGameAtomFront> AllAffected => new[] { Affected };
         object IResult.Result => Result;
     }
 

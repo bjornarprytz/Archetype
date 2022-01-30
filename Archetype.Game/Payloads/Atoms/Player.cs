@@ -21,7 +21,6 @@ namespace Archetype.Game.Payloads.Atoms
         new IDeck Deck { get; }
         new IHand Hand { get; }
         
-        [Keyword("Draw")]
         IResult<IPlayer, int> Draw(int strength);
 
         IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure);

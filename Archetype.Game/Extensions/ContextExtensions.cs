@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
-using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Extensions
 {

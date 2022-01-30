@@ -10,12 +10,8 @@ namespace Archetype.Game.Payloads.Atoms.Base
 {
     public interface IUnit : IPiece<IUnit>, IUnitFront
     {
-        [Keyword("Attack")]
         IResult<IUnit, int> Attack(int strength);
-        [Keyword("Heal")]
         IResult<IUnit, int> Heal(int strength);
-
-        [Keyword("Kill")]
         IResult<IUnit, int> Kill();
     }
 

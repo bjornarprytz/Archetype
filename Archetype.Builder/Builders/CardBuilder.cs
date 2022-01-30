@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using Archetype.Builder.Builders.Base;
-using Archetype.Builder.Exceptions;
-using Archetype.Builder.Factory;
-using Archetype.Game.Extensions;
-using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Context.Card;
-using Archetype.Game.Payloads.Context.Effect;
 using Archetype.Game.Payloads.Context.Effect.Base;
 using Archetype.Game.Payloads.Proto;
 using Archetype.View.Atoms.MetaData;

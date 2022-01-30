@@ -5,7 +5,6 @@ namespace Archetype.View.Infrastructure;
 
 public interface IEffectDescriptor
 {
-    
     IAffected Affected { get; }
     string Keyword { get; }
     IEnumerable<IOperand> Operands { get; }

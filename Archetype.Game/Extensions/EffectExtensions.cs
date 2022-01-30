@@ -93,11 +93,11 @@ public static class EffectExtensions
 
         var affected = me.ParseAffected();
 
-        var verbAttribute = mce.Method.GetRequiredAttribute<KeywordAttribute>();
+        var verb = mce.Method.Name;
         
         var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
 
-        return new EffectDescriptor(affected, verbAttribute.Name, operands);
+        return new EffectDescriptor(affected, verb, operands);
     }
 
     private static IOperand ParseArgument<T>(this Expression exp, T context)
@@ -150,11 +150,11 @@ public static class EffectExtensions
         if (lambda.Body is not MethodCallExpression mce)
             throw new MalformedEffectException("Lambda body must call a method");
 
-        var verbAttribute = mce.Method.GetRequiredAttribute<KeywordAttribute>();
+        var verb = mce.Method.Name;
 
         var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
 
-        return new EffectDescriptor(affected, verbAttribute.Name, operands);
+        return new EffectDescriptor(affected, verb, operands);
     }
 
     private static IAffected ParseAffected(this Expression expression)

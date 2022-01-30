@@ -22,14 +22,4 @@ namespace Archetype.Game.Attributes
             Description = description;
         }
     }
-
-    internal class KeywordAttribute : Attribute
-    {
-        public string Name {get;}
-
-        public KeywordAttribute(string name)
-        {
-            Name = name;
-        }
-    }
 }

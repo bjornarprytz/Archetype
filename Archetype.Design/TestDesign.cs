@@ -75,7 +75,7 @@ namespace Archetype.Design
                     .Card(cardBuilder => cardBuilder
                         .Name("Create Unit")
                         .Range(0)
-                        .Effect(context => context.Target<IMapNode>().CreateCreature("Ghoul", context.Source.Owner))))
+                        .Effect(context => context.Target<IMapNode>().Spawn("Ghoul", context.Source.Owner))))
                 .AddSet("TestSet", _setBuilderFactory, 
                     setProvider => setProvider
                         .ChangeCardTemplate(t => t with { Color = CardColor.Black })

@@ -39,7 +39,7 @@ namespace Archetype.Game.Payloads.Infrastructure
 
         IEnumerable<ICardProtoDataFront> IPlayerDataFront.DeckList => DeckList;
 
-        public IStructureProtoData Headquarters { get; set; }
+        public IStructureProtoData Headquarters { get; private set; }
         public IEnumerable<IStructureProtoData> StructurePool => _structurePool;
         public IEnumerable<ICardProtoData> CardPool => _cardPool;
         public IEnumerable<ICardProtoData> DeckList => _deckList;

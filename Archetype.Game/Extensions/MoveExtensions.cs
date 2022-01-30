@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Context;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Extensions
 {

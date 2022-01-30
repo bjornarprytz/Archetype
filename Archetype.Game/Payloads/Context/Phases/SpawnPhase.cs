@@ -28,7 +28,7 @@ namespace Archetype.Game.Payloads.Context.Phases
 
                 spawnedLevel += creature.MetaData.Level + 1; // At least 1
 
-                resultsReaderCollector.AddResult(_map.Nodes.Last().CreateCreature(creature.Name, default));
+                resultsReaderCollector.AddResult(_map.Nodes.Last().Spawn(creature.Name, default));
             }
 
             return resultsReaderCollector;

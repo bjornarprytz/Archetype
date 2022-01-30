@@ -22,7 +22,6 @@ namespace Archetype.Game.Payloads.Atoms
         ICardFront, 
         IEffectProvider
     {
-        [Keyword("Cheapen")]
         IResult<ICard, int> ReduceCost(int x);
     }
 
