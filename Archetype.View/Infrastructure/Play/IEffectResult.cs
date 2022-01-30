@@ -4,8 +4,10 @@ namespace Archetype.View.Infrastructure;
 
 public interface IEffectResult
 {
-    bool IsNull { get; }
-    IEnumerable<IGameAtomFront> AllAffected { get; }
+    IEnumerable<IEffectResult> SideEffects { get; }
+
     string Verb { get; }
+    bool IsNull { get; }
+    IGameAtomFront Affected { get; }
     object Result { get; }
 }

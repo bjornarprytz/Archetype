@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.View.Atoms;
@@ -20,19 +19,8 @@ public class HistoryEntryType : ObjectType<IHistoryEntry>
             .Type<ListType<ResultUnion>>();
     }
     
-    public class ResultUnion : UnionType
-    {
-        protected override void Configure(IUnionTypeDescriptor descriptor)
-        {
-            base.Configure(descriptor);
-
-            descriptor.Type<IntResultType>();
-            descriptor.Type<AtomResultType>();
-            descriptor.Type<AggregatedIntResultType>();
-            descriptor.Type<AggregatedAtomResultType>();
-        }
-    }
 }
+
 
 public class IntResultType : ResultType<IEffectResult<int>>
 {
@@ -41,7 +29,8 @@ public class IntResultType : ResultType<IEffectResult<int>>
         base.Configure(descriptor);
 
         descriptor.Field(r => r.Result)
-            .Name("intResult");
+            .Name("intResult")
+            ;
     }
 }
 
@@ -53,31 +42,20 @@ public class AtomResultType : ResultType<IEffectResult<IGameAtomFront>>
 
         descriptor.Field(r => r.Result)
             .Type<AtomUnion>()
-            .Name("atomResult");
+            .Name("atomResult")
+            ;
     }
 }
 
-public class AggregatedIntResultType : ResultType<IAggregatedEffectResult<int>>
+public class AggregateResultType : ResultType<IAggregateEffectResult>
 {
-    protected override void Configure(IObjectTypeDescriptor<IAggregatedEffectResult<int>> descriptor)
+    protected override void Configure(IObjectTypeDescriptor<IAggregateEffectResult> descriptor)
     {
         base.Configure(descriptor);
 
-        descriptor.Field(r => r.Result)
-            .Type<ListType<IntType>>()
-            .Name("aggIntResult");
-    }
-}
-
-public class AggregatedAtomResultType : ResultType<IAggregatedEffectResult<IGameAtomFront>>
-{
-    protected override void Configure(IObjectTypeDescriptor<IAggregatedEffectResult<IGameAtomFront>> descriptor)
-    {
-        base.Configure(descriptor);
-
-        descriptor.Field(r => r.Result)
-            .Type<ListType<AtomUnion>>()
-            .Name("aggAtomResult");
+        descriptor.Ignore(r => r.Result);
+        descriptor.Ignore(r => r.Verb);
+        descriptor.Ignore(r => r.Affected);
     }
 }
 
@@ -92,11 +70,24 @@ public abstract class ResultType<T> : ObjectType<T>
 
         descriptor.IsOfType((context, result) => result is T);
         
-        
-
         descriptor.Field(r => r.IsNull);
         descriptor.Field(r => r.Verb);
-        descriptor.Field(r => r.AllAffected)
-            .Type<ListType<AtomUnion>>();
+        descriptor.Field(r => r.Affected)
+            .Type<AtomUnion>();
+        
+        descriptor.Field(r => r.SideEffects)
+            .Type<ListType<ResultUnion>>();
+    }
+}
+
+public class ResultUnion : UnionType
+{
+    protected override void Configure(IUnionTypeDescriptor descriptor)
+    {
+        base.Configure(descriptor);
+
+        descriptor.Type<IntResultType>();
+        descriptor.Type<AtomResultType>();
+        descriptor.Type<AggregateResultType>();
     }
 }
