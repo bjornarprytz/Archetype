@@ -17,7 +17,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
 
         public IZone<T> CurrentZone { get; private set; }
 
-        public IResult<IPiece<T>, IZone<T>> MoveTo(IZone<T> zone)
+        public IEffectResult<IPiece<T>, IZone<T>> MoveTo(IZone<T> zone)
         {
             if (zone == CurrentZone)
                 return ResultFactory.Null<IPiece<T>, IZone<T>>(this);

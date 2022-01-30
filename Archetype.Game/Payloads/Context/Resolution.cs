@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Game.Extensions;
 using Archetype.Game.Payloads.Atoms;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Infrastructure;
@@ -27,79 +28,84 @@ namespace Archetype.Game.Payloads.Context
 
     public interface IResultsReader
     {
-        IEnumerable<IResult> Results { get; }
+        IEnumerable<IEffectResult> Results { get; }
     }
 
     internal interface IResultsWriter
     {
-        void AddResult(IResult effectResult);
+        void AddResult(IEffectResult effectEffectResult);
     }
 
     internal interface IResultsReaderWriter : IResultsReader, IResultsWriter { }
 
     
 
-    public interface IResult<out T> : IResult
+    public interface IEffectResult<out T> : IEffectResult
     {
         new T Result { get; }
     }
 
-    public interface IResult<out TTarget, out TResult> : IResult<TResult>
+    public interface IEffectResult<out TTarget, out TResult> : IEffectResult<TResult>
         where TTarget : class, IGameAtom
     {
         TTarget Affected { get; }
     }
 
-    internal record AggregatedEffectResult<TResult> : IResult<IEnumerable<TResult>>
+    public interface IAggregatedEffectResult<out TResult> : IEffectResult<IEnumerable<TResult>> { } // TODO: Refactor this to be more like a list of results. Problem now is that results and affected are two separate lists that the client will have to merge 
+
+    internal record AggregatedEffectResult<TResult> : IAggregatedEffectResult<TResult>
     {
-        internal AggregatedEffectResult(IEnumerable<IResult<TResult>> results)
+        internal AggregatedEffectResult(IEnumerable<IEffectResult<TResult>> results)
         {
             var nonNullResults = results.Where(r => !r.IsNull).ToList();
 
+            IsNull = nonNullResults.IsEmpty();
+            
+            Verb = nonNullResults.FirstOrDefault()?.Verb;
             AllAffected = nonNullResults.SelectMany(r => r.AllAffected).ToList();
-            Verb = nonNullResults.FirstOrDefault()?.Verb ?? throw new ArgumentException("Effect result missing Verb.");
-            Result = nonNullResults.Select(r => r.Result);
+            Result = nonNullResults.Select(r => r.Result).ToList();
         }
 
-        public bool IsNull => false;
+        public bool IsNull { get; }
+        
         public IEnumerable<IGameAtomFront> AllAffected { get; }
         public string Verb { get; }
-        object IResult.Result => Result;
+        object IEffectResult.Result => Result;
 
         public IEnumerable<TResult> Result { get; }
     }
 
-    internal record NullResult<T>(string Verb)
-        : EffectResult<T>(Verb, default);
+    internal record NullEffectResult<T>(string Verb)
+        : EffectEffectResult<T>(Verb, default);
 
-    internal record NullResult<TAffected, T>(TAffected Affected, string Verb)
-        : EffectResult<TAffected, T>(Affected, Verb, default) where TAffected : class, IGameAtom;
+    internal record NullEffectResult<TAffected, T>(TAffected Affected, string Verb)
+        : EffectEffectResult<TAffected, T>(Affected, Verb, default) where TAffected : class, IGameAtom;
 
-    internal record EffectResult<T>(string Verb, T Result) : IResult<T>
+    internal record EffectEffectResult<T>(string Verb, T Result) : IEffectResult<T>
     {
         public bool IsNull => Result is not null;
         public IEnumerable<IGameAtomFront> AllAffected => Enumerable.Empty<IGameAtomFront>();
 
-        object IResult.Result => Result;
+        object IEffectResult.Result => Result;
     }
 
-    internal record EffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result)
-        : IResult<TAffected, TResult> where TAffected : class, IGameAtom
+    internal record EffectEffectResult<TAffected, TResult>(TAffected Affected, string Verb, TResult Result)
+        : IEffectResult<TAffected, TResult> where TAffected : class, IGameAtom
     {
         public bool IsNull => Result is null;
         public IEnumerable<IGameAtomFront> AllAffected => new[] { Affected };
-        object IResult.Result => Result;
+        object IEffectResult.Result => Result;
     }
 
     internal class ResultsReaderWriter : IResultsReaderWriter, IResultsReader
     {
-        private readonly List<IResult> _results = new();
+        private readonly List<IEffectResult> _results = new();
 
-        public IEnumerable<IResult> Results => _results;
+        public IEnumerable<IEffectResult> Results => _results;
 
-        public void AddResult(IResult effectResult)
+        public void AddResult(IEffectResult effectEffectResult)
         {
-            _results.Add(effectResult);
+            _results.Add(effectEffectResult);
         }
     }
 }

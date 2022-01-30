@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Archetype.Game.Payloads.Infrastructure;
 using Archetype.Server.Actions;
 using Archetype.View.Infrastructure;
 using HotChocolate;
@@ -53,14 +54,20 @@ namespace Archetype.Server
             PlayCardInput playCardInput,
             ITopicEventSender eventSender,
             [Service] IMediator mediator,
+            [Service] IHistoryEmitter historyEmitter,
             CancellationToken cancellationToken
         )
         {
             var (cardGuid, whenceNodeGuid, targetGuids) = playCardInput;
-            
-            await mediator.Send(new PlayCardAction(cardGuid, whenceNodeGuid, targetGuids), cancellationToken);
 
-            var payload = new PlayCardPayload($"Card played ({cardGuid})");
+            var events = new List<IHistoryEntry>();
+
+            using(historyEmitter.OnResult.Subscribe(events.Add))
+            {
+                await mediator.Send(new PlayCardAction(cardGuid, whenceNodeGuid, targetGuids), cancellationToken);
+            }
+            
+            var payload = new PlayCardPayload(events);
 
             await eventSender.SendAsync(nameof(Subscriptions.OnCardPlayed), payload, cancellationToken);
             
@@ -68,7 +75,7 @@ namespace Archetype.Server
         }
 
         public record PlayCardInput(Guid CardGuid, Guid WhenceNodeGuid, IEnumerable<Guid> TargetGuids);
-        public record PlayCardPayload(string Message);// TODO: replace placeholder value 
+        public record PlayCardPayload(IEnumerable<IHistoryEntry> Events);
     }
     
     public class Subscriptions

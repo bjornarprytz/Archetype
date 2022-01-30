@@ -10,12 +10,10 @@ namespace Archetype.Game.Payloads.Context.Card
 
     internal class ContextResolver : IContextResolver
     {
-        private readonly IGameState _gameState;
         private readonly IHistoryWriter _historyWriter;
 
-        public ContextResolver(IGameState gameState, IHistoryWriter historyWriter)
+        public ContextResolver(IHistoryWriter historyWriter)
         {
-            _gameState = gameState;
             _historyWriter = historyWriter;
         }
     

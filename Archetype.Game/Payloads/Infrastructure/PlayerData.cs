@@ -15,9 +15,9 @@ namespace Archetype.Game.Payloads.Infrastructure
         new IEnumerable<ICardProtoData> CardPool { get; }
         new IEnumerable<ICardProtoData> DeckList { get; }
 
-        IResult<IStructureProtoData> SetHeadQuarters(IStructureProtoData newHq);
-        IResult<ICardProtoData> AddToCardPool(ICardProtoData card);
-        IResult<IStructureProtoData> AddToStructurePool(IStructureProtoData structure);
+        IEffectResult<IStructureProtoData> SetHeadQuarters(IStructureProtoData newHq);
+        IEffectResult<ICardProtoData> AddToCardPool(ICardProtoData card);
+        IEffectResult<IStructureProtoData> AddToStructurePool(IStructureProtoData structure);
 
         void SubmitDeck(IEnumerable<ICardProtoData> deckList);
     }
@@ -44,21 +44,21 @@ namespace Archetype.Game.Payloads.Infrastructure
         public IEnumerable<ICardProtoData> CardPool => _cardPool;
         public IEnumerable<ICardProtoData> DeckList => _deckList;
         
-        public IResult<IStructureProtoData> SetHeadQuarters(IStructureProtoData newHq)
+        public IEffectResult<IStructureProtoData> SetHeadQuarters(IStructureProtoData newHq)
         {
             Headquarters = newHq;
             
             return ResultFactory.Create(newHq);
         }
         
-        public IResult<ICardProtoData> AddToCardPool(ICardProtoData card)
+        public IEffectResult<ICardProtoData> AddToCardPool(ICardProtoData card)
         {
             _cardPool.Add(card);
             
             return ResultFactory.Create(card);
         }
         
-        public IResult<IStructureProtoData> AddToStructurePool(IStructureProtoData structure)
+        public IEffectResult<IStructureProtoData> AddToStructurePool(IStructureProtoData structure)
         {
             _structurePool.Add(structure);
             

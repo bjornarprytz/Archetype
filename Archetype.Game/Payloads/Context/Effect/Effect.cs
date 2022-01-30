@@ -9,17 +9,17 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
     {
         IEffectDescriptor CreateDescription();
 
-        IResult ResolveContext(IContext context);
+        IEffectResult ResolveContext(IContext context);
     }
 
     public class Effect : IEffect
     {
         public Effect() { }
         
-        private Func<IContext, IResult> _resolveBacking;
-        private Expression<Func<IContext, IResult>> _resolveExpression;
+        private Func<IContext, IEffectResult> _resolveBacking;
+        private Expression<Func<IContext, IEffectResult>> _resolveExpression;
         
-        private Func<IContext, IResult> Resolve
+        private Func<IContext, IEffectResult> Resolve
         {
             get
             {
@@ -28,7 +28,7 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
             }
         }
         
-        public Expression<Func<IContext, IResult>> ResolveExpression
+        public Expression<Func<IContext, IEffectResult>> ResolveExpression
         {
             get => _resolveExpression;
             set
@@ -43,7 +43,7 @@ namespace Archetype.Game.Payloads.Context.Effect.Base
             return ResolveExpression.CreateDescriptor();
         }
 
-        public IResult ResolveContext(IContext context)
+        public IEffectResult ResolveContext(IContext context)
         {
             return Resolve(context);
         }

@@ -17,7 +17,7 @@ public static class EffectExtensions
 {
     public static IEffectDescriptor CreateDescriptor<T, R>(this Expression<Func<T, R>> exp)
         where T : IContext
-        where R : IResult
+        where R : IEffectResult
     {
         return exp
             .GetMethodCall()
@@ -26,7 +26,7 @@ public static class EffectExtensions
 
     public static IEffectDescriptor CreateDescriptor<T, R>(this Expression<Func<T, R>> exp, T context)
         where T : IContext
-        where R : IResult
+        where R : IEffectResult
     {
         return exp
             .GetMethodCall()
@@ -35,7 +35,7 @@ public static class EffectExtensions
 
     private static MethodCallExpression GetMethodCall<T, R>(this Expression<Func<T, R>> exp)
         where T : IContext
-        where R : IResult
+        where R : IEffectResult
     {
         if (exp is not LambdaExpression
             {

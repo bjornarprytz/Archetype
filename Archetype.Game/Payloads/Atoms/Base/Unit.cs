@@ -10,9 +10,9 @@ namespace Archetype.Game.Payloads.Atoms.Base
 {
     public interface IUnit : IPiece<IUnit>, IUnitFront
     {
-        IResult<IUnit, int> Attack(int strength);
-        IResult<IUnit, int> Heal(int strength);
-        IResult<IUnit, int> Kill();
+        IEffectResult<IUnit, int> Attack(int strength);
+        IEffectResult<IUnit, int> Heal(int strength);
+        IEffectResult<IUnit, int> Kill();
     }
 
     internal abstract class Unit : Piece<IUnit>, IUnit
@@ -30,7 +30,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
         public int MaxDefense { get; }
         public int Defense { get; private set; }
 
-        public IResult<IUnit, int> Attack(int strength)
+        public IEffectResult<IUnit, int> Attack(int strength)
         {
             var potentialDamage = Health;
 
@@ -41,7 +41,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
             return ResultFactory.Create(this, actualDamage);
         }
 
-        public IResult<IUnit, int> Heal(int strength)
+        public IEffectResult<IUnit, int> Heal(int strength)
         {
             var potentialHeal = MaxHealth - Health;
 
@@ -52,7 +52,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
             return ResultFactory.Create(this, actualHeal);
         }
 
-        public IResult<IUnit, int> Kill()
+        public IEffectResult<IUnit, int> Kill()
         {
             var previousHealth = Health;
             

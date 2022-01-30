@@ -19,7 +19,7 @@ namespace Archetype.Game.Payloads.Atoms
         ICardFront, 
         IEffectProvider
     {
-        IResult<ICard, int> ReduceCost(int x);
+        IEffectResult<ICard, int> ReduceCost(int x);
     }
 
     internal class Card : Piece<ICard>, ICard
@@ -48,7 +48,7 @@ namespace Archetype.Game.Payloads.Atoms
         public IEnumerable<IEffect> Effects => _effects;
         
         
-        public IResult<ICard, int> ReduceCost(int x)
+        public IEffectResult<ICard, int> ReduceCost(int x)
         {
             Console.WriteLine($"Reducing cost by {x}!");
 

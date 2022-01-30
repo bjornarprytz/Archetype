@@ -10,7 +10,7 @@ namespace Archetype.Game.Extensions
 {
     public static class ContextExtensions
     {
-        public static IResult TargetEach<TTarget, TResult>(this IEnumerable<TTarget> source, Func<TTarget, IResult<TResult>> func)
+        public static IEffectResult TargetEach<TTarget, TResult>(this IEnumerable<TTarget> source, Func<TTarget, IEffectResult<TResult>> func)
             where TTarget : IGameAtom
         {
             return new AggregatedEffectResult<TResult>(source.Select(func).ToList());

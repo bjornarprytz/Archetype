@@ -74,7 +74,7 @@ internal class CardContextFactory : IContextFactory<ICardPlayArgs>
 
             resultsWriter.AddResult(_card.MoveTo(Whence.DiscardPile));
             
-            _historyWriter.Append(resultsWriter);
+            _historyWriter.Append(this, resultsWriter);
         }
     }
 }

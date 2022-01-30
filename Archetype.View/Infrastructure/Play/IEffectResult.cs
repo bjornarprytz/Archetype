@@ -2,7 +2,7 @@ using Archetype.View.Atoms;
 
 namespace Archetype.View.Infrastructure;
 
-public interface IResult
+public interface IEffectResult
 {
     bool IsNull { get; }
     IEnumerable<IGameAtomFront> AllAffected { get; }

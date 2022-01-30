@@ -181,6 +181,24 @@ public abstract class AtomType<T> : ObjectType<T>
 
         descriptor.IsOfType((context, result) => result is T);
     }
+    
+}
+public class AtomUnion : UnionType
+{
+    protected override void Configure(IUnionTypeDescriptor descriptor)
+    {
+        base.Configure(descriptor);
+        
+        descriptor.Type<CardType>();
+        descriptor.Type<CreatureType>();
+        descriptor.Type<DeckType>();
+        descriptor.Type<DiscardPileType>();
+        descriptor.Type<GraveyardType>();
+        descriptor.Type<HandType>();
+        descriptor.Type<MapNodeType>();
+        descriptor.Type<PlayerType>();
+        descriptor.Type<StructureType>();
+    }
 }
 
 

@@ -17,9 +17,9 @@ namespace Archetype.Game.Payloads.Atoms
         new IDeck Deck { get; }
         new IHand Hand { get; }
         
-        IResult<IPlayer, int> Draw(int strength);
+        IEffectResult<IPlayer, int> Draw(int strength);
 
-        IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure);
+        IEffectResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure);
     }
     
     internal class Player : Atom, IPlayer
@@ -45,7 +45,7 @@ namespace Archetype.Game.Payloads.Atoms
         public IDeck Deck { get; }
         public IHand Hand { get; }
 
-        public IResult<IPlayer, int> Draw(int strength)
+        public IEffectResult<IPlayer, int> Draw(int strength)
         {
             var actualStrength = Math.Clamp(strength, 0, Deck.NumberOfCards);
             
@@ -58,7 +58,7 @@ namespace Archetype.Game.Payloads.Atoms
             return ResultFactory.Create(this, actualStrength);
         }
 
-        public IResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure)
+        public IEffectResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure)
         {
             HeadQuarters = structure;
             

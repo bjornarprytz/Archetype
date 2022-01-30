@@ -21,7 +21,7 @@ namespace Archetype.Builder.Builders
         ICardBuilder Color(CardColor color);
         ICardBuilder Art(string link);
 
-        ICardBuilder Effect(Expression<Func<IContext, IResult>> resolveEffect);
+        ICardBuilder Effect(Expression<Func<IContext, IEffectResult>> resolveEffect);
     }
 
     internal class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
@@ -85,7 +85,7 @@ namespace Archetype.Builder.Builders
         }
         
         public ICardBuilder Effect(
-            Expression<Func<IContext, IResult>> resolveEffect
+            Expression<Func<IContext, IEffectResult>> resolveEffect
         )
         {
             _effects.Add(new Effect

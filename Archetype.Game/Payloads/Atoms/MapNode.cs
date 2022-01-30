@@ -16,10 +16,10 @@ namespace Archetype.Game.Payloads.Atoms
         new IGraveyard Graveyard { get; }
         new IDiscardPile DiscardPile { get; }
 
-        IResult<IMapNode, ICreature> Spawn(string name, IGameAtom owner);
-        IResult<IMapNode, IStructure> Build(string name, IGameAtom owner);
+        IEffectResult<IMapNode, ICreature> Spawn(string name, IGameAtom owner);
+        IEffectResult<IMapNode, IStructure> Build(string name, IGameAtom owner);
 
-        IResult<IMapNode, IMapNode> ConnectTo(IMapNode other);
+        IEffectResult<IMapNode, IMapNode> ConnectTo(IMapNode other);
 
     }
 
@@ -42,7 +42,7 @@ namespace Archetype.Game.Payloads.Atoms
         IEnumerable<IMapNodeFront> IMapNodeFront.Neighbours => Neighbours;
         IGraveyardFront IMapNodeFront.Graveyard => Graveyard;
         IDiscardPileFront IMapNodeFront.DiscardPile => DiscardPile;
-        public IResult<IMapNode, ICreature> Spawn(string name, IGameAtom owner)
+        public IEffectResult<IMapNode, ICreature> Spawn(string name, IGameAtom owner)
         {
             var creature = _instanceFactory.CreateCreature(name, owner); 
             
@@ -51,7 +51,7 @@ namespace Archetype.Game.Payloads.Atoms
             return ResultFactory.Create(this, creature);
         }
 
-        public IResult<IMapNode, IStructure> Build(string name, IGameAtom owner)
+        public IEffectResult<IMapNode, IStructure> Build(string name, IGameAtom owner)
         {
             var creature = _instanceFactory.CreateStructure(name, owner); 
             
@@ -60,7 +60,7 @@ namespace Archetype.Game.Payloads.Atoms
             return ResultFactory.Create(this, creature);
         }
 
-        public IResult<IMapNode, IMapNode> ConnectTo(IMapNode other)
+        public IEffectResult<IMapNode, IMapNode> ConnectTo(IMapNode other)
         {
             if (_neighbours.ContainsKey(other.Guid))
                 return ResultFactory.Null<IMapNode, IMapNode>(this);
