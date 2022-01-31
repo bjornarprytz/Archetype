@@ -178,6 +178,7 @@ public abstract class AtomType<T> : ObjectType<T>
         base.Configure(descriptor);
 
         descriptor.Field(atom => atom.Guid);
+        descriptor.Field(atom => atom.Owner);
 
         descriptor.IsOfType((context, result) => result is T);
     }

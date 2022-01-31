@@ -47,15 +47,6 @@ namespace Archetype.Game.Payloads.Atoms
         {
             var creature = _instanceFactory.CreateCreature(name); 
             
-            creature.MoveTo(this);
-
-            return ResultFactory.Create(this, creature);
-        }
-
-        public IEffectResult<IMapNode, IStructure> Build(string name, IGameAtom owner)
-        {
-            var creature = _instanceFactory.CreateStructure(name);
-
             var sideEffects = new List<IEffectResult>
             {
                 creature.SetOwner(owner),
@@ -63,6 +54,19 @@ namespace Archetype.Game.Payloads.Atoms
             };
 
             return ResultFactory.Create(this, creature, sideEffects);
+        }
+
+        public IEffectResult<IMapNode, IStructure> Build(string name, IGameAtom owner)
+        {
+            var structure = _instanceFactory.CreateStructure(name);
+
+            var sideEffects = new List<IEffectResult>
+            {
+                structure.SetOwner(owner),
+                structure.MoveTo(this)
+            };
+
+            return ResultFactory.Create(this, structure, sideEffects);
         }
 
         public IEffectResult<IMapNode, IMapNode> ConnectTo(IMapNode other)
