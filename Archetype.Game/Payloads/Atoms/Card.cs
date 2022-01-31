@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.Game.Payloads.Context;
@@ -28,7 +26,7 @@ namespace Archetype.Game.Payloads.Atoms
         private readonly List<IEffectDescriptor> _effectDescriptors;
         private readonly List<IEffect> _effects;
 
-        public Card(ICardProtoData protoData, IGameAtom owner) : base(protoData.Name, owner)
+        public Card(ICardProtoData protoData) : base(protoData.Name)
         {
             _targetDescriptors = protoData.TargetDescriptors.ToList();
             _effectDescriptors = protoData.EffectDescriptors.ToList();

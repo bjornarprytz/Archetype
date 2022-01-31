@@ -30,10 +30,10 @@ namespace Archetype.Game.Factory
             return new NullEffectResult<TResult>(verb);
         }
         
-        public static IEffectResult<TAffected, TResult> Null<TAffected, TResult>(TAffected affected, [CallerMemberName] string verb=default) 
+        public static IEffectResult<TAffected, TResult> Null<TAffected, TResult>([CallerMemberName] string verb=default) 
             where TAffected : class, IGameAtom
         {
-            return new NullEffectResult<TAffected, TResult>(affected, verb);
+            return new NullEffectResult<TAffected, TResult>(verb);
         }
     }
 }

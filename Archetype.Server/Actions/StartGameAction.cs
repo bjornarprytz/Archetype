@@ -41,7 +41,8 @@ namespace Archetype.Server.Actions
             
             foreach (var cardProtoData in _playerData.DeckList)
             {
-                var card = _instanceFactory.CreateCard(cardProtoData, _player);
+                var card = _instanceFactory.CreateCard(cardProtoData);
+                card.SetOwner(_player);
 
                 _player.Deck.PutCardOnTop(card);
             }

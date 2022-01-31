@@ -7,6 +7,7 @@ using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Atoms
 {
@@ -28,7 +29,7 @@ namespace Archetype.Game.Payloads.Atoms
         private readonly IInstanceFactory _instanceFactory;
         private readonly Dictionary<Guid, IMapNode> _neighbours = new();
 
-        public MapNode(IGameAtom owner, IInstanceFactory instanceFactory) : base(owner)
+        public MapNode(IInstanceFactory instanceFactory)
         {
             _instanceFactory = instanceFactory;
             DiscardPile = new DiscardPile(this);
@@ -44,7 +45,7 @@ namespace Archetype.Game.Payloads.Atoms
         IDiscardPileFront IMapNodeFront.DiscardPile => DiscardPile;
         public IEffectResult<IMapNode, ICreature> Spawn(string name, IGameAtom owner)
         {
-            var creature = _instanceFactory.CreateCreature(name, owner); 
+            var creature = _instanceFactory.CreateCreature(name); 
             
             creature.MoveTo(this);
 
@@ -53,17 +54,21 @@ namespace Archetype.Game.Payloads.Atoms
 
         public IEffectResult<IMapNode, IStructure> Build(string name, IGameAtom owner)
         {
-            var creature = _instanceFactory.CreateStructure(name, owner); 
-            
-            creature.MoveTo(this);
+            var creature = _instanceFactory.CreateStructure(name);
 
-            return ResultFactory.Create(this, creature);
+            var sideEffects = new List<IEffectResult>
+            {
+                creature.SetOwner(owner),
+                creature.MoveTo(this)
+            };
+
+            return ResultFactory.Create(this, creature, sideEffects);
         }
 
         public IEffectResult<IMapNode, IMapNode> ConnectTo(IMapNode other)
         {
             if (_neighbours.ContainsKey(other.Guid))
-                return ResultFactory.Null<IMapNode, IMapNode>(this);
+                return ResultFactory.Null<IMapNode, IMapNode>();
             
             _neighbours.Add(other.Guid, other);
             other.ConnectTo(this);

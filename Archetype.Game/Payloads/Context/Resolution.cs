@@ -55,12 +55,12 @@ namespace Archetype.Game.Payloads.Context
     internal record NullEffectResult<T>(string Verb)
         : EffectResult<T>(Verb, default, Enumerable.Empty<IEffectResult>());
 
-    internal record NullEffectResult<TAffected, T>(TAffected Affected, string Verb)
-        : EffectResult<TAffected, T>(Affected, Verb, default, Enumerable.Empty<IEffectResult>()) where TAffected : class, IGameAtom;
+    internal record NullEffectResult<TAffected, T>(string Verb)
+        : EffectResult<TAffected, T>(default, Verb, default, Enumerable.Empty<IEffectResult>()) where TAffected : class, IGameAtom;
 
     internal record AggregateEffectResult(IEnumerable<IEffectResult> SideEffects) : IAggregateEffectResult
     {
-        public bool IsNull => false;
+        public bool IsNull => SideEffects is null || SideEffects.IsEmpty();
         public string Verb => null;
         public IGameAtomFront Affected => null;
         public object Result => null;

@@ -15,13 +15,13 @@ namespace Archetype.Game.Payloads.Infrastructure
 
     public interface IInstanceFactory
     {
-        IMapNode CreateMapNode(IMapNodeProtoData nodeData, IGameAtom owner);
-        ICard CreateCard(ICardProtoData cardData, IGameAtom owner);
-        ICard CreateCard(string name, IGameAtom owner);
-        IStructure CreateStructure(IStructureProtoData structureData, IGameAtom owner);
-        IStructure CreateStructure(string name, IGameAtom owner);
-        ICreature CreateCreature(ICreatureProtoData creatureData, IGameAtom owner);
-        ICreature CreateCreature(string name, IGameAtom owner);
+        IMapNode CreateMapNode(IMapNodeProtoData nodeData);
+        ICard CreateCard(ICardProtoData cardData);
+        ICard CreateCard(string name);
+        IStructure CreateStructure(IStructureProtoData structureData);
+        IStructure CreateStructure(string name);
+        ICreature CreateCreature(ICreatureProtoData creatureData);
+        ICreature CreateCreature(string name);
     }
     
     internal class InstanceManager : IInstanceFinder, IInstanceFactory
@@ -60,70 +60,70 @@ namespace Archetype.Game.Payloads.Infrastructure
             return atom;
         }
 
-        public IMapNode CreateMapNode(IMapNodeProtoData nodeData, IGameAtom owner)
+        public IMapNode CreateMapNode(IMapNodeProtoData nodeData)
         {
-            var node = new MapNode(owner, this);
+            var node = new MapNode(this);
 
             AddAtom(node);
 
             return node;
         }
 
-        public ICard CreateCard(ICardProtoData cardData, IGameAtom owner)
+        public ICard CreateCard(ICardProtoData cardData)
         {
-            var card = new Card(cardData, owner);
+            var card = new Card(cardData);
 
             AddAtom(card);
             
             return card;
         }
 
-        public ICard CreateCard(string name, IGameAtom owner)
+        public ICard CreateCard(string name)
         {
             var protoData = _protoPool.GetCard(name);
 
             if (protoData is null)
                 throw new InvalidOperationException($"Could not find a {typeof(ICard)} named {name} in the pool");
 
-            return CreateCard(protoData, owner);
+            return CreateCard(protoData);
         }
 
-        public IStructure CreateStructure(IStructureProtoData structureData, IGameAtom owner)
+        public IStructure CreateStructure(IStructureProtoData structureData)
         {
-            var structure = new Structure(structureData, owner);
+            var structure = new Structure(structureData);
 
             AddAtom(structure);
             
             return structure;
         }
 
-        public IStructure CreateStructure(string name, IGameAtom owner)
+        public IStructure CreateStructure(string name)
         {
             var protoData = _protoPool.GetStructure(name);
 
             if (protoData is null)
                 throw new InvalidOperationException($"Could not find a a {typeof(IStructure)} named {name} in the pool");
 
-            return CreateStructure(protoData, owner);
+            return CreateStructure(protoData);
         }
 
-        public ICreature CreateCreature(ICreatureProtoData creatureData, IGameAtom owner)
+        public ICreature CreateCreature(ICreatureProtoData creatureData)
         {
-            var creature = new Creature(creatureData, owner);
+            var creature = new Creature(creatureData);
 
             AddAtom(creature);
 
             return creature;
         }
 
-        public ICreature CreateCreature(string name, IGameAtom owner)
+        public ICreature CreateCreature(string name)
         {
             var protoData = _protoPool.GetCreature(name);
 
             if (protoData is null)
                 throw new InvalidOperationException($"Could not find a {typeof(ICreature)} named {name} in the pool");
 
-            return CreateCreature(protoData, owner);
+            return CreateCreature(protoData);
         }
 
         private void RegisterKnownGameState()

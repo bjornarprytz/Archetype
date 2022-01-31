@@ -1,5 +1,4 @@
 using System;
-using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Proto;
@@ -17,7 +16,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
 
     internal abstract class Unit : Piece<IUnit>, IUnit
     {
-        protected Unit(IUnitProtoData protoData, IGameAtom owner) : base(protoData.Name, owner)
+        protected Unit(IUnitProtoData protoData) : base(protoData.Name)
         {
             Health = MaxHealth = protoData.Health;
             Defense = MaxDefense = protoData.Defense;

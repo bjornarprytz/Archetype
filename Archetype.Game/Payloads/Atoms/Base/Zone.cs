@@ -20,7 +20,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
     {
         private readonly Dictionary<Guid, T> _contents = new();
 
-        protected Zone(IGameAtom owner) : base(owner) { }
+        protected Zone(IGameAtom owner=default) : base(owner) { }
         
         public IEnumerable<T> Contents => _contents.Values;
 

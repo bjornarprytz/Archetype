@@ -131,7 +131,7 @@ namespace Archetype.Design
         {
             var protoDatas = protoData.Nodes.ToArray();
             
-            var mapNodes = protoData.Nodes.Select(protoData => _instanceFactory.CreateMapNode(protoData, null)).ToArray();
+            var mapNodes = protoData.Nodes.Select(proto => _instanceFactory.CreateMapNode(proto)).ToArray();
 
             foreach (var (mapNode, i) in mapNodes.Select((node, i) => (node, i)))
             {

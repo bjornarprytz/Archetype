@@ -19,7 +19,7 @@ namespace Archetype.Game.Payloads.Atoms
     {
         private readonly List<IEffect> _effects;
         
-        public Structure(IStructureProtoData protoData, IGameAtom owner) : base(protoData, owner)
+        public Structure(IStructureProtoData protoData) : base(protoData)
         {
             MetaData = protoData.MetaData;
             _effects = protoData.Effects.ToList(); // TODO: Maybe just use the same enumeration

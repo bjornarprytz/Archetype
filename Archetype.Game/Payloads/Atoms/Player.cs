@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Attributes;
 using Archetype.Game.Factory;
@@ -7,6 +8,7 @@ using Archetype.Game.Payloads.Context;
 using Archetype.Game.Payloads.Infrastructure;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Atoms
 {
@@ -48,14 +50,16 @@ namespace Archetype.Game.Payloads.Atoms
         public IEffectResult<IPlayer, int> Draw(int strength)
         {
             var actualStrength = Math.Clamp(strength, 0, Deck.NumberOfCards);
-            
+
+            var sideEffects = new List<IEffectResult>();
+
             for (var i=0; i < actualStrength; i++)
             {
                 var card = Deck.PopCard();
-                card.MoveTo(Hand);
+                sideEffects.Add(card.MoveTo(Hand));
             }
 
-            return ResultFactory.Create(this, actualStrength);
+            return ResultFactory.Create(this, actualStrength, sideEffects);
         }
 
         public IEffectResult<IPlayer, IStructure> SetHeadQuarters(IStructure structure)

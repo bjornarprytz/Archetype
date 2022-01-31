@@ -8,7 +8,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
     internal abstract class Piece<T> : Atom, IPiece<T>
         where T : IPiece
     {
-        protected Piece(string name, IGameAtom owner) : base(owner)
+        protected Piece(string name)
         {
             Name = name;
         }
@@ -20,7 +20,7 @@ namespace Archetype.Game.Payloads.Atoms.Base
         public IEffectResult<IPiece<T>, IZone<T>> MoveTo(IZone<T> zone)
         {
             if (zone == CurrentZone)
-                return ResultFactory.Null<IPiece<T>, IZone<T>>(this);
+                return ResultFactory.Null<IPiece<T>, IZone<T>>();
 
             CurrentZone?.Remove(Self);
             CurrentZone = zone;

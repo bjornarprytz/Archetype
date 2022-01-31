@@ -1,17 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Archetype.Game.Extensions;
+using Archetype.Game.Factory;
 using Archetype.Game.Payloads.Atoms.Base;
+using Archetype.Game.Payloads.Context;
 using Archetype.View.Atoms.Zones;
+using Archetype.View.Infrastructure;
 
 namespace Archetype.Game.Payloads.Atoms
 {
     public interface IDeck : IZone<ICard>, IDeckFront
     {
         ICard PopCard();
-        void Shuffle();
-        void PutCardOnTop(ICard card);
-        void PutCardOnBottom(ICard card);
+        IEffectResult<IDeck> Shuffle();
+        IEffectResult<IDeck, ICard> PutCardOnTop(ICard card);
+        IEffectResult<IDeck, ICard> PutCardOnBottom(ICard card);
     }
 
     internal class Deck : Zone<ICard>, IDeck
@@ -27,7 +30,7 @@ namespace Archetype.Game.Payloads.Atoms
             return card;
         }
 
-        public void Shuffle()
+        public IEffectResult<IDeck> Shuffle()
         {
             var shuffledCards = _cards.Shuffle();
             
@@ -37,16 +40,23 @@ namespace Archetype.Game.Payloads.Atoms
             {
                 _cards.Push(card);
             }
+            
+            return ResultFactory.Create(this);
         }
 
-        public void PutCardOnTop(ICard newCard)
+        public IEffectResult<IDeck, ICard> PutCardOnTop(ICard newCard)
         {
             _cards.Push(newCard);
-
-            newCard.MoveTo(this);
+            
+            var sideEffects = new List<IEffectResult>
+            {
+                newCard.MoveTo(this)
+            };
+            
+            return ResultFactory.Create(this, newCard, sideEffects);
         }
 
-        public void PutCardOnBottom(ICard newCard)
+        public IEffectResult<IDeck, ICard> PutCardOnBottom(ICard newCard)
         {
             var newOrder = _cards.Prepend(newCard).ToList();
             
@@ -57,7 +67,12 @@ namespace Archetype.Game.Payloads.Atoms
                 _cards.Push(card);
             }
 
-            newCard.MoveTo(this);
+            var sideEffects = new List<IEffectResult>
+            {
+                newCard.MoveTo(this)
+            };
+            
+            return ResultFactory.Create(this, newCard, sideEffects);
         }
 
         public int NumberOfCards => Contents.Count();

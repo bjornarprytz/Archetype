@@ -13,7 +13,7 @@ namespace Archetype.Game.Payloads.Atoms
     
     internal class Creature : Unit, ICreature
     {
-        public Creature(ICreatureProtoData protoData, IGameAtom owner) : base(protoData, owner)
+        public Creature(ICreatureProtoData protoData) : base(protoData)
         {
             MetaData = protoData.MetaData;
             Strength = protoData.Strength;
