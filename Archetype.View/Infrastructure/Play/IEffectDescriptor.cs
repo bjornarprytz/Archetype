@@ -1,7 +1,6 @@
-using Archetype.View.Extensions;
 using OneOf;
 
-namespace Archetype.View.Infrastructure;
+namespace Archetype.View.Infrastructure.Play;
 
 public interface IEffectDescriptor
 {

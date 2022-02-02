@@ -1,6 +1,3 @@
-
-using Archetype.Game.Payloads.Atoms;
-using Archetype.Game.Payloads.Atoms.Base;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.Zones;
 

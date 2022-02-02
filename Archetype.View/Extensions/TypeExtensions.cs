@@ -1,33 +1,32 @@
 using System.Text;
 
-namespace Archetype.View.Extensions
+namespace Archetype.View.Extensions;
+
+public static class TypeExtensions
 {
-    public static class TypeExtensions
+    public static string ReadableFullName(this Type type)
     {
-        public static string ReadableFullName(this Type type)
-        {
-            if (!type.IsGenericType)
-                return type.Name;
+        if (!type.IsGenericType)
+            return type.Name;
             
-            var sb = new StringBuilder();
+        var sb = new StringBuilder();
 
-            sb.Append(type.Name[..type.Name.IndexOf('`')]);
+        sb.Append(type.Name[..type.Name.IndexOf('`')]);
 
-            sb.Append('<');
+        sb.Append('<');
 
-            var first = true;
-            foreach (var genericArgument in type.GenericTypeArguments)
-            {
-                if (!first)
-                    sb.Append(',');
-                first = false;
+        var first = true;
+        foreach (var genericArgument in type.GenericTypeArguments)
+        {
+            if (!first)
+                sb.Append(',');
+            first = false;
                 
-                sb.Append(genericArgument.ReadableFullName());
-            }
-
-            sb.Append('>');
-
-            return sb.ToString();
+            sb.Append(genericArgument.ReadableFullName());
         }
+
+        sb.Append('>');
+
+        return sb.ToString();
     }
 }

@@ -1,89 +1,88 @@
 using Archetype.Builder.Builders.Base;
-using Archetype.Game.Payloads.Proto;
+using Archetype.Core.Proto;
 using Archetype.View.Atoms.MetaData;
 
-namespace Archetype.Builder.Builders
+namespace Archetype.Builder.Builders;
+
+public interface ICreatureBuilder : IBuilder<ICreatureProtoData>
 {
-    public interface ICreatureBuilder : IBuilder<ICreatureProtoData>
+    ICreatureBuilder MetaData(CreatureMetaData metaData);
+    ICreatureBuilder Movement(int movement);
+    ICreatureBuilder Strength(int strength);
+    ICreatureBuilder Health(int health);
+    ICreatureBuilder Defense(int defense);
+    ICreatureBuilder Name(string name);
+    ICreatureBuilder Art(string uri);
+    ICreatureBuilder Level(int level);
+}
+
+public class CreatureBuilder : ProtoBuilder<ICreatureProtoData>, ICreatureBuilder
+{
+    private readonly CreatureProtoData _creatureProtoData;
+
+    public CreatureBuilder()
     {
-        ICreatureBuilder MetaData(CreatureMetaData metaData);
-        ICreatureBuilder Movement(int movement);
-        ICreatureBuilder Strength(int strength);
-        ICreatureBuilder Health(int health);
-        ICreatureBuilder Defense(int defense);
-        ICreatureBuilder Name(string name);
-        ICreatureBuilder Art(string uri);
-        ICreatureBuilder Level(int level);
+        _creatureProtoData = new CreatureProtoData();
     }
 
-    public class CreatureBuilder : ProtoBuilder<ICreatureProtoData>, ICreatureBuilder
+    public ICreatureBuilder MetaData(CreatureMetaData metaData)
     {
-        private readonly CreatureProtoData _creatureProtoData;
+        _creatureProtoData.MetaData = metaData;
 
-        public CreatureBuilder()
-        {
-            _creatureProtoData = new CreatureProtoData();
-        }
+        return this;
+    }
 
-        public ICreatureBuilder MetaData(CreatureMetaData metaData)
-        {
-            _creatureProtoData.MetaData = metaData;
+    public ICreatureBuilder Movement(int movement)
+    {
+        _creatureProtoData.Movement = movement;
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Movement(int movement)
-        {
-            _creatureProtoData.Movement = movement;
+    public ICreatureBuilder Strength(int strength)
+    {
+        _creatureProtoData.Strength = strength;
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Strength(int strength)
-        {
-            _creatureProtoData.Strength = strength;
+    public ICreatureBuilder Health(int health)
+    {
+        _creatureProtoData.Health = health;
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Health(int health)
-        {
-            _creatureProtoData.Health = health;
+    public ICreatureBuilder Defense(int defense)
+    {
+        _creatureProtoData.Defense = defense;
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Defense(int defense)
-        {
-            _creatureProtoData.Defense = defense;
+    public ICreatureBuilder Name(string name)
+    {
+        _creatureProtoData.Name = name;
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Name(string name)
-        {
-            _creatureProtoData.Name = name;
+    public ICreatureBuilder Art(string uri)
+    {
+        _creatureProtoData.MetaData = _creatureProtoData.MetaData with { ImageUri = uri };
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Art(string uri)
-        {
-            _creatureProtoData.MetaData = _creatureProtoData.MetaData with { ImageUri = uri };
+    public ICreatureBuilder Level(int level)
+    {
+        _creatureProtoData.MetaData = _creatureProtoData.MetaData with { Level = level };
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICreatureBuilder Level(int level)
-        {
-            _creatureProtoData.MetaData = _creatureProtoData.MetaData with { Level = level };
-
-            return this;
-        }
-
-        protected override ICreatureProtoData BuildInternal()
-        {
-            return _creatureProtoData;
-        }
+    protected override ICreatureProtoData BuildInternal()
+    {
+        return _creatureProtoData;
     }
 }

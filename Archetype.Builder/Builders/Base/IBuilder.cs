@@ -1,9 +1,8 @@
-﻿namespace Archetype.Builder.Builders.Base
-{
-    public interface IBuilder<out T> : IBuilder
-    {
-        T Build();
-    }
+﻿namespace Archetype.Builder.Builders.Base;
 
-    public interface IBuilder{}
+public interface IBuilder<out T> : IBuilder
+{
+    T Build();
 }
+
+public interface IBuilder{}

@@ -1,6 +1,6 @@
 using Archetype.View.Proto;
 
-namespace Archetype.View.Infrastructure;
+namespace Archetype.View.Infrastructure.State;
 
 public interface ISetFront
 {

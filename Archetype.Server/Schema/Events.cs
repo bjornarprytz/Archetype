@@ -1,7 +1,6 @@
-using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Core.Infrastructure;
+using Archetype.Core.Play;
 using Archetype.View.Atoms;
-using Archetype.View.Infrastructure;
 using HotChocolate.Types;
 
 namespace Archetype.Server.Schema;

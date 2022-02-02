@@ -1,14 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Archetype.Design.Extensions
+namespace Archetype.Design.Extensions;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddDesign(this IServiceCollection serviceCollection)
     {
-        public static IServiceCollection AddDesign(this IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddSingleton<IDesign, TestDesign>();
+        serviceCollection.AddSingleton<IDesign, TestDesign>();
             
-            return serviceCollection;
-        }
+        return serviceCollection;
     }
 }

@@ -1,4 +1,4 @@
-namespace Archetype.View.Infrastructure;
+namespace Archetype.View.Infrastructure.Play;
 
 public interface ITargetDescriptor
 {

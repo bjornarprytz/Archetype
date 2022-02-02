@@ -5,13 +5,15 @@ VisualStudioVersion = 16.0.30128.74
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Archetype.Builder", "Archetype.Builder\Archetype.Builder.csproj", "{79A0A536-A37F-4C58-BE96-BDC8CD7A5069}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Game", "Archetype.Game\Archetype.Game.csproj", "{01D04719-34F4-4C36-B6ED-E19DFAD0E121}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Server", "Archetype.Server\Archetype.Server.csproj", "{288DA2FC-F855-4C9A-B656-9AD3B88F659C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Design", "Archetype.Design\Archetype.Design.csproj", "{38F00067-75E7-4CC9-B66B-FA9014BB7592}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.View", "Archetype.View\Archetype.View.csproj", "{89C910FA-88CC-4796-9F66-B1C17095568B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Core", "Archetype.Core\Archetype.Core.csproj", "{831AE0BF-9B61-46A5-9863-084997E4F953}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Engine", "Archetype.Engine\Archetype.Engine.csproj", "{ED9A8F42-C86A-4B81-994D-CC089FE57E49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +25,6 @@ Global
 		{79A0A536-A37F-4C58-BE96-BDC8CD7A5069}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79A0A536-A37F-4C58-BE96-BDC8CD7A5069}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79A0A536-A37F-4C58-BE96-BDC8CD7A5069}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01D04719-34F4-4C36-B6ED-E19DFAD0E121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01D04719-34F4-4C36-B6ED-E19DFAD0E121}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01D04719-34F4-4C36-B6ED-E19DFAD0E121}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01D04719-34F4-4C36-B6ED-E19DFAD0E121}.Release|Any CPU.Build.0 = Release|Any CPU
 		{288DA2FC-F855-4C9A-B656-9AD3B88F659C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{288DA2FC-F855-4C9A-B656-9AD3B88F659C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{288DA2FC-F855-4C9A-B656-9AD3B88F659C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +37,14 @@ Global
 		{89C910FA-88CC-4796-9F66-B1C17095568B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89C910FA-88CC-4796-9F66-B1C17095568B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89C910FA-88CC-4796-9F66-B1C17095568B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{831AE0BF-9B61-46A5-9863-084997E4F953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{831AE0BF-9B61-46A5-9863-084997E4F953}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{831AE0BF-9B61-46A5-9863-084997E4F953}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{831AE0BF-9B61-46A5-9863-084997E4F953}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

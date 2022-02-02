@@ -2,107 +2,105 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Archetype.Builder.Builders.Base;
-using Archetype.Game.Payloads.Context;
-using Archetype.Game.Payloads.Context.Effect.Base;
-using Archetype.Game.Payloads.Proto;
+using Archetype.Core.Play;
+using Archetype.Core.Proto;
 using Archetype.View.Atoms.MetaData;
 using Archetype.View.Infrastructure;
 using Archetype.View.Primitives;
 
-namespace Archetype.Builder.Builders
-{
-    public interface ICardBuilder : IBuilder<ICardProtoData>
-    {
-        ICardBuilder MetaData(CardMetaData metaData);
-        ICardBuilder Name(string name);
-        ICardBuilder Rarity(CardRarity rarity);
-        ICardBuilder Cost(int cost);
-        ICardBuilder Range(int range);
-        ICardBuilder Color(CardColor color);
-        ICardBuilder Art(string link);
+namespace Archetype.Builder.Builders;
 
-        ICardBuilder Effect(Expression<Func<IContext, IEffectResult>> resolveEffect);
+public interface ICardBuilder : IBuilder<ICardProtoData>
+{
+    ICardBuilder MetaData(CardMetaData metaData);
+    ICardBuilder Name(string name);
+    ICardBuilder Rarity(CardRarity rarity);
+    ICardBuilder Cost(int cost);
+    ICardBuilder Range(int range);
+    ICardBuilder Color(CardColor color);
+    ICardBuilder Art(string link);
+
+    ICardBuilder Effect(Expression<Func<IContext, IEffectResult>> resolveEffect);
+}
+
+internal class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
+{
+    private readonly CardProtoData _cardProtoData;
+
+    private readonly List<IEffect> _effects = new();
+
+    public CardBuilder()
+    {
+        _cardProtoData = new CardProtoData(_effects);
     }
 
-    internal class CardBuilder : ProtoBuilder<ICardProtoData>, ICardBuilder
+    public ICardBuilder MetaData(CardMetaData metaData)
     {
-        private readonly CardProtoData _cardProtoData;
+        _cardProtoData.MetaData = metaData;
 
-        private readonly List<IEffect> _effects = new();
+        return this;
+    }
 
-        public CardBuilder()
-        {
-            _cardProtoData = new CardProtoData(_effects);
-        }
+    public ICardBuilder Name(string name)
+    {
+        _cardProtoData.Name = name;
 
-        public ICardBuilder MetaData(CardMetaData metaData)
-        {
-            _cardProtoData.MetaData = metaData;
+        return this;
+    }
 
-            return this;
-        }
+    public ICardBuilder Rarity(CardRarity rarity)
+    {
+        _cardProtoData.MetaData = _cardProtoData.MetaData with { Rarity = rarity };
 
-        public ICardBuilder Name(string name)
-        {
-            _cardProtoData.Name = name;
+        return this;
+    }
 
-            return this;
-        }
+    public ICardBuilder Cost(int cost)
+    {
+        _cardProtoData.Cost = cost;
 
-        public ICardBuilder Rarity(CardRarity rarity)
-        {
-            _cardProtoData.MetaData = _cardProtoData.MetaData with { Rarity = rarity };
-
-            return this;
-        }
-
-        public ICardBuilder Cost(int cost)
-        {
-            _cardProtoData.Cost = cost;
-
-            return this;
-        }
+        return this;
+    }
         
-        public ICardBuilder Range(int range)
-        {
-            _cardProtoData.Range = range;
+    public ICardBuilder Range(int range)
+    {
+        _cardProtoData.Range = range;
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICardBuilder Color(CardColor color)
-        {
-            _cardProtoData.MetaData = _cardProtoData.MetaData with { Color = color };
+    public ICardBuilder Color(CardColor color)
+    {
+        _cardProtoData.MetaData = _cardProtoData.MetaData with { Color = color };
 
-            return this;
-        }
+        return this;
+    }
 
-        public ICardBuilder Art(string link)
-        {
-            _cardProtoData.MetaData = _cardProtoData.MetaData with { ImageUri = link };
+    public ICardBuilder Art(string link)
+    {
+        _cardProtoData.MetaData = _cardProtoData.MetaData with { ImageUri = link };
 
-            return this;
-        }
+        return this;
+    }
         
-        public ICardBuilder Effect(
-            Expression<Func<IContext, IEffectResult>> resolveEffect
-        )
+    public ICardBuilder Effect(
+        Expression<Func<IContext, IEffectResult>> resolveEffect
+    )
+    {
+        _effects.Add(new Effect
         {
-            _effects.Add(new Effect
-            {
-                ResolveExpression = resolveEffect
-            });
+            ResolveExpression = resolveEffect
+        });
 
-            return this;
-        }
+        return this;
+    }
 
-        protected override ICardProtoData BuildInternal()
-        {
-            Console.WriteLine($"Creating card {_cardProtoData.Name}");
+    protected override ICardProtoData BuildInternal()
+    {
+        Console.WriteLine($"Creating card {_cardProtoData.Name}");
 
-            _cardProtoData.GenerateDescriptors();
+        _cardProtoData.GenerateDescriptors();
 
-            return _cardProtoData;
-        }
+        return _cardProtoData;
     }
 }

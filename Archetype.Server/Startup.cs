@@ -1,7 +1,8 @@
 using Archetype.Builder.Extensions;
+using Archetype.Core.Extensions;
+using Archetype.Core.Infrastructure;
 using Archetype.Design.Extensions;
-using Archetype.Game.Extensions;
-using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Engine.Extensions;
 using Archetype.Server.Actions;
 using Archetype.Server.Extensions;
 using Archetype.Server.Schema;
@@ -13,47 +14,47 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 
-namespace Archetype.Server
+namespace Archetype.Server;
+
+public class Startup
 {
-    public class Startup
+    // This method gets called by the runtime. Use this method to add services to the container.
+    // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+    public void ConfigureServices(IServiceCollection services)
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddMediatR(typeof(StartGameAction).Assembly)
-                .AddBuilders()
-                .AddArchetype()
-                .AddDesign()
-                .AddGraphQLServer()
-                .AddMutationConventions(applyToAllMutations: true)
-                .RegisterService<ITopicEventSender>()
-                .RegisterService<IGameState>()
-                .RegisterService<IProtoPool>()
+        services
+            .AddMediatR(typeof(StartGameAction).Assembly)
+            .AddBuilders()
+            .AddArchetypeCore()
+            .AddArchetypeEngine()
+            .AddDesign()
+            .AddGraphQLServer()
+            .AddMutationConventions(applyToAllMutations: true)
+            .RegisterService<ITopicEventSender>()
+            .RegisterService<IGameState>()
+            .RegisterService<IProtoPool>()
 
-                .AddQueryType<Queries>()
-                .AddMutationType<Mutations>()
-                .AddSubscriptionType<Subscriptions>()
-                .AddInMemorySubscriptions()
-                .AddLocalTypes(typeof(CardType).Assembly)
-                ;
+            .AddQueryType<Queries>()
+            .AddMutationType<Mutations>()
+            .AddSubscriptionType<Subscriptions>()
+            .AddInMemorySubscriptions()
+            .AddLocalTypes(typeof(CardType).Assembly)
+            ;
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
+        app
+            .UseWebSockets()
+            .UseRouting()
+            .UseEndpoints(endpoints =>
             {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app
-                .UseWebSockets()
-                .UseRouting()
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapGraphQL();
-                });
-        }
+                endpoints.MapGraphQL();
+            });
     }
 }

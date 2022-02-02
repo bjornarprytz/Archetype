@@ -1,20 +1,19 @@
 using System;
 
-namespace Archetype.Builder.Exceptions
+namespace Archetype.Builder.Exceptions;
+
+public class InvalidTargetIndexException : Exception
 {
-    public class InvalidTargetIndexException : Exception
+    public InvalidTargetIndexException(int index, int targetCount)
     {
-        public InvalidTargetIndexException(int index, int targetCount)
-        {
             
-            Message = $"Invalid target index {index} for target count {targetCount}";
-        }
-
-        public override string Message { get; }
+        Message = $"Invalid target index {index} for target count {targetCount}";
     }
-    
-    public class MissingResolutionExpressionException : Exception { }
-    public class DisconnectedNodesException : Exception { }
 
-    public class MissingNameException : Exception { }
+    public override string Message { get; }
 }
+    
+public class MissingResolutionExpressionException : Exception { }
+public class DisconnectedNodesException : Exception { }
+
+public class MissingNameException : Exception { }

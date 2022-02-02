@@ -1,10 +1,6 @@
-using System;
-using System.Linq;
-using Archetype.Game.Extensions;
-using Archetype.View.Atoms;
 using Archetype.View.Infrastructure;
+using Archetype.View.Infrastructure.Play;
 using HotChocolate.Types;
-using OneOf;
 
 namespace Archetype.Server.Schema;
 

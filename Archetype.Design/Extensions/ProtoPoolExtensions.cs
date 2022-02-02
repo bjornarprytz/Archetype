@@ -1,6 +1,6 @@
 using Archetype.Builder.Builders;
 using Archetype.Builder.Factory;
-using Archetype.Game.Payloads.Infrastructure;
+using Archetype.Core.Infrastructure;
 
 namespace Archetype.Design.Extensions;
 
