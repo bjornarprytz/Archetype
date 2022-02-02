@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Core", "Archetype
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Engine", "Archetype.Engine\Archetype.Engine.csproj", "{ED9A8F42-C86A-4B81-994D-CC089FE57E49}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.DependencyInjection", "Archetype.DependencyInjection\Archetype.DependencyInjection.csproj", "{AE99B11E-40A1-4833-99A2-E2F7BCBAFDF6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED9A8F42-C86A-4B81-994D-CC089FE57E49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE99B11E-40A1-4833-99A2-E2F7BCBAFDF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE99B11E-40A1-4833-99A2-E2F7BCBAFDF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE99B11E-40A1-4833-99A2-E2F7BCBAFDF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE99B11E-40A1-4833-99A2-E2F7BCBAFDF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

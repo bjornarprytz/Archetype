@@ -1,25 +1,20 @@
-using Archetype.Core.Atoms;
-using Archetype.Core.Infrastructure;
-using Archetype.View.Atoms;
-using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.State;
-using Archetype.View.Proto;
+using Archetype.Builder.Extensions;
+using Archetype.Core.Extensions;
+using Archetype.Design.Extensions;
+using Archetype.Engine.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Archetype.Core.Extensions;
+namespace Archetype.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddCore(this IServiceCollection serviceCollection)
+    public static IServiceCollection AddArchetype(this IServiceCollection serviceCollection)
     {
         return serviceCollection
-                .AddSingleton<IProtoPool, IProtoPoolFront, ProtoPool>()
-                .AddSingleton<IGameState, IGameStateFront, GameState>()
-                .AddSingleton<IPlayer, IPlayerFront, Player>()
-                .AddSingleton<IPlayerData, IPlayerDataFront, PlayerData>()
-                .AddSingleton<IMap, IMapFront, Map>()
-                .AddSingleton<IHistoryReader, IHistoryWriter, IHistoryEmitter, History>()
-                .AddSingleton<IInstanceFactory, IInstanceFinder, InstanceManager>()
+                .AddCore()
+                .AddBuilders()
+                .AddEngine()
+                .AddDesign()
             ;
     }
 

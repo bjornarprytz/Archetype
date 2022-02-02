@@ -12,9 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Archetype.Design\Archetype.Design.csproj" />
-    <ProjectReference Include="..\Archetype.Engine\Archetype.Engine.csproj" />
-    <ProjectReference Include="..\Archetype.Game\Archetype.Game.csproj" />
+    <ProjectReference Include="..\Archetype.DependencyInjection\Archetype.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

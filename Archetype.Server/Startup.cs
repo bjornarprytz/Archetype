@@ -1,8 +1,4 @@
-using Archetype.Builder.Extensions;
-using Archetype.Core.Extensions;
-using Archetype.Core.Infrastructure;
-using Archetype.Design.Extensions;
-using Archetype.Engine.Extensions;
+using Archetype.DependencyInjection;
 using Archetype.Server.Actions;
 using Archetype.Server.Extensions;
 using Archetype.Server.Schema;
@@ -24,15 +20,10 @@ public class Startup
     {
         services
             .AddMediatR(typeof(StartGameAction).Assembly)
-            .AddBuilders()
-            .AddArchetypeCore()
-            .AddArchetypeEngine()
-            .AddDesign()
+            .AddArchetype()
             .AddGraphQLServer()
             .AddMutationConventions(applyToAllMutations: true)
             .RegisterService<ITopicEventSender>()
-            .RegisterService<IGameState>()
-            .RegisterService<IProtoPool>()
 
             .AddQueryType<Queries>()
             .AddMutationType<Mutations>()
