@@ -37,18 +37,19 @@ namespace Archetype.Server
         public async Task<StartGamePayload> StartGame(
             ITopicEventSender eventSender,
             [Service] IMediator mediator,
+            [Service] IGameState gameState,
             CancellationToken cancellationToken
         )
         {
             await mediator.Send(new StartGameAction(), cancellationToken);
 
-            var payload = new StartGamePayload("Game started!");
+            var payload = new StartGamePayload(gameState);
 
             await eventSender.SendAsync(nameof(Subscriptions.OnGameStarted), payload, cancellationToken);
             
             return payload;
         }
-        public record StartGamePayload(string Message); // TODO: Placeholder value
+        public record StartGamePayload(IGameState GameState);
         
         public async Task<PlayCardPayload> PlayCard(
             PlayCardInput playCardInput,
