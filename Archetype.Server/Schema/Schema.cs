@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Core.Infrastructure;
 using Archetype.Server.Actions;
-using Archetype.View.Infrastructure.State;
+using Archetype.View.Infrastructure;
 using HotChocolate;
 using HotChocolate.Subscriptions;
 using HotChocolate.Types;

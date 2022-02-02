@@ -1,6 +1,5 @@
 using Archetype.Core.Proto;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.State;
 using Archetype.View.Proto;
 
 namespace Archetype.Core.Atoms;

@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using Archetype.Core.Extensions;
 using Archetype.Core.Play;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.Play;
+using Archetype.View.Play;
 
 namespace Archetype.Core.Play;
 

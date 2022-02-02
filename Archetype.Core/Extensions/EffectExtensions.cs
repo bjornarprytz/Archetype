@@ -6,7 +6,7 @@ using Archetype.Core.Exceptions;
 using Archetype.Core.Play;
 using Archetype.View.Extensions;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.Play;
+using Archetype.View.Play;
 using OneOf;
 
 namespace Archetype.Core.Extensions;

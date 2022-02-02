@@ -1,5 +1,4 @@
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.State;
 using HotChocolate.Types;
 
 namespace Archetype.Server.Schema;

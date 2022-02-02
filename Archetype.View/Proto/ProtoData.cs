@@ -1,6 +1,6 @@
 using Archetype.View.Atoms.MetaData;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.Play;
+using Archetype.View.Play;
 
 namespace Archetype.View.Proto;
 

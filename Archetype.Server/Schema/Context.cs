@@ -1,5 +1,5 @@
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.Play;
+using Archetype.View.Play;
 using HotChocolate.Types;
 
 namespace Archetype.Server.Schema;

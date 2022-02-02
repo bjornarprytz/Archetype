@@ -2,7 +2,6 @@ using Archetype.Core.Atoms;
 using Archetype.Core.Infrastructure;
 using Archetype.View.Atoms;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.State;
 using Archetype.View.Proto;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -1,6 +1,6 @@
 using Archetype.View.Atoms;
 
-namespace Archetype.View.Infrastructure.State;
+namespace Archetype.View.Infrastructure;
 
 public interface IGameStateFront
 {

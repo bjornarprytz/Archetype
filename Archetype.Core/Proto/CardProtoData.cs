@@ -3,7 +3,7 @@ using Archetype.Core.Play;
 using Archetype.View.Atoms.MetaData;
 using Archetype.View.Extensions;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.Play;
+using Archetype.View.Play;
 using Archetype.View.Proto;
 
 namespace Archetype.Core.Proto;

@@ -4,7 +4,7 @@ using Archetype.Core.Proto;
 using Archetype.View.Atoms;
 using Archetype.View.Atoms.MetaData;
 using Archetype.View.Infrastructure;
-using Archetype.View.Infrastructure.Play;
+using Archetype.View.Play;
 
 namespace Archetype.Core.Atoms;
 
