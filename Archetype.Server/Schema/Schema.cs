@@ -49,7 +49,7 @@ public class Mutations
             
         return payload;
     }
-    public record StartGamePayload(IGameState GameState);
+    public record StartGamePayload(IGameStateFront GameState);
         
     public async Task<PlayCardPayload> PlayCard(
         PlayCardInput playCardInput,
