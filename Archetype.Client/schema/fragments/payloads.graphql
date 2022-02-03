@@ -1,0 +1,11 @@
+fragment PlayCardPayload on PlayCardPayload{
+    events {
+        ...HistoryEntry
+    }
+}
+
+fragment StartGamePayload on StartGamePayload{
+    gameState {
+        ...GameState
+    }
+}

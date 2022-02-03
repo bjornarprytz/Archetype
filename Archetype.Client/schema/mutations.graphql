@@ -1,2 +1,12 @@
 
 # TODO
+
+#mutation PlayCard{
+#    playCard(playCardInput: )
+#}
+
+mutation StartGame {
+    startGame {
+        ...StartGamePayload
+    }
+}
