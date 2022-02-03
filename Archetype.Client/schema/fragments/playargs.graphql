@@ -1,0 +1,60 @@
+fragment TargetDescriptor on ITargetDescriptor{
+    typeId
+}
+
+fragment EffectDescriptor on IEffectDescriptor {
+    keyword
+    operands {
+        ... Operand
+    }
+    affected {
+        ... Affected
+    }
+}
+
+fragment Operand on IOperand{
+    value {
+        ... on IImmediateValue{
+            ... ImmediateValue
+        }
+        ... on ITargetProperty{
+            ... TargetProperty
+        }
+        ... on IContextProperty{
+            ... ContextProperty
+        }
+        ... on IAggregateProperty{
+            ... AggregateProperty
+        }
+    }
+}
+
+fragment Affected on IAffected{
+    value {
+        ... on ITargetProperty{
+            ... TargetProperty
+        }
+        ... on IContextProperty{
+            ... ContextProperty
+        }
+    }
+}
+
+fragment ImmediateValue on IImmediateValue{
+    value
+}
+
+fragment TargetProperty on ITargetProperty{
+    targetIndex
+    typeId
+    propertyPath
+}
+
+fragment ContextProperty on IContextProperty{
+    propertyPath
+}
+
+fragment AggregateProperty on IAggregateProperty{
+    description
+    propertyPath
+}

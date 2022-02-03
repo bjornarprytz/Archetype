@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Archetype.Core.Infrastructure;
+using Archetype.Core.Play;
 using Archetype.Server.Actions;
 using Archetype.View.Infrastructure;
 using HotChocolate;
@@ -24,7 +26,7 @@ public class Queries
     }
 
     public IGameStateFront GetGameState() => _gameState;
-    public IProtoPoolFront GetCardPool() => _protoPool;
+    public IProtoPoolFront GetProtoPool() => _protoPool;
 }
     
 public class Mutations

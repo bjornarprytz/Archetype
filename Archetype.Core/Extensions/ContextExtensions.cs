@@ -36,7 +36,7 @@ public static class ContextExtensions
         where T : IContext
     {
         return context.History
-            .Entries.SelectMany(entry => entry.Result.Results)
+            .Entries.SelectMany(entry => entry.Results)
             .Where(result => result.Verb is nameof(IUnit.Attack))
             .Select(r => (int) r.Result) // TODO: Refactor Results to not have to rely on reflection so much
             .Sum();

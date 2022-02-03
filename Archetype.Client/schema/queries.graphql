@@ -1,0 +1,11 @@
+query GetMap {
+    gameState {
+        ...GameState
+    }
+}
+
+query GetProtoPool{
+    protoPool {
+        ...ProtoPool
+    }
+}

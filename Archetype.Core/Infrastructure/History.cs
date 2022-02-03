@@ -9,7 +9,7 @@ namespace Archetype.Core.Infrastructure;
 // TODO: Look at removing the ResultReader/Writer
 public interface IResultsReader
 {
-    IEnumerable<IEffectResult> Results { get; }
+    IEnumerable<IEffectResult> GetResults();
 }
 
 public interface IResultsWriter
@@ -37,7 +37,7 @@ public interface IHistoryWriter
 
 public interface IHistoryEntry
 {
-    IResultsReader Result { get; }
+    IEnumerable<IEffectResult> Results { get; }
 }
     
 public interface IHistoryEmitter
@@ -70,7 +70,7 @@ internal class History : IHistoryReader, IHistoryWriter, IHistoryEmitter
 
     public void Append(IContext context, IResultsReader result)
     {
-        var newEntry = new Entry(result);
+        var newEntry = new Entry(result.GetResults());
             
         _entries.Add(newEntry);
 
@@ -86,5 +86,5 @@ internal class History : IHistoryReader, IHistoryWriter, IHistoryEmitter
         _onResult.OnNext(newEntry);
     }
 
-    private record Entry(IResultsReader Result)  : IHistoryEntry;
+    private record Entry(IEnumerable<IEffectResult> Results)  : IHistoryEntry;
 }

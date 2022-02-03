@@ -13,11 +13,9 @@ public class HistoryEntryType : ObjectType<IHistoryEntry>
 
         descriptor.Description("A historic event");
 
-        descriptor.Ignore(h => h.Result);
-        descriptor.Field(h => h.Result.Results)
+        descriptor.Field(h => h.Results)
             .Type<ListType<ResultUnion>>();
     }
-    
 }
 
 
@@ -46,18 +44,6 @@ public class AtomResultType : ResultType<IEffectResult<IGameAtomFront>>
     }
 }
 
-public class AggregateResultType : ResultType<IAggregateEffectResult>
-{
-    protected override void Configure(IObjectTypeDescriptor<IAggregateEffectResult> descriptor)
-    {
-        base.Configure(descriptor);
-
-        descriptor.Ignore(r => r.Result);
-        descriptor.Ignore(r => r.Verb);
-        descriptor.Ignore(r => r.Affected);
-    }
-}
-
 public abstract class ResultType<T> : ObjectType<T>
     where T : IEffectResult
 {
@@ -74,8 +60,7 @@ public abstract class ResultType<T> : ObjectType<T>
         descriptor.Field(r => r.Affected)
             .Type<AtomUnion>();
         
-        descriptor.Field(r => r.SideEffects)
-            .Type<ListType<ResultUnion>>();
+        descriptor.Ignore(r => r.SideEffects);
     }
 }
 
@@ -87,6 +72,5 @@ public class ResultUnion : UnionType
 
         descriptor.Type<IntResultType>();
         descriptor.Type<AtomResultType>();
-        descriptor.Type<AggregateResultType>();
     }
 }

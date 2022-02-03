@@ -1,0 +1,71 @@
+fragment CardProto on ICardProtoDataFront{
+    name
+    cost
+    range
+    metaData {
+        ... CardMetaData
+    }
+    targetDescriptors {
+        ... TargetDescriptor
+    }
+    effectDescriptors {
+        ... EffectDescriptor
+    }
+}
+
+fragment CreatureProto on ICreatureProtoDataFront{
+    movement
+    strength
+    metaData {
+        ... CreatureMetaData
+    }
+}
+
+fragment StructureProto on IStructureProtoDataFront{
+    name
+    metaData {
+        ... StructureMetaData
+    }
+    effectDescriptors {
+        ... EffectDescriptor
+    }
+}
+
+fragment ProtoPool on IProtoPoolFront{
+    sets {
+        ... SetData
+    }
+}
+
+fragment SetData on ISetFront{
+    name
+    cards {
+        ... CardProto
+    }
+    creatures {
+        ... CreatureProto
+    }
+    structures {
+        ... StructureProto
+    }
+}
+
+
+fragment CardMetaData on CardMetaData{
+    imageUri
+    setName
+    color
+    rarity
+}
+
+fragment CreatureMetaData on CreatureMetaData{
+    setName
+    imageUri
+    level
+}
+
+fragment StructureMetaData on StructureMetaData{
+    setName
+    imageUri
+    level
+}
