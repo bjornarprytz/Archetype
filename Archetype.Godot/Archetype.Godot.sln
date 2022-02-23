@@ -2,6 +2,8 @@
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Godot", "Archetype.Godot.csproj", "{4C6FA4FA-6D25-48EB-9B51-044E0FB774F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Prototype1Data", "..\Archetype.Prototype1Data\Archetype.Prototype1Data.csproj", "{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 	Debug|Any CPU = Debug|Any CPU
@@ -15,5 +17,11 @@ Global
 		{4C6FA4FA-6D25-48EB-9B51-044E0FB774F4}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{4C6FA4FA-6D25-48EB-9B51-044E0FB774F4}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{4C6FA4FA-6D25-48EB-9B51-044E0FB774F4}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F128DFC-D057-4366-8B2A-0FA2DDA1635F}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

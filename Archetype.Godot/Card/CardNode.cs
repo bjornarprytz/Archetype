@@ -1,7 +1,7 @@
 using System.Reactive.Disposables;
-using Archetype.Game.Payloads.Pieces;
 using Godot;
 using Archetype.Godot.Targeting;
+using Archetype.Prototype1Data;
 
 namespace Archetype.Godot.Card
 {
@@ -16,8 +16,6 @@ namespace Archetype.Godot.Card
 		{
 			_stateMachine = new CardStateMachine(this);
 			_cardData = cardData;
-
-			// TODO: SUbscribe to changes in the card
 		}
 		
 		public override void _Ready()

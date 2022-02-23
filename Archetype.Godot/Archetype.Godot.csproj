@@ -43,11 +43,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Archetype.Game, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\Archetype.Game\bin\Release\net5.0\Archetype.Game.dll</HintPath>
-    </Reference>
-    <Reference Include="Archetype.Play, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\Archetype.Play\bin\Debug\net5.0\Archetype.Play.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Archetype.Prototype1Data\Archetype.Prototype1Data.csproj" />
   </ItemGroup>
 </Project>

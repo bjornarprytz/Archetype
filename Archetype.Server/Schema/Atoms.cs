@@ -162,7 +162,7 @@ public abstract class PieceType<T, TZone> : AtomType<T>
 
         descriptor.Field(piece => piece.Name);
         descriptor.Field(piece => piece.CurrentZone)
-            .Type<TZone>();
+            .Type<TZone>(); // TODO: Maybe this should just be treated as an atom (for reference)
     }
 }
 

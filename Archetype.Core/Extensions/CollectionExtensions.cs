@@ -48,9 +48,13 @@ public static class CollectionExtensions
     }
 
     public static V GetOrSet<K, V>(this Dictionary<K, V> dictionary, K key)
+        where K : notnull
         where V : new()
     {
-        if (dictionary.TryGetValue(key, out var value)) return value;
+        if (dictionary.TryGetValue(key, out var value))
+        {
+            return value;
+        }
             
         value = new V();
         dictionary[key] = value;

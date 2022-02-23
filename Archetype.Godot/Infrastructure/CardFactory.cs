@@ -1,6 +1,5 @@
-
-using Archetype.Game.Payloads.Pieces;
 using Archetype.Godot.Card;
+using Archetype.Prototype1Data;
 using Godot;
 
 namespace Archetype.Godot.Infrastructure

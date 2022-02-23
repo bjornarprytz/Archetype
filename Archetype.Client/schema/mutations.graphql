@@ -1,5 +1,5 @@
 
-# TODO
+# TODO: Continue https://chillicream.com/docs/strawberryshake/get-started/console
 
 #mutation PlayCard{
 #    playCard(playCardInput: )
