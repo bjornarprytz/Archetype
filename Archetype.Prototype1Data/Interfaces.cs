@@ -14,9 +14,13 @@
         IPlayer Player { get; }
         IMap Map { get; }
         
-        IEnumerable<IWave> Waves { get; }
+        IWaveEmitter WaveEmitter { get; }
     }
 
+    public interface IWaveEmitter
+    {
+        IWave EmitNext();
+    }
     public interface IWave
     {
         IEnumerable<IEnemy> Enemies { get; }
@@ -33,8 +37,7 @@
     public interface IMap
     {
         IEnumerable<IMapNode> Nodes { get; }
-        
-        
+
         IMapNode? StagingArea { get; }
     }
 

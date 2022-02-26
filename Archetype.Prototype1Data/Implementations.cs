@@ -59,7 +59,19 @@ namespace Archetype.Prototype1Data
         {
             foreach (var building in _gameState.EachBuilding())
             {
-                foreach (var enemy in building.EngagedEnemies.OfType<Enemy>())
+                var engagedEnemies = building.EngagedEnemies.OfType<Enemy>().ToList();
+
+                var attackStrength = building.Strength;
+                
+                foreach (var enemy in engagedEnemies.Where(e => e.IsAlive()))
+                {
+                    var damageAppliedToEnemy = attackStrength.Clamp(0, enemy.Health);
+                    
+                    enemy.Attack(damageAppliedToEnemy);
+                    attackStrength -= damageAppliedToEnemy;
+                }
+                
+                foreach (var enemy in engagedEnemies.Where(e => e.IsAlive()))
                 {
                     building.Attack(enemy.Strength);
                 }
@@ -68,12 +80,21 @@ namespace Archetype.Prototype1Data
 
         private void Movement()
         {
-            foreach (var enemy in _gameState.EachIncomingEnemy())
+            var path = _gameState.Map.PathToBase();
+            
+            foreach (var enemy in _gameState.EachRoamingEnemy())
             {
-                // TODO: Do the path finding
+                var from = (MapNode)enemy.Node;
+                var to = path[from];
+                
+                from.RemoveEnemy(enemy);
+                to.AddEnemy(enemy);
             }
-            
-            
+
+            foreach (var enemy in _gameState.WaveEmitter.EmitNext().Enemies.OfType<Enemy>())
+            {
+                ((MapNode)_gameState.Map.StagingArea).AddEnemy(enemy);
+            }
         }
 
         private void Upkeep()
@@ -87,8 +108,6 @@ namespace Archetype.Prototype1Data
             foreach (var building in _gameState.BuildingsWithKeyword(Keyword.Repair))
             {
                 building.Health++;
-                
-                ((Player)_gameState.Player).Draw();
             }
             
             foreach (var building in _gameState.BuildingsWithKeyword(Keyword.Draw))
@@ -100,18 +119,16 @@ namespace Archetype.Prototype1Data
 
     internal class GameState : IGameState
     {
-        private readonly List<IWave> _waves = new List<IWave>();
-
-        internal GameState(IPlayer player, IMap map, IEnumerable<IWave> waves)
+        internal GameState(IPlayer player, IMap map, IWaveEmitter waveEmitter)
         {
+            WaveEmitter = waveEmitter;
             Player = player;
             Map = map;
-            _waves.AddRange(waves);
         }
 
         public IPlayer Player { get; }
         public IMap Map { get; }
-        public IEnumerable<IWave> Waves => _waves;
+        public IWaveEmitter WaveEmitter { get; }
     }
 
     internal class Player : IPlayer
@@ -212,6 +229,25 @@ namespace Archetype.Prototype1Data
         }
     }
 
+    internal class WaveEmitter : IWaveEmitter
+    {
+        private readonly Stack<IWave> _waves = new Stack<IWave>();
+
+        public WaveEmitter(IEnumerable<IWave> waves)
+        {
+            foreach (var wave in waves.Reverse())
+            {
+                _waves.Push(wave);
+            }
+        }
+
+
+        public IWave EmitNext()
+        {
+            return _waves.Pop();
+        }
+    }
+
     internal class Wave : IWave
     {
         private readonly List<IEnemy> _enemies = new List<IEnemy>();
@@ -238,6 +274,11 @@ namespace Archetype.Prototype1Data
         public int Strength { get; internal set; }
         public IMapNode? Node { get; internal set; }
         public IBuilding? Building { get; internal set; }
+
+        internal void Attack(int damage)
+        {
+            Health -= damage;
+        }
     }
 
     internal class Building : IBuilding

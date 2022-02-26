@@ -7,7 +7,7 @@ namespace Archetype.Prototype1Data
             return new GameState(
                 new Player(1, InitialDeck()), 
                 new Map(InitialMap()),
-                Waves());
+                new WaveEmitter(Waves()));
         }
 
         private static IEnumerable<ICard> InitialDeck() =>

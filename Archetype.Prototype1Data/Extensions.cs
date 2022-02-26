@@ -67,12 +67,70 @@ namespace Archetype.Prototype1Data
             return gameState.Map.Nodes.SelectMany(n => n.Enemies).OfType<Enemy>();
         }
         
-        internal static IEnumerable<Enemy> EachIncomingEnemy(this IGameState gameState)
+        internal static IEnumerable<Enemy> EachRoamingEnemy(this IGameState gameState)
         {
             return gameState.Map.Nodes
                 .SelectMany(n => n.Enemies)
                 .OfType<Enemy>()
-                .Where( e => e.Node is not null && e.Node.ContainsBase());
+                .Where(IsRoaming);
+        }
+
+        internal static bool IsRoaming(this IEnemy enemy)
+        {
+            return enemy.IsOnTheMap() && !enemy.IsEngaged() && !enemy.Node.ContainsBase();
+        }
+        
+        internal static bool IsEngaged(this IEnemy enemy)
+        {
+            return enemy.Building is not null;
+        }
+
+        internal static bool IsOnTheMap(this IEnemy enemy)
+        {
+            return enemy.Node is not null;
+        }
+
+        internal static bool IsDead(this IEnemy enemy)
+        {
+            return !enemy.IsAlive();
+        }
+        
+        internal static bool IsAlive(this IEnemy enemy)
+        {
+            return enemy.Health > 0;
+        }
+
+        internal static IDictionary<MapNode, MapNode> PathToBase(this IMap map)
+        {
+            if (map.Nodes.FirstOrDefault(n => n.ContainsBase()) is not MapNode targetNode)
+            {
+                throw new ArgumentException("Cannot generate path for map without a base!");
+            }
+            
+            var path = new Dictionary<MapNode, MapNode> { { targetNode, targetNode } };
+
+            UpdateNeighbours(targetNode);
+
+            return path;
+
+            void UpdateNeighbours(MapNode node)
+            {
+                var neighboursToUpdate = new List<MapNode>();
+                
+                foreach (var neighbour in node.Neighbours.OfType<MapNode>())
+                {
+                    if (path.ContainsKey(neighbour))
+                        continue;
+
+                    path.Add(neighbour, node);
+                    neighboursToUpdate.Add(neighbour);
+                }
+                
+                foreach (var neighbour in neighboursToUpdate)
+                {
+                    UpdateNeighbours(neighbour);
+                }
+            }
         }
         
         internal static void Connect(this MapNode node, MapNode neighbour)
@@ -85,6 +143,11 @@ namespace Archetype.Prototype1Data
         {
             node.RemoveNeighbour(neighbour);
             neighbour.RemoveNeighbour(node);
+        }
+
+        internal static int Clamp(this int n, int min, int max)
+        {
+            return Math.Max(min, Math.Min(max, n));
         }
     }
 }
