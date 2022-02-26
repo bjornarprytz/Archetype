@@ -48,7 +48,7 @@ namespace Archetype.Prototype1Data
             };
 
 
-        private static ICard Base => new Card("Base", 0, 10, 1, 5);
+        private static ICard Base => new Card("Base", 0, 10, 1, 5, Keyword.Draw);
         private static ICard Woodcutter => new Card("Woodcutter", 1, 2, 1, 0, Keyword.ClearCutting);
         private static ICard Militia => new Card("Militia", 1, 2, 2, 2);
         private static ICard Palissade => new Card("Palissade", 1, 6, 0, 2);

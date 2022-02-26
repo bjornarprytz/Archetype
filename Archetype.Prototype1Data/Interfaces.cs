@@ -4,6 +4,7 @@
     {
         IGameState GameState { get; }
 
+        void StartGame();
         void PlayCard(ICard card, IMapNode target);
         void EngageEnemy(IBuilding building, IEnemy enemy);
         void EndTurn();

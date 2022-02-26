@@ -8,11 +8,9 @@ public class GameLoader : Node
 	private ICardFactory _cardFactory;
 	
 	[Inject]
-	public void Construct(ICardFactory cardFactory)
+	public void Construct(IGameView gameView, IGameState gameState, ICardFactory cardFactory)
 	{
-		var gameContext = Generator.Create();
-		
-		
+		gameView.StartGame();
 	}
 	
 	

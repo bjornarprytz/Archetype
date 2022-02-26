@@ -6,17 +6,17 @@ namespace Archetype.Prototype1Data
         
         internal static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection)
         {
-            var array = collection.ToArray();
+            var newOrder = collection.ToArray();
             
-            var n = array.Length;
+            var n = newOrder.Length;
             for (var i = 0; i < (n - 1); i++)
             {
                 var r = i + Random.Next(n - i);
                 
-                (array[r], array[i]) = (array[i], array[r]);
+                (newOrder[r], newOrder[i]) = (newOrder[i], newOrder[r]);
             }
 
-            return array;
+            return newOrder;
         }
 
         internal static IEnumerable<T> PickNUnique<T>(this IEnumerable<T> collection, int n)

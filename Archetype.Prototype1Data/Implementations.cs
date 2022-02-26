@@ -6,13 +6,21 @@ namespace Archetype.Prototype1Data
     {
         private readonly GameState _gameState;
 
-        internal GameView(IGameState gameState)
+        public GameView(IGameState gameState)
         {
             _gameState = (GameState)gameState;
         }
 
 
         public IGameState GameState => _gameState;
+
+        public void StartGame()
+        {
+            ((Player)_gameState.Player).Draw();
+            ((Player)_gameState.Player).Draw();
+            
+            Movement();
+        }
 
         public void PlayCard(ICard card, IMapNode target)
         {
@@ -119,7 +127,7 @@ namespace Archetype.Prototype1Data
 
     internal class GameState : IGameState
     {
-        internal GameState(IPlayer player, IMap map, IWaveEmitter waveEmitter)
+        public GameState(IPlayer player, IMap map, IWaveEmitter waveEmitter)
         {
             WaveEmitter = waveEmitter;
             Player = player;
@@ -136,7 +144,7 @@ namespace Archetype.Prototype1Data
         private readonly Stack<ICard> _deck = new Stack<ICard>();
         private readonly List<ICard> _hand = new List<ICard>();
 
-        internal Player(int resources, IEnumerable<ICard> deck)
+        public Player(int resources, IEnumerable<ICard> deck)
         {
             Resources = resources;
 
@@ -173,7 +181,7 @@ namespace Archetype.Prototype1Data
     {
         private readonly List<IMapNode> _nodes = new List<IMapNode>();
         
-        internal Map(IEnumerable<IMapNode> nodes)
+        public Map(IEnumerable<IMapNode> nodes)
         {
             _nodes.AddRange(nodes);
 
@@ -286,7 +294,7 @@ namespace Archetype.Prototype1Data
         private readonly List<ICard> _cards = new List<ICard>();
         private readonly List<IEnemy> _engagedEnemies = new List<IEnemy>();
 
-        internal Building(Card foundation)
+        public Building(Card foundation)
         {
              
             IsBase = foundation.Name == "Base";

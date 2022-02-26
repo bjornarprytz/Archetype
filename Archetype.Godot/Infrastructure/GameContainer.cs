@@ -1,4 +1,5 @@
 using System;
+using Archetype.Prototype1Data;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Godot.Infrastructure
@@ -9,6 +10,7 @@ namespace Archetype.Godot.Infrastructure
 		{
 			container
 				.AddSingleton<ICardFactory, CardFactory>()
+				.AddPrototype1()
 				/*
 				 * 
 				.AddArchetypeGraphQLClient()
