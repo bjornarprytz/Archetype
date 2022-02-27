@@ -1,3 +1,4 @@
+using System.Reactive.Subjects;
 using System.Security.Principal;
 
 namespace Archetype.Prototype1Data
@@ -89,8 +90,10 @@ namespace Archetype.Prototype1Data
         private void Movement()
         {
             var path = _gameState.Map.PathToBase();
+
+            var roamingEnemies = _gameState.EachRoamingEnemy().ToList();
             
-            foreach (var enemy in _gameState.EachRoamingEnemy())
+            foreach (var enemy in roamingEnemies)
             {
                 var from = (MapNode)enemy.Node;
                 var to = path[from];
@@ -141,6 +144,8 @@ namespace Archetype.Prototype1Data
 
     internal class Player : IPlayer
     {
+        private readonly Subject<ICard> _cardDrawn = new Subject<ICard>();
+        private readonly Subject<ICard> _cardRemoved = new Subject<ICard>();
         private readonly Stack<ICard> _deck = new Stack<ICard>();
         private readonly List<ICard> _hand = new List<ICard>();
 
@@ -157,6 +162,8 @@ namespace Archetype.Prototype1Data
         public int Resources { get; internal set; }
         public int CardsInDeck => _deck.Count;
         public IEnumerable<ICard> Hand => _hand;
+        public IObservable<ICard> OnCardDrawn => _cardDrawn;
+        public IObservable<ICard> OnCardRemoved => _cardRemoved;
 
         internal void Draw()
         {
@@ -168,12 +175,16 @@ namespace Archetype.Prototype1Data
             var card = _deck.Pop();
 
             _hand.Add(card);
+            
+            _cardDrawn.OnNext(card);
         }
 
         internal void Commit(Card card)
         {
             Resources -= card.Cost;
             _hand.Remove(card);
+            
+            _cardRemoved.OnNext(card);
         }
     }
 

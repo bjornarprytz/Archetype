@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://HUD.cs" type="Script" id=2]
+
+[node name="CanvasLayer" type="CanvasLayer"]
+script = ExtResource( 2 )
+
+[node name="StartButton" type="Button" parent="."]
+margin_left = 300.0
+margin_top = 200.0
+margin_right = 442.0
+margin_bottom = 300.0
+text = "START"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EndTurnButton" type="Button" parent="."]
+margin_left = 600.0
+margin_top = 400.0
+margin_right = 742.0
+margin_bottom = 500.0
+text = "START"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="StartButton" to="." method="StartGame"]
+[connection signal="pressed" from="EndTurnButton" to="." method="EndTurn"]

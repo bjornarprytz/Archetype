@@ -1,4 +1,6 @@
-﻿namespace Archetype.Prototype1Data
+﻿using System.Reactive;
+
+namespace Archetype.Prototype1Data
 {
     public interface IGameView
     {
@@ -33,6 +35,9 @@
         
         int CardsInDeck { get; }
         IEnumerable<ICard> Hand { get; }
+        
+        IObservable<ICard> OnCardDrawn { get; }
+        IObservable<ICard> OnCardRemoved { get; }
     }
 
     public interface IMap
