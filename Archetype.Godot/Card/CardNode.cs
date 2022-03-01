@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reactive.Disposables;
 using Godot;
 using Archetype.Godot.Targeting;
@@ -17,6 +18,16 @@ namespace Archetype.Godot.Card
 		{
 			_stateMachine = new CardStateMachine(this);
 			_cardData = cardData;
+
+			GetNode<RichTextLabel>("Name").Text = cardData.Name;
+			GetNode<RichTextLabel>("Cost").Text = cardData.Cost.ToString();
+			GetNode<RichTextLabel>("RulesText").Text = cardData.Keywords
+				.Select(keyword => keyword.ToString()).Aggregate((keyword, keyword1) => $"{keyword}, {keyword1}");
+			
+			GetNode<RichTextLabel>("Defense/Value").Text = cardData.Health.ToString();
+			GetNode<RichTextLabel>("Attack/Value").Text = cardData.Strength.ToString();
+			GetNode<RichTextLabel>("Presence/Value").Text = cardData.Presence.ToString();
+			
 		}
 
 		public override void _Input(InputEvent @event)
