@@ -54,7 +54,7 @@ namespace Archetype.Prototype1Data
         private static ICard Palissade => new Card("Palissade", 1, 6, 0, 2);
         private static ICard WatchTower => new Card("Watch Tower", 1, 6, 0, 0, Keyword.Ranged);
         private static ICard Barracks => new Card("Barracks", 2, 4, 2, 2, Keyword.Repair);
-        private static ICard Necromancer => new Card("Barracks", 2, 3, 0, 1, Keyword.RaiseDead);
+        private static ICard Necromancer => new Card("Necromancer", 2, 3, 0, 1, Keyword.RaiseDead);
 
         private static IEnemy Piglet => new Enemy("Piglet", 2, 1);
         private static IEnemy BigPig => new Enemy("Big Pig", 3, 1);
