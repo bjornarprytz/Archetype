@@ -1,14 +1,14 @@
 using System.Reactive.Disposables;
-using Archetype.Godot.Infrastructure;
 using Godot;
 using Archetype.Godot.Targeting;
 using Archetype.Prototype1Data;
 
 namespace Archetype.Godot.Card
 {
-	public class CardNode : Area2D
+	public class CardNode : Node2D
 	{
 		private readonly CompositeDisposable _disposables = new ();
+		
 		
 		private CardStateMachine _stateMachine;
 		private ICard _cardData;
@@ -17,15 +17,6 @@ namespace Archetype.Godot.Card
 		{
 			_stateMachine = new CardStateMachine(this);
 			_cardData = cardData;
-		}
-		
-		public override void _Ready()
-		{
-			base._Ready();
-			
-			Connect(Signals.CollisionObject2D.InputEvent, this, nameof(OnInputEvent));
-			Connect(Signals.CollisionObject2D.MouseEntered, this, nameof(OnMouseEntered));
-			Connect(Signals.CollisionObject2D.MouseExited, this, nameof(OnMouseExited));
 		}
 
 		public override void _Input(InputEvent @event)
@@ -42,8 +33,8 @@ namespace Archetype.Godot.Card
 		{
 			// TODO: Play card here?
 		}
-
-		private void OnInputEvent(object viewport, object @event, int shape_idx)
+		
+		private void OnInputEvent(object @event)
 		{
 			if (@event is InputEventMouseButton { Pressed: true })
 			{
@@ -62,3 +53,6 @@ namespace Archetype.Godot.Card
 		}
 	}
 }
+
+
+

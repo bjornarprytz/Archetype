@@ -7,6 +7,8 @@
 [node name="DiContainer" type="Node"]
 script = ExtResource( 1 )
 
-[node name="Area2D" parent="." instance=ExtResource( 3 )]
+[node name="Hand" parent="." instance=ExtResource( 3 )]
+position = Vector2( 260, 272 )
+points = PoolVector2Array( -12, 0, 525, 0 )
 
-[node name="CanvasLayer" parent="." instance=ExtResource( 2 )]
+[node name="HUD" parent="." instance=ExtResource( 2 )]
