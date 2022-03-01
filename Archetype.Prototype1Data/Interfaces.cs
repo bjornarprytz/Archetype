@@ -80,6 +80,7 @@ namespace Archetype.Prototype1Data
     
     public interface ICard
     {
+        Guid Id { get; }
         string Name { get; }
         int Cost { get; }
         int Health { get; }

@@ -363,6 +363,8 @@ namespace Archetype.Prototype1Data
 
         public Card(string name, int cost, int health, int strength, int presence, params Keyword[] keywords)
         {
+            Id = Guid.NewGuid();
+            
             Name = name;
             Health = health;
             Strength = strength;
@@ -372,6 +374,7 @@ namespace Archetype.Prototype1Data
             _keywords.AddRange(keywords);
         }
 
+        public Guid Id { get; }
         public string Name { get; }
         public int Cost { get; }
         public int Health { get; }

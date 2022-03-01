@@ -14,6 +14,10 @@ config/name="Archetype.Godot"
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+DependencyInjection="*res://dependencyinjection.tscn"
+
 [display]
 
 window/size/test_width=800

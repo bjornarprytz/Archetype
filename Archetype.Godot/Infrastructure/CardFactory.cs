@@ -11,17 +11,16 @@ namespace Archetype.Godot.Infrastructure
     
     public class CardFactory : ICardFactory
     {
-        private readonly PackedScene _cardScene;
+        private readonly ISceneFactory _sceneFactory;
 
-        public CardFactory()
+        public CardFactory(ISceneFactory sceneFactory)
         {
-            _cardScene = ResourceLoader.Load<PackedScene>("res://card.tscn") 
-                         ?? throw new MissingPackedSceneException("res://card.tscn");
+            _sceneFactory = sceneFactory;
         }
         
         public CardNode CreateCard(ICard card)
         {
-            var cardNode = _cardScene.Instance() as CardNode;
+            var cardNode = _sceneFactory.CreateNode<CardNode>();
             
             cardNode!.Construct(card);
 

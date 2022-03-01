@@ -8,7 +8,7 @@ namespace Archetype.Godot.Infrastructure
 
 		public MissingPackedSceneException(string scenePath)
 		{
-			Message = scenePath;
+			Message = $"Missing scene at path: {scenePath}. Have you added it to the service collection?";
 		}
 	}
 }

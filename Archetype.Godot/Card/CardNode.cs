@@ -1,4 +1,5 @@
 using System.Reactive.Disposables;
+using Archetype.Godot.Infrastructure;
 using Godot;
 using Archetype.Godot.Targeting;
 using Archetype.Prototype1Data;
@@ -11,7 +12,7 @@ namespace Archetype.Godot.Card
 		
 		private CardStateMachine _stateMachine;
 		private ICard _cardData;
-		
+
 		public void Construct(ICard cardData)
 		{
 			_stateMachine = new CardStateMachine(this);
