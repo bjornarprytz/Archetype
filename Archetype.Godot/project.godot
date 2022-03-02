@@ -11,18 +11,22 @@ config_version=4
 [application]
 
 config/name="Archetype.Godot"
-run/main_scene="res://main.tscn"
-config/icon="res://icon.png"
+run/main_scene="res://scn/main.tscn"
+config/icon="res://img/icon.png"
 
 [autoload]
 
-DependencyInjection="*res://dependencyinjection.tscn"
+DependencyInjection="*res://scn/dependencyinjection.tscn"
 
 [display]
 
 window/size/test_width=800
 window/size/test_height=600
 window/stretch/mode="2d"
+
+[gui]
+
+theme/custom_font="res://font/tajawal-medium.tres"
 
 [physics]
 

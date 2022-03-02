@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/shield-outline.png-1d9d8e137a8af2ddb0a7917c0c81cf44.stex"
+path="res://.import/icon.png-785c773011bc951c4eb2a222382599fb.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://shield-outline.png"
-dest_files=[ "res://.import/shield-outline.png-1d9d8e137a8af2ddb0a7917c0c81cf44.stex" ]
+source_file="res://img/icon.png"
+dest_files=[ "res://.import/icon.png-785c773011bc951c4eb2a222382599fb.stex" ]
 
 [params]
 

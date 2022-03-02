@@ -14,7 +14,7 @@ public static class DependencyInjectionExtensions
             .AddSingleton<ISceneFactory, SceneFactory>()
             .AddSingleton<IPackedSceneConfiguration>(
                 PackedSceneConfiguration.Create(config => config
-                    .Add<CardNode>("res://card.tscn")
+                    .Add<CardNode>("res://scn/card.tscn")
                 ));
     }
 }

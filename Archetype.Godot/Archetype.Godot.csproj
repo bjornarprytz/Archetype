@@ -45,4 +45,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Archetype.Prototype1Data\Archetype.Prototype1Data.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src" />
+  </ItemGroup>
 </Project>
