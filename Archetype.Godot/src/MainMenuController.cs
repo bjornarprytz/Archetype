@@ -13,7 +13,7 @@ public class MainMenuController : CanvasLayer
 
 	private void StartGame()
 	{
-		var gameNode = _sceneFactory.CreateNode<GameController>();
+		var gameNode = _sceneFactory.CreateNode<GameLoader>();
 		
 		GetParent().AddChild(gameNode);
 		QueueFree();

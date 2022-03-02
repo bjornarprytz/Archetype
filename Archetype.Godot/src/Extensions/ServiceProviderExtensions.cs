@@ -10,12 +10,20 @@ public static class ServiceProviderExtensions
 {
     internal static void ResolveDependencies(this Node node)
     {
-        if (node.GetType().GetMethods().FirstOrDefault(m => m.GetCustomAttribute<InjectAttribute>() != null) is not MethodInfo methodInfo) 
-            return;
+        if (node.GetType().GetMethods().FirstOrDefault(m => m.GetCustomAttribute<InjectAttribute>() != null) is
+            { } methodInfo)
+        {
+            
+            var parameters = methodInfo.GetParameters().Select(ResolveService).ToArray();
+            
+            methodInfo.Invoke(node, parameters);
+        }
 
-        var parameters = methodInfo.GetParameters().Select(ResolveService).ToArray();
 
-        methodInfo.Invoke(node, parameters);
+        foreach (var child in node.GetSubtree<Node>())
+        {
+            child.ResolveDependencies();
+        }
         
         object ResolveService(ParameterInfo parameterInfo)
         {

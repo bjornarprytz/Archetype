@@ -1,8 +1,9 @@
 using Godot;
+using System;
 using Archetype.Godot.Infrastructure;
 using Archetype.Prototype1Data;
 
-public class GameController : Spatial
+public class GameController : Control
 {
 	private IGameView _gameView;
 	
@@ -11,11 +12,27 @@ public class GameController : Spatial
 	{
 		_gameView = gameView;
 	}
-
+	
+	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		base._Ready();
 		
-		_gameView.StartGame();
+	}
+
+	private void EndTurn()
+	{
+		// Replace with function body.
+		_gameView.EndTurn();
+	}
+
+
+	private void Pause()
+	{
+		var tree = GetTree();
+
+		tree.Paused = !tree.Paused;
 	}
 }
+
+
+

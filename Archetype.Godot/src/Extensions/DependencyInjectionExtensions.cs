@@ -15,7 +15,7 @@ public static class DependencyInjectionExtensions
             .AddSingleton<IPackedSceneConfiguration>(
                 PackedSceneConfiguration.Create(config => config
                     .Add<CardNode>("res://scn/card.tscn")
-                    .Add<GameController>("res://scn/game.tscn")
+                    .Add<GameLoader>("res://scn/game.tscn")
                     .Add<MainMenuController>("res://scn/mainmenu.tscn")
                 ));
     }

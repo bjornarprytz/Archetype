@@ -7,7 +7,7 @@ namespace Archetype.Godot.Infrastructure;
 
 public interface IPackedSceneConfiguration
 {
-	PackedScene GetPackedScene<T>() where T : Node;
+	T CreateInstance<T>() where T : Node;
 }
 
 public class PackedSceneConfiguration : IPackedSceneConfiguration
@@ -29,14 +29,25 @@ public class PackedSceneConfiguration : IPackedSceneConfiguration
 	{
 		var scene = ResourceLoader.Load<PackedScene>(scenePath) 
 					?? throw new MissingPackedSceneException(scenePath);
+		
 		_packedScenes.Add(typeof(T), scene);
 
 		return this;
 	}
 
-	public PackedScene GetPackedScene<T>() where T : Node
+	public T CreateInstance<T>() where T : Node
 	{
-		return _packedScenes[typeof(T)];
+		var packedScene = _packedScenes[typeof(T)]
+			?? throw new MissingPackedSceneException(typeof(T));
+
+		var n = packedScene.Instance(); 
+		
+		if (n is not T node)
+		{
+			throw new MissingPackedSceneException(typeof(T), n.GetType());
+		}
+
+		return node;
 	}
 }
 
@@ -58,9 +69,7 @@ public class SceneFactory : ISceneFactory
 	public T CreateNode<T>()
 		where T : Node
 	{
-		var scene = _packedSceneConfiguration.GetPackedScene<T>();
-		
-		var node = scene.Instance() as T;
+		var node = _packedSceneConfiguration.CreateInstance<T>();
 		
 		node.ResolveDependencies();
 

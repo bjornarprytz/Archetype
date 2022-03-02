@@ -8,7 +8,7 @@ using Archetype.Godot.Infrastructure;
 using Archetype.Prototype1Data;
 using Godot;
 
-public class Hand : Line2D
+public class HandController : Line2D
 {
 	private readonly CompositeDisposable _disposable = new();
 	private IGameView _gameView;
@@ -19,7 +19,7 @@ public class Hand : Line2D
 	public override void _ExitTree()
 	{
 		base._ExitTree();
-		_disposable.Dispose();
+		_disposable?.Dispose();
 	}
 
 	[Inject]
