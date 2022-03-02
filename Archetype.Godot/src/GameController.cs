@@ -24,14 +24,6 @@ public class GameController : Control
 		// Replace with function body.
 		_gameView.EndTurn();
 	}
-
-
-	private void Pause()
-	{
-		var tree = GetTree();
-
-		tree.Paused = !tree.Paused;
-	}
 }
 
 

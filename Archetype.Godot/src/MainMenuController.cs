@@ -16,7 +16,7 @@ public class MainMenuController : CanvasLayer
 		var gameNode = _sceneFactory.CreateNode<GameLoader>();
 		
 		GetParent().AddChild(gameNode);
-		QueueFree();
+		this.QueueFree();
 	}
 }
 

@@ -20,15 +20,4 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Pause" type="Button" parent="."]
-margin_left = 856.0
-margin_top = 497.0
-margin_right = 1008.0
-margin_bottom = 537.0
-text = "Pause"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [connection signal="pressed" from="EndTurn" to="." method="EndTurn"]
-[connection signal="pressed" from="Pause" to="." method="Pause"]
