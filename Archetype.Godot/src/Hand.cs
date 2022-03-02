@@ -59,28 +59,11 @@ public class Hand : Line2D
 
 	private void ReSpaceCards()
 	{
-		var anchors = PolySect().ToArray(); 
+		var anchors = Points.PolySect(_cards.Count).ToArray(); 
 		
 		foreach (var (cardNode, pos) in _cards.Values.Zip(anchors, (node, vector2) => (node, vector2)))
 		{
 			cardNode.Position = pos;
 		}
-	}
-
-	private IEnumerable<Vector2> PolySect()
-	{
-		var anchorCount = _cards.Count;
-		var length = Math.Abs(Points[1].x - Points[0].x);
-
-		var stepSize = length / (anchorCount + 1);
-
-		var anchors = new List<Vector2>();
-
-		for (var i = 1; i <= anchorCount; i++)
-		{
-			anchors.Add(new Vector2(i * stepSize, Points[0].y));
-		}
-
-		return anchors;
 	}
 }
