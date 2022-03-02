@@ -1,0 +1,11 @@
+Model Information:
+* title:	Low poly Forest environment package
+* source:	https://sketchfab.com/3d-models/low-poly-forest-environment-package-fe6095d4c5b7467fbe93e788522ba880
+* author:	FreeDimensionForge (https://sketchfab.com/freedimensionforge)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Low poly Forest environment package" (https://sketchfab.com/3d-models/low-poly-forest-environment-package-fe6095d4c5b7467fbe93e788522ba880) by FreeDimensionForge (https://sketchfab.com/freedimensionforge) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

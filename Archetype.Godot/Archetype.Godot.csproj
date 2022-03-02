@@ -48,4 +48,21 @@
   <ItemGroup>
     <Folder Include="src" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="credits.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="StateMachine\**" />
+    <Compile Remove="Targeting\**" />
+    <Compile Remove="Card\**" />
+    <Compile Remove="Extensions\**" />
+    <Compile Remove="Infrastructure\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="StateMachine\**" />
+    <EmbeddedResource Remove="Targeting\**" />
+    <EmbeddedResource Remove="Card\**" />
+    <EmbeddedResource Remove="Extensions\**" />
+    <EmbeddedResource Remove="Infrastructure\**" />
+  </ItemGroup>
 </Project>
