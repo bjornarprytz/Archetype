@@ -21,7 +21,6 @@ public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMach
     
     public void MouseEntered()
     {
-        GD.Print("Mouse Entered");
         StateMachine.FireIfPossible(Triggers.HoverStart);
     }
 
@@ -42,12 +41,14 @@ public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMach
     {
         public override void OnEnter(Clearing model)
         {
-            base.OnEnter(model);
+            GD.Print("Hover on!");
+            model.HighlightOn();
         }
 
         public override void OnExit(Clearing model)
         {
-            base.OnExit(model);
+            GD.Print("Hover off!");
+            model.HighlightOff();
         }
     }
 

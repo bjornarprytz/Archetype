@@ -50,16 +50,16 @@ namespace Archetype.Godot.Card
 		
 		private void OnInputEvent(object @event)
 		{
-			if (@event is InputEventMouseButton mouseEvent)
+			if (@event is not InputEventMouseButton mouseEvent) 
+				return;
+			
+			if (mouseEvent.Pressed)
 			{
-				if (mouseEvent.Pressed)
-				{
-					_stateMachine.MouseDown();
-				}
-				else
-				{
-					_stateMachine.MouseUp();
-				}
+				_stateMachine.MouseDown();
+			}
+			else
+			{
+				_stateMachine.MouseUp();
 			}
 		}
 		
