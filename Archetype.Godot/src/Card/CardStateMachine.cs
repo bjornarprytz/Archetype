@@ -6,70 +6,55 @@ using Stateless;
 
 namespace Archetype.Godot.Card
 {
-    public class CardStateMachine : IStateMachine
+    public class CardStateMachine : BaseStateMachine<CardNode, CardStateMachine.Triggers>
     {
-        private readonly CardNode _model;
-        private readonly StateMachine<IState<CardNode>, Triggers> _stateMachine;
-
-
         private readonly IdleState _idle = new();
         private readonly HighlightState _highlight = new();
         private readonly TargetingState _targeting = new();
         
-        public CardStateMachine(CardNode model)
+        public CardStateMachine(CardNode model) : base(model)
         {
-            _model = model;
-            _stateMachine = new StateMachine<IState<CardNode>, Triggers>(_idle);
+            StateMachine = new StateMachine<IState<CardNode>, Triggers>(_idle);
 
-            _stateMachine.OnTransitioned(state =>
+            StateMachine.OnTransitioned(state =>
             {
-                state.Source.OnExit(_model);
-                state.Destination.OnEnter(_model);
+                state.Source.OnExit(Model);
+                state.Destination.OnEnter(Model);
             });
 
-            _stateMachine.Configure(_idle)
+            StateMachine.Configure(_idle)
                 .Permit(Triggers.MouseDown, _targeting)
                 .Permit(Triggers.HoverStart, _highlight);
 
-            _stateMachine.Configure(_targeting)
+            StateMachine.Configure(_targeting)
                 .Permit(Triggers.MouseUp, _idle);
             
-            _stateMachine.Configure(_highlight)
+            StateMachine.Configure(_highlight)
                 .Permit(Triggers.HoverStop, _idle)
                 .SubstateOf(_idle);
         }
         
-        public void HandleInput(InputEvent inputEvent)
-        {
-            _stateMachine.State.HandleInput(_model, inputEvent);
-
-            if (inputEvent is InputEventMouseButton { Pressed: false })
-            {
-                _stateMachine.FireIfPossible(Triggers.MouseUp);
-            }
-        }
-
-        public void Process(float delta)
-        {
-            _stateMachine.State.Process(_model, delta);
-        }
-
         public void MouseEntered()
         {
-            _stateMachine.FireIfPossible(Triggers.HoverStart);
+            StateMachine.FireIfPossible(Triggers.HoverStart);
         }
 
         public void MouseExited()
         {
-            _stateMachine.FireIfPossible(Triggers.HoverStop);
+            StateMachine.FireIfPossible(Triggers.HoverStop);
         }
 
-        public void MouseClick()
+        public void MouseDown()
         {
-            _stateMachine.FireIfPossible(Triggers.MouseDown);
+            StateMachine.FireIfPossible(Triggers.MouseDown);
+        }
+
+        public void MouseUp()
+        {
+            StateMachine.FireIfPossible(Triggers.MouseUp);
         }
         
-        private enum Triggers
+        public enum Triggers
         {
             HoverStart,
             HoverStop,

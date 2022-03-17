@@ -17,5 +17,9 @@ public class GameLoader : Spatial
 		base._Ready();
 		
 		_gameView.StartGame();
+
+		var map = GetNode<MapController>("Map");
+		
+		map.Load(_gameView.GameState.Map);
 	}
 }

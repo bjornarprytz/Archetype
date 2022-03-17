@@ -196,10 +196,12 @@ namespace Archetype.Prototype1Data
         {
             _nodes.AddRange(nodes);
 
+            Root = _nodes.FirstOrDefault();
             StagingArea = _nodes.LastOrDefault();
         }
 
         public IEnumerable<IMapNode> Nodes => _nodes;
+        public IMapNode? Root { get; }
         public IMapNode? StagingArea { get; }
     }
 

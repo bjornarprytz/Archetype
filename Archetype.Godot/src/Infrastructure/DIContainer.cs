@@ -20,7 +20,6 @@ public class DIContainer : Node
 	private void Install(IServiceCollection container)
 	{
 		container
-			.AddSingleton<ICardFactory, CardFactory>()
 			.AddPrototype1()
 			.AddSceneFactories()
 			;

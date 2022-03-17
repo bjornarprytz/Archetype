@@ -9,13 +9,14 @@
 script = ExtResource( 3 )
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( -4.37114e-08, -0.866025, 0.5, 0, 0.5, 0.866025, -1, 3.78552e-08, -2.18557e-08, 9.39889, 7.3127, -0.0581036 )
+transform = Transform( -4.37114e-08, 0.707107, -0.707107, 0, 0.707107, 0.707107, 1, 3.09086e-08, -3.09086e-08, -11.624, 4.22191, 0 )
 
-[node name="scene" parent="." instance=ExtResource( 1 )]
+[node name="Map" parent="." instance=ExtResource( 1 )]
 
 [node name="Hand" parent="." instance=ExtResource( 2 )]
 visible = true
-position = Vector2( 349, 260 )
-points = PoolVector2Array( 0, 0, 477, 0 )
+position = Vector2( 564.573, 260 )
+scale = Vector2( 0.557344, 1 )
+points = PoolVector2Array( 277.076, 0, 739.986, 0 )
 
 [node name="Control" parent="." instance=ExtResource( 4 )]

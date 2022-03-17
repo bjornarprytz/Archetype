@@ -10,14 +10,17 @@ namespace Archetype.Godot.Card
 	public class CardNode : Node2D
 	{
 		private readonly CompositeDisposable _disposables = new ();
+		private readonly CardStateMachine _stateMachine;
 		
-		
-		private CardStateMachine _stateMachine;
 		private ICard _cardData;
 
-		public void Construct(ICard cardData)
+		public CardNode()
 		{
 			_stateMachine = new CardStateMachine(this);
+		}
+		
+		public void Load(ICard cardData)
+		{
 			_cardData = cardData;
 
 			GetNode<Label>("Name").Text = cardData.Name;
@@ -28,7 +31,6 @@ namespace Archetype.Godot.Card
 			GetNode<Label>("Defense/Value").Text = cardData.Health.ToString();
 			GetNode<Label>("Attack/Value").Text = cardData.Strength.ToString();
 			GetNode<Label>("Presence/Value").Text = cardData.Presence.ToString();
-			
 		}
 
 		public override void _Input(InputEvent @event)
@@ -48,9 +50,16 @@ namespace Archetype.Godot.Card
 		
 		private void OnInputEvent(object @event)
 		{
-			if (@event is InputEventMouseButton { Pressed: true })
+			if (@event is InputEventMouseButton mouseEvent)
 			{
-				_stateMachine.MouseClick();
+				if (mouseEvent.Pressed)
+				{
+					_stateMachine.MouseDown();
+				}
+				else
+				{
+					_stateMachine.MouseUp();
+				}
 			}
 		}
 		

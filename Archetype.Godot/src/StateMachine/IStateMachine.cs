@@ -1,10 +1,28 @@
 using Godot;
+using Stateless;
 
 namespace Archetype.Godot.StateMachine
 {
-    public interface IStateMachine
+    public abstract class BaseStateMachine<TModel, TTrigger>
     {
-        void HandleInput(InputEvent inputEvent);
-        void Process(float delta);
+        
+        protected StateMachine<IState<TModel>, TTrigger> StateMachine { get; set; }
+        protected TModel Model { get; }
+    
+        protected BaseStateMachine(TModel model)
+        {
+            Model = model;
+        }
+        
+
+        public virtual void HandleInput(InputEvent inputEvent)
+        {
+            StateMachine.State.HandleInput(Model, inputEvent);
+        }
+
+        public virtual void Process(float delta)
+        {
+            StateMachine.State.Process(Model, delta);
+        }
     }
 }

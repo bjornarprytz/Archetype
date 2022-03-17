@@ -46,9 +46,6 @@
     <ProjectReference Include="..\Archetype.Prototype1Data\Archetype.Prototype1Data.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="src" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="credits.txt" />
   </ItemGroup>
   <ItemGroup>

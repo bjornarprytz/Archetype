@@ -15,14 +15,14 @@ namespace Archetype.Godot.Infrastructure
 
         public CardFactory(ISceneFactory sceneFactory)
         {
-            _sceneFactory = sceneFactory;
+            _sceneFactory = sceneFactory; 
         }
         
         public CardNode CreateCard(ICard card)
         {
             var cardNode = _sceneFactory.CreateNode<CardNode>();
             
-            cardNode!.Construct(card);
+            cardNode!.Load(card);
 
             return cardNode;
         }

@@ -44,6 +44,7 @@ namespace Archetype.Prototype1Data
     {
         IEnumerable<IMapNode> Nodes { get; }
 
+        IMapNode? Root { get; }
         IMapNode? StagingArea { get; }
     }
 

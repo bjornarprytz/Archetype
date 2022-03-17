@@ -70,7 +70,7 @@ public class SceneFactory : ISceneFactory
 		where T : Node
 	{
 		var node = _packedSceneConfiguration.CreateInstance<T>();
-		
+
 		node.ResolveDependencies();
 
 		return node;
