@@ -19,4 +19,4 @@ position = Vector2( 564.573, 260 )
 scale = Vector2( 0.557344, 1 )
 points = PoolVector2Array( 277.076, 0, 739.986, 0 )
 
-[node name="Control" parent="." instance=ExtResource( 4 )]
+[node name="UI" parent="." instance=ExtResource( 4 )]

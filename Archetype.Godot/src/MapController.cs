@@ -37,7 +37,7 @@ public class MapController : Spatial
 		AddSubtree(node);
 	}
 	
-	private void AddSubtree(IMapNode node, Vector3 translation=default, ICollection<IMapNode> handledNodes = null)
+	private void AddSubtree(IMapNode node, ICollection<IMapNode> handledNodes = null)
 	{
 		handledNodes ??= new List<IMapNode>();
 		
@@ -45,8 +45,7 @@ public class MapController : Spatial
 		{
 			return;
 		}
-		
-			
+
 		var clearingNode = _clearingFactory.Create(node);
 		_clearingContainer.AddChild(clearingNode);
 		clearingNode.Translate(handledNodes.Count * new Vector3(4, 0, 0));
@@ -55,7 +54,7 @@ public class MapController : Spatial
 		
 		foreach (var neighbour in node.Neighbours)
 		{
-			AddSubtree(neighbour, clearingNode.Translation, handledNodes);
+			AddSubtree(neighbour, handledNodes);
 		}
 	}
 }

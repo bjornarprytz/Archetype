@@ -5,13 +5,21 @@ namespace Archetype.Godot.StateMachine
 {
     public abstract class BaseStateMachine<TModel, TTrigger>
     {
-        
-        protected StateMachine<IState<TModel>, TTrigger> StateMachine { get; set; }
-        protected TModel Model { get; }
+        protected readonly IdleState Idle = new();
+        protected StateMachine<IState<TModel>, TTrigger> StateMachine { get; }
+        private TModel Model { get; }
     
         protected BaseStateMachine(TModel model)
         {
             Model = model;
+            
+            StateMachine = new StateMachine<IState<TModel>, TTrigger>(Idle);
+
+            StateMachine.OnTransitioned(state =>
+            {
+                state.Source.OnExit(Model);
+                state.Destination.OnEnter(Model);
+            });
         }
         
 
@@ -23,6 +31,11 @@ namespace Archetype.Godot.StateMachine
         public virtual void Process(float delta)
         {
             StateMachine.State.Process(Model, delta);
+        }
+        
+        protected class IdleState : State<TModel>
+        {
+            
         }
     }
 }

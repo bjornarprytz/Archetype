@@ -2,36 +2,26 @@ using Archetype.Godot.Extensions;
 using Archetype.Godot.StateMachine;
 using Archetype.Godot.Targeting;
 using Godot;
-using Stateless;
 
 namespace Archetype.Godot.Card
 {
     public class CardStateMachine : BaseStateMachine<CardNode, CardStateMachine.Triggers>
     {
-        private readonly IdleState _idle = new();
         private readonly HighlightState _highlight = new();
         private readonly TargetingState _targeting = new();
         
         public CardStateMachine(CardNode model) : base(model)
         {
-            StateMachine = new StateMachine<IState<CardNode>, Triggers>(_idle);
-
-            StateMachine.OnTransitioned(state =>
-            {
-                state.Source.OnExit(Model);
-                state.Destination.OnEnter(Model);
-            });
-
-            StateMachine.Configure(_idle)
+            StateMachine.Configure(Idle)
                 .Permit(Triggers.MouseDown, _targeting)
                 .Permit(Triggers.HoverStart, _highlight);
 
             StateMachine.Configure(_targeting)
-                .Permit(Triggers.MouseUp, _idle);
+                .Permit(Triggers.MouseUp, Idle);
             
             StateMachine.Configure(_highlight)
-                .Permit(Triggers.HoverStop, _idle)
-                .SubstateOf(_idle);
+                .Permit(Triggers.HoverStop, Idle)
+                .SubstateOf(Idle);
         }
         
         public void MouseEntered()
@@ -62,7 +52,6 @@ namespace Archetype.Godot.Card
             MouseUp,
         }
 
-        private class IdleState : State<CardNode> { }
         private class HighlightState : State<CardNode>
         {
             public override void OnEnter(CardNode model)

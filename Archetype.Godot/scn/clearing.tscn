@@ -6,15 +6,10 @@
 [ext_resource path="res://models/stylized_water_tower/tower_outline.tres" type="ArrayMesh" id=4]
 
 [sub_resource type="BoxShape" id=1]
-extents = Vector3( 0.392238, 1.06293, 0.421121 )
+extents = Vector3( 0.687248, 1.0448, 0.871414 )
 
 [node name="Clearing" type="Spatial"]
 script = ExtResource( 2 )
-
-[node name="Area" type="Area" parent="."]
-
-[node name="CollisionShape" type="CollisionShape" parent="Area"]
-shape = SubResource( 1 )
 
 [node name="scene" parent="." instance=ExtResource( 1 )]
 transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0 )
@@ -24,6 +19,11 @@ transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, 0 )
 visible = false
 mesh = ExtResource( 4 )
 material/0 = ExtResource( 3 )
+
+[node name="Area" type="Area" parent="."]
+
+[node name="CollisionShape" type="CollisionShape" parent="Area"]
+shape = SubResource( 1 )
 
 [connection signal="mouse_entered" from="Area" to="." method="OnMouseEntered"]
 [connection signal="mouse_exited" from="Area" to="." method="OnMouseExited"]

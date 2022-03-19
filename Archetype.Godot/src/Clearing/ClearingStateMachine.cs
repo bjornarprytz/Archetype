@@ -5,18 +5,17 @@ using Stateless;
 
 public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMachine.Triggers>
 {
-    private readonly IdleState _idle = new();
     private readonly HighlightState _highlight = new();
     
     public ClearingStateMachine(Clearing model) : base(model)
     {
-        StateMachine = new StateMachine<IState<Clearing>, Triggers>(_idle);
-
-        StateMachine.Configure(_idle)
+        StateMachine.Configure(Idle)
             .Permit(Triggers.HoverStart, _highlight);
 
         StateMachine.Configure(_highlight)
-            .Permit(Triggers.HoverStop, _idle);
+            .Permit(Triggers.HoverStop, Idle);
+        
+        GD.Print("State machine on!");
     }
     
     public void MouseEntered()
@@ -34,8 +33,6 @@ public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMach
         HoverStart,
         HoverStop,
     }
-    private class IdleState : State<Clearing> 
-    { }
     
     private class HighlightState : State<Clearing>
     {
