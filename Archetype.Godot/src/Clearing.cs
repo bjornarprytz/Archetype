@@ -44,13 +44,11 @@ public class Clearing : Spatial
 	
 	private void OnMouseEntered()
 	{
-		GD.Print("Enter");
 		_stateMachine.MouseEntered();
 	}
 	
 	private void OnMouseExited()
 	{
-		GD.Print("Exit");
 		_stateMachine.MouseExited();
 	} 
 }

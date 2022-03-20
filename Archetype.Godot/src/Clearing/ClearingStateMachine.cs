@@ -37,14 +37,12 @@ public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMach
     private class HighlightState : State<Clearing>
     {
         public override void OnEnter(Clearing model)
-        {
-            GD.Print("Hover on!");
+        { 
             model.HighlightOn();
         }
 
         public override void OnExit(Clearing model)
         {
-            GD.Print("Hover off!");
             model.HighlightOff();
         }
     }
