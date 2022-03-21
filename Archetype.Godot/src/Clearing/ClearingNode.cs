@@ -1,12 +1,14 @@
-using Godot;
 using Archetype.Prototype1Data;
+using Godot;
 
-public class Clearing : Spatial
+namespace Archetype.Godot.Clearing;
+
+public class ClearingNode : Spatial
 {
 	private readonly ClearingStateMachine _stateMachine;
 	private MeshInstance _highlightMesh;
 	
-	public Clearing()
+	public ClearingNode()
 	{
 		_stateMachine = new ClearingStateMachine(this);
 	}
@@ -52,5 +54,3 @@ public class Clearing : Spatial
 		_stateMachine.MouseExited();
 	} 
 }
-
-

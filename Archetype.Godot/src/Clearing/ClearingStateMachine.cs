@@ -1,13 +1,14 @@
+using Archetype.Godot.Clearing;
 using Archetype.Godot.Extensions;
 using Archetype.Godot.StateMachine;
 using Godot;
 using Stateless;
 
-public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMachine.Triggers>
+public class ClearingStateMachine : BaseStateMachine<ClearingNode, ClearingStateMachine.Triggers>
 {
     private readonly HighlightState _highlight = new();
     
-    public ClearingStateMachine(Clearing model) : base(model)
+    public ClearingStateMachine(ClearingNode model) : base(model)
     {
         StateMachine.Configure(Idle)
             .Permit(Triggers.HoverStart, _highlight);
@@ -34,14 +35,14 @@ public class ClearingStateMachine : BaseStateMachine<Clearing, ClearingStateMach
         HoverStop,
     }
     
-    private class HighlightState : State<Clearing>
+    private class HighlightState : State<ClearingNode>
     {
-        public override void OnEnter(Clearing model)
+        public override void OnEnter(ClearingNode model)
         { 
             model.HighlightOn();
         }
 
-        public override void OnExit(Clearing model)
+        public override void OnExit(ClearingNode model)
         {
             model.HighlightOff();
         }

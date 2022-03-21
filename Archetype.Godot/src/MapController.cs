@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Archetype.Godot.Clearing;
 using Archetype.Godot.Infrastructure;
 using Godot;
 using Archetype.Prototype1Data;
@@ -19,14 +20,12 @@ public class MapController : Spatial
 	public void Load(IMap map)
 	{
 		base._Ready();
-		_clearingContainer = GetNode<Node>("Clearings");
-
 		AddNodeTree(map.Root);
 	}
 
 	public override void _Ready()
 	{
-		
+		_clearingContainer = GetNode<Node>("Clearings");
 	}
 
 	private void AddNodeTree(IMapNode node)

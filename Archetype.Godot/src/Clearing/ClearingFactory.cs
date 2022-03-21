@@ -1,10 +1,12 @@
+using Archetype.Godot.Infrastructure;
 using Archetype.Prototype1Data;
 
-namespace Archetype.Godot.Infrastructure;
+namespace Archetype.Godot.Clearing;
+
 
 public interface IClearingFactory
 {
-    Clearing Create(IMapNode mapNode);
+    ClearingNode Create(IMapNode mapNode);
 }
 
 public class ClearingFactory : IClearingFactory
@@ -16,9 +18,9 @@ public class ClearingFactory : IClearingFactory
         _sceneFactory = sceneFactory;
     }
     
-    public Clearing Create(IMapNode mapNode)
+    public ClearingNode Create(IMapNode mapNode)
     {
-        var clearingNode = _sceneFactory.CreateNode<Clearing>();
+        var clearingNode = _sceneFactory.CreateNode<ClearingNode>();
         
         clearingNode.Load(mapNode);
 
