@@ -48,18 +48,18 @@ namespace Archetype.Prototype1Data
             };
 
 
-        private static ICard Base => new Card("Base", 0, 10, 1, 5, Keyword.Draw);
-        private static ICard Woodcutter => new Card("Woodcutter", 1, 2, 1, 0, Keyword.ClearCutting);
+        private static ICard Base => new Card("Base", 0, 1, 5, 10, Keyword.Draw);
+        private static ICard Woodcutter => new Card("Woodcutter", 1, 1, 0, 2, Keyword.ClearCutting);
         private static ICard Militia => new Card("Militia", 1, 2, 2, 2);
-        private static ICard Wall => new Card("Wall", 1, 6, 0, 2);
-        private static ICard WatchTower => new Card("Watch Tower", 1, 6, 0, 0, Keyword.Ranged);
-        private static ICard Barracks => new Card("Barracks", 2, 4, 2, 2, Keyword.Repair);
-        private static ICard Necromancer => new Card("Necromancer", 2, 3, 0, 1, Keyword.RaiseDead);
+        private static ICard Wall => new Card("Wall", 1, 0, 2, 6);
+        private static ICard WatchTower => new Card("Watch Tower", 1, 0, 0, 6, Keyword.Ranged);
+        private static ICard Barracks => new Card("Barracks", 2, 2, 2, 4, Keyword.Repair);
+        private static ICard Necromancer => new Card("Necromancer", 2, 0, 1, 3, Keyword.RaiseDead);
 
-        private static IEnemy Piglet => new Enemy("Piglet", 2, 1);
-        private static IEnemy BigPig => new Enemy("Big Pig", 3, 1);
-        private static IEnemy Goat => new Enemy("Goat", 1, 3);
-        private static IEnemy Cow => new Enemy("Cow", 4, 2);
-        private static IEnemy Crocodile => new Enemy("Crocodile", 3, 4);
+        private static IEnemy Piglet => new Enemy("Piglet",  1, 2);
+        private static IEnemy BigPig => new Enemy("Big Pig", 1, 3);
+        private static IEnemy Goat => new Enemy("Goat", 3, 1);
+        private static IEnemy Cow => new Enemy("Cow", 2, 4);
+        private static IEnemy Crocodile => new Enemy("Crocodile", 4, 3);
     }
 }

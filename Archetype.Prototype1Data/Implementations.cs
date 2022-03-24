@@ -283,7 +283,7 @@ namespace Archetype.Prototype1Data
 
     internal class Enemy : IEnemy
     {
-        public Enemy(string name, int health, int strength)
+        public Enemy(string name, int strength, int health)
         {
             Name = name;
             Health = health;
@@ -363,7 +363,7 @@ namespace Archetype.Prototype1Data
     {
         private readonly List<Keyword> _keywords = new List<Keyword>();
 
-        public Card(string name, int cost, int health, int strength, int presence, params Keyword[] keywords)
+        public Card(string name, int cost, int strength, int presence, int health, params Keyword[] keywords)
         {
             Id = Guid.NewGuid();
             
