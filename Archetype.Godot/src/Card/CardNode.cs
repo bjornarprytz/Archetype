@@ -29,6 +29,11 @@ namespace Archetype.Godot.Card
 		public override void _Input(InputEvent @event)
 		{
 			_stateMachine.HandleInput(@event);
+
+			if (@event is InputEventMouseButton { Pressed: false })
+			{
+				_stateMachine.MouseUp();
+			}
 		}
 
 		public override void _Process(float delta)
@@ -49,10 +54,6 @@ namespace Archetype.Godot.Card
 			if (mouseEvent.Pressed)
 			{
 				_stateMachine.MouseDown();
-			}
-			else
-			{
-				_stateMachine.MouseUp();
 			}
 		}
 		

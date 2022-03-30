@@ -46,7 +46,15 @@ public static class RandomExtensions
     {
         return collection.PickNUnique(1).FirstOrDefault();
     }
-
+    
+    internal static T PickOneRandom<T>(this T[] array)
+    {
+        if (array.Length < 1)
+            throw new ArgumentException("can't pick from an empty array"); 
+        
+        return array[Random.Next(array.Length-1)];
+    }
+    
     internal static Vector3 RandomInCenteredBounds(this Vector3 bounds)
     {
         var x = (float) (Random.NextDouble() - 0.5f ) * bounds.x;
