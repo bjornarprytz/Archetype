@@ -25,7 +25,7 @@ public class PackedSceneConfiguration : IPackedSceneConfiguration
 		return config;
 	} 
 	
-	internal PackedSceneConfiguration Add<T>(string scenePath)
+	internal PackedSceneConfiguration Add<T>(string scenePath) where T : Node
 	{
 		var scene = ResourceLoader.Load<PackedScene>(scenePath) 
 					?? throw new MissingPackedSceneException(scenePath);

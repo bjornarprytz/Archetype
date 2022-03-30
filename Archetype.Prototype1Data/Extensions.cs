@@ -2,7 +2,7 @@ namespace Archetype.Prototype1Data
 {
     internal static class Extensions
     {
-        private static readonly Random Random = new Random(); // TODO: Consider using a seed here
+        private static readonly Random Random = new (); // TODO: Consider using a seed here
         
         internal static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection)
         {

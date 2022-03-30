@@ -7,7 +7,7 @@ using Archetype.Prototype1Data;
 
 namespace Archetype.Godot.Card
 {
-	public class CardNode : Node2D
+	public class CardNode : Spatial
 	{
 		private readonly CompositeDisposable _disposables = new ();
 		private readonly CardStateMachine _stateMachine;
@@ -23,14 +23,7 @@ namespace Archetype.Godot.Card
 		{
 			_cardData = cardData;
 
-			GetNode<Label>("Name").Text = cardData.Name;
-			GetNode<Label>("Cost").Text = cardData.Cost.ToString();
-			GetNode<Label>("RulesText").Text = cardData.Keywords.IsEmpty() ? "" : cardData.Keywords
-				.Select(keyword => keyword.ToString()).Aggregate((keyword, keyword1) => $"{keyword}, {keyword1}");
-			
-			GetNode<Label>("Defense/Value").Text = cardData.Health.ToString();
-			GetNode<Label>("Attack/Value").Text = cardData.Strength.ToString();
-			GetNode<Label>("Presence/Value").Text = cardData.Presence.ToString();
+			GetNode<CardViewModel>("Viewport/CardGUI").Load(cardData);
 		}
 
 		public override void _Input(InputEvent @event)
@@ -48,7 +41,7 @@ namespace Archetype.Godot.Card
 			// TODO: Play card here?
 		}
 		
-		private void OnInputEvent(object @event)
+		private void OnInputEvent(object camera, object @event, Vector3 click_position, Vector3 click_normal, int shape_idx)
 		{
 			if (@event is not InputEventMouseButton mouseEvent) 
 				return;
@@ -74,6 +67,3 @@ namespace Archetype.Godot.Card
 		}
 	}
 }
-
-
-

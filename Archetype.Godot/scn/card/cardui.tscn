@@ -1,0 +1,111 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://font/tajawal-medium.tres" type="DynamicFont" id=1]
+[ext_resource path="res://img/sword-cross.png" type="Texture" id=2]
+[ext_resource path="res://img/shield-outline.png" type="Texture" id=3]
+[ext_resource path="res://img/adjust.png" type="Texture" id=4]
+[ext_resource path="res://img/icon.png" type="Texture" id=5]
+[ext_resource path="res://src/Card/CardViewModel.cs" type="Script" id=6]
+
+[node name="GUI" type="Control"]
+margin_right = 200.0
+margin_bottom = 300.0
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="."]
+margin_right = 200.0
+margin_bottom = 300.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Art" type="Sprite" parent="Panel"]
+position = Vector2( 100, 140 )
+texture = ExtResource( 5 )
+
+[node name="Name" type="Label" parent="Panel"]
+margin_left = 8.0
+margin_top = 6.0
+margin_right = 147.0
+margin_bottom = 45.0
+custom_fonts/font = ExtResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "asdasaasdsad"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Cost" type="Label" parent="Panel"]
+modulate = Color( 0, 0, 0, 1 )
+margin_left = 164.0
+margin_top = 5.0
+margin_right = 203.0
+margin_bottom = 43.0
+custom_fonts/font = ExtResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RulesText" type="Label" parent="Panel"]
+margin_left = 7.0
+margin_top = 178.0
+margin_right = 200.0
+margin_bottom = 247.0
+custom_fonts/font = ExtResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Defense" type="Sprite" parent="Panel"]
+position = Vector2( 172.254, 270.759 )
+texture = ExtResource( 3 )
+
+[node name="Value" type="Label" parent="Panel/Defense"]
+margin_left = -4.26776
+margin_top = -51.0102
+margin_right = 9.73224
+margin_bottom = -26.0102
+custom_fonts/font = ExtResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Presence" type="Sprite" parent="Panel"]
+position = Vector2( 100.254, 270.759 )
+texture = ExtResource( 4 )
+
+[node name="Value" type="Label" parent="Panel/Presence"]
+margin_left = -5.0
+margin_top = -50.0
+margin_right = 5.0
+margin_bottom = -25.0
+custom_fonts/font = ExtResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Attack" type="Sprite" parent="Panel"]
+position = Vector2( 27.2542, 270.759 )
+texture = ExtResource( 2 )
+
+[node name="Value" type="Label" parent="Panel/Attack"]
+margin_left = -3.50845
+margin_top = -48.2576
+margin_right = 6.49155
+margin_bottom = -23.2576
+custom_fonts/font = ExtResource( 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "1"
+__meta__ = {
+"_edit_use_anchors_": false
+}

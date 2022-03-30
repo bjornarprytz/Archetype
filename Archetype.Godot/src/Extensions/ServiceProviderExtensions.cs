@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Archetype.Godot.Infrastructure;
@@ -18,9 +19,8 @@ public static class ServiceProviderExtensions
             
             methodInfo.Invoke(node, parameters);
         }
-
-
-        foreach (var child in node.GetSubtree<Node>())
+        
+        foreach (var child in node.GetChildren<Node>())
         {
             child.ResolveDependencies();
         }

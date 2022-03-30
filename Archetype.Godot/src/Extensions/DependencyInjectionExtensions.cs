@@ -20,7 +20,7 @@ public static class DependencyInjectionExtensions
             .AddSingleton<IPackedSceneConfiguration>(
                 PackedSceneConfiguration.Create(config => config
                     .Add<CardNode>
-                        ("res://scn/card.tscn")
+                        ("res://scn//card/cardnode.tscn")
                     .Add<ClearingNode>
                         ("res://scn/clearing.tscn")
                     .Add<EnemyNode>

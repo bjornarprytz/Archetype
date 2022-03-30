@@ -8,7 +8,7 @@ using Archetype.Godot.Infrastructure;
 using Archetype.Prototype1Data;
 using Godot;
 
-public class HandController : Line2D
+public class HandController : Path
 {
 	private readonly CompositeDisposable _disposable = new();
 	private IGameView _gameView;
@@ -20,6 +20,12 @@ public class HandController : Line2D
 	{
 		base._ExitTree();
 		_disposable?.Dispose();
+	}
+
+	public override void _Ready()
+	{
+		Curve.AddPoint(Vector3.Zero);
+		Curve.AddPoint(Vector3.One);
 	}
 
 	[Inject]
@@ -59,11 +65,11 @@ public class HandController : Line2D
 
 	private void ReSpaceCards()
 	{
-		var anchors = Points.PolySect(_cards.Count).ToArray(); 
+		var anchors = Curve.GetBakedPoints().PolySect(_cards.Count).ToArray(); 
 		
 		foreach (var (cardNode, pos) in _cards.Values.Zip(anchors, (node, vector2) => (node, vector2)))
 		{
-			cardNode.Position = pos;
+			cardNode.Translation = pos;
 		}
 	}
 }

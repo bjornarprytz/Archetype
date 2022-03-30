@@ -1,8 +1,13 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://src/HandController.cs" type="Script" id=1]
 
-[node name="Hand" type="Line2D"]
-visible = false
-points = PoolVector2Array( 0, 0, 10, 0 )
+[sub_resource type="Curve3D" id=1]
+_data = {
+"points": PoolVector3Array(  ),
+"tilts": PoolRealArray(  )
+}
+
+[node name="Hand" type="Path"]
+curve = SubResource( 1 )
 script = ExtResource( 1 )

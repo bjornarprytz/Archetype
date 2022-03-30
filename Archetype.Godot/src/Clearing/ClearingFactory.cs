@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Archetype.Godot.Infrastructure;
 using Archetype.Prototype1Data;
+using Godot;
 
 namespace Archetype.Godot.Clearing;
 
@@ -20,7 +22,11 @@ public class ClearingFactory : IClearingFactory
     
     public ClearingNode Create(IMapNode mapNode)
     {
+        var sw = new Stopwatch();
+        sw.Start();
         var clearingNode = _sceneFactory.CreateNode<ClearingNode>();
+        sw.Stop();
+        GD.Print($"Spent {sw.ElapsedMilliseconds} ms creating clearing");
         
         clearingNode.Load(mapNode);
 
