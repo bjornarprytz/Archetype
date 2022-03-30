@@ -41,7 +41,7 @@ namespace Archetype.Prototype1Data
             new List<IWave>
             {
                 new Wave(Piglet, Piglet),
-                new Wave(BigPig, Goat),
+                new Wave(BigPig,  Goat),
                 new Wave(Goat, Cow),
                 new Wave(Piglet, Piglet, Piglet, Goat),
                 new Wave(Cow, Crocodile),
