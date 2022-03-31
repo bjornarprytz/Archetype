@@ -4,11 +4,11 @@ using Godot.Collections;
 
 namespace Archetype.Godot.StateMachine;
 
-public class RayHit
+public class RayHitResult
 {
     private readonly Dictionary _dictionary;
 
-    public RayHit(Dictionary rayHitCollection)
+    public RayHitResult(Dictionary rayHitCollection)
     {
         Hit = rayHitCollection.Count > 0;
 

@@ -1,3 +1,4 @@
+using Archetype.Godot.Extensions;
 using Archetype.Godot.StateMachine;
 using Godot;
 using Godot.Collections;
@@ -28,12 +29,7 @@ namespace Archetype.Godot.Targeting
 
 		public override void _PhysicsProcess(float delta)
 		{
-			var spaceState = GetWorld().DirectSpaceState;
-			var camera = GetViewport().GetCamera();
-			var from = camera.ProjectRayOrigin(_mousePosition);
-			var to = from + (camera.ProjectRayNormal(_mousePosition) * 100f); 
-			
-			var result = new RayHit(spaceState.IntersectRay(from, to, collideWithAreas: true));
+			var result = this.CastRayFromMousePosition(_mousePosition, collideWithAreas:true);
 
 			if (result.Hit)
 			{
@@ -41,9 +37,9 @@ namespace Archetype.Godot.Targeting
 			}
 		}
 
-		private void PointTo(Vector3 target)
+		private void PointTo(Vector3 worldPosition)
 		{
-			Curve.SetPointPosition(1, target);
+			Curve.SetPointPosition(1, ToLocal(worldPosition));
 		}
 		
 		
@@ -56,7 +52,6 @@ namespace Archetype.Godot.Targeting
 			
 			foreach (var point in Curve.Tessellate())
 			{
-				
 				_lineDrawer.AddVertex(point);
 			}
 			
