@@ -3,7 +3,10 @@ using Godot;
 
 namespace Archetype.Godot.StateMachine
 {
-	public interface IState<in T>
+	public interface IState // Marker interface for DI
+	{}
+	
+	public interface IState<in T> : IState
 	{
 		void HandleInput(T model, InputEvent inputEvent);
 		void Process(T model, float delta);

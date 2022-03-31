@@ -1,0 +1,78 @@
+[gd_resource type="VisualShader" load_steps=8 format=2]
+
+[sub_resource type="VisualShaderNodeExpression" id=7]
+size = Vector2( 566, 467.6 )
+expression = "float t = delta * float(i);
+float t2 = t * t;
+float one_minus_t = 1.0 - t;
+float one_minus_t2 = one_minus_t * one_minus_t;
+
+bezier = (P0 * one_minus_t2 * one_minus_t + P1 * 3.0 * t * one_minus_t2 + P2 * 3.0 * t2 * one_minus_t + P3 * t2 * t);"
+
+[sub_resource type="VisualShaderNodeVec3Uniform" id=1]
+uniform_name = "p0"
+
+[sub_resource type="VisualShaderNodeVec3Uniform" id=2]
+uniform_name = "p2"
+
+[sub_resource type="VisualShaderNodeVec3Uniform" id=3]
+uniform_name = "p3"
+
+[sub_resource type="VisualShaderNodeVec3Uniform" id=4]
+uniform_name = "p1"
+
+[sub_resource type="VisualShaderNodeScalarUniform" id=5]
+uniform_name = "delta"
+
+[sub_resource type="VisualShaderNodeScalarUniform" id=6]
+uniform_name = "i"
+
+[resource]
+resource_local_to_scene = true
+code = "shader_type spatial;
+render_mode specular_schlick_ggx;
+
+
+
+
+void vertex() {
+// Output:0
+
+}
+
+void fragment() {
+// Output:0
+
+}
+
+void light() {
+// Output:0
+
+}
+"
+graph_offset = Vector2( -956.597, -371.722 )
+nodes/fragment/0/position = Vector2( 500, -220 )
+nodes/fragment/2/node = SubResource( 1 )
+nodes/fragment/2/position = Vector2( -1100, 0 )
+nodes/fragment/3/node = SubResource( 2 )
+nodes/fragment/3/position = Vector2( -1100, 120 )
+nodes/fragment/4/node = SubResource( 3 )
+nodes/fragment/4/position = Vector2( -1100, 180 )
+nodes/fragment/5/node = SubResource( 4 )
+nodes/fragment/5/position = Vector2( -1100, 60 )
+nodes/fragment/6/node = SubResource( 5 )
+nodes/fragment/6/position = Vector2( -1100, -120 )
+nodes/fragment/7/node = SubResource( 6 )
+nodes/fragment/7/position = Vector2( -1100, -60 )
+nodes/fragment/12/node = SubResource( 7 )
+nodes/fragment/12/position = Vector2( -820, -100 )
+nodes/fragment/12/size = Vector2( 566, 467.6 )
+nodes/fragment/12/input_ports = "0,0,delta;1,0,i;2,1,p0;3,1,p1;4,1,p2;5,1,p3;"
+nodes/fragment/12/output_ports = "0,1,bezier;"
+nodes/fragment/12/expression = "float t = delta * float(i);
+float t2 = t * t;
+float one_minus_t = 1.0 - t;
+float one_minus_t2 = one_minus_t * one_minus_t;
+
+bezier = (P0 * one_minus_t2 * one_minus_t + P1 * 3.0 * t * one_minus_t2 + P2 * 3.0 * t2 * one_minus_t + P3 * t2 * t);"
+nodes/fragment/connections = PoolIntArray( 6, 0, 12, 0, 7, 0, 12, 1, 2, 0, 12, 2, 5, 0, 12, 3, 3, 0, 12, 4, 4, 0, 12, 5 )

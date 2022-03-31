@@ -1,18 +1,19 @@
-using System;
-using System.Collections.Generic;
-using Archetype.Godot.Infrastructure;
 using Godot;
-using Godot.Collections;
 
 namespace Archetype.Godot.Targeting
 {
 	public class TargetingArrow : Path
 	{
+		private ImmediateGeometry _lineDrawer;
+		private Vector2 _mousePosition;
+		
 		public override void _Ready()
 		{
 			base._Ready();
 			Curve.AddPoint(Vector3.Zero);
 			Curve.AddPoint(Vector3.Zero);
+			
+			_lineDrawer = GetNode<ImmediateGeometry>("LineDrawer");
 		}
 
 		public override void _Input(InputEvent @event)
@@ -20,37 +21,38 @@ namespace Archetype.Godot.Targeting
 			if (@event is not InputEventMouseMotion mm)
 				return;
 
-			var point = GetViewport().GetCamera().ProjectRayNormal(mm.Position);
-			
-			PointTo(point);
+			_mousePosition = mm.Position;
 		}
 
-		public void PointTo(Vector3 target)
+		public override void _PhysicsProcess(float delta)
+		{
+			var camera = GetViewport().GetCamera();
+			var from = camera.ProjectRayOrigin(_mousePosition);
+			var to = from + (camera.ProjectRayNormal(_mousePosition) * 100f); 
+			
+			PointTo(to);
+		}
+
+		private void PointTo(Vector3 target)
 		{
 			Curve.SetPointPosition(1, target);
 		}
-/*
- *TODO: Draw a bezier curve
+		
+		
 		public override void _Process(float delta)
 		{
 			base._Process(delta);
 			
+			_lineDrawer.Clear();
+			_lineDrawer.Begin(Mesh.PrimitiveType.LineStrip);
+			
 			foreach (var point in Curve.Tessellate())
 			{
-				// TODO: Draw a line
 				
-				throw new NotImplementedException();
+				_lineDrawer.AddVertex(point);
 			}
-
 			
+			_lineDrawer.End();
 		}
- */
-
-		public void Reset()
-		{
-			Curve.ClearPoints();
-		}
-		
-		
 	}
 }

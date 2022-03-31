@@ -22,6 +22,7 @@ public class DIContainer : Node
 		container
 			.AddPrototype1()
 			.AddSceneFactories()
+			.AddStates()
 			;
 	}
 }

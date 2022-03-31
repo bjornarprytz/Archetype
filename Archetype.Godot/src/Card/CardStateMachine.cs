@@ -3,7 +3,6 @@ using Archetype.Godot.Infrastructure;
 using Archetype.Godot.StateMachine;
 using Archetype.Godot.Targeting;
 using Godot;
-using Godot.Collections;
 
 namespace Archetype.Godot.Card
 {
@@ -25,7 +24,7 @@ namespace Archetype.Godot.Card
 				.Permit(Triggers.HoverStop, Idle)
 				.SubstateOf(Idle);
 		}
-		
+
 		public void MouseEntered()
 		{
 			StateMachine.FireIfPossible(Triggers.HoverStart);
