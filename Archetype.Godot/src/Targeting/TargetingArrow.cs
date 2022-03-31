@@ -1,23 +1,15 @@
+using System;
+using System.Collections.Generic;
 using Archetype.Godot.Extensions;
 using Godot;
-using Godot.Collections;
 
 namespace Archetype.Godot.Targeting
 {
-	public class TargetingArrow : Path
+	public class TargetingArrow : ImmediateGeometry
 	{
-		private ImmediateGeometry _lineDrawer;
 		private Vector2 _mousePosition;
+		private MathyExtensions.BezierParameters _bezierParameters;
 		
-		public override void _Ready()
-		{
-			base._Ready();
-			Curve.AddPoint(Vector3.Zero);
-			Curve.AddPoint(Vector3.Zero);
-			
-			_lineDrawer = GetNode<ImmediateGeometry>("LineDrawer");
-		}
-
 		public override void _Input(InputEvent @event)
 		{
 			if (@event is not InputEventMouseMotion mm)
@@ -30,31 +22,31 @@ namespace Archetype.Godot.Targeting
 		{
 			var result = this.CastRayFromMousePosition(_mousePosition, collideWithAreas:true);
 
-			if (result.Hit)
-			{
-				PointTo(result.Position);
-			}
+			_bezierParameters = result.Hit 
+				? new MathyExtensions.BezierParameters(Vector3.Zero, Transform.Up() * 3, result.Normal * 3, ToLocal(result.Position)) 
+				: default;
 		}
-
-		private void PointTo(Vector3 worldPosition)
-		{
-			Curve.SetPointPosition(1, ToLocal(worldPosition));
-		}
-		
 		
 		public override void _Process(float delta)
 		{
 			base._Process(delta);
 			
-			_lineDrawer.Clear();
-			_lineDrawer.Begin(Mesh.PrimitiveType.LineStrip);
-			
-			foreach (var point in Curve.Tessellate())
+			Clear();
+			Begin(Mesh.PrimitiveType.LineStrip);
+
+			foreach (var point in _bezierParameters.BezierPoints(10))
 			{
-				_lineDrawer.AddVertex(point);
+				AddVertex(point);
 			}
 			
-			_lineDrawer.End();
+			End();
 		}
+
+		
+
+		
+		
+		
+		
 	}
 }

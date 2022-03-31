@@ -31,6 +31,15 @@ public static class MathyExtensions
         return anchors;
     }
 
+
+    public static Vector3 Right(this Transform transform, float weight=1f) => transform.basis.x * weight;
+    public static Vector3 Left(this Transform transform, float weight=1f) => -transform.Right(weight);
+    public static Vector3 Up(this Transform transform, float weight=1f) => transform.basis.y * weight;
+    public static Vector3 Down(this Transform transform, float weight=1f) => -transform.Up(weight);
+    public static Vector3 Backward(this Transform transform, float weight=1f) => transform.basis.z * weight;
+    public static Vector3 Forward(this Transform transform, float weight=1f) => -transform.Backward(weight);
+    
+    
     public static Vector3 Size(this Transform transform)
     {
         var x = transform.basis.x.Length();
@@ -43,16 +52,55 @@ public static class MathyExtensions
         return vec1;
     }
     
-    private static Vector2 CubicBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+    public static IEnumerable<Vector3> BezierPoints(this BezierParameters p, int nPoints)
     {
-        var q0 = p0.LinearInterpolate(p1, t);
-        var q1 = p1.LinearInterpolate(p2, t);
-        var q2 = p2.LinearInterpolate(p3, t);
+        if (nPoints <= 0)
+            throw new ArgumentException("nPoints must be positive", nameof(nPoints));
+			
+        var dt = 1f / nPoints;
+
+        var t = 0f;
+
+        var points = new List<Vector3>();
+			
+        while (t < 1f)
+        {
+            points.Add(p.BezierPoint(t));
+				
+            t += dt;
+        }
+			
+        points.Add(p.BezierPoint(1f));
+
+        return points;
+    }
+    
+    public static Vector3 BezierPoint(this BezierParameters p, float t)
+    {
+        var q0 = p.Origin.LinearInterpolate(p.EntryNormal, t);
+        var q1 = p.EntryNormal.LinearInterpolate(p.ExitNormal, t);
+        var q2 = p.ExitNormal.LinearInterpolate(p.Target, t);
 
         var r0 = q0.LinearInterpolate(q1, t);
         var r1 = q1.LinearInterpolate(q2, t);
 
         var s = r0.LinearInterpolate(r1, t);
         return s;
+    }
+    
+    public struct BezierParameters
+    {
+        public BezierParameters(Vector3 origin, Vector3 entryNormal, Vector3 exitNormal, Vector3 target)
+        {
+            Origin = origin;
+            EntryNormal = entryNormal;
+            ExitNormal = exitNormal;
+            Target = target;
+        }
+
+        public Vector3 Origin { get; }
+        public Vector3 EntryNormal { get; }
+        public Vector3 ExitNormal { get; }
+        public Vector3 Target { get; }
     }
 }
