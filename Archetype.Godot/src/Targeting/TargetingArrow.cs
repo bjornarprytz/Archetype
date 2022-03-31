@@ -9,7 +9,8 @@ namespace Archetype.Godot.Targeting
 	{
 		private Vector2 _mousePosition;
 		private MathyExtensions.BezierParameters _bezierParameters;
-		
+
+
 		public override void _Input(InputEvent @event)
 		{
 			if (@event is not InputEventMouseMotion mm)

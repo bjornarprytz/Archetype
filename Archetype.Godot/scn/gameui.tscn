@@ -4,9 +4,6 @@
 
 [node name="Control" type="Control"]
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="EndTurn" type="Button" parent="."]
 margin_left = 856.0
