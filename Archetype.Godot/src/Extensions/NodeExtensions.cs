@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Archetype.Godot.StateMachine;
 using Godot;
 
 namespace Archetype.Godot.Extensions

@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-namespace Archetype.Godot.StateMachine
+namespace Archetype.Godot
 {
 	public interface IState // Marker interface for DI
 	{}

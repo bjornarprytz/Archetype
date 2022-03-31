@@ -1,6 +1,6 @@
 using System;
+using Archetype.Godot.Extensions;
 using Archetype.Godot.Infrastructure;
-using Archetype.Godot.StateMachine;
 using Archetype.Prototype1Data;
 using Godot;
 using Stateless;
@@ -20,19 +20,7 @@ public class EnemyNode : Spatial
 		State.Moving moving
 	)
 	{
-		_stateMachine = new StateMachine<IState<EnemyNode>, State.Trigger>(idle);
-		
-		_stateMachine.OnTransitioned(state =>
-		{
-			state.Source.OnExit(this);
-			state.Destination.OnEnter(this);
-		});
-		
-		_stateMachine.Configure(idle)
-			.Permit(State.Trigger.StartMoving, moving);
-
-		_stateMachine.Configure(moving)
-			.Permit(State.Trigger.StopMoving, idle);
+		_stateMachine = this.CreateStateMachine(idle, State.ConfigureState(idle, moving));
 	}
 	
 	public void Load(IEnemy enemyData)
@@ -56,6 +44,19 @@ public class EnemyNode : Spatial
 	
 	public sealed class State
 	{
+		public static Action<StateMachine<IState<EnemyNode>, Trigger>> ConfigureState(Idle idle, Moving moving)
+		{
+			return 
+				sm =>
+				{
+					sm.Configure(idle)
+						.Permit(Trigger.StartMoving, moving);
+
+					sm.Configure(moving)
+						.Permit(Trigger.StopMoving, idle);
+				};
+		}
+		
 		public enum Trigger
 		{
 			StartMoving,

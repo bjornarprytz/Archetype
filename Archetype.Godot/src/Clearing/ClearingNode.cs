@@ -1,7 +1,7 @@
-using Archetype.Godot.Card;
+using System;
+using Archetype.Godot.Enemy;
 using Archetype.Godot.Extensions;
 using Archetype.Godot.Infrastructure;
-using Archetype.Godot.StateMachine;
 using Archetype.Prototype1Data;
 using Godot;
 using Stateless;
@@ -20,19 +20,7 @@ public class ClearingNode : Spatial
 		State.Highlight highlight
 	)
 	{
-		_stateMachine = new StateMachine<IState<ClearingNode>, State.Trigger>(idle);
-		
-		_stateMachine.OnTransitioned(state =>
-		{
-			state.Source.OnExit(this);
-			state.Destination.OnEnter(this);
-		});
-		
-		_stateMachine.Configure(idle)
-			.Permit(State.Trigger.HoverStart, highlight);
-
-		_stateMachine.Configure(highlight)
-			.Permit(State.Trigger.HoverStop, idle);
+		_stateMachine = this.CreateStateMachine(idle, State.ConfigureState(idle, highlight));
 	}
 
 	public void Load(IMapNode mapNode)
@@ -78,6 +66,19 @@ public class ClearingNode : Spatial
 	
 	public sealed class State
 	{
+		public static Action<StateMachine<IState<ClearingNode>, Trigger>> ConfigureState(Idle idle, Highlight highlight)
+		{
+			return 
+				sm =>
+				{
+					sm.Configure(idle)
+						.Permit(Trigger.HoverStart, highlight);
+
+					sm.Configure(highlight)
+						.Permit(Trigger.HoverStop, idle);
+				};
+		}
+		
 		public enum Trigger
 		{
 			HoverStart,

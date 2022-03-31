@@ -1,5 +1,4 @@
 using Archetype.Godot.Extensions;
-using Archetype.Godot.StateMachine;
 using Godot;
 using Godot.Collections;
 

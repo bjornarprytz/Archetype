@@ -6,7 +6,6 @@ using Archetype.Godot.Card;
 using Archetype.Godot.Clearing;
 using Archetype.Godot.Enemy;
 using Archetype.Godot.Infrastructure;
-using Archetype.Godot.StateMachine;
 using Archetype.Godot.Targeting;
 using Microsoft.Extensions.DependencyInjection;
 

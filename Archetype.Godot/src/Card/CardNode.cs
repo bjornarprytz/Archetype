@@ -1,7 +1,7 @@
+using System;
 using System.Reactive.Disposables;
 using Archetype.Godot.Extensions;
 using Archetype.Godot.Infrastructure;
-using Archetype.Godot.StateMachine;
 using Godot;
 using Archetype.Godot.Targeting;
 using Archetype.Prototype1Data;
@@ -23,24 +23,7 @@ namespace Archetype.Godot.Card
 			State.Highlight highlight
 		)
 		{
-			_stateMachine = new StateMachine<IState<CardNode>, State.Triggers>(idle);
-			
-			_stateMachine.OnTransitioned(state =>
-			{
-				state.Source.OnExit(this);
-				state.Destination.OnEnter(this);
-			});
-			
-			_stateMachine.Configure(idle)
-				.Permit(State.Triggers.MouseDown, targeting)
-				.Permit(State.Triggers.HoverStart, highlight);
-
-			_stateMachine.Configure(targeting)
-				.Permit(State.Triggers.MouseUp, idle);
-			
-			_stateMachine.Configure(highlight)
-				.Permit(State.Triggers.HoverStop, idle)
-				.SubstateOf(idle);
+			_stateMachine = this.CreateStateMachine(idle, State.ConfigureState(idle, targeting, highlight));
 		}
 		
 		public void Load(ICard cardData)
@@ -93,6 +76,24 @@ namespace Archetype.Godot.Card
 
 		public sealed class State
 		{
+			public static Action<StateMachine<IState<CardNode>, Triggers>> ConfigureState(Idle idle, Targeting targeting, Highlight highlight)
+			{
+				return 
+					sm =>
+				{
+					sm.Configure(idle)
+						.Permit(State.Triggers.MouseDown, targeting)
+						.Permit(State.Triggers.HoverStart, highlight);
+
+					sm.Configure(targeting)
+						.Permit(State.Triggers.MouseUp, idle);
+
+					sm.Configure(highlight)
+						.Permit(State.Triggers.HoverStop, idle)
+						.SubstateOf(idle);
+				};
+			}
+			
 			public enum Triggers
 			{
 				HoverStart,

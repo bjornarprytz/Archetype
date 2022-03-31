@@ -2,7 +2,7 @@ using System.ComponentModel;
 using Godot;
 using Godot.Collections;
 
-namespace Archetype.Godot.StateMachine;
+namespace Archetype.Godot;
 
 public class RayHitResult
 {
