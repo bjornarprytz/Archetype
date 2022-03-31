@@ -1,4 +1,6 @@
+using Archetype.Godot.StateMachine;
 using Godot;
+using Godot.Collections;
 
 namespace Archetype.Godot.Targeting
 {
@@ -26,11 +28,17 @@ namespace Archetype.Godot.Targeting
 
 		public override void _PhysicsProcess(float delta)
 		{
+			var spaceState = GetWorld().DirectSpaceState;
 			var camera = GetViewport().GetCamera();
 			var from = camera.ProjectRayOrigin(_mousePosition);
 			var to = from + (camera.ProjectRayNormal(_mousePosition) * 100f); 
 			
-			PointTo(to);
+			var result = new RayHit(spaceState.IntersectRay(from, to, collideWithAreas: true));
+
+			if (result.Hit)
+			{
+				PointTo(result.Position);
+			}
 		}
 
 		private void PointTo(Vector3 target)

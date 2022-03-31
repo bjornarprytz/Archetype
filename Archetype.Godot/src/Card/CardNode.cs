@@ -91,7 +91,7 @@ namespace Archetype.Godot.Card
 			_stateMachine.FireIfPossible(State.Triggers.HoverStop);
 		}
 
-		public static class State
+		public sealed class State
 		{
 			public enum Triggers
 			{

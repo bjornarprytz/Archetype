@@ -1,6 +1,9 @@
 using System;
+using Archetype.Godot.Infrastructure;
+using Archetype.Godot.StateMachine;
 using Archetype.Prototype1Data;
 using Godot;
+using Stateless;
 
 namespace Archetype.Godot.Enemy;
 
@@ -8,11 +11,28 @@ public class EnemyNode : Spatial
 {
 	private readonly Random _random = new (69); // TODO: Remove
 	
-	private readonly EnemyStateMachine _stateMachine;
 	private Healthbar _healthbar;
-	public EnemyNode()
+	private StateMachine<IState<EnemyNode>, State.Trigger> _stateMachine;
+
+	[Inject]
+	public void Construct(
+		State.Idle idle,
+		State.Moving moving
+	)
 	{
-		_stateMachine = new EnemyStateMachine(this);
+		_stateMachine = new StateMachine<IState<EnemyNode>, State.Trigger>(idle);
+		
+		_stateMachine.OnTransitioned(state =>
+		{
+			state.Source.OnExit(this);
+			state.Destination.OnEnter(this);
+		});
+		
+		_stateMachine.Configure(idle)
+			.Permit(State.Trigger.StartMoving, moving);
+
+		_stateMachine.Configure(moving)
+			.Permit(State.Trigger.StopMoving, idle);
 	}
 	
 	public void Load(IEnemy enemyData)
@@ -32,5 +52,31 @@ public class EnemyNode : Spatial
 		_healthbar.SetHealth(health);
 		
 		GD.Print(_healthbar.Value);
+	}
+	
+	public sealed class State
+	{
+		public enum Trigger
+		{
+			StartMoving,
+			StopMoving
+		}
+
+		
+		public class Idle : State<EnemyNode>
+		{ }
+		
+		public class Moving : State<EnemyNode>
+		{
+			public override void OnEnter(EnemyNode model)
+			{
+				GD.Print($"{model.Name} started moving TODO: Do something here?");
+			}
+
+			public override void OnExit(EnemyNode model)
+			{
+				GD.Print($"{model.Name} stopped moving TODO: Do something here?");
+			}
+		}
 	}
 }

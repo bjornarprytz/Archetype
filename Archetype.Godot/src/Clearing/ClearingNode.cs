@@ -1,16 +1,38 @@
+using Archetype.Godot.Card;
+using Archetype.Godot.Extensions;
+using Archetype.Godot.Infrastructure;
+using Archetype.Godot.StateMachine;
 using Archetype.Prototype1Data;
 using Godot;
+using Stateless;
 
 namespace Archetype.Godot.Clearing;
 
 public class ClearingNode : Spatial
 {
-	private readonly ClearingStateMachine _stateMachine;
 	private MeshInstance _highlightMesh;
-	
-	public ClearingNode()
+	private StateMachine<IState<ClearingNode>, State.Trigger> _stateMachine;
+
+
+	[Inject]
+	public void Construct(
+		State.Idle idle,
+		State.Highlight highlight
+	)
 	{
-		_stateMachine = new ClearingStateMachine(this);
+		_stateMachine = new StateMachine<IState<ClearingNode>, State.Trigger>(idle);
+		
+		_stateMachine.OnTransitioned(state =>
+		{
+			state.Source.OnExit(this);
+			state.Destination.OnEnter(this);
+		});
+		
+		_stateMachine.Configure(idle)
+			.Permit(State.Trigger.HoverStart, highlight);
+
+		_stateMachine.Configure(highlight)
+			.Permit(State.Trigger.HoverStop, idle);
 	}
 
 	public void Load(IMapNode mapNode)
@@ -26,12 +48,12 @@ public class ClearingNode : Spatial
 
 	public override void _Input(InputEvent @event)
 	{
-		_stateMachine.HandleInput(@event);
+		_stateMachine.State.HandleInput(this, @event);
 	}
 
 	public override void _Process(float delta)
 	{
-		_stateMachine.Process(delta);
+		_stateMachine.State.Process(this, delta);
 	}
 
 	public void HighlightOn()
@@ -46,11 +68,36 @@ public class ClearingNode : Spatial
 	
 	private void OnMouseEntered()
 	{
-		_stateMachine.MouseEntered();
+		_stateMachine.FireIfPossible(State.Trigger.HoverStart);
 	}
 	
 	private void OnMouseExited()
 	{
-		_stateMachine.MouseExited();
-	} 
+		_stateMachine.FireIfPossible(State.Trigger.HoverStop);
+	}
+	
+	public sealed class State
+	{
+		public enum Trigger
+		{
+			HoverStart,
+			HoverStop,
+		}
+		
+		public class Idle : State<ClearingNode>
+		{ }
+		
+		public class Highlight : State<ClearingNode>
+		{
+			public override void OnEnter(ClearingNode model)
+			{ 
+				model.HighlightOn();
+			}
+
+			public override void OnExit(ClearingNode model)
+			{
+				model.HighlightOff();
+			}
+		}
+	}
 }
