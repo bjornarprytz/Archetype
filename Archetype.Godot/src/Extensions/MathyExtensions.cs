@@ -36,6 +36,11 @@ public static class MathyExtensions
         return new Vector3(vector2.x, vector2.y, z);
     }
 
+    public static Vector2 ToVector2(this Vector3 vector3)
+    {
+        return new Vector2(vector3.x, vector3.y);
+    }
+
     public static Vector3 Right(this Transform transform, float weight=1f) => transform.basis.x * weight;
     public static Vector3 Left(this Transform transform, float weight=1f) => -transform.Right(weight);
     public static Vector3 Up(this Transform transform, float weight=1f) => transform.basis.y * weight;
