@@ -30,7 +30,7 @@ public class CameraController : Spatial
 
 		GlobalTranslate(_direction
 			.Rotated(Vector3.Up, -(float)Math.PI / 2) 
-		                * _velocity);
+						* _velocity);
 	}
 
 	private static Vector3 InputToDirection()
