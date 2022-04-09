@@ -69,6 +69,8 @@ namespace Archetype.Prototype1Data
     
     public interface IBuilding
     {
+        
+        
         bool IsBase { get; }
         int Health { get; }
         int Strength { get; }

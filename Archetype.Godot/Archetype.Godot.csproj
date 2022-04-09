@@ -54,6 +54,7 @@
     <Compile Remove="Card\**" />
     <Compile Remove="Extensions\**" />
     <Compile Remove="Infrastructure\**" />
+    <Compile Remove="Archetype.Prototype2Data\**" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="StateMachine\**" />
@@ -61,5 +62,6 @@
     <EmbeddedResource Remove="Card\**" />
     <EmbeddedResource Remove="Extensions\**" />
     <EmbeddedResource Remove="Infrastructure\**" />
+    <EmbeddedResource Remove="Archetype.Prototype2Data\**" />
   </ItemGroup>
 </Project>
