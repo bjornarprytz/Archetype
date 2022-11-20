@@ -1,9 +1,0 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=2]
-
-[ext_resource path="res://vfx/shader/card_front.shader" type="Shader" id=1]
-
-[resource]
-shader = ExtResource( 1 )
-shader_param/tiled_factor = Vector2( 2, 2 )
-shader_param/time_factor = 10.0
-shader_param/amplitude = Vector2( 9, 6 )
