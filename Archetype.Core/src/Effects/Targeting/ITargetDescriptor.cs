@@ -1,6 +1,7 @@
-﻿namespace Archetype.Core.Effects;
+﻿namespace Archetype.Core.Effects.Targeting;
 
 public interface ITargetDescriptor
 {
-    Type TargetType { get; } // TODO: Possibly make this a domain type instead of a CLR type (e.g. Artifact, Player, etc.)
+    CardType TargetType { get; }
+    bool IsEnemy { get; }
 }

@@ -1,6 +1,7 @@
 ﻿using Archetype.Core.Atoms;
+using Archetype.Core.Atoms.Infrastructure;
 
-namespace Archetype.Core.Effects;
+namespace Archetype.Core.Effects.Resolution;
 
 public interface IEffectContext
 {

@@ -1,5 +1,12 @@
 namespace Archetype.Core;
 
+public enum CardType
+{
+    Unit,
+    Building,
+    Spell,
+}
+
 public enum CardColor
 {
     White,
