@@ -1,9 +1,8 @@
 ﻿using Archetype.Core.Effects;
-using Archetype.Core.Effects.Targeting;
 
 namespace Archetype.Core.Proto;
 
-public interface IProtoSpell : IProtoCard
+public interface IProtoSpell : IProtoPlayingCard
 {
     public int Cost { get; }
     

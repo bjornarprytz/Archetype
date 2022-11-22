@@ -1,6 +1,6 @@
 ﻿namespace Archetype.Core.Proto;
 
-public interface IProtoStructure : IProtoCard
+public interface IProtoStructure : IProtoPlayingCard
 {
     public int Slots { get; }
     public int Cost { get; }

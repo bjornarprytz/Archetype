@@ -7,6 +7,13 @@ public enum CardType
     Spell,
 }
 
+public enum LocationType
+{
+    Encounter,
+    Merchant,
+    Quest,
+}
+
 public enum CardColor
 {
     White,

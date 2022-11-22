@@ -1,6 +1,6 @@
 ﻿namespace Archetype.Core.Atoms.Zones;
 
-public interface IDiscardPile : IZone
+public interface IDiscardPile : IZone<ICard>
 {
     
 }

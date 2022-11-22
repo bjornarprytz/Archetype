@@ -1,6 +1,6 @@
 ﻿namespace Archetype.Core.Atoms.Zones;
 
-public interface IResolution : IZone
+public interface IResolution : IZone<ICard>
 {
     
 }

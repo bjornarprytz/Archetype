@@ -2,7 +2,7 @@
 
 namespace Archetype.Core.Atoms;
 
-public interface IHand : IZone<ICard>
+public interface IDrawPile : IZone<ICard>
 {
-    
+    public int Count { get; }
 }

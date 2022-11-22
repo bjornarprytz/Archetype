@@ -2,8 +2,8 @@
 
 namespace Archetype.Core.Atoms.Infrastructure;
 
-public interface IWorld : IAtom
+public interface IWorld : IZone<ICard>
 {
-    public IDeck WorldDeck { get; }
-    public IEnumerable<ILocation> Locations { get; }
+    public IDrawPile WorldDeck { get; }
+    public IEnumerable<ICard> OpenLocations { get; }
 }

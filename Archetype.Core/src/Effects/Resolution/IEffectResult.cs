@@ -1,4 +1,4 @@
-﻿namespace Archetype.Core.Effects.Resolution;
+﻿namespace Archetype.Core.Effects;
 
 public interface IEffectResult
 {

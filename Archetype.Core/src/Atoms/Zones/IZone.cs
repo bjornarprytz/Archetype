@@ -1,6 +1,7 @@
 ﻿namespace Archetype.Core.Atoms.Zones;
 
-public interface IZone : IAtom
+public interface IZone<out T> : IAtom
+where T : IAtom
 {
-    IEnumerable<ICard> Contents { get; }
+    IEnumerable<T> Contents { get; }
 }

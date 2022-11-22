@@ -1,4 +1,4 @@
-﻿namespace Archetype.Core.Effects.Targeting;
+﻿namespace Archetype.Core.Effects;
 
 public interface ITargetDescriptor
 {
