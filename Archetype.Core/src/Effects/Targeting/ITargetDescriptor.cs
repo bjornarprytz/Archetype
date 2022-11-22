@@ -2,6 +2,6 @@
 
 public interface ITargetDescriptor
 {
-    CardType TargetType { get; }
+    Type TargetType { get; }
     bool IsEnemy { get; }
 }

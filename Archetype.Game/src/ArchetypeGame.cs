@@ -1,6 +1,8 @@
 ﻿using Archetype.Core;
 using Archetype.Core.Proto.DeckBuilding;
 using Archetype.Rules;
+using Archetype.Rules.Encounter;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Game;
@@ -30,7 +32,7 @@ internal class ArchetypeGame : IArchetypeGame
         
         container
             .AddSingleton(State)
-            .AddRules();
+            .AddMediatR(typeof(PlayCard).Assembly);
         
         _serviceProvider = container.BuildServiceProvider();
     }

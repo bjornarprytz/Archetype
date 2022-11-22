@@ -13,7 +13,7 @@ public interface IEffectContext
 
 public interface IEffectProvider
 {
-    public IEnumerable<IEffect> Effects { get; }
+    public IEnumerable<IEffect> Effects { get; } // ordered
 }
 
 public interface ITargetProvider
