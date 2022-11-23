@@ -1,6 +1,6 @@
 ﻿using Archetype.Core.Atoms.Zones;
 
-namespace Archetype.Core.Atoms.Infrastructure;
+namespace Archetype.Core.Atoms;
 
 public interface IWorld : IZone<ICard>
 {

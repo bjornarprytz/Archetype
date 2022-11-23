@@ -1,4 +1,5 @@
 ﻿using Archetype.Core.Atoms;
+using Archetype.Core.Atoms.Zones;
 
 namespace Archetype.Core.Proto.Location;
 

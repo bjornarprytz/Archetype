@@ -1,7 +1,7 @@
 ﻿using Archetype.Core.Atoms.Zones;
-using Archetype.Core.Proto.DeckBuilding;
+using Archetype.Core.DeckBuilding;
 
-namespace Archetype.Core.Atoms.Infrastructure;
+namespace Archetype.Core.Atoms;
 
 public interface IPlayer : IAtom
 {

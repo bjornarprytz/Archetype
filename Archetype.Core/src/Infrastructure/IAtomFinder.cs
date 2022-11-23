@@ -1,4 +1,6 @@
-﻿namespace Archetype.Core.Atoms.Infrastructure;
+﻿using Archetype.Core.Atoms;
+
+namespace Archetype.Core.Infrastructure;
 
 public interface IAtomFinder
 {

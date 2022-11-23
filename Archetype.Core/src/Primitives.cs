@@ -3,7 +3,7 @@ namespace Archetype.Core;
 public enum CardType
 {
     Unit,
-    Building,
+    Structure,
     Spell,
 }
 

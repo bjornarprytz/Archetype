@@ -1,7 +1,6 @@
 ﻿using Archetype.Core.Atoms;
-using Archetype.Core.Atoms.Infrastructure;
 
-namespace Archetype.Core;
+namespace Archetype.Core.Infrastructure;
 
 public interface IGameState
 {

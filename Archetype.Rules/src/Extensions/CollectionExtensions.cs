@@ -1,4 +1,4 @@
-﻿namespace Archetype.Core.Extensions;
+﻿namespace Archetype.Rules.Extensions;
 
 public static class CollectionExtensions
 {

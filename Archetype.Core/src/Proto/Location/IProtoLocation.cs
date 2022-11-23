@@ -1,4 +1,4 @@
-﻿namespace Archetype.Core.Proto;
+﻿namespace Archetype.Core.Proto.Location;
 
 public interface IProtoLocation : IProtoData
 {

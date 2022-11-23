@@ -1,4 +1,8 @@
-﻿namespace Archetype.Core.Proto;
+﻿using Archetype.Core.Atoms;
+using Archetype.Core.Effects;
+using Archetype.Core.Infrastructure;
+
+namespace Archetype.Core.Proto.PlayingCard;
 
 public interface IProtoPlayingCard : IProtoData
 {
@@ -9,5 +13,16 @@ public interface IProtoPlayingCard : IProtoData
     public string SubType { get; }
     public string RulesText { get; }
     public CardColor Color { get; }
-    public int Resources { get; }
+    
+    public int Cost { get; }
+    public int Resources { get; } // To pay for other cards' costs
+    public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
+    public IResult Resolve(IPlayCardContext context);
+}
+
+public interface IPlayCardContext
+{
+    public IGameState GameState { get; }
+    public ICard Source { get; }
+    public ITargetProvider TargetProvider { get; }
 }
