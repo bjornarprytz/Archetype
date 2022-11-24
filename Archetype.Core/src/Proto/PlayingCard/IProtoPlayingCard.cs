@@ -17,12 +17,5 @@ public interface IProtoPlayingCard : IProtoData
     public int Cost { get; }
     public int Resources { get; } // To pay for other cards' costs
     public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
-    public IResult Resolve(IPlayCardContext context);
-}
-
-public interface IPlayCardContext
-{
-    public IGameState GameState { get; }
-    public ICard Source { get; }
-    public ITargetProvider TargetProvider { get; }
+    public IResult Resolve(IContext<ICard> context);
 }

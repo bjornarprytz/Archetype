@@ -7,4 +7,12 @@
         <RootNamespace>Archetype.Components</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Archetype.Core\Archetype.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="OneOf" Version="3.0.223" />
+    </ItemGroup>
+
 </Project>

@@ -12,8 +12,9 @@ namespace Archetype.Rules.Encounter;
 public class PlayCard
 {
     public record Command(Guid CardId, List<Guid> PaymentCardIds, List<Guid> TargetGuids) : IRequest<IEnumerable<Guid>>;
-    private record PlayContext(IGameState GameState, ICard Source, ITargetProvider TargetProvider) : IPlayCardContext;
-    
+
+    private record PlayContext(IGameState GameState, ICard Source, ITargetProvider TargetProvider) : IContext<ICard>;
+
     public class Handler : IRequestHandler<Command, IEnumerable<Guid>>
     {
         private readonly IGameState _gameState;

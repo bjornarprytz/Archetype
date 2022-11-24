@@ -3,5 +3,4 @@
 public interface ITargetDescriptor
 {
     Type TargetType { get; }
-    bool IsEnemy { get; }
 }

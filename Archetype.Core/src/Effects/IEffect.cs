@@ -4,5 +4,5 @@ namespace Archetype.Core.Effects;
 
 public interface IEffect
 {
-    public Expression<Func<IEffectContext, IResult>> ResolveExpression { get; }
+    public Expression<Func<IContext, IResult>> ResolveExpression { get; }
 }

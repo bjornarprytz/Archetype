@@ -1,7 +1,7 @@
 ﻿using Aqua.TypeExtensions;
 using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
-using Archetype.Rules.Extensions;
+using Archetype.Core.Extensions;
 
 namespace Archetype.Rules.Encounter;
 

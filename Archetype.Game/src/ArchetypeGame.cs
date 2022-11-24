@@ -1,9 +1,6 @@
-﻿using Archetype.Core;
-using Archetype.Core.DeckBuilding;
+﻿using Archetype.Core.DeckBuilding;
 using Archetype.Core.Infrastructure;
 using Archetype.Rules;
-using Archetype.Rules.Encounter;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Game;
@@ -13,9 +10,9 @@ public interface IArchetypeGame
     public IGameState State { get; }
     
     public Task<IEncounterGame> EnterLocation(Guid locationId);
+    public Task<IDeckBuilding> EnterDeckBuilding();
     public Task DrawLocation();
-    public Task<Guid> SaveDeck(IDeck deck);
-    public Task ChooseDeck(Guid deckId);
+    
     
     public Task<Guid> SaveGame();
     public Task QuitGame();
@@ -24,7 +21,7 @@ public interface IArchetypeGame
 internal class ArchetypeGame : IArchetypeGame
 {
     public IGameState State { get; }
-    private readonly ServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     private ArchetypeGame(IGameState state)
     {
@@ -33,6 +30,7 @@ internal class ArchetypeGame : IArchetypeGame
         
         container
             .AddSingleton(State)
+            .AddTransient<IEncounterGame, EncounterGame>()
             .AddRules();
         
         _serviceProvider = container.BuildServiceProvider();
@@ -58,17 +56,12 @@ internal class ArchetypeGame : IArchetypeGame
         throw new NotImplementedException();
     }
 
+    public Task<IDeckBuilding> EnterDeckBuilding()
+    {
+        throw new NotImplementedException();
+    }
+
     public Task DrawLocation()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Guid> SaveDeck(IDeck deck)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task ChooseDeck(Guid deckId)
     {
         throw new NotImplementedException();
     }
