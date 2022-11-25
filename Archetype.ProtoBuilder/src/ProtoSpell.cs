@@ -3,17 +3,17 @@ using Archetype.Components.Meta;
 using Archetype.Core;
 using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
-using Archetype.Core.Extensions;
 using Archetype.Core.Proto.PlayingCard;
 
 namespace Archetype.Components;
 
 internal class ProtoSpell : IProtoSpell
 {
-    private readonly List<ITargetDescriptor> _targetDescriptors = new (); 
-    private readonly List<IEffectDescriptor> _effectDescriptors = new (); 
+    private readonly List<ITargetDescriptor> _targetDescriptors = new ();
+    private readonly List<IEffectDescriptor> _effectDescriptors = new ();
         
     private readonly List<IEffect> _effects;
+    private List<Func<IContext, IResult>>? _effectFunctions;
 
     public ProtoSpell(List<IEffect> effects)
     {
@@ -33,44 +33,30 @@ internal class ProtoSpell : IProtoSpell
     public IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors;
     public IResult Resolve(IContext<ICard> context)
     {
-        throw new NotImplementedException();
+        _effectFunctions ??= CompileEffectFunctions();
+
+        return Result.Aggregate(_effectFunctions.Select(f => f(context)));
     }
-   
-    public void GenerateDescriptors()
+
+    public void Harden()
     {
-        // TODO: Check if this actually works
+        // TODO: This logic should be moved to the builder
+        
+        _effectFunctions ??= CompileEffectFunctions();
+          
+        _effectDescriptors.Clear();
+        _effectDescriptors.AddRange(_effects.Select(effect => effect.ResolveExpression.CreateDescriptor()));
         
         _targetDescriptors.Clear();
-        _effectDescriptors.Clear();
-            
-        _effectDescriptors.AddRange(_effects.Select(effect => effect.ResolveExpression.CreateDescriptor()));
-
-        var targets =
-            _effectDescriptors.Select(descriptor => descriptor.Affected.Description.Value)
-                .OfType<ITargetProperty>().ToList();
-
-        targets.AddRange(_effectDescriptors.SelectMany(descriptor => descriptor.Operands)
-            .Select(operand => operand.Value.Value).OfType<ITargetProperty>());
-
-        var targetDescriptors = new Dictionary<Type, Dictionary<int, ITargetProperty>>();
-
-        foreach (var target in targets)
-        {
-            targetDescriptors.GetOrSet(target.TargetType)[target.TargetIndex] = target;
-        }
-
-        foreach (var target in targets)
-        {
-            var targetsOfType = targetDescriptors[target.TargetType]; 
-                
-            if (!targetsOfType.ContainsKey(target.TargetIndex))
-            {
-                continue;
-            }
-                
-            _targetDescriptors.Add(new TargetDescriptor(target.TargetType));
-            targetsOfType.Remove(target.TargetIndex);
-        }
+        _targetDescriptors.AddRange(
+            _effectDescriptors.SelectMany(e => e.GetTargets())
+                .Select(t => new TargetDescriptor(t.TargetType))
+        );
+    }
+    
+    private List<Func<IContext, IResult>> CompileEffectFunctions()
+    {
+        return _effects.Select(e => e.ResolveExpression.Compile()).ToList();
     }
 
     private record TargetDescriptor(Type TargetType) : ITargetDescriptor;

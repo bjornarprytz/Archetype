@@ -1,13 +1,12 @@
 ﻿using Aqua.TypeExtensions;
 using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
-using Archetype.Core.Extensions;
 
 namespace Archetype.Rules.Encounter;
 
 internal class TargetProvider : ITargetProvider
 {
-    private readonly Dictionary<Type, List<IAtom>> _targets = new();
+    private readonly List<IAtom> _targets = new();
 
     public TargetProvider(IEnumerable<IAtom> chosenTargets, IEnumerable<ITargetDescriptor> targetDescriptors)
     {
@@ -19,37 +18,33 @@ internal class TargetProvider : ITargetProvider
             throw new ArgumentException($"Number of targets ({chosen.Count}) does not match required number of targets ({required.Count})");
         }
         
-        foreach (var (targetData, chosenTarget) in required.Zip(chosen))
+        foreach (var (requiredTarget, chosenTarget) in required.Zip(chosen))
         {
-            var targetType = targetData.TargetType;
+            var targetType = requiredTarget.TargetType;
         
             if (!chosenTarget.GetType().Implements(targetType))
             {
                 throw new ArgumentException("Target does not match required target type");
             }
         
-            _targets.GetOrSet(targetType).Add(chosenTarget);
+            _targets.Add(chosenTarget);
         }
-    }
-    public T GetTarget<T>() where T : IAtom
-    {
-        return GetTargetInternal<T>(0);
     }
 
     public T GetTarget<T>(int index) where T : IAtom
     {
-        return GetTargetInternal<T>(index);
-    }
-
-    private T GetTargetInternal<T>(int index)
-    {
-        var targetsOfTypeT = _targets[typeof(T)];
-
-        if (targetsOfTypeT.IsEmpty() || targetsOfTypeT.Count <= index)
+        if (index >= _targets.Count)
         {
-            throw new Exception($"Can't provide target of type {typeof(T)} and index {index}");
+            throw new ArgumentException($"Target index ({index}) out of range ({_targets.Count})");
         }
-    
-        return (T) targetsOfTypeT[index];
+        
+        var target = _targets[index];
+
+        if (target is not T typedTarget)
+        {
+            throw new ArgumentException($"Target at index {index} is not of type {typeof(T).Name}");
+        }
+
+        return typedTarget;
     }
 }

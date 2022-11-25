@@ -1,9 +1,9 @@
 ﻿namespace Archetype.Core.Extensions;
 
-public static class CollectionExtensions
+public static class MyCollectionExtensions
 {
-    private static readonly Random Random = new (); // TODO: Consider using a seed here
-        
+    public static Random Random { get; set; } = new();
+
     public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection)
     {
         var array = collection.ToArray();

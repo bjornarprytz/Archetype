@@ -10,13 +10,7 @@ internal static class ContextExtensions
     {
         return Result.Aggregate(source.Select(func).ToList());
     }
-        
-    public static T Target<T>(this IContext context)
-        where T : IAtom
-    {
-        return context.TargetProvider.GetTarget<T>();
-    }
-        
+
     public static T Target<T>(this IContext context, int index)
         where T : IAtom
     {

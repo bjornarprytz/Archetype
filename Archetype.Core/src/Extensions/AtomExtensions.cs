@@ -18,7 +18,7 @@ public static class AtomExtensions
     {
         var owner = atom.Owner;
             
-        while (owner is not null && owner.Owner != owner)
+        while (owner.Owner != owner)
         {
             owner = owner.Owner;
         }

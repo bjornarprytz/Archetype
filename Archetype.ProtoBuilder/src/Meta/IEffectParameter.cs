@@ -9,7 +9,7 @@ internal interface IEffectParameter
 
 internal interface IImmediateValue
 {
-    string Value { get; }
+    string? Value { get; }
 }
 
 internal interface ITargetProperty

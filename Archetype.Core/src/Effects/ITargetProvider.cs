@@ -4,6 +4,5 @@ namespace Archetype.Core.Effects;
 
 public interface ITargetProvider
 {
-    T GetTarget<T>() where T : IAtom;
     T GetTarget<T>(int index) where T : IAtom;
 }

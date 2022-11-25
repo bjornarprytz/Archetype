@@ -1,4 +1,5 @@
 ﻿using Archetype.Core.DeckBuilding;
+using Archetype.Core.Extensions;
 using Archetype.Core.Infrastructure;
 using Archetype.Rules;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +40,8 @@ internal class ArchetypeGame : IArchetypeGame
     public static IArchetypeGame Create(int seed)
     {
         var initialState = GameState.Init(seed);
+
+        MyCollectionExtensions.Random = new Random(seed); // TODO: Centralize random in another place
         
         return new ArchetypeGame(initialState);
     }
