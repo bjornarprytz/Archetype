@@ -8,7 +8,7 @@ using OneOf;
 
 namespace Archetype.Components.Extensions;
 
-public static class EffectExtensions
+internal static class EffectExtensions
 {
     internal static IEffectDescriptor CreateDescriptor<TContext, TResult>(this Expression<Func<TContext, TResult>> exp)
         where TContext : IContext

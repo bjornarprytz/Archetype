@@ -1,8 +1,9 @@
 ﻿using System.Linq.Expressions;
+using Archetype.Core.Effects;
 
-namespace Archetype.Core.Effects;
+namespace Archetype.Components.Meta;
 
-public interface IEffect
+internal interface IEffect
 {
     public Expression<Func<IContext, IResult>> ResolveExpression { get; }
 }

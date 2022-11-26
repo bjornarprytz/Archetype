@@ -18,4 +18,5 @@ public interface IProtoPlayingCard : IProtoData
     public int Resources { get; } // To pay for other cards' costs
     public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
     public IResult Resolve(IContext<ICard> context);
+    public string ContextualRulesText(IContext<ICard> context);
 }
