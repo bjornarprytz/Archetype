@@ -1,5 +1,4 @@
-﻿using Archetype.Core;
-using Archetype.Core.Atoms;
+﻿using Archetype.Core.Atoms;
 using Archetype.Core.Infrastructure;
 
 namespace Archetype.Game;

@@ -1,4 +1,6 @@
-﻿using Archetype.Components.Meta;
+﻿using System.Text;
+using Archetype.Components.Meta;
+using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
 
 namespace Archetype.Components.Extensions;
@@ -14,5 +16,29 @@ internal static class EffectDescriptorExtensions
         {
             yield return targetInOperands;
         }
+    }
+    
+    public static string GetStaticRulesText(this IEffectDescriptor effectDescriptor)
+    {
+        var sb = new StringBuilder(effectDescriptor.RulesTemplate);
+
+        foreach (var ( operand,  parameterIndex) in effectDescriptor.Operands.Select((o, i) => (o,i)))
+        {
+            sb.Replace($"{{{parameterIndex}}}", $"{{{operand.Description}}}");
+        }
+
+        return sb.ToString();
+    }
+    
+    public static string GetDynamicRulesText(this IEffectDescriptor effectDescriptor, IContext context)
+    {
+        var sb = new StringBuilder(effectDescriptor.RulesTemplate);
+
+        foreach (var ( operand,  parameterIndex) in effectDescriptor.Operands.Select((o, i) => (o,i)))
+        {
+            sb.Replace($"{{{parameterIndex}}}", $"{{{operand.ComputeValue(context)}}}");
+        }
+
+        return sb.ToString();
     }
 }

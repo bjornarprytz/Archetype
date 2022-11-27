@@ -1,4 +1,5 @@
-﻿using Archetype.Components.Extensions;
+﻿using System.Text;
+using Archetype.Components.Extensions;
 using Archetype.Components.Meta;
 using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
@@ -9,9 +10,10 @@ namespace Archetype.Components.Protos;
 internal class ProtoSpell : ProtoCard, IProtoSpell
 {
     private readonly List<IEffect> _effects = new ();
+    private readonly List<IEffectDescriptor> _effectDescriptors = new ();
     private readonly Dictionary<int, ITargetDescriptor> _targetDescriptors = new ();
         
-    private readonly List<Func<IContext, IResult>> _effectFunctions = new ();
+    private readonly List<Func<IContext<ICard>, IResult>> _effectFunctions = new ();
 
     public override IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors.OrderBy(t => t.Key).Select(t => t.Value);
     public override IResult Resolve(IContext<ICard> context)
@@ -21,16 +23,21 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
 
     public override string ContextualRulesText(IContext<ICard> context)
     {
-        // TODO: Figure out how to structure RulesText so that it's easy for the client to identify variables, and keywords
+        // [keyword], {parameterIndex}, <targetIndex>
         
-        throw new NotImplementedException();
+        var sb = new StringBuilder();
+
+        foreach (var effectText in _effectDescriptors.Select(e => e.GetDynamicRulesText(context)))
+        {
+            sb.AppendLine(effectText);
+        }
+
+        return sb.ToString();
     }
 
     public void AddEffect(IEffect effect)
     {
         var effectDescriptor = effect.ResolveExpression.CreateDescriptor();
-        
-        // TODO: Update static rules text here as well
         
         foreach (var target in effectDescriptor.GetTargets()
                      .DistinctBy(t => t.TargetIndex))
@@ -46,7 +53,10 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
         } 
         
         _effects.Add(effect);
+        _effectDescriptors.Add(effectDescriptor);
         _effectFunctions.Add(effect.ResolveExpression.Compile());
+
+        RulesText += effectDescriptor.GetStaticRulesText();
     }
 
     private record TargetDescriptor(Type TargetType, int TargetIndex) : ITargetDescriptor;

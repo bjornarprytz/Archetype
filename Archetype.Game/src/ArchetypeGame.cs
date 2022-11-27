@@ -1,5 +1,4 @@
-﻿using Archetype.Core.DeckBuilding;
-using Archetype.Core.Extensions;
+﻿using Archetype.Core.Extensions;
 using Archetype.Core.Infrastructure;
 using Archetype.Rules;
 using Microsoft.Extensions.DependencyInjection;

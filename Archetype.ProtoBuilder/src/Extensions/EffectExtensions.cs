@@ -1,14 +1,12 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using Archetype.Components.Meta;
 using Archetype.Core.Effects;
 using Archetype.Core.Extensions;
-using OneOf;
 
 namespace Archetype.Components.Extensions;
 
-internal static class EffectExtensions
+internal static class EffectExtensions // TODO: Write tests for these methods
 {
     internal static IEffectDescriptor CreateDescriptor<TContext, TResult>(this Expression<Func<TContext, TResult>> exp)
         where TContext : IContext
@@ -45,9 +43,6 @@ internal static class EffectExtensions
                 : mce.DescribeSingleTarget<TContext>();
     }
 
-
-    // c => c.World.Units.ForEach(a => a.Punch(4))
-    // c => c.World.Units.Where(u => u.Health > 4).ForEach(a => a.Punch(4))
     private static IEffectDescriptor DescribeMultipleTargets<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
@@ -74,13 +69,13 @@ internal static class EffectExtensions
                 $"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
 
 
-        var verb = mce.Method.Name; // TODO: Get verb template from attribute
+        var rulesTemplate = mce.Method.GetRequiredAttribute<KeywordAttribute>().Template;
         
         var operands = mce.Arguments.Select(arg => arg.ParseArgument<TContext>());
 
         return me.TryGetTargetDescriptor(out var targetDescriptor)
-            ? new EffectDescriptor(verb, operands, targetDescriptor)
-            : new EffectDescriptor(verb, operands);
+            ? new EffectDescriptor(rulesTemplate, operands, targetDescriptor)
+            : new EffectDescriptor(rulesTemplate, operands);
     }
 
     private static IEffectParameter ParseArgument<TContext>(this Expression exp)
@@ -129,11 +124,11 @@ internal static class EffectExtensions
         if (lambda.Body is not MethodCallExpression mce)
             throw new ArgumentException("Lambda body must call a method");
 
-        var verb = mce.Method.Name; // TODO: Get verb template from attribute
+        var rulesTemplate = mce.Method.GetRequiredAttribute<KeywordAttribute>().Template;
 
         var operands = mce.Arguments.Select(arg => arg.ParseArgument<TContext>());
 
-        return new EffectDescriptor(verb, operands, targetDescriptor);
+        return new EffectDescriptor(rulesTemplate, operands, targetDescriptor);
     }
 
     private static ParameterExpression GetRequiredParameterExpressionRootedInContext<TContext>(this Expression expression)
@@ -194,10 +189,10 @@ internal static class EffectExtensions
         return requiredAttribute;
     }
 
-    private record EffectDescriptor(string Keyword, IEnumerable<IEffectParameter> Operands, ITargetDescriptor? MainTarget=null) : IEffectDescriptor;
+    private record EffectDescriptor(string RulesTemplate, IEnumerable<IEffectParameter> Operands, ITargetDescriptor? MainTarget=null) : IEffectDescriptor;
     private record TargetProperty(Type TargetType, int TargetIndex) : ITargetDescriptor;
     
-    private record ContextParameter<TContext> : IEffectParameter<TContext>
+    private record ContextParameter<TContext> : IEffectParameter
         where TContext : IContext
     {
         private readonly Func<TContext, string> _parameterFunc;

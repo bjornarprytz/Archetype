@@ -1,8 +1,6 @@
-﻿using Archetype.Core;
-using Archetype.Core.Atoms;
+﻿using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
 using Archetype.Core.Infrastructure;
-using Archetype.Core.Proto;
 using Archetype.Core.Proto.PlayingCard;
 using FluentValidation;
 using MediatR;

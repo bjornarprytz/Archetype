@@ -1,6 +1,5 @@
 ﻿using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
-using Archetype.Core.Infrastructure;
 
 namespace Archetype.Core.Proto.PlayingCard;
 

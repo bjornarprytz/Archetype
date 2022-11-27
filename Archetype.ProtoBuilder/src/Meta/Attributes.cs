@@ -1,15 +1,17 @@
 ﻿namespace Archetype.Components.Meta;
 
-internal class PropertyShortHandAttribute : Attribute
+[AttributeUsage(AttributeTargets.Method)]
+internal class KeywordAttribute : Attribute
 {
-    public string Path { get; }
+    public string Template { get; }
 
-    public PropertyShortHandAttribute(string path)
+    public KeywordAttribute(string template)
     {
-        Path = path;
+        Template = template;
     }
 }
-    
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
 internal class DescriptionAttribute : Attribute
 {
     public string Description { get; }
