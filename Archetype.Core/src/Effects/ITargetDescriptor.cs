@@ -3,4 +3,5 @@
 public interface ITargetDescriptor
 {
     Type TargetType { get; }
+    int TargetIndex { get; }
 }

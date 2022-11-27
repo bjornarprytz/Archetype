@@ -10,11 +10,11 @@ internal class PropertyShortHandAttribute : Attribute
     }
 }
     
-internal class ContextFactAttribute : Attribute
+internal class DescriptionAttribute : Attribute
 {
     public string Description { get; }
 
-    public ContextFactAttribute(string description)
+    public DescriptionAttribute(string description)
     {
         Description = description;
     }

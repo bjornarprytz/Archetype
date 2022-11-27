@@ -30,12 +30,14 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
     {
         var effectDescriptor = effect.ResolveExpression.CreateDescriptor();
         
+        // TODO: Update static rules text here as well
+        
         foreach (var target in effectDescriptor.GetTargets()
                      .DistinctBy(t => t.TargetIndex))
         {
             if (!_targetDescriptors.TryGetValue(target.TargetIndex, out var t))
             {
-                _targetDescriptors[target.TargetIndex] = new TargetDescriptor(target.TargetType);
+                _targetDescriptors[target.TargetIndex] = new TargetDescriptor(target.TargetType, target.TargetIndex);
             }
             else if (t?.TargetType != target.TargetType)
             {
@@ -47,5 +49,5 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
         _effectFunctions.Add(effect.ResolveExpression.Compile());
     }
 
-    private record TargetDescriptor(Type TargetType) : ITargetDescriptor;
+    private record TargetDescriptor(Type TargetType, int TargetIndex) : ITargetDescriptor;
 }

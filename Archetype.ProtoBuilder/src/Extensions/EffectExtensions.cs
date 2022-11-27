@@ -19,15 +19,6 @@ internal static class EffectExtensions
             .ParseMethodCall<TContext>();
     }
 
-    internal static IEffectDescriptor CreateDescriptor<TContext, TResult>(this Expression<Func<TContext, TResult>> exp, TContext? context)
-        where TContext : IContext
-        where TResult : IResult
-    {
-        return exp
-            .GetMethodCall()
-            .ParseMethodCall(context);
-    }
-
     private static MethodCallExpression GetMethodCall<TContext, TResult>(this Expression<Func<TContext, TResult>> exp)
         where TContext : IContext
         where TResult : IResult
@@ -45,31 +36,27 @@ internal static class EffectExtensions
         return mce;
     }
 
-    private static IEffectDescriptor ParseMethodCall<TContext>(this MethodCallExpression mce, TContext? context = default)
+    private static IEffectDescriptor ParseMethodCall<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
         return 
             mce.Method.Name == nameof(ContextExtensions.TargetEach) 
-                ? mce.DescribeMultipleTargets(context) 
-                : mce.DescribeSingleTarget(context);
+                ? mce.DescribeMultipleTargets<TContext>() 
+                : mce.DescribeSingleTarget<TContext>();
     }
 
 
     // c => c.World.Units.ForEach(a => a.Punch(4))
     // c => c.World.Units.Where(u => u.Health > 4).ForEach(a => a.Punch(4))
-    private static IEffectDescriptor DescribeMultipleTargets<TContext>(this MethodCallExpression mce, TContext? context)
+    private static IEffectDescriptor DescribeMultipleTargets<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
         var lambda = GetLambda();
-        var affected = GetAffected();
 
-        return lambda.DescribeLambda(context, affected);
+        return mce.Arguments.First().TryGetTargetDescriptor(out var targetDescriptor) 
+            ? lambda.DescribeLambda<TContext>(targetDescriptor) 
+            : lambda.DescribeLambda<TContext>();
 
-        IAffected GetAffected()
-        {
-            return mce.Arguments.First().ParseAffected();
-        }
-        
         LambdaExpression GetLambda()
         {
             if (mce.Arguments.SecondOrDefault() is not LambdaExpression argLambda)
@@ -79,142 +66,78 @@ internal static class EffectExtensions
         }
     }
 
-    private static IEffectDescriptor DescribeSingleTarget<TContext>(this MethodCallExpression mce, TContext? context)
+    private static IEffectDescriptor DescribeSingleTarget<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
         if (mce.Object is not { Type: not null } me)
             throw new ArgumentException(
                 $"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
 
-        var affected = me.ParseAffected();
 
-        var verb = mce.Method.Name;
+        var verb = mce.Method.Name; // TODO: Get verb template from attribute
         
-        var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
+        var operands = mce.Arguments.Select(arg => arg.ParseArgument<TContext>());
 
-        return new EffectDescriptor(affected, verb, operands);
+        return me.TryGetTargetDescriptor(out var targetDescriptor)
+            ? new EffectDescriptor(verb, operands, targetDescriptor)
+            : new EffectDescriptor(verb, operands);
     }
 
-    private static IEffectParameter ParseArgument<TContext>(this Expression exp, TContext? context)
+    private static IEffectParameter ParseArgument<TContext>(this Expression exp)
         where TContext : IContext
     {
         return (exp) switch
         {
-            ConstantExpression { Value: {} value } => new Operand(new ImmediateValue(value)),
-            MethodCallExpression m => m.ParseArgumentMethod(context),
-            MemberExpression a => a.ParseProperty(context),
+            ConstantExpression { Value: {} value } => new ImmediateValue(value),
+            MethodCallExpression m => m.ParseArgumentMethod<TContext>(),
+            MemberExpression a => a.ParseProperty<TContext>(),
             _ => throw new ArgumentException($"Argument of unsupported type {exp}"),
         };
     }
 
-    private static IEffectParameter ParseArgumentMethod<TContext>(this MethodCallExpression mce, TContext? context)
+    private static IEffectParameter ParseArgumentMethod<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
         if (mce.Arguments.FirstOrDefault() is not { } contextExpression)
             throw new ArgumentException(
-                $"Cannot describe first argument of method {mce.Method.Name}, which has {mce.Arguments.Count} arguments");
+                $"Cannot parse first argument of method {mce.Method.Name}, which has {mce.Arguments.Count} arguments");
 
-        var pe = contextExpression.GetRequiredRootParameterExpression();
-
-        if (context is null || !pe.Type.IsAssignableTo(typeof(TContext))) 
-            return mce.ParseOperand();
+        var pe = contextExpression.GetRequiredParameterExpressionRootedInContext<TContext>();
+        var description = mce.Method.GetRequiredAttribute<DescriptionAttribute>().Description;
+        var parameterFunc = Expression.Lambda<Func<TContext, string>>(mce, false, pe).Compile();
         
-        var expr = Expression.Lambda<Func<TContext, int>>(mce, false, pe);
-        return new Operand(new ImmediateValue(expr.Compile().Invoke(context)));
-
+        return mce.TryGetTargetDescriptor(out var targetDescriptor) 
+            ? new ContextParameter<TContext>(parameterFunc, description, targetDescriptor) 
+            : new ContextParameter<TContext>(parameterFunc, description);
     }
 
-    private static IEffectParameter ParseProperty<TContext>(this MemberExpression me, TContext? context)
+    private static IEffectParameter ParseProperty<TContext>(this MemberExpression me)
+        where TContext : IContext
     {
-        var pe = me.GetRequiredRootParameterExpression();
+        var pe = me.GetRequiredParameterExpressionRootedInContext<TContext>();
+        var description = me.Member.GetRequiredAttribute<DescriptionAttribute>().Description;
+        var parameterFunc = Expression.Lambda<Func<TContext, string>>(me, false, pe).Compile();
 
-        if (context is null || !pe.Type.IsAssignableTo(typeof(TContext))) 
-            return me.ParseOperand();
-        
-        var expr = Expression.Lambda<Func<TContext, int>>(me, false, pe);
-
-        return new Operand(new ImmediateValue(expr.Compile().Invoke(context)));
-
+        return me.TryGetTargetDescriptor(out var targetDescriptor) 
+            ? new ContextParameter<TContext>(parameterFunc, description, targetDescriptor) 
+            : new ContextParameter<TContext>(parameterFunc, description);
     }
 
-    private static IEffectDescriptor DescribeLambda<TContext>(this LambdaExpression lambda, TContext? context, IAffected affected)
+    private static IEffectDescriptor DescribeLambda<TContext>(this LambdaExpression lambda, ITargetDescriptor? targetDescriptor=null)
         where TContext : IContext
     {
         if (lambda.Body is not MethodCallExpression mce)
             throw new ArgumentException("Lambda body must call a method");
 
-        var verb = mce.Method.Name;
+        var verb = mce.Method.Name; // TODO: Get verb template from attribute
 
-        var operands = mce.Arguments.Select(arg => arg.ParseArgument(context));
+        var operands = mce.Arguments.Select(arg => arg.ParseArgument<TContext>());
 
-        return new EffectDescriptor(affected, verb, operands);
+        return new EffectDescriptor(verb, operands, targetDescriptor);
     }
 
-    private static IAffected ParseAffected(this Expression expression)
-    {
-        return new Affected(expression.ParseParameterPath());
-    }
-    
-    private static IEffectParameter ParseOperand(this Expression expression)
-    {
-        return new Operand(expression.ParseParameterPath());
-    }
-
-    private static OneOf<IContextProperty, ITargetProperty, IAggregateProperty> ParseParameterPath(this Expression expression)
-    {
-        var (rootExpression, propertyPath) = RootExpressionAndPropertyPath();
-
-        switch (rootExpression)
-        {
-            case ParameterExpression:
-                return new ContextProperty(propertyPath);
-            
-            case MethodCallExpression { Method.Name: nameof(ContextExtensions.Target) } targetCall:
-            {
-                var targetIndex = targetCall.Arguments.SecondOrDefault() is ConstantExpression ce ? (int)ce.Value! : 0;
-
-                return new TargetProperty(targetCall.Type, targetIndex, propertyPath);
-            }
-            case MethodCallExpression mce:
-                return new AggregateProperty(mce.Method.GetRequiredAttribute<ContextFactAttribute>().Description, propertyPath);
-            default:
-                throw new ArgumentException($"Indescribable expression {expression}");
-        }
-
-        (Expression?, string) RootExpressionAndPropertyPath()
-        {
-            if (expression is MethodCallExpression { Method: { } methodInfo } )
-            {
-                if (methodInfo.GetCustomAttribute<PropertyShortHandAttribute>() is { Path: {} path } )
-                {
-                    return (expression, path); 
-                }
-            }
-            
-            var stack = new Stack<string>();
-
-            var parentExpression = expression;
-        
-            while (parentExpression is MemberExpression innerMe)
-            {
-                stack.Push(innerMe.Member.Name);
-
-                parentExpression = innerMe.Expression;
-            }
-            
-            var propertyPathSb = new StringBuilder();
-
-            while (stack.Any())
-            {
-                propertyPathSb.Append('.');
-                propertyPathSb.Append(stack.Pop());
-            }
-            
-            return (parentExpression, propertyPathSb.ToString());
-        }
-    }
-
-    private static ParameterExpression GetRequiredRootParameterExpression(this Expression expression)
+    private static ParameterExpression GetRequiredParameterExpressionRootedInContext<TContext>(this Expression expression)
+        where TContext : IContext
     {
         var rootExpression = expression;
         
@@ -229,12 +152,34 @@ internal static class EffectExtensions
                              ?? mce.Arguments.First();  // Extension method
         }
 
-        if (rootExpression is not ParameterExpression p)
+        if (rootExpression is not ParameterExpression pe || !pe.Type.IsAssignableTo(typeof(TContext)))
         {
-            throw new ArgumentException($"Expression {expression} must be rooted in a parameter");
+            throw new ArgumentException($"Expression {expression} must be rooted in the input context of type {typeof(TContext)}");
         }
 
-        return p;
+        return pe;
+    }
+
+    private static bool TryGetTargetDescriptor(this Expression expression, out ITargetDescriptor? targetDescriptor)
+    {
+        var rootExpression = expression;
+        
+        while (rootExpression is MemberExpression innerMe)
+        {
+            rootExpression = innerMe.Expression;
+        }
+
+        if (rootExpression is MethodCallExpression { Method.Name: nameof(ContextExtensions.Target) } targetCall)
+        {
+            if (targetCall.Arguments.SecondOrDefault() is not ConstantExpression { Value: int targetIndex })
+                throw new ArgumentException($"Malformed Target expression {expression}");
+
+            targetDescriptor = new TargetProperty(targetCall.Type, targetIndex);
+            return true;
+        }
+
+        targetDescriptor = null;
+        return false;
     }
 
     private static T GetRequiredAttribute<T>(this MemberInfo memberInfo)
@@ -249,102 +194,62 @@ internal static class EffectExtensions
         return requiredAttribute;
     }
 
-    private record EffectDescriptor(IAffected Affected, string Keyword, IEnumerable<IEffectParameter> Operands) : IEffectDescriptor;
-
-
-    private record Affected : IAffected 
+    private record EffectDescriptor(string Keyword, IEnumerable<IEffectParameter> Operands, ITargetDescriptor? MainTarget=null) : IEffectDescriptor;
+    private record TargetProperty(Type TargetType, int TargetIndex) : ITargetDescriptor;
+    
+    private record ContextParameter<TContext> : IEffectParameter<TContext>
+        where TContext : IContext
     {
-        public Affected(IOneOf oneOf)
+        private readonly Func<TContext, string> _parameterFunc;
+        private readonly List<ITargetDescriptor> _targets = new();
+        public ContextParameter(Func<TContext, string> parameterFunc, string description, ITargetDescriptor? targetDescriptor=null)
         {
-            Description = oneOf.Value switch
-            {
-                ITargetProperty tp => OneOf<ITargetProperty, IContextProperty>
-                    .FromT0(tp),
-                IContextProperty cp => OneOf<ITargetProperty, IContextProperty>
-                    .FromT1(cp),
-                _ => throw new ArgumentException($"Cannot parse affected of value type {oneOf.Value} "),
-            };
-        }
-    
-        public Affected(ITargetProperty description)
-        {
-            Description = OneOf<ITargetProperty, IContextProperty>.FromT0(description);
-        }
-    
-        public Affected(IContextProperty description)
-        {
-            Description = OneOf<ITargetProperty, IContextProperty>.FromT1(description);
-        }
-    
-        public OneOf<ITargetProperty, IContextProperty> Description { get; }
-    }
-    
-    private record Operand : IEffectParameter
-    {
-        public Operand(IOneOf oneOf)
-        {
-            Value = oneOf.Value switch
-            {
-                IImmediateValue iv => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
-                    .FromT0(iv),
-                ITargetProperty tp => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
-                    .FromT1(tp),
-                IContextProperty cp => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
-                    .FromT2(cp),
-                IAggregateProperty ap => OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>
-                    .FromT3(ap),
-                _ => throw new ArgumentException($"Cannot parse operand of value type {oneOf.Value} "),
-            };
-        }
-    
-        public Operand(IImmediateValue value)
-        {
-            Value = OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>.FromT0(value);
-        }
-    
-        public Operand(ITargetProperty value)
-        {
-            Value = OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>.FromT1(value);
+            _parameterFunc = parameterFunc;
+            Description = description;
+            
+            if (targetDescriptor is not null)
+                _targets.Add(targetDescriptor);
         }
 
-        public Operand(IContextProperty value)
-        {
-            Value = OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>.FromT2(value);
-        }
 
-        public Operand(IAggregateProperty value)
+        public IEnumerable<ITargetDescriptor> GetTargets() => _targets;
+
+        public string Description { get; }
+        public string ComputeValue(TContext context)
         {
-            Value = OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty>.FromT3(value);
+            return _parameterFunc(context);
         }
-    
-        public OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty> Value { get; }
+        public string ComputeValue(IContext context)
+        {
+            if (context is not TContext tContext)
+                throw new ArgumentException($"Context {context} is not of type {typeof(TContext)}");
+            
+            return _parameterFunc(tContext);
+        }
     }
 
-    private record ImmediateValue : IImmediateValue
+    private record ImmediateValue : IEffectParameter
     {
         public ImmediateValue(object value)
         {
             if (value?.ToString() is not { } stringValue)
                 throw new ArgumentNullException(nameof(value));
             
-            Value = stringValue;
-        }
-        
-        public ImmediateValue(string value)
-        {
-            Value = value;
-        }
-        
-        public ImmediateValue(int value)
-        {
-            Value = value.ToString();
+            Description = stringValue;
         }
 
-        public string Value { get; }
+        public IEnumerable<ITargetDescriptor> GetTargets()
+        {
+            return Enumerable.Empty<ITargetDescriptor>();
+        }
+
+        public string Description { get; }
+
+        public string ComputeValue(IContext context)
+        {
+            return Description;
+        }
     }
 
-    private record TargetProperty(Type TargetType, int TargetIndex, string PropertyPath) : ITargetProperty;
-    private record ContextProperty(string PropertyPath) : IContextProperty;
-
-    private record AggregateProperty(string Description, string PropertyPath) : IAggregateProperty;
+    
 }

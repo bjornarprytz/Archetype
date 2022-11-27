@@ -1,17 +1,16 @@
 ﻿using Archetype.Components.Meta;
+using Archetype.Core.Effects;
 
 namespace Archetype.Components.Extensions;
 
 internal static class EffectDescriptorExtensions
 {
-    public static IEnumerable<ITargetProperty> GetTargets(this IEffectDescriptor effectDescriptor)
+    public static IEnumerable<ITargetDescriptor> GetTargets(this IEffectDescriptor effectDescriptor)
     {
-        if (effectDescriptor.Affected.Description.Value is ITargetProperty targetInAffected)
-        {
-            yield return targetInAffected;
-        }
+        if (effectDescriptor.MainTarget != null)
+            yield return effectDescriptor.MainTarget;
 
-        foreach (var targetInOperands in effectDescriptor.Operands.Select(operand => operand.Value.Value).OfType<ITargetProperty>())
+        foreach (var targetInOperands in effectDescriptor.Operands.SelectMany(operand => operand.GetTargets()))
         {
             yield return targetInOperands;
         }

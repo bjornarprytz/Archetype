@@ -1,8 +1,10 @@
-﻿namespace Archetype.Components.Meta;
+﻿using Archetype.Core.Effects;
+
+namespace Archetype.Components.Meta;
 
 internal interface IEffectDescriptor
 {
-    IAffected Affected { get; }
+    ITargetDescriptor? MainTarget { get; }
     string Keyword { get; }
     IEnumerable<IEffectParameter> Operands { get; }
 }

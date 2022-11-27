@@ -1,31 +1,17 @@
-﻿using OneOf;
+﻿using Archetype.Core.Atoms;
+using Archetype.Core.Effects;
 
 namespace Archetype.Components.Meta;
 
+internal interface IEffectParameter<in TContext> : IEffectParameter
+    where TContext : IContext
+{
+    string ComputeValue(TContext context);
+}
+
 internal interface IEffectParameter
 {
-    OneOf<IImmediateValue, ITargetProperty, IContextProperty, IAggregateProperty> Value { get; }
-}
-
-internal interface IImmediateValue
-{
-    string? Value { get; }
-}
-
-internal interface ITargetProperty
-{
-    Type TargetType { get; }
-    int TargetIndex { get; }
-    string PropertyPath { get; }
-}
-
-internal interface IContextProperty
-{
-    string PropertyPath { get; }
-}
-
-internal interface IAggregateProperty
-{
+    IEnumerable<ITargetDescriptor> GetTargets();
     string Description { get; }
-    string PropertyPath { get; }
+    string ComputeValue(IContext context);
 }
