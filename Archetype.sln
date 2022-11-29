@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Game", "Archetype
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.ProtoBuilder", "Archetype.ProtoBuilder\Archetype.ProtoBuilder.csproj", "{338AA18D-3972-4404-854D-0EC6CF3FDC78}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.ProtoBuilder.Tests", "Archetype.ProtoBuilder.Tests\Archetype.ProtoBuilder.Tests.csproj", "{AC5F8441-0435-42B7-8ADD-D2BB28071375}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{338AA18D-3972-4404-854D-0EC6CF3FDC78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{338AA18D-3972-4404-854D-0EC6CF3FDC78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{338AA18D-3972-4404-854D-0EC6CF3FDC78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

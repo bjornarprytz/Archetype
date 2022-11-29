@@ -8,44 +8,44 @@ internal abstract class CardBuilder<T> : ICardBuilder
 {
     protected abstract T Proto { get; }
 
-    public void WithName(string name)
+    public void SetName(string name)
     {
         Proto.Name = name;
     }
-    public void WithRarity(CardRarity rarity)
+    public void SetRarity(CardRarity rarity)
     {
         Proto.Rarity = rarity;
     }
-    public void WithCost(int cost)
+    public void SetCost(int cost)
     {
         Proto.Cost = cost;
     }
 
-    public void WithColor(CardColor color)
+    public void SetColor(CardColor color)
     {
         Proto.Color = color;
     }
 
-    public void WithArt(string link)
+    public void SetArt(string link)
     {
         Proto.ImageUri = link;
     }
 
-    public void WithType(CardType type)
+    public void SetType(CardType type)
     {
         Proto.Type = type;
     }
-    public void WithSubtype(string subtype)
+    public void SetSubtype(string subtype)
     {
         Proto.SubType = subtype;
     }
 
-    public void WithResources(int resources)
+    public void SetResources(int resources)
     {
         Proto.Resources = resources;
     }
 
-    public void FromSet(string setName)
+    public void SetCardSet(string setName)
     {
         Proto.SetName = setName;
     }

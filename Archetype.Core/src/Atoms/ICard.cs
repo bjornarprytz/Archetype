@@ -1,4 +1,6 @@
 ﻿using Archetype.Core.Atoms.Zones;
+using Archetype.Core.Effects;
+using Archetype.Core.Meta;
 
 namespace Archetype.Core.Atoms;
 
@@ -8,5 +10,6 @@ public interface ICard : IAtom
     public IZone<ICard> CurrentZone { get; }
 
 
-    public void MoveTo(IZone<ICard> newZone);
+    [Keyword("Move card to {0}")]
+    public IResult MoveTo(IZone<ICard> newZone);
 }

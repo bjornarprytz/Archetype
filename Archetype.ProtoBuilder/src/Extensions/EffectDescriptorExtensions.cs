@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Archetype.Components.Meta;
-using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
 
 namespace Archetype.Components.Extensions;

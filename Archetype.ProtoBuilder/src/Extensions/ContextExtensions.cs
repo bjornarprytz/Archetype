@@ -1,10 +1,11 @@
 using Archetype.Components.Meta;
 using Archetype.Core.Atoms;
+using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Effects;
 
 namespace Archetype.Components.Extensions;
 
-internal static class ContextExtensions
+public static class ContextExtensions
 {
     public static IResult TargetEach<TTarget, TResult>(this IEnumerable<TTarget> source, Func<TTarget, IResult> func)
         where TTarget : IAtom
@@ -17,9 +18,15 @@ internal static class ContextExtensions
     {
         return context.TargetProvider.GetTarget<T>(index);
     }
+
+    [Description("Hand")]
+    public static IHand Hand(this IContext context)
+    {
+        return context.GameState.Player.Hand;
+    }
     
     [Description("Cards in hand")]
-    public static IEnumerable<ICard> Hand(this IContext context)
+    public static IEnumerable<ICard> CardsInHand(this IContext context)
     {
         return context.GameState.Player.Hand.Contents;
     }

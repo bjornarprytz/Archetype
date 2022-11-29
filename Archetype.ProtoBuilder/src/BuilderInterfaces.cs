@@ -7,21 +7,20 @@ namespace Archetype.Components;
 
 public interface ISpellBuilder : ICardBuilder
 {
-    void AddEffect(Expression<Func<IContext, IResult>> effectFunction);
+    void PushEffect(Expression<Func<IContext, IResult>> effectFunction);
 
     IProtoSpell Build();
 }
 
 public interface ICardBuilder
 {
-    public void WithName(string name);
-    public void WithRarity(CardRarity rarity);
-    public void WithCost(int cost);
-    public void WithColor(CardColor color);
-    public void WithArt(string link);
-    public void WithType(CardType type);
-    public void WithSubtype(string subtype);
-    public void WithResources(int resources);
-    public void FromSet(string setName);
-    public void OverrideRulesText(string text);
+    public void SetName(string name);
+    public void SetRarity(CardRarity rarity);
+    public void SetCost(int cost);
+    public void SetColor(CardColor color);
+    public void SetArt(string link);
+    public void SetType(CardType type);
+    public void SetSubtype(string subtype);
+    public void SetResources(int resources);
+    public void SetCardSet(string setName);
 }

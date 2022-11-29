@@ -3,10 +3,11 @@ using System.Reflection;
 using Archetype.Components.Meta;
 using Archetype.Core.Effects;
 using Archetype.Core.Extensions;
+using Archetype.Core.Meta;
 
 namespace Archetype.Components.Extensions;
 
-internal static class EffectExtensions // TODO: Write tests for these methods
+internal static class ExpressionExtensions
 {
     internal static IEffectDescriptor CreateDescriptor<TContext, TResult>(this Expression<Func<TContext, TResult>> exp)
         where TContext : IContext
@@ -99,11 +100,21 @@ internal static class EffectExtensions // TODO: Write tests for these methods
 
         var pe = contextExpression.GetRequiredParameterExpressionRootedInContext<TContext>();
         var description = mce.Method.GetRequiredAttribute<DescriptionAttribute>().Description;
-        var parameterFunc = Expression.Lambda<Func<TContext, string>>(mce, false, pe).Compile();
+
+        // TODO: This is a bit of a mess, but the idea is to get the value of the method from the context, which is tricky when it can be anything.
+        // Integers and strings are easy, but other types are not. I think returning the description is good enough for now.
+
+        mce.TryGetTargetDescriptor(out var targetDescriptor);
+
+        if (mce.Method.ReturnType != typeof(int))
+            return new ContextParameter<TContext>(_ => description, description, targetDescriptor);
         
-        return mce.TryGetTargetDescriptor(out var targetDescriptor) 
-            ? new ContextParameter<TContext>(parameterFunc, description, targetDescriptor) 
-            : new ContextParameter<TContext>(parameterFunc, description);
+        var valFunc = Expression.Lambda<Func<TContext, int>>(mce, false, pe).Compile();
+            
+        string ParameterFunc(TContext ctx) => valFunc(ctx).ToString()!;
+            
+        return new ContextParameter<TContext>(ParameterFunc, description);
+
     }
 
     private static IEffectParameter ParseProperty<TContext>(this MemberExpression me)
@@ -111,11 +122,19 @@ internal static class EffectExtensions // TODO: Write tests for these methods
     {
         var pe = me.GetRequiredParameterExpressionRootedInContext<TContext>();
         var description = me.Member.GetRequiredAttribute<DescriptionAttribute>().Description;
-        var parameterFunc = Expression.Lambda<Func<TContext, string>>(me, false, pe).Compile();
+        
+        // TODO: This is a bit of a mess, but the idea is to get the value of the property from the context
+        
+        me.TryGetTargetDescriptor(out var targetDescriptor);
 
-        return me.TryGetTargetDescriptor(out var targetDescriptor) 
-            ? new ContextParameter<TContext>(parameterFunc, description, targetDescriptor) 
-            : new ContextParameter<TContext>(parameterFunc, description);
+        if (me.Member.DeclaringType != typeof(int))
+            return new ContextParameter<TContext>(_ => description, description, targetDescriptor);
+        
+        var valFunc = Expression.Lambda<Func<TContext, int>>(me, false, pe).Compile();
+            
+        string ParameterFunc(TContext ctx) => valFunc(ctx).ToString()!;
+            
+        return new ContextParameter<TContext>(ParameterFunc, description);
     }
 
     private static IEffectDescriptor DescribeLambda<TContext>(this LambdaExpression lambda, ITargetDescriptor? targetDescriptor=null)
@@ -200,6 +219,15 @@ internal static class EffectExtensions // TODO: Write tests for these methods
         public ContextParameter(Func<TContext, string> parameterFunc, string description, ITargetDescriptor? targetDescriptor=null)
         {
             _parameterFunc = parameterFunc;
+            Description = description;
+            
+            if (targetDescriptor is not null)
+                _targets.Add(targetDescriptor);
+        }
+        
+        public ContextParameter(Func<TContext, int> parameterFunc, string description, ITargetDescriptor? targetDescriptor=null)
+        {
+            _parameterFunc = (ctx) => parameterFunc(ctx).ToString();
             Description = description;
             
             if (targetDescriptor is not null)
