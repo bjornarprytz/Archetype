@@ -100,20 +100,12 @@ internal static class ExpressionExtensions
 
         var pe = contextExpression.GetRequiredParameterExpressionRootedInContext<TContext>();
         var description = mce.Method.GetRequiredAttribute<DescriptionAttribute>().Description;
-
-        // TODO: This is a bit of a mess, but the idea is to get the value of the method from the context, which is tricky when it can be anything.
-        // Integers and strings are easy, but other types are not. I think returning the description is good enough for now.
-
-        mce.TryGetTargetDescriptor(out var targetDescriptor);
-
-        if (mce.Method.ReturnType != typeof(int))
-            return new ContextParameter<TContext>(_ => description, description, targetDescriptor);
         
-        var valFunc = Expression.Lambda<Func<TContext, int>>(mce, false, pe).Compile();
-            
-        string ParameterFunc(TContext ctx) => valFunc(ctx).ToString()!;
-            
-        return new ContextParameter<TContext>(ParameterFunc, description);
+        var parameterExpression = Expression.Lambda(mce, false, pe);
+
+        return mce.TryGetTargetDescriptor(out var targetDescriptor) 
+            ? new ContextParameter<TContext>(parameterExpression, description, targetDescriptor) 
+            : new ContextParameter<TContext>(parameterExpression, description);
 
     }
 
@@ -123,18 +115,11 @@ internal static class ExpressionExtensions
         var pe = me.GetRequiredParameterExpressionRootedInContext<TContext>();
         var description = me.Member.GetRequiredAttribute<DescriptionAttribute>().Description;
         
-        // TODO: This is a bit of a mess, but the idea is to get the value of the property from the context
-        
-        me.TryGetTargetDescriptor(out var targetDescriptor);
+        var parameterExpression = Expression.Lambda(me, false, pe);
 
-        if (me.Member.DeclaringType != typeof(int))
-            return new ContextParameter<TContext>(_ => description, description, targetDescriptor);
-        
-        var valFunc = Expression.Lambda<Func<TContext, int>>(me, false, pe).Compile();
-            
-        string ParameterFunc(TContext ctx) => valFunc(ctx).ToString()!;
-            
-        return new ContextParameter<TContext>(ParameterFunc, description);
+        return me.TryGetTargetDescriptor(out var targetDescriptor) 
+                ? new ContextParameter<TContext>(parameterExpression, description, targetDescriptor) 
+                : new ContextParameter<TContext>(parameterExpression, description);
     }
 
     private static IEffectDescriptor DescribeLambda<TContext>(this LambdaExpression lambda, ITargetDescriptor? targetDescriptor=null)
@@ -216,19 +201,19 @@ internal static class ExpressionExtensions
     {
         private readonly Func<TContext, string> _parameterFunc;
         private readonly List<ITargetDescriptor> _targets = new();
-        public ContextParameter(Func<TContext, string> parameterFunc, string description, ITargetDescriptor? targetDescriptor=null)
+        public ContextParameter(LambdaExpression parameterExpression, string description, ITargetDescriptor? targetDescriptor=null)
         {
-            _parameterFunc = parameterFunc;
             Description = description;
             
-            if (targetDescriptor is not null)
-                _targets.Add(targetDescriptor);
-        }
-        
-        public ContextParameter(Func<TContext, int> parameterFunc, string description, ITargetDescriptor? targetDescriptor=null)
-        {
-            _parameterFunc = (ctx) => parameterFunc(ctx).ToString();
-            Description = description;
+            if (parameterExpression.ReturnType == typeof(int))
+            {
+                var func = (Func<TContext, int>) parameterExpression.Compile();
+                _parameterFunc = context => func(context).ToString();
+            }
+            else
+            {
+                _parameterFunc = _ => Description;
+            }
             
             if (targetDescriptor is not null)
                 _targets.Add(targetDescriptor);

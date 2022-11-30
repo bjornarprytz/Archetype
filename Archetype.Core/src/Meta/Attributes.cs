@@ -10,3 +10,14 @@ public class KeywordAttribute : Attribute
         Template = template;
     }
 }
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Method)]
+public class DescriptionAttribute : Attribute
+{
+    public string Description { get; }
+
+    public DescriptionAttribute(string description)
+    {
+        Description = description;
+    }
+}

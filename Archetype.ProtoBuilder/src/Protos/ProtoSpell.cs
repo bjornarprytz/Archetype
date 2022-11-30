@@ -29,7 +29,7 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
 
         foreach (var effectText in _effectDescriptors.Select(e => e.GetDynamicRulesText(context)))
         {
-            sb.AppendLine(effectText);
+            sb.Append(effectText);
         }
 
         return sb.ToString();

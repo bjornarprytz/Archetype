@@ -2,6 +2,7 @@ using Archetype.Components.Meta;
 using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Effects;
+using Archetype.Core.Meta;
 
 namespace Archetype.Components.Extensions;
 
