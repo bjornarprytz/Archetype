@@ -2,16 +2,14 @@
 
 public static class MyCollectionExtensions
 {
-    public static Random Random { get; set; } = new();
-
-    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection)
+    public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection, Random random)
     {
         var array = collection.ToArray();
             
         var n = array.Length;
         for (var i = 0; i < (n - 1); i++)
         {
-            var r = i + Random.Next(n - i);
+            var r = i + random.Next(n - i);
                 
             (array[r], array[i]) = (array[i], array[r]);
         }
@@ -19,7 +17,7 @@ public static class MyCollectionExtensions
         return array;
     }
 
-    public static IEnumerable<T> PickNUnique<T>(this IEnumerable<T> collection, int n)
+    public static IEnumerable<T> PickNUnique<T>(this IEnumerable<T> collection, int n, Random random)
     {
         if (n < 1)
             throw new ArgumentException("n must be a non-zero positive int", nameof(n));
@@ -32,7 +30,7 @@ public static class MyCollectionExtensions
         if (n == pool.Count)
             return pool;
 
-        var newOrder = pool.Shuffle();
+        var newOrder = pool.Shuffle(random);
 
         return newOrder.Take(n);
     }

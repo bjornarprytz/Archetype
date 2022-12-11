@@ -1,7 +1,9 @@
-﻿namespace Archetype.Game;
+﻿using Archetype.Core.Infrastructure;
+
+namespace Archetype.Game;
 
 public class Archetype
 {
     public static IArchetypeGame NewGame(int seed) =>  ArchetypeGame.Create(seed);
-    public static Task<IArchetypeGame> LoadGameAsync(Guid gameId) =>  ArchetypeGame.Load(gameId);
+    public static IArchetypeGame LoadGame(IGameState gameState) =>  ArchetypeGame.Load(gameState);
 }

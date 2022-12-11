@@ -1,9 +1,10 @@
 ﻿using Archetype.Core.Atoms;
+using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Infrastructure;
 
-namespace Archetype.Game;
+namespace Archetype.Game.State;
 
-internal record GameState(int Seed, IPlayer Player, ICard? CurrentLocation, IWorld WorldMap) : IGameState
+internal record GameState(int Seed, IPlayer Player, ILocation? CurrentLocation, IResolution ResolutionZone) : IGameState
 {
     public static IGameState Init(int seed)
     {

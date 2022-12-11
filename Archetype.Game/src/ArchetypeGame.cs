@@ -1,6 +1,8 @@
-﻿using Archetype.Core.Extensions;
-using Archetype.Core.Infrastructure;
+﻿using Archetype.Core.Infrastructure;
+using Archetype.Game.State;
 using Archetype.Rules;
+using Archetype.Rules.Encounter;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Game;
@@ -9,19 +11,15 @@ public interface IArchetypeGame
 {
     public IGameState State { get; }
     
-    public Task<IEncounterGame> EnterLocation(Guid locationId);
-    public Task<IDeckBuilding> EnterDeckBuilding();
-    public Task DrawLocation();
-    
-    
-    public Task<Guid> SaveGame();
-    public Task QuitGame();
+    public Task PlayCard(PlayCard.Command command);
+    public Task EndTurn(EndTurn.Command command);
 }
 
 internal class ArchetypeGame : IArchetypeGame
 {
     public IGameState State { get; }
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IMediator _mediator;
+    private readonly ServiceProvider _serviceProvider;
 
     private ArchetypeGame(IGameState state)
     {
@@ -29,52 +27,33 @@ internal class ArchetypeGame : IArchetypeGame
         var container = new ServiceCollection();
         
         container
+            .AddSingleton(new Random(state.Seed))
             .AddSingleton(State)
-            .AddTransient<IEncounterGame, EncounterGame>()
             .AddRules();
         
         _serviceProvider = container.BuildServiceProvider();
+        _mediator = _serviceProvider.GetRequiredService<IMediator>();
     }
     
     public static IArchetypeGame Create(int seed)
     {
         var initialState = GameState.Init(seed);
-
-        MyCollectionExtensions.Random = new Random(seed); // TODO: Centralize random in another place
         
         return new ArchetypeGame(initialState);
     }
 
-    public static Task<IArchetypeGame> Load(Guid gameId)
+    public static IArchetypeGame Load(IGameState gameState)
     {
-        // TODO: Load game state from database
-        var initialState = GameState.Init(0);
-        
-        return Task.FromResult<IArchetypeGame>(new ArchetypeGame(initialState));
+        return new ArchetypeGame(gameState);
+    }
+    
+    public Task PlayCard(PlayCard.Command command)
+    {
+        return _mediator.Send(command);
     }
 
-    public Task<IEncounterGame> EnterLocation(Guid locationId)
+    public Task EndTurn(EndTurn.Command command)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<IDeckBuilding> EnterDeckBuilding()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task DrawLocation()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Guid> SaveGame()
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task QuitGame()
-    {
-        throw new NotImplementedException();
+        return _mediator.Send(command);
     }
 }

@@ -2,7 +2,7 @@
 using Archetype.Core.Effects;
 using Archetype.Core.Meta;
 
-namespace Archetype.Core.Atoms;
+namespace Archetype.Core.Atoms.Cards;
 
 public interface ICard : IAtom
 {

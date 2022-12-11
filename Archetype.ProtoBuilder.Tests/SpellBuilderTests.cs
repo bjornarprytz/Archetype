@@ -1,6 +1,7 @@
 ﻿using Archetype.Components;
 using Archetype.Components.Extensions;
 using Archetype.Core.Atoms;
+using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using FluentAssertions;
 using NSubstitute;

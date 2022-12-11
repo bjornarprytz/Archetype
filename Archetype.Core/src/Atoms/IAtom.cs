@@ -2,6 +2,5 @@
 
 public interface IAtom
 {
-    public IAtom Owner { get; }
     public Guid Id { get; }
 }

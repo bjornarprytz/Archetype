@@ -1,9 +1,9 @@
 ﻿using Archetype.Core.Effects;
 using Archetype.Core.Meta;
 
-namespace Archetype.Core.Atoms;
+namespace Archetype.Core.Atoms.Cards;
 
-public interface IUnit : IAtom
+public interface IUnit : ICard
 {
     [Description("Health")]
     public int Health { get; }
