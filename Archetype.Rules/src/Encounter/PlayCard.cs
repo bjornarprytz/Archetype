@@ -51,8 +51,7 @@ public class PlayCard
             {
                 throw new Exception("Not enough resources to play this card.");
             }
-            
-            
+
             foreach (var card in paymentCards)
             {
                 card.MoveTo(_gameState.Player.DiscardPile);

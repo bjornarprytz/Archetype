@@ -5,55 +5,28 @@ namespace Archetype.Game.State;
 
 internal class Map : IMap
 {
-    private readonly Dictionary<Guid, Node> _nodes = new();
-    public IEnumerable<INode> Nodes => _nodes.Values;
+    private readonly List<Node> _nodes = new();
+    public IEnumerable<INode> Nodes => _nodes;
 
 
     public void AddNode(Node node)
     {
-        _nodes.Add(node.Id, node);
+        _nodes.Add(node);
     }
     
-    public void ConnectNodes(Guid nodeId1, Guid nodeId2)
+    public void ConnectNodes(int n1, int n2)
     {
-        if (
-            !_nodes.TryGetValue(nodeId1, out var node1)
-        || 
-            !_nodes.TryGetValue(nodeId2, out var node2))
-        {
-            throw new ArgumentException($"Node with id {nodeId1} does not exist");
-        }
+        if (n1 >= _nodes.Count || n2 >= _nodes.Count || n1 < 0 || n2 < 0)
+            throw new ArgumentOutOfRangeException();
+        
+        if (n1 == n2)
+            throw new ArgumentException("Cannot connect a node to itself");
+
+        var node1 = _nodes[n1];
+        var node2 = _nodes[n2];
         
         node1.AddNeighbor(node2);
         node2.AddNeighbor(node1);
-    }
-    
-    public bool IsFullyConnected()
-    {
-        if (_nodes.Count == 0)
-        {
-            return true;
-        }
-        
-        var visited = new HashSet<Guid>();
-        var stack = new Stack<INode>();
-        stack.Push(_nodes.Values.First());
-        while (stack.Count > 0)
-        {
-            var currentNode = stack.Pop();
-            if (visited.Contains(currentNode.Id))
-            {
-                continue;
-            }
-            
-            visited.Add(currentNode.Id);
-            foreach (var neighbor in currentNode.Neighbors)
-            {
-                stack.Push(neighbor);
-            }
-        }
-
-        return visited.Count == _nodes.Count;
     }
 }
 

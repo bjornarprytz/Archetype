@@ -1,4 +1,5 @@
-﻿using Archetype.Core.Atoms.Zones;
+﻿using Archetype.Core.Atoms;
+using Archetype.Core.Atoms.Zones;
 using Archetype.Game.State;
 
 namespace Archetype.Game.Extensions;
@@ -7,7 +8,6 @@ internal static class StateGeneration
 {
     public static IMap GenerateMap(Random random, int numNodes)
     {
-        // TODO: Generate a map with the given number of nodes.
         var map = new Map();
 
         var nodes = Enumerable.Range(0, numNodes).Select(_ => new Node()).ToList();
@@ -16,16 +16,23 @@ internal static class StateGeneration
         {
             map.AddNode(node);
         }
-        
-        // TODO: Add some connections between nodes. 
-        
-        if (!map.IsFullyConnected())
+
+        if (numNodes == 0)
         {
-            throw new NotImplementedException(); // TODO: Decide what to do if the map isn't fully connected. Just retry?
+            return map;
+        }
+        
+        // TODO: Maybe connect map randomly
+        for (var i = 1; i < numNodes; i++)
+        {
+            map.ConnectNodes(i-1, i % numNodes); 
         }
 
         return map;
     }
     
-    
+    public static IPlayer GeneratePlayer(Random random)
+    {
+        return new Player();
+    }
 }
