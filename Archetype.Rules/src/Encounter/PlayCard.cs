@@ -46,6 +46,8 @@ public class PlayCard
             {
                 card.MoveTo(_gameState.Player.DiscardPile);
             }
+
+            cardToPlay.MoveTo(_gameState.ResolutionZone); // Move the card here so that it won't be affected by its own effects.
             
             var result = cardToPlay.Proto.Resolve(new PlayContext(_gameState, cardToPlay,
                 new TargetProvider(targets, cardToPlay.Proto.TargetDescriptors)));

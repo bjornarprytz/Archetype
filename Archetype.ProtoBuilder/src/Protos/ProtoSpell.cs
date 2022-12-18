@@ -20,6 +20,8 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
     public override IResult Resolve(IContext<ICard> context)
     {
         return Result.Aggregate(_effectFunctions.Select(f => f(context)));
+        
+        // TODO: Move the card to the graveyard
     }
 
     public override string ContextualRulesText(IContext<ICard> context)
