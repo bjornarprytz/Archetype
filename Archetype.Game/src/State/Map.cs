@@ -30,24 +30,11 @@ internal class Map : IMap
     }
 }
 
-internal class Node : Atom, INode
+internal class Node : Zone<IUnit>, INode
 {
     private readonly Dictionary<Guid, Node> _neighbors = new();
-    private readonly Dictionary<Guid, IUnit> _units = new();
-    public IEnumerable<IUnit> Contents => _units.Values;
     public IEnumerable<INode> Neighbors => _neighbors.Values;
-    
-    public void AddUnit(IUnit unit)
-    {
-        // TODO: This is probably better in an abstract class
-        _units.Add(unit.Id, unit);
-    }
-    
-    public void RemoveUnit(IUnit unit)
-    {
-        _units.Remove(unit.Id);
-    }
-    
+
     public void AddNeighbor(Node node)
     {
         if (node == this || _neighbors.ContainsKey(node.Id))

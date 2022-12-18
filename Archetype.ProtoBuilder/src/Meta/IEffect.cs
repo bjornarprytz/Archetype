@@ -5,5 +5,5 @@ namespace Archetype.Components.Meta;
 
 internal interface IEffect
 {
-    public Expression<Func<IContext, IResult>> ResolveExpression { get; }
+    public Expression<Func<IContext, IResult>> EffectExpression { get; }
 }

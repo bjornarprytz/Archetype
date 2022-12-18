@@ -19,7 +19,6 @@ internal class ArchetypeGame : IArchetypeGame
 {
     public IGameState State { get; }
     private readonly IMediator _mediator;
-    private readonly ServiceProvider _serviceProvider;
 
     private ArchetypeGame(IGameState state)
     {
@@ -27,22 +26,24 @@ internal class ArchetypeGame : IArchetypeGame
         var container = new ServiceCollection();
         
         container
-            .AddSingleton(new Random(state.Seed))
+            .AddSingleton(Static.Random)
             .AddSingleton(State)
             .AddRules();
         
-        _serviceProvider = container.BuildServiceProvider();
-        _mediator = _serviceProvider.GetRequiredService<IMediator>();
+        var serviceProvider = container.BuildServiceProvider();
+        _mediator = serviceProvider.GetRequiredService<IMediator>();
     }
     
     public static IArchetypeGame Create(int seed)
     {
-        var initialState = GameState.Init(seed);
+        var random = Static.SetRandomSeed(seed);
+        
+        var initialState = GameState.Init(random);
         
         return new ArchetypeGame(initialState);
     }
 
-    public static IArchetypeGame Load(IGameState gameState)
+    public static IArchetypeGame Load(IGameState gameState, int seed)
     {
         return new ArchetypeGame(gameState);
     }

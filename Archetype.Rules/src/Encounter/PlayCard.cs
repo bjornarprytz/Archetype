@@ -1,8 +1,6 @@
-﻿using Archetype.Core.Atoms;
-using Archetype.Core.Atoms.Cards;
+﻿using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Infrastructure;
-using Archetype.Core.Proto.PlayingCard;
 using FluentValidation;
 using MediatR;
 
@@ -18,13 +16,11 @@ public class PlayCard
     {
         private readonly IGameState _gameState;
         private readonly IAtomFinder _atomFinder;
-        private readonly IProtoFinder _protoFinder;
 
-        public Handler(IGameState gameState, IAtomFinder atomFinder, IProtoFinder protoFinder)
+        public Handler(IGameState gameState, IAtomFinder atomFinder)
         {
             _gameState = gameState;
             _atomFinder = atomFinder;
-            _protoFinder = protoFinder;
         }
         
         public Task<IEnumerable<Guid>> Handle(Command request, CancellationToken cancellationToken)
@@ -33,11 +29,7 @@ public class PlayCard
             if (cardToPlay.CurrentZone != _gameState.Player.Hand)
                 throw new InvalidOperationException("Cannot play a card that is not in your hand.");
             
-            var protoCard = _protoFinder.FindProto<IProtoPlayingCard>(cardToPlay.ProtoId);
-            
-            
             var targets = request.TargetGuids.Select(_atomFinder.FindAtom);
-
             
             var paymentCards = request.PaymentCardIds.Select(_atomFinder.FindAtom<ICard>).ToList();
             if (paymentCards.Any(p => p.CurrentZone != _gameState.Player.Hand))
@@ -45,9 +37,7 @@ public class PlayCard
                 throw new Exception("Cannot pay with a card that is not in your hand.");
             }
             
-            // TODO: Make cost available on the card so we don't have to look it up through the proto.
-            var paymentProtoCards = paymentCards.Select(card => _protoFinder.FindProto<IProtoPlayingCard>(card.ProtoId));
-            if (paymentProtoCards.Sum(p => p.Resources) < protoCard.Cost)
+            if (paymentCards.Sum(paymentCard => paymentCard.Proto.Stats.Resources) < cardToPlay.Proto.Stats.Cost)
             {
                 throw new Exception("Not enough resources to play this card.");
             }
@@ -57,8 +47,8 @@ public class PlayCard
                 card.MoveTo(_gameState.Player.DiscardPile);
             }
             
-            var result = protoCard.Resolve(new PlayContext(_gameState, cardToPlay,
-                new TargetProvider(targets, protoCard.TargetDescriptors)));
+            var result = cardToPlay.Proto.Resolve(new PlayContext(_gameState, cardToPlay,
+                new TargetProvider(targets, cardToPlay.Proto.TargetDescriptors)));
             
             return Task.FromResult(result.AffectedAtoms.Concat(request.PaymentCardIds));
         }

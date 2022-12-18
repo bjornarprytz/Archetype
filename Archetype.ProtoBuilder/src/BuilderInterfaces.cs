@@ -20,7 +20,7 @@ public interface ICardBuilder
     public void SetColor(CardColor color);
     public void SetArt(string link);
     public void SetType(CardType type);
-    public void SetSubtype(string subtype);
+    public void SetSubtype(string subType);
     public void SetResources(int resources);
     public void SetCardSet(string setName);
 }

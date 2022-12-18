@@ -11,4 +11,13 @@ internal abstract class Zone<TAtom> : Atom, IZone<TAtom>
     protected Zone() { }
 
     public IEnumerable<TAtom> Contents => Atoms;
+    public void Add(TAtom atom)
+    {
+        Atoms.Add(atom);
+    }
+
+    public void Remove(TAtom atom)
+    {
+        Atoms.Remove(atom);
+    }
 }

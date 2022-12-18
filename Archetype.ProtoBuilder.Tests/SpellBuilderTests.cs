@@ -60,7 +60,7 @@ public class SpellBuilderTests
             .AddEffect(context => context.Target<IUnit>(0).Damage(context.Target<IUnit>(0).Health))
             .Build();
         
-        var staticRulesText = spell.RulesText;
+        var staticRulesText = spell.Meta.StaticRulesText;
         
         // TODO: I'm reaching a very low return on complexity with the static rules text. I think I should design a way around this.
         staticRulesText.Should().Be("Deal {X} damage to this unit, where X is the target's health.");
@@ -73,7 +73,7 @@ public class SpellBuilderTests
             .AddEffect(context => context.Target<IUnit>(0).Damage(69))
             .Build();
         
-        var staticRulesText = spell.RulesText;
+        var staticRulesText = spell.Meta.StaticRulesText;
         
         staticRulesText.Should().Be("Deal {69} damage to this unit.");
     }

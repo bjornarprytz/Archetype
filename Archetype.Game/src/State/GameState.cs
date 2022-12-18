@@ -6,17 +6,14 @@ using Archetype.Game.Extensions;
 
 namespace Archetype.Game.State;
 
-internal record GameState(int Seed, IPlayer Player, IMap Map, ILocation? CurrentLocation, IResolution ResolutionZone) : IGameState
+internal record GameState(IPlayer Player, IMap Map, ILocation? CurrentLocation, IResolution ResolutionZone) : IGameState
 {
-    public static IGameState Init(int seed)
+    public static IGameState Init(Random random)
     {
-        var random = Static.SetRandomSeed(seed);
-
         var map = StateGeneration.GenerateMap(random, 5);
         var player = StateGeneration.GeneratePlayer(random);
         
         var gameState = new GameState(
-            seed, 
             player, 
             map, 
             null, 

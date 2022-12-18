@@ -1,10 +1,4 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::AC5F8441-0435-42B7-8ADD-D2BB28071375::net7.0::Archetype.ProtoBuilder.Tests.SpellBuilderTests.SpellWithTwoTargets&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::AC5F8441-0435-42B7-8ADD-D2BB28071375::net7.0::Archetype.ProtoBuilder.Tests.SpellBuilderTests.SpellWithDamageEffect&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::AC5F8441-0435-42B7-8ADD-D2BB28071375::net7.0::Archetype.ProtoBuilder.Tests.SpellBuilderTests.SpellEffectHasCorrectStaticRulesText&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::AC5F8441-0435-42B7-8ADD-D2BB28071375::net7.0::Archetype.ProtoBuilder.Tests.SpellBuilderTests.SpellEffectWithImmediateInput_HasCorrectContextualRulesText&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::AC5F8441-0435-42B7-8ADD-D2BB28071375::net7.0::Archetype.ProtoBuilder.Tests.SpellBuilderTests.SpellEffectWithComplexInput_HasCorrectStaticRulesText&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Project Location="E:\source\repos\Archetype\Archetype.ProtoBuilder.Tests" Presentation="&amp;lt;Archetype.ProtoBuilder.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

@@ -38,7 +38,7 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
 
     public void AddEffect(IEffect effect)
     {
-        var effectDescriptor = effect.ResolveExpression.CreateDescriptor();
+        var effectDescriptor = effect.EffectExpression.CreateDescriptor();
         
         foreach (var target in effectDescriptor.GetTargets()
                      .DistinctBy(t => t.TargetIndex))
@@ -55,9 +55,14 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
         
         _effects.Add(effect);
         _effectDescriptors.Add(effectDescriptor);
-        _effectFunctions.Add(effect.ResolveExpression.Compile());
+        _effectFunctions.Add(effect.EffectExpression.Compile());
+        
+        var newStaticRulesText = string.Join(Environment.NewLine, _effectDescriptors.Select(e => e.GetStaticRulesText()));
 
-        RulesText += effectDescriptor.GetStaticRulesText();
+        Meta = Meta with
+        {
+            StaticRulesText = newStaticRulesText
+        };
     }
 
     private record TargetDescriptor(Type TargetType, int TargetIndex) : ITargetDescriptor;

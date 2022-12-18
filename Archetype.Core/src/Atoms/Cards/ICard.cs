@@ -1,12 +1,13 @@
 ﻿using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Effects;
 using Archetype.Core.Meta;
+using Archetype.Core.Proto.PlayingCard;
 
 namespace Archetype.Core.Atoms.Cards;
 
 public interface ICard : IAtom
 {
-    public string ProtoId { get; }
+    public IProtoPlayingCard Proto { get; }
     public IZone<ICard> CurrentZone { get; }
 
 

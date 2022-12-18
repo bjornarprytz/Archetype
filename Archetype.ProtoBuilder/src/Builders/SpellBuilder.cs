@@ -25,5 +25,5 @@ internal class SpellBuilder : CardBuilder<ProtoSpell>, ISpellBuilder
         return Proto;
     }
 
-    private record Effect(Expression<Func<IContext, IResult>> ResolveExpression) : IEffect;
+    private record Effect(Expression<Func<IContext, IResult>> EffectExpression) : IEffect;
 }

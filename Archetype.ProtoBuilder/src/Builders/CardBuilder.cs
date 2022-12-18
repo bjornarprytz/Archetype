@@ -10,48 +10,78 @@ internal abstract class CardBuilder<T> : ICardBuilder
 
     public void SetName(string name)
     {
-        Proto.Name = name;
+        Proto.Meta = Proto.Meta with
+        {
+            Name = name
+        };
     }
     public void SetRarity(CardRarity rarity)
     {
-        Proto.Rarity = rarity;
+        Proto.Meta = Proto.Meta with
+        {
+            Rarity = rarity
+        };
     }
     public void SetCost(int cost)
     {
-        Proto.Cost = cost;
+        Proto.Stats = Proto.Stats with
+        {
+            Cost = cost
+        };
     }
 
     public void SetColor(CardColor color)
     {
-        Proto.Color = color;
+        Proto.Stats = Proto.Stats with
+        {
+            Color = color
+        };
     }
 
     public void SetArt(string link)
     {
-        Proto.ImageUri = link;
+        Proto.Meta = Proto.Meta with
+        {
+            ImageUri = link
+        };
     }
 
     public void SetType(CardType type)
     {
-        Proto.Type = type;
+        Proto.Stats = Proto.Stats with
+        {
+            Type = type
+        };
     }
-    public void SetSubtype(string subtype)
+    public void SetSubtype(string subType)
     {
-        Proto.SubType = subtype;
+        Proto.Stats = Proto.Stats with
+        {
+            SubType = subType
+        };
     }
 
     public void SetResources(int resources)
     {
-        Proto.Resources = resources;
+        Proto.Stats = Proto.Stats with
+        {
+            Resources = resources
+        };
     }
 
     public void SetCardSet(string setName)
     {
-        Proto.SetName = setName;
+        Proto.Meta = Proto.Meta with
+        {
+            SetName = setName
+        };
     }
 
     public void OverrideRulesText(string text)
     {
-        Proto.RulesText = text;
+        Proto.Meta = Proto.Meta with
+        {
+            StaticRulesText = text
+        };
     }
 }

@@ -2,7 +2,7 @@
 
 internal static class Static
 {
-    private static Random _random;
+    private static Random? _random;
     public static Random Random => _random ??= new Random();
 
     public static Random SetRandomSeed(int seed)
