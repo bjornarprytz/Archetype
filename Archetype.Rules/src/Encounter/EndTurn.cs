@@ -1,4 +1,5 @@
-﻿using Archetype.Core.Infrastructure;
+﻿using System.Data;
+using Archetype.Core.Infrastructure;
 using Archetype.Rules.Extensions;
 using FluentValidation;
 using MediatR;
@@ -34,6 +35,10 @@ public class EndTurn
         {
             public Validator(IGameState gameState)
             {
+                RuleFor(x => x)
+                    .Must(x => gameState.Prompter.CurrentPrompt == null)
+                    .WithMessage("Cannot end turn while a prompt is active");
+
                 RuleFor(x => x)
                     .Must(x => gameState.CurrentLocation != null)
                     .WithMessage("No location is currently active.");

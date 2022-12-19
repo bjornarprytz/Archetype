@@ -1,5 +1,6 @@
 ﻿using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Zones;
+using Archetype.Core.Prompts;
 
 namespace Archetype.Core.Infrastructure;
 
@@ -9,6 +10,7 @@ public interface IGameState
     public IMap Map { get; }
     public ILocation? CurrentLocation { get; }
     public IResolution ResolutionZone { get; }
+    public IPrompter Prompter { get; }
     
-    // TODO: Add effect queue for triggers and stuff that requires user input. Most game actions should require an empty queue.
+    // TODO: Add an event queue to help the client track state changes
 }

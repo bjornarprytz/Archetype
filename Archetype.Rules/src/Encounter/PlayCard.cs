@@ -58,8 +58,12 @@ public class PlayCard
     
     public class Validator : AbstractValidator<Command>
     {
-        public Validator()
+        public Validator(IGameState gameState)
         {
+            RuleFor(x => x)
+                .Must(x => gameState.Prompter.CurrentPrompt == null)
+                .WithMessage("Cannot play a card while a prompt is active.");
+            
             RuleFor(a => a.CardId).Must((args, id) => args.PaymentCardIds.All(paymentId => paymentId != id))
                 .WithMessage("Cannot pay with the card you are playing.");
             

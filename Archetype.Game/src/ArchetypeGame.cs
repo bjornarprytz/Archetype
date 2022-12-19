@@ -10,7 +10,8 @@ namespace Archetype.Game;
 public interface IArchetypeGame
 {
     public IGameState State { get; }
-    
+
+    public Task AnswerPrompt(AnswerPrompt.Command command);
     public Task PlayCard(PlayCard.Command command);
     public Task EndTurn(EndTurn.Command command);
 }
@@ -45,9 +46,16 @@ internal class ArchetypeGame : IArchetypeGame
 
     public static IArchetypeGame Load(IGameState gameState, int seed)
     {
+        Static.SetRandomSeed(seed);
+        
         return new ArchetypeGame(gameState);
     }
-    
+
+    public Task AnswerPrompt(AnswerPrompt.Command command)
+    {
+        return _mediator.Send(command);
+    }
+
     public Task PlayCard(PlayCard.Command command)
     {
         return _mediator.Send(command);
