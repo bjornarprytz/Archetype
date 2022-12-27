@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using Archetype.Core.Effects;
 using Archetype.Core.Infrastructure;
 using Archetype.Rules.Extensions;
 using FluentValidation;
@@ -8,9 +8,9 @@ namespace Archetype.Rules.Encounter;
 
 public class EndTurn
 {
-    public record Command() : IRequest<Unit>;
+    public record Command() : IRequest<IActionResult>;
     
-    public class Handler : IRequestHandler<Command, Unit>
+    public class Handler : IRequestHandler<Command, IActionResult>
     {
         private readonly IGameState _gameState;
         private readonly Random _random;
@@ -21,14 +21,16 @@ public class EndTurn
             _random = random;
         }
         
-        public Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public Task<IActionResult> Handle(Command request, CancellationToken cancellationToken)
         {
-            
-            _gameState.ResolveUpkeep(_random);
-            _gameState.ResolveCombat(_random);
-            _gameState.ResolveMovement(_random);
+            var results = new List<IResult>
+            {
+                _gameState.ResolveUpkeep(_random),
+                _gameState.ResolveCombat(_random),
+                _gameState.ResolveMovement(_random)
+            };
 
-            return Unit.Task;
+            return Task.FromResult<IActionResult>(new ActionResult(results));
         }
         
         public class Validator : AbstractValidator<Command>

@@ -11,9 +11,9 @@ public interface IArchetypeGame
 {
     public IGameState State { get; }
 
-    public Task AnswerPrompt(AnswerPrompt.Command command);
-    public Task PlayCard(PlayCard.Command command);
-    public Task EndTurn(EndTurn.Command command);
+    public Task<IActionResult> AnswerPrompt(AnswerPrompt.Command command);
+    public Task<IActionResult> PlayCard(PlayCard.Command command);
+    public Task<IActionResult> EndTurn(EndTurn.Command command);
 }
 
 internal class ArchetypeGame : IArchetypeGame
@@ -51,17 +51,17 @@ internal class ArchetypeGame : IArchetypeGame
         return new ArchetypeGame(gameState);
     }
 
-    public Task AnswerPrompt(AnswerPrompt.Command command)
+    public Task<IActionResult> AnswerPrompt(AnswerPrompt.Command command)
     {
         return _mediator.Send(command);
     }
 
-    public Task PlayCard(PlayCard.Command command)
+    public Task<IActionResult> PlayCard(PlayCard.Command command)
     {
         return _mediator.Send(command);
     }
 
-    public Task EndTurn(EndTurn.Command command)
+    public Task<IActionResult> EndTurn(EndTurn.Command command)
     {
         return _mediator.Send(command);
     }

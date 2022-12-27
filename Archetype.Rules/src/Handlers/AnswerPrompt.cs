@@ -1,5 +1,5 @@
-﻿using Archetype.Core.Infrastructure;
-using Archetype.Core.Prompts;
+﻿using Archetype.Core.Effects;
+using Archetype.Core.Infrastructure;
 using FluentValidation;
 using MediatR;
 
@@ -7,9 +7,9 @@ namespace Archetype.Rules.Encounter;
 
 public class AnswerPrompt
 {
-    public record Command(List<Guid> Atoms) : IRequest;
+    public record Command(List<Guid> Atoms) : IRequest<IActionResult>;
 
-    public class Handler : IRequestHandler<Command>
+    public class Handler : IRequestHandler<Command, IActionResult>
     {
         private readonly IGameState _gameState;
         private readonly IPromptQueue _promptQueue;
@@ -22,15 +22,18 @@ public class AnswerPrompt
             _atomFinder = atomFinder;
         }
         
-        public Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+        public Task<IActionResult> Handle(Command request, CancellationToken cancellationToken)
         {
             var atoms = request.Atoms.Select(_atomFinder.FindAtom).ToList();
 
             var promptResolver = _promptQueue.Dequeue();
-            
-            promptResolver.Resolve(_gameState, atoms);
 
-            return Unit.Task;
+            var results = new List<IResult>
+            {
+                promptResolver.Resolve(_gameState, atoms)
+            };
+
+            return Task.FromResult<IActionResult>(new ActionResult(results));
         }
     }
     

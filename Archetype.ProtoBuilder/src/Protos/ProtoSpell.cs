@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using Archetype.Components.Extensions;
 using Archetype.Components.Meta;
-using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Proto.PlayingCard;
@@ -19,9 +18,12 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
     public override IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors.OrderBy(t => t.Key).Select(t => t.Value);
     public override IResult Resolve(IContext<ICard> context)
     {
-        return Result.Aggregate(_effectFunctions.Select(f => f(context)));
-        
-        // TODO: Move the card to the graveyard
+        return IResult.Join(
+            _effectFunctions
+                .Select(f => f(context))
+                .Append(context.Source.MoveTo(context.GameState.Player.DiscardPile))
+                .ToList() // Force evaluation
+            );
     }
 
     public override string ContextualRulesText(IContext<ICard> context)

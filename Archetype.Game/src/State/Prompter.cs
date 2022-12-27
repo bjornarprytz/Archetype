@@ -1,6 +1,5 @@
 ﻿using Archetype.Core.Atoms;
 using Archetype.Core.Infrastructure;
-using Archetype.Core.Prompts;
 
 namespace Archetype.Game.State;
 

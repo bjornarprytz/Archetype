@@ -2,7 +2,6 @@
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Infrastructure;
-using Archetype.Core.Prompts;
 using Archetype.Game.Extensions;
 
 namespace Archetype.Game.State;

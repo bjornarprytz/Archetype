@@ -8,11 +8,11 @@ namespace Archetype.Rules.Encounter;
 
 public class PlayCard
 {
-    public record Command(Guid CardId, List<Guid> PaymentCardIds, List<Guid> TargetGuids) : IRequest<IEnumerable<Guid>>;
+    public record Command(Guid CardId, List<Guid> PaymentCardIds, List<Guid> TargetGuids) : IRequest<IActionResult>;
 
     private record PlayContext(IGameState GameState, ICard Source, ITargetProvider TargetProvider) : IContext<ICard>;
 
-    public class Handler : IRequestHandler<Command, IEnumerable<Guid>>
+    public class Handler : IRequestHandler<Command, IActionResult>
     {
         private readonly IGameState _gameState;
         private readonly IAtomFinder _atomFinder;
@@ -23,8 +23,10 @@ public class PlayCard
             _atomFinder = atomFinder;
         }
         
-        public Task<IEnumerable<Guid>> Handle(Command request, CancellationToken cancellationToken)
+        public Task<IActionResult> Handle(Command request, CancellationToken cancellationToken)
         {
+            // TODO: Clean this up a bit
+            
             var cardToPlay = _atomFinder.FindAtom<ICard>(request.CardId);
             if (cardToPlay.CurrentZone != _gameState.Player.Hand)
                 throw new InvalidOperationException("Cannot play a card that is not in your hand.");
@@ -42,17 +44,16 @@ public class PlayCard
                 throw new Exception("Not enough resources to play this card.");
             }
 
-            foreach (var card in paymentCards)
+            var results = new List<IResult>(
+                paymentCards.Select(card => card.MoveTo(_gameState.Player.DiscardPile)) // Discard payment
+                )
             {
-                card.MoveTo(_gameState.Player.DiscardPile);
-            }
-
-            cardToPlay.MoveTo(_gameState.ResolutionZone); // Move the card here so that it won't be affected by its own effects.
+                cardToPlay.MoveTo(_gameState.ResolutionZone), // Move the card here so that it won't be affected by its own effects.
+                cardToPlay.Proto.Resolve(new PlayContext(_gameState, cardToPlay,
+                    new TargetProvider(targets, cardToPlay.Proto.TargetDescriptors))) // Resolve
+            };
             
-            var result = cardToPlay.Proto.Resolve(new PlayContext(_gameState, cardToPlay,
-                new TargetProvider(targets, cardToPlay.Proto.TargetDescriptors)));
-            
-            return Task.FromResult(result.AffectedAtoms.Concat(request.PaymentCardIds));
+            return Task.FromResult<IActionResult>(new ActionResult(results));
         }
     }
     

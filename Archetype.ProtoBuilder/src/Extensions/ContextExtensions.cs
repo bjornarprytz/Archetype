@@ -8,10 +8,10 @@ namespace Archetype.Components.Extensions;
 
 public static class ContextExtensions
 {
-    public static IResult TargetEach<TTarget, TResult>(this IEnumerable<TTarget> source, Func<TTarget, IResult> func)
+    public static IResult TargetEach<TTarget>(this IEnumerable<TTarget> source, Func<TTarget, IResult> func)
         where TTarget : IAtom
     {
-        return Result.Aggregate(source.Select(func).ToList());
+        return IResult.Join(source.Select(func));
     }
 
     public static T Target<T>(this IContext context, int index)

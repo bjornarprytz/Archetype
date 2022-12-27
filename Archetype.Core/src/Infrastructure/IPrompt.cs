@@ -1,7 +1,7 @@
 ﻿using Archetype.Core.Atoms;
-using Archetype.Core.Infrastructure;
+using Archetype.Core.Effects;
 
-namespace Archetype.Core.Prompts;
+namespace Archetype.Core.Infrastructure;
 
 public interface IPrompter
 {
@@ -19,17 +19,14 @@ public interface IPromptResolver<in TAtom> : IPromptResolver
     where TAtom : IAtom
 {
     Type IPrompt.AtomType => typeof(TAtom);
-
-    // TODO: This should also return some kind of result
-    void Resolve(IGameState gameState, IEnumerable<TAtom> atoms);
+    IResult Resolve(IGameState gameState, IEnumerable<TAtom> atoms);
     
 }
 
 public interface IPromptResolver : IPrompt
 {
-    // TODO: This should also return some kind of result
     // TODO: Find a way to make this generic so that we can pass in the correct type of atom.
-    void Resolve(IGameState gameState, IEnumerable<IAtom> atoms);
+    IResult Resolve(IGameState gameState, IEnumerable<IAtom> atoms);
 }
 
 public interface IPrompt

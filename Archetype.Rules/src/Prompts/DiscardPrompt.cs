@@ -1,7 +1,7 @@
 ﻿using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Cards;
+using Archetype.Core.Effects;
 using Archetype.Core.Infrastructure;
-using Archetype.Core.Prompts;
 
 namespace Archetype.Rules.Prompts;
 
@@ -11,9 +11,9 @@ public readonly struct DiscardPrompt : IPromptResolver<ICard>
     public IEnumerable<Guid> EligibleAtoms { get; private init; }
     public int MaxAnswers { get; private init; }
     public int MinAnswers { get; private init; }
-    public void Resolve(IGameState gameState, IEnumerable<IAtom> atoms)
+    public IResult Resolve(IGameState gameState, IEnumerable<IAtom> atoms)
     {
-        Resolve(gameState, atoms.OfType<ICard>());
+        return Resolve(gameState, atoms.OfType<ICard>());
     }
 
     public static IPrompt FromState(IGameState state, int min, int max)
@@ -25,11 +25,11 @@ public readonly struct DiscardPrompt : IPromptResolver<ICard>
         };
     }
 
-    public void Resolve(IGameState gameState, IEnumerable<ICard> cards)
+    public IResult Resolve(IGameState gameState, IEnumerable<ICard> cards)
     {
-        foreach (var card in cards)
-        {
-            card.MoveTo(gameState.Player.DiscardPile);
-        }
+        return IResult.Join(
+            cards.Select(
+                    card => card.MoveTo(gameState.Player.DiscardPile))
+                .ToList()); // Force evaluation
     }
 }
