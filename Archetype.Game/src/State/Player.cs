@@ -2,6 +2,7 @@
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.DeckBuilding;
+using Archetype.Core.Effects;
 using Archetype.Core.Proto.PlayingCard;
 
 namespace Archetype.Game.State;

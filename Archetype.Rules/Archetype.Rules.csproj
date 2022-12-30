@@ -19,4 +19,8 @@
       <ProjectReference Include="..\Archetype.Core\Archetype.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="src\Keywords" />
+    </ItemGroup>
+
 </Project>
