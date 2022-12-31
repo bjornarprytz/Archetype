@@ -33,6 +33,6 @@ internal static class StateGeneration
     
     public static IPlayer GeneratePlayer(Random random)
     {
-        return new Player();
+        return new Player(random);
     }
 }

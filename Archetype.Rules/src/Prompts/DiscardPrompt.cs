@@ -2,6 +2,7 @@
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Infrastructure;
+using Archetype.Rules.Extensions;
 
 namespace Archetype.Rules.Prompts;
 

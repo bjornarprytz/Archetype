@@ -3,11 +3,7 @@ using Archetype.Core.Meta;
 
 namespace Archetype.Core.Atoms.Cards;
 
-public interface IUnit : ICard
+public interface IUnit 
+    : ICard, IHealth
 {
-    [Description("Health")]
-    public int Health { get; }
-    
-    [Keyword("Deal {0} damage to this unit.")]
-    public IResult Damage(int amount);
 }

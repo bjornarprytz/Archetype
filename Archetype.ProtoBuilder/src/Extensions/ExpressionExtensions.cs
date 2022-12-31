@@ -66,7 +66,7 @@ internal static class ExpressionExtensions
         where TContext : IContext
     {
         if (mce.Object is not { Type: not null } me)
-            throw new ArgumentException(
+            throw new ArgumentException( // TODO: Allow static methods
                 $"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
 
 

@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Archetype.Core\Archetype.Core.csproj" />
+      <ProjectReference Include="..\Archetype.Rules\Archetype.Rules.csproj" />
     </ItemGroup>
 
 </Project>

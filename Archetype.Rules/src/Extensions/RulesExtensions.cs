@@ -1,5 +1,4 @@
 ﻿using Archetype.Core.Effects;
-using Archetype.Core.Extensions;
 using Archetype.Core.Infrastructure;
 
 namespace Archetype.Rules.Extensions;
@@ -10,9 +9,7 @@ internal static class RulesExtensions
      
      public static IResult ResolveUpkeep(this IGameState gameState, Random random)
      {
-          var cardToDraw = gameState.Player.DrawPile.Draw();
-          
-          return cardToDraw.MoveTo(gameState.Player.Hand);
+          return gameState.Player.DrawCard();
      }
 
      public static IResult ResolveCombat(this IGameState gameState, Random random)

@@ -9,6 +9,11 @@ public interface IResult
         return new Result(results);
     }
     
+    static IResult From(IEffectResult result)
+    {
+        return new Result(result);
+    }
+    
     static IResult Empty()
     {
         return new Result();
@@ -26,11 +31,14 @@ file class Result : IResult
     private readonly List<IEffectResult> _results = new ();
     
     public Result() { }
+    public Result(IEffectResult result)
+    {
+        _results.Add(result);
+    }
     public Result(IEnumerable<IResult> results)
     {
         _results = results.SelectMany(r => r.Results).ToList();
     }
-
     public Result(IEnumerable<IEffectResult> effectResults)
     {
         _results = effectResults.ToList();

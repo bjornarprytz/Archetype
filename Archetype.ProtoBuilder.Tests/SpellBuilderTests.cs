@@ -3,6 +3,7 @@ using Archetype.Components.Extensions;
 using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
+using Archetype.Rules.Extensions;
 using FluentAssertions;
 using NSubstitute;
 
@@ -42,10 +43,10 @@ public class SpellBuilderTests
     public void SpellEffectHasCorrectContextualRulesText()
     {
         var contextMock = Substitute.For<IContext<ICard>>();
-        contextMock.Target<IUnit>(0).Health.Returns(5);
+        contextMock.Target<IUnit>(0).CurrentHealth.Returns(5);
 
         var spell = BuilderFactory.CreateSpellBuilder()
-            .AddEffect(context => context.Target<IUnit>(0).Damage(context.Target<IUnit>(0).Health))
+            .AddEffect(context => context.Target<IUnit>(0).Damage(context.Target<IUnit>(0).CurrentHealth))
             .Build();
         
         var contextualRulesText = spell.ContextualRulesText(contextMock);
@@ -57,7 +58,7 @@ public class SpellBuilderTests
     public void SpellEffectWithComplexInput_HasCorrectStaticRulesText()
     {
         var spell = BuilderFactory.CreateSpellBuilder()
-            .AddEffect(context => context.Target<IUnit>(0).Damage(context.Target<IUnit>(0).Health))
+            .AddEffect(context => context.Target<IUnit>(0).Damage(context.Target<IUnit>(0).CurrentHealth))
             .Build();
         
         var staticRulesText = spell.Meta.StaticRulesText;
