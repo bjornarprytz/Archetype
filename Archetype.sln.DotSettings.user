@@ -1,4 +1,19 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Project Location="E:\source\repos\Archetype\Archetype.ProtoBuilder.Tests" Presentation="&amp;lt;Archetype.ProtoBuilder.Tests&amp;gt;" /&gt;&#xD;
+  &lt;Or&gt;&#xD;
+    &lt;Project Location="E:\source\repos\Archetype\Archetype.ProtoBuilder.Tests" Presentation="&amp;lt;Archetype.ProtoBuilder.Tests&amp;gt;" /&gt;&#xD;
+    &lt;TestAncestor&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.Tests.Test1&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.Tests.DrawPile_ReturnsTopCard&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.Tests.DrawPile_TwoCards_ReturnsTopCard&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.Tests.DrawPile_LastCardRemoved_PeekTopCardReturnsNull&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.KeywordTests.MoveTo_ContentsInBothZonesAreUpdated&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.KeywordTests.Damage_HealthIsReduced&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.KeywordTests.MoveTo_ResultContainsAllData&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.KeywordTests.MoveTo_DestinationButNoSource_ResultContainsAllData&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.KeywordTests.Damage_ResultContainsAllData&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.KeywordTests.Damage_HealthIsReduced_AndResultIsPopulated&lt;/TestId&gt;&#xD;
+    &lt;/TestAncestor&gt;&#xD;
+    &lt;Project Location="E:\source\repos\Archetype\Archetype.Rules.Tests" Presentation="&amp;lt;Archetype.Rules.Tests&amp;gt;" /&gt;&#xD;
+  &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

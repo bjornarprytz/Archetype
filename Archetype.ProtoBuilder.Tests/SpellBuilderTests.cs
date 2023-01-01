@@ -51,7 +51,7 @@ public class SpellBuilderTests
         
         var contextualRulesText = spell.ContextualRulesText(contextMock);
         
-        contextualRulesText.Should().Be("Deal {5} damage to this unit.");
+        contextualRulesText.Should().Be("Deal {5} damage");
     }
     
     [Test]
@@ -63,8 +63,7 @@ public class SpellBuilderTests
         
         var staticRulesText = spell.Meta.StaticRulesText;
         
-        // TODO: I'm reaching a very low return on complexity with the static rules text. I think I should design a way around this.
-        staticRulesText.Should().Be("Deal {X} damage to this unit, where X is the target's health.");
+        staticRulesText.Should().Be("Deal {<0>.Health} damage");
     }
     
     [Test]
@@ -76,7 +75,7 @@ public class SpellBuilderTests
         
         var staticRulesText = spell.Meta.StaticRulesText;
         
-        staticRulesText.Should().Be("Deal {69} damage to this unit.");
+        staticRulesText.Should().Be("Deal {69} damage");
     }
     
     [Test]
@@ -90,7 +89,7 @@ public class SpellBuilderTests
         
         var contextualRulesText = spell.ContextualRulesText(contextMock);
         
-        contextualRulesText.Should().Be("Deal {69} damage to this unit.");
+        contextualRulesText.Should().Be("Deal {69} damage");
     }
     
 }

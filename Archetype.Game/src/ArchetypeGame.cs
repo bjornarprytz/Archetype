@@ -1,7 +1,7 @@
 ﻿using Archetype.Core.Infrastructure;
-using Archetype.Game.State;
 using Archetype.Rules;
-using Archetype.Rules.Encounter;
+using Archetype.Rules.Actions;
+using Archetype.Rules.State;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 

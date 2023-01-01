@@ -1,9 +1,9 @@
-﻿using Archetype.Core.Effects;
-using Archetype.Core.Meta;
+﻿using Archetype.Core.Meta;
 
 namespace Archetype.Core.Atoms.Cards;
 
 public interface IUnit 
-    : ICard, IHealth
+    : IAtom, IHealth, IZoned<IUnit>
 {
+    
 }

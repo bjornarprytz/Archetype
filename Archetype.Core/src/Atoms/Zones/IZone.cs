@@ -1,10 +1,10 @@
 ﻿namespace Archetype.Core.Atoms.Zones;
 
-public interface IZone<T> : IAtom
-    where T : IAtom
+public interface IZone<TAtom> : IAtom
+    where TAtom : IAtom
 {
-    IEnumerable<T> Contents { get; }
+    IEnumerable<TAtom> Contents { get; }
     
-    void Add(T atom);
-    void Remove(T atom);
+    void Add(TAtom atom);
+    void Remove(TAtom atom);
 }

@@ -5,7 +5,7 @@ using Archetype.Rules.Extensions;
 using FluentValidation;
 using MediatR;
 
-namespace Archetype.Rules.Encounter;
+namespace Archetype.Rules.Actions;
 
 public class PlayCard
 {

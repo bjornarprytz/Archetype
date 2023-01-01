@@ -1,6 +1,6 @@
 ﻿using Archetype.Core.Atoms;
 
-namespace Archetype.Game.State;
+namespace Archetype.Rules.State;
 
 public abstract class Atom : IAtom
 {

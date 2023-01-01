@@ -3,7 +3,7 @@ using Archetype.Core.Infrastructure;
 using FluentValidation;
 using MediatR;
 
-namespace Archetype.Rules.Encounter;
+namespace Archetype.Rules.Actions;
 
 public class AnswerPrompt
 {

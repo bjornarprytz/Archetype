@@ -2,11 +2,11 @@
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Infrastructure;
-using Archetype.Game.Extensions;
+using Archetype.Rules.Extensions;
 
-namespace Archetype.Game.State;
+namespace Archetype.Rules.State;
 
-internal record GameState(IPlayer Player, IMap Map, ILocation? CurrentLocation, IResolution ResolutionZone, IPrompter Prompter) : IGameState
+public record GameState(IPlayer Player, IMap Map, ILocation? CurrentLocation, IResolution ResolutionZone, IPrompter Prompter) : IGameState
 {
     public static IGameState Init(Random random)
     {

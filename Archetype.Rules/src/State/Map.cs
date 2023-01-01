@@ -1,9 +1,9 @@
 ﻿using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
 
-namespace Archetype.Game.State;
+namespace Archetype.Rules.State;
 
-internal class Map : IMap
+public class Map : IMap
 {
     private readonly List<Node> _nodes = new();
     public IEnumerable<INode> Nodes => _nodes;
@@ -30,7 +30,7 @@ internal class Map : IMap
     }
 }
 
-internal class Node : Zone<IUnit>, INode
+public class Node : Zone<IUnit>, INode
 {
     private readonly Dictionary<Guid, Node> _neighbors = new();
     public IEnumerable<INode> Neighbors => _neighbors.Values;

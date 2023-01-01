@@ -5,8 +5,6 @@ namespace Archetype.Rules.Extensions;
 
 internal static class RulesExtensions
 {
-     // TODO: These functions should probably return something
-     
      public static IResult ResolveUpkeep(this IGameState gameState, Random random)
      {
           return gameState.Player.DrawCard();

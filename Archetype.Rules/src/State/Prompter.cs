@@ -1,7 +1,6 @@
-﻿using Archetype.Core.Atoms;
-using Archetype.Core.Infrastructure;
+﻿using Archetype.Core.Infrastructure;
 
-namespace Archetype.Game.State;
+namespace Archetype.Rules.State;
 
 public class Prompter : IPrompter, IPromptQueue
 {

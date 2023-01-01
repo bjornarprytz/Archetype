@@ -65,16 +65,12 @@ internal static class ExpressionExtensions
     private static IEffectDescriptor DescribeSingleTarget<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
-        if (mce.Object is not { Type: not null } me)
-            throw new ArgumentException( // TODO: Allow static methods
-                $"Targeted effect must call a method on an object. Are you using an extension method? {mce}");
-
-
+        var objectExpression = mce.GetObjectExpression();
         var rulesTemplate = mce.Method.GetRequiredAttribute<KeywordAttribute>().Template;
         
-        var operands = mce.Arguments.Select(arg => arg.ParseArgument<TContext>());
+        var operands = mce.GetArgumentExpressions().Select(arg => arg.ParseArgument<TContext>());
 
-        return me.TryGetTargetDescriptor(out var targetDescriptor)
+        return objectExpression.TryGetTargetDescriptor(out var targetDescriptor)
             ? new EffectDescriptor(rulesTemplate, operands, targetDescriptor)
             : new EffectDescriptor(rulesTemplate, operands);
     }
@@ -94,9 +90,9 @@ internal static class ExpressionExtensions
     private static IEffectParameter ParseArgumentMethod<TContext>(this MethodCallExpression mce)
         where TContext : IContext
     {
-        if (mce.Arguments.FirstOrDefault() is not { } contextExpression)
+        if (mce.GetObjectExpression() is not { } contextExpression)
             throw new ArgumentException(
-                $"Cannot parse first argument of method {mce.Method.Name}, which has {mce.Arguments.Count} arguments");
+                $"Cannot parse first argument of method {mce.Method.Name}, which has {mce.GetArgumentExpressions().Count()} arguments");
 
         var pe = contextExpression.GetRequiredParameterExpressionRootedInContext<TContext>();
         var description = mce.Method.GetRequiredAttribute<DescriptionAttribute>().Description;
@@ -130,7 +126,7 @@ internal static class ExpressionExtensions
 
         var rulesTemplate = mce.Method.GetRequiredAttribute<KeywordAttribute>().Template;
 
-        var operands = mce.Arguments.Select(arg => arg.ParseArgument<TContext>());
+        var operands = mce.GetArgumentExpressions().Select(arg => arg.ParseArgument<TContext>());
 
         return new EffectDescriptor(rulesTemplate, operands, targetDescriptor);
     }
@@ -147,8 +143,7 @@ internal static class ExpressionExtensions
 
         if (rootExpression is MethodCallExpression mce )
         {
-            rootExpression = mce.Object                 // MemberMethod call
-                             ?? mce.Arguments.First();  // Extension method
+            rootExpression = mce.GetObjectExpression();
         }
 
         if (rootExpression is not ParameterExpression pe || !pe.Type.IsAssignableTo(typeof(TContext)))
@@ -191,6 +186,18 @@ internal static class ExpressionExtensions
                 $"Member {memberInfo} should be decorated with {typeof(T)}");
 
         return requiredAttribute;
+    }
+    
+    private static Expression GetObjectExpression(this MethodCallExpression mce)
+    {
+        return mce.Object ?? mce.Arguments.First();
+    }
+    
+    private static IEnumerable<Expression> GetArgumentExpressions(this MethodCallExpression mce)
+    {
+        return mce.Object == null 
+            ? mce.Arguments.Skip(1)
+            : mce.Arguments;
     }
 
     private record EffectDescriptor(string RulesTemplate, IEnumerable<IEffectParameter> Operands, ITargetDescriptor? MainTarget=null) : IEffectDescriptor;

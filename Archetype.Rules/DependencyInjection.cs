@@ -1,4 +1,4 @@
-﻿using Archetype.Rules.Encounter;
+﻿using Archetype.Rules.Actions;
 using Archetype.Rules.Validation;
 using FluentValidation;
 using MediatR;

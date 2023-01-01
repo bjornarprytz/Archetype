@@ -1,8 +1,8 @@
 ﻿using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Zones;
-using Archetype.Game.State;
+using Archetype.Rules.State;
 
-namespace Archetype.Game.Extensions;
+namespace Archetype.Rules.Extensions;
 
 internal static class StateGeneration
 {

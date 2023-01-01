@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.ProtoBuilder", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.ProtoBuilder.Tests", "Archetype.ProtoBuilder.Tests\Archetype.ProtoBuilder.Tests.csproj", "{AC5F8441-0435-42B7-8ADD-D2BB28071375}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Rules.Tests", "Archetype.Rules.Tests\Archetype.Rules.Tests.csproj", "{C6B5F16F-9BA2-482A-8E10-987AB1D7FD10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC5F8441-0435-42B7-8ADD-D2BB28071375}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6B5F16F-9BA2-482A-8E10-987AB1D7FD10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6B5F16F-9BA2-482A-8E10-987AB1D7FD10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6B5F16F-9BA2-482A-8E10-987AB1D7FD10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6B5F16F-9BA2-482A-8E10-987AB1D7FD10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

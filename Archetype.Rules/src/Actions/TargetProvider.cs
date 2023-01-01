@@ -2,7 +2,7 @@
 using Archetype.Core.Atoms;
 using Archetype.Core.Effects;
 
-namespace Archetype.Rules.Encounter;
+namespace Archetype.Rules.Actions;
 
 internal class TargetProvider : ITargetProvider
 {

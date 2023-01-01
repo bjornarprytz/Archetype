@@ -1,14 +1,13 @@
 ﻿using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.Effects;
-using Archetype.Core.Extensions;
 using Archetype.Core.Meta;
 
 namespace Archetype.Rules.Extensions;
 
 public static class KeywordExtensions
 {
-    [Keyword("Move <TAtom> to {0}")]
+    [Keyword("Move to {0}")]
     public static IResult MoveTo<TAtom>(this TAtom atom, IZone<TAtom> destination)
         where TAtom : IAtom, IZoned<TAtom>
     {
@@ -25,15 +24,18 @@ public static class KeywordExtensions
                     new Dictionary<string, string>()
                     {
                         { "Atom", atom.Id.ToString() },
-                        { "Source", source?.Id.ToString() },
+                        { "Source", source?.Id.ToString() }, // TODO: Decide on nullability
                         { "Destination", destination.Id.ToString() }
                     })
             );
     }
     
+    [Keyword("Deal {0} damage")]
     public static IResult Damage<TAtom>(this TAtom atom, int amount)
         where TAtom : IAtom, IHealth
     {
+        amount = int.Clamp(amount, 0, atom.CurrentHealth);
+        
         atom.CurrentHealth -= amount;
 
         return
@@ -48,13 +50,15 @@ public static class KeywordExtensions
             );
     }
 
+    [Keyword("Draw a card")]
     public static IResult DrawCard(this IPlayer player)
     {
-        var card = player.DrawPile.PeekTopCard();
-
-        return card.MoveTo(player.Hand);
+        return player.DrawPile.PeekTopCard() is not { } card 
+            ? IResult.Empty()
+            : card.MoveTo(player.Hand);
     }
 
+    [Keyword("Shuffle Draw Pile")]
     public static IResult ShuffleDrawPile(this IPlayer player)
     {
         player.DrawPile.Shuffle();

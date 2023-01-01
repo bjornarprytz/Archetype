@@ -5,9 +5,9 @@ using Archetype.Core.DeckBuilding;
 using Archetype.Core.Extensions;
 using Archetype.Core.Proto.PlayingCard;
 
-namespace Archetype.Game.State;
+namespace Archetype.Rules.State;
 
-internal class Player : Atom, IPlayer
+public class Player : Atom, IPlayer
 {
 
     public Player(Random random)
@@ -24,12 +24,12 @@ internal class Player : Atom, IPlayer
     public IDiscardPile DiscardPile { get; } = new DiscardPile();    
 }
 
-internal class Hand : Zone<ICard>, IHand
+public class Hand : Zone<ICard>, IHand
 {
     
 }
 
-internal class DrawPile : Zone<ICard>, IDrawPile
+public class DrawPile : Zone<ICard>, IDrawPile
 {
     private Stack<int> _order = new ();
     private readonly Random _random;
@@ -40,32 +40,32 @@ internal class DrawPile : Zone<ICard>, IDrawPile
     }
     
     public int Count => Atoms.Count;
-    public ICard? PeekTopCard() // TODO: Write tests for this
+    public ICard? PeekTopCard()
     {
-        if (_order.Count == 0 || Atoms.Count == 0)
-            return null;
-
-        var index = _order.Peek();
-        
-        while (_order.Count > 0 && index >= Atoms.Count)
-        {
-            index = _order.Pop();
-        }
-
-        return Atoms[_order.Peek()];
+        return Atoms.Count == 0 ? null : Atoms[_order.Peek()];
     }
 
     public void Shuffle()
     {
         _order = new Stack<int>(Enumerable.Range(0, Atoms.Count).Shuffle(_random));
     }
+
+    protected override void OnAtomAdded(ICard atom)
+    {
+        _order.Push(_order.Count);
+    }
+
+    protected override void OnAtomRemoved(ICard atom)
+    {
+        _order = new Stack<int>(_order.Where(i => i < Atoms.Count));
+    }
 }
 
-internal class DiscardPile : Zone<ICard>, IDiscardPile
+public class DiscardPile : Zone<ICard>, IDiscardPile
 {
 }
 
-internal class Deck : IDeck
+public class Deck : IDeck
 {
     private readonly List<IProtoPlayingCard> _cards;
     
@@ -77,7 +77,7 @@ internal class Deck : IDeck
     public IEnumerable<IProtoPlayingCard> Cards => _cards;
 }
 
-internal class CardCollection : ICardCollection
+public class CardCollection : ICardCollection
 {
     private readonly List<IProtoPlayingCard> _cards;
 

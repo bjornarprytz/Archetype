@@ -11,6 +11,8 @@ public interface IZoned<TAtom>
 
 public interface IHealth
 {
+    [Description("Health")]
     int CurrentHealth { get; set; }
+    [Description("Max Health")]
     int MaxHealth { get; set; }
 }

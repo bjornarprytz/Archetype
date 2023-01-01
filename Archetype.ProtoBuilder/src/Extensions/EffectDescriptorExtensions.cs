@@ -23,7 +23,7 @@ internal static class EffectDescriptorExtensions
 
         foreach (var ( operand,  parameterIndex) in effectDescriptor.Operands.Select((o, i) => (o,i)))
         {
-            sb.Replace($"{{{parameterIndex}}}", $"{{{operand.Description}}}");
+            sb.Replace($"{{{parameterIndex}}}", $"{{<{parameterIndex}>.{operand.Description}}}");
         }
 
         return sb.ToString();
