@@ -16,7 +16,7 @@ public class Player : Atom, IPlayer
     }
 
     public int Life { get; set; }
-    
+
     public ICardCollection CardCollection { get; } = new CardCollection();
     public IDeck CurrentDeck { get; set; } = new Deck();
     public IDrawPile DrawPile { get; }
@@ -26,7 +26,7 @@ public class Player : Atom, IPlayer
 
 public class Hand : Zone<ICard>, IHand
 {
-    
+    public int Capacity { get; set; }
 }
 
 public class DrawPile : Zone<ICard>, IDrawPile
