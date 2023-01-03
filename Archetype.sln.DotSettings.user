@@ -1,5 +1,16 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=01982aa7_002Dae08_002D4562_002Da23e_002D6d7bd7038699/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestAction" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.ActionTests.TestAction&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.ActionTests.PlayCardHandler_CardToPlayResolves&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=334f89eb_002Dff89_002D4112_002D9e95_002D4ff0f44db8cc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="PlayCardHandler_TwoTargets_CardToPlayResolvesWithRightContext" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.ActionTests.PlayCardHandler_TwoTargets_CardToPlayResolvesWithRightContext&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Or&gt;&#xD;
     &lt;Project Location="E:\source\repos\Archetype\Archetype.ProtoBuilder.Tests" Presentation="&amp;lt;Archetype.ProtoBuilder.Tests&amp;gt;" /&gt;&#xD;
     &lt;TestAncestor&gt;&#xD;
@@ -16,4 +27,9 @@
     &lt;/TestAncestor&gt;&#xD;
     &lt;Project Location="E:\source\repos\Archetype\Archetype.Rules.Tests" Presentation="&amp;lt;Archetype.Rules.Tests&amp;gt;" /&gt;&#xD;
   &lt;/Or&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d8c7b029_002D7d59_002D4439_002Dae11_002D706e8db17bce/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="PlayCardHandler_CardToPlayResolves" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.ActionTests.PlayCardHandler_TwoTargets_CardToPlayResolvesWithRightContext&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
