@@ -1,5 +1,4 @@
-﻿using Archetype.Core.Atoms.Cards;
-using Archetype.Rules.Extensions;
+﻿using Archetype.Rules.Extensions;
 using Archetype.Rules.State;
 using FluentAssertions;
 

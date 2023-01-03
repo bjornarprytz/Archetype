@@ -1,5 +1,4 @@
 ﻿using Archetype.Core.Atoms.Cards;
-using Archetype.Core.Effects;
 using Archetype.Core.Infrastructure;
 using Archetype.Rules.Extensions;
 using FluentValidation;
@@ -10,8 +9,6 @@ namespace Archetype.Rules.Actions;
 public class PlayCard
 {
     public record Command(Guid CardId, List<Guid> PaymentCardIds, List<Guid> TargetGuids) : IRequest<IActionResult>;
-
-    private record PlayContext(IGameState GameState, ICard Source, ITargetProvider TargetProvider) : IContext<ICard>;
 
     public class Handler : IRequestHandler<Command, IActionResult>
     {
@@ -26,13 +23,12 @@ public class PlayCard
         
         public Task<IActionResult> Handle(Command request, CancellationToken cancellationToken)
         {
-            // TODO: Clean this up a bit
-            
             var cardToPlay = _atomFinder.FindAtom<ICard>(request.CardId);
             if (cardToPlay.CurrentZone != _gameState.Player.Hand)
                 throw new InvalidOperationException("Cannot play a card that is not in your hand.");
             
             var targets = request.TargetGuids.Select(_atomFinder.FindAtom);
+            var targetProvider = cardToPlay.Proto.TargetDescriptors.Bind(targets);
             
             var paymentCards = request.PaymentCardIds.Select(_atomFinder.FindAtom<ICard>).ToList();
             if (paymentCards.Any(p => p.CurrentZone != _gameState.Player.Hand))
@@ -40,21 +36,14 @@ public class PlayCard
                 throw new Exception("Cannot pay with a card that is not in your hand.");
             }
             
-            if (paymentCards.Sum(paymentCard => paymentCard.Proto.Stats.Resources) < cardToPlay.Proto.Stats.Cost)
+            if (paymentCards.Sum(paymentCard => paymentCard.Proto.Stats.Value) < cardToPlay.Proto.Stats.Cost)
             {
                 throw new Exception("Not enough resources to play this card.");
             }
 
-            var results = new List<IResult>(
-                paymentCards.Select(card => card.MoveTo(_gameState.Player.DiscardPile)) // Discard payment
-                )
-            {
-                cardToPlay.MoveTo(_gameState.ResolutionZone), // Move the card here so that it won't be affected by its own effects.
-                cardToPlay.Proto.Resolve(new PlayContext(_gameState, cardToPlay,
-                    new TargetProvider(targets, cardToPlay.Proto.TargetDescriptors))) // Resolve
-            };
+            var result = cardToPlay.Resolve(_gameState, paymentCards, targetProvider);
             
-            return Task.FromResult<IActionResult>(new ActionResult(results));
+            return Task.FromResult<IActionResult>(new ActionResult(result));
         }
     }
     

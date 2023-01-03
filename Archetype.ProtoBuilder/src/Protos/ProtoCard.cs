@@ -1,6 +1,4 @@
-﻿using Archetype.Core;
-using Archetype.Core.Atoms;
-using Archetype.Core.Atoms.Cards;
+﻿using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Proto.PlayingCard;
 
@@ -14,6 +12,6 @@ internal abstract class ProtoCard : IProtoPlayingCard
     public CardStats Stats { get; set; }
     
     public abstract IEnumerable<ITargetDescriptor> TargetDescriptors { get; }
-    public abstract IResult Resolve(IContext<ICard> context);
+    public abstract IResult Resolve(IContext context);
     public abstract string ContextualRulesText(IContext<ICard> context);
 }

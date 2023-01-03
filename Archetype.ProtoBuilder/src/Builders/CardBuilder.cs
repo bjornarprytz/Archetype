@@ -65,7 +65,7 @@ internal abstract class CardBuilder<T> : ICardBuilder
     {
         Proto.Stats = Proto.Stats with
         {
-            Resources = resources
+            Value = resources
         };
     }
 

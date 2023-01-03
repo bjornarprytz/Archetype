@@ -1,6 +1,5 @@
 ﻿using Archetype.Components;
 using Archetype.Components.Extensions;
-using Archetype.Core.Atoms;
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Rules.Extensions;
@@ -69,6 +68,8 @@ public class SpellBuilderTests
     [Test]
     public void SpellEffectWithImmediateInput_HasCorrectStaticRulesText()
     {
+        // TODO: Fix this test
+        
         var spell = BuilderFactory.CreateSpellBuilder()
             .AddEffect(context => context.Target<IUnit>(0).Damage(69))
             .Build();

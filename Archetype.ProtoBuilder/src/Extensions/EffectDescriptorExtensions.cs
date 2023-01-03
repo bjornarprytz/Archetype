@@ -21,7 +21,7 @@ internal static class EffectDescriptorExtensions
     {
         var sb = new StringBuilder(effectDescriptor.RulesTemplate);
 
-        foreach (var ( operand,  parameterIndex) in effectDescriptor.Operands.Select((o, i) => (o,i)))
+        foreach (var (operand, parameterIndex) in effectDescriptor.Operands.Select((o, i) => (o,i)))
         {
             sb.Replace($"{{{parameterIndex}}}", $"{{<{parameterIndex}>.{operand.Description}}}");
         }

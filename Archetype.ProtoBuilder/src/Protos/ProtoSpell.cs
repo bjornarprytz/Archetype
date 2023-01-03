@@ -4,7 +4,6 @@ using Archetype.Components.Meta;
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Proto.PlayingCard;
-using Archetype.Rules.Extensions;
 
 namespace Archetype.Components.Protos;
 
@@ -14,15 +13,14 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
     private readonly List<IEffectDescriptor> _effectDescriptors = new ();
     private readonly Dictionary<int, ITargetDescriptor> _targetDescriptors = new ();
         
-    private readonly List<Func<IContext<ICard>, IResult>> _effectFunctions = new ();
+    private readonly List<Func<IContext, IResult>> _effectFunctions = new ();
 
     public override IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors.OrderBy(t => t.Key).Select(t => t.Value);
-    public override IResult Resolve(IContext<ICard> context)
+    public override IResult Resolve(IContext context)
     {
         return IResult.Join(
             _effectFunctions
                 .Select(f => f(context))
-                .Append(context.Source.MoveTo(context.GameState.Player.DiscardPile))
                 .ToList() // Force evaluation
             );
     }
