@@ -1,8 +1,8 @@
-﻿using Archetype.Core.Proto.PlayingCard;
+﻿using Archetype.Core.Proto;
 
 namespace Archetype.Core.DeckBuilding;
 
 public interface ICardCollection
 {
-    IEnumerable<IProtoPlayingCard> Cards { get; }
+    IEnumerable<IProtoCard> Cards { get; }
 }

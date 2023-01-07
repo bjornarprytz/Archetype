@@ -1,11 +1,11 @@
 ﻿using Archetype.Core.Meta;
-using Archetype.Core.Proto.PlayingCard;
+using Archetype.Core.Proto;
 
 namespace Archetype.Core.Atoms.Cards;
 
 public interface ICard : 
     IAtom, 
-    IZoned<ICard>
+    IZoned
 {
-    public IProtoPlayingCard Proto { get; }
+    public IProtoCard Proto { get; }
 }

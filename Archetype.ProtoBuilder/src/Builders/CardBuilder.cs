@@ -1,4 +1,4 @@
-﻿using Archetype.Components.Protos;
+﻿using Archetype.Components.Proto;
 using Archetype.Core;
 
 namespace Archetype.Components.Builders;
@@ -10,10 +10,7 @@ internal abstract class CardBuilder<T> : ICardBuilder
 
     public void SetName(string name)
     {
-        Proto.Meta = Proto.Meta with
-        {
-            Name = name
-        };
+        Proto.Name = name;
     }
     public void SetRarity(CardRarity rarity)
     {

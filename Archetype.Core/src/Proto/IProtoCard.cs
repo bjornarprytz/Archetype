@@ -1,10 +1,11 @@
 ﻿using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 
-namespace Archetype.Core.Proto.PlayingCard;
+namespace Archetype.Core.Proto;
 
-public interface IProtoPlayingCard : IProtoData
+public interface IProtoCard
 {
+    public string Name { get; }
     public CardStats Stats { get; }
     public CardMetaData Meta { get; }
     public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
@@ -21,9 +22,8 @@ public record struct CardStats(
 );
 
 public record struct CardMetaData( // Immutable data
-    string Name,
     string SetName,
     string ImageUri,
     CardRarity Rarity,
     string StaticRulesText
-    );
+);

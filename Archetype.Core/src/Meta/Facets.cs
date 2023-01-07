@@ -1,12 +1,10 @@
-﻿using Archetype.Core.Atoms;
-using Archetype.Core.Atoms.Zones;
+﻿using Archetype.Core.Atoms.Zones;
 
 namespace Archetype.Core.Meta;
 
-public interface IZoned<TAtom> 
-    where TAtom : IAtom
+public interface IZoned
 {
-    IZone<TAtom>? CurrentZone { get; set; }
+    IZone? CurrentZone { get; set; }
 }
 
 public interface IHealth

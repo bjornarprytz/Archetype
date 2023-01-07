@@ -1,8 +1,8 @@
-﻿using Archetype.Core.Proto.PlayingCard;
+﻿using Archetype.Core.Proto;
 
 namespace Archetype.Core.DeckBuilding;
 
 public interface IDeck
 {
-    public IEnumerable<IProtoPlayingCard> Cards { get; }
+    public IEnumerable<IProtoCard> Cards { get; }
 }

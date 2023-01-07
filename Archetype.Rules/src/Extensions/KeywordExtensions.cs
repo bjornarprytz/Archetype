@@ -9,7 +9,7 @@ public static class KeywordExtensions
 {
     [Keyword("Move to {0}")]
     public static IResult MoveTo<TAtom>(this TAtom atom, IZone<TAtom> destination)
-        where TAtom : IAtom, IZoned<TAtom>
+        where TAtom : IAtom, IZoned
     {
         var source = atom.CurrentZone;
 
@@ -24,7 +24,7 @@ public static class KeywordExtensions
                     new Dictionary<string, string>()
                     {
                         { "Atom", atom.Id.ToString() },
-                        { "Source", source?.Id.ToString() }, // TODO: Decide on nullability
+                        { "Source", source?.Id.ToString() ?? "None" }, // TODO: Decide on nullability
                         { "Destination", destination.Id.ToString() }
                     })
             );

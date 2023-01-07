@@ -3,9 +3,9 @@ using Archetype.Components.Extensions;
 using Archetype.Components.Meta;
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
-using Archetype.Core.Proto.PlayingCard;
+using Archetype.Core.Proto;
 
-namespace Archetype.Components.Protos;
+namespace Archetype.Components.Proto;
 
 internal class ProtoSpell : ProtoCard, IProtoSpell
 {

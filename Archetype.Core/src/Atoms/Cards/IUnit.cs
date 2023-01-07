@@ -2,8 +2,8 @@
 
 namespace Archetype.Core.Atoms.Cards;
 
-public interface IUnit 
-    : IAtom, IHealth, IZoned<IUnit>
+public interface IUnit
+    : ICard, IHealth
 {
     
 }

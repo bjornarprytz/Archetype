@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Archetype.Core;
 using Archetype.Core.Effects;
-using Archetype.Core.Proto.PlayingCard;
+using Archetype.Core.Proto;
 
 namespace Archetype.Components;
 

@@ -15,7 +15,7 @@ public interface IArchetypeGame
     public Task<IActionResult> PlayCard(PlayCard.Command command);
     public Task<IActionResult> EndTurn(EndTurn.Command command);
     
-    // - StartGame? Or is that implicit?
+    // TODO: StartGame? Or is that implicit?
     
     // TODO: Observation actions:
     // - Possible targets for card

@@ -1,6 +1,9 @@
-﻿namespace Archetype.Core.Atoms.Cards;
+﻿using Archetype.Core.Meta;
 
-public interface IStructure : ICard
+namespace Archetype.Core.Atoms.Cards;
+
+public interface IStructure 
+    : ICard, IHealth
 {
     
 }

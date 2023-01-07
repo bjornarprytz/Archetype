@@ -3,7 +3,8 @@ using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.DeckBuilding;
 using Archetype.Core.Extensions;
-using Archetype.Core.Proto.PlayingCard;
+using Archetype.Core.Infrastructure;
+using Archetype.Core.Proto;
 
 namespace Archetype.Rules.State;
 
@@ -67,24 +68,24 @@ public class DiscardPile : Zone<ICard>, IDiscardPile
 
 public class Deck : IDeck
 {
-    private readonly List<IProtoPlayingCard> _cards;
+    private readonly List<IProtoCard> _cards;
     
     public Deck()
     {
-        _cards = new List<IProtoPlayingCard>();
+        _cards = new List<IProtoCard>();
     }
 
-    public IEnumerable<IProtoPlayingCard> Cards => _cards;
+    public IEnumerable<IProtoCard> Cards => _cards;
 }
 
 public class CardCollection : ICardCollection
 {
-    private readonly List<IProtoPlayingCard> _cards;
+    private readonly List<IProtoCard> _cards;
 
     public CardCollection()
     {
-        _cards = new List<IProtoPlayingCard>();
+        _cards = new List<IProtoCard>();
     }
 
-    public IEnumerable<IProtoPlayingCard> Cards => _cards;
+    public IEnumerable<IProtoCard> Cards => _cards;
 }

@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 using Archetype.Components.Meta;
-using Archetype.Components.Protos;
+using Archetype.Components.Proto;
 using Archetype.Core.Effects;
-using Archetype.Core.Proto.PlayingCard;
+using Archetype.Core.Proto;
 
 namespace Archetype.Components.Builders;
 

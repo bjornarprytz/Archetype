@@ -1,6 +1,6 @@
 ﻿using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
-using Archetype.Core.Proto.PlayingCard;
+using Archetype.Core.Proto;
 
 namespace Archetype.Rules.State;
 
@@ -30,7 +30,7 @@ public class Card : Atom, ICard
     // - Can essentially do anything.
     // - Go to the graveyard when played
     
-
-    public IZone<ICard>? CurrentZone { get; set; }
-    public IProtoPlayingCard Proto { get; }
+    
+    public IZone? CurrentZone { get; set; }
+    public IProtoCard Proto { get; }
 }
