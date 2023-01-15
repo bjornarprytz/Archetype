@@ -55,7 +55,7 @@ public class ActionTests
 
         var result = playCardHandler.Handle(new PlayCard.Command(_cardToPlayId, new List<Guid> { _cardToPayWithId }, new List<Guid>()), CancellationToken.None);
 
-        _cardToPlay.Proto.Received(1).Resolve(Arg.Is<IContext<ICard>>(c => 
+        _cardToPlay.Received(1).Resolve(Arg.Is<IContext<ICard>>(c => 
                 c.Source == _cardToPlay && c.GameState == _gameState));
     }
     
@@ -76,7 +76,7 @@ public class ActionTests
         descriptor2.TargetType.Returns(typeof(IAtom));
         _atomFinder.FindAtom(guid2).Returns(target2);
         
-        _cardToPlay.Proto.TargetDescriptors.Returns(new List<ITargetDescriptor>
+        _cardToPlay.TargetDescriptors.Returns(new List<ITargetDescriptor>
         {
             descriptor1,
             descriptor2
@@ -86,7 +86,7 @@ public class ActionTests
 
         var result = playCardHandler.Handle(new PlayCard.Command(_cardToPlayId, new List<Guid> { _cardToPayWithId }, new List<Guid>{ guid1, guid2 }), CancellationToken.None);
 
-        _cardToPlay.Proto.Received(1).Resolve(Arg.Is<IContext<ICard>>(c => 
+        _cardToPlay.Received(1).Resolve(Arg.Is<IContext<ICard>>(c => 
                 c.Source == _cardToPlay && c.GameState == _gameState 
             && c.TargetProvider.GetTarget<IAtom>(0) == target1 && c.TargetProvider.GetTarget<IAtom>(1) == target2));
     }

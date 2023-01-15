@@ -1,6 +1,8 @@
+using Archetype.Core.Atoms.Cards;
 using Archetype.Rules.Extensions;
 using Archetype.Rules.State;
 using FluentAssertions;
+using NSubstitute;
 
 namespace Archetype.Rules.Tests;
 
@@ -22,7 +24,7 @@ public class Tests
     [Test]
     public void DrawPile_LastCardRemoved_PeekTopCardReturnsNull()
     {
-        var card = new Card();
+        var card = Substitute.For<ICard>();
         
         card.MoveTo(_drawPile);
         card.MoveTo(new Hand());
@@ -33,7 +35,7 @@ public class Tests
     [Test]
     public void DrawPile_OneCard_PeekTopCardReturnsIt()
     {
-        var card = new Card();
+        var card = Substitute.For<ICard>();
         
         card.MoveTo(_drawPile);
         
@@ -43,8 +45,8 @@ public class Tests
     [Test]
     public void DrawPile_TwoCards_ReturnsTopCard()
     {
-        var card = new Card();
-        var card2 = new Card();
+        var card = Substitute.For<ICard>();
+        var card2 = Substitute.For<ICard>();
         
         card.MoveTo(_drawPile);
         card2.MoveTo(_drawPile);

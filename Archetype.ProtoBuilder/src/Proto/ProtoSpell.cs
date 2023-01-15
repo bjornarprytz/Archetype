@@ -25,7 +25,7 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
             );
     }
 
-    public override string ContextualRulesText(IContext<ICard> context)
+    public override string ContextualRulesText(IContext context)
     {
         // [keyword], {parameterIndex}, <targetIndex>
         

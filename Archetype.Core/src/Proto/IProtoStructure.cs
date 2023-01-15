@@ -2,7 +2,7 @@
 
 public interface IProtoStructure : IProtoCard
 {
-    public int Slots { get; }
-    public int Strength { get; }
-    public int Defense { get; }
+    StructureStats StructureStats { get; }
 }
+
+public record struct StructureStats(int Slots, int Power, int Health);

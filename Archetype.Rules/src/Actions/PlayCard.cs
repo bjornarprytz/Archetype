@@ -28,7 +28,7 @@ public class PlayCard
                 throw new InvalidOperationException("Cannot play a card that is not in your hand.");
             
             var targets = request.TargetGuids.Select(_atomFinder.FindAtom);
-            var targetProvider = cardToPlay.Proto.TargetDescriptors.Bind(targets);
+            var targetProvider = cardToPlay.TargetDescriptors.Bind(targets);
             
             var paymentCards = request.PaymentCardIds.Select(_atomFinder.FindAtom<ICard>).ToList();
             if (paymentCards.Any(p => p.CurrentZone != _gameState.Player.Hand))
@@ -36,7 +36,7 @@ public class PlayCard
                 throw new Exception("Cannot pay with a card that is not in your hand.");
             }
             
-            if (paymentCards.Sum(paymentCard => paymentCard.Proto.Stats.Value) < cardToPlay.Proto.Stats.Cost)
+            if (paymentCards.Sum(paymentCard => paymentCard.Value) < cardToPlay.Cost)
             {
                 throw new Exception("Not enough resources to play this card.");
             }

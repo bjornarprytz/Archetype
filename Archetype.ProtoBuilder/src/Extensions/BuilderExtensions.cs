@@ -49,10 +49,10 @@ public static class BuilderExtensions
         builder.SetType(type);
         return builder;
     }
-    public static TBuilder WithSubtype<TBuilder>(this TBuilder builder, string subtype)
+    public static TBuilder WithTags<TBuilder>(this TBuilder builder, params string[] tags)
     where TBuilder : ICardBuilder
     {
-        builder.SetSubtype(subtype);
+        builder.WithTags(tags);
         return builder;
     }
     public static TBuilder WithResources<TBuilder>(this TBuilder builder, int resources)

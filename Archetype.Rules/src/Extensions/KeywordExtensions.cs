@@ -24,7 +24,7 @@ public static class KeywordExtensions
                     new Dictionary<string, string>()
                     {
                         { "Atom", atom.Id.ToString() },
-                        { "Source", source?.Id.ToString() ?? "None" }, // TODO: Decide on nullability
+                        { "Source", source?.Id.ToString() ?? "None" },
                         { "Destination", destination.Id.ToString() }
                     })
             );
@@ -47,6 +47,28 @@ public static class KeywordExtensions
                         { "Atom", atom.Id.ToString() },
                         { "Amount", amount.ToString() }
                     })
+            );
+    }
+    
+    [Keyword("Attack")]
+    public static IResult Attack<TAttacker, TTarget>(this TAttacker attacker, TTarget target)
+        where TAttacker : IAtom, IPower
+        where TTarget : IAtom, IHealth
+    {
+        var damageResult = target.Damage(attacker.Power);
+
+        return
+            IResult.Join(
+                damageResult,
+                IResult.From(
+                    new EffectResult(
+                        "Attack",
+                        new Dictionary<string, string>()
+                        {
+                            { "Attacker", attacker.Id.ToString() },
+                            { "Target", target.Id.ToString() }
+                        })
+                )
             );
     }
 

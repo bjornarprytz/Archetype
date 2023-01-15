@@ -35,7 +35,7 @@ internal static class RulesExtensions
      {
           return paymentCards.Select(card => card.MoveTo(gameState.Player.DiscardPile)) // Discard payment
                     .Append(cardToPlay.MoveTo(gameState.ResolutionZone)) // Move the card here so that it won't be affected by its own effects
-                    .Append(cardToPlay.Proto.Resolve(new PlayContext(gameState, cardToPlay, targetProvider)) // Resolve the card
+                    .Append(cardToPlay.Resolve(new PlayContext(gameState, cardToPlay, targetProvider)) // Resolve the card
                     ).ToList();
      }
      

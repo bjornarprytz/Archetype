@@ -1,5 +1,4 @@
-﻿using Archetype.Core.Atoms.Cards;
-using Archetype.Core.Effects;
+﻿using Archetype.Core.Effects;
 
 namespace Archetype.Core.Proto;
 
@@ -10,14 +9,14 @@ public interface IProtoCard
     public CardMetaData Meta { get; }
     public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
     public IResult Resolve(IContext context);
-    public string ContextualRulesText(IContext<ICard> context);
+    public string ContextualRulesText(IContext context);
 }
 
 public record struct CardStats(
     int Cost, 
     int Value,
     CardType Type,
-    string SubType,
+    IReadOnlyList<string> Tags,
     CardColor Color
 );
 

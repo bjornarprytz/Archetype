@@ -50,11 +50,11 @@ internal abstract class CardBuilder<T> : ICardBuilder
             Type = type
         };
     }
-    public void SetSubtype(string subType)
+    public void WithTags(params string[] rest)
     {
         Proto.Stats = Proto.Stats with
         {
-            SubType = subType
+            Tags = new List<string>(Proto.Stats.Tags.Concat(rest)) 
         };
     }
 

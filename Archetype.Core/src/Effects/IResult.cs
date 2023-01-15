@@ -9,6 +9,11 @@ public interface IResult
         return new Result(results);
     }
     
+    static IResult Join(params IResult[] results)
+    {
+        return new Result(results);
+    }
+    
     static IResult From(IEffectResult result)
     {
         return new Result(result);

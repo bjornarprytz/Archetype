@@ -1,6 +1,11 @@
-﻿using Archetype.Rules.Extensions;
+﻿using Archetype.Core.Atoms.Cards;
+using Archetype.Core.Atoms.Zones;
+using Archetype.Core.Meta;
+using Archetype.Rules.Extensions;
 using Archetype.Rules.State;
 using FluentAssertions;
+using NSubstitute;
+using NSubstitute.ReceivedExtensions;
 
 namespace Archetype.Rules.Tests;
 
@@ -9,25 +14,26 @@ public class KeywordTests
     [Test]
     public void MoveTo_ContentsInBothZonesAreUpdated()
     {
-        var node1 = new Node();
-        var node2 = new Node();
-        var unit = new Unit();
-        
-        unit.MoveTo(node1);
-        unit.MoveTo(node2);
+        var card = Substitute.For<ICard>();
+        var hand = Substitute.For<IHand>();
+        var discardPile = Substitute.For<IDiscardPile>();
 
-        node1.Contents.Should().NotContain(unit);
-        node2.Contents.Should().Contain(unit);
+        card.CurrentZone.Returns(hand);
+        
+        card.MoveTo(discardPile);
+        ((IZone) hand).Received(1).Remove(card);
+        discardPile.Received(1).Add(card);
+        card.Received(1).CurrentZone = discardPile;
     }
     
     [Test]
     public void MoveTo_SourceAndDestination_ResultContainsAllData()
     {
-        var unit = new Unit();
-        var node1 = new Node();
-        var node2 = new Node();
+        var unit = Substitute.For<IUnit>();
+        var node1 = Substitute.For<INode>();
+        var node2 = Substitute.For<INode>();
         
-        unit.MoveTo(node1);
+        unit.CurrentZone.Returns(node1);
         var result = unit.MoveTo(node2);
 
         var effectResult = result.Results.Single();
@@ -47,10 +53,10 @@ public class KeywordTests
     [Test]
     public void MoveTo_DestinationButNoSource_ResultContainsAllData()
     {
-        var unit = new Unit();
-        var node1 = new Node();
+        var unit = Substitute.For<IUnit>();
+        var node1 = Substitute.For<INode>();
         
-        
+        unit.CurrentZone.Returns((IZone) null!);
         var result = unit.MoveTo(node1);
 
         var effectResult = result.Results.Single();
@@ -61,7 +67,7 @@ public class KeywordTests
             .WhoseValue.Should().Be(unit.Id.ToString());
         
         effectResult.Data.Should().ContainKey("Source")
-            .WhoseValue.Should().Be(null);
+            .WhoseValue.Should().Be("None");
         
         effectResult.Data.Should().ContainKey("Destination")
             .WhoseValue.Should().Be(node1.Id.ToString());
@@ -75,11 +81,10 @@ public class KeywordTests
     {
         const int startingHealth = 1;
         
-        var unit = new Unit
-        {
-            CurrentHealth = startingHealth,
-            MaxHealth = startingHealth
-        };
+        var unit = Substitute.For<IUnit>();
+        unit.CurrentHealth.Returns(startingHealth);
+        unit.MaxHealth.Returns(startingHealth);
+        
         var result = unit.Damage(damage);
         unit.CurrentHealth.Should().Be(expectedHealth);
 
@@ -97,11 +102,12 @@ public class KeywordTests
     [Test]
     public void Damage_ResultContainsAllData()
     {
-        var unit = new Unit
-        {
-            CurrentHealth = 1,
-            MaxHealth = 1
-        };
+        const int startingHealth = 1;
+        
+        var unit = Substitute.For<IUnit>();
+        unit.CurrentHealth.Returns(startingHealth);
+        unit.MaxHealth.Returns(startingHealth);
+        
         var result = unit.Damage(1);
 
         var effectResult = result.Results.Single();
@@ -109,5 +115,35 @@ public class KeywordTests
         effectResult.Keyword.Should().Be("Damage");
         
         
+    }
+    
+    [Test]
+    public void Attack_HealthIsReduced()
+    {
+        const int startingHealth = 1;
+        
+        var attacker = Substitute.For<IUnit>();
+        var defender = Substitute.For<IUnit>();
+        
+        attacker.CurrentHealth.Returns(startingHealth);
+        attacker.MaxHealth.Returns(startingHealth);
+        
+        attacker.Attack(defender);
+        
+        defender.CurrentHealth.Should().Be(startingHealth - 1);
+    }
+    
+    [Test]
+    public void Attack_ResultIsPopulated()
+    {
+        var attacker = Substitute.For<IUnit>();
+        var target = Substitute.For<IUnit>();
+        
+        var result = attacker.Attack(target);
+        
+        result.Results.Should().Contain(effectResult => 
+            effectResult.Keyword == "Attack" 
+            && effectResult.Data["Attacker"] == attacker.Id.ToString() 
+            && effectResult.Data["Target"] == target.Id.ToString());
     }
 }
