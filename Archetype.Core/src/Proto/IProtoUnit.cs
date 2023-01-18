@@ -6,8 +6,4 @@ public interface IProtoUnit : IProtoCard
 }
 
 
-public record struct UnitStats {
-    public int Power { get; }
-    public int Health { get; }
-    public int Movement { get; }
-}
+public record struct UnitStats(int Power, int Health, int Movement);

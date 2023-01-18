@@ -1,15 +1,18 @@
 ﻿using Archetype.Core.Effects;
+using Archetype.Core.Triggers;
 
 namespace Archetype.Core.Proto;
 
 public interface IProtoCard
 {
-    public string Name { get; }
-    public CardStats Stats { get; }
-    public CardMetaData Meta { get; }
-    public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
-    public IResult Resolve(IContext context);
-    public string ContextualRulesText(IContext context);
+    string Name { get; }
+    CardStats Stats { get; }
+    CardMetaData Meta { get; }
+    IEnumerable<ITrigger> Triggers { get; }
+    IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
+    IResult Resolve(IContext context);
+    string ContextualRulesText(IContext context);
+    
 }
 
 public record struct CardStats(

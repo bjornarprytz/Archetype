@@ -4,6 +4,7 @@ using Archetype.Components.Meta;
 using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Proto;
+using Archetype.Core.Triggers;
 
 namespace Archetype.Components.Proto;
 
@@ -14,14 +15,14 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
     private readonly Dictionary<int, ITargetDescriptor> _targetDescriptors = new ();
         
     private readonly List<Func<IContext, IResult>> _effectFunctions = new ();
-
+    
     public override IEnumerable<ITargetDescriptor> TargetDescriptors => _targetDescriptors.OrderBy(t => t.Key).Select(t => t.Value);
     public override IResult Resolve(IContext context)
     {
         return IResult.Join(
             _effectFunctions
                 .Select(f => f(context))
-                .ToList() // Force evaluation
+                .ToList() // Force resolution
             );
     }
 
@@ -60,7 +61,9 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
         _effectDescriptors.Add(effectDescriptor);
         _effectFunctions.Add(effect.EffectExpression.Compile());
         
-        var newStaticRulesText = string.Join(Environment.NewLine, _effectDescriptors.Select(e => e.GetStaticRulesText()));
+        var newStaticRulesText = string.Join(
+            Environment.NewLine, _effectDescriptors.Select(e => e.GetStaticRulesText())
+            ); // TODO: Include triggers in the static rules text
 
         Meta = Meta with
         {

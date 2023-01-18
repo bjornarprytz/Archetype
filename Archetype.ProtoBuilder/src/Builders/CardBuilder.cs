@@ -1,5 +1,6 @@
 ﻿using Archetype.Components.Proto;
 using Archetype.Core;
+using Archetype.Core.Triggers;
 
 namespace Archetype.Components.Builders;
 
@@ -7,6 +8,11 @@ internal abstract class CardBuilder<T> : ICardBuilder
     where T : ProtoCard
 {
     protected abstract T Proto { get; }
+
+    public void PushTrigger(ITrigger trigger)
+    {
+        Proto.AddTrigger(trigger);
+    }
 
     public void SetName(string name)
     {

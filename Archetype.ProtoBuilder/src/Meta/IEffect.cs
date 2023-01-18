@@ -7,3 +7,5 @@ internal interface IEffect
 {
     public Expression<Func<IContext, IResult>> EffectExpression { get; }
 }
+
+internal record Effect(Expression<Func<IContext, IResult>> EffectExpression) : IEffect;

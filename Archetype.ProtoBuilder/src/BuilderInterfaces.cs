@@ -2,8 +2,17 @@
 using Archetype.Core;
 using Archetype.Core.Effects;
 using Archetype.Core.Proto;
+using Archetype.Core.Triggers;
 
 namespace Archetype.Components;
+
+public interface ITriggerBuilder
+{
+    void PushEffect(Expression<Func<IContext, IResult>> effectFunction);
+    void WithCondition(Expression<Func<IContext, IEffectResult, bool>> conditionFunction);
+    
+    ITrigger Build();
+}
 
 public interface ISpellBuilder : ICardBuilder
 {
@@ -14,13 +23,14 @@ public interface ISpellBuilder : ICardBuilder
 
 public interface ICardBuilder
 {
-    public void SetName(string name);
-    public void SetRarity(CardRarity rarity);
-    public void SetCost(int cost);
-    public void SetColor(CardColor color);
-    public void SetArt(string link);
-    public void SetType(CardType type);
-    public void WithTags(params string[] rest);
-    public void SetResources(int resources);
-    public void SetCardSet(string setName);
+    void PushTrigger(ITrigger trigger);
+    void SetName(string name);
+    void SetRarity(CardRarity rarity);
+    void SetCost(int cost);
+    void SetColor(CardColor color);
+    void SetArt(string link);
+    void SetType(CardType type);
+    void WithTags(params string[] rest);
+    void SetResources(int resources);
+    void SetCardSet(string setName);
 }
