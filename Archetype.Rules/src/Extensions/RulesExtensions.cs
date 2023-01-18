@@ -39,5 +39,5 @@ internal static class RulesExtensions
                     ).ToList();
      }
      
-     private record PlayContext(IGameState GameState, ICard Source, ITargetProvider TargetProvider) : IContext<ICard>;
+     private record PlayContext(IGameState GameState, ICard Source, ITargetProvider TargetProvider) : IContext;
 }

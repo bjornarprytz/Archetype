@@ -31,10 +31,12 @@ public interface ICard :
     IType,
     ITags
 {
+    
     CardMetaData MetaData { get; }
     string Name { get; }
     string StaticRulesText { get; }
-    public IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
-    public IResult Resolve(IContext context);
-    public string ContextualRulesText(IContext context);
+    IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
+    IResult Resolve(IContext context);
+    string ContextualRulesText(IContext context);
+    
 }

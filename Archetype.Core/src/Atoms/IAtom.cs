@@ -2,5 +2,5 @@
 
 public interface IAtom
 {
-    public Guid Id { get; }
+    Guid Id { get; }
 }

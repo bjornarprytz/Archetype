@@ -41,7 +41,7 @@ public class SpellBuilderTests
     [Test]
     public void SpellEffectHasCorrectContextualRulesText()
     {
-        var contextMock = Substitute.For<IContext<ICard>>();
+        var contextMock = Substitute.For<IContext>();
         contextMock.Target<IUnit>(0).CurrentHealth.Returns(5);
 
         var spell = BuilderFactory.CreateSpellBuilder()
@@ -82,7 +82,7 @@ public class SpellBuilderTests
     [Test]
     public void SpellEffectWithImmediateInput_HasCorrectContextualRulesText()
     {
-        var contextMock = Substitute.For<IContext<ICard>>();
+        var contextMock = Substitute.For<IContext>();
 
         var spell = BuilderFactory.CreateSpellBuilder()
             .AddEffect(context => context.Target<IUnit>(0).Damage(69))
