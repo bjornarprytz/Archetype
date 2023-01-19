@@ -22,6 +22,8 @@ internal class SpellBuilder : CardBuilder<ProtoSpell>, ISpellBuilder
 
     public IProtoSpell Build()
     {
+        // TODO: Figure out how and when to format the StaticRulesText
+        
         return Proto;
     }
 }

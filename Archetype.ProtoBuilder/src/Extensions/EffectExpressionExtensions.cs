@@ -7,7 +7,7 @@ using Archetype.Core.Meta;
 
 namespace Archetype.Components.Extensions;
 
-internal static class ExpressionExtensions
+internal static class EffectExpressionExtensions
 {
     internal static IEffectDescriptor CreateDescriptor<TContext, TResult>(this Expression<Func<TContext, TResult>> exp)
         where TContext : IContext

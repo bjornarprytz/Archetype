@@ -8,60 +8,41 @@ namespace Archetype.Components.Builders;
 
 public class TriggerBuilder : ITriggerBuilder
 {
-    private readonly List<Func<IContext, IResult>> _effectFunctions = new ();
-    private Func<IContext, IEffectResult, bool>? _triggerCondition;
-    private List<IEffectDescriptor> _effectDescriptors = new ();
+    private readonly Trigger _trigger = new ();
 
     public void PushEffect(Expression<Func<IContext, IResult>> effectFunction)
     {
-        var effectDescriptor = effectFunction.CreateDescriptor();
-
-        if (effectDescriptor.GetTargets().Any())
-        {
-            throw new ArgumentException("Trigger effects cannot have targets.");
-        }
-        
-        _effectFunctions.Add(effectFunction.Compile());
-        _effectDescriptors.Add(effectDescriptor);
+        _trigger.AddEffect(new Effect(effectFunction));
     }
 
-    public void WithCondition(Expression<Func<IContext, IEffectResult, bool>> conditionFunction)
+    public void WithPreCondition(Expression<Func<IContext, bool>> condition)
     {
-        _triggerCondition = conditionFunction.Compile();
+        // E.g. card needs to be in the hand
+        _trigger.SetPreCondition(condition);
+    }
+    
+    public void WhenEventMatches(Expression<Func<IEffectResult, bool>> eventMatchFunction)
+    {
+        // E.g. keyword==Damage and target==Player
+        _trigger.SetEventMatch(eventMatchFunction);
     }
 
     public ITrigger Build()
     {
-        if (_triggerCondition == null)
-        {
-            throw new InvalidOperationException("Trigger condition is not set.");
-        }
 
-        if (!_effectFunctions.Any())
-        {
-            throw new InvalidOperationException("Trigger effects must be non-empty.");
-        }
-        
-        return new Trigger(_triggerCondition, _effectFunctions, _effectDescriptors);
+        return _trigger;
     }
 
     private class Trigger : ITrigger
     {
-        private readonly Func<IContext, IEffectResult, bool> _triggerCondition;
+        private Func<IContext, bool> _triggerPreCondition;
+        private Func<IEffectResult, bool> _triggerEventMatch;
         private readonly List<IEffectDescriptor> _effectDescriptors;
         private readonly List<Func<IContext, IResult>> _effectFunctions;
 
-        public Trigger(Func<IContext, IEffectResult, bool> triggerCondition, IEnumerable<Func<IContext, IResult>> effectFunctions, IEnumerable<IEffectDescriptor> effectDescriptors)
-        {
-            _triggerCondition = triggerCondition;
-            _effectFunctions = new (effectFunctions);
-            _effectDescriptors = new (effectDescriptors);
-        }
-
-
         public bool ConditionMet(IContext context, IEffectResult @event)
         {
-            return _triggerCondition(context, @event);
+            return _triggerPreCondition(context) && _triggerEventMatch(@event);
         }
 
         public IResult Resolve(IContext context)
@@ -76,7 +57,30 @@ public class TriggerBuilder : ITriggerBuilder
             // Use the condition in the text
             // Use the effect descriptors to generate a string that describes the trigger's effects.
         }
+        
+        public void SetPreCondition(Expression<Func<IContext, bool>> preCondition)
+        {
+            _triggerPreCondition = preCondition.Compile();
+        }
+        
+        public void SetEventMatch(Expression<Func<IEffectResult, bool>> eventMatch)
+        {
+            _triggerEventMatch = eventMatch.Compile();
+        }
 
+        public void AddEffect(IEffect effect)
+        {
+            var effectDescriptor = effect.EffectExpression.CreateDescriptor();
+
+            if (effectDescriptor.GetTargets().Any())
+            {
+                throw new ArgumentException("Trigger effects cannot have targets.");
+            }
+        
+            _effectFunctions.Add(effect.EffectExpression.Compile());
+            _effectDescriptors.Add(effectDescriptor);
+        }
+        
         public string StaticRulesText { get; }
     }
 }

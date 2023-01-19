@@ -1,16 +1,13 @@
 ﻿using System.Text;
 using Archetype.Components.Extensions;
 using Archetype.Components.Meta;
-using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Effects;
 using Archetype.Core.Proto;
-using Archetype.Core.Triggers;
 
 namespace Archetype.Components.Proto;
 
 internal class ProtoSpell : ProtoCard, IProtoSpell
 {
-    private readonly List<IEffect> _effects = new ();
     private readonly List<IEffectDescriptor> _effectDescriptors = new ();
     private readonly Dictionary<int, ITargetDescriptor> _targetDescriptors = new ();
         
@@ -57,18 +54,8 @@ internal class ProtoSpell : ProtoCard, IProtoSpell
             }
         } 
         
-        _effects.Add(effect);
         _effectDescriptors.Add(effectDescriptor);
         _effectFunctions.Add(effect.EffectExpression.Compile());
-        
-        var newStaticRulesText = string.Join(
-            Environment.NewLine, _effectDescriptors.Select(e => e.GetStaticRulesText())
-            ); // TODO: Include triggers in the static rules text
-
-        Meta = Meta with
-        {
-            StaticRulesText = newStaticRulesText
-        };
     }
 
     private record TargetDescriptor(Type TargetType, int TargetIndex) : ITargetDescriptor;

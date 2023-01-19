@@ -9,7 +9,8 @@ namespace Archetype.Components;
 public interface ITriggerBuilder
 {
     void PushEffect(Expression<Func<IContext, IResult>> effectFunction);
-    void WithCondition(Expression<Func<IContext, IEffectResult, bool>> conditionFunction);
+    public void WithPreCondition(Expression<Func<IContext, bool>> condition);
+    public void WhenEventMatches(Expression<Func<IEffectResult, bool>> eventMatchFunction);
     
     ITrigger Build();
 }
