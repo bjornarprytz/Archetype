@@ -22,7 +22,6 @@ internal static class StateGeneration
             return map;
         }
         
-        // TODO: Maybe connect map randomly
         for (var i = 1; i < numNodes; i++)
         {
             map.ConnectNodes(i-1, i % numNodes); 

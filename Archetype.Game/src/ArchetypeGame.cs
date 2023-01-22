@@ -11,6 +11,7 @@ public interface IArchetypeGame
 {
     public IGameState State { get; }
 
+    public Task<IActionResult> InitState();
     public Task<IActionResult> AnswerPrompt(AnswerPrompt.Command command);
     public Task<IActionResult> PlayCard(PlayCard.Command command);
     public Task<IActionResult> EndTurn(EndTurn.Command command);
@@ -54,6 +55,12 @@ internal class ArchetypeGame : IArchetypeGame
         Static.SetRandomSeed(seed);
         
         return new ArchetypeGame(gameState);
+    }
+
+
+    public Task<IActionResult> InitState()
+    {
+        //TODO: Generate cards from deck
     }
 
     public Task<IActionResult> AnswerPrompt(AnswerPrompt.Command command)

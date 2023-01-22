@@ -1,4 +1,6 @@
-﻿using Archetype.Rules.Actions;
+﻿using Archetype.Core.Infrastructure;
+using Archetype.Rules.Actions;
+using Archetype.Rules.Factory;
 using Archetype.Rules.Validation;
 using FluentValidation;
 using MediatR;
@@ -13,6 +15,7 @@ public static class DependencyInjection
         services
             .AddValidatorsFromAssemblyContaining<PlayCard.Validator>()
             .AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>))
+            .AddSingleton<ICardFactory, CardFactory>()
             .AddMediatR(typeof(PlayCard.Handler).Assembly);
         
         return services;
