@@ -1,5 +1,4 @@
 ﻿using Archetype.Core.Effects;
-using Archetype.Core.Triggers;
 
 namespace Archetype.Core.Proto;
 
@@ -8,7 +7,6 @@ public interface IProtoCard
     string Name { get; }
     CardStats Stats { get; }
     CardMetaData Meta { get; }
-    IEnumerable<ITrigger> Triggers { get; }
     IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
     IResult Resolve(IContext context);
     string ContextualRulesText(IContext context);
