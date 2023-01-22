@@ -5,6 +5,13 @@ namespace Archetype.Rules.State;
 
 public class Unit : Card, IUnit
 {
+    // - Target Nodes when played
+    // - Enter play in that node.
+    // - Can move and attack.
+    // - Can be destroyed. Going to graveyard.
+    // - Can be modified.
+    // - Can have effects that trigger when they enter play, move, attack, or are destroyed or attacked.
+    
     public Unit(IProtoUnit protoUnit) : base(protoUnit)
     {
         Power = protoUnit.UnitStats.Power;

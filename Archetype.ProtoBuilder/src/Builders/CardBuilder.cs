@@ -73,12 +73,4 @@ internal abstract class CardBuilder<T> : ICardBuilder
             SetName = setName
         };
     }
-
-    public void OverrideRulesText(string text)
-    {
-        Proto.Meta = Proto.Meta with
-        {
-            StaticRulesText = text
-        };
-    }
 }

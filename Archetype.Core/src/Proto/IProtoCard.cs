@@ -24,6 +24,5 @@ public record struct CardStats(
 public record struct CardMetaData( // Immutable data
     string SetName,
     string ImageUri,
-    CardRarity Rarity,
-    string StaticRulesText
+    CardRarity Rarity
 );

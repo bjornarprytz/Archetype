@@ -1,11 +1,8 @@
 ﻿using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
-using Archetype.Core.Meta;
 using Archetype.Rules.Extensions;
-using Archetype.Rules.State;
 using FluentAssertions;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
 
 namespace Archetype.Rules.Tests;
 

@@ -67,7 +67,6 @@ public abstract class Card : Atom, ICard
         _tags.Add(tag);
     }
 
-    public string StaticRulesText => _proto.Meta.StaticRulesText;
     public IEnumerable<ITargetDescriptor> TargetDescriptors => _proto.TargetDescriptors;
     public IResult Resolve(IContext context) => _proto.Resolve(context);
     public string ContextualRulesText(IContext context) => _proto.ContextualRulesText(context);

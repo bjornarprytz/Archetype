@@ -1,4 +1,5 @@
 ﻿using Archetype.Core.Atoms.Zones;
+using Archetype.Core.Effects;
 
 namespace Archetype.Core.Meta;
 
@@ -57,4 +58,17 @@ public interface ITags
     IEnumerable<string> Tags { get; }
     void AddTag(string tag);
     void RemoveTag(string tag);
+}
+
+public interface IPlayable
+{
+    int Cost { get; }
+    IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
+    IResult Resolve(IContext context);
+}
+
+public interface IRulesText
+{
+    string StaticRulesText { get; }
+    string ContextualRulesText(IContext context);
 }

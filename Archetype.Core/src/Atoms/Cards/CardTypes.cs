@@ -1,5 +1,4 @@
-﻿using Archetype.Core.Effects;
-using Archetype.Core.Meta;
+﻿using Archetype.Core.Meta;
 using Archetype.Core.Proto;
 
 namespace Archetype.Core.Atoms.Cards;
@@ -16,7 +15,7 @@ public interface IStructure :
 { }
 
 public interface IUnit : 
-    ICard, 
+    ICard,
     IHealth,
     IPower,
     IMovement
@@ -24,19 +23,11 @@ public interface IUnit :
 
 
 public interface ICard : 
-    IAtom, 
-    IZoned,
-    ICost,
+    IAtom,
+    IPlayable,
     IValue,
-    IType,
-    ITags
+    IZoned
 {
-    
     CardMetaData MetaData { get; }
     string Name { get; }
-    string StaticRulesText { get; }
-    IEnumerable<ITargetDescriptor> TargetDescriptors { get; } // ordered
-    IResult Resolve(IContext context);
-    string ContextualRulesText(IContext context);
-    
 }

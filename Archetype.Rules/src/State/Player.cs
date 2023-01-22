@@ -3,7 +3,6 @@ using Archetype.Core.Atoms.Cards;
 using Archetype.Core.Atoms.Zones;
 using Archetype.Core.DeckBuilding;
 using Archetype.Core.Extensions;
-using Archetype.Core.Infrastructure;
 using Archetype.Core.Proto;
 
 namespace Archetype.Rules.State;
