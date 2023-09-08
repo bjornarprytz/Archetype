@@ -1,32 +1,32 @@
-﻿namespace Archetype.Framework;
+﻿using Archetype.Rules.Definitions;
+using Archetype.Rules.Proto;
+
+namespace Archetype.Rules;
 
 public static class DefinitionExtensions
 {
-    public static TDef GetOrThrow<TDef>(this Definitions definitions, ProtoData protoData) where TDef : KeywordDefinition
+    public static TDef GetOrThrow<TDef>(this State.Definitions definitions, ProtoData protoData) where TDef : KeywordDefinition
     {
         if (definitions.Keywords[protoData.Keyword] is not TDef requiredDefinition)
             throw new InvalidOperationException($"Keyword ({protoData.Keyword}) is not a {typeof(TDef).Name}");
         
         return requiredDefinition;
     }
-    public static IEnumerable<(CostDefinition, CostPayload)> EnumerateCosts(this Definitions definitions, IEnumerable<ProtoCost> costs, IEnumerable<CostPayload> payloads)
+    public static IEnumerable<(CostDefinition, CostPayload)> EnumerateCosts(this State.Definitions definitions, IEnumerable<ProtoCost> costs, IEnumerable<CostPayload> payloads)
     {
         return costs.Select(definitions.GetOrThrow<CostDefinition>).Zip(payloads);
     }
-    public static bool CheckCosts(this Definitions definitions, 
-        IEnumerable<ProtoCost> costs,
-        IEnumerable<CostPayload> payments
+    public static bool CheckCosts(this State.Definitions definitions, 
+        IReadOnlyList<ProtoCost> costs,
+        IReadOnlyList<CostPayload> payments
         )
     {
-        var costList = costs.ToList();
-        var paymentList = payments.ToList();
-        
-        var cardsInPayment = paymentList.SelectMany(p => p.Payment).ToList();
+        var cardsInPayment = payments.SelectMany(p => p.Payment).ToList();
 
         if (cardsInPayment.DistinctBy(c => c.Id).Count() != cardsInPayment.Count)
             throw new InvalidOperationException("Duplicate cards in payment");
 
-        foreach (var (cost, payment) in costList.Zip(paymentList))
+        foreach (var (cost, payment) in costs.Zip(payments))
         {
             var costDefinition = definitions.GetOrThrow<CostDefinition>(cost);
             

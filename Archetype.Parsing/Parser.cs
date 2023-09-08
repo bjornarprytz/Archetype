@@ -1,7 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
+using Archetype.Core;
+using Archetype.Rules;
+using Archetype.Rules.Proto;
+using Archetype.Rules.State;
 
-namespace Archetype.Framework;
+namespace Archetype.Parsing;
 
 public class SetData
 {

@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
+using Archetype.Core;
 
-namespace Archetype.Framework;
+namespace Archetype.Rules.Definitions;
 
 public abstract class KeywordDefinition
 {

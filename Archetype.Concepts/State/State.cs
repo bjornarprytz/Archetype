@@ -1,4 +1,7 @@
-﻿namespace Archetype.Framework;
+﻿using Archetype.Rules.Definitions;
+using Archetype.Rules.Proto;
+
+namespace Archetype.Rules.State;
 
 public class Definitions
 {
@@ -30,3 +33,8 @@ public class Card : Atom
     // TODO: The card needs to have an API which uses the proto data in conjunction with the modifiers
 }
 
+public class Ability
+{
+    public Card Source { get; set; }
+    public ProtoAbility Proto { get; set; }
+}

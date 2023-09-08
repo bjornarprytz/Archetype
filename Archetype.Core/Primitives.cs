@@ -1,4 +1,4 @@
-﻿namespace Archetype.Framework;
+﻿namespace Archetype.Core;
 
 public enum CardType
 {

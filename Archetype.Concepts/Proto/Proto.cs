@@ -1,4 +1,6 @@
-﻿namespace Archetype.Framework;
+﻿using Archetype.Core;
+
+namespace Archetype.Rules.Proto;
 
 public abstract class ProtoData
 {
