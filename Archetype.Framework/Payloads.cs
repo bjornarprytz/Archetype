@@ -22,15 +22,15 @@ public class AbilityArgs
 
 public class Event
 {
-    
     public IEnumerable<Event> Children { get; set; }
+    
 }
 
 public class PlayCardPayload
 {
     public Card Card { get; set; }
     public CardArgs CardArgs { get; set; }
-    public CostPayload Payment { get; set; }
+    public IReadOnlyList<CostPayload> Payments { get; set; }
 }
 
 public class AbilityPayload
@@ -38,7 +38,7 @@ public class AbilityPayload
     public Card Card { get; set; }
     public int AbilityIndex { get; set; }
     public AbilityArgs AbilityArgs { get; set; }
-    public CostPayload Payment { get; set; }
+    public IReadOnlyList<CostPayload> Payments { get; set; }
 }
 
 public class EffectPayload

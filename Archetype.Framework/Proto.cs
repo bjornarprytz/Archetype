@@ -1,60 +1,68 @@
 ﻿namespace Archetype.Framework;
 
-public class ProtoEffect
+public abstract class ProtoData
+{
+    public string Keyword { get; set; }
+}
+
+public class ProtoEffect : ProtoData
 {
     public CreateEffect Create { get; set; }
 }
 
-public class ProtoReaction
+public class ProtoReaction : ProtoData
 {
-    public ReactionDefinition Definition { get; set; }
     public ProtoEffect Effect { get; set; }
 }
 
-public class ProtoAura
+public class ProtoAura : ProtoData
 {
     public ProtoCondition Condition { get; set; }
-    public AuraDefinition Definition { get; set; }
 }
 
-public class ProtoFeature
+public class ProtoFeature : ProtoData
 {
-    public string Name { get; set; }
     public int Stacks { get; set; }
 }
 
-public class ProtoAbility
+public class ProtoAbility : ProtoData
 {
-    public IEnumerable<ProtoCondition> Conditions { get; set; }
-    public ProtoCost Cost { get; set; }
-    public IEnumerable<ProtoEffect> Effects { get; set; }
+    public IReadOnlyList<ProtoCondition> Conditions { get; set; }
+    public IReadOnlyList<ProtoCost> Costs { get; set; }
+    public IReadOnlyList<ProtoEffect> Effects { get; set; }
     
     public CreateAbilityEffects CreateEffects { get; set; }
 }
 
-public class ProtoCondition
+public class ProtoCondition : ProtoData
 {
     public CheckState Check { get; set; } 
 }
 
-public class ProtoCost
+public class ProtoCost : ProtoData
 {
-    public CostDefinition Definition { get; set; }
+    public int Amount { get; set; }
 }
 
 public class ProtoCard
 {
     public string Name { get; set; } // ID
     public CardType Type { get; set; }
-    public ProtoCost Cost { get; set; }
-    public IEnumerable<ProtoCondition> Conditions { get; set; }
-    public IEnumerable<ProtoReaction> Reactions { get; set; }
-    public IEnumerable<ProtoEffect> Effects { get; set; }
-    public IEnumerable<ProtoAura> Auras { get; set; }
-    public IEnumerable<ProtoFeature> Features { get; set; }
-    public IEnumerable<ProtoAbility> Abilities { get; set; }
-    
-    public CreateCardEffects CreateEffects { get; set; }
+    public IReadOnlyList<ProtoCost> Costs { get; set; }
+    public IReadOnlyList<ProtoCondition> Conditions { get; set; }
+    public IReadOnlyList<ProtoReaction> Reactions { get; set; }
+    public IReadOnlyList<ProtoEffect> Effects { get; set; }
+    public IReadOnlyList<ProtoAura> Auras { get; set; }
+    public IReadOnlyList<ProtoFeature> Features { get; set; }
+    public IReadOnlyList<ProtoAbility> Abilities { get; set; }
+    public IReadOnlyDictionary<string, string> Characteristics { get; set; }
 
-    // TODO: Basically add functionality to cover all the keyword definitions
+    public CreateCardEffects CreateEffects { get; set; }
+}
+
+public class ProtoSet
+{
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public IReadOnlyList<ProtoCard> Cards { get; set; }
 }

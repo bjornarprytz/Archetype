@@ -1,7 +1,9 @@
 ﻿// Global using directives
 
+global using ParseKeyword = System.Func<string, Archetype.Framework.ProtoData>;
+
 global using CheckCard = System.Func<Archetype.Framework.Card, bool>;
-global using CheckCost = System.Func<Archetype.Framework.CostPayload, bool>;
+global using CheckCost = System.Func<Archetype.Framework.CostPayload, int, bool>;
 global using CheckEvent = System.Func<Archetype.Framework.Event, Archetype.Framework.Card, bool>;
 global using CheckState = System.Func<Archetype.Framework.Card, Archetype.Framework.GameState, bool>;
 

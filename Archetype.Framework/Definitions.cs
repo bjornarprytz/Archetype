@@ -8,7 +8,8 @@ public abstract class KeywordDefinition
     public KeywordType Type { get; set; }
     public string Template { get; set; }
     public string ReminderText { get; set; }
-    public Regex ParseRegex { get; set; }
+    public Regex Pattern { get; set; }
+    public ParseKeyword Parse { get; set; }
 }
 
 // The bread and butter of state changes
@@ -55,8 +56,7 @@ public class ConditionDefinition : KeywordDefinition
 // Cost of abilities and cards
 public class CostDefinition : KeywordDefinition
 {
+    public CostType Type { get; set; }
     public CheckCost Check { get; set; }
     public ResolveCost Resolve { get; set; }
-    public CostType Type { get; set; }
-    public int Cost { get; set; }
 }
