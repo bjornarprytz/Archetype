@@ -34,7 +34,7 @@ public class ProtoAbility
 
 public class ProtoCondition
 {
-    public CheckState Check { get; set; }
+    public CheckState Check { get; set; } 
 }
 
 public class ProtoCost
