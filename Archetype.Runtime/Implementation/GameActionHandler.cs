@@ -17,6 +17,10 @@ public class GameActionHandler : IGameActionHandler
     {
         var result = _mediator.Send(args);
 
-        // TODO: Flush the effect queue
+        return new ActionResult
+        {
+            Events = _effectQueue.ResolveAll().ToList()
+            // TODO: Add AvailableActions
+        };
     }
 }

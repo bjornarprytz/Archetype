@@ -3,6 +3,13 @@ using Archetype.Core;
 
 namespace Archetype.Rules.Definitions;
 
+public class KeywordOperand
+{
+    public KeywordOperandType Type { get; set; }
+    public string Description { get; set; }
+    public bool IsOptional { get; set; }
+}
+
 public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
@@ -11,53 +18,88 @@ public abstract class KeywordDefinition
     public string ReminderText { get; set; }
     public Regex Pattern { get; set; }
     public ParseKeyword Parse { get; set; }
+    public IReadOnlyList<KeywordOperand> Operands { get; set; }
 }
 
 // The bread and butter of state changes
+// Examples:
+// DAMAGE <1> 6
+// HEAL <2> 3
+// DRAW 4
 public class EffectDefinition : KeywordDefinition
 {
     public ResolveEffect Resolve { get; set; }
-    public int NArgs { get; set; } // All args are integers
-    public IEnumerable<CardType> Targets { get; set; }
 }
 
 // Hook into special rules
+//
+// Examples:
+// TARGETS Enemy Unit Any
+// 
+// Other definitions can then reference the targets:
+// DAMAGE <1> 6 // Deal 6 damage to the first target
+// HEAL <2> 3 // Heal the second target for 3
 public class FeatureDefinition : KeywordDefinition
 {
-    public bool Stackable { get; set; }
+    
 }
 
 // Modify game objects
+//
+// Examples:
+// STRENGTH Self 2
+// This would add 2 strength to the card
+//
+// WEAKEN Node 1
+// This would reduce the strength of all cards on the node by 1
+//
+// ADD_TRAMPLE Global
+// This would add the trample keyword to all cards
 public class AuraDefinition : KeywordDefinition
 {
-    public Scope Scope { get; set; }
     public ApplyAura Apply { get; set; }
     public RemoveAura Remove { get; set; }
-    public CheckCard CanApply { get; set; }
-    public int Duration { get; set; } = -1; // -1 = permanent
+    public CheckCard CanApply { get; set; } // Filter cards
 }
+
+// ON_DEATH Self { ... } 4
 
 public class ReactionDefinition : KeywordDefinition
 {
-    public CheckEvent WillTrigger { get; set; }
-    public int Count { get; set; } = -1; // -1 = infinite
+    public CheckEvent CheckIfTriggered { get; set; }
 }
 
+// ABILITY { ... }
 public class AbilityDefinition : KeywordDefinition
 {
     
 }
 
-// Conditions for using an ability or playing a card
+// IN_HAND_CONDITION
+// LIFE_GTE_CONDITION 10
 public class ConditionDefinition : KeywordDefinition
 {
     public CheckState Check { get; set; }
 }
 
-// Cost of abilities and cards
+// Examples:
+// RESOURCE_COST 4
+// SACRIFICE_COST 1
 public class CostDefinition : KeywordDefinition
 {
     public CostType Type { get; set; }
     public CheckCost Check { get; set; }
     public ResolveCost Resolve { get; set; }
 }
+
+// Examples:
+// N_CARDS_IN_HAND 'X'
+// Will compute the cards in hand and store it in the 'X' property
+//
+// Other definitions can then use the computed value:
+// RESOURCE_COST [X]
+public class ComputedValueDefinition : KeywordDefinition
+{
+    public ComputeProperty Compute { get; set; }
+}
+

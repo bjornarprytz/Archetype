@@ -13,7 +13,8 @@ public interface IEffectQueue
 {
     public void Push(Effect payload);
     public IEnumerable<Effect> Effects { get; }
-    public bool ResolveNext();
+    public Event? ResolveNext();
+    public IEnumerable<Event> ResolveAll();
 }
 
 public interface IGameActionHandler

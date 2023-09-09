@@ -1,5 +1,6 @@
 ﻿namespace Archetype.Core;
 
+[Flags]
 public enum CardType
 {
     Spell,
@@ -9,6 +10,7 @@ public enum CardType
     Enemy
 }
 
+[Flags]
 public enum KeywordType
 {
     Effect,
@@ -18,9 +20,18 @@ public enum KeywordType
     DelayedEffect,
     Ability,
     Condition,
-    Cost
+    Cost,
 }
 
+[Flags]
+public enum KeywordOperandType
+{
+    Target,
+    Integer,
+    String
+}
+
+[Flags]
 public enum CostType
 {
     Resource, // From hand, with resource value
@@ -30,6 +41,7 @@ public enum CostType
     Exhaust, // From discard pile
 }
 
+[Flags]
 public enum Scope
 {
     Self,

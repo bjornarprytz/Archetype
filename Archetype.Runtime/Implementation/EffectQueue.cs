@@ -25,18 +25,30 @@ public class EffectQueue : IEffectQueue
     }
 
     public IEnumerable<Effect> Effects => _queue;
-    public bool ResolveNext()
+    public Event? ResolveNext()
     {
         if (_queue.Count == 0)
-            return false;
+            return null;
         
         var payload = _queue.Dequeue();
         var e = Resolve(payload);
         _eventHistory.Push(e);
         
-        return true;
+        return e;
     }
-    
+
+    public IEnumerable<Event> ResolveAll()
+    {
+        var events = new List<Event>();
+        
+        while (ResolveNext() is {} e)
+        {
+            events.Add(e);
+        }
+
+        return events;
+    }
+
     private Event Resolve(Effect payload)
     {
         if (_definitions.Keywords[payload.Keyword] is not EffectDefinition effectDefinition)
