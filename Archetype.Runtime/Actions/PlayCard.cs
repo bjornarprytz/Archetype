@@ -4,8 +4,6 @@ using MediatR;
 
 namespace Archetype.Runtime.Actions;
 
-public record PlayCardArgs(Card Card, IReadOnlyList<Card> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
-
 public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 {
     private readonly IEventHistory _history;
@@ -38,7 +36,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        foreach (var effect in args.Card.Proto.CreateEffects(args.Targets))
+        foreach (var effect in args.Card.CreateEffects(args))
         {
             _effectQueue.Push(effect);
         }

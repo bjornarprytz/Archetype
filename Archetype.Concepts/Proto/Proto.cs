@@ -46,6 +46,12 @@ public class ProtoCost : ProtoData
     public int Amount { get; set; }
 }
 
+public class ProtoComputedProperty : ProtoData
+{
+    public string Key { get; set; }
+    public ComputeProperty Compute { get; set; }
+}
+
 public class ProtoCard
 {
     public string Name { get; set; } // ID
@@ -57,9 +63,9 @@ public class ProtoCard
     public IReadOnlyList<ProtoAura> Auras { get; set; }
     public IReadOnlyList<ProtoFeature> Features { get; set; }
     public IReadOnlyList<ProtoAbility> Abilities { get; set; }
-    public IReadOnlyDictionary<string, string> Characteristics { get; set; }
+    public IReadOnlyList<ProtoComputedProperty> ComputedProperties { get; set; }
 
-    public CreateCardEffects CreateEffects { get; set; }
+    public IReadOnlyDictionary<string, string> Characteristics { get; set; }
 }
 
 public class ProtoSet

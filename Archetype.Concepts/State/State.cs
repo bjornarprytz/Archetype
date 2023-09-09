@@ -30,7 +30,13 @@ public class Card : Atom
     public object Modifiers { get; set; } // TODO: Define this
     public object RulesText { get; set; } // TODO: Define this
     
-    // TODO: The card needs to have an API which uses the proto data in conjunction with the modifiers
+    private IDictionary<string, int> ComputedIntegers { get; set; } // Use this to create rules text
+    private IDictionary<string, string> ComputedStrings { get; set; } // Use this to create rules text
+    
+    public IEnumerable<Effect> CreateEffects(PlayCardArgs args)
+    {
+        
+    }
 }
 
 public class Ability
