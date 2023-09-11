@@ -25,6 +25,8 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         var costs = args.Card.Proto.Costs;
         var payments = args.Payments;
         
+        args.Card.UpdateComputedValues(_definitions, _gameState);
+        
         if (_definitions.CheckConditions(conditions, args.Card, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         

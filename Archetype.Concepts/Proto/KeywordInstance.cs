@@ -46,6 +46,7 @@ public class AbilityInstance : KeywordInstance
     public IReadOnlyList<ConditionInstance> Conditions { get; set; }
     public IReadOnlyList<CostInstance> Costs { get; set; }
     public IReadOnlyList<EffectInstance> Effects { get; set; }
+    public IReadOnlyList<ComputedValueInstance> ComputedValues { get; set; }
 }
 
 public class ConditionInstance : KeywordInstance
@@ -58,7 +59,7 @@ public class CostInstance : KeywordInstance
     public int Amount { get; set; }
 }
 
-public class ComputedPropertyInstance : KeywordInstance
+public class ComputedValueInstance : KeywordInstance
 {
     public string Key { get; set; }
 }

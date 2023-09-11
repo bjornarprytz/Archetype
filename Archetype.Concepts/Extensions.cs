@@ -50,19 +50,19 @@ public static class DefinitionExtensions
             .All(c => c.Check(source, gameState));
     }
 
-    public static IEnumerable<Effect> CreateEffects(this IReadOnlyList<EffectInstance> effectInstances, Card source, IComputedPropertyCache computedPropertyCache, IReadOnlyList<Card> targets)
+    public static IEnumerable<Effect> CreateEffects(this IReadOnlyList<EffectInstance> effectInstances, Card source, IComputedValuesCache computedValuesCache, IReadOnlyList<Card> targets)
     {
         return effectInstances.Select(effectInstance => new Effect
         {
             Keyword = effectInstance.Keyword,
-            Operands = effectInstance.Operands.GetOperands(computedPropertyCache),
+            Operands = effectInstance.Operands.GetOperands(computedValuesCache),
             Source = source,
             Targets = effectInstance.Targets.GetTargets(targets)
         });
     }
 
     public static IReadOnlyList<object> GetOperands(this IReadOnlyList<OperandDescription> operandDescriptions,
-        IComputedPropertyCache computedPropertyCache)
+        IComputedValuesCache computedValuesCache)
     {
         var operands = new List<object>();
 
@@ -70,7 +70,7 @@ public static class DefinitionExtensions
         {
             if (operand.IsComputed)
             {
-                if (computedPropertyCache.GetComputedProperty(operand.ComputedPropertyKey) is {} computedValue)
+                if (computedValuesCache.GetComputedValue(operand.ComputedPropertyKey) is {} computedValue)
                     operands.Add(computedValue);
                 else
                 {

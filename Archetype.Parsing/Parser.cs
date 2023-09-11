@@ -76,7 +76,7 @@ public class CardParser : ICardParser
         var effects = new List<EffectInstance>();
         var features = new List<FeatureInstance>();
         var abilities = new List<AbilityInstance>();
-        var computedProperties = new List<ComputedPropertyInstance>();
+        var computedValues = new List<ComputedValueInstance>();
 
         foreach (var token in cardData.Text.Split(";"))
         {
@@ -107,8 +107,8 @@ public class CardParser : ICardParser
                 case AbilityInstance abilityInstance:
                     abilities.Add(abilityInstance);
                     break;
-                case ComputedPropertyInstance computedPropertyInstance:
-                    computedProperties.Add(computedPropertyInstance);
+                case ComputedValueInstance computedValueInstance:
+                    computedValues.Add(computedValueInstance);
                     break;
                 default:
                     throw new InvalidOperationException($"Unknown keyword instance type: {protoData.GetType().Name}");

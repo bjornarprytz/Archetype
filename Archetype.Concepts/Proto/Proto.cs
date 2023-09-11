@@ -13,7 +13,7 @@ public class ProtoCard
     public IReadOnlyList<EffectInstance> Effects { get; set; }
     public IReadOnlyList<FeatureInstance> Features { get; set; }
     public IReadOnlyList<AbilityInstance> Abilities { get; set; }
-    public IReadOnlyList<ComputedPropertyInstance> ComputedProperties { get; set; }
+    public IReadOnlyList<ComputedValueInstance> ComputedValues { get; set; }
 
     public IReadOnlyDictionary<string, string> Characteristics { get; set; }
 }

@@ -21,10 +21,13 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 
     public Task<Unit> Handle(UseAbilityArgs args, CancellationToken cancellationToken)
     {
-        var ability = args.Ability.Proto;
-        var conditions = ability.Conditions;
-        var costs = ability.Costs;
+        var protoAbility = args.Ability.Proto;
+        var conditions = protoAbility.Conditions;
+        var costs = protoAbility.Costs;
+        var ability = args.Ability;
         var payments = args.Payments;
+        
+        ability.UpdateComputedValues(_definitions, _gameState);
 
         if (_definitions.CheckConditions(conditions, args.Ability.Source, _gameState))
             throw new InvalidOperationException("Invalid conditions");
@@ -37,7 +40,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        foreach (var effect in ability.Effects.CreateEffects(args.Ability.Source, args.Ability, args.Targets))
+        foreach (var effect in protoAbility.Effects.CreateEffects(ability.Source, ability, args.Targets))
         {
             _effectQueue.Push(effect);
         };

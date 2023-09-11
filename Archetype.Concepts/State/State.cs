@@ -23,49 +23,70 @@ public class GameState
     
 }
 
-public interface IComputedPropertyCache
+public interface IComputedValuesCache
 {
-    object? GetComputedProperty(string key);
+    object? GetComputedValue(string key);
+    void UpdateComputedValues(Definitions definitions, GameState gameState);
 }
 
-public class Card : Atom, IComputedPropertyCache
+public class Card : Atom, IComputedValuesCache
 {
     public Zone CurrentZone { get; set; }
     public ProtoCard Proto { get; set; }
     public object Modifiers { get; set; } // TODO: Define this
     public object RulesText { get; set; } // TODO: Define this
     
-    private IDictionary<string, int> ComputedIntegers { get; set; } // Use this to create rules text
-    private IDictionary<string, string> ComputedStrings { get; set; } // Use this to create rules text
+    private IDictionary<string, object> _computedValues { get; set; } // Use this to create rules text
 
-    public object? GetComputedProperty(string key)
+    public object? GetComputedValue(string key)
     {
-        if (ComputedIntegers.TryGetValue(key, out var value))
-            return value;
+        return _computedValues.TryGetValue(key, out var value) ? value : null;
+    }
 
-        if (ComputedStrings.TryGetValue(key, out var stringValue))
-            return stringValue;
+    public void UpdateComputedValues(Definitions definitions, GameState gameState)
+    {
+        var computedValues = Proto.ComputedValues;
 
-        return null;
+        foreach (var computedProperty in computedValues)
+        {
+            var definition = definitions.GetOrThrow<ComputedValueDefinition>(computedProperty);
+            
+            var value = definition.Compute(this, gameState);
+            
+            if (value is not int or string)
+                throw new InvalidOperationException($"Computed property ({computedProperty.Key}) is not an int or string");
+            
+            _computedValues[computedProperty.Key] = value;
+        }
     }
 }
 
-public class Ability : IComputedPropertyCache
+public class Ability : IComputedValuesCache
 {
     public Card Source { get; set; }
     public AbilityInstance Proto { get; set; }
     
-    private IDictionary<string, int> ComputedIntegers { get; set; } // Use this to create rules text
-    private IDictionary<string, string> ComputedStrings { get; set; } // Use this to create rules text
+    private IDictionary<string, object> _computedValues { get; set; } // Use this to create rules text
 
-    public object? GetComputedProperty(string key)
+    public object? GetComputedValue(string key)
     {
-        if (ComputedIntegers.TryGetValue(key, out var value))
-            return value;
+        return _computedValues.TryGetValue(key, out var value) ? value : null;
+    }
 
-        if (ComputedStrings.TryGetValue(key, out var stringValue))
-            return stringValue;
+    public void UpdateComputedValues(Definitions definitions, GameState gameState)
+    {
+        var computedValues = Proto.ComputedValues;
 
-        return null;
+        foreach (var computedProperty in computedValues)
+        {
+            var definition = definitions.GetOrThrow<ComputedValueDefinition>(computedProperty);
+            
+            var value = definition.Compute(Source, gameState);
+            
+            if (value is not int or string)
+                throw new InvalidOperationException($"Computed property ({computedProperty.Key}) is not an int or string");
+            
+            _computedValues[computedProperty.Key] = value;
+        }
     }
 }
