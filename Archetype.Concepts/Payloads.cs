@@ -12,9 +12,9 @@ public class Event
 public class Effect
 {
     public string Keyword { get; set; }
-    public IReadOnlyList<int> KeywordOperands { get; set; }
+    public IReadOnlyList<object> Operands { get; set; }
     public Card Source { get; set; }
-    public IReadOnlyList<Card> Targets { get; set; }
+    public IReadOnlyDictionary<int, Card> Targets { get; set; }
 }
 
 public class CostPayload

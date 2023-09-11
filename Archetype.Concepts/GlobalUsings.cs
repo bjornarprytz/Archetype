@@ -1,6 +1,6 @@
 ﻿// Global using directives
 
-global using ParseKeyword = System.Func<string, Archetype.Rules.Proto.ProtoData>;
+global using ParseKeyword = System.Func<string, Archetype.Rules.Proto.KeywordInstance>;
 
 
 global using CheckCard = System.Func<Archetype.Rules.State.Card, bool>;

@@ -26,7 +26,6 @@ public enum KeywordType
 [Flags]
 public enum KeywordOperandType
 {
-    Target,
     Integer,
     String
 }

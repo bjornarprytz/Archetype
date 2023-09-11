@@ -25,7 +25,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         var costs = args.Card.Proto.Costs;
         var payments = args.Payments;
         
-        if (!conditions.All(c => c.Check(args.Card, _gameState)))
+        if (_definitions.CheckConditions(conditions, args.Card, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
         if (!_definitions.CheckCosts(costs, payments))
@@ -36,7 +36,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        foreach (var effect in args.Card.CreateEffects(args))
+        foreach (var effect in args.Card.Proto.Effects.CreateEffects(args.Card, args.Card, args.Targets))
         {
             _effectQueue.Push(effect);
         }

@@ -23,7 +23,12 @@ public class GameState
     
 }
 
-public class Card : Atom
+public interface IComputedPropertyCache
+{
+    object? GetComputedProperty(string key);
+}
+
+public class Card : Atom, IComputedPropertyCache
 {
     public Zone CurrentZone { get; set; }
     public ProtoCard Proto { get; set; }
@@ -32,15 +37,35 @@ public class Card : Atom
     
     private IDictionary<string, int> ComputedIntegers { get; set; } // Use this to create rules text
     private IDictionary<string, string> ComputedStrings { get; set; } // Use this to create rules text
-    
-    public IEnumerable<Effect> CreateEffects(PlayCardArgs args)
+
+    public object? GetComputedProperty(string key)
     {
-        
+        if (ComputedIntegers.TryGetValue(key, out var value))
+            return value;
+
+        if (ComputedStrings.TryGetValue(key, out var stringValue))
+            return stringValue;
+
+        return null;
     }
 }
 
-public class Ability
+public class Ability : IComputedPropertyCache
 {
     public Card Source { get; set; }
-    public ProtoAbility Proto { get; set; }
+    public AbilityInstance Proto { get; set; }
+    
+    private IDictionary<string, int> ComputedIntegers { get; set; } // Use this to create rules text
+    private IDictionary<string, string> ComputedStrings { get; set; } // Use this to create rules text
+
+    public object? GetComputedProperty(string key)
+    {
+        if (ComputedIntegers.TryGetValue(key, out var value))
+            return value;
+
+        if (ComputedStrings.TryGetValue(key, out var stringValue))
+            return stringValue;
+
+        return null;
+    }
 }

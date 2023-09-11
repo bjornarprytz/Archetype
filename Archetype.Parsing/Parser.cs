@@ -70,13 +70,13 @@ public class CardParser : ICardParser
 
     public ProtoCard ParseCard(CardData cardData)
     {
-        var cost = new List<ProtoCost>();
-        var conditions = new List<ProtoCondition>();
-        var reactions = new List<ProtoReaction>();
-        var effects = new List<ProtoEffect>();
-        var auras = new List<ProtoAura>();
-        var features = new List<ProtoFeature>();
-        var abilities = new List<ProtoAbility>();
+        var cost = new List<CostInstance>();
+        var conditions = new List<ConditionInstance>();
+        var reactions = new List<ReactionInstance>();
+        var effects = new List<EffectInstance>();
+        var features = new List<FeatureInstance>();
+        var abilities = new List<AbilityInstance>();
+        var computedProperties = new List<ComputedPropertyInstance>();
 
         foreach (var token in cardData.Text.Split(";"))
         {
@@ -89,29 +89,29 @@ public class CardParser : ICardParser
 
             switch (protoData)
             {
-                case ProtoCost protoCost:
-                    cost.Add(protoCost);
+                case CostInstance costInstance:
+                    cost.Add(costInstance);
                     break;
-                case ProtoCondition protoCondition:
-                    conditions.Add(protoCondition);
+                case ConditionInstance conditionInstance:
+                    conditions.Add(conditionInstance);
                     break;
-                case ProtoReaction protoReaction:
-                    reactions.Add(protoReaction);
+                case ReactionInstance reactionInstance:
+                    reactions.Add(reactionInstance);
                     break;
-                case ProtoEffect protoEffect:
-                    effects.Add(protoEffect);
+                case EffectInstance effectInstance:
+                    effects.Add(effectInstance);
                     break;
-                case ProtoAura protoAura:
-                    auras.Add(protoAura);
+                case FeatureInstance featureInstance:
+                    features.Add(featureInstance);
                     break;
-                case ProtoFeature protoFeature:
-                    features.Add(protoFeature);
+                case AbilityInstance abilityInstance:
+                    abilities.Add(abilityInstance);
                     break;
-                case ProtoAbility protoAbility:
-                    abilities.Add(protoAbility);
+                case ComputedPropertyInstance computedPropertyInstance:
+                    computedProperties.Add(computedPropertyInstance);
                     break;
                 default:
-                    throw new InvalidOperationException($"Unknown proto data type: {protoData.GetType().Name}");
+                    throw new InvalidOperationException($"Unknown keyword instance type: {protoData.GetType().Name}");
             }
         }
         

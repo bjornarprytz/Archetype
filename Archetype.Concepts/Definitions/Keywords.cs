@@ -10,6 +10,13 @@ public class KeywordOperand
     public bool IsOptional { get; set; }
 }
 
+public class KeywordTarget
+{
+    public CardType Type { get; set; }
+    public string Description { get; set; }
+    public bool IsOptional { get; set; }
+}
+
 public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
@@ -18,6 +25,7 @@ public abstract class KeywordDefinition
     public string ReminderText { get; set; }
     public Regex Pattern { get; set; }
     public ParseKeyword Parse { get; set; }
+    public IReadOnlyList<KeywordTarget> Targets { get; set; }
     public IReadOnlyList<KeywordOperand> Operands { get; set; }
 }
 
@@ -26,6 +34,7 @@ public abstract class KeywordDefinition
 // DAMAGE <1> 6
 // HEAL <2> 3
 // DRAW 4
+// MODIFY <1> Strength 1
 public class EffectDefinition : KeywordDefinition
 {
     public ResolveEffect Resolve { get; set; }
@@ -34,6 +43,7 @@ public class EffectDefinition : KeywordDefinition
 // Hook into special rules
 //
 // Examples:
+// STRENGTH 2
 // TARGETS Enemy Unit Any
 // 
 // Other definitions can then reference the targets:
@@ -44,26 +54,7 @@ public class FeatureDefinition : KeywordDefinition
     
 }
 
-// Modify game objects
-//
-// Examples:
-// STRENGTH Self 2
-// This would add 2 strength to the card
-//
-// WEAKEN Node 1
-// This would reduce the strength of all cards on the node by 1
-//
-// ADD_TRAMPLE Global
-// This would add the trample keyword to all cards
-public class AuraDefinition : KeywordDefinition
-{
-    public ApplyAura Apply { get; set; }
-    public RemoveAura Remove { get; set; }
-    public CheckCard CanApply { get; set; } // Filter cards
-}
-
-// ON_DEATH Self { ... } 4
-
+// ON_DEATH Self { ... }
 public class ReactionDefinition : KeywordDefinition
 {
     public CheckEvent CheckIfTriggered { get; set; }

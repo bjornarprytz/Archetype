@@ -25,10 +25,10 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var conditions = ability.Conditions;
         var costs = ability.Costs;
         var payments = args.Payments;
-        
-        if (!conditions.All(c => c.Check(args.Ability.Source, _gameState)))
-            throw new InvalidOperationException("Invalid conditions");
 
+        if (_definitions.CheckConditions(conditions, args.Ability.Source, _gameState))
+            throw new InvalidOperationException("Invalid conditions");
+        
         if (!_definitions.CheckCosts(costs, payments))
             throw new InvalidOperationException("Invalid payment");
 
@@ -37,7 +37,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        foreach (var effect in ability.CreateEffects(args.Targets))
+        foreach (var effect in ability.Effects.CreateEffects(args.Ability.Source, args.Ability, args.Targets))
         {
             _effectQueue.Push(effect);
         };
