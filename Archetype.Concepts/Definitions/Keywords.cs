@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿
+using System.Text.RegularExpressions;
 using Archetype.Core;
 
 namespace Archetype.Rules.Definitions;

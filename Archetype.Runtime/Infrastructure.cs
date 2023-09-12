@@ -11,10 +11,13 @@ public interface IEventHistory
 
 public interface IEffectQueue
 {
-    public void Push(Effect payload);
-    public IEnumerable<Effect> Effects { get; }
-    public Event? ResolveNext();
-    public IEnumerable<Event> ResolveAll();
+    void Push(ResolutionContext context);
+    Event? ResolveNext();
+}
+
+public interface IGameLoop
+{
+    ActionResult Advance();
 }
 
 public interface IGameActionHandler
@@ -24,11 +27,12 @@ public interface IGameActionHandler
 
 public class ActionDescription
 {
-    string Name { get; set; }
+    public string Name { get; set; }
+    
+    // TODO: Describe requirements of the action
 }
 
 public class ActionResult
 {
-    public IReadOnlyList<Event> Events { get; set; }
     public IReadOnlyList<ActionDescription> AvailableActions { get; set; }
 }

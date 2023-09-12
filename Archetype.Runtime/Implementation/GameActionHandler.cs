@@ -1,26 +1,23 @@
-﻿using MediatR;
+﻿using Archetype.Rules;
+using MediatR;
 
 namespace Archetype.Runtime.Implementation;
 
 public class GameActionHandler : IGameActionHandler
 {
     private readonly IMediator _mediator;
-    private readonly IEffectQueue _effectQueue;
+    private readonly IGameLoop _gameLoop;
 
-    public GameActionHandler(IMediator mediator, IEffectQueue effectQueue)
+    public GameActionHandler(IMediator mediator, IGameLoop gameLoop)
     {
         _mediator = mediator;
-        _effectQueue = effectQueue;
+        _gameLoop = gameLoop;
     }
     
     public ActionResult Handle(IRequest args)
     {
-        var result = _mediator.Send(args);
+        var result = _mediator.Send(args); // TODO: Deal with async
 
-        return new ActionResult
-        {
-            Events = _effectQueue.ResolveAll().ToList()
-            // TODO: Add AvailableActions
-        };
+        return _gameLoop.Advance();
     }
 }

@@ -32,6 +32,8 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         if (_definitions.CheckConditions(conditions, args.Ability.Source, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
+        // TODO: Check targets
+        
         if (!_definitions.CheckCosts(costs, payments))
             throw new InvalidOperationException("Invalid payment");
 
@@ -39,11 +41,10 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         {
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
+        
+        var resolutionContext = ability.CreateResolutionContext(payments, args.Targets);
 
-        foreach (var effect in protoAbility.Effects.CreateEffects(ability.Source, ability, args.Targets))
-        {
-            _effectQueue.Push(effect);
-        };
+        _effectQueue.Push(resolutionContext);
 
         return Unit.Task;
     }

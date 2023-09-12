@@ -29,7 +29,7 @@ public interface IComputedValuesCache
     void UpdateComputedValues(Definitions definitions, GameState gameState);
 }
 
-public class Card : Atom, IComputedValuesCache
+public class Card : Atom, IActionBlock
 {
     public Zone CurrentZone { get; set; }
     public ProtoCard Proto { get; set; }
@@ -37,6 +37,10 @@ public class Card : Atom, IComputedValuesCache
     public object RulesText { get; set; } // TODO: Define this
     
     private IDictionary<string, object> _computedValues { get; set; } // Use this to create rules text
+
+    public Card Source => this;
+    public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
+    public IReadOnlyList<CostInstance> Costs => Proto.Costs;
 
     public object? GetComputedValue(string key)
     {
@@ -61,9 +65,12 @@ public class Card : Atom, IComputedValuesCache
     }
 }
 
-public class Ability : IComputedValuesCache
+public class Ability : IActionBlock
 {
     public Card Source { get; set; }
+    public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
+    public IReadOnlyList<CostInstance> Costs => Proto.Costs;
+    
     public AbilityInstance Proto { get; set; }
     
     private IDictionary<string, object> _computedValues { get; set; } // Use this to create rules text

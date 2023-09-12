@@ -1,5 +1,4 @@
-﻿using Archetype.Core;
-using Archetype.Rules.Definitions;
+﻿using Archetype.Rules.Definitions;
 using Archetype.Rules.Proto;
 using Archetype.Rules.State;
 
@@ -50,19 +49,31 @@ public static class DefinitionExtensions
             .All(c => c.Check(source, gameState));
     }
 
-    public static IEnumerable<Effect> CreateEffects(this IReadOnlyList<EffectInstance> effectInstances, Card source, IComputedValuesCache computedValuesCache, IReadOnlyList<Card> targets)
+    public static ResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IReadOnlyList<CostPayload> payments, IReadOnlyList<Card> targets)
     {
-        return effectInstances.Select(effectInstance => new Effect
+        return new ResolutionContext
         {
+            Effects = actionBlock.Effects.Select(effectInstance => effectInstance.CreateEffect(actionBlock, targets)).ToList(),
+            Costs = payments,
+            Source = actionBlock.Source,
+            State = new Dictionary<string, object>(),
+        };
+
+    }
+
+    public static Effect CreateEffect(this EffectInstance effectInstance, IActionBlock actionBlock, IReadOnlyList<Card> targets)
+    {
+        return new Effect
+        {
+            Source = actionBlock.Source,
             Keyword = effectInstance.Keyword,
-            Operands = effectInstance.Operands.GetOperands(computedValuesCache),
-            Source = source,
+            Operands = effectInstance.Operands.GetOperands(actionBlock),
             Targets = effectInstance.Targets.GetTargets(targets)
-        });
+        };
     }
 
     public static IReadOnlyList<object> GetOperands(this IReadOnlyList<OperandDescription> operandDescriptions,
-        IComputedValuesCache computedValuesCache)
+        IActionBlock actionBlock)
     {
         var operands = new List<object>();
 
@@ -70,7 +81,7 @@ public static class DefinitionExtensions
         {
             if (operand.IsComputed)
             {
-                if (computedValuesCache.GetComputedValue(operand.ComputedPropertyKey) is {} computedValue)
+                if (actionBlock.GetComputedValue(operand.ComputedPropertyKey) is {} computedValue)
                     operands.Add(computedValue);
                 else
                 {

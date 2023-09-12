@@ -24,12 +24,15 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         var conditions = args.Card.Proto.Conditions;
         var costs = args.Card.Proto.Costs;
         var payments = args.Payments;
+        var targets = args.Targets;
         
         args.Card.UpdateComputedValues(_definitions, _gameState);
         
         if (_definitions.CheckConditions(conditions, args.Card, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
+        // TODO: Check targets
+
         if (!_definitions.CheckCosts(costs, payments))
             throw new InvalidOperationException("Invalid payment");
 
@@ -38,10 +41,9 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        foreach (var effect in args.Card.Proto.Effects.CreateEffects(args.Card, args.Card, args.Targets))
-        {
-            _effectQueue.Push(effect);
-        }
+        var resolutionContext = args.Card.CreateResolutionContext(payments, targets);
+        
+        _effectQueue.Push(resolutionContext);
 
         return Unit.Task;
     }

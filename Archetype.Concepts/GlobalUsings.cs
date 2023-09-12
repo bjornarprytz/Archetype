@@ -10,7 +10,7 @@ global using CheckState = System.Func<Archetype.Rules.State.Card, Archetype.Rule
 global using ComputeProperty = System.Func<Archetype.Rules.State.Card, Archetype.Rules.State.GameState, object>;
 
 global using ResolveCost = System.Func<Archetype.Rules.State.GameState, Archetype.Rules.State.Definitions, Archetype.Rules.CostPayload, Archetype.Rules.Event>;
-global using ResolveEffect = System.Func<Archetype.Rules.State.GameState, Archetype.Rules.State.Definitions, Archetype.Rules.Effect, Archetype.Rules.Event>;
+global using ResolveEffect = System.Func<Archetype.Rules.State.GameState, Archetype.Rules.State.Definitions, Archetype.Rules.Effect, Archetype.Rules.ResolutionContext, Archetype.Rules.Event>;
 
 global using ApplyAura = System.Func<Archetype.Rules.State.Card, Archetype.Rules.Event>;
 global using RemoveAura = System.Func<Archetype.Rules.State.Card, Archetype.Rules.Event>;
