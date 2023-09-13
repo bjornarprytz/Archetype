@@ -33,7 +33,8 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         if (_definitions.CheckConditions(conditions, card, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
-        // TODO: Check targets
+        if (!card.CheckTargets(targets))
+            throw new InvalidOperationException("Invalid targets");
 
         if (!_definitions.CheckCosts(costs, payments))
             throw new InvalidOperationException("Invalid payment");

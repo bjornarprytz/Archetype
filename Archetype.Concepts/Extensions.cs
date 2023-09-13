@@ -116,6 +116,24 @@ public static class DefinitionExtensions
         return operands;
     }
 
+    public static bool CheckTargets(this IActionBlock actionBlock, IReadOnlyList<IAtom> targets)
+    {
+        var targetDescriptors = actionBlock.GetTargetDescriptors().ToList();
+
+        if (targets.Count > targetDescriptors.Count 
+            ||
+            targets.Count < targetDescriptors.Count(d => !d.IsOptional))
+            throw new InvalidOperationException($"Invalid number of targets ({targets.Count})");
+
+        foreach (var (description, target) in targetDescriptors.Zip(targets))
+        {
+            if (description.CheckTarget(target))
+                throw new InvalidOperationException($"Target ({target.Id}) does not match type the description ({description.CharacteristicsMatch})");
+        }
+
+        return true;
+    }
+    
     public static IReadOnlyDictionary<int, IAtom> GetTargets(this IReadOnlyList<TargetDescription> targetDescriptions,
         IReadOnlyList<IAtom> targets)
     {

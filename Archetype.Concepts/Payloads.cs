@@ -16,7 +16,7 @@ public class ResolutionContext
     public IReadOnlyList<Effect> Effects { get; set; }
     public IReadOnlyList<CostPayload> Costs { get; set; }
     
-    public IDictionary<string, object> State { get; set; } // TODO: rename this
+    public IDictionary<string, object> State { get; set; } // TODO: rename this. It is essentially for storing state between effects, like answers to prompts 
 }
 
 public class Effect

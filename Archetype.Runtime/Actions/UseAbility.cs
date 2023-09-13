@@ -35,8 +35,9 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         if (_definitions.CheckConditions(conditions, abilitySource, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
-        // TODO: Check targets
-        
+        if (abilitySource.GetTargetDescriptors().Zip(targets).All((t) => t.First.CheckTarget(t.Second)))
+            throw new InvalidOperationException("Invalid targets");
+
         if (!_definitions.CheckCosts(costs, payments))
             throw new InvalidOperationException("Invalid payment");
 

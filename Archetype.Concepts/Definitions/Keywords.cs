@@ -22,7 +22,6 @@ public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
     public KeywordType Type { get; set; }
-    public string Template { get; set; }
     public string ReminderText { get; set; }
     public Regex Pattern { get; set; }
     public ParseKeyword Parse { get; set; }

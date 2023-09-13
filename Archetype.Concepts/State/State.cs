@@ -33,6 +33,8 @@ public interface IActionBlock
 
     public object? GetComputedValue(string key);
     void UpdateComputedValues(State.Definitions definitions, IGameState gameState);
+    
+    IEnumerable<TargetDescription> GetTargetDescriptors();
 }
 
 public interface ICard : IAtom, IActionBlock
@@ -84,6 +86,11 @@ public class Card : ICard
             _computedValues[computedProperty.Key] = value;
         }
     }
+
+    public IEnumerable<TargetDescription> GetTargetDescriptors()
+    {
+        return Proto.Effects.SelectMany(e => e.Targets).DistinctBy(t => t.Index).OrderBy(t => t.Index);
+    }
 }
 
 public class Ability : IAbility
@@ -116,5 +123,10 @@ public class Ability : IAbility
             
             _computedValues[computedProperty.Key] = value;
         }
+    }
+    
+    public IEnumerable<TargetDescription> GetTargetDescriptors()
+    {
+        return Proto.Effects.SelectMany(e => e.Targets).DistinctBy(t => t.Index).OrderBy(t => t.Index);
     }
 }
