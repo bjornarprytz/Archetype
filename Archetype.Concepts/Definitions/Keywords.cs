@@ -13,7 +13,7 @@ public class KeywordOperand
 
 public class KeywordTarget
 {
-    public CardType Type { get; set; }
+    public string Type { get; set; }
     public string Description { get; set; }
     public bool IsOptional { get; set; }
 }

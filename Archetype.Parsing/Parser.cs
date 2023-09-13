@@ -17,7 +17,6 @@ public class SetData
 public class CardData
 {
     public string Name { get; set; }
-    public CardType Type { get; set; }
     public string Text { get; set; }
     public Dictionary<string, string> Characteristics { get; set; }
 }
@@ -119,7 +118,6 @@ public class CardParser : ICardParser
         var protoCard = new ProtoCard
         {
             Name = cardData.Name,
-            Type = cardData.Type,
             
             Characteristics = new ReadOnlyDictionary<string, string>(cardData.Characteristics)
         };

@@ -8,10 +8,10 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 {
     private readonly IEventHistory _history;
     private readonly IEffectQueue _effectQueue;
-    private readonly GameState _gameState;
+    private readonly IGameState _gameState;
     private readonly Definitions _definitions;
 
-    public PlayCardHandler(GameState gameState, Definitions definitions, IEffectQueue effectQueue, IEventHistory history)
+    public PlayCardHandler(IGameState gameState, Definitions definitions, IEffectQueue effectQueue, IEventHistory history)
     {
         _gameState = gameState;
         _definitions = definitions;
@@ -21,14 +21,16 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 
     public Task<Unit> Handle(PlayCardArgs args, CancellationToken cancellationToken)
     {
-        var conditions = args.Card.Proto.Conditions;
-        var costs = args.Card.Proto.Costs;
+        var card = _gameState.GetAtom<ICard>(args.Card);
+        var targets = args.Targets.Select(_gameState.GetAtom).ToList();
+        
+        var conditions = card.Proto.Conditions;
+        var costs = card.Proto.Costs;
         var payments = args.Payments;
-        var targets = args.Targets;
         
-        args.Card.UpdateComputedValues(_definitions, _gameState);
+        card.UpdateComputedValues(_definitions, _gameState);
         
-        if (_definitions.CheckConditions(conditions, args.Card, _gameState))
+        if (_definitions.CheckConditions(conditions, card, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
         // TODO: Check targets
@@ -41,7 +43,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        var resolutionContext = args.Card.CreateResolutionContext(payments, targets);
+        var resolutionContext = card.CreateResolutionContext(payments, targets);
         
         _effectQueue.Push(resolutionContext);
 

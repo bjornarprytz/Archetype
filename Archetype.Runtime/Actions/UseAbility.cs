@@ -8,10 +8,10 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 {
     private readonly IEventHistory _history;
     private readonly IEffectQueue _effectQueue;
-    private readonly GameState _gameState;
+    private readonly IGameState _gameState;
     private readonly Definitions _definitions;
 
-    public UseAbilityHandler(GameState gameState, Definitions definitions, IEffectQueue effectQueue, IEventHistory history)
+    public UseAbilityHandler(IGameState gameState, Definitions definitions, IEffectQueue effectQueue, IEventHistory history)
     {
         _gameState = gameState;
         _definitions = definitions;
@@ -21,15 +21,18 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 
     public Task<Unit> Handle(UseAbilityArgs args, CancellationToken cancellationToken)
     {
-        var protoAbility = args.Ability.Proto;
+        var abilitySource = _gameState.GetAtom<ICard>(args.AbilitySource);
+        var targets = args.Targets.Select(_gameState.GetAtom).ToList();
+
+        var ability = abilitySource.Abilities[args.AbilityIndex];
+        var protoAbility = ability.Proto;
         var conditions = protoAbility.Conditions;
         var costs = protoAbility.Costs;
-        var ability = args.Ability;
         var payments = args.Payments;
-        
+
         ability.UpdateComputedValues(_definitions, _gameState);
 
-        if (_definitions.CheckConditions(conditions, args.Ability.Source, _gameState))
+        if (_definitions.CheckConditions(conditions, abilitySource, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
         // TODO: Check targets
@@ -42,7 +45,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
         
-        var resolutionContext = ability.CreateResolutionContext(payments, args.Targets);
+        var resolutionContext = ability.CreateResolutionContext(payments, targets);
 
         _effectQueue.Push(resolutionContext);
 

@@ -8,37 +8,58 @@ public class Definitions
     public IDictionary<string, KeywordDefinition> Keywords { get; set; }
 }
 
-public abstract class Atom
+public interface IAtom
+{
+    Guid Id { get; set; }
+    IDictionary<string, string> Characteristics { get; set; }
+}
+
+public interface IZone : IAtom
+{
+    IEnumerable<ICard> Cards { get; set; }
+}
+
+public interface IGameState
+{
+    IDictionary<Guid, IZone> Zones { get; set; }
+    IDictionary<Guid, IAtom> Atoms { get; set; }
+}
+
+public interface IActionBlock
+{
+    public IAtom Source { get; }
+    public IReadOnlyList<EffectInstance> Effects { get; }
+    public IReadOnlyList<CostInstance> Costs { get; }
+
+    public object? GetComputedValue(string key);
+    void UpdateComputedValues(State.Definitions definitions, IGameState gameState);
+}
+
+public interface ICard : IAtom, IActionBlock
+{
+    IZone CurrentZone { get; set; }
+    ProtoCard Proto { get; set; }
+    IReadOnlyList<IAbility> Abilities { get; set; }
+}
+
+public interface IAbility : IActionBlock
+{
+    public AbilityInstance Proto { get; set; }
+}
+
+public class Card : ICard
 {
     public Guid Id { get; set; }
-}
-
-public abstract class Zone : Atom
-{
-    public IEnumerable<Card> Cards { get; set; }
-}
-
-public class GameState
-{
-    
-}
-
-public interface IComputedValuesCache
-{
-    object? GetComputedValue(string key);
-    void UpdateComputedValues(Definitions definitions, GameState gameState);
-}
-
-public class Card : Atom, IActionBlock
-{
-    public Zone CurrentZone { get; set; }
+    public IAtom Source => this;
+    public IZone CurrentZone { get; set; }
     public ProtoCard Proto { get; set; }
     public object Modifiers { get; set; } // TODO: Define this
     public object RulesText { get; set; } // TODO: Define this
     
+    public IDictionary<string, string> Characteristics { get; set; } // TODO: Define this, with proto and modifiers in mind
     private IDictionary<string, object> _computedValues { get; set; } // Use this to create rules text
 
-    public Card Source => this;
+    public IReadOnlyList<IAbility> Abilities { get; set; }
     public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
     public IReadOnlyList<CostInstance> Costs => Proto.Costs;
 
@@ -47,7 +68,7 @@ public class Card : Atom, IActionBlock
         return _computedValues.TryGetValue(key, out var value) ? value : null;
     }
 
-    public void UpdateComputedValues(Definitions definitions, GameState gameState)
+    public void UpdateComputedValues(Definitions definitions, IGameState gameState)
     {
         var computedValues = Proto.ComputedValues;
 
@@ -65,9 +86,9 @@ public class Card : Atom, IActionBlock
     }
 }
 
-public class Ability : IActionBlock
+public class Ability : IAbility
 {
-    public Card Source { get; set; }
+    public IAtom Source { get; set; }
     public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
     public IReadOnlyList<CostInstance> Costs => Proto.Costs;
     
@@ -80,7 +101,7 @@ public class Ability : IActionBlock
         return _computedValues.TryGetValue(key, out var value) ? value : null;
     }
 
-    public void UpdateComputedValues(Definitions definitions, GameState gameState)
+    public void UpdateComputedValues(Definitions definitions, IGameState gameState)
     {
         var computedValues = Proto.ComputedValues;
 

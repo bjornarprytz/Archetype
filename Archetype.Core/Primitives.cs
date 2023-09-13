@@ -1,16 +1,6 @@
 ﻿namespace Archetype.Core;
 
 [Flags]
-public enum CardType
-{
-    Spell,
-    Unit,
-    Structure,
-    Node,
-    Enemy
-}
-
-[Flags]
 public enum KeywordType
 {
     Effect,

@@ -7,14 +7,14 @@ namespace Archetype.Runtime.Implementation;
 public class EffectQueue : IEffectQueue
 {
     private readonly IEventHistory _eventHistory;
-    private readonly GameState _state;
+    private readonly IGameState _state;
     private readonly Definitions _definitions;
     
     private ResolutionContext? _currentContext;
     private readonly Queue<ResolutionContext> _contextQueue = new();
     private readonly Queue<Effect> _effectQueue = new();
 
-    public EffectQueue(IEventHistory eventHistory, GameState state, Definitions definitions)
+    public EffectQueue(IEventHistory eventHistory, IGameState state, Definitions definitions)
     {
         _eventHistory = eventHistory;
         _state = state;

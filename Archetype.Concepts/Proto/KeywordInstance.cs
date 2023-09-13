@@ -6,7 +6,7 @@ public class TargetDescription
 {
     public int Index { get; set; } // In the card target list
     
-    public CardType Type { get; set; }
+    public IReadOnlyDictionary<string, string> CharacteristicsMatch { get; set; }
     public string Description { get; set; }
     public bool IsOptional { get; set; }
 }

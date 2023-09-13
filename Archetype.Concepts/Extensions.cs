@@ -43,13 +43,32 @@ public static class DefinitionExtensions
         return true;
     }
     
-    public static bool CheckConditions(this State.Definitions definitions, IReadOnlyList<ConditionInstance> conditions, Card source, GameState gameState)
+    public static T GetAtom<T> (this IGameState gameState, Guid id) where T : IAtom
+    {
+        if (!gameState.Atoms.TryGetValue(id, out var atom))
+            throw new InvalidOperationException($"Atom ({id}) not found");
+
+        if (atom is T requiredAtom)
+            return requiredAtom;
+        
+        throw new InvalidOperationException($"Atom ({id}) is not a {typeof(T).Name}");
+    }
+    
+    public static IAtom GetAtom(this IGameState gameState, Guid id)
+    {
+        if (gameState.Atoms.TryGetValue(id, out var atom))
+            return atom;
+        
+        throw new InvalidOperationException($"Atom ({id}) not found");
+    }
+    
+    public static bool CheckConditions(this State.Definitions definitions, IReadOnlyList<ConditionInstance> conditions, IAtom source, IGameState gameState)
     {
         return !conditions.Select(definitions.GetOrThrow<ConditionDefinition>)
             .All(c => c.Check(source, gameState));
     }
 
-    public static ResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IReadOnlyList<CostPayload> payments, IReadOnlyList<Card> targets)
+    public static ResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
     {
         return new ResolutionContext
         {
@@ -61,7 +80,7 @@ public static class DefinitionExtensions
 
     }
 
-    public static Effect CreateEffect(this EffectInstance effectInstance, IActionBlock actionBlock, IReadOnlyList<Card> targets)
+    public static Effect CreateEffect(this EffectInstance effectInstance, IActionBlock actionBlock, IReadOnlyList<IAtom> targets)
     {
         return new Effect
         {
@@ -97,25 +116,30 @@ public static class DefinitionExtensions
         return operands;
     }
 
-    public static IReadOnlyDictionary<int, Card> GetTargets(this IReadOnlyList<TargetDescription> targetDescriptions,
-        IReadOnlyList<Card> targets)
+    public static IReadOnlyDictionary<int, IAtom> GetTargets(this IReadOnlyList<TargetDescription> targetDescriptions,
+        IReadOnlyList<IAtom> targets)
     {
-        var result = new Dictionary<int, Card>();
+        var result = new Dictionary<int, IAtom>();
         
         foreach (var targetDescription in targetDescriptions.DistinctBy(t => t.Index))
         {
             if (targetDescription.Index >= targets.Count)
                 throw new InvalidOperationException($"Target index ({targetDescription.Index}) is out of range");
             if (!targetDescription.IsOptional && !targetDescription.CheckTarget(targets[targetDescription.Index]))
-                throw new InvalidOperationException($"Target ({targets[targetDescription.Index].Id}) does not match type ({targetDescription.Type})");
+                throw new InvalidOperationException($"Target ({targets[targetDescription.Index].Id}) does not match type the description ({targetDescription.CharacteristicsMatch})");
             
             result.Add(targetDescription.Index, targets[targetDescription.Index]);
         }
         
         return result;
     }
-    public static bool CheckTarget(this TargetDescription targetDescription, Card target)
+    public static bool CheckTarget(this TargetDescription targetDescription, IAtom target)
     {
-        return targetDescription.Type.HasFlag(target.Proto.Type);
+        return 
+            targetDescription.CharacteristicsMatch.Values.All(c => 
+                    target.Characteristics[c].Contains(
+                        targetDescription.CharacteristicsMatch[c]
+                        )
+                    );
     }
 }
