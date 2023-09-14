@@ -1,5 +1,4 @@
-﻿using Archetype.Rules.State;
-using MediatR;
+﻿using MediatR;
 
 namespace Archetype.Rules;
 

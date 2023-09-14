@@ -1,5 +1,4 @@
-﻿using Archetype.Rules;
-using MediatR;
+﻿using MediatR;
 
 namespace Archetype.Runtime.Implementation;
 

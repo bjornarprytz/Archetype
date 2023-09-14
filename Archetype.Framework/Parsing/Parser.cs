@@ -1,9 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
-using Archetype.Core;
-using Archetype.Rules;
 using Archetype.Rules.Proto;
-using Archetype.Rules.State;
+using Archetype.Runtime;
 
 namespace Archetype.Parsing;
 
@@ -60,9 +58,9 @@ public class Parser : ISetParser
 
 public class CardParser : ICardParser
 {
-    private readonly Definitions _definitions;
+    private readonly IDefinitions _definitions;
 
-    public CardParser(Definitions definitions)
+    public CardParser(IDefinitions definitions)
     {
         _definitions = definitions;
     }

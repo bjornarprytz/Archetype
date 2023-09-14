@@ -1,23 +1,24 @@
-﻿using Archetype.Rules.Definitions;
+﻿using Archetype.Rules;
+using Archetype.Rules.Definitions;
 using Archetype.Rules.Proto;
-using Archetype.Rules.State;
+using Archetype.Runtime.State;
 
-namespace Archetype.Rules;
+namespace Archetype.Runtime;
 
-public static class DefinitionExtensions
+public static class RuntimeExtensions
 {
-    public static TDef GetOrThrow<TDef>(this State.Definitions definitions, KeywordInstance keywordInstance) where TDef : KeywordDefinition
+    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, KeywordInstance keywordInstance) where TDef : KeywordDefinition
     {
         if (definitions.Keywords[keywordInstance.Keyword] is not TDef requiredDefinition)
             throw new InvalidOperationException($"Keyword ({keywordInstance.Keyword}) is not a {typeof(TDef).Name}");
         
         return requiredDefinition;
     }
-    public static IEnumerable<(CostDefinition, CostPayload)> EnumerateCosts(this State.Definitions definitions, IEnumerable<CostInstance> costs, IEnumerable<CostPayload> payloads)
+    public static IEnumerable<(CostDefinition, CostPayload)> EnumerateCosts(this IDefinitions definitions, IEnumerable<CostInstance> costs, IEnumerable<CostPayload> payloads)
     {
         return costs.Select(definitions.GetOrThrow<CostDefinition>).Zip(payloads);
     }
-    public static bool CheckCosts(this State.Definitions definitions, 
+    public static bool CheckCosts(this IDefinitions definitions, 
         IReadOnlyList<CostInstance> costs,
         IReadOnlyList<CostPayload> payments
         )
@@ -62,7 +63,7 @@ public static class DefinitionExtensions
         throw new InvalidOperationException($"Atom ({id}) not found");
     }
     
-    public static bool CheckConditions(this State.Definitions definitions, IReadOnlyList<ConditionInstance> conditions, IAtom source, IGameState gameState)
+    public static bool CheckConditions(this IDefinitions definitions, IReadOnlyList<ConditionInstance> conditions, IAtom source, IGameState gameState)
     {
         return !conditions.Select(definitions.GetOrThrow<ConditionDefinition>)
             .All(c => c.Check(source, gameState));
@@ -90,7 +91,7 @@ public static class DefinitionExtensions
             Targets = effectInstance.Targets.GetTargets(targets)
         };
     }
-
+    
     public static IReadOnlyList<object> GetOperands(this IReadOnlyList<OperandDescription> operandDescriptions,
         IActionBlock actionBlock)
     {

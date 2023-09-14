@@ -7,8 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Archetype.Core\Archetype.Core.csproj" />
-      <ProjectReference Include="..\Archetype.Concepts\Archetype.Concepts.csproj" />
+      <ProjectReference Include="..\Archetype.Proto\Archetype.Proto.csproj" />
     </ItemGroup>
 
 </Project>

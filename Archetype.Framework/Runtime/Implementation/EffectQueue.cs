@@ -1,6 +1,6 @@
 ﻿using Archetype.Rules;
 using Archetype.Rules.Definitions;
-using Archetype.Rules.State;
+using Archetype.Runtime.State;
 
 namespace Archetype.Runtime.Implementation;
 
@@ -8,13 +8,13 @@ public class EffectQueue : IEffectQueue
 {
     private readonly IEventHistory _eventHistory;
     private readonly IGameState _state;
-    private readonly Definitions _definitions;
+    private readonly IDefinitions _definitions;
     
     private ResolutionContext? _currentContext;
     private readonly Queue<ResolutionContext> _contextQueue = new();
     private readonly Queue<Effect> _effectQueue = new();
 
-    public EffectQueue(IEventHistory eventHistory, IGameState state, Definitions definitions)
+    public EffectQueue(IEventHistory eventHistory, IGameState state, IDefinitions definitions)
     {
         _eventHistory = eventHistory;
         _state = state;
@@ -26,7 +26,7 @@ public class EffectQueue : IEffectQueue
         _contextQueue.Enqueue(context);
     }
 
-    public Event? ResolveNext()
+    public IEvent? ResolveNext()
     {
         if (_effectQueue.Count == 0)
         {
@@ -43,7 +43,7 @@ public class EffectQueue : IEffectQueue
         return e;
     }
 
-    private Event Resolve(Effect payload)
+    private IEvent Resolve(Effect payload)
     {
         if (_definitions.Keywords[payload.Keyword] is not EffectDefinition effectDefinition)
             throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect");

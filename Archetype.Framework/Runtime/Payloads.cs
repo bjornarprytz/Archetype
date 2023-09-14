@@ -1,13 +1,12 @@
 ﻿using Archetype.Core;
-using Archetype.Rules.Proto;
-using Archetype.Rules.State;
+using Archetype.Runtime.State;
 
 namespace Archetype.Rules;
 
-public class Event
+public interface IEvent
 {
     public bool IsPrompt { get; set; } // TODO: Figure out a better mechanism. Type? Enum?
-    public IEnumerable<Event> Children { get; set; }
+    public IEnumerable<IEvent> Children { get; set; }
 }
 
 public class ResolutionContext

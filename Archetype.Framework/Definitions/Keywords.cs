@@ -1,6 +1,7 @@
 ﻿
 using System.Text.RegularExpressions;
 using Archetype.Core;
+using Archetype.Rules.Proto;
 
 namespace Archetype.Rules.Definitions;
 
@@ -21,10 +22,9 @@ public class KeywordTarget
 public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
-    public KeywordType Type { get; set; }
     public string ReminderText { get; set; }
     public Regex Pattern { get; set; }
-    public ParseKeyword Parse { get; set; }
+    public Func<string, KeywordInstance> Parse { get; set; }
     public IReadOnlyList<KeywordTarget> Targets { get; set; }
     public IReadOnlyList<KeywordOperand> Operands { get; set; }
 }

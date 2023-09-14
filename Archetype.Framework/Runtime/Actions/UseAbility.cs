@@ -1,5 +1,5 @@
 ﻿using Archetype.Rules;
-using Archetype.Rules.State;
+using Archetype.Runtime.State;
 using MediatR;
 
 namespace Archetype.Runtime.Actions;
@@ -9,9 +9,9 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
     private readonly IEventHistory _history;
     private readonly IEffectQueue _effectQueue;
     private readonly IGameState _gameState;
-    private readonly Definitions _definitions;
+    private readonly IDefinitions _definitions;
 
-    public UseAbilityHandler(IGameState gameState, Definitions definitions, IEffectQueue effectQueue, IEventHistory history)
+    public UseAbilityHandler(IGameState gameState, IDefinitions definitions, IEffectQueue effectQueue, IEventHistory history)
     {
         _gameState = gameState;
         _definitions = definitions;

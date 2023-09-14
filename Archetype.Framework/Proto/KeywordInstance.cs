@@ -2,6 +2,11 @@
 
 namespace Archetype.Rules.Proto;
 
+public abstract class KeywordInstance
+{
+    public string Keyword { get; set; }
+}
+
 public class TargetDescription
 {
     public int Index { get; set; } // In the card target list
@@ -20,10 +25,7 @@ public class OperandDescription
     public string ComputedPropertyKey { get; set; } // If computed, the value is cached with each card instance
 }
 
-public abstract class KeywordInstance
-{
-    public string Keyword { get; set; }
-}
+
 
 public class EffectInstance : KeywordInstance
 {

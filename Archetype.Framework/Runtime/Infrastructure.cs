@@ -1,18 +1,24 @@
 ﻿using Archetype.Rules;
+using Archetype.Rules.Definitions;
 using MediatR;
 
 namespace Archetype.Runtime;
 
+public interface IDefinitions
+{
+    IDictionary<string, KeywordDefinition> Keywords { get; set; }
+}
+
 public interface IEventHistory
 {
-    public void Push(Event e);
-    public IReadOnlyList<Event> Events { get; set; }
+    public void Push(IEvent e);
+    public IReadOnlyList<IEvent> Events { get; set; }
 }
 
 public interface IEffectQueue
 {
     void Push(ResolutionContext context);
-    Event? ResolveNext();
+    IEvent? ResolveNext();
 }
 
 public interface IGameLoop

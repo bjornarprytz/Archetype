@@ -1,6 +1,13 @@
 ﻿namespace Archetype.Core;
 
 [Flags]
+public enum KeywordOperandType
+{
+    Integer,
+    String
+}
+
+[Flags]
 public enum KeywordType
 {
     Effect,
@@ -13,12 +20,7 @@ public enum KeywordType
     Cost,
 }
 
-[Flags]
-public enum KeywordOperandType
-{
-    Integer,
-    String
-}
+
 
 [Flags]
 public enum CostType
