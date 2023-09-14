@@ -1,4 +1,4 @@
-﻿namespace Archetype.Runtime.Implementation;
+﻿namespace Archetype.Framework.Runtime.Implementation;
 
 public class GameLoop : IGameLoop
 {

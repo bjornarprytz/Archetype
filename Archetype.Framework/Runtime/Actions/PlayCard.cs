@@ -1,8 +1,7 @@
-﻿using Archetype.Rules;
-using Archetype.Runtime.State;
+﻿using Archetype.Framework.Runtime.State;
 using MediatR;
 
-namespace Archetype.Runtime.Actions;
+namespace Archetype.Framework.Runtime.Actions;
 
 public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 {

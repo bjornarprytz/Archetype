@@ -1,8 +1,7 @@
-﻿using Archetype.Rules;
-using Archetype.Rules.Definitions;
-using Archetype.Runtime.State;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime.State;
 
-namespace Archetype.Runtime.Implementation;
+namespace Archetype.Framework.Runtime.Implementation;
 
 public class EffectQueue : IEffectQueue
 {

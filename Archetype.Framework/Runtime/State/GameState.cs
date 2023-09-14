@@ -1,6 +1,6 @@
-﻿using Archetype.Rules.Proto;
+﻿using Archetype.Framework.Proto;
 
-namespace Archetype.Runtime.State;
+namespace Archetype.Framework.Runtime.State;
 
 public interface IAtom
 {

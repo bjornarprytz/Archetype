@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
-using Archetype.Rules.Proto;
-using Archetype.Runtime;
+using Archetype.Framework.Proto;
+using Archetype.Framework.Runtime;
 
-namespace Archetype.Parsing;
+namespace Archetype.Framework.Parsing;
 
 public class SetData
 {

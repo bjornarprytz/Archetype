@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Archetype.Rules;
+namespace Archetype.Framework.Runtime.Actions;
 
 public record PlayCardArgs(Guid Card, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
 public record StartGameArgs(IEnumerable<string> DeckOfCards) : IRequest<Unit>;

@@ -1,2 +1,2 @@
-﻿namespace Archetype.Rules.Definitions;
+﻿namespace Archetype.Framework.Definitions;
 

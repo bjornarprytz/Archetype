@@ -1,9 +1,7 @@
-﻿
-using System.Text.RegularExpressions;
-using Archetype.Core;
-using Archetype.Rules.Proto;
+﻿using System.Text.RegularExpressions;
+using Archetype.Framework.Proto;
 
-namespace Archetype.Rules.Definitions;
+namespace Archetype.Framework.Definitions;
 
 public class KeywordOperand
 {

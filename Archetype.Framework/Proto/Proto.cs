@@ -1,4 +1,4 @@
-﻿namespace Archetype.Rules.Proto;
+﻿namespace Archetype.Framework.Proto;
 
 
 public class ProtoCard

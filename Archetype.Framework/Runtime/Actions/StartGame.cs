@@ -1,2 +1,2 @@
-﻿namespace Archetype.Runtime.Actions;
+﻿namespace Archetype.Framework.Runtime.Actions;
 

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Archetype.Runtime.Implementation;
+namespace Archetype.Framework.Runtime.Implementation;
 
 public class GameActionHandler : IGameActionHandler
 {

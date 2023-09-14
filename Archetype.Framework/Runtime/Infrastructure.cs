@@ -1,8 +1,7 @@
-﻿using Archetype.Rules;
-using Archetype.Rules.Definitions;
+﻿using Archetype.Framework.Definitions;
 using MediatR;
 
-namespace Archetype.Runtime;
+namespace Archetype.Framework.Runtime;
 
 public interface IDefinitions
 {

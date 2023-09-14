@@ -1,7 +1,7 @@
-﻿using Archetype.Core;
-using Archetype.Runtime.State;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime.State;
 
-namespace Archetype.Rules;
+namespace Archetype.Framework.Runtime;
 
 public interface IEvent
 {

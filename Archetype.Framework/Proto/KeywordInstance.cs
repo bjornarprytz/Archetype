@@ -1,6 +1,6 @@
-﻿using Archetype.Core;
+﻿using Archetype.Framework.Definitions;
 
-namespace Archetype.Rules.Proto;
+namespace Archetype.Framework.Proto;
 
 public abstract class KeywordInstance
 {

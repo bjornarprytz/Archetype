@@ -1,9 +1,8 @@
-﻿using Archetype.Rules;
-using Archetype.Rules.Definitions;
-using Archetype.Rules.Proto;
-using Archetype.Runtime.State;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Proto;
+using Archetype.Framework.Runtime.State;
 
-namespace Archetype.Runtime;
+namespace Archetype.Framework.Runtime;
 
 public static class RuntimeExtensions
 {

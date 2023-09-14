@@ -1,4 +1,4 @@
-﻿namespace Archetype.Core;
+﻿namespace Archetype.Framework.Definitions;
 
 [Flags]
 public enum KeywordOperandType

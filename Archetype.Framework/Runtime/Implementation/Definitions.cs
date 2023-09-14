@@ -1,6 +1,6 @@
-﻿using Archetype.Rules.Definitions;
+﻿using Archetype.Framework.Definitions;
 
-namespace Archetype.Runtime.Implementation;
+namespace Archetype.Framework.Runtime.Implementation;
 
 public class Definitions : IDefinitions
 {
