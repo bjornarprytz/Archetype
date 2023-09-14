@@ -3,6 +3,8 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
+public record PlayCardArgs(Guid Card, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
+
 public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 {
     private readonly IEventHistory _history;

@@ -6,7 +6,8 @@ namespace Archetype.Framework.Runtime;
 public interface IEvent
 {
     public bool IsPrompt { get; set; } // TODO: Figure out a better mechanism. Type? Enum?
-    public IEnumerable<IEvent> Children { get; set; }
+    public IEvent Parent { get; set; }
+    public IReadOnlyList<IEvent> Children { get; set; }
 }
 
 public class ResolutionContext

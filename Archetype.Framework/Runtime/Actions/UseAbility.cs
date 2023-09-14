@@ -3,6 +3,8 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
+public record UseAbilityArgs(Guid AbilitySource, int AbilityIndex, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
+
 public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 {
     private readonly IEventHistory _history;
