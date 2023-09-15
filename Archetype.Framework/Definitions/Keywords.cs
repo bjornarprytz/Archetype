@@ -31,8 +31,9 @@ public abstract class KeywordDefinition
 // Examples:
 // DAMAGE <1> 6
 // HEAL <2> 3
-// DRAW 4
+// DRAW [X] // get args from a computed value
 // MODIFY <1> Strength 1
+// DISCARD -1- // get args from the first prompt response
 public class EffectDefinition : KeywordDefinition
 {
     public ResolveEffect Resolve { get; set; }
@@ -42,6 +43,7 @@ public class EffectDefinition : KeywordDefinition
 //
 // Examples:
 // STRENGTH 2
+// PROMPT "Choose a card to discard"  
 // TARGETS Enemy Unit Any
 // 
 // Other definitions can then reference the targets:

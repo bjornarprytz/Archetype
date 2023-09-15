@@ -12,11 +12,16 @@ public class GameActionHandler : IGameActionHandler
         _mediator = mediator;
         _gameLoop = gameLoop;
     }
-    
-    public ActionResult Handle(IRequest args)
-    {
-        var result = _mediator.Send(args); // TODO: Deal with async
 
-        return _gameLoop.Advance();
+    public IGameAPI CurrentApi { get; private set; } // TODO: Initialize this
+
+    public IGameAPI Handle(IRequest args)
+    {
+        var result = _mediator.Send(args);
+        result.Wait();
+
+        CurrentApi = _gameLoop.Advance();
+
+        return CurrentApi;
     }
 }

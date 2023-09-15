@@ -8,15 +8,15 @@ public record UseAbilityArgs(Guid AbilitySource, int AbilityIndex, IReadOnlyList
 public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 {
     private readonly IEventHistory _history;
-    private readonly IEffectQueue _effectQueue;
+    private readonly IActionQueue _actionQueue;
     private readonly IGameState _gameState;
     private readonly IDefinitions _definitions;
 
-    public UseAbilityHandler(IGameState gameState, IDefinitions definitions, IEffectQueue effectQueue, IEventHistory history)
+    public UseAbilityHandler(IGameState gameState, IDefinitions definitions, IActionQueue actionQueue, IEventHistory history)
     {
         _gameState = gameState;
         _definitions = definitions;
-        _effectQueue = effectQueue;
+        _actionQueue = actionQueue;
         _history = history;
     }
 
@@ -49,7 +49,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         
         var resolutionContext = ability.CreateResolutionContext(payments, targets);
 
-        _effectQueue.Push(resolutionContext);
+        _actionQueue.Push(resolutionContext);
 
         return Unit.Task;
     }

@@ -1,4 +1,6 @@
 ﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime.Actions;
+using Archetype.Framework.Runtime.State;
 using MediatR;
 
 namespace Archetype.Framework.Runtime;
@@ -14,30 +16,29 @@ public interface IEventHistory
     public IReadOnlyList<IEvent> Events { get; set; }
 }
 
-public interface IEffectQueue
+public interface IActionQueue
 {
+    ResolutionContext? CurrentContext { get; }
     void Push(ResolutionContext context);
     IEvent? ResolveNext();
 }
 
 public interface IGameLoop
 {
-    ActionResult Advance();
+    IGameAPI Advance();
 }
 
 public interface IGameActionHandler
 {
-    public ActionResult Handle(IRequest args);
+    IGameAPI CurrentApi { get; }
+    IGameAPI Handle(IRequest args);
 }
 
-public class ActionDescription
-{
-    public string Name { get; set; }
-    
-    // TODO: Describe requirements of the action
-}
+public record ActionDescription(ActionType Type);
 
-public class ActionResult
+
+public interface IGameAPI
 {
-    public IReadOnlyList<ActionDescription> AvailableActions { get; set; }
+    IGameState State { get; set; }
+    IReadOnlyList<ActionDescription> AvailableActions { get; set; }
 }
