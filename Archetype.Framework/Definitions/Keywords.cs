@@ -12,7 +12,7 @@ public class KeywordOperand
 
 public class KeywordTarget
 {
-    public string Type { get; set; }
+    public string Type { get; set; } // "Unit | Structure | Player | Any"
     public string Description { get; set; }
     public bool IsOptional { get; set; }
 }
@@ -20,7 +20,7 @@ public class KeywordTarget
 public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
-    public string ReminderText { get; set; }
+    public string ReminderText { get; set; } // E.g. "Deal {X} damage to target unit or structure"
     public Regex Pattern { get; set; }
     public Func<string, KeywordInstance> Parse { get; set; }
     public IReadOnlyList<KeywordTarget> Targets { get; set; }

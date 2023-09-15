@@ -27,8 +27,8 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         var card = _gameState.GetAtom<ICard>(args.Card);
         var targets = args.Targets.Select(_gameState.GetAtom).ToList();
         
-        var conditions = card.Proto.Conditions;
-        var costs = card.Proto.Costs;
+        var conditions = card.Conditions;
+        var costs = card.Costs;
         var payments = args.Payments;
         
         card.UpdateComputedValues(_definitions, _gameState);

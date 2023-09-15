@@ -38,11 +38,11 @@ public class ActionQueue : IActionQueue
         
         var payload = _effectQueue.Dequeue();
         var e = Resolve(payload);
-        _eventHistory.Push(e);
+        CurrentContext!.Events.Add(e);
         
-        if (_effectQueue.Count == 0 && CurrentContext != null)
+        if (_effectQueue.Count == 0)
         {
-            _eventHistory.Push(new ActionBlockEvent(CurrentContext)); // TODO: Is this the right place to do this?
+            _eventHistory.Push(new ActionBlockEvent(CurrentContext));
             
             CurrentContext = null;
         }

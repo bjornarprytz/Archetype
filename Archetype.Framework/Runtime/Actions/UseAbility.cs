@@ -26,9 +26,8 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var targets = args.Targets.Select(_gameState.GetAtom).ToList();
 
         var ability = abilitySource.Abilities[args.AbilityIndex];
-        var protoAbility = ability.Proto;
-        var conditions = protoAbility.Conditions;
-        var costs = protoAbility.Costs;
+        var conditions = ability.Conditions;
+        var costs = ability.Costs;
         var payments = args.Payments;
 
         ability.UpdateComputedValues(_definitions, _gameState);

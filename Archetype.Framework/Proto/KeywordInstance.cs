@@ -7,14 +7,11 @@ public abstract class KeywordInstance
     public string Keyword { get; set; }
 }
 
-public class TargetDescription
-{
-    public int Index { get; set; } // In the card target list
-    
-    public IReadOnlyDictionary<string, string> CharacteristicsMatch { get; set; }
-    public string Description { get; set; }
-    public bool IsOptional { get; set; }
-}
+public record TargetDescription(
+    int Index,
+    IReadOnlyDictionary<string, string> CharacteristicsMatch,
+    bool IsOptional
+);
 
 public class OperandDescription
 {

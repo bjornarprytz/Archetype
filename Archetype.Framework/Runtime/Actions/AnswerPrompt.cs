@@ -18,8 +18,6 @@ public class AnswerPromptHandler : IRequestHandler<AnswerPromptArgs, Unit>
     
     public Task<Unit> Handle(AnswerPromptArgs request, CancellationToken cancellationToken)
     {
-        // TODO: Figure out how to validate answers to prompts
-
         if (_actionQueue.CurrentContext == null)
             throw new InvalidOperationException("No prompt to answer");
         
