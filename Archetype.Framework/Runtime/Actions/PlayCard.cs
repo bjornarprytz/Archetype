@@ -1,8 +1,10 @@
-﻿using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime.State;
 using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
+public record CostPayload(CostType Type, IReadOnlyList<ICard> Payment);
 public record PlayCardArgs(Guid Card, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
 
 public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>

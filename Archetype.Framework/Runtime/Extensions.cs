@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
+using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime;
@@ -75,7 +76,7 @@ public static class RuntimeExtensions
             Effects = actionBlock.Effects.Select(effectInstance => effectInstance.CreateEffect(actionBlock, targets)).ToList(),
             Costs = payments,
             Source = actionBlock.Source,
-            State = new Dictionary<string, object>(),
+            Targets = targets,
         };
 
     }

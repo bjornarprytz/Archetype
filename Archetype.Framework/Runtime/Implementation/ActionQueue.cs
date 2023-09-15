@@ -40,6 +40,13 @@ public class ActionQueue : IActionQueue
         var e = Resolve(payload);
         _eventHistory.Push(e);
         
+        if (_effectQueue.Count == 0 && CurrentContext != null)
+        {
+            _eventHistory.Push(new ActionBlockEvent(CurrentContext)); // TODO: Is this the right place to do this?
+            
+            CurrentContext = null;
+        }
+        
         return e;
     }
 
@@ -56,8 +63,6 @@ public class ActionQueue : IActionQueue
 
     private bool TryAdvanceContext()
     {
-        CurrentContext = null;
-            
         if (_contextQueue.Count == 0)
         {
             return false;

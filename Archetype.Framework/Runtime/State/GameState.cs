@@ -10,7 +10,8 @@ public interface IAtom
 
 public interface IZone : IAtom
 {
-    IEnumerable<ICard> Cards { get; set; }
+    IList<ICard> Cards { get; set; }
+    
 }
 
 public interface IGameState
@@ -19,14 +20,25 @@ public interface IGameState
     IDictionary<Guid, IAtom> Atoms { get; set; }
 }
 
+public interface IActionBlock
+{
+    public IAtom Source { get; }
+    public IReadOnlyList<EffectInstance> Effects { get; }
+    public IReadOnlyList<CostInstance> Costs { get; }
+
+    public object? GetComputedValue(string key);
+    void UpdateComputedValues(IDefinitions definitions, IGameState gameState);
+    
+    IEnumerable<TargetDescription> GetTargetDescriptors();
+}
+
 public interface ICard : IAtom, IActionBlock
 {
-    IZone CurrentZone { get; set; }
     ProtoCard Proto { get; set; }
     IReadOnlyList<IAbility> Abilities { get; set; }
     
-    IDictionary<string, string> Characteristics { get; set; } // TODO: Define this, with proto and modifiers in mind
-    object Modifiers { get; set; } // TODO: Define this
+    IZone CurrentZone { get; set; }
+    IDictionary<string, string> Characteristics { get; set; }
     object RulesText { get; set; } // TODO: Define this
 }
 
