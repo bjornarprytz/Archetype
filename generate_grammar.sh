@@ -1,0 +1,1 @@
+antlr4 Archetype.Framework/Parsing/CardGrammar.g4 -Dlanguage=CSharp -o Archetype.Framework/Parsing/Generated/

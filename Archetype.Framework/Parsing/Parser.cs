@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
+using Antlr4.Runtime;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 
@@ -16,7 +17,6 @@ public class CardData
 {
     public string Name { get; set; }
     public string Text { get; set; }
-    public Dictionary<string, string> Characteristics { get; set; }
 }
 
 public interface ICardParser
@@ -26,7 +26,7 @@ public interface ICardParser
 
 public interface ISetParser
 {
-    public ProtoSet ParseGame(string setJson);
+    public ProtoSet ParseSet(string setJson);
 }
 
 public class Parser : ISetParser
@@ -38,7 +38,7 @@ public class Parser : ISetParser
         _cardParser = cardParser;
     }
 
-    public ProtoSet ParseGame(string setJson)
+    public ProtoSet ParseSet(string setJson)
     {
         var setData = JsonSerializer.Deserialize<SetData>(setJson);
 
@@ -67,59 +67,18 @@ public class CardParser : ICardParser
 
     public ProtoCard ParseCard(CardData cardData)
     {
-        var cost = new List<CostInstance>();
-        var conditions = new List<ConditionInstance>();
-        var reactions = new List<ReactionInstance>();
-        var effects = new List<EffectInstance>();
-        var features = new List<FeatureInstance>();
-        var abilities = new List<AbilityInstance>();
-        var computedValues = new List<ComputedValueInstance>();
-
-        foreach (var token in cardData.Text.Split(";"))
-        {
-            var definition = _definitions.Keywords.Values.FirstOrDefault(def => def.Pattern.Match(token).Success);
-            
-            if (definition is null)
-                throw new InvalidOperationException($"Could not parse token: {token}");
-
-            var protoData = definition.Parse(token);
-
-            switch (protoData)
-            {
-                case CostInstance costInstance:
-                    cost.Add(costInstance);
-                    break;
-                case ConditionInstance conditionInstance:
-                    conditions.Add(conditionInstance);
-                    break;
-                case ReactionInstance reactionInstance:
-                    reactions.Add(reactionInstance);
-                    break;
-                case EffectInstance effectInstance:
-                    effects.Add(effectInstance);
-                    break;
-                case FeatureInstance featureInstance:
-                    features.Add(featureInstance);
-                    break;
-                case AbilityInstance abilityInstance:
-                    abilities.Add(abilityInstance);
-                    break;
-                case ComputedValueInstance computedValueInstance:
-                    computedValues.Add(computedValueInstance);
-                    break;
-                default:
-                    throw new InvalidOperationException($"Unknown keyword instance type: {protoData.GetType().Name}");
-            }
-        }
+        var inputStream = new AntlrInputStream(cardData.Text);
+        var lexer = new CardGrammarLexer(inputStream);
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new CardGrammarParser(tokenStream);
         
+        var tree = parser.actionBlock();
         
-        var protoCard = new ProtoCard
-        {
-            Name = cardData.Name,
-            
-            Characteristics = new ReadOnlyDictionary<string, string>(cardData.Characteristics)
-        };
-        
-        return protoCard;
+
+        var t = tree.ToStringTree(parser);
+
+        Console.WriteLine(t);
+
+        return null;
     }
 }

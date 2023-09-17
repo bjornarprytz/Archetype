@@ -13,7 +13,6 @@ public static class Extensions
         {
             Name = "Move",
             ReminderText = "Move a card from one zone to another.",
-            Pattern = new Regex("Move (?<source>.+) to (?<destination>.+)"), // NOTE: This is a very simple pattern, but it's enough for now
             Parse = (input) =>
             {
                 var match = new Regex("Move (?<source>.+) to (?<destination>.+)").Match(input);
