@@ -1,29 +1,30 @@
 grammar CardGrammar;
 
-actionBlock: effect*;
+actionBlock: keywords;
 
-effect: keyword targetSelector* operand* ';';
+keywords: (effect | targetProvider)*;
 
-keyword: ANY;
+targetProvider: '<' keyword '>' operand* cardSelector ';';
+effect: keyword target* operand* ';';
 
-operand: NUMBER | STRING;
+target: '<' index '>';
 
-targetSelector: ZONE ('(' filterList ')')?;
-
+cardSelector: cardFilter*;
+cardFilter: '(' filterList ')';
 filterList: filter (',' filter)*;
-
 filter: filterKey ':' filterValue;
-
-filterKey: ANY;
-
+filterKey: keyword;
 filterValue: ANY ('|' ANY)*;
 
-ZONE: 'hand' | 'target';
-NUMBER: DIGIT+;
-STRING: '"' WORD '"';
-ANY: WORD;
+keyword: ANY;
+operand: NUMBER | STRING;
+index: NUMBER;
 
-fragment WORD : [a-zA-Z0-9_]+;
+STRING: '"' (~["\r\n])* '"';
+NUMBER: DIGIT+;
+ANY: WORD+;
+
+fragment WORD: [a-zA-Z0-9_]+;
 fragment DIGIT: [0-9];
 
 WS: [ \t\r\n]+ -> skip; // skip whitespace characters

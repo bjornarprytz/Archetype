@@ -24,8 +24,10 @@ public class Tests
             Name = "Lightning Bolt",
             Text = 
 """ 
-    DAMAGE hand(type:unit|card,trample:true) 4;
-    HEAL target 1 "Goodbye";
+    <TARGETS> (type:unit|structure);
+    DAMAGE <0> 4;
+    <PROMPT> "Choose a card to discard" 2 (zone:hand);
+    DISCARD <1> 1;
     DRAW 1;
 """
         });

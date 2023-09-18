@@ -13,7 +13,6 @@ public class KeywordOperand
 public class KeywordTarget
 {
     public string Type { get; set; } // "Unit | Structure | Player | Any"
-    public string Description { get; set; }
     public bool IsOptional { get; set; }
 }
 

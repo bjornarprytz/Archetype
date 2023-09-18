@@ -1,4 +1,5 @@
 ﻿.old/
+.antlr/
 
 .vs/
 **/bin
