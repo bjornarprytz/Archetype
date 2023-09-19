@@ -1,33 +1,30 @@
 ﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime;
+using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Proto;
 
 public abstract class KeywordInstance
 {
     public string Keyword { get; set; }
+    public IReadOnlyList<KeywordOperand> Operands { get; set; }
 }
 
-public record TargetDescription(
-    int Index,
-    IReadOnlyDictionary<string, string> CharacteristicsMatch,
-    bool IsOptional
+public record KeywordTarget(
+    Func<IAtom, bool> ValidateTarget,
+    Func<IResolutionContext, IAtom> GetTarget
 );
 
-public class OperandDescription
+public record KeywordOperand
 {
-    public KeywordOperandType Type { get; set; }
-    
-    public bool IsComputed { get; set; }
-    public object Value { get; set; } // If not computed
-    public string ComputedPropertyKey { get; set; } // If computed, the value is cached with each card instance
+    public Func<IResolutionContext, object> GetValue { get; set; }
 }
 
 
 
 public class EffectInstance : KeywordInstance
 {
-    public IReadOnlyList<OperandDescription> Operands { get; set; }
-    public IReadOnlyList<TargetDescription> Targets { get; set; }
+    public IReadOnlyList<KeywordTarget> Targets { get; set; }
 }
 
 public class ReactionInstance : KeywordInstance
@@ -42,6 +39,7 @@ public class FeatureInstance : KeywordInstance
 
 public class AbilityInstance : KeywordInstance
 {
+    public IReadOnlyList<TargetDescription> Targets { get; set; }
     public IReadOnlyList<ConditionInstance> Conditions { get; set; }
     public IReadOnlyList<CostInstance> Costs { get; set; }
     public IReadOnlyList<EffectInstance> Effects { get; set; }
@@ -60,5 +58,4 @@ public class CostInstance : KeywordInstance
 
 public class ComputedValueInstance : KeywordInstance
 {
-    public string Key { get; set; }
 }

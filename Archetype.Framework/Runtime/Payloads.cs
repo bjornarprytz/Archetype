@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Runtime.Actions;
+﻿using Archetype.Framework.Proto;
+using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime;
@@ -29,13 +30,18 @@ public record ActionBlockEvent
 }
 
 
+public interface IResolutionFrame
+{
+    IResolutionContext Context { get; }
+    IReadOnlyList<EffectInstance> Effects { get; }
+}
 
+public record ResolutionFrame(IResolutionContext Context, IReadOnlyList<EffectInstance> Effects) : IResolutionFrame;
 
 public interface IResolutionContext
 {
     public IGameState GameState { get; }
     public IAtom Source { get; }
-    public IReadOnlyList<Effect> Effects { get; }
     public IReadOnlyList<CostPayload> Costs { get; }
     public IReadOnlyList<IAtom> Targets { get; }
     
@@ -48,7 +54,6 @@ public class ResolutionContext : IResolutionContext
 {
     public required IGameState GameState { get; init; }
     public required IAtom Source { get; init; }
-    public required IReadOnlyList<Effect> Effects { get; init; }
     public required IReadOnlyList<CostPayload> Costs { get; init; }
     public required IReadOnlyList<IAtom> Targets { get; init; }
 
@@ -63,5 +68,5 @@ public class Effect
     public required string Keyword { get; init; }
     public required IReadOnlyList<object> Operands { get; init; }
     
-    public required IReadOnlyDictionary<int, IAtom> Targets { get; init; }
+    public required IReadOnlyList<IAtom> Targets { get; init; }
 }

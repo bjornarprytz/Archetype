@@ -76,7 +76,7 @@ public class CardParser : ICardParser
 
         var protoBuilder = new ProtoBuilder();
         
-
+        // TODO: Parse card data and add to protoBuilder
 
         return protoBuilder.Build();
     }

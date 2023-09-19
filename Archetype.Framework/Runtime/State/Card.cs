@@ -5,7 +5,7 @@ namespace Archetype.Framework.Runtime.State;
 
 public class Card : ICard
 {
-    private readonly Dictionary<string, object> _computedValues = new(); 
+    private readonly List<object> _computedValues = new(); 
         
     public Guid Id { get; set; }
     public ProtoCard Proto { get; init; }
@@ -13,7 +13,7 @@ public class Card : ICard
     
     public IZone CurrentZone { get; set; }
     public IAtom Source => this;
-    
+    public IReadOnlyList<TargetDescription> TargetsDescriptors => Proto.Targets;
     public IReadOnlyList<FeatureInstance> Features => Proto.Features;
     public IReadOnlyList<ReactionInstance> Reactions => Proto.Reactions;
     public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
@@ -23,24 +23,19 @@ public class Card : ICard
     
 
 
-    public object? GetComputedValue(string key)
+    public object? GetComputedValue(int index)
     {
-        return _computedValues.TryGetValue(key, out var value) ? value : null;
+        return _computedValues.Count <= index ? null : _computedValues[index];
     }
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
     {
-        foreach (var computedValue in Proto.ComputedValues)
+        foreach (var (computedValue, index) in Proto.ComputedValues.Select(((instance, i) => (instance, i))))
         {
             var keywordDefinition = definitions.GetOrThrow<ComputedValueDefinition>(computedValue);
             
-            _computedValues[computedValue.Key] = keywordDefinition.Compute(Source, gameState);
+            _computedValues[index] = keywordDefinition.Compute(Source, gameState);
         }
-    }
-
-    public IEnumerable<TargetDescription> GetTargetDescriptors()
-    {
-        return Effects.SelectMany(e => e.Targets).DistinctBy(t => t.Index).OrderBy(t => t.Index);
     }
 }
 
@@ -50,29 +45,27 @@ public class Ability : IAbility
     public Guid Id { get; init; }
     public AbilityInstance Proto { get; init; }
     public IAtom Source { get; init; }
+    public IReadOnlyList<TargetDescription> TargetsDescriptors { get; }
+    public IReadOnlyList<TargetDescription> Targets => Proto.Targets;
     public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
     public IReadOnlyList<CostInstance> Costs => Proto.Costs;
     public IReadOnlyList<ConditionInstance> Conditions => Proto.Conditions;
 
-    private readonly Dictionary<string, object> _computedValues = new(); 
-    public object? GetComputedValue(string key)
+    private readonly List<object> _computedValues = new(); 
+
+    public object? GetComputedValue(int index)
     {
-        return _computedValues.TryGetValue(key, out var value) ? value : null;
+        return _computedValues.Count <= index ? null : _computedValues[index];
     }
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
     {
-        foreach (var computedValue in Proto.ComputedValues)
+        foreach (var (computedValue, index) in Proto.ComputedValues.Select(((instance, i) => (instance, i))))
         {
             var keywordDefinition = definitions.GetOrThrow<ComputedValueDefinition>(computedValue);
             
-            _computedValues[computedValue.Key] = keywordDefinition.Compute(Source, gameState);
+            _computedValues[index] = keywordDefinition.Compute(Source, gameState);
         }
-    }
-
-    public IEnumerable<TargetDescription> GetTargetDescriptors()
-    {
-        return Effects.SelectMany(e => e.Targets).DistinctBy(t => t.Index).OrderBy(t => t.Index);
     }
 
     public IReadOnlyList<FeatureInstance> Features { get; }

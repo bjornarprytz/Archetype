@@ -18,12 +18,12 @@ public class AnswerPromptHandler : IRequestHandler<AnswerPromptArgs, Unit>
     
     public Task<Unit> Handle(AnswerPromptArgs request, CancellationToken cancellationToken)
     {
-        if (_actionQueue.CurrentContext == null)
+        if (_actionQueue.CurrentFrame == null)
             throw new InvalidOperationException("No prompt to answer");
         
         var selection = request.Answer.Select(_gameState.GetAtom).ToList();
         
-        _actionQueue.CurrentContext.PromptResponses.Add(selection);
+        _actionQueue.CurrentFrame.Context.PromptResponses.Add(selection);
 
         return Unit.Task;
     }

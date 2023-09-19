@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Proto;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Proto;
 
 namespace Archetype.Framework.Runtime.State;
 
@@ -22,14 +23,13 @@ public interface IGameState
 public interface IActionBlock
 {
     IAtom Source { get; }
+    IReadOnlyList<TargetDescription> TargetsDescriptors { get; }
     IReadOnlyList<EffectInstance> Effects { get; }
     IReadOnlyList<CostInstance> Costs { get; }
     IReadOnlyList<ConditionInstance> Conditions { get; }
 
-    object? GetComputedValue(string key);
+    object? GetComputedValue(int index);
     void UpdateComputedValues(IDefinitions definitions, IGameState gameState);
-
-    IEnumerable<TargetDescription> GetTargetDescriptors();
 }
 
 public interface ICard : IAtom, IActionBlock

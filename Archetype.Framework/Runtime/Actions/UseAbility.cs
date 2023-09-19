@@ -35,7 +35,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         if (_definitions.CheckConditions(conditions, abilitySource, _gameState))
             throw new InvalidOperationException("Invalid conditions");
         
-        if (abilitySource.GetTargetDescriptors().Zip(targets).All((t) => t.First.CheckTarget(t.Second)))
+        if (abilitySource.CheckTargets(targets))
             throw new InvalidOperationException("Invalid targets");
 
         if (!_definitions.CheckCosts(costs, payments))
@@ -48,7 +48,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         
         var resolutionContext = ability.CreateResolutionContext(_gameState, payments, targets);
 
-        _actionQueue.Push(resolutionContext);
+        _actionQueue.Push(new ResolutionFrame(resolutionContext, ability.Effects.ToList()));
 
         return Unit.Task;
     }

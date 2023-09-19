@@ -49,7 +49,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 
         var resolutionContext = card.CreateResolutionContext(_gameState, payments, targets);
         
-        _actionQueue.Push(resolutionContext);
+        _actionQueue.Push(new ResolutionFrame(resolutionContext, card.Effects.ToList()));
 
         return Unit.Task;
     }

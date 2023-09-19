@@ -2,16 +2,15 @@
 
 namespace Archetype.Framework.Definitions;
 
-public class KeywordOperand
+public class OperandDescription
 {
     public KeywordOperandType Type { get; set; }
-    public string Description { get; set; }
     public bool IsOptional { get; set; }
 }
 
-public class KeywordTarget
+public class TargetDescription
 {
-    public string Type { get; set; } // "Unit | Structure | Player | Any"
+    public IReadOnlyDictionary<string, string> Characteristics { get; set; } // "E.g. Type: Unit | Structure | Player | Any"
     public bool IsOptional { get; set; }
 }
 
@@ -19,8 +18,8 @@ public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
     public string ReminderText { get; set; } // E.g. "Deal {X} damage to target unit or structure"
-    public IReadOnlyList<KeywordTarget> Targets { get; set; }
-    public IReadOnlyList<KeywordOperand> Operands { get; set; }
+    public IReadOnlyList<TargetDescription> Targets { get; set; }
+    public IReadOnlyList<OperandDescription> Operands { get; set; }
 }
 
 // The bread and butter of state changes

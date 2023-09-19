@@ -1,9 +1,12 @@
-﻿namespace Archetype.Framework.Proto;
+﻿using Archetype.Framework.Definitions;
+
+namespace Archetype.Framework.Proto;
 
 
 public class ProtoCard
 {
     public string Name { get; set; } // ID
+    public IReadOnlyList<TargetDescription> Targets { get; set; }
     public IReadOnlyList<CostInstance> Costs { get; set; }
     public IReadOnlyList<ConditionInstance> Conditions { get; set; }
     public IReadOnlyList<ReactionInstance> Reactions { get; set; }

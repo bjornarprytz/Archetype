@@ -2,6 +2,7 @@
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
+using KeywordOperand = Archetype.Framework.Proto.KeywordOperand;
 
 namespace Archetype.Framework.Runtime;
 
@@ -9,8 +10,13 @@ public static class RuntimeExtensions
 {
     public static TDef GetOrThrow<TDef>(this IDefinitions definitions, KeywordInstance keywordInstance) where TDef : KeywordDefinition
     {
-        if (definitions.Keywords[keywordInstance.Keyword] is not TDef requiredDefinition)
-            throw new InvalidOperationException($"Keyword ({keywordInstance.Keyword}) is not a {typeof(TDef).Name}");
+        return definitions.GetOrThrow<TDef>(keywordInstance.Keyword);
+    }
+    
+    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, string keyword) where TDef : KeywordDefinition
+    {
+        if (definitions.Keywords[keyword] is not TDef requiredDefinition)
+            throw new InvalidOperationException($"Keyword ({keyword}) is not a {typeof(TDef).Name}");
         
         return requiredDefinition;
     }
@@ -74,7 +80,6 @@ public static class RuntimeExtensions
         return new ResolutionContext
         {
             GameState = gameState,
-            Effects = actionBlock.Effects.Select(effectInstance => effectInstance.CreateEffect(actionBlock, targets)).ToList(),
             Costs = payments,
             Source = actionBlock.Source,
             Targets = targets,
@@ -82,45 +87,20 @@ public static class RuntimeExtensions
 
     }
 
-    public static Effect CreateEffect(this EffectInstance effectInstance, IActionBlock actionBlock, IReadOnlyList<IAtom> targets)
+    public static Effect CreateEffect(this EffectInstance effectInstance, IResolutionContext context)
     {
         return new Effect
         {
-            Source = actionBlock.Source,
+            Source = context.Source,
             Keyword = effectInstance.Keyword,
-            Operands = effectInstance.Operands.GetOperands(actionBlock),
-            Targets = effectInstance.Targets.GetTargets(targets)
+            Operands = effectInstance.Operands.Select(o => o.GetValue(context)).ToList(),
+            Targets = effectInstance.Targets.Select(t => t.GetTarget(context)).ToList()
         };
-    }
-    
-    public static IReadOnlyList<object> GetOperands(this IReadOnlyList<OperandDescription> operandDescriptions,
-        IActionBlock actionBlock)
-    {
-        var operands = new List<object>();
-
-        foreach (var operand in operandDescriptions)
-        {
-            if (operand.IsComputed)
-            {
-                if (actionBlock.GetComputedValue(operand.ComputedPropertyKey) is {} computedValue)
-                    operands.Add(computedValue);
-                else
-                {
-                    throw new InvalidOperationException($"Computed property ({operand.ComputedPropertyKey}) not found");
-                }
-            }
-            else
-            {
-                operands.Add(operand.Value);
-            }
-        }
-
-        return operands;
     }
 
     public static bool CheckTargets(this IActionBlock actionBlock, IReadOnlyList<IAtom> targets)
     {
-        var targetDescriptors = actionBlock.GetTargetDescriptors().ToList();
+        var targetDescriptors = actionBlock.TargetsDescriptors;
 
         if (targets.Count > targetDescriptors.Count 
             ||
@@ -130,36 +110,25 @@ public static class RuntimeExtensions
         foreach (var (description, target) in targetDescriptors.Zip(targets))
         {
             if (description.CheckTarget(target))
-                throw new InvalidOperationException($"Target ({target.Id}) does not match type the description ({description.CharacteristicsMatch})");
+                throw new InvalidOperationException($"Target ({target.Id}) does not match the description");
         }
 
         return true;
     }
     
-    public static IReadOnlyDictionary<int, IAtom> GetTargets(this IReadOnlyList<TargetDescription> targetDescriptions,
-        IReadOnlyList<IAtom> targets)
+    public static bool CheckTarget(this TargetDescription description, IAtom target)
     {
-        var result = new Dictionary<int, IAtom>();
-        
-        foreach (var targetDescription in targetDescriptions.DistinctBy(t => t.Index))
+        foreach (var (keyword, requiredMatches) in description.Characteristics)
         {
-            if (targetDescription.Index >= targets.Count)
-                throw new InvalidOperationException($"Target index ({targetDescription.Index}) is out of range");
-            if (!targetDescription.IsOptional && !targetDescription.CheckTarget(targets[targetDescription.Index]))
-                throw new InvalidOperationException($"Target ({targets[targetDescription.Index].Id}) does not match type the description ({targetDescription.CharacteristicsMatch})");
+            var characteristics = requiredMatches.Split('|').Select(s => s.Trim());
             
-            result.Add(targetDescription.Index, targets[targetDescription.Index]);
+            if (!target.Characteristics.TryGetValue(keyword, out var value))
+                return false;
+  
+            if (characteristics.Any(c => c != value))
+                return false;
         }
-        
-        return result;
-    }
-    public static bool CheckTarget(this TargetDescription targetDescription, IAtom target)
-    {
-        return 
-            targetDescription.CharacteristicsMatch.Values.All(c => 
-                    target.Characteristics[c].Contains(
-                        targetDescription.CharacteristicsMatch[c]
-                        )
-                    );
+
+        return true;
     }
 }

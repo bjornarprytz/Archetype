@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime.Implementation;
@@ -8,8 +9,8 @@ public class ActionQueue : IActionQueue
     private readonly IEventHistory _eventHistory;
     private readonly IDefinitions _definitions;
     
-    private readonly Queue<IResolutionContext> _contextQueue = new();
-    private readonly Queue<Effect> _effectQueue = new();
+    private readonly Queue<IResolutionFrame> _frameQueue = new();
+    private readonly Queue<EffectInstance> _effectQueue = new();
 
     public ActionQueue(IEventHistory eventHistory, IDefinitions definitions)
     {
@@ -17,32 +18,32 @@ public class ActionQueue : IActionQueue
         _definitions = definitions;
     }
 
-    public IResolutionContext? CurrentContext { get; private set; }
+    public IResolutionFrame? CurrentFrame { get; private set; }
 
-    public void Push(IResolutionContext context)
+    public void Push(IResolutionFrame context)
     {
-        _contextQueue.Enqueue(context);
+        _frameQueue.Enqueue(context);
     }
 
     public IEvent? ResolveNext()
     {
         if (_effectQueue.Count == 0)
         {
-            if (!TryAdvanceContext())
+            if (!TryAdvanceFrame())
             {
                 return null;
             }
         }
         
         var payload = _effectQueue.Dequeue();
-        var e = Resolve(payload);
-        CurrentContext!.Events.Add(e);
+        var e = Resolve(payload.CreateEffect(CurrentFrame!.Context));
+        CurrentFrame!.Context.Events.Add(e);
         
         if (_effectQueue.Count == 0)
         {
-            _eventHistory.Push(new ActionBlockEvent(CurrentContext));
+            _eventHistory.Push(new ActionBlockEvent(CurrentFrame.Context));
             
-            CurrentContext = null;
+            CurrentFrame = null;
         }
         
         return e;
@@ -53,27 +54,27 @@ public class ActionQueue : IActionQueue
         if (_definitions.Keywords[payload.Keyword] is not EffectDefinition effectDefinition)
             throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect");
 
-        if (CurrentContext == null)
+        if (CurrentFrame == null)
             throw new InvalidOperationException("No current context");
         
-        return effectDefinition.Resolve(CurrentContext, _definitions, payload);
+        return effectDefinition.Resolve(CurrentFrame.Context, _definitions, payload);
     }
 
-    private bool TryAdvanceContext()
+    private bool TryAdvanceFrame()
     {
-        if (_contextQueue.Count == 0)
+        if (_frameQueue.Count == 0)
         {
             return false;
         }
         
-        CurrentContext = _contextQueue.Dequeue();
+        CurrentFrame = _frameQueue.Dequeue();
 
-        if (CurrentContext.Effects.Count == 0)
+        if (CurrentFrame.Effects.Count == 0)
         {
             throw new InvalidOperationException("Context has no effects");
         }
 
-        foreach (var effect in CurrentContext.Effects)
+        foreach (var effect in CurrentFrame.Effects)
         {
             _effectQueue.Enqueue(effect);
         }
