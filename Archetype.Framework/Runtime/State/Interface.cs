@@ -27,8 +27,8 @@ public interface IActionBlock
     IReadOnlyList<EffectInstance> Effects { get; }
     IReadOnlyList<CostInstance> Costs { get; }
     IReadOnlyList<ConditionInstance> Conditions { get; }
-
-    object? GetComputedValue(int index);
+    IReadOnlyList<object> ComputedValues { get; }
+    
     void UpdateComputedValues(IDefinitions definitions, IGameState gameState);
 }
 

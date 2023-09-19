@@ -20,13 +20,8 @@ public class Card : ICard
     public IReadOnlyList<CostInstance> Costs => Proto.Costs;
     public IReadOnlyList<ConditionInstance> Conditions => Proto.Conditions;
     public IReadOnlyDictionary<string, string> Characteristics => Proto.Characteristics;
+    public IReadOnlyList<object> ComputedValues => _computedValues;
     
-
-
-    public object? GetComputedValue(int index)
-    {
-        return _computedValues.Count <= index ? null : _computedValues[index];
-    }
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
     {
@@ -41,6 +36,7 @@ public class Card : ICard
 
 public class Ability : IAbility
 {
+    private readonly List<object> _computedValues = new(); 
         
     public Guid Id { get; init; }
     public AbilityInstance Proto { get; init; }
@@ -50,8 +46,8 @@ public class Ability : IAbility
     public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
     public IReadOnlyList<CostInstance> Costs => Proto.Costs;
     public IReadOnlyList<ConditionInstance> Conditions => Proto.Conditions;
+    public IReadOnlyList<object> ComputedValues => _computedValues;
 
-    private readonly List<object> _computedValues = new(); 
 
     public object? GetComputedValue(int index)
     {

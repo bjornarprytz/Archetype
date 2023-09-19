@@ -83,6 +83,7 @@ public static class RuntimeExtensions
             Costs = payments,
             Source = actionBlock.Source,
             Targets = targets,
+            ComputedValues = actionBlock.ComputedValues,
         };
 
     }
