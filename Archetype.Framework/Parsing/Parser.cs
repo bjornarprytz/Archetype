@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Antlr4.Runtime;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
@@ -68,9 +67,9 @@ public class CardParser : ICardParser
     public ProtoCard ParseCard(CardData cardData)
     {
         var inputStream = new AntlrInputStream(cardData.Text);
-        var lexer = new CardGrammarLexer(inputStream);
+        var lexer = new ActionBlockLexer(inputStream);
         var tokenStream = new CommonTokenStream(lexer);
-        var parser = new CardGrammarParser(tokenStream);
+        var parser = new ActionBlockParser(tokenStream);
         
         var tree = parser.actionBlock();
         

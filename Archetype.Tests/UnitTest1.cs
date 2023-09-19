@@ -1,4 +1,3 @@
-using Archetype.Framework.Definitions;
 using Archetype.Framework.Parsing;
 using Archetype.Framework.Runtime;
 using NSubstitute;

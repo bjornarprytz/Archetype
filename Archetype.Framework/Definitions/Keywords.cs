@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Archetype.Framework.Proto;
+﻿using Archetype.Framework.Proto;
 
 namespace Archetype.Framework.Definitions;
 
