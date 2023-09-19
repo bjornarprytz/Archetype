@@ -1,7 +1,8 @@
 grammar CardGrammar;
 
-actionBlock: keywords;
+actionBlock: targetDeclaration? keywords;
 
+targetDeclaration: '<TARGETS' cardSelector '>' ';';
 keywords: (effect | targetProvider)*;
 
 targetProvider: '<' keyword '>' operand* cardSelector ';';
@@ -9,8 +10,8 @@ effect: keyword target* operand* ';';
 
 target: '<' index '>';
 
-cardSelector: cardFilter*;
-cardFilter: '(' filterList ')';
+cardSelector: cardFilters*;
+cardFilters: '(' filterList ')';
 filterList: filter (',' filter)*;
 filter: filterKey ':' filterValue;
 filterKey: keyword;

@@ -24,7 +24,7 @@ public class Tests
             Name = "Lightning Bolt",
             Text = 
 """ 
-    <TARGETS> (type:unit|structure);
+    <TARGETS (type:unit|structure)(type:structure)>;
     DAMAGE <0> 4;
     <PROMPT> "Choose a card to discard" 2 (zone:hand);
     DISCARD <1> 1;
