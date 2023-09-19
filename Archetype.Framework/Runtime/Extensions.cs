@@ -69,10 +69,11 @@ public static class RuntimeExtensions
             .All(c => c.Check(source, gameState));
     }
 
-    public static ResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
+    public static IResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IGameState gameState, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
     {
         return new ResolutionContext
         {
+            GameState = gameState,
             Effects = actionBlock.Effects.Select(effectInstance => effectInstance.CreateEffect(actionBlock, targets)).ToList(),
             Costs = payments,
             Source = actionBlock.Source,

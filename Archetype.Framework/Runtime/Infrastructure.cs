@@ -18,8 +18,8 @@ public interface IEventHistory
 
 public interface IActionQueue
 {
-    ResolutionContext? CurrentContext { get; }
-    void Push(ResolutionContext context);
+    IResolutionContext? CurrentContext { get; }
+    void Push(IResolutionContext context);
     IEvent? ResolveNext();
 }
 

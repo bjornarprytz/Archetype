@@ -22,36 +22,46 @@ public record EffectEvent(Effect EffectPayload) : EventBase;
 public record ActionBlockEvent
     (IAtom Source, IReadOnlyList<IAtom> Targets, IReadOnlyList<CostPayload> Payment) : EventBase
 {
-    public ActionBlockEvent(ResolutionContext context) : this(context.Source, context.Targets, context.Costs)
+    public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Costs)
     {
         Children = context.Events.ToList();
     }
 }
 
-public class ResolutionContext
+
+
+
+public interface IResolutionContext
 {
-    public ResolutionContext()
-    {
-        PromptResponses = new List<IReadOnlyList<IAtom>>();
-        Events = new List<IEvent>();
-        State = new Dictionary<string, object>();
-    }
+    public IGameState GameState { get; }
+    public IAtom Source { get; }
+    public IReadOnlyList<Effect> Effects { get; }
+    public IReadOnlyList<CostPayload> Costs { get; }
+    public IReadOnlyList<IAtom> Targets { get; }
     
-    public IAtom Source { get; set; }
-    public IReadOnlyList<Effect> Effects { get; set; }
-    public IReadOnlyList<CostPayload> Costs { get; set; }
-    public IReadOnlyList<IAtom> Targets { get; set; }
-    
-    public IList<IReadOnlyList<IAtom>> PromptResponses { get; set; }
-    public IList<IEvent> Events { get; set; }
-    public IDictionary<string, object> State { get; set; } // TODO: rename this. It is essentially for storing state between effects 
+    public IList<IReadOnlyList<IAtom>> PromptResponses { get; }
+    public IList<IEvent> Events { get; }
+    public IDictionary<string, object> Memory { get; } 
+}
+
+public class ResolutionContext : IResolutionContext
+{
+    public required IGameState GameState { get; init; }
+    public required IAtom Source { get; init; }
+    public required IReadOnlyList<Effect> Effects { get; init; }
+    public required IReadOnlyList<CostPayload> Costs { get; init; }
+    public required IReadOnlyList<IAtom> Targets { get; init; }
+
+    public IList<IReadOnlyList<IAtom>> PromptResponses { get; } = new List<IReadOnlyList<IAtom>>();
+    public IList<IEvent> Events { get; } = new List<IEvent>();
+    public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }
 
 public class Effect
 {
-    public IAtom Source { get; set; }
-    public string Keyword { get; set; }
-    public IReadOnlyList<object> Operands { get; set; }
+    public required IAtom Source { get; init; }
+    public required string Keyword { get; init; }
+    public required IReadOnlyList<object> Operands { get; init; }
     
-    public IReadOnlyDictionary<int, IAtom> Targets { get; set; }
+    public required IReadOnlyDictionary<int, IAtom> Targets { get; init; }
 }

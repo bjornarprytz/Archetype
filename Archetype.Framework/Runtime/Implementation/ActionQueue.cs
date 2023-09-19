@@ -6,22 +6,20 @@ namespace Archetype.Framework.Runtime.Implementation;
 public class ActionQueue : IActionQueue
 {
     private readonly IEventHistory _eventHistory;
-    private readonly IGameState _state;
     private readonly IDefinitions _definitions;
     
-    private readonly Queue<ResolutionContext> _contextQueue = new();
+    private readonly Queue<IResolutionContext> _contextQueue = new();
     private readonly Queue<Effect> _effectQueue = new();
 
-    public ActionQueue(IEventHistory eventHistory, IGameState state, IDefinitions definitions)
+    public ActionQueue(IEventHistory eventHistory, IDefinitions definitions)
     {
         _eventHistory = eventHistory;
-        _state = state;
         _definitions = definitions;
     }
 
-    public ResolutionContext? CurrentContext { get; private set; }
+    public IResolutionContext? CurrentContext { get; private set; }
 
-    public void Push(ResolutionContext context)
+    public void Push(IResolutionContext context)
     {
         _contextQueue.Enqueue(context);
     }
@@ -58,7 +56,7 @@ public class ActionQueue : IActionQueue
         if (CurrentContext == null)
             throw new InvalidOperationException("No current context");
         
-        return effectDefinition.Resolve(_state, _definitions, payload, CurrentContext);
+        return effectDefinition.Resolve(CurrentContext, _definitions, payload);
     }
 
     private bool TryAdvanceContext()

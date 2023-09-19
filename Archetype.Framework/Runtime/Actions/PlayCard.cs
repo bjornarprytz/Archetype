@@ -47,7 +47,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
 
-        var resolutionContext = card.CreateResolutionContext(payments, targets);
+        var resolutionContext = card.CreateResolutionContext(_gameState, payments, targets);
         
         _actionQueue.Push(resolutionContext);
 

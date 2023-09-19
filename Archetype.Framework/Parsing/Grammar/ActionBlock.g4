@@ -1,41 +1,30 @@
 grammar ActionBlock;
 
-actionBlock: '{' computedValueDeclaration? targetDeclaration? keywords '}';
+actionBlock:                '{' computedValueDeclaration? targetDeclaration? keywords '}';
 
-computedValueDeclaration: '[COMPUTED' computedValue* ']' ';';
-targetDeclaration: '<TARGETS' cardSelector '>' ';';
-keywords: (effect | targetProvider)*;
-
-
-targetProvider: '<' keyword '>' operand* cardSelector ';';
-effect: keyword target* operand* ';';
-
-computedValue: valueKey ':' gameStateValue | eventValue;
-cardSelector: cardFilters*;
-target: '<' index '>';
-
-gameStateValue: cardFilters '#' aggregate;
-eventValue: EVENT_SPAN  filterList '#' aggregate;
+computedValueDeclaration:   '[COMPUTED' computedValue* ']' ';';
+targetDeclaration:          '<TARGETS' cardSelector '>' ';';
+keywords:                   (effect | targetProvider)*;
 
 
-valueKey: ANY;
-keyword: ANY;
-index: NUMBER;
-aggregate: 'count'; // TODO: Add more aggregates
+targetProvider:             '<' keyword '>' operand* cardSelector ';';
+effect:                     keyword target* operand* ';';
+
+computedValue:              keyword operand* ';';
+cardSelector:               cardFilters*;
+target:                     '<' index '>';
+computedValueRef:           '[' index ']';
 
 
-cardFilters: '(' filterList ')';
-filterList: filter (',' filter)*;
-filter: (filterKey ':' filterValue) | (propertyFilter);
-filterKey: keyword;
-filterValue: ANY ('|' ANY)*;
-propertyFilter: ('zone:' ZONE);
+cardFilters:                '(' filterList ')';
+filterList:                 filter (',' filter)*;
+filter:                     (filterKey ':' filterValue);
+filterKey:                  keyword;
+filterValue:                ANY ('|' ANY)*;
 
-operand: NUMBER | STRING | computedValueRef;
-computedValueRef: '[' valueKey ']';
-
-ZONE: 'hand' | 'deck' | 'discard' | 'node' | 'exile' | 'any';
-EVENT_SPAN: 'current' | 'turn' | 'game';
+keyword:                    ANY;
+index:                      NUMBER;
+operand:                    NUMBER | STRING | computedValueRef;
 
 STRING: '"' (~["\r\n])* '"';
 NUMBER: DIGIT+;

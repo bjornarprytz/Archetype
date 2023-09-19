@@ -46,7 +46,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
             _history.Push(cost.Resolve(_gameState, _definitions, payment));
         }
         
-        var resolutionContext = ability.CreateResolutionContext(payments, targets);
+        var resolutionContext = ability.CreateResolutionContext(_gameState, payments, targets);
 
         _actionQueue.Push(resolutionContext);
 

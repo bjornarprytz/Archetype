@@ -5,10 +5,10 @@
     &lt;TestId&gt;NUnit3x::C6B5F16F-9BA2-482A-8E10-987AB1D7FD10::net7.0::Archetype.Rules.Tests.ActionTests.PlayCardHandler_CardToPlayResolves&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=334f89eb_002Dff89_002D4112_002D9e95_002D4ff0f44db8cc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="PlayCardHandler_TwoTargets_CardToPlayResolvesWithRightContext" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=334f89eb_002Dff89_002D4112_002D9e95_002D4ff0f44db8cc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="PlayCardHandler_TwoTargets_CardToPlayResolvesWithRightContext" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="E:\source\repos\Archetype\Archetype.Tests" Presentation="&amp;lt;Archetype.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	</wpf:ResourceDictionary>

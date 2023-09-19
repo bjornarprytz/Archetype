@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Antlr4.Runtime;
+using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 
@@ -72,12 +73,37 @@ public class CardParser : ICardParser
         var parser = new ActionBlockParser(tokenStream);
         
         var tree = parser.actionBlock();
+
+        var protoBuilder = new ProtoBuilder();
         
 
-        var t = tree.ToStringTree(parser);
 
-        Console.WriteLine(t);
-
-        return null;
+        return protoBuilder.Build();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

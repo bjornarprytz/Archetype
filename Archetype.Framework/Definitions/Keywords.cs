@@ -19,7 +19,6 @@ public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
     public string ReminderText { get; set; } // E.g. "Deal {X} damage to target unit or structure"
-    public Func<string, KeywordInstance> Parse { get; set; }
     public IReadOnlyList<KeywordTarget> Targets { get; set; }
     public IReadOnlyList<KeywordOperand> Operands { get; set; }
 }

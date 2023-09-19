@@ -1,3 +1,4 @@
+using Archetype.Framework.Definitions;
 using Archetype.Framework.Parsing;
 using Archetype.Framework.Runtime;
 using NSubstitute;
@@ -24,11 +25,10 @@ public class Tests
             Text = 
 """ 
 {
-    [COMPUTED X:(zone:hand#count)]
     <TARGETS (type:unit|structure)(type:structure)>;
     DAMAGE <0> 4;
     <PROMPT> "Choose a card to discard" 2 (zone:hand);
-    DISCARD <1> [;
+    DISCARD <1> [0];
     DRAW 1;
 }
 """
