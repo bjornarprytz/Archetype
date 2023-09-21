@@ -12,8 +12,6 @@ public class ParseTests
     public void Setup()
     {
     }
-
-    
     
     [Test]
     public void LightningBolt()

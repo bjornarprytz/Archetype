@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Proto;
+﻿using System.Collections;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 
@@ -13,10 +14,9 @@ public interface IEvent
 public abstract record EventBase : IEvent
 {
     public IEvent? Parent { get; set; }
-    public IReadOnlyList<IEvent> Children { get; set; }
+    public IReadOnlyList<IEvent> Children { get; set; } = new List<IEvent>();
 }
 
-public record PromptEvent(IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks) : EventBase;
 
 public record EffectEvent(Effect EffectPayload) : EventBase;
 
@@ -71,4 +71,24 @@ public class Effect
     public required IReadOnlyList<object> Operands { get; init; }
     
     public required IReadOnlyList<IAtom> Targets { get; init; }
+}
+
+public interface IAtomFilter
+{
+    public IEnumerable<IAtom> Filter(IResolutionContext context);
+}
+
+public class Filter : IAtomFilter
+{
+    private Filter() { }
+    
+    public static Filter Parse(string filter)
+    {
+        return new Filter();
+    }
+
+    public IEnumerable<IAtom> Filter(IResolutionContext context)
+    {
+        throw new NotImplementedException();
+    }
 }

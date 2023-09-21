@@ -6,5 +6,5 @@ global using CheckState = System.Func<Archetype.Framework.Runtime.State.IAtom, A
 global using ComputeProperty = System.Func<Archetype.Framework.Runtime.State.IAtom, Archetype.Framework.Runtime.State.IGameState, object>;
 
 global using ResolveCost = System.Func<Archetype.Framework.Runtime.State.IGameState, Archetype.Framework.Runtime.IDefinitions, Archetype.Framework.Runtime.Actions.CostPayload, Archetype.Framework.Runtime.IEvent>;
-global using ResolveEffect = System.Func<Archetype.Framework.Runtime.IResolutionContext, Archetype.Framework.Runtime.IDefinitions, Archetype.Framework.Runtime.Effect, Archetype.Framework.Runtime.IEvent>;
+global using ResolveEffect = System.Func<Archetype.Framework.Runtime.IResolutionContext, Archetype.Framework.Runtime.Effect, Archetype.Framework.Runtime.IEvent>;
 global using CreateEffectSequence = System.Func<Archetype.Framework.Runtime.IResolutionContext, Archetype.Framework.Runtime.IDefinitions, System.Collections.Generic.IEnumerable<Archetype.Framework.Proto.EffectInstance>>;

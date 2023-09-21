@@ -1,25 +1,18 @@
-﻿using Archetype.Framework.Proto;
+﻿using System.Collections;
+using Archetype.Framework.Proto;
+using Archetype.Framework.Runtime;
 
 namespace Archetype.Framework.Definitions;
 
-public class OperandDescription
-{
-    public KeywordOperandType Type { get; set; }
-    public bool IsOptional { get; set; }
-}
-
-public class TargetDescription
-{
-    public IReadOnlyDictionary<string, string> Characteristics { get; set; } // "E.g. Type: Unit | Structure | Player | Any"
-    public bool IsOptional { get; set; }
-}
+public record OperandDescription(KeywordOperandType Type, bool IsOptional);
+public record TargetDescription(IReadOnlyDictionary<string, string> Characteristics, bool IsOptional);
 
 public abstract class KeywordDefinition
 {
-    public string Name { get; set; } // ID
-    public string ReminderText { get; set; } // E.g. "Deal [X] damage to target unit or structure"
-    public IReadOnlyList<TargetDescription> Targets { get; set; }
-    public IReadOnlyList<OperandDescription> Operands { get; set; }
+    public abstract string Name { get; } // ID
+    public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
+    public virtual IReadOnlyList<TargetDescription> Targets { get; } = Array.Empty<TargetDescription>();
+    public virtual IReadOnlyList<OperandDescription> Operands { get; } = Array.Empty<OperandDescription>();
 }
 
 // The bread and butter of state changes
@@ -29,16 +22,17 @@ public abstract class KeywordDefinition
 // DRAW [X] // get args from a computed value
 // MODIFY <1> Strength 1
 // DISCARD -1- // get args from the first prompt response
-public class EffectPrimitiveDefinition : KeywordDefinition
+public abstract class EffectPrimitiveDefinition : KeywordDefinition
 {
-    public ResolveEffect Resolve { get; set; }
+    public abstract IEvent Resolve(IResolutionContext context, Effect payload);
 }
 
-public class EffectCompositeDefinition : KeywordDefinition
+public abstract class EffectCompositeDefinition : KeywordDefinition
 {
-    // Composes effects to support more complex effects
-    
-    public CreateEffectSequence Create { get; set; }
+    public abstract IEnumerable<EffectInstance> CreateEffectSequence(
+        IResolutionContext context,
+        IDefinitions definitions
+        );
 }
 
 // Hook into special rules

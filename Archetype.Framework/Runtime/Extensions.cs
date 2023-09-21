@@ -15,7 +15,7 @@ public static class RuntimeExtensions
     
     public static TDef GetOrThrow<TDef>(this IDefinitions definitions, string keyword) where TDef : KeywordDefinition
     {
-        if (definitions.Keywords[keyword] is not TDef requiredDefinition)
+        if (definitions.GetKeyword(keyword) is not TDef requiredDefinition)
             throw new InvalidOperationException($"Keyword ({keyword}) is not a {typeof(TDef).Name}");
         
         return requiredDefinition;
@@ -89,9 +89,9 @@ public static class RuntimeExtensions
     
     public static IEnumerable<EffectInstance> GetPrimitives(this EffectInstance effectInstance, IDefinitions definitions, IResolutionContext context)
     {
-        return definitions.Keywords[effectInstance.Keyword] switch
+        return definitions.GetKeyword(effectInstance.Keyword) switch
         {
-            EffectCompositeDefinition composite => composite.Create(context, definitions).SelectMany(e => e.GetPrimitives(definitions, context)),
+            EffectCompositeDefinition composite => composite.CreateEffectSequence(context, definitions).SelectMany(e => e.GetPrimitives(definitions, context)),
             EffectPrimitiveDefinition primitive => new[] { effectInstance },
             _ => throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect")
         };

@@ -50,13 +50,13 @@ public class ActionQueue : IActionQueue
 
     private IEvent Resolve(Effect payload)
     {
-        if (_definitions.Keywords[payload.Keyword] is not EffectPrimitiveDefinition effectDefinition)
+        if (_definitions.GetKeyword(payload.Keyword) is not EffectPrimitiveDefinition effectDefinition)
             throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect primitive");
 
         if (CurrentFrame == null)
             throw new InvalidOperationException("No current context");
         
-        return effectDefinition.Resolve(CurrentFrame.Context, _definitions, payload);
+        return effectDefinition.Resolve(CurrentFrame.Context, payload);
     }
 
     private bool TryAdvanceFrame()

@@ -4,17 +4,15 @@ actionBlock:                '{' computedValueDeclaration? targetDeclaration? key
 
 computedValueDeclaration:   '[COMPUTED' computedValue* ']' ';';
 targetDeclaration:          '<TARGETS' atomSelector '>' ';';
-keywords:                   (effect | targetProvider)*;
+keywords:                   effect*;
 
-targetProvider:             '-' keyword '-' operand* atomSelector ';'; // e.g. Prompts
 effect:                     keyword targetRef* operand* ';';
 
 computedValue:              keyword operand* ';';
 atomSelector:               atomFilter*;
-targetRef:                  declaredTarget | providedTarget;
+targetRef:                  declaredTarget;
 computedValueRef:           '[' index ']';
 declaredTarget:             '<' index '>';
-providedTarget:             '-' index '-';
 
 
 atomFilter:                '(' filterList ')';

@@ -7,7 +7,12 @@ namespace Archetype.Framework.Runtime;
 
 public interface IDefinitions
 {
-    IDictionary<string, KeywordDefinition> Keywords { get; set; }
+    KeywordDefinition? GetKeyword(string keyword);
+}
+
+public interface IDefinitionBuilder
+{
+    void AddKeyword(KeywordDefinition keywordDefinition);
 }
 
 public interface IEventHistory
