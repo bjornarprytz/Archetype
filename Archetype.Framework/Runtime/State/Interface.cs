@@ -34,11 +34,12 @@ public interface IActionBlock
 
 public interface ICard : IAtom, IActionBlock
 {
-    IReadOnlyList<IAbility> Abilities { get; }
+    IReadOnlyDictionary<string, IAbility> Abilities { get; }
     IReadOnlyList<FeatureInstance> Features { get; }
     IReadOnlyList<ReactionInstance> Reactions { get; }
 
     IZone CurrentZone { get; set; }
+    bool Tapped { get; set; }
 }
 
 public interface IAbility : IActionBlock

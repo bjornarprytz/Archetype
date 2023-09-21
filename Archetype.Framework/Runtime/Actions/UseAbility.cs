@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
-public record UseAbilityArgs(Guid AbilitySource, int AbilityIndex, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
+public record UseAbilityArgs(Guid AbilitySource, string AbilityName, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
 
 public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 {
@@ -25,7 +25,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var abilitySource = _gameState.GetAtom<ICard>(args.AbilitySource);
         var targets = args.Targets.Select(_gameState.GetAtom).ToList();
 
-        var ability = abilitySource.Abilities[args.AbilityIndex];
+        var ability = abilitySource.Abilities[args.AbilityName];
         var conditions = ability.Conditions;
         var costs = ability.Costs;
         var payments = args.Payments;

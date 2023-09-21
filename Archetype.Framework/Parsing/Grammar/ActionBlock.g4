@@ -3,20 +3,21 @@ grammar ActionBlock;
 actionBlock:                '{' computedValueDeclaration? targetDeclaration? keywords '}';
 
 computedValueDeclaration:   '[COMPUTED' computedValue* ']' ';';
-targetDeclaration:          '<TARGETS' cardSelector '>' ';';
+targetDeclaration:          '<TARGETS' atomSelector '>' ';';
 keywords:                   (effect | targetProvider)*;
 
-
-targetProvider:             '<' keyword '>' operand* cardSelector ';';
-effect:                     keyword target* operand* ';';
+targetProvider:             '-' keyword '-' operand* atomSelector ';'; // e.g. Prompts
+effect:                     keyword targetRef* operand* ';';
 
 computedValue:              keyword operand* ';';
-cardSelector:               cardFilters*;
-target:                     '<' index '>';
+atomSelector:               atomFilter*;
+targetRef:                  declaredTarget | providedTarget;
 computedValueRef:           '[' index ']';
+declaredTarget:             '<' index '>';
+providedTarget:             '-' index '-';
 
 
-cardFilters:                '(' filterList ')';
+atomFilter:                '(' filterList ')';
 filterList:                 filter (',' filter)*;
 filter:                     (filterKey ':' filterValue);
 filterKey:                  keyword;

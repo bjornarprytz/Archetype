@@ -17,7 +17,7 @@ public class TargetDescription
 public abstract class KeywordDefinition
 {
     public string Name { get; set; } // ID
-    public string ReminderText { get; set; } // E.g. "Deal {X} damage to target unit or structure"
+    public string ReminderText { get; set; } // E.g. "Deal [X] damage to target unit or structure"
     public IReadOnlyList<TargetDescription> Targets { get; set; }
     public IReadOnlyList<OperandDescription> Operands { get; set; }
 }

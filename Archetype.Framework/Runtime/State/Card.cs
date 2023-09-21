@@ -5,27 +5,33 @@ namespace Archetype.Framework.Runtime.State;
 
 public class Card : ICard
 {
-    private readonly List<object> _computedValues = new(); 
-        
+    private readonly List<object> _computedValues = new();
+    private readonly ProtoCard _proto;
+
+    public Card(ProtoCard proto)
+    {
+        _proto = proto;
+    }
+    
     public Guid Id { get; set; }
-    public ProtoCard Proto { get; init; }
-    public IReadOnlyList<IAbility> Abilities { get; init; }
+    public IReadOnlyDictionary<string, IAbility> Abilities { get; init; }
     
     public IZone CurrentZone { get; set; }
+    public bool Tapped { get; set; }
     public IAtom Source => this;
-    public IReadOnlyList<TargetDescription> TargetsDescriptors => Proto.Targets;
-    public IReadOnlyList<FeatureInstance> Features => Proto.Features;
-    public IReadOnlyList<ReactionInstance> Reactions => Proto.Reactions;
-    public IReadOnlyList<EffectInstance> Effects => Proto.Effects;
-    public IReadOnlyList<CostInstance> Costs => Proto.Costs;
-    public IReadOnlyList<ConditionInstance> Conditions => Proto.Conditions;
-    public IReadOnlyDictionary<string, string> Characteristics => Proto.Characteristics;
+    public IReadOnlyList<TargetDescription> TargetsDescriptors => _proto.Targets;
+    public IReadOnlyList<FeatureInstance> Features => _proto.Features;
+    public IReadOnlyList<ReactionInstance> Reactions => _proto.Reactions;
+    public IReadOnlyList<EffectInstance> Effects => _proto.Effects;
+    public IReadOnlyList<CostInstance> Costs => _proto.Costs;
+    public IReadOnlyList<ConditionInstance> Conditions => _proto.Conditions;
+    public IReadOnlyDictionary<string, string> Characteristics => _proto.Characteristics;
     public IReadOnlyList<object> ComputedValues => _computedValues;
     
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
     {
-        foreach (var (computedValue, index) in Proto.ComputedValues.Select(((instance, i) => (instance, i))))
+        foreach (var (computedValue, index) in _proto.ComputedValues.Select(((instance, i) => (instance, i))))
         {
             var keywordDefinition = definitions.GetOrThrow<ComputedValueDefinition>(computedValue);
             

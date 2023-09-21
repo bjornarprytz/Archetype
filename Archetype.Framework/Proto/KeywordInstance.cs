@@ -29,7 +29,9 @@ public class EffectInstance : KeywordInstance
 
 public class ReactionInstance : KeywordInstance
 {
-    public EffectInstance Effect { get; set; }
+    public IReadOnlyList<TargetDescription> Targets { get; set; }
+    public IReadOnlyList<ComputedValueInstance> ComputedValues { get; set; }
+    public IReadOnlyList<EffectInstance> Effects { get; set; }
 }
 
 public class FeatureInstance : KeywordInstance
@@ -39,6 +41,7 @@ public class FeatureInstance : KeywordInstance
 
 public class AbilityInstance : KeywordInstance
 {
+    public string Name { get; set; }
     public IReadOnlyList<TargetDescription> Targets { get; set; }
     public IReadOnlyList<ConditionInstance> Conditions { get; set; }
     public IReadOnlyList<CostInstance> Costs { get; set; }
