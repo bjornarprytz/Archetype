@@ -29,9 +29,16 @@ public abstract class KeywordDefinition
 // DRAW [X] // get args from a computed value
 // MODIFY <1> Strength 1
 // DISCARD -1- // get args from the first prompt response
-public class EffectDefinition : KeywordDefinition
+public class EffectPrimitiveDefinition : KeywordDefinition
 {
     public ResolveEffect Resolve { get; set; }
+}
+
+public class EffectCompositeDefinition : KeywordDefinition
+{
+    // Composes effects to support more complex effects
+    
+    public CreateEffectSequence Create { get; set; }
 }
 
 // Hook into special rules

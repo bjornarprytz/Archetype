@@ -20,8 +20,6 @@ public record KeywordOperand
     public Func<IResolutionContext, object> GetValue { get; set; }
 }
 
-
-
 public class EffectInstance : KeywordInstance
 {
     public IReadOnlyList<KeywordTarget> Targets { get; set; }

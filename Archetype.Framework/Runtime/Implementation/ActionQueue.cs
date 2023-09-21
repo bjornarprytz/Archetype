@@ -1,6 +1,5 @@
 ﻿using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
-using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime.Implementation;
 
@@ -51,8 +50,8 @@ public class ActionQueue : IActionQueue
 
     private IEvent Resolve(Effect payload)
     {
-        if (_definitions.Keywords[payload.Keyword] is not EffectDefinition effectDefinition)
-            throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect");
+        if (_definitions.Keywords[payload.Keyword] is not EffectPrimitiveDefinition effectDefinition)
+            throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect primitive");
 
         if (CurrentFrame == null)
             throw new InvalidOperationException("No current context");
@@ -71,10 +70,10 @@ public class ActionQueue : IActionQueue
 
         if (CurrentFrame.Effects.Count == 0)
         {
-            throw new InvalidOperationException("Context has no effects");
+            throw new InvalidOperationException("Next resolution frame has no effects");
         }
-
-        foreach (var effect in CurrentFrame.Effects)
+        
+        foreach (var effect in CurrentFrame.Effects.SelectMany(e => e.GetPrimitives(_definitions, CurrentFrame.Context)))
         {
             _effectQueue.Enqueue(effect);
         }

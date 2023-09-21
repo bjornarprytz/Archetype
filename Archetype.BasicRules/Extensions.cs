@@ -9,7 +9,7 @@ public static class Extensions
 {
     public static IDefinitions AddBasicRules(this IDefinitions definitions)
     {
-        definitions.Keywords.Add("Move", new EffectDefinition
+        definitions.Keywords.Add("Move", new EffectPrimitiveDefinition
         {
             Name = "Move",
             ReminderText = "Move a card from one zone to another.",

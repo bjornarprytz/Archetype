@@ -85,7 +85,16 @@ public static class RuntimeExtensions
             Targets = targets,
             ComputedValues = actionBlock.ComputedValues,
         };
-
+    }
+    
+    public static IEnumerable<EffectInstance> GetPrimitives(this EffectInstance effectInstance, IDefinitions definitions, IResolutionContext context)
+    {
+        return definitions.Keywords[effectInstance.Keyword] switch
+        {
+            EffectCompositeDefinition composite => composite.Create(context, definitions).SelectMany(e => e.GetPrimitives(definitions, context)),
+            EffectPrimitiveDefinition primitive => new[] { effectInstance },
+            _ => throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect")
+        };
     }
 
     public static Effect CreateEffect(this EffectInstance effectInstance, IResolutionContext context)
