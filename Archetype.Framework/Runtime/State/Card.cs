@@ -3,7 +3,7 @@ using Archetype.Framework.Proto;
 
 namespace Archetype.Framework.Runtime.State;
 
-public class Card : ICard
+public class Card : Atom, ICard
 {
     private readonly List<object> _computedValues = new();
     private readonly ProtoCard _proto;
@@ -13,10 +13,9 @@ public class Card : ICard
         _proto = proto;
     }
     
-    public Guid Id { get; set; }
     public IReadOnlyDictionary<string, IAbility> Abilities { get; init; }
     
-    public IZone CurrentZone { get; set; }
+    public IZone? CurrentZone { get; set; }
     public bool Tapped { get; set; }
     public IAtom Source => this;
     public IReadOnlyList<TargetDescription> TargetsDescriptors => _proto.Targets;
@@ -25,8 +24,8 @@ public class Card : ICard
     public IReadOnlyList<EffectInstance> Effects => _proto.Effects;
     public IReadOnlyList<CostInstance> Costs => _proto.Costs;
     public IReadOnlyList<ConditionInstance> Conditions => _proto.Conditions;
-    public IReadOnlyDictionary<string, string> Characteristics => _proto.Characteristics;
     public IReadOnlyList<object> ComputedValues => _computedValues;
+    public override IReadOnlyDictionary<string, string> Characteristics => _proto.Characteristics;
     
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)

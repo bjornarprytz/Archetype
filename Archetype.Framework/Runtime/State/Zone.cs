@@ -1,8 +1,7 @@
 ﻿namespace Archetype.Framework.Runtime.State;
 
-public class Zone : IZone
+public class Zone : Atom, IZone
 {
-    public Guid Id { get; init; }
-    public IReadOnlyDictionary<string, string> Characteristics { get; init; }
+    public override IReadOnlyDictionary<string, string> Characteristics { get; }
     public IList<ICard> Cards { get; init; }
 }

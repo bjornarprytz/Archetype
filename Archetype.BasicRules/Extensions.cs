@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection;
 using System.Security.Cryptography;
 using Archetype.BasicRules.Primitives;
 using Archetype.Framework.Definitions;
@@ -11,17 +12,25 @@ namespace Archetype.BasicRules;
 
 public static class Extensions
 {
-    private static KeywordDefinition[] basicRules = new[]
-    {
-        new Move(),
-    };
-    
     public static IDefinitionBuilder AddBasicRules(this IDefinitionBuilder definitions)
     {
-        foreach (var definition in basicRules)
+        foreach (var t in Assembly.GetAssembly(typeof(Move))!.GetTypes().Where(t => t.IsSubclassOf(typeof(KeywordDefinition)) && !t.IsAbstract))
         {
-            definitions.AddKeyword(definition);
-        }
+            if (t == null)
+            {
+                throw new InvalidOperationException($"Failed to create instance of {t?.FullName}");
+            }
+            
+            var instance = Activator.CreateInstance(t);
+            
+            if (instance is not KeywordDefinition keywordDefinition)
+            {
+                throw new InvalidOperationException($"Failed to create instance of {t.FullName}");
+            }
+            
+            Console.WriteLine("Adding keyword: " + keywordDefinition.Name);
+            definitions.AddKeyword(keywordDefinition);
+        };
         
         return definitions;
     }

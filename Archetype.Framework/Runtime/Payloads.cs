@@ -40,6 +40,7 @@ public record ResolutionFrame(IResolutionContext Context, IReadOnlyList<EffectIn
 
 public interface IResolutionContext
 {
+    public IMetaGameState MetaGameState { get; }
     public IGameState GameState { get; }
     public IAtom Source { get; }
     public IReadOnlyList<CostPayload> Costs { get; }
@@ -53,6 +54,7 @@ public interface IResolutionContext
 
 public class ResolutionContext : IResolutionContext
 {
+    public required IMetaGameState MetaGameState { get; init; }
     public required IGameState GameState { get; init; }
     public required IAtom Source { get; init; }
     public required IReadOnlyList<CostPayload> Costs { get; init; }

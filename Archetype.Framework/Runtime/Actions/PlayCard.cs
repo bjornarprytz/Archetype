@@ -11,12 +11,12 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 {
     private readonly IEventHistory _history;
     private readonly IActionQueue _actionQueue;
-    private readonly IGameState _gameState;
+    private readonly IGameRoot _gameRoot;
     private readonly IDefinitions _definitions;
 
-    public PlayCardHandler(IGameState gameState, IDefinitions definitions, IActionQueue actionQueue, IEventHistory history)
+    public PlayCardHandler(IGameRoot gameRoot, IDefinitions definitions, IActionQueue actionQueue, IEventHistory history)
     {
-        _gameState = gameState;
+        _gameRoot = gameRoot;
         _definitions = definitions;
         _actionQueue = actionQueue;
         _history = history;
@@ -24,16 +24,18 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 
     public Task<Unit> Handle(PlayCardArgs args, CancellationToken cancellationToken)
     {
-        var card = _gameState.GetAtom<ICard>(args.Card);
-        var targets = args.Targets.Select(_gameState.GetAtom).ToList();
+        var gameState = _gameRoot.GameState;
+        
+        var card = gameState.GetAtom<ICard>(args.Card);
+        var targets = args.Targets.Select(gameState.GetAtom).ToList();
         
         var conditions = card.Conditions;
         var costs = card.Costs;
         var payments = args.Payments;
         
-        card.UpdateComputedValues(_definitions, _gameState);
+        card.UpdateComputedValues(_definitions, gameState);
         
-        if (_definitions.CheckConditions(conditions, card, _gameState))
+        if (_definitions.CheckConditions(conditions, card, gameState))
             throw new InvalidOperationException("Invalid conditions");
         
         if (!card.CheckTargets(targets))
@@ -44,10 +46,10 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 
         foreach (var (cost, payment) in _definitions.EnumerateCosts(costs, payments))
         {
-            _history.Push(cost.Resolve(_gameState, _definitions, payment));
+            _history.Push(cost.Resolve(gameState, _definitions, payment));
         }
 
-        var resolutionContext = card.CreateResolutionContext(_gameState, payments, targets);
+        var resolutionContext = card.CreateResolutionContext(_gameRoot, payments, targets);
         
         _actionQueue.Push(new ResolutionFrame(resolutionContext, card.Effects.ToList()));
 

@@ -9,12 +9,12 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 {
     private readonly IEventHistory _history;
     private readonly IActionQueue _actionQueue;
-    private readonly IGameState _gameState;
+    private readonly IGameRoot _gameRoot;
     private readonly IDefinitions _definitions;
 
-    public UseAbilityHandler(IGameState gameState, IDefinitions definitions, IActionQueue actionQueue, IEventHistory history)
+    public UseAbilityHandler(IGameRoot gameRoot, IDefinitions definitions, IActionQueue actionQueue, IEventHistory history)
     {
-        _gameState = gameState;
+        _gameRoot = gameRoot;
         _definitions = definitions;
         _actionQueue = actionQueue;
         _history = history;
@@ -22,17 +22,19 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 
     public Task<Unit> Handle(UseAbilityArgs args, CancellationToken cancellationToken)
     {
-        var abilitySource = _gameState.GetAtom<ICard>(args.AbilitySource);
-        var targets = args.Targets.Select(_gameState.GetAtom).ToList();
+        var gameState = _gameRoot.GameState;
+        
+        var abilitySource = gameState.GetAtom<ICard>(args.AbilitySource);
+        var targets = args.Targets.Select(gameState.GetAtom).ToList();
 
         var ability = abilitySource.Abilities[args.AbilityName];
         var conditions = ability.Conditions;
         var costs = ability.Costs;
         var payments = args.Payments;
 
-        ability.UpdateComputedValues(_definitions, _gameState);
+        ability.UpdateComputedValues(_definitions, gameState);
 
-        if (_definitions.CheckConditions(conditions, abilitySource, _gameState))
+        if (_definitions.CheckConditions(conditions, abilitySource, gameState))
             throw new InvalidOperationException("Invalid conditions");
         
         if (abilitySource.CheckTargets(targets))
@@ -43,10 +45,10 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 
         foreach (var (cost, payment) in _definitions.EnumerateCosts(costs, payments))
         {
-            _history.Push(cost.Resolve(_gameState, _definitions, payment));
+            _history.Push(cost.Resolve(gameState, _definitions, payment));
         }
         
-        var resolutionContext = ability.CreateResolutionContext(_gameState, payments, targets);
+        var resolutionContext = ability.CreateResolutionContext(_gameRoot, payments, targets);
 
         _actionQueue.Push(new ResolutionFrame(resolutionContext, ability.Effects.ToList()));
 

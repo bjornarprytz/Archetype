@@ -75,11 +75,12 @@ public static class RuntimeExtensions
             .All(c => c.Check(source, gameState));
     }
 
-    public static IResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IGameState gameState, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
+    public static IResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
     {
         return new ResolutionContext
         {
-            GameState = gameState,
+            MetaGameState = gameRoot.MetaGameState,
+            GameState = gameRoot.GameState,
             Costs = payments,
             Source = actionBlock.Source,
             Targets = targets,

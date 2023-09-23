@@ -14,11 +14,33 @@ public interface IZone : IAtom
     IList<ICard> Cards { get; }
 }
 
+public interface IGameRoot
+{
+    IMetaGameState MetaGameState { get; }
+    IGameState GameState { get; }
+    IInfrastructure Infrastructure { get; }
+}
+
 public interface IGameState
 {
     IDictionary<Guid, IZone> Zones { get; }
     IDictionary<Guid, IAtom> Atoms { get; }
 }
+
+public interface IMetaGameState
+{
+    IDefinitions Definitions { get; }
+    IProtoCards ProtoCards { get; }
+}
+
+public interface IInfrastructure
+{
+    IEventHistory EventHistory { get; }
+    IActionQueue ActionQueue { get; }
+    IGameLoop GameLoop { get; }
+    IGameActionHandler GameActionHandler { get; }
+}
+
 
 public interface IActionBlock
 {
@@ -38,7 +60,7 @@ public interface ICard : IAtom, IActionBlock
     IReadOnlyList<FeatureInstance> Features { get; }
     IReadOnlyList<ReactionInstance> Reactions { get; }
 
-    IZone CurrentZone { get; set; }
+    IZone? CurrentZone { get; set; }
     bool Tapped { get; set; }
 }
 

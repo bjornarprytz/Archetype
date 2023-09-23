@@ -1,9 +1,15 @@
 ﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 using MediatR;
 
 namespace Archetype.Framework.Runtime;
+
+public interface IProtoCards
+{
+    ProtoCard? GetProtoCard(string name);
+}
 
 public interface IDefinitions
 {
