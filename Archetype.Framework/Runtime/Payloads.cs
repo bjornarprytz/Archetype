@@ -73,22 +73,4 @@ public class Effect
     public required IReadOnlyList<IAtom> Targets { get; init; }
 }
 
-public interface IAtomFilter
-{
-    public IEnumerable<IAtom> Filter(IResolutionContext context);
-}
 
-public class Filter : IAtomFilter
-{
-    private Filter() { }
-    
-    public static Filter Parse(string filter)
-    {
-        return new Filter();
-    }
-
-    public IEnumerable<IAtom> Filter(IResolutionContext context)
-    {
-        throw new NotImplementedException();
-    }
-}

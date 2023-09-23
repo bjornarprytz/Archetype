@@ -29,7 +29,7 @@ costs: {
     COST_RESOURCE 1;
 }
 conditions: {
-    CONDITION_ZONE (zone:hand);
+    CONDITION_ZONE (state.zone:hand);
 }
 characteristics: {
     TYPE spell;
@@ -38,7 +38,7 @@ characteristics: {
     RARITY common;
 }
 actionBlock: {
-    <TARGETS (type:any)>;
+    <TARGETS (meta.type:any)>;
     DAMAGE <0> 3;
 }
 """
@@ -51,7 +51,7 @@ actionBlock: {
         protoCard.Characteristics.Should().ContainKey("COLOR").WhoseValue.Should().Be("red");
         protoCard.Characteristics.Should().ContainKey("RARITY").WhoseValue.Should().Be("common");
         protoCard.Targets.Should().HaveCount(1);
-        protoCard.Targets[0].Characteristics.Should().ContainKey("TYPE").WhoseValue.Should().Be("any");
+        protoCard.Targets[0].Filters.Should().ContainKey("TYPE").WhoseValue.Should().Be("any");
         protoCard.Targets[0].IsOptional.Should().BeFalse();
         protoCard.Effects.Should().HaveCount(1);
         protoCard.Effects[0].Keyword.Should().Be("DAMAGE");
@@ -109,7 +109,7 @@ abilities: [
         protoCard.Abilities.Should().HaveCount(1);
         protoCard.Abilities.Should().ContainKey("Ping");
         protoCard.Abilities["Ping"].Targets.Should().HaveCount(1);
-        protoCard.Abilities["Ping"].Targets[0].Characteristics.Should().ContainKey("TYPE").WhoseValue.Should().Be("any");
+        protoCard.Abilities["Ping"].Targets[0].Filters.Should().ContainKey("TYPE").WhoseValue.Should().Be("any");
         protoCard.Abilities["Ping"].Targets[0].IsOptional.Should().BeFalse();
         protoCard.Abilities["Ping"].Effects.Should().HaveCount(1);
         protoCard.Abilities["Ping"].Effects[0].Keyword.Should().Be("DAMAGE");

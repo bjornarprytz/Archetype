@@ -9,20 +9,16 @@ public class Prompt : EffectPrimitiveDefinition
     public override string ReminderText => "Prompt the player to make a choice.";
 
     public override IReadOnlyList<OperandDescription> Operands { get; } = OperandHelpers.Required(
-        KeywordOperandType.String, 
-        KeywordOperandType.String, 
-        KeywordOperandType.Integer, 
-        KeywordOperandType.Integer
+        KeywordOperandType.Filter, 
+        KeywordOperandType.Number, 
+        KeywordOperandType.Number,
+        KeywordOperandType.String
     ).ToList();
 
     public override IEvent Resolve(IResolutionContext context, Effect payload)
     {
-        var (promptText, filterString, min, max) =  payload.Operands.Deconstruct<string, string, int, int>();
-        
-        var filter = Filter.Parse(filterString);
+        var (atoms, min, max, promptText) =  payload.Operands.Deconstruct<IReadOnlyList<Guid>, int, int, string>();
 
-        var atoms = filter.Filter(context).Select(a => a.Id).ToList();
-        
         return new PromptEvent(atoms, min, max, promptText);
     }
 

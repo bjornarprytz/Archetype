@@ -5,7 +5,7 @@ using Archetype.Framework.Runtime;
 namespace Archetype.Framework.Definitions;
 
 public record OperandDescription(KeywordOperandType Type, bool IsOptional);
-public record TargetDescription(IReadOnlyDictionary<string, string> Characteristics, bool IsOptional);
+public record TargetDescription(IReadOnlyDictionary<string, string> Filters, bool IsOptional);
 
 public abstract class KeywordDefinition
 {
@@ -24,7 +24,7 @@ public abstract class KeywordDefinition
 // DISCARD -1- // get args from the first prompt response
 public abstract class EffectPrimitiveDefinition : KeywordDefinition
 {
-    public abstract IEvent Resolve(IResolutionContext context, Effect payload);
+    public abstract IEvent Resolve(IResolutionContext context, Effect effectInstance);
 }
 
 public abstract class EffectCompositeDefinition : KeywordDefinition
@@ -45,26 +45,23 @@ public abstract class EffectCompositeDefinition : KeywordDefinition
 // Other definitions can then reference the targets:
 // DAMAGE <1> 6 // Deal 6 damage to the first target
 // HEAL <2> 3 // Heal the second target for 3
-public class FeatureDefinition : KeywordDefinition
-{
-    
-}
+public abstract class FeatureDefinition : KeywordDefinition { }
 
 // ON_DEATH Self { ... }
-public class ReactionDefinition : KeywordDefinition
-{
+public abstract class ReactionDefinition : KeywordDefinition
+{ 
     public CheckEvent CheckIfTriggered { get; set; }
 }
 
 // ABILITY { ... }
-public class AbilityDefinition : KeywordDefinition
+public abstract class AbilityDefinition : KeywordDefinition
 {
     
 }
 
 // IN_HAND_CONDITION
 // LIFE_GTE_CONDITION 10
-public class ConditionDefinition : KeywordDefinition
+public abstract class ConditionDefinition : KeywordDefinition
 {
     public CheckState Check { get; set; }
 }
@@ -72,7 +69,7 @@ public class ConditionDefinition : KeywordDefinition
 // Examples:
 // RESOURCE_COST 4
 // SACRIFICE_COST 1
-public class CostDefinition : KeywordDefinition
+public abstract class CostDefinition : KeywordDefinition
 {
     public CostType Type { get; set; }
     public CheckCost Check { get; set; }
@@ -85,7 +82,7 @@ public class CostDefinition : KeywordDefinition
 //
 // Other definitions can then use the computed value:
 // RESOURCE_COST [X]
-public class ComputedValueDefinition : KeywordDefinition
+public abstract class ComputedValueDefinition : KeywordDefinition
 {
     public ComputeProperty Compute { get; set; }
 }

@@ -34,8 +34,9 @@ public class ActionQueue : IActionQueue
             }
         }
         
-        var payload = _effectQueue.Dequeue();
-        var e = Resolve(payload.CreateEffect(CurrentFrame!.Context));
+        var effectInstance = _effectQueue.Dequeue();
+        
+        var e = Resolve(effectInstance);
         CurrentFrame!.Context.Events.Add(e);
         
         if (_effectQueue.Count == 0)
@@ -48,13 +49,15 @@ public class ActionQueue : IActionQueue
         return e;
     }
 
-    private IEvent Resolve(Effect payload)
+    private IEvent Resolve(EffectInstance effectInstance)
     {
-        if (_definitions.GetKeyword(payload.Keyword) is not EffectPrimitiveDefinition effectDefinition)
-            throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect primitive");
+        if (_definitions.GetKeyword(effectInstance.Keyword) is not EffectPrimitiveDefinition effectDefinition)
+            throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect primitive");
 
         if (CurrentFrame == null)
             throw new InvalidOperationException("No current context");
+        
+        var payload = effectInstance.BindPayload(CurrentFrame!.Context);
         
         return effectDefinition.Resolve(CurrentFrame.Context, payload);
     }

@@ -3,7 +3,8 @@
 [Flags]
 public enum KeywordOperandType
 {
-    Integer,
+    Filter,
+    Number,
     String
 }
 

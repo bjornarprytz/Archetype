@@ -97,7 +97,7 @@ public static class RuntimeExtensions
         };
     }
 
-    public static Effect CreateEffect(this EffectInstance effectInstance, IResolutionContext context)
+    public static Effect BindPayload(this EffectInstance effectInstance, IResolutionContext context)
     {
         return new Effect
         {
@@ -128,7 +128,7 @@ public static class RuntimeExtensions
     
     public static bool CheckTarget(this TargetDescription description, IAtom target)
     {
-        foreach (var (keyword, requiredMatches) in description.Characteristics)
+        foreach (var (keyword, requiredMatches) in description.Filters)
         {
             var characteristics = requiredMatches.Split('|').Select(s => s.Trim());
             

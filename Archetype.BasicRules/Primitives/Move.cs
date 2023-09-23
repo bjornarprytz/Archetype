@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.State;
 
@@ -25,6 +26,5 @@ public class Move : EffectPrimitiveDefinition
 
         return new MoveEvent(card, from, to);
     }
-
 }
 public record MoveEvent(ICard Card, IZone From, IZone To) : EventBase;
