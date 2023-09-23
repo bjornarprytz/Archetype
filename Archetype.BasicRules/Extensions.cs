@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Security.Cryptography;
 using Archetype.BasicRules.Primitives;
 using Archetype.Framework.Definitions;
 using Archetype.Framework.Runtime;
@@ -86,6 +87,19 @@ public static class Extensions
         }
         
         return result;
+    }
+    
+    public static void Shuffle<T> (this IList<T> list)
+    {
+        var random = new Random();
+        var n = list.Count;
+        
+        while (n > 1) 
+        {
+            n--;
+            var k = random.Next(n + 1);
+            (list[k], list[n]) = (list[n], list[k]);
+        }
     }
 }
 

@@ -1,5 +1,4 @@
 ﻿using Archetype.Framework.Definitions;
-using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.State;
 
