@@ -11,9 +11,18 @@ public class Card : Atom, ICard
     public Card(ProtoCard proto)
     {
         _proto = proto;
+        
+        Abilities = proto.Abilities.ToDictionary(
+            pair => pair.Key,
+            pair => new Ability
+            {
+                Proto = pair.Value,
+                Source = this
+            } as IAbility
+        );
     }
     
-    public IReadOnlyDictionary<string, IAbility> Abilities { get; init; }
+    public IReadOnlyDictionary<string, IAbility> Abilities { get; }
     
     public IZone? CurrentZone { get; set; }
     public bool Tapped { get; set; }
@@ -43,7 +52,7 @@ public class Ability : IAbility
 {
     private readonly List<object> _computedValues = new(); 
         
-    public Guid Id { get; init; }
+    public Guid Id { get; }
     public AbilityInstance Proto { get; init; }
     public IAtom Source { get; init; }
     public IReadOnlyList<TargetDescription> TargetsDescriptors { get; }

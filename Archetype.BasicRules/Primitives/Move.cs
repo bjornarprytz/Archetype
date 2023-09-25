@@ -19,11 +19,11 @@ public class Move : EffectPrimitiveDefinition
         var (card, to) = payload.Targets.Deconstruct<ICard, IZone>();
         var from = card.CurrentZone;
 
-        from.Cards.Remove(card);
+        from?.Cards.Remove(card);
         to.Cards.Add(card);
         card.CurrentZone = to;
 
         return new MoveEvent(card, from, to);
     }
 }
-public record MoveEvent(ICard Card, IZone From, IZone To) : EventBase;
+public record MoveEvent(ICard Card, IZone? From, IZone To) : EventBase;

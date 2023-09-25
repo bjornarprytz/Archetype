@@ -25,21 +25,17 @@ public class ParseTests
             Name = "Lightning Bolt",
             Text = 
 """
-costs: {
-    COST_RESOURCE 1;
-}
-conditions: {
-    CONDITION_ZONE (state.zone:hand);
-}
-characteristics: {
-    TYPE spell;
-    SUBTYPE instant;
-    COLOR red;
-    RARITY common;
-}
-actionBlock: {
-    <TARGETS (meta.type:any)>;
-    DAMAGE <0> 3;
+
+(SUBTYPE instant)
+(COLOR red)
+(RARITY common)
+(TYPE spell)
+(COST_RESOURCE 1)
+(CONDITION_ZONE zone:hand)
+(TARGETS type:any)
+
+effects: {
+    (DAMAGE <0> 3)
 }
 """
         });
@@ -70,33 +66,27 @@ actionBlock: {
             Name = "Prodigal Sorcerer",
             Text =
 """
-costs: {
-    COST_RESOURCE 3;
+
+(TYPE unit)
+(SUBTYPE wizard)
+(COLOR blue)
+(RARITY common)
+(CONDITION_ZONE zone:field)
+(TARGETS type:any)
+
+effects: {
+    (TARGETS type:node)
+    (MOVE ~ <0>)
 }
-conditions: {
-    CONDITION_ZONE (zone:hand);
-}
-characteristics: {
-    TYPE unit;
-    SUBTYPE wizard;
-    COLOR blue;
-    RARITY common;
-}
-features: {
-    POWER 1;
-    TOUGHNESS 1;
-}
-abilities: [
-    {
-        cost: COST_WORK ~;
-        name: "Ping";
-        text: 
-        {
-            <TARGETS (type:any)>;
-            DAMAGE <0> 1;
-        }
+
+abilities: {
+    (COST_WORK)
+    (TARGETS type:any)
+    effects: {
+        (DAMAGE <0> 1)
     }
-]
+}
+
 """
         });
         

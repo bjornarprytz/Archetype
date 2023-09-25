@@ -1,32 +1,26 @@
 grammar ActionBlock;
 
-actionBlock:                '{' computedValueDeclaration? targetDeclaration? keywords '}';
+effects:                '{' function* '}';
 
-computedValueDeclaration:   '[COMPUTED' computedValue* ']' ';';
-targetDeclaration:          '<TARGETS' atomSelector '>' ';';
-keywords:                   effect*;
+function:                   '(' keyword targetRef* operand* ')';
 
-effect:                     keyword targetRef* operand* ';';
+operand:                    NUMBER | STRING | filters | computedValueRef;
 
-computedValue:              keyword operand* ';';
-atomSelector:               atomFilter*;
-targetRef:                  declaredTarget;
+targetRef:                  '<' index '>' | SELF;
 computedValueRef:           '[' index ']';
-declaredTarget:             '<' index '>';
 
-
-atomFilter:                '(' filterList ')';
-filterList:                 filter (',' filter)*;
+filters:                 filterList;
+filterList:                 filter ('&' filter)*;
 filter:                     (filterKey ':' filterValue);
-filterKey:                  keyword;
+filterKey:                  ANY;
 filterValue:                ANY ('|' ANY)*;
 
 keyword:                    ANY;
 index:                      NUMBER;
-operand:                    NUMBER | STRING | computedValueRef;
 
 STRING: '"' (~["\r\n])* '"';
 NUMBER: DIGIT+;
+SELF: '~';
 ANY: WORD+;
 
 fragment WORD: [a-zA-Z0-9_]+;
