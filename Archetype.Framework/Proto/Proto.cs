@@ -14,9 +14,7 @@ public class ProtoCard
     public IReadOnlyList<ConditionInstance> Conditions { get; set; }
     
     public IReadOnlyList<ReactionInstance> Reactions { get; set; }
-    public IReadOnlyList<FeatureInstance> Features { get; set; }
-
-    public IReadOnlyDictionary<string, string> Characteristics { get; set; }
+    public IReadOnlyDictionary<string, CharacteristicInstance> Characteristics { get; set; }
 }
 
 public class ProtoSet

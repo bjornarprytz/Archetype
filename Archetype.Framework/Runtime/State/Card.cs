@@ -28,13 +28,12 @@ public class Card : Atom, ICard
     public bool Tapped { get; set; }
     public IAtom Source => this;
     public IReadOnlyList<TargetDescription> TargetsDescriptors => _proto.Targets;
-    public IReadOnlyList<FeatureInstance> Features => _proto.Features;
     public IReadOnlyList<ReactionInstance> Reactions => _proto.Reactions;
     public IReadOnlyList<EffectInstance> Effects => _proto.Effects;
     public IReadOnlyList<CostInstance> Costs => _proto.Costs;
     public IReadOnlyList<ConditionInstance> Conditions => _proto.Conditions;
     public IReadOnlyList<object> ComputedValues => _computedValues;
-    public override IReadOnlyDictionary<string, string> Characteristics => _proto.Characteristics;
+    public override IReadOnlyDictionary<string, CharacteristicInstance> Characteristics => _proto.Characteristics;
     
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
@@ -77,6 +76,4 @@ public class Ability : IAbility
             _computedValues[index] = keywordDefinition.Compute(Source, gameState);
         }
     }
-
-    public IReadOnlyList<FeatureInstance> Features { get; }
 }

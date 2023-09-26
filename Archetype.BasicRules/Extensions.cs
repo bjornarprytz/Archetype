@@ -14,7 +14,7 @@ public static class Extensions
 {
     public static IDefinitionBuilder AddBasicRules(this IDefinitionBuilder definitions)
     {
-        foreach (var t in Assembly.GetAssembly(typeof(Move))!.GetTypes().Where(t => t.IsSubclassOf(typeof(KeywordDefinition)) && !t.IsAbstract))
+        foreach (var t in Assembly.GetAssembly(typeof(ChangeZone))!.GetTypes().Where(t => t.IsSubclassOf(typeof(KeywordDefinition)) && !t.IsAbstract))
         {
             if (t == null)
             {

@@ -2,7 +2,6 @@
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
-using KeywordOperand = Archetype.Framework.Proto.KeywordOperand;
 
 namespace Archetype.Framework.Runtime;
 
@@ -133,7 +132,8 @@ public static class RuntimeExtensions
         {
             var characteristics = requiredMatches.Split('|').Select(s => s.Trim());
             
-            if (!target.Characteristics.TryGetValue(keyword, out var value))
+            if (!target.Characteristics.TryGetValue(keyword, out var instance) 
+                || instance is not CharacteristicInstance<string> { TypedValue: { } value })
                 return false;
   
             if (characteristics.Any(c => c != value))
@@ -141,5 +141,12 @@ public static class RuntimeExtensions
         }
 
         return true;
+    }
+    
+    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue)
+    {
+        return atom.Characteristics.TryGetValue(key, out var instance) 
+               // && instance is CharacteristicInstance<T> { TypedValue: { } typedValue } 
+               && (stringValue == "any" || instance.Value.Equals(stringValue));
     }
 }

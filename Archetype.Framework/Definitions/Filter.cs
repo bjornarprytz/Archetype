@@ -57,13 +57,13 @@ public class Filter : IAtomFilter
     public IEnumerable<IAtom> ProvideAtoms(IResolutionContext context)
     {
         return context.GameState.Zones.Values
-            .Where(z => _zoneSubtypes.Contains(z.Characteristics["subtype"])) // TODO: Make sure Zones have a subtype like hand, node, etc.
+            .Where(z => _zoneSubtypes.Any(s => z.HasCharacteristic("SUBTYPE", s)))
             .SelectMany(z => z.Cards)
             .Where(FilterAtom);
     }
     
     public bool FilterAtom(IAtom atom)
     {
-        return _characteristics.All(c => c.MatchValues.Any(mv => atom.Characteristics[c.Key] == mv));
+        return _characteristics.All(c => c.MatchValues.Any(mv => atom.HasCharacteristic(c.Key, mv)));
     }
 }

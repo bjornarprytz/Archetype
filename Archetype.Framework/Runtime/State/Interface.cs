@@ -6,7 +6,7 @@ namespace Archetype.Framework.Runtime.State;
 public interface IAtom
 {
     Guid Id { get; }
-    IReadOnlyDictionary<string, string> Characteristics { get; }
+    IReadOnlyDictionary<string, CharacteristicInstance> Characteristics { get; }
 }
 
 public interface IZone : IAtom
@@ -57,7 +57,6 @@ public interface IActionBlock
 public interface ICard : IAtom, IActionBlock
 {
     IReadOnlyDictionary<string, IAbility> Abilities { get; }
-    IReadOnlyList<FeatureInstance> Features { get; }
     IReadOnlyList<ReactionInstance> Reactions { get; }
 
     IZone? CurrentZone { get; set; }
@@ -66,7 +65,7 @@ public interface ICard : IAtom, IActionBlock
 
 public interface IAbility : IActionBlock
 {
-    IReadOnlyList<FeatureInstance> Features { get; }
+    
 }
 
 public interface IGamePhase

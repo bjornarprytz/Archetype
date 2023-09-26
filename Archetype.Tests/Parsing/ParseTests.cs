@@ -1,5 +1,4 @@
-﻿using Archetype.Framework.Definitions;
-using Archetype.Framework.Parsing;
+﻿using Archetype.Framework.Parsing;
 using Archetype.Framework.Runtime;
 using FluentAssertions;
 using NSubstitute;
@@ -12,50 +11,55 @@ public class ParseTests
     public void Setup()
     {
     }
-    
+
     [Test]
     public void LightningBolt()
     {
         var definitions = Substitute.For<IDefinitions>();
-        
+
         var parser = new CardParser(definitions);
 
         var protoCard = parser.ParseCard(new CardData
         {
             Name = "Lightning Bolt",
-            Text = 
-"""
+            Text =
+                """
+                    (TARGETS <type:any>)
 
-(SUBTYPE instant)
-(COLOR red)
-(RARITY common)
-(TYPE spell)
-(COST_RESOURCE 1)
-(CONDITION_ZONE zone:hand)
-(TARGETS type:any)
+                    (subtype instant)
+                    (Color red)
+                    (RARITY common)
+                    (type spell)
 
-effects: {
-    (DAMAGE <0> 3)
-}
-"""
+                    (COST_RESOURCE 1)
+                    (CONDITION_SELF zone:hand)
+
+                    effects: {
+                        (DAMAGE <0> 3)
+                    }
+                """
         });
-        
+
         protoCard.Should().NotBeNull();
-        protoCard.Name.Should().Be("Lightning Bolt");
-        protoCard.Characteristics.Should().ContainKey("TYPE").WhoseValue.Should().Be("spell");
-        protoCard.Characteristics.Should().ContainKey("SUBTYPE").WhoseValue.Should().Be("instant");
-        protoCard.Characteristics.Should().ContainKey("COLOR").WhoseValue.Should().Be("red");
-        protoCard.Characteristics.Should().ContainKey("RARITY").WhoseValue.Should().Be("common");
-        protoCard.Targets.Should().HaveCount(1);
-        protoCard.Targets[0].Filters.Should().ContainKey("TYPE").WhoseValue.Should().Be("any");
-        protoCard.Targets[0].IsOptional.Should().BeFalse();
-        protoCard.Effects.Should().HaveCount(1);
-        protoCard.Effects[0].Keyword.Should().Be("DAMAGE");
-        protoCard.Effects[0].Operands.Should().HaveCount(1);
+        protoCard!.Name.Should().Be("Lightning Bolt");
+
+        protoCard.Targets.Should()
+            .ContainSingle(c => c.Filters.Count == 1 && c.Filters["type"] == "any" && !c.IsOptional);
+
+        protoCard.Characteristics["SUBTYPE"].Value.Should().Be("instant");
+        protoCard.Characteristics["COLOR"].Value.Should().Be("red");
+        protoCard.Characteristics["RARITY"].Value.Should().Be("common");
+        protoCard.Characteristics["TYPE"].Value.Should().Be("spell");
+
+        protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Amount == 1));
+        protoCard.Conditions.Should().ContainSingle(c => c.Keyword == "CONDITION_SELF" && c.Operands.Count == 1);
+
+        protoCard.Effects.Should()
+            .ContainSingle(c => c.Keyword == "DAMAGE" && c.Targets.Count == 1 && c.Operands.Count == 1);
     }
 
     [Test]
-    public void ProdigalSorcerer()
+    public void ArcTrail()
     {
         var definitions = Substitute.For<IDefinitions>();
 
@@ -63,49 +67,41 @@ effects: {
 
         var protoCard = parser.ParseCard(new CardData
         {
-            Name = "Prodigal Sorcerer",
+            Name = "Arc Trail",
             Text =
-"""
+                """
+                    (TARGETS <type:unit|player?> <type:unit|player?>)
+                    (subtype sorcery)
+                    (Color red)
+                    (RARITY uncommon)
+                    (type spell)
 
-(TYPE unit)
-(SUBTYPE wizard)
-(COLOR blue)
-(RARITY common)
-(CONDITION_ZONE zone:field)
-(TARGETS type:any)
+                    (COST_RESOURCE 2)
+                    (CONDITION_SELF zone:hand)
 
-effects: {
-    (TARGETS type:node)
-    (MOVE ~ <0>)
-}
-
-abilities: {
-    (COST_WORK)
-    (TARGETS type:any)
-    effects: {
-        (DAMAGE <0> 1)
-    }
-}
-
-"""
+                    effects: {
+                        (DAMAGE <0> 2)
+                        (DAMAGE <1> 1)
+                    } 
+                """
         });
         
         protoCard.Should().NotBeNull();
-        protoCard.Name.Should().Be("Prodigal Sorcerer");
-        protoCard.Characteristics.Should().ContainKey("TYPE").WhoseValue.Should().Be("unit");
-        protoCard.Characteristics.Should().ContainKey("SUBTYPE").WhoseValue.Should().Be("wizard");
-        protoCard.Characteristics.Should().ContainKey("COLOR").WhoseValue.Should().Be("blue");
-        protoCard.Characteristics.Should().ContainKey("RARITY").WhoseValue.Should().Be("common");
-        protoCard.Abilities.Should().HaveCount(1);
-        protoCard.Abilities.Should().ContainKey("Ping");
-        protoCard.Abilities["Ping"].Targets.Should().HaveCount(1);
-        protoCard.Abilities["Ping"].Targets[0].Filters.Should().ContainKey("TYPE").WhoseValue.Should().Be("any");
-        protoCard.Abilities["Ping"].Targets[0].IsOptional.Should().BeFalse();
-        protoCard.Abilities["Ping"].Effects.Should().HaveCount(1);
-        protoCard.Abilities["Ping"].Effects[0].Keyword.Should().Be("DAMAGE");
-        protoCard.Abilities["Ping"].Effects[0].Operands.Should().HaveCount(1);
-        protoCard.Abilities["Ping"].Costs.Should().HaveCount(1);
-        protoCard.Abilities["Ping"].Costs[0].Keyword.Should().Be("COST_WORK");
-        protoCard.Abilities["Ping"].Costs[0].Operands.Should().HaveCount(1);
+        protoCard!.Name.Should().Be("Arc Trail");
+        
+        protoCard.Targets.Should()
+            .ContainSingle(c => c.Filters.Count == 1 && c.Filters["type"] == "unit|player?" && !c.IsOptional);
+        
+        protoCard.Characteristics["SUBTYPE"].Value.Should().Be("sorcery");
+        protoCard.Characteristics["COLOR"].Value.Should().Be("red");
+        protoCard.Characteristics["RARITY"].Value.Should().Be("uncommon");
+        protoCard.Characteristics["TYPE"].Value.Should().Be("spell");
+        
+        protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Amount == 2));
+        protoCard.Conditions.Should().ContainSingle(c => c.Keyword == "CONDITION_SELF" && c.Operands.Count == 1);
+        
+        protoCard.Effects.Should()
+            .Contain(c => c.Keyword == "DAMAGE" && c.Targets.Count == 1 && c.Operands.Count == 1);
+        
     }
 }
