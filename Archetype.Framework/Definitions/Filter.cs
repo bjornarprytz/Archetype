@@ -22,7 +22,7 @@ public class Filter : IAtomFilter
     {
         FilterString = filterString.Trim('(', ')', ' ');
         
-        var filterTokens = FilterString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        var filterTokens = FilterString.Split('&', StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var token in filterTokens)
         {

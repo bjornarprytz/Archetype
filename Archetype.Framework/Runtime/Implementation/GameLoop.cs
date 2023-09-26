@@ -11,7 +11,6 @@ public class GameLoop : IGameLoop
 
     public IGameAPI Advance()
     {
-        // TODO: Implement this
         // resolve effects until it's empty or there's a prompt
         // if the player is allowed actions in this phase, return those
         // otherwise, advance to the next phase, enqueueing the steps (which should be ActionBlocks)

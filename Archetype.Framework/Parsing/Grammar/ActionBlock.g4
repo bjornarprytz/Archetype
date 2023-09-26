@@ -1,14 +1,17 @@
 grammar ActionBlock;
 
-cardText:                   effects;
+cardText:                   static effects? abilities?;
 
-effects:                    '{' targets? computedValues? function* '}';
+static:                     keywordExpression*;
+abilities:                  'abilities: ' actionBlock+;
+effects:                    'effects:' actionBlock;
 
+actionBlock:                '{' targets? computedValues? keywordExpression* '}';
 targets:                    '(TARGETS' ('<' filters '?'? '>')+ ')';
-computedValues:             '(COMPUTE' function* ')';
-function:                   '(' keyword targetRef* operand* ')';
+computedValues:             '(COMPUTE' keywordExpression* ')';
+keywordExpression:          '(' keyword targetRef* operand* ')';
 
-operand:                    NUMBER | STRING | filters | computedValueRef;
+operand:                    NUMBER | STRING | filter | computedValueRef;
 
 targetRef:                  '<' index '>' | SELF;
 computedValueRef:           '[' index ']';

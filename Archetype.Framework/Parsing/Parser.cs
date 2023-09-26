@@ -72,11 +72,16 @@ public class CardParser : ICardParser
         var tokenStream = new CommonTokenStream(lexer);
         var parser = new ActionBlockParser(tokenStream);
         
-        var tree = parser.actionBlock();
+        var tree = parser.cardText();
 
         var protoBuilder = new ProtoBuilder();
+
+        foreach (var keywordExpression in tree.@static().keywordExpression())
+        {
+            
+        }
+
         
-        // TODO: Parse card data and add to protoBuilder
 
         return protoBuilder.Build();
     }
