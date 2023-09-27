@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Antlr4.Runtime;
-using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 
@@ -76,13 +75,22 @@ public class CardParser : ICardParser
 
         var protoBuilder = new ProtoBuilder();
 
-        foreach (var keywordExpression in tree.@static().keywordExpression())
+        foreach (var staticKeyword in tree.@static().keywordExpression())
         {
-            
+            if (staticKeyword.GetKeywordInstance(_definitions) is not { } keywordInstance)
+            {
+                throw new InvalidOperationException($"Could not find keyword definition: {staticKeyword.keyword().GetText()}");
+            }
+
+            protoBuilder.AddStaticKeyword(keywordInstance);
         }
 
+        var targetSpecs = tree.effects().actionBlock().GetTargetSpecs().ToList();
+        var computedValues = tree.effects().actionBlock().GetComputedValues(_definitions).ToList();
+        var effectInstances = tree.effects().actionBlock().GetEffectKeywordInstances(_definitions).ToList();
         
-
+        protoBuilder.AddEffects(targetSpecs, computedValues, effectInstances);
+        
         return protoBuilder.Build();
     }
 }

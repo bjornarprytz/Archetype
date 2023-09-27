@@ -70,16 +70,15 @@ public class ParseTests
             Name = "Arc Trail",
             Text =
                 """
-                    (TARGETS <type:unit|player?> <type:unit|player?>)
                     (subtype sorcery)
                     (Color red)
                     (RARITY uncommon)
                     (type spell)
 
                     (COST_RESOURCE 2)
-                    (CONDITION_SELF zone:hand)
 
                     effects: {
+                        (TARGETS <type:unit|player?> <type:unit|player?>)
                         (DAMAGE <0> 2)
                         (DAMAGE <1> 1)
                     } 

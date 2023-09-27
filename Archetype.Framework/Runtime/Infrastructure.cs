@@ -13,7 +13,7 @@ public interface IProtoCards
 
 public interface IDefinitions
 {
-    KeywordDefinition? GetKeyword(string keyword);
+    KeywordDefinition? GetDefinition(string keyword);
 }
 
 public interface IDefinitionBuilder

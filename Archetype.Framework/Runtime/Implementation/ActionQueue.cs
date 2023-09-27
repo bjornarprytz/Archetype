@@ -51,7 +51,7 @@ public class ActionQueue : IActionQueue
 
     private IEvent Resolve(EffectInstance effectInstance)
     {
-        if (_definitions.GetKeyword(effectInstance.Keyword) is not EffectPrimitiveDefinition effectDefinition)
+        if (_definitions.GetDefinition(effectInstance.Keyword) is not EffectPrimitiveDefinition effectDefinition)
             throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect primitive");
 
         if (CurrentFrame == null)

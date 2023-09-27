@@ -6,7 +6,7 @@ public class Definitions : IDefinitions, IDefinitionBuilder
 {
     private readonly Dictionary<string, KeywordDefinition> _keywords = new();
 
-    public KeywordDefinition? GetKeyword(string keyword)
+    public KeywordDefinition? GetDefinition(string keyword)
     {
         return _keywords.TryGetValue(keyword, out var definition) ? definition : null;
     }
