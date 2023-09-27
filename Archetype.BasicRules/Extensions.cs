@@ -35,7 +35,7 @@ public static class Extensions
         return definitions;
     }
     
-    public static T0 Deconstruct<T0>(this IReadOnlyList<object> collection)
+    public static T0 Deconstruct<T0>(this IReadOnlyList<object> collection) // TODO: These don't work on operands because they "box" the value, review this. 
     {
         if (collection.Count != 1)
         {
@@ -75,29 +75,6 @@ public static class Extensions
         return (collection[0] is T0 t0 && collection[1] is T1 t1 && collection[2] is T2 t2 && collection[3] is T3 t3) ? (t0, t1, t2, t3) : throw new InvalidOperationException();
     }
 
-    public static IReadOnlyDictionary<string, string> ToCharacteristicFilter(this string filterString)
-    {
-        var filters = filterString.Split(',');
-
-        var result = new Dictionary<string, string>();
-        
-        foreach (var charFilter in filters)
-        {
-            var parts = charFilter.Split(':');
-            
-            if (parts.Length != 2)
-            {
-                throw new InvalidOperationException($"Invalid characteristic filter ({filterString})");
-            }
-            var characteristic = parts[0].Trim();
-            var filter = parts[1].Trim();
-            
-            result.Add(characteristic, filter);
-        }
-        
-        return result;
-    }
-    
     public static void Shuffle<T> (this IList<T> list)
     {
         var random = new Random();

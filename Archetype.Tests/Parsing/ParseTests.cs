@@ -24,17 +24,17 @@ public class ParseTests
             Name = "Lightning Bolt",
             Text =
                 """
-                    (TARGETS <type:any>)
-
                     (subtype instant)
                     (Color red)
                     (RARITY common)
                     (type spell)
+                    (TRAMPLE)
 
                     (COST_RESOURCE 1)
                     (CONDITION_SELF zone:hand)
 
                     effects: {
+                        (TARGETS <type:any>)
                         (DAMAGE <0> 3)
                     }
                 """
@@ -50,6 +50,7 @@ public class ParseTests
         protoCard.Characteristics["COLOR"].Value.Should().Be("red");
         protoCard.Characteristics["RARITY"].Value.Should().Be("common");
         protoCard.Characteristics["TYPE"].Value.Should().Be("spell");
+        protoCard.Characteristics["TRAMPLE"].Value.Should().Be("true"); // TODO: Should this be a bool?
 
         protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Amount == 1));
         protoCard.Conditions.Should().ContainSingle(c => c.Keyword == "CONDITION_SELF" && c.Operands.Count == 1);

@@ -46,22 +46,25 @@ public static class Extensions
     
     public static KeywordInstance GetKeywordInstance(this ActionBlockParser.KeywordExpressionContext keywordContext, IDefinitions definitions)
     {
-        if (keywordContext.keyword().GetText() is not { } keyword)
-            throw new InvalidOperationException("Keyword expression has no keyword");
+        if (keywordContext.keyword().GetText() is not { } keyword 
+            || definitions.GetDefinition(keyword) is not { } definition)
+            throw new InvalidOperationException("Keyword expression has no valid keyword");
         
-        var targetRefs = keywordContext.targetRef()?.Select(GetTargetIndex).ToList() ?? new List<string>();
-        
-        var operands = keywordContext.operand()
+        var targetRefs = keywordContext.targetRef()?.Select(GetTarget).ToList() ?? new List<KeywordTarget>();
+        var operands = keywordContext.operand()?.Select(ToOperand).ToList() ?? new List<KeywordOperand>();
 
-
-        return definitions.GetDefinition() ?? throw new InvalidOperationException($"Could not find keyword definition: {name}");
+        return new KeywordInstance
+        {
+            Keyword = keyword,
+            Operands = operands,
+            Targets = targetRefs
+        };
     }
     
-    public static IEnumerable<KeywordTarget> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
+    public static IEnumerable<TargetDescription> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
     {
-        var targetDescriptionContext = actionBlockContext.targets().targetSpecs();
-        
-        return keywordContext.targetRef()?.Select(GetTargetDescription) ?? Enumerable.Empty<TargetDescription>();
+        return actionBlockContext.targets().targetSpecs()
+            .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.optional() != null));
     } 
 
     public static IEnumerable<ComputedValueInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
@@ -84,8 +87,24 @@ public static class Extensions
         return effectKeyword;
     }
 
-    private static string GetTargetIndex(this ActionBlockParser.TargetRefContext targetRefContext)
+    private static KeywordTarget GetTarget(this ActionBlockParser.TargetRefContext targetRefContext)
     {
-        return targetRefContext.index()?.NUMBER()?.GetText() ?? targetRefContext.SELF()?.GetText() ?? throw new InvalidOperationException("Target ref has no index or SELF");
+        var targetText =  targetRefContext.index()?.NUMBER()?.GetText() ?? targetRefContext.SELF()?.GetText() ?? throw new InvalidOperationException("Target ref has no index or SELF");
+        
+        if (int.TryParse(targetText, out var index))
+        {
+            return new KeywordTarget(
+                ctx => ctx.Targets[index]
+            );
+        }
+        if (targetText == "~")
+        {
+            return new KeywordTarget(
+                ctx => ctx.Source
+            );
+        }
+        
+        throw new InvalidOperationException($"Could not parse target ref: {targetText}");
+        
     }
 }

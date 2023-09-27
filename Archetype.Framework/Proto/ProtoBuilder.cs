@@ -1,4 +1,6 @@
-﻿namespace Archetype.Framework.Proto;
+﻿using Archetype.Framework.Definitions;
+
+namespace Archetype.Framework.Proto;
 
 
 public class ProtoBuilder
@@ -24,7 +26,7 @@ public class ProtoBuilder
         // TODO: Ensure it's a static keyword
     }
     
-    public void AddEffects(IReadOnlyList<KeywordTarget> targets, IReadOnlyList<ComputedValueInstance> computedValues, IReadOnlyList<EffectInstance> effects)
+    public void AddEffects(IReadOnlyList<TargetDescription> targets, IReadOnlyList<ComputedValueInstance> computedValues, IReadOnlyList<EffectInstance> effects)
     {
         
     }

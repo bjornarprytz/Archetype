@@ -66,13 +66,6 @@ public class ResolutionContext : IResolutionContext
     public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }
 
-public class Effect
-{
-    public required IAtom Source { get; init; }
-    public required string Keyword { get; init; }
-    public required IReadOnlyList<object> Operands { get; init; }
-    
-    public required IReadOnlyList<IAtom> Targets { get; init; }
-}
+public record Effect(IAtom Source, string Keyword, IReadOnlyList<object> Operands, IReadOnlyList<IAtom> Targets);
 
 

@@ -99,13 +99,12 @@ public static class RuntimeExtensions
 
     public static Effect BindPayload(this EffectInstance effectInstance, IResolutionContext context)
     {
-        return new Effect
-        {
-            Source = context.Source,
-            Keyword = effectInstance.Keyword,
-            Operands = effectInstance.Operands.Select(o => o.GetValue(context)).ToList(),
-            Targets = effectInstance.Targets.Select(t => t.GetTarget(context)).ToList()
-        };
+        return new Effect(
+            context.Source, 
+            effectInstance.Keyword, 
+            effectInstance.Operands.Select(o => o.GetValue(context)).ToList(), 
+            effectInstance.Targets.Select(t => t.GetTarget(context)).ToList()
+        );
     }
 
     public static bool CheckTargets(this IActionBlock actionBlock, IReadOnlyList<IAtom> targets)

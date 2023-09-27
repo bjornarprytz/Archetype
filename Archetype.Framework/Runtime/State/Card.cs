@@ -52,7 +52,7 @@ public class Ability : IAbility
     private readonly List<object> _computedValues = new(); 
         
     public Guid Id { get; }
-    public AbilityInstance Proto { get; init; }
+    public ProtoAbility Proto { get; init; }
     public IAtom Source { get; init; }
     public IReadOnlyList<TargetDescription> TargetsDescriptors { get; }
     public IReadOnlyList<TargetDescription> Targets => Proto.Targets;

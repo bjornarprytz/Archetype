@@ -1,11 +1,16 @@
 ﻿using System.Collections;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
+using Archetype.Framework.Runtime.Actions;
+using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Definitions;
 
 public record OperandDescription(KeywordOperandType Type, bool IsOptional);
-public record TargetDescription(IReadOnlyDictionary<string, string> Filters, bool IsOptional);
+public record TargetDescription(Filter Filter, bool IsOptional); 
+// This represesnts two things currently, allowed targets for a keyword and the target of an effect
+// E.g. "Deal 3 damage to target unit or structure", but Damage can also target a player, so it's not a 1:1 mapping
+// TODO: Figure out if this needs to be split into two different things.
 
 public abstract class KeywordDefinition
 {
@@ -24,7 +29,7 @@ public abstract class KeywordDefinition
 // DISCARD -1- // get args from the first prompt response
 public abstract class EffectPrimitiveDefinition : KeywordDefinition
 {
-    public abstract IEvent Resolve(IResolutionContext context, Effect effectInstance);
+    public abstract IEvent Resolve(IResolutionContext context, Effect effect);
 }
 
 public abstract class EffectCompositeDefinition : KeywordDefinition
@@ -45,7 +50,8 @@ public abstract class EffectCompositeDefinition : KeywordDefinition
 // Other definitions can then reference the targets:
 // DAMAGE <1> 6 // Deal 6 damage to the first target
 // HEAL <2> 3 // Heal the second target for 3
-public abstract class FeatureDefinition : KeywordDefinition { }
+// TODO: Figure out something smart for characteristics and features. The idea is to have low-effort static definitions, while supporting reminder text, computed properties, if possible. 
+public abstract class CharacteristicDefinition : KeywordDefinition { } 
 
 // ON_DEATH Self { ... }
 public abstract class ReactionDefinition : KeywordDefinition
@@ -72,8 +78,9 @@ public abstract class ConditionDefinition : KeywordDefinition
 public abstract class CostDefinition : KeywordDefinition
 {
     public CostType Type { get; set; }
-    public CheckCost Check { get; set; }
-    public ResolveCost Resolve { get; set; }
+    
+    public abstract IEvent Resolve(IGameState gameState, IDefinitions definitions, CostPayload costPayload);
+    public abstract bool Check(CostPayload costPayload, int amount);
 }
 
 // Examples:
@@ -84,6 +91,6 @@ public abstract class CostDefinition : KeywordDefinition
 // RESOURCE_COST [X]
 public abstract class ComputedValueDefinition : KeywordDefinition
 {
-    public ComputeProperty Compute { get; set; }
+    public abstract object Compute(IAtom source, IGameState gameState);
 }
 
