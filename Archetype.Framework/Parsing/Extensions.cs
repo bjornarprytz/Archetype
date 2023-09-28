@@ -8,14 +8,24 @@ public static class Extensions
 {
     public static KeywordOperand ToOperand(this ActionBlockParser.OperandContext context)
     {
-        var text = context.GetText();
-
         Func<IResolutionContext, object> func;
         
-        if (context.NUMBER() is { } numberToken)
+        if (context.any() is { } anyToken)
         {
-            var number = int.Parse(numberToken.GetText());
-            func = _ => number;
+            if (anyToken.NUMBER() is { } numberToken)
+            {
+                var number = int.Parse(numberToken.GetText());
+                func = _ => number;
+            }
+            else if (anyToken.WORD() is { } stringToken)
+            {
+                var word = stringToken.GetText();
+                func = _ => word;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not parse any: {context.GetText()}");
+            }
         }
         else if (context.STRING() is { } stringToken)
         {
@@ -35,7 +45,7 @@ public static class Extensions
         }
         else
         {
-            throw new InvalidOperationException($"Could not parse operand: {text}");
+            throw new InvalidOperationException($"Could not parse operand: {context.GetText()}");
         }
         
         return new KeywordOperand
@@ -61,34 +71,44 @@ public static class Extensions
         };
     }
 
+    private static IEnumerable<KeywordInstance> GetKeywordInstances(this IEnumerable<ActionBlockParser.KeywordExpressionContext>? contexts, IDefinitions definitions)
+    {
+        return contexts?.Select(kw => kw.GetKeywordInstance(definitions)) ?? new List<KeywordInstance>();
+    }
+
     public static IEnumerable<TargetDescription> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
     {
-        return actionBlockContext.targets().targetSpecs()
-            .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.OPTIONAL() != null));
+        return actionBlockContext.targets()?.targetSpecs()?
+            .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.OPTIONAL() != null))
+            ?? new List<TargetDescription>();
     } 
 
     public static IEnumerable<KeywordInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {
-        return actionBlockContext.computedValues()
-            .keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
+        return actionBlockContext.computedValues()?
+            .keywordExpression().GetKeywordInstances(definitions) 
+            ?? new List<KeywordInstance>();
     }
     
     public static IEnumerable<KeywordInstance> GetCosts(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {
-        return actionBlockContext.costs()
-            .keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
+        return actionBlockContext.costs()?
+            .keywordExpression().GetKeywordInstances(definitions)
+            ?? new List<KeywordInstance>();
     }
     
     public static IEnumerable<KeywordInstance> GetConditions(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {
-        return actionBlockContext.conditions()
-            .keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
+        return actionBlockContext.conditions()?
+            .keywordExpression().GetKeywordInstances(definitions)
+            ?? new List<KeywordInstance>();
     }
 
     public static IEnumerable<KeywordInstance> GetEffectKeywordInstances(
         this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {
-        return actionBlockContext.keywordExpression().Select(k => k.GetKeywordInstance(definitions));
+        return actionBlockContext.keywordExpression()
+            .GetKeywordInstances(definitions);
     }
 
     private static KeywordTarget GetTarget(this ActionBlockParser.TargetRefContext targetRefContext)

@@ -1,6 +1,5 @@
 grammar ActionBlock;
 
-// TODO: Might need something to differentiate cards and abilities
 cardText:                   name static? effects? abilities?; 
 
 name:                       '(NAME' STRING ')';
@@ -19,7 +18,7 @@ conditions:                 '(CONDITIONS' keywordExpression+ ')';
 costs:                      '(COSTS' keywordExpression+ ')';
 
 keywordExpression:          '(' keyword targetRef* operand* ')';
-operand:                    NUMBER | STRING | filter | computedValueRef;
+operand:                    any | STRING | filter | computedValueRef;
 
 targetRef:                  '<' index '>' | SELF;
 computedValueRef:           '[' index ']';
@@ -28,19 +27,18 @@ filters:                    filterList;
 filterList:                 filter ('&' filter)*;
 filter:                     (filterKey ':' filterValue);
 filterKey:                  keyword;
-filterValue:                ANY ('|' ANY)*;
+filterValue:                any ('|' any)*;
 
-keyword:                    KEYWORD;
+keyword:                    WORD;
 index:                      NUMBER;
+any:                        WORD | NUMBER;
 
 STRING: '"' (~["\r\n])* '"';
 NUMBER: DIGIT+;
 SELF: '~';
 OPTIONAL: '?';
-KEYWORD: WORD;
-ANY: (WORD | NUMBER);
+WORD: ([a-zA-Z][a-zA-Z_]*);
 
-fragment WORD: ([a-zA-Z][a-zA-Z_]*);
 fragment DIGIT: [0-9];
 
 WS: [ \t\r\n]+ -> skip; // skip whitespace characters

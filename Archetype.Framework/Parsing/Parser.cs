@@ -75,7 +75,7 @@ public class CardParser : ICardParser
 
         var protoBuilder = new ProtoBuilder();
 
-        var characteristics = tree.characteristics().keywordExpression().Select(kw => kw.GetKeywordInstance(_definitions)).ToList();
+        var characteristics = tree.@static().keywordExpression().Select(kw => kw.GetKeywordInstance(_definitions)).ToList();
         
         protoBuilder.AddCharacteristics(characteristics);
 

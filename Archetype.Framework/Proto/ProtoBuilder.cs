@@ -29,6 +29,6 @@ public class ProtoBuilder
 
     public void SetActionBlock(List<KeywordInstance> targets, List<KeywordInstance> computedValues, List<TargetDescription> targetSpecs, List<KeywordInstance> computedValueInstances, List<KeywordInstance> effectInstances)
     {
-        throw new NotImplementedException();
+        // TODO: Implement
     }
 }

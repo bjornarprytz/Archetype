@@ -25,19 +25,24 @@ public class ParseTests
             Name = "Lightning Bolt",
             Text =
                 """
-                    (subtype instant)
-                    (Color red)
-                    (RARITY common)
-                    (type spell)
-                    (TRAMPLE)
+                    (STATIC 
+                        (subtype instant)
+                        (Color red)
+                        (RARITY common)
+                        (type spell)
+                        (TRAMPLE)
+                    )
 
-                    (COST_RESOURCE 1)
-                    (CONDITION_SELF zone:hand)
-
-                    effects: {
+                    (EFFECTS {
+                        (COSTS
+                            (COST_RESOURCE 1)
+                        )
+                        (CONDITIONS
+                            (CONDITION_SELF zone:hand)
+                        )
                         (TARGETS <type:any>)
                         (DAMAGE <0> 3)
-                    }
+                    })
                 """
         });
 
@@ -69,7 +74,7 @@ public class ParseTests
             Name = "Arc Trail",
             Text =
                 """
-                    (CHARACTERISTICS
+                    (STATIC
                         (subtype sorcery)
                         (Color red)
                         (RARITY uncommon)
