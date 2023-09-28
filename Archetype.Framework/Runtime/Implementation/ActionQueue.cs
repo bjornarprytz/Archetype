@@ -9,7 +9,7 @@ public class ActionQueue : IActionQueue
     private readonly IDefinitions _definitions;
     
     private readonly Queue<IResolutionFrame> _frameQueue = new();
-    private readonly Queue<EffectInstance> _effectQueue = new();
+    private readonly Queue<KeywordInstance> _effectQueue = new();
 
     public ActionQueue(IEventHistory eventHistory, IDefinitions definitions)
     {
@@ -49,7 +49,7 @@ public class ActionQueue : IActionQueue
         return e;
     }
 
-    private IEvent Resolve(EffectInstance effectInstance)
+    private IEvent Resolve(KeywordInstance effectInstance)
     {
         if (_definitions.GetDefinition(effectInstance.Keyword) is not EffectPrimitiveDefinition effectDefinition)
             throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect primitive");

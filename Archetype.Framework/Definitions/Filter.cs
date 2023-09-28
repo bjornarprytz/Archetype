@@ -9,7 +9,7 @@ public interface IAtomFilter
 
     public IEnumerable<IAtom> ProvideAtoms(IResolutionContext context);
 
-    public bool FilterAtom(IAtom atom);
+    public bool FilterAtom(IAtom atom, IResolutionContext context);
 }
 
 public class Filter : IAtomFilter
@@ -57,13 +57,13 @@ public class Filter : IAtomFilter
     public IEnumerable<IAtom> ProvideAtoms(IResolutionContext context)
     {
         return context.GameState.Zones.Values
-            .Where(z => _zoneSubtypes.Any(s => z.HasCharacteristic("SUBTYPE", s)))
+            .Where(z => _zoneSubtypes.Any(s => z.HasCharacteristic("SUBTYPE", s, context)))
             .SelectMany(z => z.Cards)
-            .Where(FilterAtom);
+            .Where(a => FilterAtom(a, context));
     }
     
-    public bool FilterAtom(IAtom atom)
+    public bool FilterAtom(IAtom atom, IResolutionContext context)
     {
-        return _characteristics.All(c => c.MatchValues.Any(mv => atom.HasCharacteristic(c.Key, mv)));
+        return _characteristics.All(c => c.MatchValues.Any(mv => atom.HasCharacteristic(c.Key, mv, context)));
     }
 }

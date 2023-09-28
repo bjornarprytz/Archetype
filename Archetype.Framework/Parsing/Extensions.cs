@@ -60,31 +60,35 @@ public static class Extensions
             Targets = targetRefs
         };
     }
-    
+
     public static IEnumerable<TargetDescription> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
     {
         return actionBlockContext.targets().targetSpecs()
-            .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.optional() != null));
+            .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.OPTIONAL() != null));
     } 
 
-    public static IEnumerable<ComputedValueInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+    public static IEnumerable<KeywordInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {
-        var computedValueContext = actionBlockContext.computedValues().keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
-        
-        return keywordContext.targetRef()?.Select(GetTargetDescription) ?? Enumerable.Empty<TargetDescription>();
+        return actionBlockContext.computedValues()
+            .keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
+    }
+    
+    public static IEnumerable<KeywordInstance> GetCosts(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+    {
+        return actionBlockContext.costs()
+            .keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
+    }
+    
+    public static IEnumerable<KeywordInstance> GetConditions(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+    {
+        return actionBlockContext.conditions()
+            .keywordExpression().Select(kw => kw.GetKeywordInstance(definitions));
     }
 
-    public static IEnumerable<EffectInstance> GetEffectKeywordInstances(
+    public static IEnumerable<KeywordInstance> GetEffectKeywordInstances(
         this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {
-        var keywords = actionBlockContext.keywordExpression().Select(k => k.GetKeywordInstance(definitions)).ToList();
-        
-        var effectKeyword = keywords.OfType<EffectInstance>().ToList();
-        
-        if (keywords.Count != effectKeyword.Count)
-            throw new InvalidOperationException("Not all keywords in the action block are effects");
-        
-        return effectKeyword;
+        return actionBlockContext.keywordExpression().Select(k => k.GetKeywordInstance(definitions));
     }
 
     private static KeywordTarget GetTarget(this ActionBlockParser.TargetRefContext targetRefContext)

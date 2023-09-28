@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Parsing;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Parsing;
 using Archetype.Framework.Runtime;
 using FluentAssertions;
 using NSubstitute;
@@ -43,16 +44,13 @@ public class ParseTests
         protoCard.Should().NotBeNull();
         protoCard!.Name.Should().Be("Lightning Bolt");
 
-        protoCard.Targets.Should()
-            .ContainSingle(c => c.Filters.Count == 1 && c.Filters["type"] == "any" && !c.IsOptional);
+        protoCard.Characteristics["SUBTYPE"].Operands[0].GetValue(null).Should().Be("instant");
+        protoCard.Characteristics["COLOR"].Operands[0].GetValue(null).Should().Be("red");
+        protoCard.Characteristics["RARITY"].Operands[0].GetValue(null).Should().Be("common");
+        protoCard.Characteristics["TYPE"].Operands[0].GetValue(null).Should().Be("spell");
+        protoCard.Characteristics["TRAMPLE"].Operands[0].GetValue(null).Should().Be("true"); // TODO: Should this be a bool?
 
-        protoCard.Characteristics["SUBTYPE"].Value.Should().Be("instant");
-        protoCard.Characteristics["COLOR"].Value.Should().Be("red");
-        protoCard.Characteristics["RARITY"].Value.Should().Be("common");
-        protoCard.Characteristics["TYPE"].Value.Should().Be("spell");
-        protoCard.Characteristics["TRAMPLE"].Value.Should().Be("true"); // TODO: Should this be a bool?
-
-        protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Amount == 1));
+        protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Operands[0].GetValue(null).Equals(1)));
         protoCard.Conditions.Should().ContainSingle(c => c.Keyword == "CONDITION_SELF" && c.Operands.Count == 1);
 
         protoCard.Effects.Should()
@@ -71,33 +69,42 @@ public class ParseTests
             Name = "Arc Trail",
             Text =
                 """
-                    (subtype sorcery)
-                    (Color red)
-                    (RARITY uncommon)
-                    (type spell)
+                    (CHARACTERISTICS
+                        (subtype sorcery)
+                        (Color red)
+                        (RARITY uncommon)
+                        (type spell)
+                    )
 
-                    (COST_RESOURCE 2)
 
-                    effects: {
-                        (TARGETS <type:unit|player?> <type:unit|player?>)
+                    (EFFECTS {
+                        (COSTS
+                            (COST_RESOURCE 2)
+                        )
+                        (CONDITIONS
+                            (CONDITION_SELF zone:hand)
+                        )
+                        (TARGETS <type:any?> <type:unit|player?>)
                         (DAMAGE <0> 2)
                         (DAMAGE <1> 1)
-                    } 
+                    })
                 """
         });
         
         protoCard.Should().NotBeNull();
         protoCard!.Name.Should().Be("Arc Trail");
+
+        protoCard.Targets.Should().HaveCount(2);
+        protoCard.Targets[0].Filter.Should().BeEquivalentTo(Filter.Parse("<type:any?>"));
+        protoCard.Targets[1].Filter.Should().BeEquivalentTo(Filter.Parse("<type:unit|player?>"));
+            
         
-        protoCard.Targets.Should()
-            .ContainSingle(c => c.Filters.Count == 1 && c.Filters["type"] == "unit|player?" && !c.IsOptional);
+        protoCard.Characteristics["SUBTYPE"].Operands[0].GetValue(null).Should().Be("sorcery");
+        protoCard.Characteristics["COLOR"].Operands[0].GetValue(null).Should().Be("red");
+        protoCard.Characteristics["RARITY"].Operands[0].GetValue(null).Should().Be("uncommon");
+        protoCard.Characteristics["TYPE"].Operands[0].GetValue(null).Should().Be("spell");
         
-        protoCard.Characteristics["SUBTYPE"].Value.Should().Be("sorcery");
-        protoCard.Characteristics["COLOR"].Value.Should().Be("red");
-        protoCard.Characteristics["RARITY"].Value.Should().Be("uncommon");
-        protoCard.Characteristics["TYPE"].Value.Should().Be("spell");
-        
-        protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Amount == 2));
+        protoCard.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Operands[0].GetValue(null).Equals(2)));
         protoCard.Conditions.Should().ContainSingle(c => c.Keyword == "CONDITION_SELF" && c.Operands.Count == 1);
         
         protoCard.Effects.Should()

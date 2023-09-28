@@ -21,14 +21,14 @@ public class ProtoBuilder
         return _card;
     }
     
-    public void AddStaticKeyword(KeywordInstance keywordInstance)
+    public void AddCharacteristics(List<KeywordInstance> keywordInstance)
     {
         // TODO: Ensure it's a static keyword
     }
     
-    public void AddEffects(IReadOnlyList<TargetDescription> targets, IReadOnlyList<ComputedValueInstance> computedValues, IReadOnlyList<EffectInstance> effects)
+
+    public void SetActionBlock(List<KeywordInstance> targets, List<KeywordInstance> computedValues, List<TargetDescription> targetSpecs, List<KeywordInstance> computedValueInstances, List<KeywordInstance> effectInstances)
     {
-        
+        throw new NotImplementedException();
     }
-    
 }

@@ -33,10 +33,10 @@ public record ActionBlockEvent
 public interface IResolutionFrame
 {
     IResolutionContext Context { get; }
-    IReadOnlyList<EffectInstance> Effects { get; }
+    IReadOnlyList<KeywordInstance> Effects { get; }
 }
 
-public record ResolutionFrame(IResolutionContext Context, IReadOnlyList<EffectInstance> Effects) : IResolutionFrame;
+public record ResolutionFrame(IResolutionContext Context, IReadOnlyList<KeywordInstance> Effects) : IResolutionFrame;
 
 public interface IResolutionContext
 {

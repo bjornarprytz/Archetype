@@ -19,12 +19,14 @@ public static class RuntimeExtensions
         
         return requiredDefinition;
     }
-    public static IEnumerable<(CostDefinition, CostPayload)> EnumerateCosts(this IDefinitions definitions, IEnumerable<CostInstance> costs, IEnumerable<CostPayload> payloads)
+    public static IEnumerable<(CostDefinition, CostPayload, KeywordInstance)> EnumerateCosts(this IDefinitions definitions, IEnumerable<KeywordInstance> costs, IEnumerable<CostPayload> payloads)
     {
-        return costs.Select(definitions.GetOrThrow<CostDefinition>).Zip(payloads);
+        var list = costs.ToList();
+        
+        return list.Select(definitions.GetOrThrow<CostDefinition>).Zip(payloads, list);
     }
     public static bool CheckCosts(this IDefinitions definitions, 
-        IReadOnlyList<CostInstance> costs,
+        IReadOnlyList<KeywordInstance> costs,
         IReadOnlyList<CostPayload> payments
         )
     {
@@ -40,7 +42,7 @@ public static class RuntimeExtensions
             if (costDefinition.Type != payment.Type)
                 throw new InvalidOperationException($"Cost type ({costDefinition.Type}) does not match payment type ({payment.Type})");
             
-            if (!costDefinition.Check(payment, cost.Amount))
+            if (!costDefinition.Check(payment, cost))
             {
                 return false;
             }
@@ -68,7 +70,7 @@ public static class RuntimeExtensions
         throw new InvalidOperationException($"Atom ({id}) not found");
     }
     
-    public static bool CheckConditions(this IDefinitions definitions, IReadOnlyList<ConditionInstance> conditions, IAtom source, IGameState gameState)
+    public static bool CheckConditions(this IDefinitions definitions, IReadOnlyList<KeywordInstance> conditions, IAtom source, IGameState gameState)
     {
         return !conditions.Select(definitions.GetOrThrow<ConditionDefinition>)
             .All(c => c.Check(source, gameState));
@@ -76,7 +78,15 @@ public static class RuntimeExtensions
 
     public static IResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
     {
-        return new ResolutionContext
+        var definitions = gameRoot.MetaGameState.Definitions;
+        var gameState = gameRoot.GameState;
+        var conditions = actionBlock.Conditions;
+        var costs = actionBlock.Costs;
+        var source = actionBlock.Source;
+
+        actionBlock.UpdateComputedValues(definitions, gameState);
+        
+        var resolutionContext = new ResolutionContext
         {
             MetaGameState = gameRoot.MetaGameState,
             GameState = gameRoot.GameState,
@@ -85,9 +95,20 @@ public static class RuntimeExtensions
             Targets = targets,
             ComputedValues = actionBlock.ComputedValues,
         };
+
+        if (definitions.CheckConditions(conditions, source, gameState))
+            throw new InvalidOperationException("Invalid conditions");
+        
+        if (!definitions.CheckCosts(costs, payments))
+            throw new InvalidOperationException("Invalid payment");
+        
+        if (actionBlock.CheckTargets(resolutionContext))
+            throw new InvalidOperationException("Invalid targets");
+
+        return resolutionContext;
     }
     
-    public static IEnumerable<EffectInstance> GetPrimitives(this EffectInstance effectInstance, IDefinitions definitions, IResolutionContext context)
+    public static IEnumerable<KeywordInstance> GetPrimitives(this KeywordInstance effectInstance, IDefinitions definitions, IResolutionContext context)
     {
         return definitions.GetDefinition(effectInstance.Keyword) switch
         {
@@ -97,7 +118,7 @@ public static class RuntimeExtensions
         };
     }
 
-    public static Effect BindPayload(this EffectInstance effectInstance, IResolutionContext context)
+    public static Effect BindPayload(this KeywordInstance effectInstance, IResolutionContext context)
     {
         return new Effect(
             context.Source, 
@@ -107,9 +128,10 @@ public static class RuntimeExtensions
         );
     }
 
-    public static bool CheckTargets(this IActionBlock actionBlock, IReadOnlyList<IAtom> targets)
+    public static bool CheckTargets(this IActionBlock actionBlock, IResolutionContext context)
     {
         var targetDescriptors = actionBlock.TargetsDescriptors;
+        var targets = context.Targets;
 
         if (targets.Count > targetDescriptors.Count 
             ||
@@ -118,34 +140,17 @@ public static class RuntimeExtensions
 
         foreach (var (description, target) in targetDescriptors.Zip(targets))
         {
-            if (description.CheckTarget(target))
+            if (description.Filter.FilterAtom(target, context))
                 throw new InvalidOperationException($"Target ({target.Id}) does not match the description");
         }
 
         return true;
     }
     
-    public static bool CheckTarget(this TargetDescription description, IAtom target)
-    {
-        foreach (var (keyword, requiredMatches) in description.Filters)
-        {
-            var characteristics = requiredMatches.Split('|').Select(s => s.Trim());
-            
-            if (!target.Characteristics.TryGetValue(keyword, out var instance) 
-                || instance is not CharacteristicInstance<string> { TypedValue: { } value })
-                return false;
-  
-            if (characteristics.Any(c => c != value))
-                return false;
-        }
-
-        return true;
-    }
-    
-    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue)
+    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue, IResolutionContext? context=null)
     {
         return atom.Characteristics.TryGetValue(key, out var instance) 
                // && instance is CharacteristicInstance<T> { TypedValue: { } typedValue } 
-               && (stringValue == "any" || instance.Value.Equals(stringValue));
+               && (stringValue == "any" || instance.Operands[0].GetValue(context).Equals(stringValue));
     }
 }

@@ -6,7 +6,7 @@ namespace Archetype.Framework.Runtime.State;
 public interface IAtom
 {
     Guid Id { get; }
-    IReadOnlyDictionary<string, CharacteristicInstance> Characteristics { get; }
+    IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; }
 }
 
 public interface IZone : IAtom
@@ -46,9 +46,9 @@ public interface IActionBlock
 {
     IAtom Source { get; }
     IReadOnlyList<TargetDescription> TargetsDescriptors { get; }
-    IReadOnlyList<EffectInstance> Effects { get; }
-    IReadOnlyList<CostInstance> Costs { get; }
-    IReadOnlyList<ConditionInstance> Conditions { get; }
+    IReadOnlyList<KeywordInstance> Effects { get; }
+    IReadOnlyList<KeywordInstance> Costs { get; }
+    IReadOnlyList<KeywordInstance> Conditions { get; }
     IReadOnlyList<object> ComputedValues { get; }
     
     void UpdateComputedValues(IDefinitions definitions, IGameState gameState);
@@ -57,7 +57,6 @@ public interface IActionBlock
 public interface ICard : IAtom, IActionBlock
 {
     IReadOnlyDictionary<string, IAbility> Abilities { get; }
-    IReadOnlyList<ReactionInstance> Reactions { get; }
 
     IZone? CurrentZone { get; set; }
     bool Tapped { get; set; }

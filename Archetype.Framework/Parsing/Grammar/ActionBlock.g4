@@ -1,20 +1,22 @@
 grammar ActionBlock;
 
 // TODO: Might need something to differentiate cards and abilities
-cardText:                   static effects? abilities?; 
-abilityText:                abilityName effects;
+cardText:                   name static? effects? abilities?; 
 
-abilities:                  'abilities: ' abilityRef+;
-effects:                    'effects:' actionBlock;
+name:                       '(NAME' STRING ')';
+static:                     '(STATIC' keywordExpression+ ')';
+effects:                    '(EFFECTS' actionBlock ')';
+abilities:                  '(ABILITIES' ability+ ')';
 
-abilityRef:                 '{' abilityName static '}';
-actionBlock:                '{' targets? computedValues? keywordExpression* '}';
+ability:                    '{' abilityName actionBlock '}';
+actionBlock:                '{' costs? conditions? targets? computedValues? keywordExpression+ '}';
+
 computedValues:             '(COMPUTE' keywordExpression+ ')';
-
 abilityName:                keyword;
-static:                     keywordExpression*;
 targets:                    '(TARGETS' targetSpecs+ ')';
-targetSpecs:                '<' filters optional? '>';
+targetSpecs:                '<' filters OPTIONAL? '>';
+conditions:                 '(CONDITIONS' keywordExpression+ ')';
+costs:                      '(COSTS' keywordExpression+ ')';
 
 keywordExpression:          '(' keyword targetRef* operand* ')';
 operand:                    NUMBER | STRING | filter | computedValueRef;
@@ -27,7 +29,6 @@ filterList:                 filter ('&' filter)*;
 filter:                     (filterKey ':' filterValue);
 filterKey:                  keyword;
 filterValue:                ANY ('|' ANY)*;
-optional:                   '?';
 
 keyword:                    KEYWORD;
 index:                      NUMBER;
@@ -35,6 +36,7 @@ index:                      NUMBER;
 STRING: '"' (~["\r\n])* '"';
 NUMBER: DIGIT+;
 SELF: '~';
+OPTIONAL: '?';
 KEYWORD: WORD;
 ANY: (WORD | NUMBER);
 

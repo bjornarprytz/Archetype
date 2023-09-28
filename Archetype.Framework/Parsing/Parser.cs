@@ -75,21 +75,17 @@ public class CardParser : ICardParser
 
         var protoBuilder = new ProtoBuilder();
 
-        foreach (var staticKeyword in tree.@static().keywordExpression())
-        {
-            if (staticKeyword.GetKeywordInstance(_definitions) is not { } keywordInstance)
-            {
-                throw new InvalidOperationException($"Could not find keyword definition: {staticKeyword.keyword().GetText()}");
-            }
+        var characteristics = tree.characteristics().keywordExpression().Select(kw => kw.GetKeywordInstance(_definitions)).ToList();
+        
+        protoBuilder.AddCharacteristics(characteristics);
 
-            protoBuilder.AddStaticKeyword(keywordInstance);
-        }
-
+        var costs = tree.effects().actionBlock().GetCosts(_definitions).ToList();
+        var conditions = tree.effects().actionBlock().GetConditions(_definitions).ToList();
         var targetSpecs = tree.effects().actionBlock().GetTargetSpecs().ToList();
         var computedValues = tree.effects().actionBlock().GetComputedValues(_definitions).ToList();
         var effectInstances = tree.effects().actionBlock().GetEffectKeywordInstances(_definitions).ToList();
         
-        protoBuilder.AddEffects(targetSpecs, computedValues, effectInstances);
+        protoBuilder.SetActionBlock(costs, conditions, targetSpecs, computedValues, effectInstances);
         
         return protoBuilder.Build();
     }

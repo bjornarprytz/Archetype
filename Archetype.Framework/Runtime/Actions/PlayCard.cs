@@ -29,28 +29,16 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         var card = gameState.GetAtom<ICard>(args.Card);
         var targets = args.Targets.Select(gameState.GetAtom).ToList();
         
-        var conditions = card.Conditions;
         var costs = card.Costs;
         var payments = args.Payments;
         
-        card.UpdateComputedValues(_definitions, gameState);
-        
-        if (_definitions.CheckConditions(conditions, card, gameState))
-            throw new InvalidOperationException("Invalid conditions");
-        
-        if (!card.CheckTargets(targets))
-            throw new InvalidOperationException("Invalid targets");
+        var resolutionContext = card.CreateResolutionContext(_gameRoot, payments, targets);
 
-        if (!_definitions.CheckCosts(costs, payments))
-            throw new InvalidOperationException("Invalid payment");
-
-        foreach (var (cost, payment) in _definitions.EnumerateCosts(costs, payments))
+        foreach (var (cost, payment, instance) in _definitions.EnumerateCosts(costs, payments))
         {
-            _history.Push(cost.Resolve(gameState, _definitions, payment));
+            _history.Push(cost.Resolve(gameState, _definitions, payment, instance));
         }
 
-        var resolutionContext = card.CreateResolutionContext(_gameRoot, payments, targets);
-        
         _actionQueue.Push(new ResolutionFrame(resolutionContext, card.Effects.ToList()));
 
         return Unit.Task;
