@@ -25,7 +25,7 @@ public static class RuntimeExtensions
         
         return list.Select(definitions.GetOrThrow<CostDefinition>).Zip(payloads, list);
     }
-    public static bool CheckCosts(this IDefinitions definitions, 
+    public static bool CheckPayments(this IDefinitions definitions, 
         IReadOnlyList<KeywordInstance> costs,
         IReadOnlyList<CostPayload> payments
         )
@@ -76,7 +76,7 @@ public static class RuntimeExtensions
             .All(c => c.Check(source, gameState));
     }
 
-    public static IResolutionContext CreateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
+    public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
     {
         var definitions = gameRoot.MetaGameState.Definitions;
         var gameState = gameRoot.GameState;
@@ -90,7 +90,7 @@ public static class RuntimeExtensions
         {
             MetaGameState = gameRoot.MetaGameState,
             GameState = gameRoot.GameState,
-            Costs = payments,
+            Payments = payments,
             Source = actionBlock.Source,
             Targets = targets,
             ComputedValues = actionBlock.ComputedValues,
@@ -99,7 +99,7 @@ public static class RuntimeExtensions
         if (definitions.CheckConditions(conditions, source, gameState))
             throw new InvalidOperationException("Invalid conditions");
         
-        if (!definitions.CheckCosts(costs, payments))
+        if (!definitions.CheckPayments(costs, payments))
             throw new InvalidOperationException("Invalid payment");
         
         if (actionBlock.CheckTargets(resolutionContext))

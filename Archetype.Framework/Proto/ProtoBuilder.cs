@@ -12,12 +12,6 @@ public class ProtoBuilder
     private readonly List<KeywordInstance> _computedValues = new();
     private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
     private readonly Dictionary<string, KeywordInstance> _characteristics = new();
-
-    public ProtoBuilder()
-    {
-        
-    }
-    
     
     public IProtoCard Build()
     {

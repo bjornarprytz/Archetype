@@ -31,7 +31,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var payments = args.Payments;
         var costs = ability.Costs;
         
-        var resolutionContext = ability.CreateResolutionContext(_gameRoot, payments, targets);
+        var resolutionContext = ability.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
         
         foreach (var (cost, payment, instance) in _definitions.EnumerateCosts(costs, payments))
         {

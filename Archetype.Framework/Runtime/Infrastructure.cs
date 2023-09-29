@@ -47,9 +47,16 @@ public interface IGameActionHandler
 
 public record ActionDescription(ActionType Type);
 
+public record InitialApi : IGameAPI
+{
+    public IGameState State { get; } = null;
+
+    public IReadOnlyList<ActionDescription> AvailableActions { get; set; } =
+        new[] { new ActionDescription(ActionType.StartGame) };
+}
 
 public interface IGameAPI
 {
-    IGameState State { get; set; }
-    IReadOnlyList<ActionDescription> AvailableActions { get; set; }
+    IGameState State { get; }
+    IReadOnlyList<ActionDescription> AvailableActions { get; }
 }

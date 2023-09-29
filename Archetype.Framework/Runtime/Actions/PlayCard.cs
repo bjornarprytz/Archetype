@@ -32,7 +32,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         var costs = card.Costs;
         var payments = args.Payments;
         
-        var resolutionContext = card.CreateResolutionContext(_gameRoot, payments, targets);
+        var resolutionContext = card.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
 
         foreach (var (cost, payment, instance) in _definitions.EnumerateCosts(costs, payments))
         {

@@ -22,7 +22,7 @@ public record EffectEvent(EffectPayload EffectPayload) : EventBase;
 public record ActionBlockEvent
     (IAtom Source, IReadOnlyList<IAtom> Targets, IReadOnlyList<CostPayload> Payment) : EventBase
 {
-    public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Costs)
+    public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments)
     {
         Children = context.Events.ToList();
     }
@@ -42,7 +42,7 @@ public interface IResolutionContext
     public IMetaGameState MetaGameState { get; }
     public IGameState GameState { get; }
     public IAtom Source { get; }
-    public IReadOnlyList<CostPayload> Costs { get; }
+    public IReadOnlyList<CostPayload> Payments { get; }
     public IReadOnlyList<IAtom> Targets { get; }
     public IReadOnlyList<int> ComputedValues { get; }
 
@@ -56,7 +56,7 @@ public class ResolutionContext : IResolutionContext
     public required IMetaGameState MetaGameState { get; init; }
     public required IGameState GameState { get; init; }
     public required IAtom Source { get; init; }
-    public required IReadOnlyList<CostPayload> Costs { get; init; }
+    public required IReadOnlyList<CostPayload> Payments { get; init; }
     public required IReadOnlyList<IAtom> Targets { get; init; }
     public required IReadOnlyList<int> ComputedValues { get; init; }
 
