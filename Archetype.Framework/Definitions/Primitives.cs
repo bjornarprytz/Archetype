@@ -1,11 +1,12 @@
 ﻿namespace Archetype.Framework.Definitions;
 
 [Flags]
-public enum KeywordOperandType
+public enum KeywordOperandParsedType
 {
     Filter,
     Number,
-    String
+    String,
+    Word
 }
 
 [Flags]
@@ -19,3 +20,17 @@ public enum CostType
     Exhaust, // From discard pile
 }
 
+
+public static class Helpers
+{
+    public static KeywordOperandParsedType GetParsedType<T>()
+    {
+        return typeof(T) switch
+        {
+            { } t when t == typeof(Filter) => KeywordOperandParsedType.Filter,
+            { } t when t == typeof(int) => KeywordOperandParsedType.Number,
+            { } t when t == typeof(string) => KeywordOperandParsedType.String | KeywordOperandParsedType.Word,
+            _ => throw new InvalidOperationException($"Unknown operand type {typeof(T)}")
+        };
+    }
+} 

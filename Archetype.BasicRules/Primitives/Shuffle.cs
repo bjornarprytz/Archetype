@@ -10,7 +10,7 @@ public class Shuffle : EffectPrimitiveDefinition
     public override string ReminderText => "Shuffle target draw pile.";
     
     public override IReadOnlyList<TargetDescription> Targets { get; } = TargetHelpers.Required(
-        "type:zone,subtype:drawpile"
+        "type:zone&subtype:drawpile"
     ).ToList();
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayloadInstance)
     {

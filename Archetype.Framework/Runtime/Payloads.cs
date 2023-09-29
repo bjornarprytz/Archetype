@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Archetype.Framework.Proto;
+﻿using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 

@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using Archetype.Framework.Proto;
+﻿using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Definitions;
 
-public record OperandDescription(KeywordOperandType Type, bool IsOptional);
+
+
 public record TargetDescription(Filter Filter, bool IsOptional); 
 // This represesnts two things currently, allowed targets for a keyword and the target of an effect
 // E.g. "Deal 3 damage to target unit or structure", but Damage can also target a player, so it's not a 1:1 mapping
@@ -14,10 +14,12 @@ public record TargetDescription(Filter Filter, bool IsOptional);
 
 public abstract class KeywordDefinition
 {
+    
     public abstract string Name { get; } // ID
     public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
+    protected virtual OperandDeclaration OperandDeclaration => OperandHelpers.DeclareNone();
     public virtual IReadOnlyList<TargetDescription> Targets { get; } = Array.Empty<TargetDescription>();
-    public virtual IReadOnlyList<OperandDescription> Operands { get; } = Array.Empty<OperandDescription>();
+    public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
 }
 
 // The bread and butter of state changes
@@ -91,6 +93,6 @@ public abstract class CostDefinition : KeywordDefinition
 // RESOURCE_COST [X]
 public abstract class ComputedValueDefinition : KeywordDefinition
 {
-    public abstract object Compute(IAtom source, IGameState gameState);
+    public abstract int Compute(IAtom source, IGameState gameState);
 }
 
