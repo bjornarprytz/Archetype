@@ -5,10 +5,10 @@ namespace Archetype.Framework.Runtime.State;
 
 public class Card : Atom, ICard
 {
-    private readonly List<object> _computedValues = new();
-    private readonly ProtoCard _proto;
+    private readonly List<int> _computedValues = new();
+    private readonly IProtoCard _proto;
 
-    public Card(ProtoCard proto)
+    public Card(IProtoCard proto)
     {
         _proto = proto;
         
@@ -27,17 +27,17 @@ public class Card : Atom, ICard
     public IZone? CurrentZone { get; set; }
     public bool Tapped { get; set; }
     public IAtom Source => this;
-    public IReadOnlyList<TargetDescription> TargetsDescriptors => _proto.Targets;
-    public IReadOnlyList<KeywordInstance> Effects => _proto.Effects;
-    public IReadOnlyList<KeywordInstance> Costs => _proto.Costs;
-    public IReadOnlyList<KeywordInstance> Conditions => _proto.Conditions;
-    public IReadOnlyList<object> ComputedValues => _computedValues;
+    public IReadOnlyList<TargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
+    public IReadOnlyList<KeywordInstance> Effects => _proto.ActionBlock.Effects;
+    public IReadOnlyList<KeywordInstance> Costs => _proto.ActionBlock.Costs;
+    public IReadOnlyList<KeywordInstance> Conditions => _proto.ActionBlock.Conditions;
+    public IReadOnlyList<int> ComputedValues => _computedValues;
     public override IReadOnlyDictionary<string, KeywordInstance> Characteristics => _proto.Characteristics;
     
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
     {
-        foreach (var (computedValue, index) in _proto.ComputedValues.Select(((instance, i) => (instance, i))))
+        foreach (var (computedValue, index) in _proto.ActionBlock.ComputedValues.Select(((instance, i) => (instance, i))))
         {
             var keywordDefinition = definitions.GetOrThrow<ComputedValueDefinition>(computedValue);
             
@@ -48,16 +48,15 @@ public class Card : Atom, ICard
 
 public class Ability : IAbility
 {
-    private readonly List<object> _computedValues = new(); 
-        
-    public Guid Id { get; }
-    public ProtoAbility Proto { get; init; }
-    public IAtom Source { get; init; }
-    public IReadOnlyList<TargetDescription> TargetsDescriptors => Proto.Targets;
+    private readonly List<int> _computedValues = new(); 
+    
+    public required IProtoActionBlock Proto { get; init; }
+    public required IAtom Source { get; init; }
+    public IReadOnlyList<TargetDescription> TargetsDescriptors => Proto.TargetSpecs;
     public IReadOnlyList<KeywordInstance> Effects => Proto.Effects;
     public IReadOnlyList<KeywordInstance> Costs => Proto.Costs;
     public IReadOnlyList<KeywordInstance> Conditions => Proto.Conditions;
-    public IReadOnlyList<object> ComputedValues => _computedValues;
+    public IReadOnlyList<int> ComputedValues => _computedValues;
 
 
     public object? GetComputedValue(int index)

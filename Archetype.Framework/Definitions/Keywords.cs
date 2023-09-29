@@ -14,7 +14,6 @@ public record TargetDescription(Filter Filter, bool IsOptional);
 
 public abstract class KeywordDefinition
 {
-    
     public abstract string Name { get; } // ID
     public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
     protected virtual OperandDeclaration OperandDeclaration => OperandHelpers.DeclareNone();

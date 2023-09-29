@@ -49,7 +49,7 @@ public interface IActionBlock
     IReadOnlyList<KeywordInstance> Effects { get; }
     IReadOnlyList<KeywordInstance> Costs { get; }
     IReadOnlyList<KeywordInstance> Conditions { get; }
-    IReadOnlyList<object> ComputedValues { get; }
+    IReadOnlyList<int> ComputedValues { get; }
     
     void UpdateComputedValues(IDefinitions definitions, IGameState gameState);
 }

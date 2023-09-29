@@ -81,7 +81,7 @@ public static class Extensions
         return actionBlockContext.targets()?.targetSpecs()?
             .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.OPTIONAL() != null))
             ?? new List<TargetDescription>();
-    } 
+    }
 
     public static IEnumerable<KeywordInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
     {

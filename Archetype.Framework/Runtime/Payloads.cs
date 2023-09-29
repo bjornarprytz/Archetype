@@ -44,11 +44,11 @@ public interface IResolutionContext
     public IAtom Source { get; }
     public IReadOnlyList<CostPayload> Costs { get; }
     public IReadOnlyList<IAtom> Targets { get; }
-    public IReadOnlyList<object> ComputedValues { get; }
+    public IReadOnlyList<int> ComputedValues { get; }
 
     public IList<IReadOnlyList<IAtom>> PromptResponses { get; }
     public IList<IEvent> Events { get; }
-    public IDictionary<string, object> Memory { get; } 
+    public IDictionary<string, object> Memory { get; } // TODO: Evaluate if this is needed
 }
 
 public class ResolutionContext : IResolutionContext
@@ -58,7 +58,7 @@ public class ResolutionContext : IResolutionContext
     public required IAtom Source { get; init; }
     public required IReadOnlyList<CostPayload> Costs { get; init; }
     public required IReadOnlyList<IAtom> Targets { get; init; }
-    public required IReadOnlyList<object> ComputedValues { get; init; }
+    public required IReadOnlyList<int> ComputedValues { get; init; }
 
     public IList<IReadOnlyList<IAtom>> PromptResponses { get; } = new List<IReadOnlyList<IAtom>>();
     public IList<IEvent> Events { get; } = new List<IEvent>();

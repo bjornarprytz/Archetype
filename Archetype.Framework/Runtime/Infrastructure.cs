@@ -8,7 +8,7 @@ namespace Archetype.Framework.Runtime;
 
 public interface IProtoCards
 {
-    ProtoCard? GetProtoCard(string name);
+    IProtoCard? GetProtoCard(string name);
 }
 
 public interface IDefinitions

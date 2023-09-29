@@ -2,14 +2,24 @@
 
 namespace Archetype.Framework.Proto;
 
-
 public class ProtoBuilder
 {
-    private ProtoCard _card;
+    private readonly string _name;
+    private readonly List<TargetDescription> _targetSpecs = new();
+    private readonly List<KeywordInstance> _conditions = new();
+    private readonly List<KeywordInstance> _effects = new();
+    private readonly List<KeywordInstance> _costs = new();
+    private readonly List<KeywordInstance> _computedValues = new();
+    private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
+    private readonly Dictionary<string, KeywordInstance> _characteristics = new();
 
+    public ProtoBuilder()
+    {
+        
+    }
     
     
-    public ProtoCard Build()
+    public IProtoCard Build()
     {
         // TODO: Validate card
         // TODO: Add type specific effects and conditions
@@ -18,17 +28,58 @@ public class ProtoBuilder
         
         // NOTE: This could be a pluggable behaviour, because it's encroaching on the game design domain
         
-        return _card;
+        var protoCard = new ProtoCard (
+            Name: _name,
+            ActionBlock: new ProtoActionBlock(
+                TargetSpecs: _targetSpecs,
+                Conditions: _conditions,
+                Costs: _costs,
+                Effects: _effects,
+                ComputedValues: _computedValues
+            ),
+            Abilities: _abilities,
+            Characteristics: _characteristics
+        );
+        
+        return protoCard;
     }
     
-    public void AddCharacteristics(List<KeywordInstance> keywordInstance)
+    public void AddCharacteristics(List<KeywordInstance> characteristicsInstances)
     {
-        // TODO: Ensure it's a static keyword
+        foreach (var instance in characteristicsInstances)
+        {
+            _characteristics.Add(instance.Keyword, instance);
+        }
     }
     
 
-    public void SetActionBlock(List<KeywordInstance> targets, List<KeywordInstance> computedValues, List<TargetDescription> targetSpecs, List<KeywordInstance> computedValueInstances, List<KeywordInstance> effectInstances)
+    public void SetActionBlock(
+        List<TargetDescription> targetSpecs, 
+        List<KeywordInstance> costs, 
+        List<KeywordInstance> conditions, 
+        List<KeywordInstance> computedValues, 
+        List<KeywordInstance> effects
+        )
     {
-        // TODO: Implement
+        _targetSpecs.AddRange(targetSpecs);
+        _costs.AddRange(costs);
+        _conditions.AddRange(conditions);
+        _computedValues.AddRange(computedValues);
+        _effects.AddRange(effects);
     }
+
+    private record ProtoCard(
+        string Name, 
+        IProtoActionBlock ActionBlock,
+        IReadOnlyDictionary<string, IProtoActionBlock> Abilities, 
+        IReadOnlyDictionary<string, KeywordInstance> Characteristics
+        ) : IProtoCard;
+
+    private record ProtoActionBlock(
+        IReadOnlyList<TargetDescription> TargetSpecs,
+        IReadOnlyList<KeywordInstance> Conditions,
+        IReadOnlyList<KeywordInstance> Costs,
+        IReadOnlyList<KeywordInstance> Effects,
+        IReadOnlyList<KeywordInstance> ComputedValues
+    ) : IProtoActionBlock;
 }

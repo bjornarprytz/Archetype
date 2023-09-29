@@ -20,12 +20,12 @@ public class CardData
 
 public interface ICardParser
 {
-    public ProtoCard ParseCard(CardData cardData);
+    public IProtoCard ParseCard(CardData cardData);
 }
 
 public interface ISetParser
 {
-    public ProtoSet ParseSet(string setJson);
+    public IProtoSet ParseSet(string setJson);
 }
 
 public class Parser : ISetParser
@@ -37,7 +37,7 @@ public class Parser : ISetParser
         _cardParser = cardParser;
     }
 
-    public ProtoSet ParseSet(string setJson)
+    public IProtoSet ParseSet(string setJson)
     {
         var setData = JsonSerializer.Deserialize<SetData>(setJson);
 
@@ -47,12 +47,14 @@ public class Parser : ISetParser
         var cards = setData.Cards.Select(_cardParser.ParseCard);
         
         return new ProtoSet
-        {
-            Name = setData.Name,
-            Description = setData.Description,
-            Cards = cards.ToList()
-        };
+        (
+            setData.Name,
+            setData.Description,
+            cards.ToList()
+        );
     }
+
+    private record ProtoSet(string Name, string Description, IReadOnlyList<IProtoCard> Cards) : IProtoSet;
 }
 
 public class CardParser : ICardParser
@@ -64,7 +66,7 @@ public class CardParser : ICardParser
         _definitions = definitions;
     }
 
-    public ProtoCard ParseCard(CardData cardData)
+    public IProtoCard ParseCard(CardData cardData)
     {
         var inputStream = new AntlrInputStream(cardData.Text);
         var lexer = new ActionBlockLexer(inputStream);
@@ -83,9 +85,9 @@ public class CardParser : ICardParser
         var conditions = tree.effects().actionBlock().GetConditions(_definitions).ToList();
         var targetSpecs = tree.effects().actionBlock().GetTargetSpecs().ToList();
         var computedValues = tree.effects().actionBlock().GetComputedValues(_definitions).ToList();
-        var effectInstances = tree.effects().actionBlock().GetEffectKeywordInstances(_definitions).ToList();
+        var effects = tree.effects().actionBlock().GetEffectKeywordInstances(_definitions).ToList();
         
-        protoBuilder.SetActionBlock(costs, conditions, targetSpecs, computedValues, effectInstances);
+        protoBuilder.SetActionBlock(targetSpecs, costs, conditions, computedValues, effects);
         
         return protoBuilder.Build();
     }

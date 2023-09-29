@@ -2,32 +2,27 @@
 
 namespace Archetype.Framework.Proto;
 
-public class ProtoAbility
+public interface IProtoActionBlock
 {
-    public string Name { get; set; }
-    public IReadOnlyList<TargetDescription> Targets { get; set; }
-    public IReadOnlyList<KeywordInstance> Conditions { get; set; }
-    public IReadOnlyList<KeywordInstance> Costs { get; set; }
-    public IReadOnlyList<KeywordInstance> Effects { get; set; }
-    public IReadOnlyList<KeywordInstance> ComputedValues { get; set; }
+    public IReadOnlyList<TargetDescription> TargetSpecs { get; }
+    public IReadOnlyList<KeywordInstance> Conditions { get; }
+    public IReadOnlyList<KeywordInstance> Costs { get; }
+    public IReadOnlyList<KeywordInstance> Effects { get; }
+    public IReadOnlyList<KeywordInstance> ComputedValues { get; }
 }
 
-public class ProtoCard
+public interface IProtoCard
 {
-    public string Name { get; set; }
-    public IReadOnlyList<TargetDescription> Targets { get; set; }
-    public IReadOnlyList<KeywordInstance> Conditions { get; set; }
-    public IReadOnlyList<KeywordInstance> Effects { get; set; }
-    public IReadOnlyList<KeywordInstance> Costs { get; set; }
-    public IReadOnlyList<KeywordInstance> ComputedValues { get; set; }
-    public IReadOnlyDictionary<string, ProtoAbility> Abilities { get; set; } // Key is ability name
+    public string Name { get; }
+    public IProtoActionBlock ActionBlock { get; }
+    public IReadOnlyDictionary<string, IProtoActionBlock> Abilities { get; } // Key is ability name
     
-    public IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; set; } // Key is characteristic keyword
+    public IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } // Key is characteristic keyword
 }
 
-public class ProtoSet
+public interface IProtoSet
 {
-    public string Name { get; set; }
-    public string Description { get; set; }
-    public IReadOnlyList<ProtoCard> Cards { get; set; }
+    public string Name { get; }
+    public string Description { get; }
+    public IReadOnlyList<IProtoCard> Cards { get; }
 }
