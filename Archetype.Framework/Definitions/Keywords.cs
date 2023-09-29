@@ -6,18 +6,13 @@ using Archetype.Framework.Runtime.State;
 namespace Archetype.Framework.Definitions;
 
 
-
-public record TargetDescription(Filter Filter, bool IsOptional); 
-// This represesnts two things currently, allowed targets for a keyword and the target of an effect
-// E.g. "Deal 3 damage to target unit or structure", but Damage can also target a player, so it's not a 1:1 mapping
-// TODO: Figure out if this needs to be split into two different things.
-
 public abstract class KeywordDefinition
 {
     public abstract string Name { get; } // ID
     public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
-    protected virtual OperandDeclaration OperandDeclaration => OperandHelpers.DeclareNone();
-    public virtual IReadOnlyList<TargetDescription> Targets { get; } = Array.Empty<TargetDescription>();
+    protected virtual OperandDeclaration OperandDeclaration { get; } = new();
+    protected virtual TargetDeclaration TargetDeclaration { get; } = new();
+    public IReadOnlyList<KeywordTargetDescription> Targets => TargetDeclaration;
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
 }
 
@@ -50,8 +45,7 @@ public abstract class EffectCompositeDefinition : KeywordDefinition
 // 
 // Other definitions can then reference the targets:
 // DAMAGE <1> 6 // Deal 6 damage to the first target
-// HEAL <2> 3 // Heal the second target for 3
-// TODO: Figure out something smart for characteristics and features. The idea is to have low-effort static definitions, while supporting reminder text, computed properties, if possible. 
+// HEAL <2> 3 // Heal the second target for 3 
 public abstract class CharacteristicDefinition : KeywordDefinition { } 
 
 // ON_DEATH Self { ... }

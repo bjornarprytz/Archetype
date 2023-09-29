@@ -4,7 +4,7 @@ namespace Archetype.Framework.Proto;
 
 public interface IProtoActionBlock
 {
-    public IReadOnlyList<TargetDescription> TargetSpecs { get; }
+    public IReadOnlyList<CardTargetDescription> TargetSpecs { get; }
     public IReadOnlyList<KeywordInstance> Conditions { get; }
     public IReadOnlyList<KeywordInstance> Costs { get; }
     public IReadOnlyList<KeywordInstance> Effects { get; }

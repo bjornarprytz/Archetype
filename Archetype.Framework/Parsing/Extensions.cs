@@ -76,11 +76,11 @@ public static class Extensions
         return contexts?.Select(kw => kw.GetKeywordInstance(definitions)) ?? new List<KeywordInstance>();
     }
 
-    public static IEnumerable<TargetDescription> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
+    public static IEnumerable<CardTargetDescription> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
     {
         return actionBlockContext.targets()?.targetSpecs()?
-            .Select(c => new TargetDescription(Filter.Parse(c.filters().GetText()), c.OPTIONAL() != null))
-            ?? new List<TargetDescription>();
+            .Select(c => new CardTargetDescription(Filter.Parse(c.filters().GetText()), c.OPTIONAL() != null))
+            ?? new List<CardTargetDescription>();
     }
 
     public static IEnumerable<KeywordInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)

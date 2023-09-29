@@ -5,7 +5,7 @@ namespace Archetype.Framework.Proto;
 public class ProtoBuilder
 {
     private readonly string _name;
-    private readonly List<TargetDescription> _targetSpecs = new();
+    private readonly List<CardTargetDescription> _targetSpecs = new();
     private readonly List<KeywordInstance> _conditions = new();
     private readonly List<KeywordInstance> _effects = new();
     private readonly List<KeywordInstance> _costs = new();
@@ -54,7 +54,7 @@ public class ProtoBuilder
     
 
     public void SetActionBlock(
-        List<TargetDescription> targetSpecs, 
+        List<CardTargetDescription> targetSpecs, 
         List<KeywordInstance> costs, 
         List<KeywordInstance> conditions, 
         List<KeywordInstance> computedValues, 
@@ -76,7 +76,7 @@ public class ProtoBuilder
         ) : IProtoCard;
 
     private record ProtoActionBlock(
-        IReadOnlyList<TargetDescription> TargetSpecs,
+        IReadOnlyList<CardTargetDescription> TargetSpecs,
         IReadOnlyList<KeywordInstance> Conditions,
         IReadOnlyList<KeywordInstance> Costs,
         IReadOnlyList<KeywordInstance> Effects,

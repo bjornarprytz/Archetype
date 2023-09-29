@@ -8,15 +8,12 @@ public class ChangeZone : EffectPrimitiveDefinition
 {
     public override string Name => "CHANGE_ZONE";
     public override string ReminderText =>  "Change zone from the existing zone to the target zone.";
-    
-    public override IReadOnlyList<TargetDescription> Targets { get; } = TargetHelpers.Required(
-        "type:card",
-        "type:zone"
-    ).ToList();
+
+    protected override TargetDeclaration<ICard, IZone> TargetDeclaration { get; } = new();
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload payload)
     {
-        var (card, to) = payload.Targets.Deconstruct<ICard, IZone>();
+        var (card, to) = TargetDeclaration.UnpackTargets(payload);
         var from = card.CurrentZone;
 
         from?.Cards.Remove(card);

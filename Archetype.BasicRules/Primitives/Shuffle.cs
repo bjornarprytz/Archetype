@@ -8,13 +8,13 @@ public class Shuffle : EffectPrimitiveDefinition
 {
     public override string Name => "SHUFFLE";
     public override string ReminderText => "Shuffle target draw pile.";
-    
-    public override IReadOnlyList<TargetDescription> Targets { get; } = TargetHelpers.Required(
-        "type:zone&subtype:drawpile"
-    ).ToList();
-    public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayloadInstance)
+
+    protected override TargetDeclaration<IZone> TargetDeclaration { get; } = new();
+
+
+    public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var zone = effectPayloadInstance.Targets.Deconstruct<IZone>();
+        var zone = TargetDeclaration.UnpackTargets(effectPayload);
         zone.Cards.Shuffle();
         return new ShuffleEvent(zone);
     }

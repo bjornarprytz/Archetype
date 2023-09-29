@@ -27,7 +27,7 @@ public class Card : Atom, ICard
     public IZone? CurrentZone { get; set; }
     public bool Tapped { get; set; }
     public IAtom Source => this;
-    public IReadOnlyList<TargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
+    public IReadOnlyList<CardTargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
     public IReadOnlyList<KeywordInstance> Effects => _proto.ActionBlock.Effects;
     public IReadOnlyList<KeywordInstance> Costs => _proto.ActionBlock.Costs;
     public IReadOnlyList<KeywordInstance> Conditions => _proto.ActionBlock.Conditions;
@@ -52,7 +52,7 @@ public class Ability : IAbility
     
     public required IProtoActionBlock Proto { get; init; }
     public required IAtom Source { get; init; }
-    public IReadOnlyList<TargetDescription> TargetsDescriptors => Proto.TargetSpecs;
+    public IReadOnlyList<CardTargetDescription> TargetsDescriptors => Proto.TargetSpecs;
     public IReadOnlyList<KeywordInstance> Effects => Proto.Effects;
     public IReadOnlyList<KeywordInstance> Costs => Proto.Costs;
     public IReadOnlyList<KeywordInstance> Conditions => Proto.Conditions;

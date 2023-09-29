@@ -45,7 +45,7 @@ public interface IInfrastructure
 public interface IActionBlock
 {
     IAtom Source { get; }
-    IReadOnlyList<TargetDescription> TargetsDescriptors { get; }
+    IReadOnlyList<CardTargetDescription> TargetsDescriptors { get; }
     IReadOnlyList<KeywordInstance> Effects { get; }
     IReadOnlyList<KeywordInstance> Costs { get; }
     IReadOnlyList<KeywordInstance> Conditions { get; }

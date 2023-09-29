@@ -3,33 +3,6 @@ using Archetype.Framework.Runtime;
 
 namespace Archetype.Framework.Definitions;
 
-public static class OperandHelpers
-{
-    public static OperandDeclaration DeclareNone()
-    {
-        return new OperandDeclaration();
-    }
-    
-    public static OperandDeclaration<T0> Declare<T0>(bool isOptional = false)
-    {
-        return new OperandDeclaration<T0>(isOptional);
-    }
-    
-    public static OperandDeclaration<T0, T1> Declare<T0, T1>(int nOptional = 0)
-    {
-        return new OperandDeclaration<T0, T1>(nOptional);
-    }
-    
-    public static OperandDeclaration<T0, T1, T2> Declare<T0, T1, T2>(int nOptional = 0)
-    {
-        return new OperandDeclaration<T0, T1, T2>(nOptional);
-    }
-    
-    public static OperandDeclaration<T0, T1, T2, T3> Declare<T0, T1, T2, T3>(int nOptional = 0)
-    {
-        return new OperandDeclaration<T0, T1, T2, T3>(nOptional);
-    }
-}
 
 public record OperandDescription<T>() : OperandDescription(Helpers.GetParsedType<T>());
 

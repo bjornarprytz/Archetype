@@ -23,7 +23,7 @@ public enum CostType
 
 public static class Helpers
 {
-    public static KeywordOperandParsedType GetParsedType<T>()
+    public static KeywordOperandParsedType GetParsedType<T>() // TODO: Use this somewhere (for validation?), or remove it
     {
         return typeof(T) switch
         {
