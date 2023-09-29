@@ -17,10 +17,10 @@ public class CreateCard : EffectPrimitiveDefinition
         "type:zone"
     ).ToList();
 
-    public override IEvent Resolve(IResolutionContext context, Effect effectInstance)
+    public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var protoCard = effectInstance.Operands.Deconstruct<ProtoCard>();
-        var zone = effectInstance.Targets.Deconstruct<IZone>();
+        var protoCard = effectPayload.Operands.Deconstruct<ProtoCard>();
+        var zone = effectPayload.Targets.Deconstruct<IZone>();
 
         var card = new Card(protoCard)
         {

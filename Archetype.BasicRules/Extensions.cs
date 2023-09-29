@@ -35,7 +35,7 @@ public static class Extensions
         return definitions;
     }
     
-    public static T0 Deconstruct<T0>(this IReadOnlyList<object> collection) // TODO: These don't work on operands because they "box" the value, review this. 
+    public static T0 Deconstruct<T0>(this IReadOnlyList<object> collection)
     {
         if (collection.Count != 1)
         {

@@ -12,9 +12,9 @@ public class Shuffle : EffectPrimitiveDefinition
     public override IReadOnlyList<TargetDescription> Targets { get; } = TargetHelpers.Required(
         "type:zone,subtype:drawpile"
     ).ToList();
-    public override IEvent Resolve(IResolutionContext context, Effect effectInstance)
+    public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayloadInstance)
     {
-        var zone = effectInstance.Targets.Deconstruct<IZone>();
+        var zone = effectPayloadInstance.Targets.Deconstruct<IZone>();
         zone.Cards.Shuffle();
         return new ShuffleEvent(zone);
     }

@@ -14,7 +14,7 @@ public class ChangeZone : EffectPrimitiveDefinition
         "type:zone"
     ).ToList();
 
-    public override IEvent Resolve(IResolutionContext context, Effect payload)
+    public override IEvent Resolve(IResolutionContext context, EffectPayload payload)
     {
         var (card, to) = payload.Targets.Deconstruct<ICard, IZone>();
         var from = card.CurrentZone;

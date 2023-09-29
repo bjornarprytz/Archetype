@@ -15,7 +15,7 @@ public class Prompt : EffectPrimitiveDefinition
         KeywordOperandType.String
     ).ToList();
 
-    public override IEvent Resolve(IResolutionContext context, Effect payload)
+    public override IEvent Resolve(IResolutionContext context, EffectPayload payload)
     {
         var (atoms, min, max, promptText) =  payload.Operands.Deconstruct<IReadOnlyList<Guid>, int, int, string>();
 

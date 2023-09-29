@@ -29,7 +29,7 @@ public abstract class KeywordDefinition
 // DISCARD -1- // get args from the first prompt response
 public abstract class EffectPrimitiveDefinition : KeywordDefinition
 {
-    public abstract IEvent Resolve(IResolutionContext context, Effect effect);
+    public abstract IEvent Resolve(IResolutionContext context, EffectPayload effectPayload);
 }
 
 public abstract class EffectCompositeDefinition : KeywordDefinition

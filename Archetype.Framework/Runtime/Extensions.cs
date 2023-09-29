@@ -118,9 +118,9 @@ public static class RuntimeExtensions
         };
     }
 
-    public static Effect BindPayload(this KeywordInstance effectInstance, IResolutionContext context)
+    public static EffectPayload BindPayload(this KeywordInstance effectInstance, IResolutionContext context)
     {
-        return new Effect(
+        return new EffectPayload(
             context.Source, 
             effectInstance.Keyword, 
             effectInstance.Operands.Select(o => o.GetValue(context)).ToList(), 

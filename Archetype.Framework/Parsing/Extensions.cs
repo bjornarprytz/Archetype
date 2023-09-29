@@ -41,7 +41,7 @@ public static class Extensions
         else if (context.filter() is { } filterContext)
         {
             var filter = Filter.Parse(filterContext.GetText());
-            func = ctx => filter.ProvideAtoms(ctx); // TODO: Is this the right thing to return? Or should the caller use the filter
+            func = ctx => filter.ProvideAtoms(ctx);
         }
         else
         {

@@ -18,7 +18,7 @@ public abstract record EventBase : IEvent
 }
 
 
-public record EffectEvent(Effect EffectPayload) : EventBase;
+public record EffectEvent(EffectPayload EffectPayload) : EventBase;
 
 public record ActionBlockEvent
     (IAtom Source, IReadOnlyList<IAtom> Targets, IReadOnlyList<CostPayload> Payment) : EventBase
@@ -66,6 +66,6 @@ public class ResolutionContext : IResolutionContext
     public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }
 
-public record Effect(IAtom Source, string Keyword, IReadOnlyList<object> Operands, IReadOnlyList<IAtom> Targets);
+public record EffectPayload(IAtom Source, string Keyword, IReadOnlyList<object> Operands, IReadOnlyList<IAtom> Targets);
 
 
