@@ -10,7 +10,7 @@ public static class Extensions
 {
     public static IDefinitionBuilder AddBasicRules(this IDefinitionBuilder definitions)
     {
-        foreach (var t in Assembly.GetAssembly(typeof(ChangeZone))!.GetTypes().Where(t => t.IsSubclassOf(typeof(KeywordDefinition)) && !t.IsAbstract))
+        foreach (var t in Assembly.GetAssembly(typeof(ChangeZone))!.GetTypes().Where(t => t.IsSubclassOf(typeof(IKeywordDefinition)) && !t.IsAbstract))
         {
             if (t == null)
             {
@@ -19,7 +19,7 @@ public static class Extensions
             
             var instance = Activator.CreateInstance(t);
             
-            if (instance is not KeywordDefinition keywordDefinition)
+            if (instance is not IKeywordDefinition keywordDefinition)
             {
                 throw new InvalidOperationException($"Failed to create instance of {t.FullName}");
             }

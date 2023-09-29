@@ -13,12 +13,12 @@ public interface IProtoCards
 
 public interface IDefinitions
 {
-    KeywordDefinition? GetDefinition(string keyword);
+    IKeywordDefinition? GetDefinition(string keyword);
 }
 
 public interface IDefinitionBuilder
 {
-    void AddKeyword(KeywordDefinition keywordDefinition);
+    void AddKeyword(IKeywordDefinition keywordDefinition);
 }
 
 public interface IEventHistory

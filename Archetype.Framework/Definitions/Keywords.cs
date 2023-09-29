@@ -5,8 +5,14 @@ using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Definitions;
 
-
-public abstract class KeywordDefinition
+public interface IKeywordDefinition
+{
+    string Name { get; }
+    string ReminderText { get; }
+    IReadOnlyList<KeywordTargetDescription> Targets { get; }
+    IReadOnlyList<IOperandDescription> Operands { get; }
+}
+public abstract class KeywordDefinition : IKeywordDefinition
 {
     public abstract string Name { get; } // ID
     public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"

@@ -4,7 +4,7 @@ namespace Archetype.Framework.Proto;
 
 public class ProtoBuilder
 {
-    private readonly string _name;
+    private string _name;
     private readonly List<CardTargetDescription> _targetSpecs = new();
     private readonly List<KeywordInstance> _conditions = new();
     private readonly List<KeywordInstance> _effects = new();
@@ -42,6 +42,11 @@ public class ProtoBuilder
         );
         
         return protoCard;
+    }
+    
+    public void SetName(string name)
+    {
+        _name = name;
     }
     
     public void AddCharacteristics(List<KeywordInstance> characteristicsInstances)

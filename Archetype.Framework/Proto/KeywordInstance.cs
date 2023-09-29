@@ -5,7 +5,14 @@ namespace Archetype.Framework.Proto;
 
 public record KeywordInstance
 {
-    public string Keyword { get; init; }
+    private readonly string _keyword = "_UNINITIALIZED_";
+    
+    public string Keyword
+    {
+        get => _keyword;
+        init => _keyword = value.ToUpper();
+    }
+
     public IReadOnlyList<KeywordOperand> Operands { get; init; }
     
     public IReadOnlyList<KeywordTarget> Targets { get; init; }

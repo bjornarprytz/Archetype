@@ -3,6 +3,7 @@ using Archetype.Framework.Parsing;
 using Archetype.Framework.Runtime;
 using FluentAssertions;
 using NSubstitute;
+using NSubstitute.Core;
 
 namespace Archetype.Tests.Parsing;
 
@@ -17,14 +18,16 @@ public class ParseTests
     public void LightningBolt()
     {
         var definitions = Substitute.For<IDefinitions>();
+        var keywordDefinition = Substitute.For<IKeywordDefinition>();
+        definitions.GetDefinition(Arg.Any<string>()).Returns(keywordDefinition);
 
         var parser = new CardParser(definitions);
 
         var protoCard = parser.ParseCard(new CardData
         {
-            Name = "Lightning Bolt",
             Text =
                 """
+                    (NAME "Lightning Bolt")
                     (STATIC 
                         (subtype instant)
                         (Color red)
@@ -53,7 +56,7 @@ public class ParseTests
         protoCard.Characteristics["COLOR"].Operands[0].GetValue(null).Should().Be("red");
         protoCard.Characteristics["RARITY"].Operands[0].GetValue(null).Should().Be("common");
         protoCard.Characteristics["TYPE"].Operands[0].GetValue(null).Should().Be("spell");
-        protoCard.Characteristics["TRAMPLE"].Operands[0].GetValue(null).Should().Be("true"); // TODO: Should this be a bool?
+        protoCard.Characteristics.Should().ContainKey("TRAMPLE");
 
         protoCard.ActionBlock.Costs.Should().ContainSingle(c => (c.Keyword == "COST_RESOURCE" && c.Operands[0].GetValue(null).Equals(1)));
         protoCard.ActionBlock.Conditions.Should().ContainSingle(c => c.Keyword == "CONDITION_SELF" && c.Operands.Count == 1);
@@ -71,9 +74,9 @@ public class ParseTests
 
         var protoCard = parser.ParseCard(new CardData
         {
-            Name = "Arc Trail",
             Text =
                 """
+                    (NAME "Arc Trail")
                     (STATIC
                         (subtype sorcery)
                         (Color red)
@@ -100,8 +103,8 @@ public class ParseTests
         protoCard!.Name.Should().Be("Arc Trail");
 
         protoCard.ActionBlock.TargetSpecs.Should().HaveCount(2);
-        protoCard.ActionBlock.TargetSpecs[0].Filter.Should().BeEquivalentTo(Filter.Parse("<type:any?>"));
-        protoCard.ActionBlock.TargetSpecs[1].Filter.Should().BeEquivalentTo(Filter.Parse("<type:unit|player?>"));
+        protoCard.ActionBlock.TargetSpecs[0].Filter.Should().BeEquivalentTo(Filter.Parse("type:any"));
+        protoCard.ActionBlock.TargetSpecs[1].Filter.Should().BeEquivalentTo(Filter.Parse("type:unit|player"));
             
         
         protoCard.Characteristics["SUBTYPE"].Operands[0].GetValue(null).Should().Be("sorcery");

@@ -7,12 +7,12 @@ namespace Archetype.Framework.Runtime;
 
 public static class RuntimeExtensions
 {
-    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, KeywordInstance keywordInstance) where TDef : KeywordDefinition
+    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, KeywordInstance keywordInstance) where TDef : IKeywordDefinition
     {
         return definitions.GetOrThrow<TDef>(keywordInstance.Keyword);
     }
     
-    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, string keyword) where TDef : KeywordDefinition
+    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, string keyword) where TDef : IKeywordDefinition
     {
         if (definitions.GetDefinition(keyword) is not TDef requiredDefinition)
             throw new InvalidOperationException($"Keyword ({keyword}) is not a {typeof(TDef).Name}");

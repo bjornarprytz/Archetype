@@ -14,7 +14,6 @@ public class SetData
 
 public class CardData
 {
-    public string Name { get; set; }
     public string Text { get; set; }
 }
 
@@ -77,8 +76,11 @@ public class CardParser : ICardParser
 
         var protoBuilder = new ProtoBuilder();
 
-        var characteristics = tree.@static().keywordExpression().Select(kw => kw.GetKeywordInstance(_definitions)).ToList();
+        var name = tree.name().STRING().GetText().Trim('"');
+        protoBuilder.SetName(name);
         
+        var characteristics = tree.@static().keywordExpression().Select(kw => kw.GetKeywordInstance(_definitions)).ToList();
+
         protoBuilder.AddCharacteristics(characteristics);
 
         var costs = tree.effects().actionBlock().GetCosts(_definitions).ToList();
