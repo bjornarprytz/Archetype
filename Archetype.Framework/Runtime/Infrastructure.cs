@@ -14,6 +14,7 @@ public interface IProtoCards
 public interface IDefinitions
 {
     IKeywordDefinition? GetDefinition(string keyword);
+    T? GetDefinition<T>() where T : IKeywordDefinition;
 }
 
 public interface IDefinitionBuilder

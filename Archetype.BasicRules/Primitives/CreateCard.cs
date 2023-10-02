@@ -26,6 +26,7 @@ public class CreateCard : EffectPrimitiveDefinition
             CurrentZone = zone
         };
         zone.Cards.Add(card);
+        context.GameState.AddAtom(card);
 
         return new CreateCardEvent(card, zone);
     }

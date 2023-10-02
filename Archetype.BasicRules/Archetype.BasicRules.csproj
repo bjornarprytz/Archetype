@@ -10,8 +10,4 @@
       <ProjectReference Include="..\Archetype.Framework\Archetype.Framework.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Composite" />
-    </ItemGroup>
-
 </Project>

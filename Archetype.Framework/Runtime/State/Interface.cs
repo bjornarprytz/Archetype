@@ -7,6 +7,7 @@ public interface IAtom
 {
     Guid Id { get; }
     IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; }
+    IDictionary<string, object> State { get; }
 }
 
 public interface IZone : IAtom
@@ -57,9 +58,7 @@ public interface IActionBlock
 public interface ICard : IAtom, IActionBlock
 {
     IReadOnlyDictionary<string, IAbility> Abilities { get; }
-
     IZone? CurrentZone { get; set; }
-    bool Tapped { get; set; }
 }
 
 public interface IAbility : IActionBlock

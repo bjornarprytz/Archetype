@@ -36,9 +36,9 @@ public abstract class EffectPrimitiveDefinition : KeywordDefinition
 
 public abstract class EffectCompositeDefinition : KeywordDefinition
 {
-    public abstract IEnumerable<KeywordInstance> CreateEffectSequence(
-        IResolutionContext context,
-        IDefinitions definitions
+    public abstract ICompositeKeywordInstance CreateEffectSequence(
+        IResolutionContext context, 
+        IKeywordInstance keywordInstance
         );
 }
 
@@ -76,12 +76,11 @@ public abstract class ConditionDefinition : KeywordDefinition
 // Examples:
 // RESOURCE_COST 4
 // SACRIFICE_COST 1
-public abstract class CostDefinition : KeywordDefinition
+public abstract class CostDefinition : EffectCompositeDefinition
 {
     public CostType Type { get; set; }
     
-    public abstract IEvent Resolve(IGameState gameState, IDefinitions definitions, CostPayload costPayload, KeywordInstance keywordInstance);
-    public abstract bool Check(CostPayload costPayload, KeywordInstance keywordInstance);
+    public abstract bool Check(PaymentPayload paymentPayload, KeywordInstance keywordInstance);
 }
 
 // Examples:

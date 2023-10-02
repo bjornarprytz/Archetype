@@ -25,7 +25,7 @@ public class Card : Atom, ICard
     public IReadOnlyDictionary<string, IAbility> Abilities { get; }
     
     public IZone? CurrentZone { get; set; }
-    public bool Tapped { get; set; }
+    public IDictionary<string, object> State { get; }
     public IAtom Source => this;
     public IReadOnlyList<CardTargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
     public IReadOnlyList<KeywordInstance> Effects => _proto.ActionBlock.Effects;

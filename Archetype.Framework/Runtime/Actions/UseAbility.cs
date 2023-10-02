@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
-public record UseAbilityArgs(Guid AbilitySource, string AbilityName, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
+public record UseAbilityArgs(Guid AbilitySource, string AbilityName, IReadOnlyList<Guid> Targets, IReadOnlyList<PaymentPayload> Payments) : IRequest<Unit>;
 
 public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
 {
@@ -30,15 +30,11 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var ability = abilitySource.Abilities[args.AbilityName];
         var payments = args.Payments;
         var costs = ability.Costs;
+        var effects = ability.Effects;
         
         var resolutionContext = ability.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
-        
-        foreach (var (cost, payment, instance) in _definitions.EnumerateCosts(costs, payments))
-        {
-            _history.Push(cost.Resolve(gameState, _definitions, payment, instance));
-        }
 
-        _actionQueue.Push(new ResolutionFrame(resolutionContext, ability.Effects.ToList()));
+        _actionQueue.Push(new ResolutionFrame(resolutionContext, costs, effects));
 
         return Unit.Task;
     }

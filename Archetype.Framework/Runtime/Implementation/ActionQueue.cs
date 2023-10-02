@@ -9,7 +9,7 @@ public class ActionQueue : IActionQueue
     private readonly IDefinitions _definitions;
     
     private readonly Queue<IResolutionFrame> _frameQueue = new();
-    private readonly Queue<KeywordInstance> _effectQueue = new();
+    private readonly Queue<IKeywordInstance> _effectQueue = new();
 
     public ActionQueue(IEventHistory eventHistory, IDefinitions definitions)
     {
@@ -49,7 +49,7 @@ public class ActionQueue : IActionQueue
         return e;
     }
 
-    private IEvent Resolve(KeywordInstance effectInstance)
+    private IEvent Resolve(IKeywordInstance effectInstance)
     {
         if (_definitions.GetDefinition(effectInstance.Keyword) is not EffectPrimitiveDefinition effectDefinition)
             throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect primitive");
@@ -74,6 +74,11 @@ public class ActionQueue : IActionQueue
         if (CurrentFrame.Effects.Count == 0)
         {
             throw new InvalidOperationException("Next resolution frame has no effects");
+        }
+
+        foreach (var cost in CurrentFrame.Costs.SelectMany(c => c.GetPrimitives(_definitions, CurrentFrame.Context)))
+        {
+            _effectQueue.Enqueue(cost);
         }
         
         foreach (var effect in CurrentFrame.Effects.SelectMany(e => e.GetPrimitives(_definitions, CurrentFrame.Context)))

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 
 namespace Archetype.Framework.Definitions;
@@ -49,6 +50,11 @@ public class OperandDeclaration<T0> : OperandDeclaration
     {
         return effectPayload.Operands.Deconstruct<T0>();
     }
+    
+    public T0 UnpackOperands(IKeywordInstance keywordInstance)
+    {
+        return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0>();
+    }
 }
 
 public class OperandDeclaration<T0, T1> : OperandDeclaration
@@ -65,6 +71,11 @@ public class OperandDeclaration<T0, T1> : OperandDeclaration
     public (T0, T1) UnpackOperands(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1>();
+    }
+    
+    public (T0, T1) UnpackOperands(IKeywordInstance keywordInstance)
+    {
+        return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1>();
     }
 }
 
@@ -84,6 +95,11 @@ public class OperandDeclaration<T0, T1, T2> : OperandDeclaration
     {
         return effectPayload.Operands.Deconstruct<T0, T1, T2>();
     }
+    
+    public (T0, T1, T2) UnpackOperands(IKeywordInstance keywordInstance)
+    {
+        return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2>();
+    }
 }
 
 public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
@@ -102,5 +118,10 @@ public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
     public (T0, T1, T2, T3) UnpackOperands(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1, T2, T3>();
+    }
+    
+    public (T0, T1, T2, T3) UnpackOperands(IKeywordInstance keywordInstance)
+    {
+        return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3>();
     }
 }

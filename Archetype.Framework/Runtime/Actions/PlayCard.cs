@@ -4,8 +4,8 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
-public record CostPayload(CostType Type, IReadOnlyList<ICard> Payment);
-public record PlayCardArgs(Guid Card, IReadOnlyList<Guid> Targets, IReadOnlyList<CostPayload> Payments) : IRequest<Unit>;
+public record PaymentPayload(CostType Type, IReadOnlyList<ICard> Payment);
+public record PlayCardArgs(Guid Card, IReadOnlyList<Guid> Targets, IReadOnlyList<PaymentPayload> Payments) : IRequest<Unit>;
 
 public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
 {
@@ -31,15 +31,11 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         
         var costs = card.Costs;
         var payments = args.Payments;
+        var effects = card.Effects;
         
         var resolutionContext = card.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
 
-        foreach (var (cost, payment, instance) in _definitions.EnumerateCosts(costs, payments))
-        {
-            _history.Push(cost.Resolve(gameState, _definitions, payment, instance));
-        }
-
-        _actionQueue.Push(new ResolutionFrame(resolutionContext, card.Effects.ToList()));
+        _actionQueue.Push(new ResolutionFrame(resolutionContext, costs, effects));
 
         return Unit.Task;
     }

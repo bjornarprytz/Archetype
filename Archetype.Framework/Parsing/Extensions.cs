@@ -117,15 +117,11 @@ public static class Extensions
         
         if (int.TryParse(targetText, out var index))
         {
-            return new KeywordTarget(
-                ctx => ctx.Targets[index]
-            );
+            return Declare.Target(index);
         }
         if (targetText == "~")
         {
-            return new KeywordTarget(
-                ctx => ctx.Source
-            );
+            return Declare.TargetSource();
         }
         
         throw new InvalidOperationException($"Could not parse target ref: {targetText}");

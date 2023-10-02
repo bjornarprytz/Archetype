@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Proto;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 
@@ -16,11 +17,10 @@ public abstract record EventBase : IEvent
     public IReadOnlyList<IEvent> Children { get; set; } = new List<IEvent>();
 }
 
-
-public record EffectEvent(EffectPayload EffectPayload) : EventBase;
+public record NonEvent : EventBase;
 
 public record ActionBlockEvent
-    (IAtom Source, IReadOnlyList<IAtom> Targets, IReadOnlyList<CostPayload> Payment) : EventBase
+    (IAtom Source, IReadOnlyList<IAtom> Targets, IReadOnlyDictionary<CostType, PaymentPayload> Payment) : EventBase
 {
     public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments)
     {
@@ -32,17 +32,19 @@ public record ActionBlockEvent
 public interface IResolutionFrame
 {
     IResolutionContext Context { get; }
+    IReadOnlyList<KeywordInstance> Costs { get; }
     IReadOnlyList<KeywordInstance> Effects { get; }
 }
 
-public record ResolutionFrame(IResolutionContext Context, IReadOnlyList<KeywordInstance> Effects) : IResolutionFrame;
+public record ResolutionFrame(IResolutionContext Context, IReadOnlyList<KeywordInstance> Costs,
+    IReadOnlyList<KeywordInstance> Effects) : IResolutionFrame;
 
 public interface IResolutionContext
 {
     public IMetaGameState MetaGameState { get; }
     public IGameState GameState { get; }
     public IAtom Source { get; }
-    public IReadOnlyList<CostPayload> Payments { get; }
+    public IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; }
     public IReadOnlyList<IAtom> Targets { get; }
     public IReadOnlyList<int> ComputedValues { get; }
 
@@ -56,7 +58,7 @@ public class ResolutionContext : IResolutionContext
     public required IMetaGameState MetaGameState { get; init; }
     public required IGameState GameState { get; init; }
     public required IAtom Source { get; init; }
-    public required IReadOnlyList<CostPayload> Payments { get; init; }
+    public required IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; init; }
     public required IReadOnlyList<IAtom> Targets { get; init; }
     public required IReadOnlyList<int> ComputedValues { get; init; }
 

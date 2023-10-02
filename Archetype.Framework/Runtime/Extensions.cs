@@ -19,7 +19,15 @@ public static class RuntimeExtensions
         
         return requiredDefinition;
     }
-    public static IEnumerable<(CostDefinition, CostPayload, KeywordInstance)> EnumerateCosts(this IDefinitions definitions, IEnumerable<KeywordInstance> costs, IEnumerable<CostPayload> payloads)
+    
+    public static TDef GetOrThrow<TDef>(this IDefinitions definitions) where TDef : IKeywordDefinition
+    {
+        if (definitions.GetDefinition<TDef>() is not { } requiredDefinition)
+            throw new InvalidOperationException($"There is no definition for {typeof(TDef).Name}");
+        
+        return requiredDefinition;
+    }
+    public static IEnumerable<(CostDefinition, PaymentPayload, KeywordInstance)> EnumerateCosts(this IDefinitions definitions, IEnumerable<KeywordInstance> costs, IEnumerable<PaymentPayload> payloads)
     {
         var list = costs.ToList();
         
@@ -27,7 +35,7 @@ public static class RuntimeExtensions
     }
     public static bool CheckPayments(this IDefinitions definitions, 
         IReadOnlyList<KeywordInstance> costs,
-        IReadOnlyList<CostPayload> payments
+        IReadOnlyList<PaymentPayload> payments
         )
     {
         var cardsInPayment = payments.SelectMany(p => p.Payment).ToList();
@@ -70,19 +78,27 @@ public static class RuntimeExtensions
         throw new InvalidOperationException($"Atom ({id}) not found");
     }
     
+    public static void AddAtom(this IGameState gameState, IAtom atom)
+    {
+        gameState.Atoms.Add(atom.Id, atom);
+    }
+    
     public static bool CheckConditions(this IDefinitions definitions, IReadOnlyList<KeywordInstance> conditions, IAtom source, IGameState gameState)
     {
         return !conditions.Select(definitions.GetOrThrow<ConditionDefinition>)
             .All(c => c.Check(source, gameState));
     }
 
-    public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<CostPayload> payments, IReadOnlyList<IAtom> targets)
+    public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<PaymentPayload> payments, IReadOnlyList<IAtom> targets)
     {
         var definitions = gameRoot.MetaGameState.Definitions;
         var gameState = gameRoot.GameState;
         var conditions = actionBlock.Conditions;
         var costs = actionBlock.Costs;
         var source = actionBlock.Source;
+        
+        if (!definitions.CheckPayments(costs, payments))
+            throw new InvalidOperationException("Invalid payment");
 
         actionBlock.UpdateComputedValues(definitions, gameState);
         
@@ -90,7 +106,7 @@ public static class RuntimeExtensions
         {
             MetaGameState = gameRoot.MetaGameState,
             GameState = gameRoot.GameState,
-            Payments = payments,
+            Payments = payments.ToDictionary(k => k.Type, v => v),
             Source = actionBlock.Source,
             Targets = targets,
             ComputedValues = actionBlock.ComputedValues,
@@ -99,8 +115,6 @@ public static class RuntimeExtensions
         if (definitions.CheckConditions(conditions, source, gameState))
             throw new InvalidOperationException("Invalid conditions");
         
-        if (!definitions.CheckPayments(costs, payments))
-            throw new InvalidOperationException("Invalid payment");
         
         if (actionBlock.CheckTargets(resolutionContext))
             throw new InvalidOperationException("Invalid targets");
@@ -108,17 +122,17 @@ public static class RuntimeExtensions
         return resolutionContext;
     }
     
-    public static IEnumerable<KeywordInstance> GetPrimitives(this KeywordInstance effectInstance, IDefinitions definitions, IResolutionContext context)
+    public static IEnumerable<IKeywordInstance> GetPrimitives(this IKeywordInstance effectInstance, IDefinitions definitions, IResolutionContext context)
     {
         return definitions.GetDefinition(effectInstance.Keyword) switch
         {
-            EffectCompositeDefinition composite => composite.CreateEffectSequence(context, definitions).SelectMany(e => e.GetPrimitives(definitions, context)),
+            EffectCompositeDefinition composite => composite.CreateEffectSequence(context, effectInstance).Children.SelectMany(e => e.GetPrimitives(definitions, context)),
             EffectPrimitiveDefinition primitive => new[] { effectInstance },
             _ => throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect")
         };
     }
 
-    public static EffectPayload BindPayload(this KeywordInstance effectInstance, IResolutionContext context)
+    public static EffectPayload BindPayload(this IKeywordInstance effectInstance, IResolutionContext context)
     {
         return new EffectPayload(
             context.Source, 
@@ -152,5 +166,33 @@ public static class RuntimeExtensions
         return atom.Characteristics.TryGetValue(key, out var instance) 
                // && instance is CharacteristicInstance<T> { TypedValue: { } typedValue } 
                && (stringValue == "any" || instance.Operands[0].GetValue(context).Equals(stringValue));
+    }
+    
+    public static T? GetState<T>(this IAtom atom, string key)
+    {
+        if (!atom.State.TryGetValue(key, out var value)) return default;
+        
+        if (value is T typedValue)
+            return typedValue;
+            
+        throw new InvalidOperationException($"State key {key} is not of type {typeof(T).Name}");
+
+    }
+    
+    public static KeywordInstance? GetCharacteristic(this IAtom atom, string key)
+    {
+        return !atom.Characteristics.TryGetValue(key, out var value) ? null : value;
+    }
+    
+    public static int GetResourceValue(this IAtom atom)
+    {
+        var value = atom.GetCharacteristic("RESOURCE_VALUE")?.Operands[0].GetValue(null);
+
+        return value switch
+        {
+            int intValue => intValue,
+            string stringValue when int.TryParse(stringValue, out var intValueFromString) => intValueFromString,
+            _ => 0
+        };
     }
 }
