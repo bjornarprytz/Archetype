@@ -80,7 +80,7 @@ public abstract class CostDefinition : EffectCompositeDefinition
 {
     public CostType Type { get; set; }
     
-    public abstract bool Check(PaymentPayload paymentPayload, KeywordInstance keywordInstance);
+    public abstract bool Check(PaymentPayload paymentPayload, IKeywordInstance keywordInstance);
 }
 
 // Examples:

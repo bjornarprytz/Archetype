@@ -3,7 +3,6 @@ using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Proto;
 
-// TODO: Use this instead of the old KeywordInstance
 public interface IKeywordInstance
 {
     string Keyword { get; }

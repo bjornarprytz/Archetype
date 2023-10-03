@@ -1,6 +1,5 @@
 ﻿namespace Archetype.BasicRules;
 
-// TODO: State as dictionary
 // TODO: Conditions (
 // TODO: Cost
 // TODO: Pluggable protobuilder

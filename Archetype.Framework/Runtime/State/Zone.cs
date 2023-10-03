@@ -4,7 +4,7 @@ namespace Archetype.Framework.Runtime.State;
 
 public class Node : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "node")
@@ -14,7 +14,7 @@ public class Node : Atom, IZone
 
 public class DrawPile : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "draw pile")
@@ -24,7 +24,7 @@ public class DrawPile : Atom, IZone
 
 public class Hand : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "hand")
@@ -34,7 +34,7 @@ public class Hand : Atom, IZone
 
 public class DiscardPile : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "discard pile")
@@ -44,7 +44,7 @@ public class DiscardPile : Atom, IZone
 
 public class Exile : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "exile")
@@ -54,7 +54,7 @@ public class Exile : Atom, IZone
 
 public class Stack : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "stack")
@@ -64,7 +64,7 @@ public class Stack : Atom, IZone
 
 public class Payment : Atom, IZone
 {
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } = 
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
             ("TYPE", "zone"), 
             ("SUBTYPE", "payment")

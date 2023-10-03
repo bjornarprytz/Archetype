@@ -7,7 +7,7 @@ namespace Archetype.Framework.Runtime;
 
 public static class RuntimeExtensions
 {
-    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, KeywordInstance keywordInstance) where TDef : IKeywordDefinition
+    public static TDef GetOrThrow<TDef>(this IDefinitions definitions, IKeywordInstance keywordInstance) where TDef : IKeywordDefinition
     {
         return definitions.GetOrThrow<TDef>(keywordInstance.Keyword);
     }
@@ -27,14 +27,14 @@ public static class RuntimeExtensions
         
         return requiredDefinition;
     }
-    public static IEnumerable<(CostDefinition, PaymentPayload, KeywordInstance)> EnumerateCosts(this IDefinitions definitions, IEnumerable<KeywordInstance> costs, IEnumerable<PaymentPayload> payloads)
+    public static IEnumerable<(CostDefinition, PaymentPayload, IKeywordInstance)> EnumerateCosts(this IDefinitions definitions, IEnumerable<IKeywordInstance> costs, IEnumerable<PaymentPayload> payloads)
     {
         var list = costs.ToList();
         
         return list.Select(definitions.GetOrThrow<CostDefinition>).Zip(payloads, list);
     }
     public static bool CheckPayments(this IDefinitions definitions, 
-        IReadOnlyList<KeywordInstance> costs,
+        IReadOnlyList<IKeywordInstance> costs,
         IReadOnlyList<PaymentPayload> payments
         )
     {
@@ -83,7 +83,7 @@ public static class RuntimeExtensions
         gameState.Atoms.Add(atom.Id, atom);
     }
     
-    public static bool CheckConditions(this IDefinitions definitions, IReadOnlyList<KeywordInstance> conditions, IAtom source, IGameState gameState)
+    public static bool CheckConditions(this IDefinitions definitions, IReadOnlyList<IKeywordInstance> conditions, IAtom source, IGameState gameState)
     {
         return !conditions.Select(definitions.GetOrThrow<ConditionDefinition>)
             .All(c => c.Check(source, gameState));
@@ -179,7 +179,7 @@ public static class RuntimeExtensions
 
     }
     
-    public static KeywordInstance? GetCharacteristic(this IAtom atom, string key)
+    public static IKeywordInstance? GetCharacteristic(this IAtom atom, string key)
     {
         return !atom.Characteristics.TryGetValue(key, out var value) ? null : value;
     }

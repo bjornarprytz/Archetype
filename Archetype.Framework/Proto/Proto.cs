@@ -5,10 +5,10 @@ namespace Archetype.Framework.Proto;
 public interface IProtoActionBlock
 {
     public IReadOnlyList<CardTargetDescription> TargetSpecs { get; }
-    public IReadOnlyList<KeywordInstance> Conditions { get; }
-    public IReadOnlyList<KeywordInstance> Costs { get; }
-    public IReadOnlyList<KeywordInstance> Effects { get; }
-    public IReadOnlyList<KeywordInstance> ComputedValues { get; }
+    public IReadOnlyList<IKeywordInstance> Conditions { get; }
+    public IReadOnlyList<IKeywordInstance> Costs { get; }
+    public IReadOnlyList<IKeywordInstance> Effects { get; }
+    public IReadOnlyList<IKeywordInstance> ComputedValues { get; }
 }
 
 public interface IProtoCard
@@ -17,7 +17,7 @@ public interface IProtoCard
     public IProtoActionBlock ActionBlock { get; }
     public IReadOnlyDictionary<string, IProtoActionBlock> Abilities { get; } // Key is ability name
     
-    public IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; } // Key is characteristic keyword
+    public IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } // Key is characteristic keyword
 }
 
 public interface IProtoSet

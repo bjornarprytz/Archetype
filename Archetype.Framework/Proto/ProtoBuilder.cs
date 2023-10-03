@@ -6,12 +6,12 @@ public class ProtoBuilder
 {
     private string _name;
     private readonly List<CardTargetDescription> _targetSpecs = new();
-    private readonly List<KeywordInstance> _conditions = new();
-    private readonly List<KeywordInstance> _effects = new();
-    private readonly List<KeywordInstance> _costs = new();
-    private readonly List<KeywordInstance> _computedValues = new();
+    private readonly List<IKeywordInstance> _conditions = new();
+    private readonly List<IKeywordInstance> _effects = new();
+    private readonly List<IKeywordInstance> _costs = new();
+    private readonly List<IKeywordInstance> _computedValues = new();
     private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
-    private readonly Dictionary<string, KeywordInstance> _characteristics = new();
+    private readonly Dictionary<string, IKeywordInstance> _characteristics = new();
     
     public IProtoCard Build()
     {
@@ -43,7 +43,7 @@ public class ProtoBuilder
         _name = name;
     }
     
-    public void AddCharacteristics(List<KeywordInstance> characteristicsInstances)
+    public void AddCharacteristics(List<IKeywordInstance> characteristicsInstances)
     {
         foreach (var instance in characteristicsInstances)
         {
@@ -54,10 +54,10 @@ public class ProtoBuilder
 
     public void SetActionBlock(
         List<CardTargetDescription> targetSpecs, 
-        List<KeywordInstance> costs, 
-        List<KeywordInstance> conditions, 
-        List<KeywordInstance> computedValues, 
-        List<KeywordInstance> effects
+        List<IKeywordInstance> costs, 
+        List<IKeywordInstance> conditions, 
+        List<IKeywordInstance> computedValues, 
+        List<IKeywordInstance> effects
         )
     {
         _targetSpecs.AddRange(targetSpecs);
@@ -71,14 +71,14 @@ public class ProtoBuilder
         string Name, 
         IProtoActionBlock ActionBlock,
         IReadOnlyDictionary<string, IProtoActionBlock> Abilities, 
-        IReadOnlyDictionary<string, KeywordInstance> Characteristics
+        IReadOnlyDictionary<string, IKeywordInstance> Characteristics
         ) : IProtoCard;
 
     private record ProtoActionBlock(
         IReadOnlyList<CardTargetDescription> TargetSpecs,
-        IReadOnlyList<KeywordInstance> Conditions,
-        IReadOnlyList<KeywordInstance> Costs,
-        IReadOnlyList<KeywordInstance> Effects,
-        IReadOnlyList<KeywordInstance> ComputedValues
+        IReadOnlyList<IKeywordInstance> Conditions,
+        IReadOnlyList<IKeywordInstance> Costs,
+        IReadOnlyList<IKeywordInstance> Effects,
+        IReadOnlyList<IKeywordInstance> ComputedValues
     ) : IProtoActionBlock;
 }

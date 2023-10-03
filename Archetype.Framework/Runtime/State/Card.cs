@@ -28,11 +28,11 @@ public class Card : Atom, ICard
     public IDictionary<string, object> State { get; }
     public IAtom Source => this;
     public IReadOnlyList<CardTargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
-    public IReadOnlyList<KeywordInstance> Effects => _proto.ActionBlock.Effects;
-    public IReadOnlyList<KeywordInstance> Costs => _proto.ActionBlock.Costs;
-    public IReadOnlyList<KeywordInstance> Conditions => _proto.ActionBlock.Conditions;
+    public IReadOnlyList<IKeywordInstance> Effects => _proto.ActionBlock.Effects;
+    public IReadOnlyList<IKeywordInstance> Costs => _proto.ActionBlock.Costs;
+    public IReadOnlyList<IKeywordInstance> Conditions => _proto.ActionBlock.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;
-    public override IReadOnlyDictionary<string, KeywordInstance> Characteristics => _proto.Characteristics;
+    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics => _proto.Characteristics;
     
 
     public void UpdateComputedValues(IDefinitions definitions, IGameState gameState)
@@ -53,9 +53,9 @@ public class Ability : IAbility
     public required IProtoActionBlock Proto { get; init; }
     public required IAtom Source { get; init; }
     public IReadOnlyList<CardTargetDescription> TargetsDescriptors => Proto.TargetSpecs;
-    public IReadOnlyList<KeywordInstance> Effects => Proto.Effects;
-    public IReadOnlyList<KeywordInstance> Costs => Proto.Costs;
-    public IReadOnlyList<KeywordInstance> Conditions => Proto.Conditions;
+    public IReadOnlyList<IKeywordInstance> Effects => Proto.Effects;
+    public IReadOnlyList<IKeywordInstance> Costs => Proto.Costs;
+    public IReadOnlyList<IKeywordInstance> Conditions => Proto.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;
 
 

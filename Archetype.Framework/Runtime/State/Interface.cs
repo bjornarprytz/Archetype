@@ -6,7 +6,7 @@ namespace Archetype.Framework.Runtime.State;
 public interface IAtom
 {
     Guid Id { get; }
-    IReadOnlyDictionary<string, KeywordInstance> Characteristics { get; }
+    IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; }
     IDictionary<string, object> State { get; }
 }
 
@@ -47,9 +47,9 @@ public interface IActionBlock
 {
     IAtom Source { get; }
     IReadOnlyList<CardTargetDescription> TargetsDescriptors { get; }
-    IReadOnlyList<KeywordInstance> Effects { get; }
-    IReadOnlyList<KeywordInstance> Costs { get; }
-    IReadOnlyList<KeywordInstance> Conditions { get; }
+    IReadOnlyList<IKeywordInstance> Effects { get; }
+    IReadOnlyList<IKeywordInstance> Costs { get; }
+    IReadOnlyList<IKeywordInstance> Conditions { get; }
     IReadOnlyList<int> ComputedValues { get; }
     
     void UpdateComputedValues(IDefinitions definitions, IGameState gameState);

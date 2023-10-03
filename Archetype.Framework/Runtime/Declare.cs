@@ -5,7 +5,7 @@ namespace Archetype.Framework.Runtime;
 
 public static class Declare
 {
-    public static ICompositeKeywordInstance CompositeKeyword(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands, IReadOnlyList<KeywordInstance> children)
+    public static ICompositeKeywordInstance CompositeKeyword(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands, IReadOnlyList<IKeywordInstance> children)
     {
         return new CompositeKeywordInstance
         {
@@ -35,10 +35,10 @@ public static class Declare
         return new KeywordInstance { Keyword = keyword };
     }
     
-    public static IReadOnlyDictionary<string, KeywordInstance> Characteristics(params (string Keyword, string Value)[] characteristics)
+    public static IReadOnlyDictionary<string, IKeywordInstance> Characteristics(params (string Keyword, string Value)[] characteristics)
     {
         return characteristics
-            .Select(c => new KeywordInstance{Keyword = c.Keyword, Operands = Operands(Operand(c.Value)) })
+            .Select(c => KeywordInstance(c.Keyword, Operands(Operand(c.Value))))
             .ToDictionary(kw => kw.Keyword, kw => kw);
     }
     
