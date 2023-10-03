@@ -11,7 +11,7 @@ public interface IKeywordDefinition
     string ReminderText { get; }
     IReadOnlyList<KeywordTargetDescription> Targets { get; }
     IReadOnlyList<IOperandDescription> Operands { get; }
-    IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets, IDefinitions definitions);
+    IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets);
 }
 public abstract class KeywordDefinition : IKeywordDefinition
 {
@@ -22,13 +22,25 @@ public abstract class KeywordDefinition : IKeywordDefinition
     public IReadOnlyList<KeywordTargetDescription> Targets => TargetDeclaration;
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
 
-    public virtual IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets, IDefinitions definitions)
+    public IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets)
     {
+        var operandsList = operands.ToList();
+        var targetsList = targets.ToList();
+
+        if (!OperandDeclaration.Validate(operandsList))
+        {
+            throw new InvalidOperationException($"Invalid operands for keyword {Name}");
+        }
+        if (!TargetDeclaration.Validate(targetsList))
+        {
+            throw new InvalidOperationException($"Invalid targets for keyword {Name}");
+        }
+        
         return new KeywordInstance 
         {
             Keyword = Name,
-            Operands = operands.ToList(),
-            Targets = targets.ToList(),
+            Operands = operandsList,
+            Targets = targetsList,
         };
     }
 }
@@ -47,7 +59,7 @@ public abstract class EffectPrimitiveDefinition : KeywordDefinition
 
 public abstract class EffectCompositeDefinition : KeywordDefinition
 {
-    public abstract ICompositeKeywordInstance Compose(IResolutionContext context, EffectPayload effectPayload);
+    public abstract IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload);
 }
 
 // Hook into special rules

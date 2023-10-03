@@ -13,32 +13,14 @@ public class WorkCost : CostDefinition
 
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
 
-    public override IEnumerable<EffectPayload> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        var definition = context.MetaGameState.Definitions.GetOrThrow<Tap>();
-        
-        var requiredAmount = OperandDeclaration.UnpackOperands(effectPayload);
+        var tapDefinition = context.MetaGameState.Definitions.GetOrThrow<Tap>();
         var cards = context.Payments[Type];
-        
-        return Declare.CompositeKeyword(
-            Name,
-            effectPayload.Targets,
-            effectPayload.Operands,
-            
-            )
+
+        return cards.Payment.Select(c =>
+            tapDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(c)))).ToList();
     }
-
-    public override CompositeKeywordInstance Compose(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets, IDefinitions definitions)
-    {
-        var operandList = operands.ToList();
-        var targetList = targets.ToList();
-        
-        var tapDefinition = definitions.GetOrThrow<Tap>();
-
-        return 
-        );
-    }
-
 
     public override bool Check(PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
     {

@@ -5,17 +5,6 @@ namespace Archetype.Framework.Runtime;
 
 public static class Declare
 {
-    public static CompositeKeywordInstance CompositeKeyword(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands, IEnumerable<IKeywordInstance> children)
-    {
-        return new CompositeKeywordInstance
-        {
-            Keyword = keyword,
-            Targets = targets,
-            Operands = operands,
-            Children = children.ToList(),
-        };
-    }
-
     public static IKeywordInstance KeywordInstance(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands)
     {
         return new KeywordInstance { Keyword = keyword, Operands = operands, Targets = targets };
@@ -68,16 +57,16 @@ public static class Declare
 
     public static KeywordOperand Operand(string value)
     {
-        return new KeywordOperand { GetValue = _ => value };
+        return new KeywordOperand<string>(_ => value);
     }
     
     public static KeywordOperand Operand(int value)
     {
-        return new KeywordOperand { GetValue = _ => value };
+        return new KeywordOperand<int>(_ => value);
     }
     
-    public static KeywordOperand Operand(Func<IResolutionContext, object> getValueFunc)
+    public static KeywordOperand Operand<T>(Func<IResolutionContext, T> getValueFunc)
     {
-        return new KeywordOperand { GetValue = getValueFunc };
+        return new KeywordOperand<T>(getValueFunc);
     }
 }

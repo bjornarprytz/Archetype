@@ -8,8 +8,10 @@ public class ActionQueue : IActionQueue
     private readonly IEventHistory _eventHistory;
     private readonly IDefinitions _definitions;
     
+    // Card scope
     private readonly Queue<IResolutionFrame> _frameQueue = new();
-    private readonly Queue<IKeywordInstance> _effectQueue = new();
+    // Keyword scope
+    private readonly QueueStack<IKeywordInstance> _keywordStack = new();
 
     public ActionQueue(IEventHistory eventHistory, IDefinitions definitions)
     {
@@ -26,20 +28,23 @@ public class ActionQueue : IActionQueue
 
     public IEvent? ResolveNext()
     {
-        if (_effectQueue.Count == 0)
+        if (_keywordStack.Count == 0)
         {
             if (!TryAdvanceFrame())
             {
                 return null;
             }
         }
-        
-        var effectInstance = _effectQueue.Dequeue();
-        
-        var e = Resolve(effectInstance);
+
+        if (GetNextPayload() is not { } payload)
+        {
+            return null;
+        }
+
+        var e = Resolve(payload);
         CurrentFrame!.Context.Events.Add(e);
         
-        if (_effectQueue.Count == 0)
+        if (_keywordStack.Count == 0)
         {
             _eventHistory.Push(new ActionBlockEvent(CurrentFrame.Context));
             
@@ -49,17 +54,50 @@ public class ActionQueue : IActionQueue
         return e;
     }
 
-    private IEvent Resolve(IKeywordInstance effectInstance)
+    private EffectPayload? GetNextPayload()
     {
-        if (_definitions.GetDefinition(effectInstance.Keyword) is not EffectPrimitiveDefinition effectDefinition)
-            throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect primitive");
+        if (_keywordStack.Count == 0)
+        {
+            return null;
+        }
+        
+        while (true)
+        {
+            var effectInstance = _keywordStack.Pop();
+            var payload = effectInstance.BindPayload(CurrentFrame!.Context);
 
-        if (CurrentFrame == null)
-            throw new InvalidOperationException("No current context");
+            if (_definitions.GetDefinition(effectInstance.Keyword) is EffectCompositeDefinition definition)
+            {
+                var keywordInstances = definition.Compose(CurrentFrame!.Context, payload);
+
+                if (keywordInstances.Count == 0)
+                {
+                    throw new InvalidOperationException("Composite effect returned no effects");
+                }
+
+                // Push in reverse order so that the first effect is on top of the stack
+                foreach (var keywordInstance in keywordInstances.Reverse())
+                {
+                    _keywordStack.Push(keywordInstance);
+                }
+            }
+            else
+            {
+                return payload;
+            }
+        }
+    }
+
+    private IEvent Resolve(EffectPayload payload)
+    {
+        var definition = _definitions.GetDefinition(payload.Keyword);
+
+        if (definition is EffectPrimitiveDefinition primitive)
+        {
+            return primitive.Resolve(CurrentFrame!.Context, payload);
+        }
         
-        var payload = effectInstance.BindPayload(CurrentFrame!.Context);
-        
-        return effectDefinition.Resolve(CurrentFrame.Context, payload);
+        throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect");
     }
 
     private bool TryAdvanceFrame()
@@ -76,15 +114,17 @@ public class ActionQueue : IActionQueue
             throw new InvalidOperationException("Next resolution frame has no effects");
         }
 
-        foreach (var cost in CurrentFrame.Costs.Select(c => c.ComposePrimitives(_definitions, CurrentFrame.Context)))
+        foreach (var cost in CurrentFrame.Costs)
         {
-            _effectQueue.Enqueue(cost);
+            _keywordStack.Enqueue(cost);
         }
         
-        foreach (var effect in CurrentFrame.Effects.Select(e => e.ComposePrimitives(_definitions, CurrentFrame.Context)))
+        foreach (var effect in CurrentFrame.Effects)
         {
-            _effectQueue.Enqueue(effect);
+            _keywordStack.Enqueue(effect);
         }
+        
+        
 
         return true;
     }

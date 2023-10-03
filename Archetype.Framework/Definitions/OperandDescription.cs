@@ -22,6 +22,7 @@ public abstract record OperandDescription(KeywordOperandParsedType ParsedType) :
 public class OperandDeclaration : IReadOnlyList<IOperandDescription>
 {
     protected IReadOnlyList<IOperandDescription> Operands { get; init; } = new List<IOperandDescription>();
+    public virtual bool Validate(IReadOnlyList<KeywordOperand> operands) => operands.Count == 0;
     public IEnumerator<IOperandDescription> GetEnumerator()
     {
         return Operands.GetEnumerator();
@@ -44,6 +45,11 @@ public class OperandDeclaration<T0> : OperandDeclaration
         {
             new OperandDescription<T0> {IsOptional = isOptional},
         };
+    }
+
+    public override bool Validate(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Count == 1 && operands[0].Type == typeof(T0);
     }
 
     public T0 UnpackOperands(EffectPayload effectPayload)
@@ -72,7 +78,12 @@ public class OperandDeclaration<T0, T1> : OperandDeclaration
             new OperandDescription<T1> {IsOptional = nOptional >= 1},
         };
     }
-    
+
+    public override bool Validate(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Count == 2 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1);
+    }
+
     public (T0, T1) UnpackOperands(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1>();
@@ -100,7 +111,12 @@ public class OperandDeclaration<T0, T1, T2> : OperandDeclaration
             new OperandDescription<T2> {IsOptional = nOptional >= 1},
         };
     }
-    
+
+    public override bool Validate(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Count == 3 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2);
+    }
+
     public (T0, T1, T2) UnpackOperands(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1, T2>();
@@ -129,7 +145,12 @@ public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
             new OperandDescription<T3> {IsOptional = nOptional >= 1},
         };
     }
-    
+
+    public override bool Validate(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Count == 4 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2) && operands[3].Type == typeof(T3);
+    }
+
     public (T0, T1, T2, T3) UnpackOperands(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1, T2, T3>();

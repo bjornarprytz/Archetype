@@ -10,19 +10,6 @@ public interface IKeywordInstance
     IReadOnlyList<KeywordTarget> Targets { get; }
 }
 
-public interface ICompositeKeywordInstance : IKeywordInstance
-{
-    IReadOnlyList<IKeywordInstance> SubKeywords { get; }
-}
-
-public record CompositeKeywordInstance : KeywordInstance, ICompositeKeywordInstance
-{
-    
-    public List<IKeywordInstance> Children { get; init; } = new ();
-    public IReadOnlyList<IKeywordInstance> SubKeywords => Children;
-}
-
-
 public record KeywordInstance : IKeywordInstance
 {
     private readonly string _keyword = "_UNINITIALIZED_";
@@ -42,7 +29,10 @@ public record KeywordTarget(
     Func<IResolutionContext, IAtom> GetTarget
 );
 
-public record KeywordOperand
+public record KeywordOperand(Type Type, Func<IResolutionContext, object?> GetValue);
+
+public record KeywordOperand<T>(Func<IResolutionContext, T> GetTypedValue) : KeywordOperand(typeof(T),
+    ctx => GetTypedValue(ctx))
 {
-    public Func<IResolutionContext, object> GetValue { get; init; }
+    public Func<IResolutionContext, T> GetTypedValue { get; init; } = GetTypedValue;
 }

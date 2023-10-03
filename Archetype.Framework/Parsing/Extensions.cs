@@ -1,6 +1,7 @@
 ﻿using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
+using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Parsing;
 
@@ -8,50 +9,46 @@ public static class Extensions
 {
     public static KeywordOperand ToOperand(this ActionBlockParser.OperandContext context)
     {
-        Func<IResolutionContext, object> func;
-        
         if (context.any() is { } anyToken)
         {
             if (anyToken.NUMBER() is { } numberToken)
             {
                 var number = int.Parse(numberToken.GetText());
-                func = _ => number;
+                
+                return new KeywordOperand<int>(_ => number);
             }
-            else if (anyToken.WORD() is { } stringToken)
+
+            if (anyToken.WORD() is { } stringToken)
             {
                 var word = stringToken.GetText();
-                func = _ => word;
+                
+                return new KeywordOperand<string>(_ => word);
             }
-            else
+            throw new InvalidOperationException($"Could not parse any: {context.GetText()}");
+        }
+
+        {
+            if (context.STRING() is { } stringToken)
             {
-                throw new InvalidOperationException($"Could not parse any: {context.GetText()}");
+                var str = stringToken.GetText();
+
+                return new KeywordOperand<string>(_ => str);
+            }
+            if (context.computedValueRef() is { } computedValueRef && computedValueRef.index() is { } indexContext)
+            {
+                var index = int.Parse(indexContext.GetText());
+
+                return new KeywordOperand<int>(ctx => ctx.ComputedValues[index]);
+            }
+            if (context.filter() is { } filterContext)
+            {
+                var filter = Filter.Parse(filterContext.GetText());
+
+                return new KeywordOperand<IEnumerable<IAtom>>(ctx => filter.ProvideAtoms(ctx));
             }
         }
-        else if (context.STRING() is { } stringToken)
-        {
-            var str = stringToken.GetText();
-            func = _ => str;
-        }
-        else if (context.computedValueRef() is { } computedValueRef && computedValueRef.index() is { } indexContext)
-        {
-            var index = int.Parse(indexContext.GetText());
-            
-            func = ctx => ctx.ComputedValues[index];
-        }
-        else if (context.filter() is { } filterContext)
-        {
-            var filter = Filter.Parse(filterContext.GetText());
-            func = ctx => filter.ProvideAtoms(ctx);
-        }
-        else
-        {
-            throw new InvalidOperationException($"Could not parse operand: {context.GetText()}");
-        }
-        
-        return new KeywordOperand
-        {
-            GetValue = func
-        };
+
+        throw new InvalidOperationException($"Could not parse operand: {context.GetText()}");
     }
     
     public static IKeywordInstance GetKeywordInstance(this ActionBlockParser.KeywordExpressionContext keywordContext, IDefinitions definitions)
@@ -63,7 +60,7 @@ public static class Extensions
         var targetRefs = keywordContext.targetRef()?.Select(GetTarget).ToList() ?? new List<KeywordTarget>();
         var operands = keywordContext.operand()?.Select(ToOperand).ToList() ?? new List<KeywordOperand>();
 
-        return definition.CreateInstance(operands, targetRefs, definitions);
+        return definition.CreateInstance(operands, targetRefs);
     }
 
     private static IEnumerable<IKeywordInstance> GetKeywordInstances(this IEnumerable<ActionBlockParser.KeywordExpressionContext>? contexts, IDefinitions definitions)

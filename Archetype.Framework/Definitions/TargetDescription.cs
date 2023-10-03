@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.State;
 
@@ -13,6 +14,8 @@ public record KeywordTargetDescription<T>(bool IsOptional) : KeywordTargetDescri
 public class TargetDeclaration : IReadOnlyList<KeywordTargetDescription>
 {
     protected IReadOnlyList<KeywordTargetDescription> Targets { get; init; } = new List<KeywordTargetDescription>();
+    
+    public bool Validate(IReadOnlyList<KeywordTarget> targets) => targets.Count == Targets.Count(t => !t.IsOptional);
     
     public IEnumerator<KeywordTargetDescription> GetEnumerator()
     {
@@ -39,7 +42,7 @@ public class TargetDeclaration<T0> : TargetDeclaration
             new KeywordTargetDescription<T0>(isOptional)
         };
     }
-    
+
     public T0 UnpackTargets(EffectPayload effectPayload)
     {
         return effectPayload.Targets.Deconstruct<T0>();

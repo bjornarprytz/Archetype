@@ -9,7 +9,7 @@ public class Shuffle : EffectPrimitiveDefinition
     public override string Name => "SHUFFLE";
     public override string ReminderText => "Shuffle target draw pile.";
 
-    protected override TargetDeclaration<IZone> TargetDeclaration { get; } = new(); // TODO: Make this a DrawPile once it's implemented
+    protected override TargetDeclaration<DrawPile> TargetDeclaration { get; } = new();
 
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)

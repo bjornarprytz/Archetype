@@ -126,16 +126,6 @@ public static class RuntimeExtensions
 
         return resolutionContext;
     }
-    
-    public static IKeywordInstance ComposePrimitives(this IKeywordInstance effectInstance, IDefinitions definitions, IResolutionContext context)
-    {
-        return definitions.GetDefinition(effectInstance.Keyword) switch
-        {
-            EffectPrimitiveDefinition primitive => effectInstance,
-            EffectCompositeDefinition composite => composite.CreateCompositeKeywordInstance(context, effectInstance),
-            _ => throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect")
-        };
-    }
 
     public static EffectPayload BindPayload(this IKeywordInstance effectInstance, IResolutionContext context)
     {
@@ -166,7 +156,7 @@ public static class RuntimeExtensions
         return true;
     }
     
-    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue, IResolutionContext? context=null)
+    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue, IResolutionContext context=null)
     {
         return atom.Characteristics.TryGetValue(key, out var instance) 
                // && instance is CharacteristicInstance<T> { TypedValue: { } typedValue } 
