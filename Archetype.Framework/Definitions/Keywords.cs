@@ -11,6 +11,7 @@ public interface IKeywordDefinition
     string ReminderText { get; }
     IReadOnlyList<KeywordTargetDescription> Targets { get; }
     IReadOnlyList<IOperandDescription> Operands { get; }
+    IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets, IDefinitions definitions);
 }
 public abstract class KeywordDefinition : IKeywordDefinition
 {
@@ -20,6 +21,16 @@ public abstract class KeywordDefinition : IKeywordDefinition
     protected virtual TargetDeclaration TargetDeclaration { get; } = new();
     public IReadOnlyList<KeywordTargetDescription> Targets => TargetDeclaration;
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
+
+    public virtual IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets, IDefinitions definitions)
+    {
+        return new KeywordInstance 
+        {
+            Keyword = Name,
+            Operands = operands.ToList(),
+            Targets = targets.ToList(),
+        };
+    }
 }
 
 // The bread and butter of state changes
@@ -36,10 +47,7 @@ public abstract class EffectPrimitiveDefinition : KeywordDefinition
 
 public abstract class EffectCompositeDefinition : KeywordDefinition
 {
-    public abstract ICompositeKeywordInstance CreateEffectSequence(
-        IResolutionContext context, 
-        IKeywordInstance keywordInstance
-        );
+    public abstract ICompositeKeywordInstance Compose(IResolutionContext context, EffectPayload effectPayload);
 }
 
 // Hook into special rules
@@ -78,7 +86,7 @@ public abstract class ConditionDefinition : KeywordDefinition
 // SACRIFICE_COST 1
 public abstract class CostDefinition : EffectCompositeDefinition
 {
-    public CostType Type { get; set; }
+    public abstract CostType Type { get; }
     
     public abstract bool Check(PaymentPayload paymentPayload, IKeywordInstance keywordInstance);
 }

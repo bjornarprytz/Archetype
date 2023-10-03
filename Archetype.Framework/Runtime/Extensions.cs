@@ -12,6 +12,11 @@ public static class RuntimeExtensions
         return definitions.GetOrThrow<TDef>(keywordInstance.Keyword);
     }
     
+    public static IKeywordDefinition? GetOrThrow(this IDefinitions definitions, IKeywordInstance keywordInstance)
+    {
+        return definitions.GetDefinition(keywordInstance.Keyword) ?? throw new InvalidOperationException($"Keyword ({keywordInstance.Keyword}) not found");
+    }
+    
     public static TDef GetOrThrow<TDef>(this IDefinitions definitions, string keyword) where TDef : IKeywordDefinition
     {
         if (definitions.GetDefinition(keyword) is not TDef requiredDefinition)
@@ -122,12 +127,12 @@ public static class RuntimeExtensions
         return resolutionContext;
     }
     
-    public static IEnumerable<IKeywordInstance> GetPrimitives(this IKeywordInstance effectInstance, IDefinitions definitions, IResolutionContext context)
+    public static IKeywordInstance ComposePrimitives(this IKeywordInstance effectInstance, IDefinitions definitions, IResolutionContext context)
     {
         return definitions.GetDefinition(effectInstance.Keyword) switch
         {
-            EffectCompositeDefinition composite => composite.CreateEffectSequence(context, effectInstance).Children.SelectMany(e => e.GetPrimitives(definitions, context)),
-            EffectPrimitiveDefinition primitive => new[] { effectInstance },
+            EffectPrimitiveDefinition primitive => effectInstance,
+            EffectCompositeDefinition composite => composite.CreateCompositeKeywordInstance(context, effectInstance),
             _ => throw new InvalidOperationException($"Keyword ({effectInstance.Keyword}) is not an effect")
         };
     }

@@ -12,12 +12,14 @@ public interface IKeywordInstance
 
 public interface ICompositeKeywordInstance : IKeywordInstance
 {
-    IReadOnlyList<IKeywordInstance> Children { get; }
+    IReadOnlyList<IKeywordInstance> SubKeywords { get; }
 }
 
 public record CompositeKeywordInstance : KeywordInstance, ICompositeKeywordInstance
 {
-    public IReadOnlyList<IKeywordInstance> Children { get; init; } = new List<IKeywordInstance>();
+    
+    public List<IKeywordInstance> Children { get; init; } = new ();
+    public IReadOnlyList<IKeywordInstance> SubKeywords => Children;
 }
 
 

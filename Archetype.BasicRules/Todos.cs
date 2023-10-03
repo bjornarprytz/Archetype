@@ -1,7 +1,6 @@
 ﻿namespace Archetype.BasicRules;
 
 // TODO: Conditions (
-// TODO: Cost
 // TODO: Pluggable protobuilder
 // TODO: Compute (MAX, MIN, COUNT)
 // TODO: Game Phase

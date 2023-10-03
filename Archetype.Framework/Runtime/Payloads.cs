@@ -67,6 +67,15 @@ public class ResolutionContext : IResolutionContext
     public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }
 
-public record EffectPayload(IAtom Source, string Keyword, IReadOnlyList<object> Operands, IReadOnlyList<IAtom> Targets);
+
+public interface IEffectPayload
+{
+    IAtom Source { get; }
+    string Keyword { get; }
+    IReadOnlyList<object> Operands { get; }
+    IReadOnlyList<IAtom> Targets { get; }
+}
+public record NestedEffectPayload(IAtom Source, string Keyword, IReadOnlyList<object> Operands, IReadOnlyList<IAtom> Targets) : EffectPayload(Source, Keyword, Operands, Targets) ;
+public record EffectPayload(IAtom Source, string Keyword, IReadOnlyList<object> Operands, IReadOnlyList<IAtom> Targets) : IEffectPayload;
 
 

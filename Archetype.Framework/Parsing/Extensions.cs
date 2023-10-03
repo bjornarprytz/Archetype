@@ -63,12 +63,7 @@ public static class Extensions
         var targetRefs = keywordContext.targetRef()?.Select(GetTarget).ToList() ?? new List<KeywordTarget>();
         var operands = keywordContext.operand()?.Select(ToOperand).ToList() ?? new List<KeywordOperand>();
 
-        return new KeywordInstance
-        {
-            Keyword = keyword,
-            Operands = operands,
-            Targets = targetRefs
-        };
+        return definition.CreateInstance(operands, targetRefs, definitions);
     }
 
     private static IEnumerable<IKeywordInstance> GetKeywordInstances(this IEnumerable<ActionBlockParser.KeywordExpressionContext>? contexts, IDefinitions definitions)

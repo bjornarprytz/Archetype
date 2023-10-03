@@ -7,25 +7,35 @@ namespace Archetype.BasicRules.Primitives;
 
 public class WorkCost : CostDefinition
 {
+    public override CostType Type => CostType.Work;
     public override string Name => "WORK_COST";
     public override string ReminderText => "Pay a work cost by tapping cards.";
 
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
-    public override ICompositeKeywordInstance CreateEffectSequence(IResolutionContext context, IKeywordInstance keywordInstance)
+
+    public override IEnumerable<EffectPayload> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        if (context.Payments[Type] is not { } payment)
-            throw new InvalidOperationException($"No payment found for cost type {Type}");
-
-        var cards = payment.Payment;
-        var requiredAmount = OperandDeclaration.UnpackOperands(keywordInstance);
+        var definition = context.MetaGameState.Definitions.GetOrThrow<Tap>();
         
-        var tapDefinition = context.MetaGameState.Definitions.GetOrThrow<Tap>();
-
+        var requiredAmount = OperandDeclaration.UnpackOperands(effectPayload);
+        var cards = context.Payments[Type];
+        
         return Declare.CompositeKeyword(
             Name,
-            Declare.Targets(),
-            Declare.Operands(Declare.Operand(requiredAmount)),
-            cards.Select(c => Declare.KeywordInstance(tapDefinition.Name, Declare.Targets(Declare.Target(c)))).ToList()
+            effectPayload.Targets,
+            effectPayload.Operands,
+            
+            )
+    }
+
+    public override CompositeKeywordInstance Compose(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets, IDefinitions definitions)
+    {
+        var operandList = operands.ToList();
+        var targetList = targets.ToList();
+        
+        var tapDefinition = definitions.GetOrThrow<Tap>();
+
+        return 
         );
     }
 

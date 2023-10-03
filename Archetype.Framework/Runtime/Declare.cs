@@ -5,14 +5,14 @@ namespace Archetype.Framework.Runtime;
 
 public static class Declare
 {
-    public static ICompositeKeywordInstance CompositeKeyword(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands, IReadOnlyList<IKeywordInstance> children)
+    public static CompositeKeywordInstance CompositeKeyword(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands, IEnumerable<IKeywordInstance> children)
     {
         return new CompositeKeywordInstance
         {
             Keyword = keyword,
             Targets = targets,
             Operands = operands,
-            Children = children,
+            Children = children.ToList(),
         };
     }
 

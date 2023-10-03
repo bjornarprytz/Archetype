@@ -55,6 +55,11 @@ public class OperandDeclaration<T0> : OperandDeclaration
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0>();
     }
+    
+    public T0 UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0>();
+    }
 }
 
 public class OperandDeclaration<T0, T1> : OperandDeclaration
@@ -76,6 +81,11 @@ public class OperandDeclaration<T0, T1> : OperandDeclaration
     public (T0, T1) UnpackOperands(IKeywordInstance keywordInstance)
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1>();
+    }
+    
+    public (T0, T1) UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1>();
     }
 }
 
@@ -100,6 +110,11 @@ public class OperandDeclaration<T0, T1, T2> : OperandDeclaration
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2>();
     }
+    
+    public (T0, T1, T2) UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2>();
+    }
 }
 
 public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
@@ -123,5 +138,10 @@ public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
     public (T0, T1, T2, T3) UnpackOperands(IKeywordInstance keywordInstance)
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3>();
+    }
+    
+    public (T0, T1, T2, T3) UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3>();
     }
 }

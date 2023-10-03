@@ -76,12 +76,12 @@ public class ActionQueue : IActionQueue
             throw new InvalidOperationException("Next resolution frame has no effects");
         }
 
-        foreach (var cost in CurrentFrame.Costs.SelectMany(c => c.GetPrimitives(_definitions, CurrentFrame.Context)))
+        foreach (var cost in CurrentFrame.Costs.Select(c => c.ComposePrimitives(_definitions, CurrentFrame.Context)))
         {
             _effectQueue.Enqueue(cost);
         }
         
-        foreach (var effect in CurrentFrame.Effects.SelectMany(e => e.GetPrimitives(_definitions, CurrentFrame.Context)))
+        foreach (var effect in CurrentFrame.Effects.Select(e => e.ComposePrimitives(_definitions, CurrentFrame.Context)))
         {
             _effectQueue.Enqueue(effect);
         }
