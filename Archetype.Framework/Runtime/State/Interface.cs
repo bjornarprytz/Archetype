@@ -30,7 +30,7 @@ public interface IGameState
 
 public interface IMetaGameState
 {
-    IDefinitions Definitions { get; }
+    IRules Rules { get; }
     IProtoCards ProtoCards { get; }
 }
 
@@ -52,7 +52,7 @@ public interface IActionBlock
     IReadOnlyList<IKeywordInstance> Conditions { get; }
     IReadOnlyList<int> ComputedValues { get; }
     
-    void UpdateComputedValues(IDefinitions definitions, IGameState gameState);
+    void UpdateComputedValues(IRules rules, IGameState gameState);
 }
 
 public interface ICard : IAtom, IActionBlock

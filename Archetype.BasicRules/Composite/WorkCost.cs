@@ -15,7 +15,7 @@ public class WorkCost : CostDefinition
 
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        var tapDefinition = context.MetaGameState.Definitions.GetOrThrow<Tap>();
+        var tapDefinition = context.MetaGameState.Rules.GetOrThrow<Tap>();
         var cards = context.Payments[Type];
 
         return cards.Payment.Select(c =>

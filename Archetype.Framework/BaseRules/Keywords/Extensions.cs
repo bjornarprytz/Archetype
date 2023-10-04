@@ -1,14 +1,14 @@
 ﻿using System.Reflection;
 using Archetype.BasicRules.Primitives;
 using Archetype.Framework.Definitions;
-using IDefinitionBuilder = Archetype.Framework.Runtime.IDefinitionBuilder;
+using Archetype.Framework.Runtime;
 
 namespace Archetype.BasicRules;
 
 
 public static class Extensions
 {
-    public static IDefinitionBuilder AddBasicRules(this IDefinitionBuilder definitions)
+    public static IRulesBuilder AddBasicKeywords(this IRulesBuilder ruleses)
     {
         foreach (var t in Assembly.GetAssembly(typeof(ChangeZone))!.GetTypes().Where(t => t.IsSubclassOf(typeof(IKeywordDefinition)) && !t.IsAbstract))
         {
@@ -25,10 +25,10 @@ public static class Extensions
             }
             
             Console.WriteLine("Adding keyword: " + keywordDefinition.Name);
-            definitions.AddKeyword(keywordDefinition);
+            ruleses.AddKeyword(keywordDefinition);
         };
         
-        return definitions;
+        return ruleses;
     }
     
     

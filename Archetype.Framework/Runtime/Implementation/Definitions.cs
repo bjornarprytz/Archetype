@@ -1,11 +1,14 @@
 ﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime.Implementation;
 
-public class Definitions : IDefinitions, IDefinitionBuilder
+public class Rules : IRules, IRulesBuilder
 {
     private readonly Dictionary<string, IKeywordDefinition> _keywords = new();
     private readonly Dictionary<Type, IKeywordDefinition> _keywordsByType = new();
+
+    public IReadOnlyList<IPhase> Phases { get; private set; } = Array.Empty<IPhase>();
 
     public IKeywordDefinition? GetDefinition(string keyword)
     {
@@ -30,5 +33,10 @@ public class Definitions : IDefinitions, IDefinitionBuilder
         
         _keywords.Add(keywordDefinition.Name, keywordDefinition);
         _keywordsByType.Add(keywordDefinition.GetType(), keywordDefinition);
+    }
+
+    public void SetTurnSequence(IReadOnlyList<IPhase> phase)
+    {
+        Phases = phase;
     }
 }

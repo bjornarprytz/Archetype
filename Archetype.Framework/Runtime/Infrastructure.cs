@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Definitions;
+﻿using Archetype.BasicRules.Primitives;
+using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
@@ -11,15 +12,17 @@ public interface IProtoCards
     IProtoCard? GetProtoCard(string name);
 }
 
-public interface IDefinitions
+public interface IRules
 {
+    IReadOnlyList<IPhase> Phases { get; } // TODO: Is this the right place for this?
     IKeywordDefinition? GetDefinition(string keyword);
     T? GetDefinition<T>() where T : IKeywordDefinition;
 }
 
-public interface IDefinitionBuilder
+public interface IRulesBuilder
 {
     void AddKeyword(IKeywordDefinition keywordDefinition);
+    void SetTurnSequence(IReadOnlyList<IPhase> phase);
 }
 
 public interface IEventHistory
@@ -32,12 +35,14 @@ public interface IActionQueue
 {
     IResolutionFrame? CurrentFrame { get; }
     void Push(IResolutionFrame frame);
-    IEvent? ResolveNext();
+    IEvent? ResolveNextKeyword();
 }
 
 public interface IGameLoop
 {
+    IPhase CurrentPhase { get; }
     IGameAPI Advance();
+    IGameAPI EndPhase();
 }
 
 public interface IGameActionHandler
@@ -50,14 +55,19 @@ public record ActionDescription(ActionType Type);
 
 public record InitialApi : IGameAPI
 {
-    public IGameState State { get; } = null;
-
-    public IReadOnlyList<ActionDescription> AvailableActions { get; set; } =
+    public IReadOnlyList<ActionDescription> AvailableActions { get; } =
         new[] { new ActionDescription(ActionType.StartGame) };
 }
 
+// TODO: Does this need something from the event?
+public record PromptApi : IGameAPI
+{
+    public IReadOnlyList<ActionDescription> AvailableActions { get; } = new []{ new ActionDescription(ActionType.AnswerPrompt) };
+}
+
+public record GameAPI(IReadOnlyList<ActionDescription> AvailableActions) : IGameAPI;
+
 public interface IGameAPI
 {
-    IGameState State { get; }
     IReadOnlyList<ActionDescription> AvailableActions { get; }
 }

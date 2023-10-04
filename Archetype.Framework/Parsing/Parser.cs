@@ -58,11 +58,11 @@ public class Parser : ISetParser
 
 public class CardParser : ICardParser
 {
-    private readonly IDefinitions _definitions;
+    private readonly IRules _rules;
 
-    public CardParser(IDefinitions definitions)
+    public CardParser(IRules rules)
     {
-        _definitions = definitions;
+        _rules = rules;
     }
 
     public IProtoCard ParseCard(CardData cardData)
@@ -79,15 +79,15 @@ public class CardParser : ICardParser
         var name = tree.name().STRING().GetText().Trim('"');
         protoBuilder.SetName(name);
         
-        var characteristics = tree.@static().keywordExpression().Select(kw => kw.GetKeywordInstance(_definitions)).ToList();
+        var characteristics = tree.@static().keywordExpression().Select(kw => kw.GetKeywordInstance(_rules)).ToList();
 
         protoBuilder.AddCharacteristics(characteristics);
 
-        var costs = tree.effects().actionBlock().GetCosts(_definitions).ToList();
-        var conditions = tree.effects().actionBlock().GetConditions(_definitions).ToList();
+        var costs = tree.effects().actionBlock().GetCosts(_rules).ToList();
+        var conditions = tree.effects().actionBlock().GetConditions(_rules).ToList();
         var targetSpecs = tree.effects().actionBlock().GetTargetSpecs().ToList();
-        var computedValues = tree.effects().actionBlock().GetComputedValues(_definitions).ToList();
-        var effects = tree.effects().actionBlock().GetEffectKeywordInstances(_definitions).ToList();
+        var computedValues = tree.effects().actionBlock().GetComputedValues(_rules).ToList();
+        var effects = tree.effects().actionBlock().GetEffectKeywordInstances(_rules).ToList();
         
         protoBuilder.SetActionBlock(targetSpecs, costs, conditions, computedValues, effects);
         

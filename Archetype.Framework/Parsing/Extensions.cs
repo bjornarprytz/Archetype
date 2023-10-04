@@ -51,10 +51,10 @@ public static class Extensions
         throw new InvalidOperationException($"Could not parse operand: {context.GetText()}");
     }
     
-    public static IKeywordInstance GetKeywordInstance(this ActionBlockParser.KeywordExpressionContext keywordContext, IDefinitions definitions)
+    public static IKeywordInstance GetKeywordInstance(this ActionBlockParser.KeywordExpressionContext keywordContext, IRules rules)
     {
         if (keywordContext.keyword().GetText() is not { } keyword 
-            || definitions.GetDefinition(keyword) is not { } definition)
+            || rules.GetDefinition(keyword) is not { } definition)
             throw new InvalidOperationException("Keyword expression has no valid keyword");
         
         var targetRefs = keywordContext.targetRef()?.Select(GetTarget).ToList() ?? new List<KeywordTarget>();
@@ -63,9 +63,9 @@ public static class Extensions
         return definition.CreateInstance(operands, targetRefs);
     }
 
-    private static IEnumerable<IKeywordInstance> GetKeywordInstances(this IEnumerable<ActionBlockParser.KeywordExpressionContext>? contexts, IDefinitions definitions)
+    private static IEnumerable<IKeywordInstance> GetKeywordInstances(this IEnumerable<ActionBlockParser.KeywordExpressionContext>? contexts, IRules rules)
     {
-        return contexts?.Select(kw => kw.GetKeywordInstance(definitions)) ?? new List<IKeywordInstance>();
+        return contexts?.Select(kw => kw.GetKeywordInstance(rules)) ?? new List<IKeywordInstance>();
     }
 
     public static IEnumerable<CardTargetDescription> GetTargetSpecs(this ActionBlockParser.ActionBlockContext actionBlockContext)
@@ -75,32 +75,32 @@ public static class Extensions
             ?? new List<CardTargetDescription>();
     }
 
-    public static IEnumerable<IKeywordInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+    public static IEnumerable<IKeywordInstance> GetComputedValues(this ActionBlockParser.ActionBlockContext actionBlockContext, IRules rules)
     {
         return actionBlockContext.computedValues()?
-            .keywordExpression().GetKeywordInstances(definitions) 
+            .keywordExpression().GetKeywordInstances(rules) 
             ?? new List<IKeywordInstance>();
     }
     
-    public static IEnumerable<IKeywordInstance> GetCosts(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+    public static IEnumerable<IKeywordInstance> GetCosts(this ActionBlockParser.ActionBlockContext actionBlockContext, IRules rules)
     {
         return actionBlockContext.costs()?
-            .keywordExpression().GetKeywordInstances(definitions)
+            .keywordExpression().GetKeywordInstances(rules)
             ?? new List<IKeywordInstance>();
     }
     
-    public static IEnumerable<IKeywordInstance> GetConditions(this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+    public static IEnumerable<IKeywordInstance> GetConditions(this ActionBlockParser.ActionBlockContext actionBlockContext, IRules rules)
     {
         return actionBlockContext.conditions()?
-            .keywordExpression().GetKeywordInstances(definitions)
+            .keywordExpression().GetKeywordInstances(rules)
             ?? new List<IKeywordInstance>();
     }
 
     public static IEnumerable<IKeywordInstance> GetEffectKeywordInstances(
-        this ActionBlockParser.ActionBlockContext actionBlockContext, IDefinitions definitions)
+        this ActionBlockParser.ActionBlockContext actionBlockContext, IRules rules)
     {
         return actionBlockContext.keywordExpression()
-            .GetKeywordInstances(definitions);
+            .GetKeywordInstances(rules);
     }
 
     private static KeywordTarget GetTarget(this ActionBlockParser.TargetRefContext targetRefContext)

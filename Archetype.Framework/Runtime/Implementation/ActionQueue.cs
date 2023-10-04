@@ -6,17 +6,17 @@ namespace Archetype.Framework.Runtime.Implementation;
 public class ActionQueue : IActionQueue
 {
     private readonly IEventHistory _eventHistory;
-    private readonly IDefinitions _definitions;
+    private readonly IRules _rules;
     
     // Card scope
     private readonly Queue<IResolutionFrame> _frameQueue = new();
     // Keyword scope
     private readonly QueueStack<IKeywordInstance> _keywordStack = new();
 
-    public ActionQueue(IEventHistory eventHistory, IDefinitions definitions)
+    public ActionQueue(IEventHistory eventHistory, IRules rules)
     {
         _eventHistory = eventHistory;
-        _definitions = definitions;
+        _rules = rules;
     }
 
     public IResolutionFrame? CurrentFrame { get; private set; }
@@ -26,7 +26,7 @@ public class ActionQueue : IActionQueue
         _frameQueue.Enqueue(context);
     }
 
-    public IEvent? ResolveNext()
+    public IEvent? ResolveNextKeyword()
     {
         if (_keywordStack.Count == 0)
         {
@@ -66,7 +66,7 @@ public class ActionQueue : IActionQueue
             var effectInstance = _keywordStack.Pop();
             var payload = effectInstance.BindPayload(CurrentFrame!.Context);
 
-            if (_definitions.GetDefinition(effectInstance.Keyword) is EffectCompositeDefinition definition)
+            if (_rules.GetDefinition(effectInstance.Keyword) is EffectCompositeDefinition definition)
             {
                 var keywordInstances = definition.Compose(CurrentFrame!.Context, payload);
 
@@ -90,7 +90,7 @@ public class ActionQueue : IActionQueue
 
     private IEvent Resolve(EffectPayload payload)
     {
-        var definition = _definitions.GetDefinition(payload.Keyword);
+        var definition = _rules.GetDefinition(payload.Keyword);
 
         if (definition is EffectPrimitiveDefinition primitive)
         {
@@ -102,12 +102,12 @@ public class ActionQueue : IActionQueue
 
     private bool TryAdvanceFrame()
     {
-        if (_frameQueue.Count == 0)
+        if (!_frameQueue.TryDequeue(out var nextFrame))
         {
             return false;
         }
         
-        CurrentFrame = _frameQueue.Dequeue();
+        CurrentFrame = nextFrame;
 
         if (CurrentFrame.Effects.Count == 0)
         {

@@ -1,10 +1,15 @@
 ﻿using Archetype.Framework.Proto;
+using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime;
 
 public static class Declare
 {
+    public static IReadOnlyList<IKeywordInstance> KeywordInstances(params IKeywordInstance[] instances)
+    {
+        return instances.ToList();
+    }
     public static IKeywordInstance KeywordInstance(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands)
     {
         return new KeywordInstance { Keyword = keyword, Operands = operands, Targets = targets };
@@ -68,5 +73,10 @@ public static class Declare
     public static KeywordOperand Operand<T>(Func<IResolutionContext, T> getValueFunc)
     {
         return new KeywordOperand<T>(getValueFunc);
+    }
+
+    public static IReadOnlyList<PaymentPayload> Payments(params PaymentPayload[] payments)
+    {
+        return payments.ToList();
     }
 }

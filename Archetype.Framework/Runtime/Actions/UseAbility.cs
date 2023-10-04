@@ -10,12 +10,12 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
     private readonly IEventHistory _history;
     private readonly IActionQueue _actionQueue;
     private readonly IGameRoot _gameRoot;
-    private readonly IDefinitions _definitions;
+    private readonly IRules _rules;
 
-    public UseAbilityHandler(IGameRoot gameRoot, IDefinitions definitions, IActionQueue actionQueue, IEventHistory history)
+    public UseAbilityHandler(IGameRoot gameRoot, IRules rules, IActionQueue actionQueue, IEventHistory history)
     {
         _gameRoot = gameRoot;
-        _definitions = definitions;
+        _rules = rules;
         _actionQueue = actionQueue;
         _history = history;
     }

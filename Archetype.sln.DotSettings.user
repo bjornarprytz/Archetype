@@ -10,8 +10,7 @@
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=48973f40_002Dbaf4_002D448d_002Dac20_002D10fdf75c55a9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="LightningBolt" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Parsing.ParseTests.LightningBolt&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Parsing.ParseTests.ArcTrail&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Parsing.ParseTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
