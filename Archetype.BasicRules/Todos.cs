@@ -14,5 +14,5 @@
 // TODO: Polish Syntax
 
 
-// TODO: Prompt responses should be scoped, in order to avoid collision between contexts
+// TODO: Prompt responses should be scoped, in order to avoid collision between contexts. OR maybe I could figure something out with GUIDs
 // TODO: Figure out if payment check could include the context, because some characteristics could depend on the context (e.g. the target of a payment). Or maybe 

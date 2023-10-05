@@ -81,6 +81,12 @@ public class CombatStep : EffectCompositeDefinition
     public override string ReminderText => "Player attacks.";
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        throw new NotImplementedException();
+        var lane1 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "1", context));
+        var lane2 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "2", context));
+        var lane3 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "3", context));
+        var lane4 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "4", context));
+        
+        // TODO: Resolve combat
+        
     }
 }

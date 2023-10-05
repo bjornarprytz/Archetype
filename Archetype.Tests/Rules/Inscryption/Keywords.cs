@@ -111,6 +111,12 @@ public class MoveSideways : CharacteristicDefinition
     public override string ReminderText => "Move sideways.";
 }
 
+public class Lane : CharacteristicDefinition
+{
+    public override string Name => "LANE";
+    public override string ReminderText => "Lane.";
+}
+
 public class BloodCost : CostDefinition
 {
     public override CostType Type => CostType.Sacrifice;

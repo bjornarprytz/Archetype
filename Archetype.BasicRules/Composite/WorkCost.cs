@@ -8,6 +8,7 @@ namespace Archetype.BasicRules.Primitives;
 public class WorkCost : CostDefinition
 {
     public override CostType Type => CostType.Work;
+
     public override string Name => "WORK_COST";
     public override string ReminderText => "Pay a work cost by tapping cards.";
 
@@ -22,7 +23,7 @@ public class WorkCost : CostDefinition
             tapDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(c)))).ToList();
     }
 
-    public override bool Check(PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
+    public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
     {
         if (paymentPayload.Type != Type)
             throw new InvalidOperationException($"Cost type ({Type}) does not match payment type ({paymentPayload.Type})");
