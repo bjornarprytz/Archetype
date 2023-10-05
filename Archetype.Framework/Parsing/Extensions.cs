@@ -15,14 +15,14 @@ public static class Extensions
             {
                 var number = int.Parse(numberToken.GetText());
                 
-                return new KeywordOperand<int>(_ => number);
+                return new ImmediateKeywordOperand<int>(number);
             }
 
             if (anyToken.WORD() is { } stringToken)
             {
                 var word = stringToken.GetText();
                 
-                return new KeywordOperand<string>(_ => word);
+                return new ImmediateKeywordOperand<string>(word);
             }
             throw new InvalidOperationException($"Could not parse any: {context.GetText()}");
         }
@@ -32,19 +32,19 @@ public static class Extensions
             {
                 var str = stringToken.GetText();
 
-                return new KeywordOperand<string>(_ => str);
+                return new ImmediateKeywordOperand<string>(str);
             }
             if (context.computedValueRef() is { } computedValueRef && computedValueRef.index() is { } indexContext)
             {
                 var index = int.Parse(indexContext.GetText());
 
-                return new KeywordOperand<int>(ctx => ctx.ComputedValues[index]);
+                return new ComputedPropertyKeywordOperand(index);
             }
             if (context.filter() is { } filterContext)
             {
                 var filter = Filter.Parse(filterContext.GetText());
 
-                return new KeywordOperand<IEnumerable<IAtom>>(ctx => filter.ProvideAtoms(ctx));
+                return new FilterKeywordOperand(filter);
             }
         }
 

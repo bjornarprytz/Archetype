@@ -2,7 +2,15 @@
 
 namespace Archetype.Framework.Runtime.State;
 
-public class Node : Atom, IZone
+public interface INode : IZone { }
+public interface IDrawPile : IZone { ICard GetTopCard(); }
+public interface IHand : IZone { }
+public interface IDiscardPile : IZone { }
+public interface IExile : IZone { }
+public interface IStack : IZone { }
+public interface IPayment : IZone { }
+
+public class Node : Atom, INode
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
@@ -12,7 +20,7 @@ public class Node : Atom, IZone
     public IList<ICard> Cards { get; } = new List<ICard>();
 }
 
-public class DrawPile : Atom, IZone
+public class DrawPile : Atom, IDrawPile
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
@@ -20,9 +28,13 @@ public class DrawPile : Atom, IZone
             ("SUBTYPE", "draw pile")
             );
     public IList<ICard> Cards { get; } = new List<ICard>();
+    public ICard? GetTopCard()
+    {
+        return Cards.LastOrDefault();
+    }
 }
 
-public class Hand : Atom, IZone
+public class Hand : Atom, IHand
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
@@ -32,7 +44,7 @@ public class Hand : Atom, IZone
     public IList<ICard> Cards { get; } = new List<ICard>();
 }
 
-public class DiscardPile : Atom, IZone
+public class DiscardPile : Atom, IDiscardPile
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
@@ -42,7 +54,7 @@ public class DiscardPile : Atom, IZone
     public IList<ICard> Cards { get; } = new List<ICard>();
 }
 
-public class Exile : Atom, IZone
+public class Exile : Atom, IExile
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
@@ -52,7 +64,7 @@ public class Exile : Atom, IZone
     public IList<ICard> Cards { get; } = new List<ICard>();
 }
 
-public class Stack : Atom, IZone
+public class Stack : Atom, IStack
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(
@@ -62,7 +74,7 @@ public class Stack : Atom, IZone
     public IList<ICard> Cards { get; } = new List<ICard>();
 }
 
-public class Payment : Atom, IZone
+public class Payment : Atom, IPayment
 {
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
         Declare.Characteristics(

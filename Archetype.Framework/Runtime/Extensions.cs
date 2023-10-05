@@ -39,6 +39,7 @@ public static class RuntimeExtensions
         return list.Select(rules.GetOrThrow<CostDefinition>).Zip(payloads, list);
     }
     public static bool CheckPayments(this IRules rules, 
+        IResolutionContext context,
         IReadOnlyList<IKeywordInstance> costs,
         IReadOnlyList<PaymentPayload> payments
         )
@@ -55,7 +56,7 @@ public static class RuntimeExtensions
             if (costDefinition.Type != payment.Type)
                 throw new InvalidOperationException($"Cost type ({costDefinition.Type}) does not match payment type ({payment.Type})");
             
-            if (!costDefinition.Check(payment, cost))
+            if (!costDefinition.Check(context, payment, cost))
             {
                 return false;
             }
@@ -102,9 +103,6 @@ public static class RuntimeExtensions
         var costs = actionBlock.Costs;
         var source = actionBlock.Source;
         
-        if (!definitions.CheckPayments(costs, payments))
-            throw new InvalidOperationException("Invalid payment");
-
         actionBlock.UpdateComputedValues(definitions, gameState);
         
         var resolutionContext = new ResolutionContext
@@ -116,7 +114,10 @@ public static class RuntimeExtensions
             Targets = targets,
             ComputedValues = actionBlock.ComputedValues,
         };
-
+        
+        if (!definitions.CheckPayments(resolutionContext, costs, payments))
+            throw new InvalidOperationException("Invalid payment");
+        
         if (definitions.CheckConditions(conditions, source, gameState))
             throw new InvalidOperationException("Invalid conditions");
         
@@ -177,6 +178,23 @@ public static class RuntimeExtensions
     public static IKeywordInstance? GetCharacteristic(this IAtom atom, string key)
     {
         return !atom.Characteristics.TryGetValue(key, out var value) ? null : value;
+    }
+    
+    public static int GetCharacteristicValue(this IAtom atom, string key, IResolutionContext context)
+    {
+        var keywordInstance = atom.GetCharacteristic(key);
+        if (keywordInstance is null)
+            throw new InvalidOperationException($"Characteristic {key} not found");
+
+        if (keywordInstance.Operands.Count == 0)
+            throw new InvalidOperationException($"Characteristic {key} has no operands");
+        
+        return keywordInstance.Operands[0].GetValue(context) switch
+        {
+            int intValue => intValue,
+            string stringValue when int.TryParse(stringValue, out var intValueFromString) => intValueFromString,
+            _ => throw new InvalidOperationException($"Characteristic {key} is not of type integer, or cannot be parsed as an integer")
+        };
     }
     
     public static int GetResourceValue(this IAtom atom)

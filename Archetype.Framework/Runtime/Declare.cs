@@ -41,6 +41,11 @@ public static class Declare
         return targets.ToList();
     }
     
+    public static KeywordTarget Target(Func<IResolutionContext, IAtom> getTargetFunc)
+    {
+        return new KeywordTarget(getTargetFunc);
+    }
+    
     public static KeywordTarget Target(IAtom atom)
     {
         return new KeywordTarget(_ => atom);

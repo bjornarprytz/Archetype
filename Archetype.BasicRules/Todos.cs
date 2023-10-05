@@ -12,3 +12,7 @@
 // TODO: Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
 // TODO: Unit tests for a realistic rules implementation
 // TODO: Polish Syntax
+
+
+// TODO: Prompt responses should be scoped, in order to avoid collision between contexts
+// TODO: Figure out if payment check could include the context, because some characteristics could depend on the context (e.g. the target of a payment). Or maybe 

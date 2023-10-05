@@ -10,19 +10,21 @@ public abstract class ChangeState<TAtom, T> : EffectPrimitiveDefinition
     protected override TargetDeclaration<TAtom> TargetDeclaration { get; } = new();
     
     protected abstract string Property { get; }
-    protected abstract T Value { get; }
+    protected abstract T ProduceValue(IResolutionContext context, EffectPayload effectPayload);
     
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
         var atom = TargetDeclaration.UnpackTargets(effectPayload);
 
-        if (atom.GetState<T>(Property) is { } existingValue && existingValue.Equals(Value))
+        var value = ProduceValue(context, effectPayload);
+
+        if (atom.GetState<T>(Property) is { } existingValue && existingValue.Equals(value))
             return new NonEvent();
          
-        atom.State[Property] = Value!;
+        atom.State[Property] = value!;
         
-        return new ChangeStateEvent<T>(atom, Property, Value);
+        return new ChangeStateEvent<T>(atom, Property, value);
     }
 }
 

@@ -29,9 +29,11 @@ public class GameLoop : IGameLoop
         
         if (!_phases.Where(p => p.AllowedActions.Count > 0).All(p => p.AllowedActions.Any(a => a.Type == ActionType.PassTurn)))
             throw new InvalidOperationException("Not all phases have a pass turn action");
+
+        CurrentPhase = NextPhase();
     }
 
-    public IPhase CurrentPhase { get; private set; } = new NoPhase();
+    public IPhase CurrentPhase { get; private set; }
 
     public IGameAPI Advance()
     {

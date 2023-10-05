@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Runtime;
+﻿using Archetype.Framework.Definitions;
+using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Proto;
@@ -36,3 +37,9 @@ public record KeywordOperand<T>(Func<IResolutionContext, T> GetTypedValue) : Key
 {
     public Func<IResolutionContext, T> GetTypedValue { get; init; } = GetTypedValue;
 }
+
+public record ImmediateKeywordOperand<T>(T Value) : KeywordOperand<T>(_ => Value);
+public record FilterKeywordOperand(Filter Filter) : KeywordOperand<IEnumerable<IAtom>>(Filter.ProvideAtoms);
+public record ComputedPropertyKeywordOperand(int ComputedValueIndex) : KeywordOperand<int>(
+    ctx => ctx.ComputedValues[ComputedValueIndex]
+);

@@ -14,32 +14,32 @@ public interface IStep : IActionBlock
     public string Name { get; }
 }
 
-
-// TODO: Don't know if this is needed
-public record NoPhase : IPhase
+public abstract class Phase : Atom, IPhase
 {
-    public Guid Id => Guid.Empty;
-    public IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = new Dictionary<string, IKeywordInstance>();
-    public IDictionary<string, object> State { get; } = new Dictionary<string, object>();
-    public IReadOnlyList<IStep> Steps { get; } = new List<IStep>();
-    public IReadOnlyList<ActionDescription> AllowedActions { get; } = new List<ActionDescription>();
+    public abstract IReadOnlyList<IStep> Steps { get; }
+    public abstract IReadOnlyList<ActionDescription> AllowedActions { get; }
 }
 
-public record NoStep : IStep
+public abstract class Step : IStep
 {
-    public Guid Id => Guid.Empty;
-    public IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = new Dictionary<string, IKeywordInstance>();
-    public IDictionary<string, object> State { get; } = new Dictionary<string, object>();
-    public IAtom Source { get; } = null;
-    public IReadOnlyList<CardTargetDescription> TargetsDescriptors { get; } = new List<CardTargetDescription>();
-    public IReadOnlyList<IKeywordInstance> Effects { get; } = new List<IKeywordInstance>();
-    public IReadOnlyList<IKeywordInstance> Costs { get; } = new List<IKeywordInstance>();
-    public IReadOnlyList<IKeywordInstance> Conditions { get; } = new List<IKeywordInstance>();
-    public IReadOnlyList<int> ComputedValues { get; } = new List<int>();
-    public void UpdateComputedValues(IRules rules, IGameState gameState)
+    protected Step(IPhase source)
     {
-        throw new NotImplementedException();
+        Source = source;
     }
 
-    public string Name { get; } = "_NO_STEP_";
+    public IAtom Source { get; }
+    public abstract string Name { get; }
+    public abstract IReadOnlyList<IKeywordInstance> Effects { get; }
+    
+    
+    public virtual IReadOnlyList<int> ComputedValues { get; } = ArraySegment<int>.Empty;
+    public virtual void UpdateComputedValues(IRules rules, IGameState gameState)
+    {
+        Console.WriteLine($"Nothing to update in this step ({Name})");
+    }
+    
+    public IReadOnlyList<CardTargetDescription> TargetsDescriptors { get; } = Array.Empty<CardTargetDescription>();
+    public IReadOnlyList<IKeywordInstance> Costs { get; } = Array.Empty<IKeywordInstance>();
+    public IReadOnlyList<IKeywordInstance> Conditions { get; } = Array.Empty<IKeywordInstance>();
+    
 }

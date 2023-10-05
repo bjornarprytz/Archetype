@@ -18,6 +18,7 @@ public enum CostType
     Discard, // From hand
     Mill, // From draw pile
     Exhaust, // From discard pile
+    Coins, // From the player's pocket
 }
 
 
