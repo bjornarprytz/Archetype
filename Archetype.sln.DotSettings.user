@@ -16,4 +16,5 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b15d9a60_002D106c_002D4d76_002Dba75_002D119075c311af/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Project Location="E:\source\repos\Archetype\Archetype.Tests" Presentation="&amp;lt;Archetype.Tests&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Inscryption/@EntryIndexedValue">True</s:Boolean>
 	</wpf:ResourceDictionary>

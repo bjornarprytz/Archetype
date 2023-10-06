@@ -157,11 +157,11 @@ public static class RuntimeExtensions
         return true;
     }
     
-    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue, IResolutionContext context=null)
+    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue, IResolutionContext context)
     {
         return atom.Characteristics.TryGetValue(key, out var instance) 
                // && instance is CharacteristicInstance<T> { TypedValue: { } typedValue } 
-               && (stringValue == "any" || instance.Operands[0].GetValue(context).Equals(stringValue));
+               && (stringValue == "any" || instance.Operands[0].GetValue(context) is {} v && v.Equals(stringValue));
     }
     
     public static T? GetState<T>(this IAtom atom, string key)

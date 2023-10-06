@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
-public record PaymentPayload(CostType Type, IReadOnlyList<IAtom> Payment);
+public record PaymentPayload(CostType Type, IReadOnlyList<IAtom> Payment, int Amount);
 public record PlayCardArgs(Guid Card, IReadOnlyList<Guid> Targets, IReadOnlyList<PaymentPayload> Payments) : IRequest<Unit>;
 
 public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>

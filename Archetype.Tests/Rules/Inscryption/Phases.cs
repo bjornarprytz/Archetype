@@ -75,18 +75,56 @@ public class DrawCardStep : EffectCompositeDefinition
     }
 }
 
-public class CombatStep : EffectCompositeDefinition
+public class PlayerCombatStep : EffectCompositeDefinition
 {
-    public override string Name => "COMBAT_STEP";
-    public override string ReminderText => "Player attacks.";
+    public override string Name => "PLAYER_COMBAT_STEP";
+    public override string ReminderText => "The player attacks Leshy.";
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        var lane1 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "1", context));
-        var lane2 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "2", context));
-        var lane3 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "3", context));
-        var lane4 = context.GameState.Zones.Values.OfType<INode>().Single(l => l.HasCharacteristic("LANE", "4", context));
+        var lane1 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "1", context));
+        var lane2 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "2", context));
+        var lane3 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "3", context));
+        var lane4 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "4", context));
+
+        var attackLeshyDefinition = context.MetaGameState.Rules.GetOrThrow<AttackLeshy>();
+
+        return new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
+            attackLeshyDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(lane)))
+            ).ToList();
+    }
+}
+
+public class LeshyCombatStep : EffectCompositeDefinition
+{
+    public override string Name => "LESHY_COMBAT_STEP";
+    public override string ReminderText => "Leshy attacks the player.";
+    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var lane1 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "1", context));
+        var lane2 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "2", context));
+        var lane3 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "3", context));
+        var lane4 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "4", context));
+
+        var attackLeshyDefinition = context.MetaGameState.Rules.GetOrThrow<AttackPlayer>();
+
+        return new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
+            attackLeshyDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(lane)))
+        ).ToList();
+    }
+}
+
+public class StateBasedEffects : EffectCompositeDefinition
+{
+    public override string Name => "STATE_BASED_EFFECTS";
+    public override string ReminderText => "Check for state-based effects.";
+    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var exileDeadThings = context.MetaGameState.Rules.GetOrThrow<ExileDeadThings>().CreateInstance(Declare.Operands(), Declare.Targets());
+        var checkVictoryDefinition = context.MetaGameState.Rules.GetOrThrow<CheckVictory>().CreateInstance(Declare.Operands(), Declare.Targets());
         
-        // TODO: Resolve combat
-        
+        return Declare.KeywordInstances(
+            exileDeadThings,
+            checkVictoryDefinition
+            );
     }
 }

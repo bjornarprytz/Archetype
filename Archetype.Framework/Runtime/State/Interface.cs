@@ -26,6 +26,8 @@ public interface IGameState
 {
     IDictionary<Guid, IZone> Zones { get; }
     IDictionary<Guid, IAtom> Atoms { get; }
+    
+    IPlayer Player { get; }
 }
 
 public interface IMetaGameState

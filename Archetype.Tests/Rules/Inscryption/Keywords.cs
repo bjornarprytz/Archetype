@@ -30,36 +30,122 @@ public class DrawCard : EffectCompositeDefinition
 }
 
 
-public class Attack : EffectCompositeDefinition
+public class AttackLeshy : EffectCompositeDefinition
 {
     public override string Name => "ATTACK";
     public override string ReminderText => "Attack with a unit.";
-    protected override TargetDeclaration<ICard, ICard> TargetDeclaration { get; } = new();
+    protected override TargetDeclaration<ILane> TargetDeclaration { get; } = new();
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        var (attacker, defender) = TargetDeclaration.UnpackTargets(effectPayload);
+        var lane = TargetDeclaration.UnpackTargets(effectPayload);
+        
+        var attacker = lane.HomeCritter;
+        var defender = lane.AwayCritter;
+        var stagedCreature = lane.StagingCritter;
+
+        if (attacker is null) return Declare.KeywordInstances();
+        
+        var power = attacker.GetCharacteristicValue("POWER", context);
+
+        if (defender is null)
+        {
+             var tipScalesDefinition = context.MetaGameState.Rules.GetOrThrow<TipScales>();
+                var tipScales = tipScalesDefinition.CreateInstance(
+                    Declare.Operands(Declare.Operand(power)),
+                    Declare.Targets());
+            
+            return Declare.KeywordInstances(tipScales);
+        }
         
 
         var damageDefinition = context.MetaGameState.Rules.GetOrThrow<Damage>();
         var damage = damageDefinition.CreateInstance(
-            Declare.Operands(Declare.Operand(attacker.GetCharacteristicValue("POWER", context))),
+            Declare.Operands(Declare.Operand(power)),
             Declare.Targets(Declare.Target(defender)));
         
+        var trampleAmount = power - defender.GetCharacteristicValue("HEALTH", context);
+
+        if (stagedCreature is null || trampleAmount <= 0) return Declare.KeywordInstances(damage);
         
+        var trampleDamage = damageDefinition.CreateInstance(
+            Declare.Operands(Declare.Operand(trampleAmount)), 
+            Declare.Targets(Declare.Target(stagedCreature)));
+            
+        return Declare.KeywordInstances(damage, trampleDamage);
+    }
+}
+
+public class AttackPlayer : EffectCompositeDefinition
+{
+    public override string Name => "ATTACK";
+    public override string ReminderText => "Attack with a unit.";
+    protected override TargetDeclaration<ILane> TargetDeclaration { get; } = new();
+    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var lane = TargetDeclaration.UnpackTargets(effectPayload);
+        
+        var attacker = lane.HomeCritter;
+        var defender = lane.AwayCritter;
+
+        if (attacker is null) return Declare.KeywordInstances();
+
+        var power = attacker.GetCharacteristicValue("POWER", context);
+
+        if (defender is null)
+        {
+             var tipScalesDefinition = context.MetaGameState.Rules.GetOrThrow<TipScales>();
+                var tipScales = tipScalesDefinition.CreateInstance(
+                    Declare.Operands(Declare.Operand( -power )), // Minus because
+                    Declare.Targets());
+            
+            return Declare.KeywordInstances(tipScales);
+        }
+        
+
+        var damageDefinition = context.MetaGameState.Rules.GetOrThrow<Damage>();
+        var damage = damageDefinition.CreateInstance(
+            Declare.Operands(Declare.Operand(power)),
+            Declare.Targets(Declare.Target(defender)));
         
         return Declare.KeywordInstances(damage);
     }
 }
 
+public class TipScales : EffectPrimitiveDefinition
+{
+    public override string Name => "TIP_SCALES";
+    public override string ReminderText => "Tip the scales.";
+    protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
+
+    public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var amount = OperandDeclaration.UnpackOperands(effectPayload);
+        
+        var player = context.GameState.Player as IInscryptionPlayer;
+        
+        if (amount > 0)
+        {
+            player!.MyTeeth += amount;
+        }
+        else
+        {
+            player!.TheirTeeth -= amount;
+        }
+
+        return new TipScalesEvent(amount);
+    }
+}
+public record TipScalesEvent(int Amount) : EventBase;
+
 public class Damage : ChangeState<ICard, int>
 {
     public override string Name => "DAMAGE";
     public override string ReminderText => "Deal damage to a unit.";
-    protected override string Property => "HEALTH";
+    protected override string Property => "DAMAGE_TAKEN";
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
     protected override int ProduceValue(IResolutionContext context, EffectPayload effectPayload)
     {
-        return - OperandDeclaration.UnpackOperands(effectPayload);
+        return OperandDeclaration.UnpackOperands(effectPayload);
     }
 }
 
@@ -117,6 +203,19 @@ public class Lane : CharacteristicDefinition
     public override string ReminderText => "Lane.";
 }
 
+
+public class ChangeBones : ChangeState<IInscryptionPlayer, int>
+{
+    public override string Name => "CHANGE_BONES";
+    public override string ReminderText => "Change bones.";
+    protected override string Property => "BONES";
+    protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
+    protected override int ProduceValue(IResolutionContext context, EffectPayload effectPayload)
+    {
+        return OperandDeclaration.UnpackOperands(effectPayload);
+    }
+}
+
 public class BloodCost : CostDefinition
 {
     public override CostType Type => CostType.Sacrifice;
@@ -152,21 +251,20 @@ public class BonesCost : CostDefinition
 {
     public override CostType Type => CostType.Coins;
     public override string Name => "BONES_COST";
-    public override string ReminderText => "Pay a bones cost by discarding bones.";
+    public override string ReminderText => "Pay a bones cost.";
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
 
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
     {
-        var bones = context.Payments[Type].Payment;
+        var bonesAmount = context.Payments[Type].Amount;
         
-        var exile = context.GameState.Zones.Values.OfType<IExile>().Single();
-        var changeZoneDefinition = context.MetaGameState.Rules.GetOrThrow<ChangeZone>();
+        var changeBonesDefinition = context.MetaGameState.Rules.GetOrThrow<ChangeBones>();
         
-        var changeZones = bones.Select(b => changeZoneDefinition.CreateInstance(
-            Declare.Operands(), 
-            Declare.Targets(Declare.Target(b), Declare.Target(exile))));
+        var changeBones = changeBonesDefinition.CreateInstance(
+            Declare.Operands(Declare.Operand(-bonesAmount)), 
+            Declare.Targets());
         
-        return changeZones.ToList();
+        return Declare.KeywordInstances(changeBones);
     }
 
     public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
@@ -175,7 +273,51 @@ public class BonesCost : CostDefinition
             return false;
         
         var requiredAmount = OperandDeclaration.UnpackOperands(keywordInstance);
+        
+        var player = context.GameState.Player;
+        
+        var playerBones = player.GetState<int>("BONES");
+        
+        return requiredAmount >= playerBones;
+    }
+}
 
-        return requiredAmount >= paymentPayload.Payment.Count; // Coins are atoms
+public class CheckVictory : EffectPrimitiveDefinition
+{
+    public override string Name => "CHECK_VICTORY";
+    public override string ReminderText => "Check for victory.";
+    public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var player = context.GameState.Player as IInscryptionPlayer;
+
+        var difference = int.Abs(player!.TheirTeeth - player.MyTeeth); 
+        
+        if (difference >= 5)
+        {
+            return new GameOverEvent(player.MyTeeth > player.TheirTeeth);
+        }
+        
+        return new NonEvent();
+    }
+}
+public record GameOverEvent(bool Victory) : EventBase;
+
+public class ExileDeadThings : EffectCompositeDefinition
+{
+    public override string Name => "EXILE_DEAD_THINGS";
+    public override string ReminderText => "Exile dead things.";
+    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var deadCritters = context.GameState.Atoms.Values.OfType<ICard>().Where(c => c.GetState<int>("DAMAGE_TAKEN") >= c.GetCharacteristicValue("HEALTH", context)).ToList();
+
+        var exile = context.GameState.Zones.Values.OfType<IExile>().Single();
+        
+        var changeZoneDefinition = context.MetaGameState.Rules.GetOrThrow<ChangeZone>();
+        
+        var changeZones = deadCritters.Select(c => changeZoneDefinition.CreateInstance(
+            Declare.Operands(), 
+            Declare.Targets(Declare.Target(c), Declare.Target(exile))));
+        
+        return changeZones.ToList();
     }
 }
