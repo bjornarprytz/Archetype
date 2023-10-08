@@ -11,7 +11,7 @@ public interface ILane : INode
 
 public interface IBone : IAtom { }
 
-public interface IInscryptionPlayer : IPlayer // TODO: Remember to add bones in the implementation
+public interface IInscryptionPlayer : IPlayer // TODO: Remember to add bones to the State in the implementation
 {
     int MyTeeth { get; set; }
     int TheirTeeth { get; set; }

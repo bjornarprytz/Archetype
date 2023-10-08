@@ -32,7 +32,7 @@ public class DrawCard : EffectCompositeDefinition
 
 public class AttackLeshy : EffectCompositeDefinition
 {
-    public override string Name => "ATTACK";
+    public override string Name => "ATTACK_LESHY";
     public override string ReminderText => "Attack with a unit.";
     protected override TargetDeclaration<ILane> TargetDeclaration { get; } = new();
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
@@ -77,7 +77,7 @@ public class AttackLeshy : EffectCompositeDefinition
 
 public class AttackPlayer : EffectCompositeDefinition
 {
-    public override string Name => "ATTACK";
+    public override string Name => "ATTACK_PLAYER";
     public override string ReminderText => "Attack with a unit.";
     protected override TargetDeclaration<ILane> TargetDeclaration { get; } = new();
     public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
@@ -203,6 +203,37 @@ public class Lane : CharacteristicDefinition
     public override string ReminderText => "Lane.";
 }
 
+public class MoveSidewaysResolver : EffectCompositeDefinition
+{
+    public override string Name => "MOVE_SIDEWAYS";
+    public override string ReminderText => "Move sideways.";
+    protected override OperandDeclaration<string> OperandDeclaration { get; } = new();
+    protected override TargetDeclaration<ICard, ILane, ILane> TargetDeclaration { get; } = new();
+    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    {
+        var alignment = OperandDeclaration.UnpackOperands(effectPayload);
+        var (critter, primary, secondary) = TargetDeclaration.UnpackTargets(effectPayload);
+
+        var enemy = alignment.Equals("Leshy", StringComparison.InvariantCultureIgnoreCase);
+        
+        var changeZoneDefinition = context.MetaGameState.Rules.GetOrThrow<ChangeZone>();
+        
+        Func<ILane, bool> zoneChecker = enemy ? z => z.AwayCritter == null : z => z.HomeCritter == null;
+        
+        if (zoneChecker(primary))
+        {
+            return Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(primary))));
+        }
+        
+        if (zoneChecker(secondary))
+        {
+            return Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(secondary))));
+        }
+        
+        return Declare.KeywordInstances();
+        
+    }
+}
 
 public class ChangeBones : ChangeState<IInscryptionPlayer, int>
 {

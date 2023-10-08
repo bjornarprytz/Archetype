@@ -67,15 +67,3 @@ public interface IAbility : IActionBlock
 {
     
 }
-
-public interface IGamePhase
-{
-    string Name { get; }
-    IReadOnlyList<IGameStep> Steps { get; }
-    IReadOnlyList<ActionDescription> GameActions { get; }
-}
-
-public interface IGameStep : IActionBlock
-{
-    string Name { get; }
-}
