@@ -66,7 +66,7 @@ public class ActionQueue : IActionQueue
             var effectInstance = _keywordStack.Pop();
             var payload = effectInstance.BindPayload(CurrentFrame!.Context);
 
-            if (_rules.GetDefinition(effectInstance.Keyword) is EffectCompositeDefinition definition)
+            if (_rules.GetDefinition(effectInstance.Keyword) is IEffectCompositeDefinition definition)
             {
                 var keywordInstances = definition.Compose(CurrentFrame!.Context, payload);
 
@@ -92,7 +92,7 @@ public class ActionQueue : IActionQueue
     {
         var definition = _rules.GetDefinition(payload.Keyword);
 
-        if (definition is EffectPrimitiveDefinition primitive)
+        if (definition is IEffectPrimitiveDefinition primitive)
         {
             return primitive.Resolve(CurrentFrame!.Context, payload);
         }

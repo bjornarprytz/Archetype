@@ -52,15 +52,25 @@ public abstract class KeywordDefinition : IKeywordDefinition
 // DRAW [X] // get args from a computed value
 // MODIFY <1> Strength 1
 // DISCARD -1- // get args from the first prompt response
-public abstract class EffectPrimitiveDefinition : KeywordDefinition
+public abstract class EffectPrimitiveDefinition : KeywordDefinition, IEffectPrimitiveDefinition
 {
     public abstract IEvent Resolve(IResolutionContext context, EffectPayload effectPayload);
 }
 
-public abstract class EffectCompositeDefinition : KeywordDefinition
+public interface IEffectPrimitiveDefinition : IKeywordDefinition
+{
+    public IEvent Resolve(IResolutionContext context, EffectPayload effectPayload);
+}
+
+public abstract class EffectCompositeDefinition : KeywordDefinition, IEffectCompositeDefinition
 {
     public abstract IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload);
 }
+
+public interface IEffectCompositeDefinition : IKeywordDefinition
+{
+    IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload);
+} 
 
 // Hook into special rules
 //
