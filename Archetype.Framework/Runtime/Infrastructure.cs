@@ -40,7 +40,7 @@ public interface IActionQueue
 
 public interface IGameLoop
 {
-    IPhase CurrentPhase { get; }
+    IPhase? CurrentPhase { get; }
     IGameAPI Advance();
     IGameAPI EndPhase();
 }

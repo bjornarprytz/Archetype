@@ -8,11 +8,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=334f89eb_002Dff89_002D4112_002D9e95_002D4ff0f44db8cc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="PlayCardHandler_TwoTargets_CardToPlayResolvesWithRightContext" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=48973f40_002Dbaf4_002D448d_002Dac20_002D10fdf75c55a9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="LightningBolt" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.ActionQueueTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
-&lt;/SessionState&gt;</s:String>
+	
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9e8e4909_002D1cf7_002D4867_002Db0f5_002D66a3ccbdfc31/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ResolveNextKeyword_CompositeDefinition_ReturnsEvent" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.ActionQueueTests.ResolveNextKeyword_CompositeDefinition_ReturnsEvent&lt;/TestId&gt;&#xD;
@@ -24,6 +20,11 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b841410b_002D94b7_002D4891_002Dae57_002D4e5bb44df10d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ResolveNextKeyword_CompositeDefinition_ReturnsEvent #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.ActionQueueTests.ResolveNextKeyword_CompositeDefinition_ReturnsEvent&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.QueueStackTests.Enqueue_AddsItemToEndOfStack&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.GameLoopTests.Advance_ReturnsPrompt_WhenPromptEventHappens&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.GameLoopTests.Advance_WhenActionQueueReturnsPromptEvent_ReturnsPromptApi&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.GameLoopTests.Advance_WhenThereAreMultipleSteps_TheyAreResolvedInOrder&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net7.0::Archetype.Tests.Infrastructure.GameLoopTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Inscryption/@EntryIndexedValue">True</s:Boolean>

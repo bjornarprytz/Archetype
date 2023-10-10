@@ -19,28 +19,19 @@ public class GameLoop : IGameLoop
         _gameRoot = gameRoot;
         _actionQueue = _gameRoot.Infrastructure.ActionQueue;
         _phases = _gameRoot.MetaGameState.Rules.Phases;
-        
-        // TODO: Maybe move this validation elsewhere?
-        if (_phases.Count == 0)
-            throw new InvalidOperationException("No phases defined");
-
-        if (!_phases.Any(p => p.AllowedActions.Count > 0))
-            throw new InvalidOperationException("None of the phases have any allowed actions");
-        
-        if (!_phases.Where(p => p.AllowedActions.Count > 0).All(p => p.AllowedActions.Any(a => a.Type == ActionType.PassTurn)))
-            throw new InvalidOperationException("Not all phases have a pass turn action");
-
-        CurrentPhase = NextPhase();
     }
 
-    public IPhase CurrentPhase { get; private set; }
+    public IPhase? CurrentPhase { get; private set; } = default;
 
     public IGameAPI Advance()
     {
         // TODO: Check victory conditions now and then (when?)
         
+        CurrentPhase ??= MountNextPhase();
+        
         while (true)
         {
+            
             // Flush the action queue
             if (!ResolveActionQueue())
             {
@@ -61,28 +52,41 @@ public class GameLoop : IGameLoop
                 return new GameAPI(CurrentPhase.AllowedActions);
             }
 
-            CurrentPhase = NextPhase();
+            CurrentPhase = MountNextPhase();
         }
     }
 
     public IGameAPI EndPhase()
     {
-        CurrentPhase = NextPhase();
+        CurrentPhase = MountNextPhase();
 
         return Advance();
     }
 
-    private IPhase NextPhase()
+    private IPhase MountNextPhase()
     {
-        if (_remainingPhases.TryDequeue(out var nextPhase)) return nextPhase;
-        
-        // Next turn
-        foreach (var phase in _phases)
+        if (_remainingPhases.Count == 0)
         {
-            _remainingPhases.Enqueue(phase);
+            // Next turn
+            foreach (var phase in _phases)
+            {
+                _remainingPhases.Enqueue(phase);
+            }
+        }
+        
+        var nextPhase = _remainingPhases.Dequeue();
+        
+        if (_remainingSteps.Count > 0)
+        {
+            throw new InvalidOperationException("Steps remaining");
         }
 
-        return _remainingPhases.Dequeue();
+        foreach (var step in nextPhase.Steps)
+        {
+            _remainingSteps.Enqueue(step);
+        }
+        
+        return nextPhase;
     }
 
     private bool ResolveSteps()

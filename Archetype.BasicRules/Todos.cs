@@ -20,4 +20,9 @@
 // TODO: Add state based effects resolver
 // TODO: Stop game loop when victory condition is met
 // TODO: Create stronger abstraction around zones etc. in order to let implementations decide how to handle them. E.g. change zone should not give keyword resolvers access to the list directly. The DrawPile is a good example of this, where the order of cards should be hidden. 
-// TODO: Detect and avoid infinite loops from circular dependencies (a composite keyword that contains itself)
+// TODO: Have a defined validation step for rules and cards, in order to avoid runtime errors
+/*
+ * TODO: Detect and avoid infinite loops from circular dependencies (a composite keyword that contains itself)
+ * TODO: Detect invalid turn order (phases) (No phases, No allowed actions, and when there are allowed actions, PassTurn should be one of them)
+ * 
+ */

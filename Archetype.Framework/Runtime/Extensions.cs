@@ -91,8 +91,7 @@ public static class RuntimeExtensions
     
     public static bool CheckConditions(this IRules rules, IReadOnlyList<IKeywordInstance> conditions, IAtom source, IGameState gameState)
     {
-        return !conditions.Select(rules.GetOrThrow<ConditionDefinition>)
-            .All(c => c.Check(source, gameState));
+        return conditions.Select(rules.GetOrThrow<ConditionDefinition>).All(c => c.Check(source, gameState));
     }
 
     public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<PaymentPayload> payments, IReadOnlyList<IAtom> targets)
@@ -118,11 +117,10 @@ public static class RuntimeExtensions
         if (!definitions.CheckPayments(resolutionContext, costs, payments))
             throw new InvalidOperationException("Invalid payment");
         
-        if (definitions.CheckConditions(conditions, source, gameState))
+        if (!definitions.CheckConditions(conditions, source, gameState))
             throw new InvalidOperationException("Invalid conditions");
         
-        
-        if (actionBlock.CheckTargets(resolutionContext))
+        if (!actionBlock.CheckTargets(resolutionContext))
             throw new InvalidOperationException("Invalid targets");
 
         return resolutionContext;
@@ -140,8 +138,8 @@ public static class RuntimeExtensions
 
     public static bool CheckTargets(this IActionBlock actionBlock, IResolutionContext context)
     {
-        var targetDescriptors = actionBlock.TargetsDescriptors;
-        var targets = context.Targets;
+        var targetDescriptors = actionBlock?.TargetsDescriptors ?? new List<CardTargetDescription>();
+        var targets = context?.Targets ?? new List<IAtom>();
 
         if (targets.Count > targetDescriptors.Count 
             ||
