@@ -5,7 +5,7 @@ namespace Archetype.Framework.Runtime.Implementation;
 
 public class ActionQueue : IActionQueue
 {
-    private readonly IEventHistory _eventHistory;
+    private readonly IEventBus _eventBus;
     private readonly IRules _rules;
     
     // Card scope
@@ -13,9 +13,9 @@ public class ActionQueue : IActionQueue
     // Keyword scope
     private readonly QueueStack<IKeywordInstance> _keywordStack = new();
 
-    public ActionQueue(IEventHistory eventHistory, IRules rules)
+    public ActionQueue(IEventBus eventBus, IRules rules)
     {
-        _eventHistory = eventHistory;
+        _eventBus = eventBus;
         _rules = rules;
     }
 
@@ -46,7 +46,7 @@ public class ActionQueue : IActionQueue
         
         if (_keywordStack.Count == 0)
         {
-            _eventHistory.Push(new ActionBlockEvent(CurrentFrame.Context));
+            _eventBus.Publish(new ActionBlockEvent(CurrentFrame.Context));
             
             CurrentFrame = null;
         }
@@ -56,24 +56,13 @@ public class ActionQueue : IActionQueue
 
     private EffectPayload? GetNextPayload()
     {
-        if (_keywordStack.Count == 0)
+        while (_keywordStack.TryPop(out var effectInstance))
         {
-            return null;
-        }
-        
-        while (true)
-        {
-            var effectInstance = _keywordStack.Pop();
             var payload = effectInstance.BindPayload(CurrentFrame!.Context);
 
             if (_rules.GetDefinition(effectInstance.Keyword) is IEffectCompositeDefinition definition)
             {
                 var keywordInstances = definition.Compose(CurrentFrame!.Context, payload);
-
-                if (keywordInstances.Count == 0)
-                {
-                    throw new InvalidOperationException("Composite effect returned no effects");
-                }
 
                 // Push in reverse order so that the first effect is on top of the stack
                 foreach (var keywordInstance in keywordInstances.Reverse())
@@ -86,6 +75,8 @@ public class ActionQueue : IActionQueue
                 return payload;
             }
         }
+        
+        return null;
     }
 
     private IEvent Resolve(EffectPayload payload)

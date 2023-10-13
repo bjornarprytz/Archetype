@@ -19,34 +19,40 @@ public class GameLoopTests
 {
     private readonly IGameRoot _gameRoot = Substitute.For<IGameRoot>();
     private readonly IActionQueue _actionQueue = Substitute.For<IActionQueue>();
-    private readonly IReadOnlyList<IPhase> _phases = new List<IPhase> { Substitute.For<IPhase>(), Substitute.For<IPhase>() };
+    private readonly IPhase _firstPhase = Substitute.For<IPhase>();
+    private readonly IPhase _secondPhase = Substitute.For<IPhase>();
+    private readonly IPhase _thirdPhase = Substitute.For<IPhase>();
     private GameLoop _sut = default!;
 
     [SetUp]
     public void SetUp()
     {
-        
         _actionQueue.ResolveNextKeyword().Returns(null as IEvent);
         
         _gameRoot.Infrastructure.ActionQueue.Returns(_actionQueue);
-        _gameRoot.MetaGameState.Rules.Phases.Returns(_phases);
+        _gameRoot.MetaGameState.Rules.Phases.Returns(new List<IPhase>(){ _firstPhase, _secondPhase, _thirdPhase });
+        
+        _thirdPhase.AllowedActions.Returns(new List<ActionDescription>(){ new (ActionType.PassTurn) });
+        
         _sut = new GameLoop(_gameRoot);
     }
-
+    
     [Test]
-    public void Advance_WhenNoAllowedActions_ReturnsGameAPIWithAllowedActions()
+    public void Advance_AdvancesToTheNextPhaseWithAllowedActions_DoesNotAdvanceToNextPhase()
     {
-        _phases[0].AllowedActions.Returns(new List<ActionDescription>(){ new (ActionType.PassTurn) });
-        var result = _sut.Advance();
+        _sut.Advance();
         
-        result.Should().BeOfType<GameAPI>();
+        _sut.CurrentPhase.Should().Be(_thirdPhase);
+        
+        _sut.Advance();
+        
+        _sut.CurrentPhase.Should().Be(_thirdPhase);
     }
     
     [Test]
     public void Advance_WhenActionQueueReturnsPromptEvent_ReturnsPromptApi()
     {
-        
-        _phases[0].AllowedActions.Returns(new List<ActionDescription>());
+        _firstPhase.AllowedActions.Returns(new List<ActionDescription>());
         _actionQueue.ResolveNextKeyword().Returns(new PromptEvent(default!, default!, default!, default!));
         var result = _sut.Advance();
     }
@@ -63,10 +69,10 @@ public class GameLoopTests
         var step2 = Substitute.For<IStep>();
         step2.Effects.Returns(new List<IKeywordInstance>(){ keyword3 });
         
-        _phases[0].Steps.Returns(new List<IStep>(){ step1, step2 });
-        _phases[0].AllowedActions.Returns(new List<ActionDescription>());
+        _firstPhase.Steps.Returns(new List<IStep>(){ step1, step2 });
+        _firstPhase.AllowedActions.Returns(new List<ActionDescription>());
         
-        _phases[1].AllowedActions.Returns(new List<ActionDescription>() { new (ActionType.PassTurn) });
+        _secondPhase.AllowedActions.Returns(new List<ActionDescription>() { new (ActionType.PassTurn) });
         
         var result = _sut.Advance();
         
@@ -76,19 +82,25 @@ public class GameLoopTests
         result.AvailableActions.Should().ContainSingle(x => x.Type == ActionType.PassTurn);
     }
 
+    
+    
     [Test]
-    public void EndPhase_UpdatesCurrentPhaseAndCallsAdvance()
+    public void EndPhase_AdvancesToTheNextPhase_AndResetsTurnOrder()
     {
-        var nextPhase = _phases[1];
-        
-        _sut.CurrentPhase.Returns(_phases[0]);
-        _sut.Advance().Returns(new PromptApi());
+        _firstPhase.AllowedActions.Returns(new List<ActionDescription>() { new (ActionType.PassTurn) });
 
-        var result = _sut.EndPhase();
+        _sut.EndPhase();
         
-        _sut.CurrentPhase.Should().Be(nextPhase);
-        result.Should().BeOfType<PromptApi>();
+        _sut.CurrentPhase.Should().Be(_firstPhase);
+        
+        _sut.EndPhase();
+        
+        _sut.CurrentPhase.Should().Be(_thirdPhase);
+        
+        _sut.EndPhase();
+        
+        _sut.CurrentPhase.Should().Be(_firstPhase);
     }
-
-    // Add more test methods to cover additional scenarios and edge cases as needed.
+    
+    
 }

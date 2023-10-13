@@ -11,6 +11,17 @@ public interface IEvent
     public IReadOnlyList<IEvent> Children { get; set; }
 }
 
+public interface IActionBlockEvent : IEvent
+{
+    public IAtom Source { get; }
+    public IReadOnlyList<IAtom> Targets { get; }
+    public IReadOnlyDictionary<CostType, PaymentPayload> Payment { get; }
+    
+    public IReadOnlyList<int> ComputedValues { get; }
+    public IList<IReadOnlyList<IAtom>> PromptResponses { get; } 
+}
+
+
 public abstract record EventBase : IEvent
 {
     public IEvent? Parent { get; set; }
@@ -20,9 +31,15 @@ public abstract record EventBase : IEvent
 public record NonEvent : EventBase;
 
 public record ActionBlockEvent
-    (IAtom Source, IReadOnlyList<IAtom> Targets, IReadOnlyDictionary<CostType, PaymentPayload> Payment) : EventBase
+    (
+        IAtom Source, 
+        IReadOnlyList<IAtom> Targets, 
+        IReadOnlyDictionary<CostType, PaymentPayload> Payment,
+        IReadOnlyList<int> ComputedValues,
+        IList<IReadOnlyList<IAtom>> PromptResponses
+        ) : EventBase, IActionBlockEvent
 {
-    public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments)
+    public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments, context.ComputedValues, context.PromptResponses)
     {
         Children = context.Events.ToList();
     }
@@ -49,7 +66,7 @@ public interface IResolutionContext
     public IReadOnlyList<int> ComputedValues { get; }
 
     public IList<IReadOnlyList<IAtom>> PromptResponses { get; }
-    public IList<IEvent> Events { get; }
+    public IList<IEvent> Events { get; } // TODO: Update this
     public IDictionary<string, object> Memory { get; } // TODO: Evaluate if this is needed
 }
 

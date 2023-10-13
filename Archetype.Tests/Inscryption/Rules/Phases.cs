@@ -14,6 +14,9 @@ public class UpkeepPhase : Phase
         Steps = new[] { new RefreshStep(this) };
     }
     
+    public override string Name => "UPKEEP_PHASE";
+    
+    
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = new Dictionary<string, IKeywordInstance>();
     public override IReadOnlyList<IStep> Steps { get; } 
     public override IReadOnlyList<ActionDescription> AllowedActions { get; } = Array.Empty<ActionDescription>();
@@ -36,6 +39,7 @@ public class MainPhase : Phase
     {
         Steps = ArraySegment<IStep>.Empty;
     }
+    public override string Name => "MAIN_PHASE";
     
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = new Dictionary<string, IKeywordInstance>();
     public override IReadOnlyList<IStep> Steps { get; } 
@@ -56,6 +60,7 @@ public class CombatPhase : Phase
             new LeshyCombatStep(this)
         };
     }
+    public override string Name => "COMBAT_PHASE";
     
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = new Dictionary<string, IKeywordInstance>();
     public override IReadOnlyList<IStep> Steps { get; }

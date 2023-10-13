@@ -78,6 +78,37 @@ public class QueueStackTests
         // Assert
         count.Should().Be(2);
     }
+    
+    [Test]
+    public void TryPop_ReturnsTrueAndItemWhenNotEmpty()
+    {
+        // Arrange
+        var queueStack = new QueueStack<int>();
+        queueStack.Push(1);
+
+        // Act
+        var result = queueStack.TryPop(out var item);
+
+        // Assert
+        result.Should().BeTrue();
+        item.Should().Be(1);
+    }
+    
+    [Test]
+    public void TryPop_ReturnsFalseWhenEmpty()
+    {
+        // Arrange
+        var queueStack = new QueueStack<int>();
+
+        // Act
+        var result = queueStack.TryPop(out var item);
+
+        // Assert
+        result.Should().BeFalse();
+        item.Should().Be(default);
+    }
+    
+    
 
     [Test]
     public void Count_ReturnsZeroWhenStackIsEmpty()
@@ -91,4 +122,5 @@ public class QueueStackTests
         // Assert
         count.Should().Be(0);
     }
+    
 }

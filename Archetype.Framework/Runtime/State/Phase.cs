@@ -5,6 +5,7 @@ namespace Archetype.Framework.Runtime.State;
 
 public interface IPhase : IAtom
 {
+    public string Name { get; }
     public IReadOnlyList<IStep> Steps { get; }
     public IReadOnlyList<ActionDescription> AllowedActions { get; }
 }
@@ -16,6 +17,7 @@ public interface IStep : IActionBlock
 
 public abstract class Phase : Atom, IPhase
 {
+    public abstract string Name { get; }
     public abstract IReadOnlyList<IStep> Steps { get; }
     public abstract IReadOnlyList<ActionDescription> AllowedActions { get; }
 }

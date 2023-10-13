@@ -27,8 +27,16 @@ public interface IRulesBuilder
 
 public interface IEventHistory
 {
-    public void Push(IEvent e);
-    public IReadOnlyList<IEvent> Events { get; set; }
+    IReadOnlyList<IEvent> KeywordEvents { get; }
+    IReadOnlyList<IActionBlockEvent> ActionBlockEvents { get; }
+}
+
+public interface IEventBus
+{
+    void Publish<T>(T @event) where T : IActionBlockEvent;
+    void Subscribe<T>(IAtom subscriber, Action<T> handler) where T : IEvent;
+    void Unsubscribe<T>(IAtom subscriber, Action<T> handler) where T : IEvent;
+    
 }
 
 public interface IActionQueue

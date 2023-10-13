@@ -20,8 +20,25 @@ public class QueueStack<T>
     
     public T Pop()
     {
+        if (_items.Count == 0)
+        {
+            throw new InvalidOperationException("QueueStack is empty");
+        }
+        
         var item = _items[0];
         _items.RemoveAt(0);
         return item;
+    }
+    
+    public bool TryPop(out T item)
+    {
+        if (_items.Count == 0)
+        {
+            item = default!;
+            return false;
+        }
+        
+        item = Pop();
+        return true;
     }
 }

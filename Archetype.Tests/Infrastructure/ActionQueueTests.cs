@@ -1,10 +1,7 @@
-﻿using Archetype.BasicRules.Primitives;
-using Archetype.Framework.Definitions;
+﻿using Archetype.Framework.Definitions;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.Implementation;
-using Archetype.Framework.Runtime.State;
-using Archetype.Tests.Rules.Inscryption;
 using FluentAssertions;
 using NSubstitute;
 
@@ -13,14 +10,14 @@ namespace Archetype.Tests.Infrastructure;
 [TestFixture]
 public class ActionQueueTests
 {
-    private readonly IEventHistory _eventHistory = Substitute.For<IEventHistory>();
+    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
     private readonly IRules _rules = Substitute.For<IRules>();
     private ActionQueue _sut = null!;
 
     [SetUp]
     public void SetUp()
     {
-        _sut = new ActionQueue(_eventHistory, _rules);
+        _sut = new ActionQueue(_eventBus, _rules);
     }
 
     [Test]
