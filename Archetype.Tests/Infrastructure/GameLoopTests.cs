@@ -17,16 +17,22 @@ using System.Collections.Generic;
 [TestFixture]
 public class GameLoopTests
 {
-    private readonly IGameRoot _gameRoot = Substitute.For<IGameRoot>();
-    private readonly IActionQueue _actionQueue = Substitute.For<IActionQueue>();
-    private readonly IPhase _firstPhase = Substitute.For<IPhase>();
-    private readonly IPhase _secondPhase = Substitute.For<IPhase>();
-    private readonly IPhase _thirdPhase = Substitute.For<IPhase>();
     private GameLoop _sut = default!;
+    
+    private IGameRoot _gameRoot;
+    private IActionQueue _actionQueue;
+    private IPhase _firstPhase;
+    private IPhase _secondPhase;
+    private IPhase _thirdPhase;
 
     [SetUp]
     public void SetUp()
     {
+        _gameRoot = Substitute.For<IGameRoot>();
+        _actionQueue = Substitute.For<IActionQueue>();
+        _firstPhase = Substitute.For<IPhase>();
+        _secondPhase = Substitute.For<IPhase>();
+        _thirdPhase = Substitute.For<IPhase>();
         _actionQueue.ResolveNextKeyword().Returns(null as IEvent);
         
         _gameRoot.Infrastructure.ActionQueue.Returns(_actionQueue);

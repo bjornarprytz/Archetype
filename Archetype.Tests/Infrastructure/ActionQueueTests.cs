@@ -72,8 +72,10 @@ public class ActionQueueTests
         primitiveKeywordInstance.Targets.Returns(ArraySegment<KeywordTarget>.Empty);
         
         var compositeDefinition = Substitute.For<IEffectCompositeDefinition>();
+        var compositionFrame = Substitute.For<IKeywordFrame>();
+        compositionFrame.Effects.Returns(new List<IKeywordInstance> { primitiveKeywordInstance });
         compositeDefinition.Name.Returns("CompositeTestKeyword");
-        compositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(new List<IKeywordInstance> { primitiveKeywordInstance });
+        compositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(compositionFrame);
         
         var compositeKeywordInstance = Substitute.For<IKeywordInstance>();
         compositeKeywordInstance.Keyword.Returns("CompositeTestKeyword");

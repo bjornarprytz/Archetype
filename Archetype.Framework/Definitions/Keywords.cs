@@ -64,12 +64,12 @@ public interface IEffectPrimitiveDefinition : IKeywordDefinition
 
 public abstract class EffectCompositeDefinition : KeywordDefinition, IEffectCompositeDefinition
 {
-    public abstract IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload);
+    public abstract IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload);
 }
 
 public interface IEffectCompositeDefinition : IKeywordDefinition
 {
-    IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload);
+    IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload);
 } 
 
 // Hook into special rules

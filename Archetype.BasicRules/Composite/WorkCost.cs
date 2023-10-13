@@ -2,6 +2,7 @@
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.Actions;
+using Archetype.Framework.Runtime.State;
 
 namespace Archetype.BasicRules.Primitives;
 
@@ -14,13 +15,16 @@ public class WorkCost : CostDefinition
 
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
 
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var tapDefinition = context.MetaGameState.Rules.GetOrThrow<Tap>();
         var cards = context.Payments[Type];
 
-        return cards.Payment.Select(c =>
-            tapDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(c)))).ToList();
+        return new KeywordFrame(
+            new WorkCostEvent(cards.Payment.ToList()),
+            cards.Payment.Select(c =>
+                tapDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(c)))).ToList()
+        );
     }
 
     public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
@@ -30,6 +34,7 @@ public class WorkCost : CostDefinition
         
         var requiredAmount = OperandDeclaration.UnpackOperands(keywordInstance);
         return requiredAmount >= paymentPayload.Payment.Count && paymentPayload.Payment.All(c => c.GetState<bool>("TAPPED") == false);
-
     }
 }
+
+public record WorkCostEvent(IReadOnlyList<IAtom> Payments) : EventBase;

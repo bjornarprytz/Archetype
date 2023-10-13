@@ -8,7 +8,7 @@ namespace Archetype.Framework.Runtime;
 public interface IEvent
 {
     public IEvent Parent { get; set; }
-    public IReadOnlyList<IEvent> Children { get; set; }
+    public IList<IEvent> Children { get; }
 }
 
 public interface IActionBlockEvent : IEvent
@@ -21,11 +21,10 @@ public interface IActionBlockEvent : IEvent
     public IList<IReadOnlyList<IAtom>> PromptResponses { get; } 
 }
 
-
 public abstract record EventBase : IEvent
 {
     public IEvent? Parent { get; set; }
-    public IReadOnlyList<IEvent> Children { get; set; } = new List<IEvent>();
+    public IList<IEvent> Children { get; set; } = new List<IEvent>();
 }
 
 public record NonEvent : EventBase;
@@ -44,6 +43,14 @@ public record ActionBlockEvent
         Children = context.Events.ToList();
     }
 }
+
+public interface IKeywordFrame
+{
+    public IEvent Event { get; }
+    public IReadOnlyList<IKeywordInstance> Effects { get; }
+}
+
+public record KeywordFrame(IEvent Event, IReadOnlyList<IKeywordInstance> Effects) : IKeywordFrame;
 
 
 public interface IResolutionFrame

@@ -94,7 +94,7 @@ public class DrawCardStepResolver : EffectCompositeDefinition
 {
     public override string Name => "DRAW_CARD_STEP";
     public override string ReminderText => "Draw a card from either deck.";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var promptDefinition = context.MetaGameState.Rules.GetOrThrow<Prompt>();
         var drawCardDefinition = context.MetaGameState.Rules.GetOrThrow<DrawCard>();
@@ -105,7 +105,7 @@ public class DrawCardStepResolver : EffectCompositeDefinition
         var draw = drawCardDefinition.CreateInstance(Declare.Operands(),
             Declare.Targets(Declare.Target(ctx => ctx.PromptResponses[0][0])));
 
-        return Declare.KeywordInstances(prompt, draw);
+        return new GenericKeywordFrame(Declare.KeywordInstances(prompt, draw));
     }
 }
 
@@ -113,7 +113,7 @@ public class PlayerCombatStepResolver : EffectCompositeDefinition
 {
     public override string Name => "PLAYER_COMBAT_STEP";
     public override string ReminderText => "The player attacks Leshy.";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var lane1 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "1", context));
         var lane2 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "2", context));
@@ -122,9 +122,9 @@ public class PlayerCombatStepResolver : EffectCompositeDefinition
 
         var attackLeshyDefinition = context.MetaGameState.Rules.GetOrThrow<AttackLeshy>();
 
-        return new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
+        return new GenericKeywordFrame( new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
             attackLeshyDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(lane)))
-            ).ToList();
+            ).ToList());
     }
 }
 
@@ -132,7 +132,7 @@ public class PlayerSigilStepResolver : EffectCompositeDefinition
 {
     public override string Name => "PLAYER_SIGIL_STEP";
     public override string ReminderText => "The player sigils trigger";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var lane1 = context.GameState.Zones.Values.OfType<ILane>()
             .Single(l => l.HasCharacteristic("LANE", "1", context));
@@ -154,7 +154,7 @@ public class PlayerSigilStepResolver : EffectCompositeDefinition
         var critters = new[] { critter1, critter2, critter3, critter4 }.ToList();
 
         if (critters.All(c => c != null))
-            return Declare.KeywordInstances();
+            return new GenericKeywordFrame(Declare.KeywordInstances());
 
         var keywords = new List<IKeywordInstance>();
         
@@ -172,7 +172,7 @@ public class PlayerSigilStepResolver : EffectCompositeDefinition
             keywords.Add(moveSidewaysDefinition.CreateInstance(Declare.Operands(Declare.Operand("Player")), Declare.Targets(Declare.Target(critter), Declare.Target(primaryTargetLane), Declare.Target(secondaryTargetLane))));
         }
         
-        return keywords;
+        return new GenericKeywordFrame(keywords);
     }
 }
 
@@ -180,7 +180,7 @@ public class LeshyCombatStepResolver : EffectCompositeDefinition
 {
     public override string Name => "LESHY_COMBAT_STEP";
     public override string ReminderText => "Leshy attacks the player.";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var lane1 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "1", context));
         var lane2 = context.GameState.Zones.Values.OfType<ILane>().Single(l => l.HasCharacteristic("LANE", "2", context));
@@ -189,9 +189,9 @@ public class LeshyCombatStepResolver : EffectCompositeDefinition
 
         var attackLeshyDefinition = context.MetaGameState.Rules.GetOrThrow<AttackPlayer>();
 
-        return new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
+        return new GenericKeywordFrame(new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
             attackLeshyDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(lane)))
-        ).ToList();
+        ).ToList());
     }
 }
 
@@ -199,7 +199,7 @@ public class LeshySigilStepResolver : EffectCompositeDefinition
 {
     public override string Name => "LESHY_SIGIL_STEP";
     public override string ReminderText => "Leshy sigils trigger.";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var lane1 = context.GameState.Zones.Values.OfType<ILane>()
             .Single(l => l.HasCharacteristic("LANE", "1", context));
@@ -221,7 +221,7 @@ public class LeshySigilStepResolver : EffectCompositeDefinition
         var critters = new[] { critter1, critter2, critter3, critter4 }.ToList();
 
         if (critters.All(c => c != null))
-            return Declare.KeywordInstances();
+            return new GenericKeywordFrame(Declare.KeywordInstances());
 
         var keywords = new List<IKeywordInstance>();
         
@@ -239,7 +239,7 @@ public class LeshySigilStepResolver : EffectCompositeDefinition
             keywords.Add(moveSidewaysDefinition.CreateInstance(Declare.Operands(Declare.Operand("Leshy")), Declare.Targets(Declare.Target(critter), Declare.Target(primaryTargetLane), Declare.Target(secondaryTargetLane))));
         }
         
-        return keywords;
+        return new GenericKeywordFrame(keywords);
     }
 }
 
@@ -247,14 +247,14 @@ public class StateBasedEffectsResolver : EffectCompositeDefinition
 {
     public override string Name => "STATE_BASED_EFFECTS";
     public override string ReminderText => "Check for state-based effects.";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var exileDeadThings = context.MetaGameState.Rules.GetOrThrow<ExileDeadThings>().CreateInstance(Declare.Operands(), Declare.Targets());
         var checkVictoryDefinition = context.MetaGameState.Rules.GetOrThrow<CheckVictory>().CreateInstance(Declare.Operands(), Declare.Targets());
         
-        return Declare.KeywordInstances(
+        return new GenericKeywordFrame(Declare.KeywordInstances(
             exileDeadThings,
             checkVictoryDefinition
-            );
+            ));
     }
 }

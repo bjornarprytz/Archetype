@@ -7,12 +7,15 @@ using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Tests.Rules.Inscryption;
 
+public record GenericEvent() : EventBase;
+public record GenericKeywordFrame(IReadOnlyList<IKeywordInstance> Effects) : KeywordFrame(new GenericEvent(), Effects);
+
 public class DrawCard : EffectCompositeDefinition
 {
     public override string Name => "DRAW_CARD";
     public override string ReminderText => "Draw a card.";
     protected override TargetDeclaration<IDrawPile> TargetDeclaration { get; } = new();
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var deck = TargetDeclaration.UnpackTargets(effectPayload);
         var changeZoneDefinition = context.MetaGameState.Rules.GetOrThrow<ChangeZone>();
@@ -24,8 +27,12 @@ public class DrawCard : EffectCompositeDefinition
         var changeZone = changeZoneDefinition.CreateInstance(
             Declare.Operands(), 
             Declare.Targets(Declare.Target(topCard), Declare.Target(GetHand)));
-        
-        return Declare.KeywordInstances(changeZone);
+
+        return
+            new GenericKeywordFrame(
+                Declare.KeywordInstances(changeZone)
+            );
+
     }
 }
 
@@ -35,7 +42,7 @@ public class AttackLeshy : EffectCompositeDefinition
     public override string Name => "ATTACK_LESHY";
     public override string ReminderText => "Attack with a unit.";
     protected override TargetDeclaration<ILane> TargetDeclaration { get; } = new();
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var lane = TargetDeclaration.UnpackTargets(effectPayload);
         
@@ -43,7 +50,7 @@ public class AttackLeshy : EffectCompositeDefinition
         var defender = lane.AwayCritter;
         var stagedCreature = lane.StagingCritter;
 
-        if (attacker is null) return Declare.KeywordInstances();
+        if (attacker is null) return new GenericKeywordFrame(Declare.KeywordInstances());
         
         var power = attacker.GetCharacteristicValue("POWER", context);
 
@@ -53,8 +60,8 @@ public class AttackLeshy : EffectCompositeDefinition
                 var tipScales = tipScalesDefinition.CreateInstance(
                     Declare.Operands(Declare.Operand(power)),
                     Declare.Targets());
-            
-            return Declare.KeywordInstances(tipScales);
+
+                return new GenericKeywordFrame(Declare.KeywordInstances(tipScales));
         }
         
 
@@ -65,13 +72,13 @@ public class AttackLeshy : EffectCompositeDefinition
         
         var trampleAmount = power - defender.GetCharacteristicValue("HEALTH", context);
 
-        if (stagedCreature is null || trampleAmount <= 0) return Declare.KeywordInstances(damage);
+        if (stagedCreature is null || trampleAmount <= 0) return new GenericKeywordFrame(Declare.KeywordInstances(damage));
         
         var trampleDamage = damageDefinition.CreateInstance(
             Declare.Operands(Declare.Operand(trampleAmount)), 
             Declare.Targets(Declare.Target(stagedCreature)));
             
-        return Declare.KeywordInstances(damage, trampleDamage);
+        return new GenericKeywordFrame(Declare.KeywordInstances(damage, trampleDamage));
     }
 }
 
@@ -80,14 +87,14 @@ public class AttackPlayer : EffectCompositeDefinition
     public override string Name => "ATTACK_PLAYER";
     public override string ReminderText => "Attack with a unit.";
     protected override TargetDeclaration<ILane> TargetDeclaration { get; } = new();
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var lane = TargetDeclaration.UnpackTargets(effectPayload);
         
         var attacker = lane.HomeCritter;
         var defender = lane.AwayCritter;
 
-        if (attacker is null) return Declare.KeywordInstances();
+        if (attacker is null) return new GenericKeywordFrame(Declare.KeywordInstances());
 
         var power = attacker.GetCharacteristicValue("POWER", context);
 
@@ -98,7 +105,7 @@ public class AttackPlayer : EffectCompositeDefinition
                     Declare.Operands(Declare.Operand( -power )), // Minus because
                     Declare.Targets());
             
-            return Declare.KeywordInstances(tipScales);
+            return new GenericKeywordFrame(Declare.KeywordInstances(tipScales));
         }
         
 
@@ -106,8 +113,8 @@ public class AttackPlayer : EffectCompositeDefinition
         var damage = damageDefinition.CreateInstance(
             Declare.Operands(Declare.Operand(power)),
             Declare.Targets(Declare.Target(defender)));
-        
-        return Declare.KeywordInstances(damage);
+
+        return new GenericKeywordFrame(Declare.KeywordInstances(damage));
     }
 }
 
@@ -209,7 +216,7 @@ public class MoveSidewaysResolver : EffectCompositeDefinition
     public override string ReminderText => "Move sideways.";
     protected override OperandDeclaration<string> OperandDeclaration { get; } = new();
     protected override TargetDeclaration<ICard, ILane, ILane> TargetDeclaration { get; } = new();
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var alignment = OperandDeclaration.UnpackOperands(effectPayload);
         var (critter, primary, secondary) = TargetDeclaration.UnpackTargets(effectPayload);
@@ -220,18 +227,13 @@ public class MoveSidewaysResolver : EffectCompositeDefinition
         
         Func<ILane, bool> zoneChecker = enemy ? z => z.AwayCritter == null : z => z.HomeCritter == null;
         
-        if (zoneChecker(primary))
-        {
-            return Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(primary))));
-        }
+        var keywords = zoneChecker(primary) 
+            ? Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(primary))))
+            : zoneChecker(secondary)
+            ? Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(secondary))))
+            : Declare.KeywordInstances();
         
-        if (zoneChecker(secondary))
-        {
-            return Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(secondary))));
-        }
-        
-        return Declare.KeywordInstances();
-        
+        return new GenericKeywordFrame(keywords);
     }
 }
 
@@ -253,7 +255,7 @@ public class BloodCost : CostDefinition
     public override string Name => "BLOOD_COST";
     public override string ReminderText => "Pay a blood cost by sacrificing critters.";
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var critters = context.Payments[Type].Payment;
         
@@ -264,7 +266,7 @@ public class BloodCost : CostDefinition
             Declare.Operands(), 
             Declare.Targets(Declare.Target(c), Declare.Target(exile))));
         
-        return changeZones.ToList();
+        return new GenericKeywordFrame(changeZones.ToList());
     }
 
     public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
@@ -285,7 +287,7 @@ public class BonesCost : CostDefinition
     public override string ReminderText => "Pay a bones cost.";
     protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
 
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var bonesAmount = context.Payments[Type].Amount;
         
@@ -295,7 +297,7 @@ public class BonesCost : CostDefinition
             Declare.Operands(Declare.Operand(-bonesAmount)), 
             Declare.Targets());
         
-        return Declare.KeywordInstances(changeBones);
+        return new GenericKeywordFrame(Declare.KeywordInstances(changeBones));
     }
 
     public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
@@ -337,7 +339,7 @@ public class ExileDeadThings : EffectCompositeDefinition
 {
     public override string Name => "EXILE_DEAD_THINGS";
     public override string ReminderText => "Exile dead things.";
-    public override IReadOnlyList<IKeywordInstance> Compose(IResolutionContext context, EffectPayload effectPayload)
+    public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var deadCritters = context.GameState.Atoms.Values.OfType<ICard>().Where(c => c.GetState<int>("DAMAGE_TAKEN") >= c.GetCharacteristicValue("HEALTH", context)).ToList();
 
@@ -349,6 +351,6 @@ public class ExileDeadThings : EffectCompositeDefinition
             Declare.Operands(), 
             Declare.Targets(Declare.Target(c), Declare.Target(exile))));
         
-        return changeZones.ToList();
+        return new GenericKeywordFrame(changeZones.ToList());
     }
 }
