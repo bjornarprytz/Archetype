@@ -2,6 +2,7 @@
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.Implementation;
+using Archetype.Framework.Runtime.State;
 using FluentAssertions;
 using NSubstitute;
 
@@ -10,13 +11,26 @@ namespace Archetype.Tests.Infrastructure;
 [TestFixture]
 public class ActionQueueTests
 {
-    private readonly IEventBus _eventBus = Substitute.For<IEventBus>();
-    private readonly IRules _rules = Substitute.For<IRules>();
+    private IEventBus _eventBus;
+    private IRules _rules;
+    private IEffectPrimitiveDefinition _primitiveDefinition;
+    private IEffectCompositeDefinition _compositeDefinition;
     private ActionQueue _sut = null!;
+    
 
     [SetUp]
     public void SetUp()
     {
+        _rules = Substitute.For<IRules>();
+        _primitiveDefinition = Substitute.For<IEffectPrimitiveDefinition>();
+        _compositeDefinition = Substitute.For<IEffectCompositeDefinition>();
+        _primitiveDefinition.Name.Returns("PrimitiveTestKeyword");
+        _compositeDefinition.Name.Returns("CompositeTestKeyword");
+        _rules.GetDefinition("CompositeTestKeyword").Returns(_compositeDefinition);
+        _rules.GetDefinition("PrimitiveTestKeyword").Returns(_primitiveDefinition);
+        
+        _eventBus = Substitute.For<IEventBus>();
+        
         _sut = new ActionQueue(_eventBus, _rules);
     }
 
@@ -61,34 +75,24 @@ public class ActionQueueTests
     [Test]
     public void ResolveNextKeyword_CompositeDefinition_ReturnsEvent()
     {
-        var primitiveDefinition = Substitute.For<IEffectPrimitiveDefinition>();
         var returnEvent = Substitute.For<IEvent>();
-        primitiveDefinition.Name.Returns("PrimitiveTestKeyword");
-        primitiveDefinition.Resolve(default!, default!).ReturnsForAnyArgs(returnEvent);
+        _primitiveDefinition.Resolve(default!, default!).ReturnsForAnyArgs(returnEvent);
         
         var primitiveKeywordInstance = Substitute.For<IKeywordInstance>();
         primitiveKeywordInstance.Keyword.Returns("PrimitiveTestKeyword");
-        primitiveKeywordInstance.Operands.Returns(ArraySegment<KeywordOperand>.Empty);
-        primitiveKeywordInstance.Targets.Returns(ArraySegment<KeywordTarget>.Empty);
         
-        var compositeDefinition = Substitute.For<IEffectCompositeDefinition>();
-        var compositionFrame = Substitute.For<IKeywordFrame>();
-        compositionFrame.Effects.Returns(new List<IKeywordInstance> { primitiveKeywordInstance });
-        compositeDefinition.Name.Returns("CompositeTestKeyword");
-        compositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(compositionFrame);
+        var keywordFrame = Substitute.For<IKeywordFrame>();
+        keywordFrame.Effects.Returns(new List<IKeywordInstance> { primitiveKeywordInstance });
+        _compositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(keywordFrame);
         
         var compositeKeywordInstance = Substitute.For<IKeywordInstance>();
         compositeKeywordInstance.Keyword.Returns("CompositeTestKeyword");
-        compositeKeywordInstance.Operands.Returns(ArraySegment<KeywordOperand>.Empty);
-        compositeKeywordInstance.Targets.Returns(ArraySegment<KeywordTarget>.Empty);
         
         var resolutionContext = Substitute.For<IResolutionContext>();
         var resolutionFrame = Substitute.For<IResolutionFrame>();
         resolutionFrame.Effects.Returns(new List<IKeywordInstance> { compositeKeywordInstance });
         resolutionFrame.Context.Returns(resolutionContext);
         
-        _rules.GetDefinition("CompositeTestKeyword").Returns(compositeDefinition);
-        _rules.GetDefinition("PrimitiveTestKeyword").Returns(primitiveDefinition);
         _sut.Push(resolutionFrame);
 
         var result = _sut.ResolveNextKeyword();
@@ -96,6 +100,67 @@ public class ActionQueueTests
         result.Should().NotBeNull();
         result.Should().Be(returnEvent);
         
-        primitiveDefinition.Resolve(resolutionContext, Arg.Is<EffectPayload>( e => e.Keyword == "PrimitiveTestKeyword")).Received(1);
+        _primitiveDefinition.Resolve(resolutionContext, Arg.Is<EffectPayload>( e => e.Keyword == "PrimitiveTestKeyword")).Received(1);
+    }
+    
+    [Test]
+    public void ResolveNextKeyword_CompositeDefinition_PublishesActionBlockEvent()
+    {
+        var otherCompositeDefinition = Substitute.For<IEffectCompositeDefinition>();
+        otherCompositeDefinition.Name.Returns("OtherCompositeTestKeyword");
+        _rules.GetDefinition("OtherCompositeTestKeyword").Returns(otherCompositeDefinition);
+        
+        var primitiveKeywordInstance1 = Substitute.For<IKeywordInstance>();
+        primitiveKeywordInstance1.Keyword.Returns("PrimitiveTestKeyword");
+        var primitiveKeywordInstance2 = Substitute.For<IKeywordInstance>();
+        primitiveKeywordInstance2.Keyword.Returns("PrimitiveTestKeyword");
+        var primitiveKeywordInstance3 = Substitute.For<IKeywordInstance>();
+        primitiveKeywordInstance3.Keyword.Returns("PrimitiveTestKeyword");
+        var compositeKeywordInstance = Substitute.For<IKeywordInstance>();
+        compositeKeywordInstance.Keyword.Returns("CompositeTestKeyword");
+        var otherCompositeKeywordInstance = Substitute.For<IKeywordInstance>();
+        otherCompositeKeywordInstance.Keyword.Returns("OtherCompositeTestKeyword");
+        
+        
+        
+        var primitiveEvent = Substitute.For<IEvent>();
+        _primitiveDefinition.Resolve(default!, default!).ReturnsForAnyArgs(primitiveEvent);
+        var compositeEvent = Substitute.For<IEvent>();
+        compositeEvent.Children.Returns(new List<IEvent>());
+        var otherCompositeEvent = Substitute.For<IEvent>();
+        otherCompositeEvent.Children.Returns(new List<IEvent>());
+        
+        var keywordFrame = Substitute.For<IKeywordFrame>();
+        keywordFrame.Event.Returns(compositeEvent);
+        keywordFrame.Effects.Returns(new List<IKeywordInstance> { primitiveKeywordInstance1 });
+        _compositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(keywordFrame);
+        
+        var otherKeywordFrame = Substitute.For<IKeywordFrame>();
+        otherKeywordFrame.Event.Returns(otherCompositeEvent);
+        otherKeywordFrame.Effects.Returns(new List<IKeywordInstance> { primitiveKeywordInstance2 });
+        otherCompositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(otherKeywordFrame);
+        
+        var resolutionContext = Substitute.For<IResolutionContext>();
+        var resolutionFrame = Substitute.For<IResolutionFrame>();
+        var source = Substitute.For<IAtom>();
+        resolutionContext.Source.Returns(source);
+        resolutionContext.Events.Returns(new List<IEvent>());
+        resolutionFrame.Effects.Returns(new List<IKeywordInstance> { compositeKeywordInstance, otherCompositeKeywordInstance, primitiveKeywordInstance3 });
+        resolutionFrame.Context.Returns(resolutionContext);
+        
+        _sut.Push(resolutionFrame);
+
+        while(_sut.ResolveNextKeyword() != null) { };
+        
+        _eventBus.Received(1).Publish(Arg.Is<IActionBlockEvent>(e => e.Source == resolutionContext.Source 
+                                                                     && e.Targets == resolutionContext.Targets 
+                                                                     && e.Payments == resolutionContext.Payments 
+                                                                     && e.ComputedValues == resolutionContext.ComputedValues 
+                                                                     && e.PromptResponses == resolutionContext.PromptResponses
+                                                                     && e.Children.SequenceEqual(new []{ compositeEvent, otherCompositeEvent, primitiveEvent })
+        ));
+        
+        compositeEvent.Children.Should().Contain(primitiveEvent);
+        otherCompositeEvent.Children.Should().Contain(primitiveEvent);
     }
 }

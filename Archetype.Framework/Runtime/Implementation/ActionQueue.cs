@@ -31,7 +31,7 @@ public class ActionQueue : IActionQueue
 
     public IEvent? ResolveNextKeyword()
     {
-        if (TryPopPrimitive(out var keywordInstance))
+        if (!TryPopPrimitive(out var keywordInstance))
         {
             return null;
         }
