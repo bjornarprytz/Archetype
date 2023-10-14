@@ -129,6 +129,7 @@ public static class RuntimeExtensions
     public static EffectPayload BindPayload(this IKeywordInstance effectInstance, IResolutionContext context)
     {
         return new EffectPayload(
+            effectInstance.Id,
             context.Source, 
             effectInstance.Keyword, 
             effectInstance.Operands.Select(o => o.GetValue(context)).ToList(), 

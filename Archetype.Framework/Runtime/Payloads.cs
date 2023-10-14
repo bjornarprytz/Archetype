@@ -91,6 +91,6 @@ public class ResolutionContext : IResolutionContext
     public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }
 
-public record EffectPayload(IAtom Source, string Keyword, IReadOnlyList<object?> Operands, IReadOnlyList<IAtom> Targets);
+public record EffectPayload(Guid Id, IAtom Source, string Keyword, IReadOnlyList<object?> Operands, IReadOnlyList<IAtom> Targets);
 
 

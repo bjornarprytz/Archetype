@@ -112,10 +112,13 @@ public class ActionQueueTests
         
         var primitiveKeywordInstance1 = Substitute.For<IKeywordInstance>();
         primitiveKeywordInstance1.Keyword.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance1.Id.Returns(Guid.NewGuid());
         var primitiveKeywordInstance2 = Substitute.For<IKeywordInstance>();
         primitiveKeywordInstance2.Keyword.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance2.Id.Returns(Guid.NewGuid());
         var primitiveKeywordInstance3 = Substitute.For<IKeywordInstance>();
         primitiveKeywordInstance3.Keyword.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance3.Id.Returns(Guid.NewGuid());
         var compositeKeywordInstance = Substitute.For<IKeywordInstance>();
         compositeKeywordInstance.Keyword.Returns("CompositeTestKeyword");
         var otherCompositeKeywordInstance = Substitute.For<IKeywordInstance>();
