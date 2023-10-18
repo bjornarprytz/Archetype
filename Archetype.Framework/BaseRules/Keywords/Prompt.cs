@@ -17,9 +17,9 @@ public class Prompt : EffectPrimitiveDefinition
 
         var atomIds = atoms.Select(a => a.Id).ToList();
 
-        return new PromptEvent(atomIds, min, max, promptText);
+        return new PromptEvent(payload.Id, atomIds, min, max, promptText);
     }
 
 }
 
-public record PromptEvent(IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks, string PromptText) : EventBase;
+public record PromptEvent(Guid PromptId, IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks, string PromptText) : EventBase;

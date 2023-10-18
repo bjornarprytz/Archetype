@@ -59,7 +59,7 @@ public class GameLoopTests
     public void Advance_WhenActionQueueReturnsPromptEvent_ReturnsPromptApi()
     {
         _firstPhase.AllowedActions.Returns(new List<ActionDescription>());
-        _actionQueue.ResolveNextKeyword().Returns(new PromptEvent(default!, default!, default!, default!));
+        _actionQueue.ResolveNextKeyword().Returns(new PromptEvent(default!, default!, default!, default!, default!));
         var result = _sut.Advance();
     }
     

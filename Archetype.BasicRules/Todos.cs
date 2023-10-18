@@ -1,6 +1,5 @@
 ﻿namespace Archetype.BasicRules;
 
-// TODO: Prompt responses should be scoped, in order to avoid collision between contexts. OR maybe I could figure something out with GUIDs
 // TODO: Create stronger abstraction around zones etc. in order to let implementations decide how to handle them. E.g. change zone should not give keyword resolvers access to the list directly. The DrawPile is a good example of this, where the order of cards should be hidden. 
 // TODO: Polish Syntax
 // TODO: Prune classes and interfaces that are not used

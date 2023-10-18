@@ -18,7 +18,7 @@ public interface IActionBlockEvent : IEvent
     public IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; }
     
     public IReadOnlyList<int> ComputedValues { get; }
-    public IList<IReadOnlyList<IAtom>> PromptResponses { get; } 
+    public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } 
 }
 
 public abstract record EventBase : IEvent
@@ -35,7 +35,7 @@ public record ActionBlockEvent
         IReadOnlyList<IAtom> Targets, 
         IReadOnlyDictionary<CostType, PaymentPayload> Payments,
         IReadOnlyList<int> ComputedValues,
-        IList<IReadOnlyList<IAtom>> PromptResponses
+        IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses
         ) : EventBase, IActionBlockEvent
 {
     public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments, context.ComputedValues, context.PromptResponses)
@@ -72,8 +72,8 @@ public interface IResolutionContext
     public IReadOnlyList<IAtom> Targets { get; }
     public IReadOnlyList<int> ComputedValues { get; }
 
-    public IList<IReadOnlyList<IAtom>> PromptResponses { get; }
-    public IList<IEvent> Events { get; } // TODO: Update this
+    public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; }
+    public IList<IEvent> Events { get; }
     public IDictionary<string, object> Memory { get; } // TODO: Evaluate if this is needed
 }
 
@@ -86,7 +86,7 @@ public class ResolutionContext : IResolutionContext
     public required IReadOnlyList<IAtom> Targets { get; init; }
     public required IReadOnlyList<int> ComputedValues { get; init; }
 
-    public IList<IReadOnlyList<IAtom>> PromptResponses { get; } = new List<IReadOnlyList<IAtom>>();
+    public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } = new Dictionary<Guid, IReadOnlyList<IAtom>>();
     public IList<IEvent> Events { get; } = new List<IEvent>();
     public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }

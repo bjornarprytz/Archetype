@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Archetype.Framework.Runtime.Actions;
 
-public record AnswerPromptArgs(IReadOnlyList<Guid> Answer) : IRequest<Unit>;
+public record AnswerPromptArgs(Guid PromptId, IReadOnlyList<Guid> Answer) : IRequest<Unit>;
 
 public class AnswerPromptHandler : IRequestHandler<AnswerPromptArgs, Unit>
 {
@@ -23,7 +23,7 @@ public class AnswerPromptHandler : IRequestHandler<AnswerPromptArgs, Unit>
         
         var selection = request.Answer.Select(_gameState.GetAtom).ToList();
         
-        _actionQueue.CurrentFrame.Context.PromptResponses.Add(selection);
+        _actionQueue.CurrentFrame.Context.PromptResponses.Add(request.PromptId, selection);
 
         return Unit.Task;
     }

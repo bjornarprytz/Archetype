@@ -103,7 +103,7 @@ public class DrawCardStepResolver : EffectCompositeDefinition
 
         var prompt = promptDefinition.CreateInstance(Declare.Operands(Declare.Operand(GetDrawPiles), Declare.Operand(1), Declare.Operand(1), Declare.Operand("Pick a deck to draw from")), Declare.Targets());
         var draw = drawCardDefinition.CreateInstance(Declare.Operands(),
-            Declare.Targets(Declare.Target(ctx => ctx.PromptResponses[0][0])));
+            Declare.Targets(Declare.Target(ctx => ctx.PromptResponses[prompt.Id][0])));
 
         return new GenericKeywordFrame(Declare.KeywordInstances(prompt, draw));
     }
