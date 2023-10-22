@@ -87,7 +87,7 @@ public abstract class CharacteristicDefinition : KeywordDefinition { }
 // ON_DEATH Self { ... }
 public abstract class ReactionDefinition : KeywordDefinition
 { 
-    public CheckEvent CheckIfTriggered { get; set; }
+    public abstract bool CheckIfTriggered(IAtom source, IEvent @event);
 }
 
 // ABILITY { ... }
@@ -100,7 +100,7 @@ public abstract class AbilityDefinition : KeywordDefinition
 // LIFE_GTE_CONDITION 10
 public abstract class ConditionDefinition : KeywordDefinition
 {
-    public CheckState Check { get; set; }
+    public abstract bool Check(IAtom source, IGameState gameState); 
 }
 
 // Examples:
