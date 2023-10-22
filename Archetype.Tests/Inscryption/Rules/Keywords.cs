@@ -4,6 +4,7 @@ using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
+using Archetype.Tests.Inscryption.Cards;
 
 namespace Archetype.Tests.Rules.Inscryption;
 
@@ -20,7 +21,7 @@ public class DrawCard : EffectCompositeDefinition
         var deck = TargetDeclaration.UnpackTargets(effectPayload);
         var changeZoneDefinition = context.MetaGameState.Rules.GetOrThrow<ChangeZone>();
 
-        var topCard = deck.GetTopCard();
+        var topCard = deck.PeekTop();
         
         IAtom GetHand(IResolutionContext ctx) => ctx.GameState.Zones.Values.OfType<IHand>().Single();
         

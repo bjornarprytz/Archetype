@@ -16,8 +16,8 @@ public class ChangeZone : EffectPrimitiveDefinition
         var (card, to) = TargetDeclaration.UnpackTargets(payload);
         var from = card.CurrentZone;
 
-        from?.Cards.Remove(card);
-        to.Cards.Add(card);
+        from?.Remove(card);
+        to.Add(card);
         card.CurrentZone = to;
 
         return new ChangeZoneEvent(card, from, to);

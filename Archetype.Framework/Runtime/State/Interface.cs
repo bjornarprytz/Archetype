@@ -12,7 +12,15 @@ public interface IAtom
 
 public interface IZone : IAtom
 {
-    IList<ICard> Cards { get; }
+    IReadOnlyList<IAtom> Atoms { get; }
+    void Add(IAtom atom);
+    void Remove(IAtom atom);
+}
+
+public interface IOrderedZone : IZone
+{
+    void Shuffle();
+    IAtom? PeekTop();
 }
 
 public interface IGameRoot

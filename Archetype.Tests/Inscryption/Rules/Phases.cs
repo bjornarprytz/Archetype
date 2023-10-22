@@ -4,6 +4,7 @@ using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.Actions;
 using Archetype.Framework.Runtime.State;
+using Archetype.Tests.Inscryption.Cards;
 
 namespace Archetype.Tests.Rules.Inscryption;
 

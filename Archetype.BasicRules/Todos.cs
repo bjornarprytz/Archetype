@@ -1,8 +1,7 @@
 ﻿namespace Archetype.BasicRules;
-
-// TODO: Create stronger abstraction around zones etc. in order to let implementations decide how to handle them. E.g. change zone should not give keyword resolvers access to the list directly. The DrawPile is a good example of this, where the order of cards should be hidden. 
-// TODO: Polish Syntax
+ 
 // TODO: Prune classes and interfaces that are not used
+// TODO: Polish Syntax
 
 // TODO: Reconsider GameAPI (does it work? Is the caller presented with enough information to act?) (e.g. the prompt API)
 // TODO: Player object
@@ -11,6 +10,7 @@
 // TODO: Pluggable protobuilder
 // TODO: Compute (MAX, MIN, COUNT)
 // TODO: Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
+// TODO: Unit tests for basic rules
 
 
 // TODO: Add state based effects resolver

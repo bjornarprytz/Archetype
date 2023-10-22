@@ -58,7 +58,7 @@ public class Filter : IAtomFilter
     {
         return context.GameState.Zones.Values
             .Where(z => _zoneSubtypes.Any(s => z.HasCharacteristic("SUBTYPE", s, context)))
-            .SelectMany(z => z.Cards)
+            .SelectMany(z => z.Atoms)
             .Where(a => FilterAtom(a, context));
     }
     
