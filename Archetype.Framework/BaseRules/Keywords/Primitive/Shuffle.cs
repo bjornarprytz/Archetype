@@ -16,8 +16,8 @@ public class Shuffle : EffectPrimitiveDefinition
     {
         var zone = TargetDeclaration.UnpackTargets(effectPayload);
         zone.Shuffle();
-        return new ShuffleEvent(zone);
+        return new ShuffleEvent(effectPayload.Source, zone);
     }
 }
 
-public record ShuffleEvent(IOrderedZone Zone) : EventBase;
+public record ShuffleEvent(IAtom Source, IOrderedZone Zone) : EventBase(Source);

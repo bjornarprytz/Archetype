@@ -21,7 +21,7 @@ public class WorkCost : CostDefinition
         var cards = context.Payments[Type];
 
         return new KeywordFrame(
-            new WorkCostEvent(cards.Payment.ToList()),
+            new WorkCostEvent(effectPayload.Source, cards.Payment.ToList()),
             cards.Payment.Select(c =>
                 tapDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(c)))).ToList()
         );
@@ -37,4 +37,4 @@ public class WorkCost : CostDefinition
     }
 }
 
-public record WorkCostEvent(IReadOnlyList<IAtom> Payments) : EventBase;
+public record WorkCostEvent(IAtom Source, IReadOnlyList<IAtom> Payments) : EventBase(Source);

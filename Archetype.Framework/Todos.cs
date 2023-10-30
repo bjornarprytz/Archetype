@@ -7,11 +7,8 @@
 // TODO: Player object
 
 // TODO: Conditions
-// TODO: Pluggable protobuilder
 // TODO: Compute (MAX, MIN, COUNT)
 // TODO: Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
-// TODO: Unit tests for basic rules
-
 
 // TODO: Add state based effects resolver
 // TODO: Stop game loop when victory condition is met

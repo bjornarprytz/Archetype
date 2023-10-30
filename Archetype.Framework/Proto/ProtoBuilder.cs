@@ -1,10 +1,14 @@
 ﻿using Archetype.Framework.Definitions;
+using FluentValidation;
 
 namespace Archetype.Framework.Proto;
 
 public class ProtoBuilder
 {
-    private string _name;
+    private readonly IEnumerable<IValidator<IProtoCard>> _validators;
+    private readonly IList<Action<ProtoCard>> _onBuildPlugin = new List<Action<ProtoCard>>();
+    
+    private string? _name;
     private readonly List<CardTargetDescription> _targetSpecs = new();
     private readonly List<IKeywordInstance> _conditions = new();
     private readonly List<IKeywordInstance> _effects = new();
@@ -12,16 +16,18 @@ public class ProtoBuilder
     private readonly List<IKeywordInstance> _computedValues = new();
     private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
     private readonly Dictionary<string, IKeywordInstance> _characteristics = new();
+
+    public ProtoBuilder(IEnumerable<IValidator<IProtoCard>> validators, IEnumerable<Action<ProtoCard>> plugins)
+    {
+        _validators = validators;
+        foreach (var plugin in plugins)
+        {
+            _onBuildPlugin.Add(plugin);
+        }
+    }
     
     public IProtoCard Build()
     {
-        // TODO: Validate card
-        // TODO: Add type specific effects and conditions
-        // e.g. units always target nodes, and put themselves into play
-        // spells go to the discard pile
-        
-        // NOTE: This could be a pluggable behaviour, because it's encroaching on the game design domain
-        
         var protoCard = new ProtoCard (
             Name: _name,
             ActionBlock: new ProtoActionBlock(
@@ -34,6 +40,16 @@ public class ProtoBuilder
             Abilities: _abilities,
             Characteristics: _characteristics
         );
+        
+        foreach (var plugin in _onBuildPlugin)
+        {
+            plugin(protoCard);
+        }
+        
+        foreach (var validator in _validators)
+        {
+            validator.ValidateAndThrow(protoCard);
+        }
         
         return protoCard;
     }
@@ -67,14 +83,14 @@ public class ProtoBuilder
         _effects.AddRange(effects);
     }
 
-    private record ProtoCard(
+    public record ProtoCard(
         string Name, 
         IProtoActionBlock ActionBlock,
         IReadOnlyDictionary<string, IProtoActionBlock> Abilities, 
         IReadOnlyDictionary<string, IKeywordInstance> Characteristics
         ) : IProtoCard;
 
-    private record ProtoActionBlock(
+    public record ProtoActionBlock(
         IReadOnlyList<CardTargetDescription> TargetSpecs,
         IReadOnlyList<IKeywordInstance> Conditions,
         IReadOnlyList<IKeywordInstance> Costs,

@@ -8,8 +8,8 @@ using Archetype.Tests.Inscryption.Cards;
 
 namespace Archetype.Tests.Rules.Inscryption;
 
-public record GenericEvent() : EventBase;
-public record GenericKeywordFrame(IReadOnlyList<IKeywordInstance> Effects) : KeywordFrame(new GenericEvent(), Effects);
+public record GenericEvent(IAtom Souce) : EventBase(Souce);
+public record GenericKeywordFrame(IAtom Source, IReadOnlyList<IKeywordInstance> Effects) : KeywordFrame(new GenericEvent(Source), Effects);
 
 public class DrawCard : EffectCompositeDefinition
 {
@@ -31,6 +31,7 @@ public class DrawCard : EffectCompositeDefinition
 
         return
             new GenericKeywordFrame(
+                    effectPayload.Source,
                 Declare.KeywordInstances(changeZone)
             );
 
@@ -51,7 +52,8 @@ public class AttackLeshy : EffectCompositeDefinition
         var defender = lane.AwayCritter;
         var stagedCreature = lane.StagingCritter;
 
-        if (attacker is null) return new GenericKeywordFrame(Declare.KeywordInstances());
+        if (attacker is null) return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances());
         
         var power = attacker.GetCharacteristicValue("POWER", context);
 
@@ -62,7 +64,8 @@ public class AttackLeshy : EffectCompositeDefinition
                     Declare.Operands(Declare.Operand(power)),
                     Declare.Targets());
 
-                return new GenericKeywordFrame(Declare.KeywordInstances(tipScales));
+                return new GenericKeywordFrame(
+                    effectPayload.Source,Declare.KeywordInstances(tipScales));
         }
         
 
@@ -73,13 +76,15 @@ public class AttackLeshy : EffectCompositeDefinition
         
         var trampleAmount = power - defender.GetCharacteristicValue("HEALTH", context);
 
-        if (stagedCreature is null || trampleAmount <= 0) return new GenericKeywordFrame(Declare.KeywordInstances(damage));
+        if (stagedCreature is null || trampleAmount <= 0) return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances(damage));
         
         var trampleDamage = damageDefinition.CreateInstance(
             Declare.Operands(Declare.Operand(trampleAmount)), 
             Declare.Targets(Declare.Target(stagedCreature)));
             
-        return new GenericKeywordFrame(Declare.KeywordInstances(damage, trampleDamage));
+        return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances(damage, trampleDamage));
     }
 }
 
@@ -95,7 +100,8 @@ public class AttackPlayer : EffectCompositeDefinition
         var attacker = lane.HomeCritter;
         var defender = lane.AwayCritter;
 
-        if (attacker is null) return new GenericKeywordFrame(Declare.KeywordInstances());
+        if (attacker is null) return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances());
 
         var power = attacker.GetCharacteristicValue("POWER", context);
 
@@ -106,7 +112,8 @@ public class AttackPlayer : EffectCompositeDefinition
                     Declare.Operands(Declare.Operand( -power )), // Minus because
                     Declare.Targets());
             
-            return new GenericKeywordFrame(Declare.KeywordInstances(tipScales));
+            return new GenericKeywordFrame(
+                effectPayload.Source,Declare.KeywordInstances(tipScales));
         }
         
 
@@ -115,7 +122,8 @@ public class AttackPlayer : EffectCompositeDefinition
             Declare.Operands(Declare.Operand(power)),
             Declare.Targets(Declare.Target(defender)));
 
-        return new GenericKeywordFrame(Declare.KeywordInstances(damage));
+        return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances(damage));
     }
 }
 
@@ -140,10 +148,10 @@ public class TipScales : EffectPrimitiveDefinition
             player!.TheirTeeth -= amount;
         }
 
-        return new TipScalesEvent(amount);
+        return new TipScalesEvent(effectPayload.Source, amount);
     }
 }
-public record TipScalesEvent(int Amount) : EventBase;
+public record TipScalesEvent(IAtom Source, int Amount) : EventBase(Source);
 
 public class Damage : ChangeState<ICard, int>
 {
@@ -234,7 +242,8 @@ public class MoveSidewaysResolver : EffectCompositeDefinition
             ? Declare.KeywordInstances(changeZoneDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(critter), Declare.Target(secondary))))
             : Declare.KeywordInstances();
         
-        return new GenericKeywordFrame(keywords);
+        return new GenericKeywordFrame(
+            effectPayload.Source, keywords);
     }
 }
 
@@ -267,7 +276,8 @@ public class BloodCost : CostDefinition
             Declare.Operands(), 
             Declare.Targets(Declare.Target(c), Declare.Target(exile))));
         
-        return new GenericKeywordFrame(changeZones.ToList());
+        return new GenericKeywordFrame(
+            effectPayload.Source,changeZones.ToList());
     }
 
     public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
@@ -298,7 +308,8 @@ public class BonesCost : CostDefinition
             Declare.Operands(Declare.Operand(-bonesAmount)), 
             Declare.Targets());
         
-        return new GenericKeywordFrame(Declare.KeywordInstances(changeBones));
+        return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances(changeBones));
     }
 
     public override bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance)
@@ -328,13 +339,13 @@ public class CheckVictory : EffectPrimitiveDefinition
         
         if (difference >= 5)
         {
-            return new GameOverEvent(player.MyTeeth > player.TheirTeeth);
+            return new GameOverEvent(effectPayload.Source, player.MyTeeth > player.TheirTeeth);
         }
         
-        return new NonEvent();
+        return new NonEvent(effectPayload.Source);
     }
 }
-public record GameOverEvent(bool Victory) : EventBase;
+public record GameOverEvent(IAtom Source, bool Victory) : EventBase(Source);
 
 public class ExileDeadThings : EffectCompositeDefinition
 {
@@ -352,6 +363,7 @@ public class ExileDeadThings : EffectCompositeDefinition
             Declare.Operands(), 
             Declare.Targets(Declare.Target(c), Declare.Target(exile))));
         
-        return new GenericKeywordFrame(changeZones.ToList());
+        return new GenericKeywordFrame(
+            effectPayload.Source,changeZones.ToList());
     }
 }

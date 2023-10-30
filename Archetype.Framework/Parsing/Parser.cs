@@ -2,6 +2,7 @@
 using Antlr4.Runtime;
 using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
+using FluentValidation;
 
 namespace Archetype.Framework.Parsing;
 
@@ -74,7 +75,7 @@ public class CardParser : ICardParser
         
         var tree = parser.cardText();
 
-        var protoBuilder = new ProtoBuilder();
+        var protoBuilder = new ProtoBuilder(Enumerable.Empty<IValidator<IProtoCard>>(), Enumerable.Empty<Action<ProtoBuilder.ProtoCard>>());
 
         var name = tree.name().STRING().GetText().Trim('"');
         protoBuilder.SetName(name);

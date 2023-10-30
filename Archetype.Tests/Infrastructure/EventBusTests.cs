@@ -54,7 +54,7 @@ public class EventBusTests
     public void Publish_WhenCalled_DoesNotPublishNonEvents()
     {
         var actionBlockEvent = Substitute.For<IActionBlockEvent>();
-        var keywordEvent1 = new NonEvent();
+        var keywordEvent1 = new NonEvent(Substitute.For<IAtom>());
         var keywordEvent2 = Substitute.For<IEvent>();
         actionBlockEvent.Children.Returns(new List<IEvent> { keywordEvent1, keywordEvent2 });
         

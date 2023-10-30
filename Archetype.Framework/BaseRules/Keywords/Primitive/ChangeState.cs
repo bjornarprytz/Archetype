@@ -20,12 +20,12 @@ public abstract class ChangeState<TAtom, T> : EffectPrimitiveDefinition
         var value = ProduceValue(context, effectPayload);
 
         if (atom.GetState<T>(Property) is { } existingValue && existingValue.Equals(value))
-            return new NonEvent();
+            return new NonEvent(effectPayload.Source);
          
         atom.State[Property] = value!;
         
-        return new ChangeStateEvent<T>(atom, Property, value);
+        return new ChangeStateEvent<T>(effectPayload.Source, atom, Property, value);
     }
 }
 
-public record ChangeStateEvent<T>(IAtom Atom, string Property, T Value) : EventBase;
+public record ChangeStateEvent<T>(IAtom Source, IAtom Atom, string Property, T Value) : EventBase(Source);

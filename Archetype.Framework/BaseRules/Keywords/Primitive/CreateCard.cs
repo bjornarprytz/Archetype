@@ -28,8 +28,8 @@ public class CreateCard : EffectPrimitiveDefinition
         zone.Add(card);
         context.GameState.AddAtom(card);
 
-        return new CreateCardEvent(card, zone);
+        return new CreateCardEvent(effectPayload.Source, card, zone);
     }
 }
 
-public record CreateCardEvent(ICard Card, IZone Zone) : EventBase;
+public record CreateCardEvent(IAtom Source, ICard Card, IZone Zone) : EventBase(Source);

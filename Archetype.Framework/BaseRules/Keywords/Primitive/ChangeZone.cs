@@ -20,7 +20,7 @@ public class ChangeZone : EffectPrimitiveDefinition
         to.Add(card);
         card.CurrentZone = to;
 
-        return new ChangeZoneEvent(card, from, to);
+        return new ChangeZoneEvent(payload.Source, card, from, to);
     }
 }
-public record ChangeZoneEvent(ICard Card, IZone? From, IZone To) : EventBase;
+public record ChangeZoneEvent(IAtom Source, ICard Card, IZone? From, IZone To) : EventBase(Source);

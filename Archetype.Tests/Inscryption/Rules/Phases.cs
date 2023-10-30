@@ -106,7 +106,8 @@ public class DrawCardStepResolver : EffectCompositeDefinition
         var draw = drawCardDefinition.CreateInstance(Declare.Operands(),
             Declare.Targets(Declare.Target(ctx => ctx.PromptResponses[prompt.Id][0])));
 
-        return new GenericKeywordFrame(Declare.KeywordInstances(prompt, draw));
+        return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances(prompt, draw));
     }
 }
 
@@ -123,7 +124,8 @@ public class PlayerCombatStepResolver : EffectCompositeDefinition
 
         var attackLeshyDefinition = context.MetaGameState.Rules.GetOrThrow<AttackLeshy>();
 
-        return new GenericKeywordFrame( new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
+        return new GenericKeywordFrame( 
+            effectPayload.Source,new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
             attackLeshyDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(lane)))
             ).ToList());
     }
@@ -155,7 +157,8 @@ public class PlayerSigilStepResolver : EffectCompositeDefinition
         var critters = new[] { critter1, critter2, critter3, critter4 }.ToList();
 
         if (critters.All(c => c != null))
-            return new GenericKeywordFrame(Declare.KeywordInstances());
+            return new GenericKeywordFrame(
+                effectPayload.Source,Declare.KeywordInstances());
 
         var keywords = new List<IKeywordInstance>();
         
@@ -173,7 +176,8 @@ public class PlayerSigilStepResolver : EffectCompositeDefinition
             keywords.Add(moveSidewaysDefinition.CreateInstance(Declare.Operands(Declare.Operand("Player")), Declare.Targets(Declare.Target(critter), Declare.Target(primaryTargetLane), Declare.Target(secondaryTargetLane))));
         }
         
-        return new GenericKeywordFrame(keywords);
+        return new GenericKeywordFrame(
+            effectPayload.Source,keywords);
     }
 }
 
@@ -190,7 +194,8 @@ public class LeshyCombatStepResolver : EffectCompositeDefinition
 
         var attackLeshyDefinition = context.MetaGameState.Rules.GetOrThrow<AttackPlayer>();
 
-        return new GenericKeywordFrame(new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
+        return new GenericKeywordFrame(
+            effectPayload.Source,new[] { lane1, lane2, lane3, lane4 }.Select(lane => 
             attackLeshyDefinition.CreateInstance(Declare.Operands(), Declare.Targets(Declare.Target(lane)))
         ).ToList());
     }
@@ -222,7 +227,8 @@ public class LeshySigilStepResolver : EffectCompositeDefinition
         var critters = new[] { critter1, critter2, critter3, critter4 }.ToList();
 
         if (critters.All(c => c != null))
-            return new GenericKeywordFrame(Declare.KeywordInstances());
+            return new GenericKeywordFrame(
+                effectPayload.Source,Declare.KeywordInstances());
 
         var keywords = new List<IKeywordInstance>();
         
@@ -240,7 +246,8 @@ public class LeshySigilStepResolver : EffectCompositeDefinition
             keywords.Add(moveSidewaysDefinition.CreateInstance(Declare.Operands(Declare.Operand("Leshy")), Declare.Targets(Declare.Target(critter), Declare.Target(primaryTargetLane), Declare.Target(secondaryTargetLane))));
         }
         
-        return new GenericKeywordFrame(keywords);
+        return new GenericKeywordFrame(
+            effectPayload.Source,keywords);
     }
 }
 
@@ -253,7 +260,8 @@ public class StateBasedEffectsResolver : EffectCompositeDefinition
         var exileDeadThings = context.MetaGameState.Rules.GetOrThrow<ExileDeadThings>().CreateInstance(Declare.Operands(), Declare.Targets());
         var checkVictoryDefinition = context.MetaGameState.Rules.GetOrThrow<CheckVictory>().CreateInstance(Declare.Operands(), Declare.Targets());
         
-        return new GenericKeywordFrame(Declare.KeywordInstances(
+        return new GenericKeywordFrame(
+            effectPayload.Source,Declare.KeywordInstances(
             exileDeadThings,
             checkVictoryDefinition
             ));

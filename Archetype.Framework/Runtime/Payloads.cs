@@ -7,6 +7,7 @@ namespace Archetype.Framework.Runtime;
 
 public interface IEvent
 {
+    public IAtom Source { get; }
     public IEvent Parent { get; set; }
     public IList<IEvent> Children { get; }
 }
@@ -21,13 +22,13 @@ public interface IActionBlockEvent : IEvent
     public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } 
 }
 
-public abstract record EventBase : IEvent
+public abstract record EventBase(IAtom Source) : IEvent
 {
     public IEvent? Parent { get; set; }
     public IList<IEvent> Children { get; set; } = new List<IEvent>();
 }
 
-public record NonEvent : EventBase;
+public record NonEvent(IAtom Source) : EventBase(Source);
 
 public record ActionBlockEvent
     (
@@ -36,7 +37,7 @@ public record ActionBlockEvent
         IReadOnlyDictionary<CostType, PaymentPayload> Payments,
         IReadOnlyList<int> ComputedValues,
         IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses
-        ) : EventBase, IActionBlockEvent
+        ) : EventBase(Source), IActionBlockEvent
 {
     public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments, context.ComputedValues, context.PromptResponses)
     {

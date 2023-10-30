@@ -5,17 +5,16 @@ using Archetype.Framework.Runtime;
 namespace Archetype.Framework.Definitions;
 
 
-public record OperandDescription<T>() : OperandDescription(Helpers.GetParsedType<T>());
+public record OperandDescription<T>() : IOperandDescription
+{
+    public bool IsOptional { get; init; }
+    public Type Type => typeof(T);
+}
 
 public interface IOperandDescription
 {
     public bool IsOptional { get; init; }
-    public KeywordOperandParsedType ParsedType { get; }
-}
-
-public abstract record OperandDescription(KeywordOperandParsedType ParsedType) : IOperandDescription
-{
-    public bool IsOptional { get; init; }
+    public Type Type { get; }
 }
 
 

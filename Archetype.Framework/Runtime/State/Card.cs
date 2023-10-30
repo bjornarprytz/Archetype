@@ -21,11 +21,11 @@ public class Card : Atom, ICard
             } as IAbility
         );
     }
-    
+
+    public string Name => _proto.Name;
     public IReadOnlyDictionary<string, IAbility> Abilities { get; }
     
     public IZone? CurrentZone { get; set; }
-    public IDictionary<string, object> State { get; }
     public IAtom Source => this;
     public IReadOnlyList<CardTargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
     public IReadOnlyList<IKeywordInstance> Effects => _proto.ActionBlock.Effects;

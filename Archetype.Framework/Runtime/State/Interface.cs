@@ -67,6 +67,7 @@ public interface IActionBlock
 
 public interface ICard : IAtom, IActionBlock
 {
+    string Name { get; }
     IReadOnlyDictionary<string, IAbility> Abilities { get; }
     IZone? CurrentZone { get; set; }
 }
