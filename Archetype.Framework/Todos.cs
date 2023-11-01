@@ -1,20 +1,31 @@
 ﻿namespace Archetype.BasicRules;
  
 // TODO: Prune classes and interfaces that are not used
-// TODO: Polish Syntax
+// TODO: Scrap the syntax (it's a game dev concern)
 
-// TODO: Reconsider GameAPI (does it work? Is the caller presented with enough information to act?) (e.g. the prompt API)
-// TODO: Player object
-
-// TODO: Conditions
-// TODO: Compute (MAX, MIN, COUNT)
-// TODO: Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
-
-// TODO: Add state based effects resolver
-// TODO: Stop game loop when victory condition is met
-
-/*
- * TODO: Have a defined validation step for rules and cards, in order to avoid runtime errors
- * TODO: Detect and avoid infinite loops from circular dependencies (a composite keyword that contains itself)
- * TODO: Detect invalid turn order (phases) (No phases, No allowed actions, and when there are allowed actions, PassTurn should be one of them)
- */
+// TODO: What remains?
+    /*
+     * - Bootstrapping API
+     *  - RulesBuilder (Produce the Rules)
+     *      - keywords
+     *      - order and resolution of phases and steps
+     *      - state based effects resolution (e.g. death, game end, etc.)
+     *  - ProtoBuilder (Produce the ProtoCards)
+     *  - StateBuilder (Produce the initial game state)
+     *      - custom atoms (Zones, Units, the player, etc.)
+     *      - the initial "game board" (DrawPile, Hand, etc.)
+     *
+     * - Validate the provided rules and proto cards
+     *  - Detect and avoid infinite loops from circular dependencies (a composite keyword that contains itself)
+     *  - Detect invalid turn order (phases) (No phases, No allowed actions, and when there are allowed actions, PassTurn should be one of them)
+     * - The framework must call into these provided APIs
+     * - Initiate the game loop
+     * - Provide an API to execute game actions
+     *
+     * - Core:
+     *  - CleanupBlock, which is executed after the ActionBlock
+     *  - Keywords (with unit tests):
+     *      - Conditions
+     *      - Compute (MAX, MIN, COUNT)
+     *      - Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
+     */
