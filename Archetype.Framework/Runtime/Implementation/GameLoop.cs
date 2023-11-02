@@ -18,7 +18,7 @@ public class GameLoop : IGameLoop
     {
         _gameRoot = gameRoot;
         _actionQueue = _gameRoot.Infrastructure.ActionQueue;
-        _phases = _gameRoot.MetaGameState.Rules.Phases;
+        _phases = _gameRoot.MetaGameState.Rules.TurnSequence;
     }
 
     public IPhase? CurrentPhase { get; private set; } = default;

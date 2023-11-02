@@ -8,7 +8,7 @@ public class Rules : IRules, IRulesBuilder
     private readonly Dictionary<string, IKeywordDefinition> _keywords = new();
     private readonly Dictionary<Type, IKeywordDefinition> _keywordsByType = new();
 
-    public IReadOnlyList<IPhase> Phases { get; private set; } = Array.Empty<IPhase>();
+    public IReadOnlyList<IPhase> TurnSequence { get; private set; } = Array.Empty<IPhase>();
 
     public IKeywordDefinition? GetDefinition(string keyword)
     {
@@ -35,8 +35,8 @@ public class Rules : IRules, IRulesBuilder
         _keywordsByType.Add(keywordDefinition.GetType(), keywordDefinition);
     }
 
-    public void SetTurnSequence(IReadOnlyList<IPhase> phase)
+    public void SetTurnSequence(IReadOnlyList<IPhase> turnSequence)
     {
-        Phases = phase;
+        TurnSequence = turnSequence;
     }
 }

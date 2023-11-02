@@ -14,7 +14,7 @@ public interface IProtoCards
 
 public interface IRules
 {
-    IReadOnlyList<IPhase> Phases { get; } // TODO: Is this the right place for this?
+    IReadOnlyList<IPhase> TurnSequence { get; }
     IKeywordDefinition? GetDefinition(string keyword);
     T? GetDefinition<T>() where T : IKeywordDefinition;
 }

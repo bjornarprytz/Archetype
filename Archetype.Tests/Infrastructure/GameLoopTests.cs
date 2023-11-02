@@ -36,7 +36,7 @@ public class GameLoopTests
         _actionQueue.ResolveNextKeyword().Returns(null as IEvent);
         
         _gameRoot.Infrastructure.ActionQueue.Returns(_actionQueue);
-        _gameRoot.MetaGameState.Rules.Phases.Returns(new List<IPhase>(){ _firstPhase, _secondPhase, _thirdPhase });
+        _gameRoot.MetaGameState.Rules.TurnSequence.Returns(new List<IPhase>(){ _firstPhase, _secondPhase, _thirdPhase });
         
         _thirdPhase.AllowedActions.Returns(new List<ActionDescription>(){ new (ActionType.PassTurn) });
         
