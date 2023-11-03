@@ -32,18 +32,16 @@ public class RefreshStep : Step
 
     public override string Name => "REFRESH_STEP";
     public override IReadOnlyList<IKeywordInstance> Effects { get; }
+    public override IReadOnlyList<IKeywordInstance> AfterEffects { get; } = ArraySegment<IKeywordInstance>.Empty;
 }
 
 public class MainPhase : Phase
 {
-    public MainPhase()
-    {
-        Steps = ArraySegment<IStep>.Empty;
-    }
     public override string Name => "MAIN_PHASE";
     
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = new Dictionary<string, IKeywordInstance>();
-    public override IReadOnlyList<IStep> Steps { get; } 
+    public override IReadOnlyList<IStep> Steps { get; } = ArraySegment<IStep>.Empty;
+
     public override IReadOnlyList<ActionDescription> AllowedActions { get; } = new List<ActionDescription>()
     {
         new (ActionType.PlayCard),
@@ -77,6 +75,7 @@ public class PlayerCombatStep : Step
 
     public override string Name => "PLAYER_COMBAT_STEP";
     public override IReadOnlyList<IKeywordInstance> Effects { get; }
+    public override IReadOnlyList<IKeywordInstance> AfterEffects { get; } = ArraySegment<IKeywordInstance>.Empty;
 }
 
 public class LeshyCombatStep : Step
@@ -88,6 +87,7 @@ public class LeshyCombatStep : Step
 
     public override string Name => "LESHY_COMBAT_STEP";
     public override IReadOnlyList<IKeywordInstance> Effects { get; }
+    public override IReadOnlyList<IKeywordInstance> AfterEffects { get; } = ArraySegment<IKeywordInstance>.Empty;
 }
 
 

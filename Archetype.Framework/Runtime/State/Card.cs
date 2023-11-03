@@ -29,6 +29,7 @@ public class Card : Atom, ICard
     public IAtom Source => this;
     public IReadOnlyList<CardTargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
     public IReadOnlyList<IKeywordInstance> Effects => _proto.ActionBlock.Effects;
+    public IReadOnlyList<IKeywordInstance> AfterEffects => _proto.ActionBlock.AfterEffects;
     public IReadOnlyList<IKeywordInstance> Costs => _proto.ActionBlock.Costs;
     public IReadOnlyList<IKeywordInstance> Conditions => _proto.ActionBlock.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;
@@ -54,6 +55,7 @@ public class Ability : IAbility
     public required IAtom Source { get; init; }
     public IReadOnlyList<CardTargetDescription> TargetsDescriptors => Proto.TargetSpecs;
     public IReadOnlyList<IKeywordInstance> Effects => Proto.Effects;
+    public IReadOnlyList<IKeywordInstance> AfterEffects => Proto.AfterEffects;
     public IReadOnlyList<IKeywordInstance> Costs => Proto.Costs;
     public IReadOnlyList<IKeywordInstance> Conditions => Proto.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;

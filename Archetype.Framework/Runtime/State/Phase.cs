@@ -32,8 +32,9 @@ public abstract class Step : IStep
     public IAtom Source { get; }
     public abstract string Name { get; }
     public abstract IReadOnlyList<IKeywordInstance> Effects { get; }
-    
-    
+    public abstract IReadOnlyList<IKeywordInstance> AfterEffects { get; }
+
+
     public virtual IReadOnlyList<int> ComputedValues { get; } = ArraySegment<int>.Empty;
     public virtual void UpdateComputedValues(IRules rules, IGameState gameState)
     {

@@ -31,7 +31,7 @@ public class PlayCardHandler : IRequestHandler<PlayCardArgs, Unit>
         
         var costs = card.Costs;
         var payments = args.Payments;
-        var effects = card.Effects;
+        var effects = card.Effects.Concat(card.AfterEffects).ToList();
         
         var resolutionContext = card.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
 

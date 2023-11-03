@@ -24,7 +24,6 @@
      *
      * - Core:
      *  - CleanupBlock, which is executed after the ActionBlock
-     *  - Make generic GameState (and cast from the IGameState wherever necessary)
      *  - Keywords (with unit tests):
      *      - Conditions
      *      - Compute (MAX, MIN, COUNT)

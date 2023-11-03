@@ -8,6 +8,7 @@ public interface IProtoActionBlock
     public IReadOnlyList<IKeywordInstance> Conditions { get; }
     public IReadOnlyList<IKeywordInstance> Costs { get; }
     public IReadOnlyList<IKeywordInstance> Effects { get; }
+    public IReadOnlyList<IKeywordInstance> AfterEffects { get; }
     public IReadOnlyList<IKeywordInstance> ComputedValues { get; }
 }
 

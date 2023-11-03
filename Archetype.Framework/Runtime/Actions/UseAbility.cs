@@ -30,7 +30,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var ability = abilitySource.Abilities[args.AbilityName];
         var payments = args.Payments;
         var costs = ability.Costs;
-        var effects = ability.Effects;
+        var effects = ability.Effects.Concat(ability.AfterEffects).ToList();
         
         var resolutionContext = ability.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
 

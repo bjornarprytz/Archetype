@@ -58,6 +58,7 @@ public interface IActionBlock
     IAtom Source { get; }
     IReadOnlyList<CardTargetDescription> TargetsDescriptors { get; }
     IReadOnlyList<IKeywordInstance> Effects { get; }
+    IReadOnlyList<IKeywordInstance> AfterEffects { get; }
     IReadOnlyList<IKeywordInstance> Costs { get; }
     IReadOnlyList<IKeywordInstance> Conditions { get; }
     IReadOnlyList<int> ComputedValues { get; }

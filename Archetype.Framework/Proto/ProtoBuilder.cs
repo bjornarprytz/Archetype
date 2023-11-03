@@ -35,6 +35,7 @@ public class ProtoBuilder
                 Conditions: _conditions,
                 Costs: _costs,
                 Effects: _effects,
+                AfterEffects: Array.Empty<IKeywordInstance>(),
                 ComputedValues: _computedValues
             ),
             Abilities: _abilities,
@@ -95,6 +96,7 @@ public class ProtoBuilder
         IReadOnlyList<IKeywordInstance> Conditions,
         IReadOnlyList<IKeywordInstance> Costs,
         IReadOnlyList<IKeywordInstance> Effects,
+        IReadOnlyList<IKeywordInstance> AfterEffects,
         IReadOnlyList<IKeywordInstance> ComputedValues
     ) : IProtoActionBlock;
 }
