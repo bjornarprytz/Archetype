@@ -72,40 +72,13 @@ public interface IEffectCompositeDefinition : IKeywordDefinition
     IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload);
 } 
 
-// Hook into special rules
-//
-// Examples:
-// STRENGTH 2
-// PROMPT "Choose a card to discard"  
-// TARGETS Enemy Unit Any
-// 
-// Other definitions can then reference the targets:
-// DAMAGE <1> 6 // Deal 6 damage to the first target
-// HEAL <2> 3 // Heal the second target for 3 
 public abstract class CharacteristicDefinition : KeywordDefinition { } 
 
-// ON_DEATH Self { ... }
-public abstract class ReactionDefinition : KeywordDefinition
-{ 
-    public abstract bool CheckIfTriggered(IAtom source, IEvent @event);
-}
-
-// ABILITY { ... }
-public abstract class AbilityDefinition : KeywordDefinition
-{
-    
-}
-
-// IN_HAND_CONDITION
-// LIFE_GTE_CONDITION 10
 public abstract class ConditionDefinition : KeywordDefinition
 {
-    public abstract bool Check(IAtom source, IGameState gameState); 
+    public abstract bool Check(IResolutionContext context); 
 }
 
-// Examples:
-// RESOURCE_COST 4
-// SACRIFICE_COST 1
 public abstract class CostDefinition : EffectCompositeDefinition
 {
     public abstract CostType Type { get; }
@@ -113,12 +86,6 @@ public abstract class CostDefinition : EffectCompositeDefinition
     public abstract bool Check(IResolutionContext context, PaymentPayload paymentPayload, IKeywordInstance keywordInstance);
 }
 
-// Examples:
-// N_CARDS_IN_HAND 'X'
-// Will compute the cards in hand and store it in the 'X' property
-//
-// Other definitions can then use the computed value:
-// RESOURCE_COST [X]
 public abstract class ComputedValueDefinition : KeywordDefinition
 {
     public abstract int Compute(IAtom source, IGameState gameState);

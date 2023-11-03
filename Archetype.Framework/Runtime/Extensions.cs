@@ -89,9 +89,9 @@ public static class RuntimeExtensions
         gameState.Atoms.Add(atom.Id, atom);
     }
     
-    public static bool CheckConditions(this IRules rules, IReadOnlyList<IKeywordInstance> conditions, IAtom source, IGameState gameState)
+    public static bool CheckConditions(this IRules rules, IReadOnlyList<IKeywordInstance> conditions, IResolutionContext context)
     {
-        return conditions.Select(rules.GetOrThrow<ConditionDefinition>).All(c => c.Check(source, gameState));
+        return conditions.Select(rules.GetOrThrow<ConditionDefinition>).All(c => c.Check(context));
     }
 
     public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<PaymentPayload> payments, IReadOnlyList<IAtom> targets)
@@ -117,7 +117,7 @@ public static class RuntimeExtensions
         if (!definitions.CheckPayments(resolutionContext, costs, payments))
             throw new InvalidOperationException("Invalid payment");
         
-        if (!definitions.CheckConditions(conditions, source, gameState))
+        if (!definitions.CheckConditions(conditions, resolutionContext))
             throw new InvalidOperationException("Invalid conditions");
         
         if (!actionBlock.CheckTargets(resolutionContext))

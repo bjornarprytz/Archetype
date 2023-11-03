@@ -21,11 +21,10 @@
      * - The framework must call into these provided APIs
      * - Initiate the game loop
      * - Provide an API to execute game actions
+     * - Unit test game actions
      *
-     * - Core:
-     *  - CleanupBlock, which is executed after the ActionBlock
+     * - Core: 
      *  - Keywords (with unit tests):
-     *      - Conditions
      *      - Compute (MAX, MIN, COUNT)
      *      - Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
      */

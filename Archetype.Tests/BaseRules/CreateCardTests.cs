@@ -25,6 +25,12 @@ public class CreateCardTests
     }
     
     [Test]
+    public void ShouldHaveCorrectName()
+    {
+        _sut.Name.Should().Be("CREATE_CARD");
+    }
+    
+    [Test]
     public void ShouldCreateCard()
     {
         // Arrange
@@ -50,8 +56,5 @@ public class CreateCardTests
         result.As<CreateCardEvent>().Card.Name.Should().Be("TestCard");
         result.As<CreateCardEvent>().Zone.Should().Be(_targetZone);
         result.As<CreateCardEvent>().Source.Should().Be(payload.Source);
-        
     }
-
-    
 }
