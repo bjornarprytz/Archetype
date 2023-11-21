@@ -76,7 +76,7 @@ public abstract class CharacteristicDefinition : KeywordDefinition { }
 
 public abstract class ConditionDefinition : KeywordDefinition
 {
-    public abstract bool Check(IResolutionContext context); 
+    public abstract bool Check(IResolutionContext context, IKeywordInstance keywordInstance); 
 }
 
 public abstract class CostDefinition : EffectCompositeDefinition
@@ -88,6 +88,6 @@ public abstract class CostDefinition : EffectCompositeDefinition
 
 public abstract class ComputedValueDefinition : KeywordDefinition
 {
-    public abstract int Compute(IAtom source, IGameState gameState);
+    public abstract int Compute(IResolutionContext context, IKeywordInstance keywordInstance);
 }
 

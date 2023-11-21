@@ -40,8 +40,19 @@ public record KeywordOperand<T>(Func<IResolutionContext, T> GetTypedValue) : Key
     public Func<IResolutionContext, T> GetTypedValue { get; init; } = GetTypedValue;
 }
 
-public record ImmediateKeywordOperand<T>(T Value) : KeywordOperand<T>(_ => Value);
-public record FilterKeywordOperand(Filter Filter) : KeywordOperand<IEnumerable<IAtom>>(Filter.ProvideAtoms);
+public record ImmediateKeywordOperand<T>(T Value) : KeywordOperand<T>(_ => Value)
+{
+    public T Value { get; init; } = Value;
+}
+
+public record FilterKeywordOperand(Filter Filter) : KeywordOperand<IEnumerable<IAtom>>(Filter.ProvideAtoms)
+{
+    public Filter Filter { get; init; } = Filter;
+}
+
 public record ComputedPropertyKeywordOperand(int ComputedValueIndex) : KeywordOperand<int>(
     ctx => ctx.ComputedValues[ComputedValueIndex]
-);
+)
+{
+    public int ComputedValueIndex { get; init; } = ComputedValueIndex;
+}

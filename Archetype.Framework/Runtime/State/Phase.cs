@@ -36,7 +36,7 @@ public abstract class Step : IStep
 
 
     public virtual IReadOnlyList<int> ComputedValues { get; } = ArraySegment<int>.Empty;
-    public virtual void UpdateComputedValues(IRules rules, IGameState gameState)
+    public virtual void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext)
     {
         Console.WriteLine($"Nothing to update in this step ({Name})");
     }

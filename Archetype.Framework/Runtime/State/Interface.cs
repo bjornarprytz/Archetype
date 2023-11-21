@@ -64,7 +64,7 @@ public interface IActionBlock
     IReadOnlyList<IKeywordInstance> Conditions { get; }
     IReadOnlyList<int> ComputedValues { get; }
     
-    void UpdateComputedValues(IRules rules, IGameState gameState);
+    void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext);
 }
 
 public interface ICard : IAtom, IActionBlock

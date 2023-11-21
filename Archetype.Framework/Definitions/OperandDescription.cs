@@ -56,9 +56,9 @@ public class OperandDeclaration<T0> : OperandDeclaration
         return effectPayload.Operands.Deconstruct<T0>();
     }
     
-    public T0 UnpackOperands(IKeywordInstance keywordInstance)
+    public T0 UnpackOperands(IKeywordInstance keywordInstance, IResolutionContext? context=null)
     {
-        return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0>();
+        return keywordInstance.Operands.Select(operand => operand.GetValue(context)).Deconstruct<T0>();
     }
     
     public T0 UnpackOperands(IReadOnlyList<KeywordOperand> operands)

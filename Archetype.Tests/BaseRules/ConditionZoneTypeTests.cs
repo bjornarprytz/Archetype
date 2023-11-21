@@ -1,4 +1,5 @@
 ﻿using Archetype.BasicRules.Primitives;
+using Archetype.Framework.Proto;
 using Archetype.Framework.Runtime;
 using Archetype.Framework.Runtime.State;
 using FluentAssertions;
@@ -37,7 +38,7 @@ public class ConditionZoneTypeTests
         _context.Source.CurrentZone.Returns(Substitute.For<ISomeZone>());
         
         // Act
-        var result = _sut.Check(_context);
+        var result = _sut.Check(_context, Substitute.For<IKeywordInstance>());
 
         // Assert
         result.Should().BeTrue();
@@ -50,7 +51,7 @@ public class ConditionZoneTypeTests
         _context.Source.CurrentZone.Returns(Substitute.For<ISomeOtherZone>());
         
         // Act
-        var result = _sut.Check(_context);
+        var result = _sut.Check(_context, Substitute.For<IKeywordInstance>());
 
         // Assert
         result.Should().BeFalse();

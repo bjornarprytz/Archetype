@@ -35,13 +35,13 @@ public class Card : Atom, ICard
     public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics => _proto.Characteristics;
     
 
-    public void UpdateComputedValues(IRules rules, IGameState gameState)
+    public void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext)
     {
-        foreach (var (computedValue, index) in _proto.ActionBlock.ComputedValues.Select(((instance, i) => (instance, i))))
+        foreach (var (computedValue, index) in _proto.ActionBlock.ComputedValues.Select((instance, i) => (instance, i)))
         {
             var keywordDefinition = rules.GetOrThrow<ComputedValueDefinition>(computedValue);
             
-            _computedValues[index] = keywordDefinition.Compute(Source, gameState);
+            _computedValues[index] = keywordDefinition.Compute(resolutionContext, computedValue);
         }
     }
 }
@@ -65,13 +65,13 @@ public class Ability : IAbility
         return _computedValues.Count <= index ? null : _computedValues[index];
     }
 
-    public void UpdateComputedValues(IRules rules, IGameState gameState)
+    public void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext)
     {
         foreach (var (computedValue, index) in Proto.ComputedValues.Select(((instance, i) => (instance, i))))
         {
             var keywordDefinition = rules.GetOrThrow<ComputedValueDefinition>(computedValue);
             
-            _computedValues[index] = keywordDefinition.Compute(Source, gameState);
+            _computedValues[index] = keywordDefinition.Compute(resolutionContext, computedValue);
         }
     }
 }

@@ -25,6 +25,9 @@
      *
      * - Core: 
      *  - Keywords (with unit tests):
+     *      - CreateZone
+     *          - May need ProtoZone too
      *      - Compute (MAX, MIN, COUNT)
+     *          - unit tests
      *      - Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
      */
