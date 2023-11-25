@@ -27,7 +27,6 @@
      *  - Keywords (with unit tests):
      *      - CreateZone
      *          - May need ProtoZone too
-     *      - Compute (MAX, MIN, COUNT)
-     *          - unit tests
-     *      - Modify keyword instances (e.g. IModifiable { KeywordInstance Modify(int) })
+     * - Future Scope:
+     *   - ComputeCount for specific values of a characteristic (e.g. ComputeCount("Health", 10)) 
      */

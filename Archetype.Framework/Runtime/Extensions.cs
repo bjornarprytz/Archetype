@@ -163,6 +163,11 @@ public static class RuntimeExtensions
                && (stringValue == "any" || instance.Operands[0].GetValue(context) is {} v && v.Equals(stringValue));
     }
     
+    public static bool HasCharacteristic(this IAtom atom, string key)
+    {
+        return atom.Characteristics.ContainsKey(key);
+    }
+    
     public static T? GetState<T>(this IAtom atom, string key)
     {
         if (!atom.State.TryGetValue(key, out var value)) return default;
@@ -183,10 +188,10 @@ public static class RuntimeExtensions
     {
         var keywordInstance = atom.GetCharacteristic(key);
         if (keywordInstance is null)
-            throw new InvalidOperationException($"Characteristic {key} not found");
+            return 0;
 
-        if (keywordInstance.Operands.Count == 0)
-            throw new InvalidOperationException($"Characteristic {key} has no operands");
+        if (keywordInstance.Operands.Count != 1)
+            throw new InvalidOperationException($"Characteristic {key} does not have exactly one operand");
         
         return keywordInstance.Operands[0].GetValue(context) switch
         {
