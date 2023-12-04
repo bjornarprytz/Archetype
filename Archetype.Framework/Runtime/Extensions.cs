@@ -94,30 +94,28 @@ public static class RuntimeExtensions
         return conditions.All(keywordInstance => rules.GetOrThrow<ConditionDefinition>(keywordInstance).Check(context, keywordInstance));
     }
 
-    public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameRoot gameRoot, IReadOnlyList<PaymentPayload> payments, IReadOnlyList<IAtom> targets)
+    public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameState gameState, IMetaGameState metaGameState, IReadOnlyList<PaymentPayload> payments, IReadOnlyList<IAtom> targets)
     {
-        var definitions = gameRoot.MetaGameState.Rules;
-        var gameState = gameRoot.GameState;
+        var rules = metaGameState.Rules;
         var conditions = actionBlock.Conditions;
         var costs = actionBlock.Costs;
-        var source = actionBlock.Source;
         
         var resolutionContext = new ResolutionContext
         {
-            MetaGameState = gameRoot.MetaGameState,
-            GameState = gameRoot.GameState,
+            MetaGameState = metaGameState,
+            GameState = gameState,
             Payments = payments.ToDictionary(k => k.Type, v => v),
             Source = actionBlock.Source,
             Targets = targets,
             ComputedValues = actionBlock.ComputedValues,
         };
         
-        actionBlock.UpdateComputedValues(definitions, resolutionContext);
+        actionBlock.UpdateComputedValues(rules, resolutionContext);
         
-        if (!definitions.CheckPayments(resolutionContext, costs, payments))
+        if (!rules.CheckPayments(resolutionContext, costs, payments))
             throw new InvalidOperationException("Invalid payment");
         
-        if (!definitions.CheckConditions(conditions, resolutionContext))
+        if (!rules.CheckConditions(conditions, resolutionContext))
             throw new InvalidOperationException("Invalid conditions");
         
         if (!actionBlock.CheckTargets(resolutionContext))

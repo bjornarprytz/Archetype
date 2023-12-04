@@ -7,19 +7,22 @@ namespace Archetype.Framework.Runtime.Implementation;
 
 public class GameLoop : IGameLoop
 {
-    private readonly IGameRoot _gameRoot;
     private readonly IActionQueue _actionQueue;
     private readonly IReadOnlyList<IPhase> _phases;
+    private readonly IGameState _gameState;
+    private readonly IMetaGameState _metaGameState;
     
     private readonly Queue<IPhase> _remainingPhases = new();
     private readonly Queue<IStep> _remainingSteps = new();
 
-    public GameLoop(IGameRoot gameRoot)
+    public GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameState metaGameState)
     {
-        _gameRoot = gameRoot;
-        _actionQueue = _gameRoot.Infrastructure.ActionQueue;
-        _phases = _gameRoot.MetaGameState.Rules.TurnSequence;
+        _actionQueue = actionQueue;
+        _phases = metaGameState.Rules.TurnSequence;
+        _gameState = gameState;
+        _metaGameState = metaGameState;
     }
+
 
     public IPhase? CurrentPhase { get; private set; } = default;
 
@@ -119,7 +122,7 @@ public class GameLoop : IGameLoop
 
     private IResolutionFrame CreateResolutionFrame(IStep step)
     {
-        var resolutionContext = step.CreateAndValidateResolutionContext(_gameRoot, new List<PaymentPayload>(), new List<IAtom>());
+        var resolutionContext = step.CreateAndValidateResolutionContext(_gameState, _metaGameState, new List<PaymentPayload>(), new List<IAtom>());
 
         return new ResolutionFrame(resolutionContext, Declare.KeywordInstances(), step.Effects);
     }

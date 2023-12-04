@@ -40,7 +40,7 @@ public class GameLoopTests
         
         _thirdPhase.AllowedActions.Returns(new List<ActionDescription>(){ new (ActionType.PassTurn) });
         
-        _sut = new GameLoop(_gameRoot);
+        _sut = new GameLoop(_gameRoot.Infrastructure.ActionQueue, _gameRoot.GameState, _gameRoot.MetaGameState);
     }
     
     [Test]

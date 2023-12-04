@@ -23,10 +23,6 @@
      * - Provide an API to execute game actions
      * - Unit test game actions
      *
-     * - Core: 
-     *  - Keywords (with unit tests):
-     *      - CreateZone
-     *          - May need ProtoZone too
      * - Future Scope:
      *   - ComputeCount for specific values of a characteristic (e.g. ComputeCount("Health", 10)) 
      */

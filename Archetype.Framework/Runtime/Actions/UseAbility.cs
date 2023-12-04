@@ -32,7 +32,7 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var costs = ability.Costs;
         var effects = ability.Effects.Concat(ability.AfterEffects).ToList();
         
-        var resolutionContext = ability.CreateAndValidateResolutionContext(_gameRoot, payments, targets);
+        var resolutionContext = ability.CreateAndValidateResolutionContext(_gameRoot.GameState, _gameRoot.MetaGameState, payments, targets);
 
         _actionQueue.Push(new ResolutionFrame(resolutionContext, costs, effects));
 
