@@ -5,24 +5,12 @@ namespace Archetype.Framework.Runtime.Actions;
 
 public record UseAbilityArgs(Guid AbilitySource, string AbilityName, IReadOnlyList<Guid> Targets, IReadOnlyList<PaymentPayload> Payments) : IRequest<Unit>;
 
-public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
+public class UseAbilityHandler(IGameRoot gameRoot, IActionQueue actionQueue)
+    : IRequestHandler<UseAbilityArgs, Unit>
 {
-    private readonly IEventHistory _history;
-    private readonly IActionQueue _actionQueue;
-    private readonly IGameRoot _gameRoot;
-    private readonly IRules _rules;
-
-    public UseAbilityHandler(IGameRoot gameRoot, IRules rules, IActionQueue actionQueue, IEventHistory history)
-    {
-        _gameRoot = gameRoot;
-        _rules = rules;
-        _actionQueue = actionQueue;
-        _history = history;
-    }
-
     public Task<Unit> Handle(UseAbilityArgs args, CancellationToken cancellationToken)
     {
-        var gameState = _gameRoot.GameState;
+        var gameState = gameRoot.GameState;
         
         var abilitySource = gameState.GetAtom<ICard>(args.AbilitySource);
         var targets = args.Targets.Select(gameState.GetAtom).ToList();
@@ -32,9 +20,9 @@ public class UseAbilityHandler : IRequestHandler<UseAbilityArgs, Unit>
         var costs = ability.Costs;
         var effects = ability.Effects.Concat(ability.AfterEffects).ToList();
         
-        var resolutionContext = ability.CreateAndValidateResolutionContext(_gameRoot.GameState, _gameRoot.MetaGameState, payments, targets);
+        var resolutionContext = ability.CreateAndValidateResolutionContext(gameRoot.GameState, gameRoot.MetaGameState, payments, targets);
 
-        _actionQueue.Push(new ResolutionFrame(resolutionContext, costs, effects));
+        actionQueue.Push(new ResolutionFrame(resolutionContext, costs, effects));
 
         return Unit.Task;
     }

@@ -3,11 +3,8 @@ using Archetype.Framework.Proto;
 
 namespace Archetype.Framework.Runtime.Implementation;
 
-public class ActionQueue : IActionQueue
+public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 {
-    private readonly IEventBus _eventBus;
-    private readonly IRules _rules;
-
     public IResolutionFrame? CurrentFrame { get; private set; }
     
     // Card scope
@@ -16,12 +13,6 @@ public class ActionQueue : IActionQueue
     private readonly QueueStack<IKeywordInstance> _keywordStack = new();
     // Composite keyword scope
     private readonly Stack<IKeywordFrame> _keywordFrames = new();
-    
-    public ActionQueue(IEventBus eventBus, IRules rules)
-    {
-        _eventBus = eventBus;
-        _rules = rules;
-    }
 
 
     public void Push(IResolutionFrame context)
@@ -41,7 +32,7 @@ public class ActionQueue : IActionQueue
 
         if (_keywordStack.Count == 0)
         {
-            _eventBus.Publish(new ActionBlockEvent(CurrentFrame.Context));
+            eventBus.Publish(new ActionBlockEvent(CurrentFrame.Context));
             CurrentFrame = null;
         }
         
@@ -49,7 +40,7 @@ public class ActionQueue : IActionQueue
     }
     private IEvent Resolve(EffectPayload payload)
     {
-        var definition = _rules.GetDefinition(payload.Keyword);
+        var definition = rules.GetDefinition(payload.Keyword);
 
         if (definition is IEffectPrimitiveDefinition primitive)
         {
@@ -98,7 +89,7 @@ public class ActionQueue : IActionQueue
         {
             payload = keywordInstance.BindPayload(CurrentFrame!.Context);
             
-            if (_rules.GetDefinition(keywordInstance.Keyword) is not IEffectCompositeDefinition compositeDefinition)
+            if (rules.GetDefinition(keywordInstance.Keyword) is not IEffectCompositeDefinition compositeDefinition)
             {
                 return true;
             }

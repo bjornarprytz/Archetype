@@ -5,25 +5,16 @@ namespace Archetype.Framework.Runtime.Actions;
 
 public record AnswerPromptArgs(Guid PromptId, IReadOnlyList<Guid> Answer) : IRequest<Unit>;
 
-public class AnswerPromptHandler : IRequestHandler<AnswerPromptArgs, Unit>
+public class AnswerPromptHandler(IActionQueue actionQueue, IGameState gameState) : IRequestHandler<AnswerPromptArgs, Unit>
 {
-    private readonly IActionQueue _actionQueue;
-    private readonly IGameState _gameState;
-
-    public AnswerPromptHandler(IActionQueue actionQueue, IGameState gameState)
-    {
-        _actionQueue = actionQueue;
-        _gameState = gameState;
-    }
-    
     public Task<Unit> Handle(AnswerPromptArgs request, CancellationToken cancellationToken)
     {
-        if (_actionQueue.CurrentFrame == null)
+        if (actionQueue.CurrentFrame == null)
             throw new InvalidOperationException("No prompt to answer");
         
-        var selection = request.Answer.Select(_gameState.GetAtom).ToList();
+        var selection = request.Answer.Select(gameState.GetAtom).ToList();
         
-        _actionQueue.CurrentFrame.Context.PromptResponses.Add(request.PromptId, selection);
+        actionQueue.CurrentFrame.Context.PromptResponses.Add(request.PromptId, selection);
 
         return Unit.Task;
     }

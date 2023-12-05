@@ -5,23 +5,13 @@ using Archetype.Framework.Runtime.State;
 
 namespace Archetype.Framework.Runtime.Implementation;
 
-public class GameLoop : IGameLoop
+public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameState metaGameState)
+    : IGameLoop
 {
-    private readonly IActionQueue _actionQueue;
-    private readonly IReadOnlyList<IPhase> _phases;
-    private readonly IGameState _gameState;
-    private readonly IMetaGameState _metaGameState;
-    
+    private readonly IReadOnlyList<IPhase> _phases = metaGameState.Rules.TurnSequence;
+
     private readonly Queue<IPhase> _remainingPhases = new();
     private readonly Queue<IStep> _remainingSteps = new();
-
-    public GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameState metaGameState)
-    {
-        _actionQueue = actionQueue;
-        _phases = metaGameState.Rules.TurnSequence;
-        _gameState = gameState;
-        _metaGameState = metaGameState;
-    }
 
 
     public IPhase? CurrentPhase { get; private set; } = default;
@@ -96,7 +86,7 @@ public class GameLoop : IGameLoop
     {
         while (_remainingSteps.TryDequeue(out var step))
         {
-            _actionQueue.Push(CreateResolutionFrame(step));
+            actionQueue.Push(CreateResolutionFrame(step));
                 
             if (!ResolveActionQueue())
             {
@@ -109,7 +99,7 @@ public class GameLoop : IGameLoop
 
     private bool ResolveActionQueue()
     {
-        while (_actionQueue.ResolveNextKeyword() is {} e)
+        while (actionQueue.ResolveNextKeyword() is {} e)
         {
             if (e is PromptEvent)
             {
@@ -122,7 +112,7 @@ public class GameLoop : IGameLoop
 
     private IResolutionFrame CreateResolutionFrame(IStep step)
     {
-        var resolutionContext = step.CreateAndValidateResolutionContext(_gameState, _metaGameState, new List<PaymentPayload>(), new List<IAtom>());
+        var resolutionContext = step.CreateAndValidateResolutionContext(gameState, metaGameState, new List<PaymentPayload>(), new List<IAtom>());
 
         return new ResolutionFrame(resolutionContext, Declare.KeywordInstances(), step.Effects);
     }

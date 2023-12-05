@@ -2,14 +2,8 @@
 
 namespace Archetype.Framework.Runtime.Implementation;
 
-public class MetaGameState : IMetaGameState
+public class MetaGameState(IRules rules, IProtoCards protoCards) : IMetaGameState
 {
-    public MetaGameState(IRules rules, IProtoCards protoCards)
-    {
-        Rules = rules;
-        ProtoCards = protoCards;
-    }
-
-    public IRules Rules { get; }
-    public IProtoCards ProtoCards { get; }
+    public IRules Rules { get; } = rules;
+    public IProtoCards ProtoCards { get; } = protoCards;
 }
