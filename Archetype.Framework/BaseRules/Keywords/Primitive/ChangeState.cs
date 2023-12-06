@@ -14,7 +14,7 @@ public abstract class ChangeState<TAtom, T> : EffectPrimitiveDefinition
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var (atom, value) = OperandDeclaration.UnpackOperands(effectPayload);
+        var (atom, value) = OperandDeclaration.Unpack(effectPayload);
 
         if (atom.GetState<T>(Property) is { } existingValue && existingValue.Equals(value))
             return new NonEvent(effectPayload.Source);

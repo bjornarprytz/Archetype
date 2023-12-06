@@ -13,7 +13,7 @@ public class CreateCard : EffectPrimitiveDefinition
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var (cardName, zone) = OperandDeclaration.UnpackOperands(effectPayload);
+        var (cardName, zone) = OperandDeclaration.Unpack(effectPayload);
 
         if (context.MetaGameState.ProtoCards.GetProtoCard(cardName) is not { } protoCard)
             throw new InvalidOperationException($"No card with name {cardName} exists.");

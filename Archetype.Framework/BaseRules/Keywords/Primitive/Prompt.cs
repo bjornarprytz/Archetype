@@ -12,7 +12,7 @@ public class Prompt : EffectPrimitiveDefinition
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload payload)
     {
-        var (atoms, min, max, promptText) = OperandDeclaration.UnpackOperands(payload);
+        var (atoms, min, max, promptText) = OperandDeclaration.Unpack(payload);
 
         var atomIds = atoms.Select(a => a.Id).ToList();
 

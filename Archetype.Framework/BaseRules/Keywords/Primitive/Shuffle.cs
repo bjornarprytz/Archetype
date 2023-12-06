@@ -13,7 +13,7 @@ public class Shuffle : EffectPrimitiveDefinition
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var zone = OperandDeclaration.UnpackOperands(effectPayload);
+        var zone = OperandDeclaration.Unpack(effectPayload);
         zone.Shuffle();
         return new ShuffleEvent(effectPayload.Source, zone);
     }

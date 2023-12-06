@@ -50,17 +50,17 @@ public class OperandDeclaration<T0> : OperandDeclaration
         return operands.Count == 1 && operands[0].Type == typeof(T0);
     }
 
-    public T0 UnpackOperands(EffectPayload effectPayload)
+    public T0 Unpack(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0>();
     }
     
-    public T0 UnpackOperands(IKeywordInstance keywordInstance, IResolutionContext? context=null)
+    public T0 Unpack(IKeywordInstance keywordInstance, IResolutionContext? context=null)
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(context)).Deconstruct<T0>();
     }
     
-    public T0 UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    public T0 Unpack(IReadOnlyList<KeywordOperand> operands)
     {
         return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0>();
     }
@@ -82,17 +82,17 @@ public class OperandDeclaration<T0, T1> : OperandDeclaration
         return operands.Count == 2 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1);
     }
 
-    public (T0, T1) UnpackOperands(EffectPayload effectPayload)
+    public (T0, T1) Unpack(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1>();
     }
     
-    public (T0, T1) UnpackOperands(IKeywordInstance keywordInstance)
+    public (T0, T1) Unpack(IKeywordInstance keywordInstance)
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1>();
     }
     
-    public (T0, T1) UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    public (T0, T1) Unpack(IReadOnlyList<KeywordOperand> operands)
     {
         return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1>();
     }
@@ -115,17 +115,17 @@ public class OperandDeclaration<T0, T1, T2> : OperandDeclaration
         return operands.Count == 3 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2);
     }
 
-    public (T0, T1, T2) UnpackOperands(EffectPayload effectPayload)
+    public (T0, T1, T2) Unpack(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1, T2>();
     }
     
-    public (T0, T1, T2) UnpackOperands(IKeywordInstance keywordInstance)
+    public (T0, T1, T2) Unpack(IKeywordInstance keywordInstance)
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2>();
     }
     
-    public (T0, T1, T2) UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    public (T0, T1, T2) Unpack(IReadOnlyList<KeywordOperand> operands)
     {
         return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2>();
     }
@@ -149,18 +149,53 @@ public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
         return operands.Count == 4 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2) && operands[3].Type == typeof(T3);
     }
 
-    public (T0, T1, T2, T3) UnpackOperands(EffectPayload effectPayload)
+    public (T0, T1, T2, T3) Unpack(EffectPayload effectPayload)
     {
         return effectPayload.Operands.Deconstruct<T0, T1, T2, T3>();
     }
     
-    public (T0, T1, T2, T3) UnpackOperands(IKeywordInstance keywordInstance)
+    public (T0, T1, T2, T3) Unpack(IKeywordInstance keywordInstance)
     {
         return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3>();
     }
     
-    public (T0, T1, T2, T3) UnpackOperands(IReadOnlyList<KeywordOperand> operands)
+    public (T0, T1, T2, T3) Unpack(IReadOnlyList<KeywordOperand> operands)
     {
         return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3>();
+    }
+}
+
+public class OperandDeclaration<T0, T1, T2, T3, T4> : OperandDeclaration
+{
+    public OperandDeclaration(int nOptional = 0)
+    {
+        Operands = new List<IOperandDescription>
+        {
+            new OperandDescription<T0> {IsOptional = nOptional >= 5},
+            new OperandDescription<T1> {IsOptional = nOptional >= 4},
+            new OperandDescription<T2> {IsOptional = nOptional >= 3},
+            new OperandDescription<T3> {IsOptional = nOptional >= 2},
+            new OperandDescription<T4> {IsOptional = nOptional >= 1},
+        };
+    }
+
+    public override bool Validate(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Count == 5 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2) && operands[3].Type == typeof(T3) && operands[4].Type == typeof(T4);
+    }
+
+    public (T0, T1, T2, T3, T4) Unpack(EffectPayload effectPayload)
+    {
+        return effectPayload.Operands.Deconstruct<T0, T1, T2, T3, T4>();
+    }
+    
+    public (T0, T1, T2, T3, T4) Unpack(IKeywordInstance keywordInstance)
+    {
+        return keywordInstance.Operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3, T4>();
+    }
+    
+    public (T0, T1, T2, T3, T4) Unpack(IReadOnlyList<KeywordOperand> operands)
+    {
+        return operands.Select(operand => operand.GetValue(null)).Deconstruct<T0, T1, T2, T3, T4>();
     }
 }

@@ -12,7 +12,7 @@ public class ChangeZone : EffectPrimitiveDefinition
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload payload)
     {
-        var (atom, to) = OperandDeclaration.UnpackOperands(payload);
+        var (atom, to) = OperandDeclaration.Unpack(payload);
         var from = atom.CurrentZone;
 
         from?.Remove(atom);
