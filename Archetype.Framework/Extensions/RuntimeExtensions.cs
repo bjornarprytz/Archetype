@@ -44,8 +44,7 @@ public static class RuntimeExtensions
             effectInstance.Id,
             context.Source, 
             effectInstance.Keyword, 
-            effectInstance.Operands.Select(o => o.GetValue(context)).ToList(), 
-            effectInstance.Targets.Select(t => t.GetTarget(context)).ToList()
+            effectInstance.Operands.Select(o => o.GetValue(context)).ToList()
         );
     }
 

@@ -7,7 +7,6 @@ public interface IKeywordInstance
     Guid Id { get; }
     string Keyword { get; }
     IReadOnlyList<KeywordOperand> Operands { get; }
-    IReadOnlyList<KeywordTarget> Targets { get; }
 }
 
 public record KeywordInstance : IKeywordInstance
@@ -22,8 +21,6 @@ public record KeywordInstance : IKeywordInstance
 
     public Guid Id { get; } = Guid.NewGuid();
     public IReadOnlyList<KeywordOperand> Operands { get; init; } = new List<KeywordOperand>();
-    
-    public IReadOnlyList<KeywordTarget> Targets { get; init; } = new List<KeywordTarget>();
 }
 
 public record KeywordTarget(

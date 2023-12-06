@@ -34,6 +34,9 @@ public class ComputeMaxTests
         var target1 = Substitute.For<ICard>();
         var target2 = Substitute.For<ICard>();
         var target3 = Substitute.For<ICard>();
+        
+        var atomProvider = Substitute.For<IAtomProvider>();
+        atomProvider.ProvideAtoms(context).Returns(new List<IAtom> { target1, target2, target3 });
 
         var char1 = Substitute.For<IKeywordInstance>();
         char1.Keyword.Returns("TestProperty");
@@ -48,8 +51,7 @@ public class ComputeMaxTests
         char3.Keyword.Returns("OtherProperty");
         char3.Operands.Returns(Declare.Operands(Declare.Operand(69)));
 
-        keywordInstance.Operands.Returns(Declare.Operands(Declare.Operand("TestProperty")));
-        keywordInstance.Targets.Returns(Declare.Targets(Declare.Target(target1), Declare.Target(target2), Declare.Target(target3)));
+        keywordInstance.Operands.Returns(Declare.Operands(Declare.Operand(atomProvider), Declare.Operand("TestProperty")));
         
         target1.Characteristics.Returns( new Dictionary<string, IKeywordInstance> { ["TestProperty"] = char1 });
         target2.Characteristics.Returns( new Dictionary<string, IKeywordInstance> { ["TestProperty"] = char2 });
@@ -71,8 +73,10 @@ public class ComputeMaxTests
         var context = Substitute.For<IResolutionContext>();
         var keywordInstance = Substitute.For<IKeywordInstance>();
 
-        keywordInstance.Operands.Returns(Declare.Operands(Declare.Operand("TestProperty")));
-        keywordInstance.Targets.Returns(Declare.Targets());
+        var atomProvider = Substitute.For<IAtomProvider>();
+        atomProvider.ProvideAtoms(context).Returns(Enumerable.Empty<IAtom>());
+        
+        keywordInstance.Operands.Returns(Declare.Operands(Declare.Operand(atomProvider), Declare.Operand("TestProperty")));
         
         // Act
         

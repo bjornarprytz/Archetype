@@ -35,8 +35,7 @@ public class ShuffleTests
                 Guid.NewGuid(),
                 Substitute.For<IAtom>(),
                 _sut.Name,
-                new object[] { },
-                new [] { _targetZone }
+                new object[] { _targetZone }
             );
     
             // Act

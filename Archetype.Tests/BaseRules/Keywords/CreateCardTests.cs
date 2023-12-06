@@ -42,8 +42,7 @@ public class CreateCardTests
             Guid.NewGuid(),
             Substitute.For<IAtom>(),
             _sut.Name,
-            new object[] { "TestCard" },
-            new [] { _targetZone }
+            new object[] { "TestCard", _targetZone }
         );
 
         // Act

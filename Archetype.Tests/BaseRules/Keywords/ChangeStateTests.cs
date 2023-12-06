@@ -28,8 +28,7 @@ public class ChangeStateTests
             Guid.NewGuid(),
             Substitute.For<IAtom>(),
             _sut.Name,
-            new object[] { 42 },
-            new [] { _target }
+            new object?[] { _target, 42 }
         );
 
         // Act
@@ -52,8 +51,7 @@ public class ChangeStateTests
             Guid.NewGuid(),
             Substitute.For<IAtom>(),
             _sut.Name,
-            new object[] { 1 },
-            new [] { _target }
+            new object[] { _target, 1 }
         );
 
         _target.State.Returns(new Dictionary<string, object> { { "DUMMY", 1 } });

@@ -2,6 +2,6 @@
 
 namespace Archetype.Framework.Core.Primitives;
 
-public record EffectPayload(Guid Id, IAtom Source, string Keyword, IReadOnlyList<object?> Operands, IReadOnlyList<IAtom> Targets);
+public record EffectPayload(Guid Id, IAtom Source, string Keyword, IReadOnlyList<object?> Operands);
 
 

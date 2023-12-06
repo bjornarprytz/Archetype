@@ -54,7 +54,6 @@ public class ActionQueueTests
         var keywordInstance = Substitute.For<IKeywordInstance>();
         keywordInstance.Keyword.Returns("TestKeyword");
         keywordInstance.Operands.Returns(ArraySegment<KeywordOperand>.Empty);
-        keywordInstance.Targets.Returns(ArraySegment<KeywordTarget>.Empty);
         
         var resolutionFrame = Substitute.For<IResolutionFrame>();
         resolutionFrame.Effects.Returns(new List<IKeywordInstance> { keywordInstance });

@@ -43,8 +43,7 @@ public class ChangeZoneTests
             Guid.NewGuid(),
             Substitute.For<IAtom>(),
             _sut.Name,
-            new object[] { },
-            new IAtom[] { _atom, _to }
+            new [] { _atom, _to }
         );
 
         // Act
@@ -71,8 +70,7 @@ public class ChangeZoneTests
             Guid.NewGuid(),
             Substitute.For<IAtom>(),
             _sut.Name,
-            new object[] { },
-            new IAtom[] { _atom, _to }
+            new [] { _atom, _to }
         );
 
         // Act

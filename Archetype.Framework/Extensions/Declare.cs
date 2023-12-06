@@ -10,14 +10,6 @@ public static class Declare
     {
         return instances.ToList();
     }
-    public static IKeywordInstance KeywordInstance(string keyword, IReadOnlyList<KeywordTarget> targets, IReadOnlyList<KeywordOperand> operands)
-    {
-        return new KeywordInstance { Keyword = keyword, Operands = operands, Targets = targets };
-    }
-    public static IKeywordInstance KeywordInstance(string keyword, IReadOnlyList<KeywordTarget> targets)
-    {
-        return new KeywordInstance { Keyword = keyword, Targets = targets };
-    }
     
     public static IKeywordInstance KeywordInstance(string keyword, IReadOnlyList<KeywordOperand> operands)
     {
@@ -34,25 +26,6 @@ public static class Declare
         return characteristics
             .Select(c => KeywordInstance(c.Keyword, Operands(Operand(c.Value))))
             .ToDictionary(kw => kw.Keyword, kw => kw);
-    }
-    
-    public static IReadOnlyList<KeywordTarget> Targets(params KeywordTarget[] targets)
-    {
-        return targets.ToList();
-    }
-    
-    public static KeywordTarget Target(Func<IResolutionContext, IAtom> getTargetFunc)
-    {
-        return new KeywordTarget(getTargetFunc);
-    }
-    
-    public static KeywordTarget Target(IAtom atom)
-    {
-        return new KeywordTarget(_ => atom);
-    }
-    public static KeywordTarget Target(int index)
-    {
-        return new KeywordTarget(ctx => ctx.Targets[index]);
     }
     public static KeywordOperand TargetSource()
     {

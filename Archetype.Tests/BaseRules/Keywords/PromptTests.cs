@@ -43,8 +43,7 @@ public class PromptTests
             Guid.NewGuid(),
             Substitute.For<IAtom>(),
             _sut.Name,
-            new object[] { options, 1, 2, "Pick one or two things among the options" },
-            Array.Empty<IAtom>()
+            new object[] { options, 1, 2, "Pick one or two things among the options" }
         );
 
         // Act
