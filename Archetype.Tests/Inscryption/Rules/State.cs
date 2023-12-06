@@ -1,4 +1,4 @@
-﻿using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.State;
 using Archetype.Tests.Inscryption.Cards;
 
 namespace Archetype.Tests.Rules.Inscryption;

@@ -1,14 +1,14 @@
-﻿using Archetype.BasicRules.Primitives;
-using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.Implementation;
+﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
+using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Core.Structure;
+using Archetype.Framework.Interface;
+using Archetype.Framework.Interface.Actions;
+using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute.Extensions;
 
 namespace Archetype.Tests.Infrastructure;
 
-using Archetype.Framework.Proto;
-using Archetype.Framework.Runtime.Actions;
-using Archetype.Framework.Runtime.State;
 using NUnit.Framework;
 using NSubstitute;
 using System;

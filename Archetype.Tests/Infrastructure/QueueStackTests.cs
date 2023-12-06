@@ -1,4 +1,4 @@
-﻿using Archetype.Framework.Runtime;
+﻿using Archetype.Framework.Core.Structure;
 using FluentAssertions;
 
 namespace Archetype.Tests.Infrastructure;

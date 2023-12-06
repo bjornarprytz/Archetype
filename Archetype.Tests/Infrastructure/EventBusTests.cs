@@ -1,6 +1,6 @@
-﻿using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.Implementation;
-using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Core.Structure;
+using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
 

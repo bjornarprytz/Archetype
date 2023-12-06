@@ -1,8 +1,8 @@
-﻿using Archetype.Framework.Definitions;
-using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
+using Archetype.Framework.State;
 
-namespace Archetype.BasicRules.Primitives;
+namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
 public abstract class ChangeState<TAtom, T> : EffectPrimitiveDefinition
     where TAtom : IAtom

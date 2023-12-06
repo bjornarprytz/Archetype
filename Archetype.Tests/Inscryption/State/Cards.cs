@@ -1,5 +1,5 @@
 ﻿using Archetype.Framework.Parsing;
-using Archetype.Framework.Runtime.State;
+using Archetype.Framework.State;
 using Archetype.Tests.Rules.Inscryption;
 
 namespace Archetype.Tests.Inscryption.Cards;

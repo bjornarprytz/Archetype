@@ -1,7 +1,6 @@
-﻿using Archetype.BasicRules;
-using Archetype.Framework.Proto;
-using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
+using Archetype.Framework.State;
 
 namespace Archetype.Tests.Inscryption.Cards;
 

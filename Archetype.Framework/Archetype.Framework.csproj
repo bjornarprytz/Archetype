@@ -17,4 +17,8 @@
       <PackageReference Include="PubSub" Version="4.0.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="BaseRules\" />
+    </ItemGroup>
+
 </Project>

@@ -1,28 +1,21 @@
-﻿namespace Archetype.BasicRules;
+﻿namespace Archetype.Framework;
  
-// TODO: Prune classes and interfaces that are not used
-// TODO: Scrap the syntax (it's a game dev concern)
 
-// TODO: What remains?
+
+// TODO: Target is a card concept. Keywords should not have a concept of targets. The operands should be bound at the card level.
+// TODO: Revisit wether cards/abilities need to _be_ an actionBlock, or if they could _have_ an actionBlock.
+
+
+// TODO: Future Scope
     /*
-     * - Bootstrapping API
-     *  - RulesBuilder (Produce the Rules)
-     *      - keywords
-     *      - order and resolution of phases and steps
-     *      - state based effects resolution (e.g. death, game end, etc.)
-     *  - ProtoBuilder (Produce the ProtoCards)
-     *  - StateBuilder (Produce the initial game state)
-     *      - custom atoms (Zones, Units, the player, etc.)
-     *      - the initial "game board" (DrawPile, Hand, etc.)
-     *
-     * - Validate the provided rules and proto cards
-     *  - Detect and avoid infinite loops from circular dependencies (a composite keyword that contains itself)
-     *  - Detect invalid turn order (phases) (No phases, No allowed actions, and when there are allowed actions, PassTurn should be one of them)
-     * - The framework must call into these provided APIs
-     * - Initiate the game loop
-     * - Provide an API to execute game actions
-     * - Unit test game actions
-     *
+     * Refactor and rename classes so it reflects the structure of the framework. 
      * - Future Scope:
-     *   - ComputeCount for specific values of a characteristic (e.g. ComputeCount("Health", 10)) 
+     *  - Unit test game actions
+     *  - Provide an API to execute game actions
+     *  - Validate the provided rules and proto cards
+     *      - Detect and avoid infinite loops from circular dependencies (a composite keyword that contains itself)
+     *      - Detect invalid turn order (phases) (No phases, No allowed actions, and when there are allowed actions, PassTurn should be one of them)
+     *  - The framework must call into these provided APIs
+     *  - Initiate the game loop
+     *  - ComputeCount for specific values of a characteristic (e.g. ComputeCount("Health", 10)) 
      */

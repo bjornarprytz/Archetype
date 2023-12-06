@@ -1,10 +1,10 @@
-﻿using Archetype.Framework.Definitions;
-using Archetype.Framework.Proto;
-using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.Actions;
-using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
+using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
+using Archetype.Framework.Interface.Actions;
+using Archetype.Framework.State;
 
-namespace Archetype.BasicRules.Primitives;
+namespace Archetype.Framework.BaseRules.Keywords.Composite;
 
 public class WorkCost : CostDefinition
 {

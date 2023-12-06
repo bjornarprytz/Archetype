@@ -1,9 +1,7 @@
-﻿using Archetype.Framework.Definitions;
-using Archetype.Framework.Proto;
-using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.State;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.State;
 
-namespace Archetype.BasicRules.Primitives;
+namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
 public class ConditionZoneType<TZone> : ConditionDefinition
     where TZone : IZone

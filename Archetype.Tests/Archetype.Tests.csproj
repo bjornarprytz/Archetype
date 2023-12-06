@@ -20,6 +20,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Archetype.Framework\Archetype.Framework.csproj" />
+      <ProjectReference Include="..\Archetype.Prototype1\Archetype.Prototype1.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="BaseRules\" />
     </ItemGroup>
 
 </Project>

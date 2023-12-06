@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Reflection;
-using Archetype.BasicRules.Primitives;
-using Archetype.Framework.Definitions;
-using Archetype.Framework.Runtime;
-using Archetype.Framework.Runtime.State;
+using Archetype.Framework.BaseRules.Keywords.Primitive;
+using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.DependencyInjection;
+using Archetype.Framework.Design;
+using Archetype.Framework.State;
 
 namespace Archetype.Tests.Rules.Inscryption;
 
@@ -11,16 +12,19 @@ public static class Build
 {
     public static IRules InscryptionRules()
     {
-        var rules = new Framework.Runtime.Implementation.Rules();
+        var rulesBuilder = new RulesBuilder();
         
         foreach (var keyword in GetKeywords())
         {
-            rules.AddKeyword(keyword);
+            rulesBuilder.AddKeyword(keyword);
+        }
+
+        foreach (var phase in GetPhases())
+        {
+            rulesBuilder.AddPhase(phase);
         }
         
-        rules.SetTurnSequence(GetPhases().ToList());
-        
-        return rules;
+        return rulesBuilder.Build();
     }
 
 
