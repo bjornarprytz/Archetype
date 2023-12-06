@@ -74,10 +74,5 @@ public class ChangeStateTests
         public override string Name => "DUMMY";
         public override string ReminderText => "Dummy reminder text";
         protected override string Property => "DUMMY";
-        protected override OperandDeclaration<int> OperandDeclaration { get; } = new();
-        protected override int ProduceValue(IResolutionContext context, EffectPayload effectPayload)
-        {
-            return OperandDeclaration.UnpackOperands(effectPayload);
-        }
     }
 }

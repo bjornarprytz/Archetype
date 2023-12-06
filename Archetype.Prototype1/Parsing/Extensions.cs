@@ -56,11 +56,15 @@ public static class Extensions
         if (keywordContext.keyword().GetText() is not { } keyword 
             || rules.GetDefinition(keyword) is not { } definition)
             throw new InvalidOperationException("Keyword expression has no valid keyword");
-        
-        var targetRefs = keywordContext.targetRef()?.Select(GetTarget).ToList() ?? new List<KeywordTarget>();
-        var operands = keywordContext.operand()?.Select(ToOperand).ToList() ?? new List<KeywordOperand>();
 
-        return definition.CreateInstance(operands, targetRefs);
+        var targetRefs = keywordContext.targetRef()?.Select(GetTarget).ToList() ?? new List<KeywordOperand>();
+        var operands = (keywordContext.operand()?.Select(ToOperand).ToList() ?? new List<KeywordOperand>());
+        
+        var operandList = new List<KeywordOperand>();
+        operandList.AddRange(targetRefs);
+        operandList.AddRange(operands);
+        
+        return definition.CreateInstance(operandList);
     }
 
     private static IEnumerable<IKeywordInstance> GetKeywordInstances(this IEnumerable<ActionBlockParser.KeywordExpressionContext>? contexts, IRules rules)
@@ -103,13 +107,13 @@ public static class Extensions
             .GetKeywordInstances(rules);
     }
 
-    private static KeywordTarget GetTarget(this ActionBlockParser.TargetRefContext targetRefContext)
+    private static KeywordOperand GetTarget(this ActionBlockParser.TargetRefContext targetRefContext)
     {
         var targetText =  targetRefContext.index()?.NUMBER()?.GetText() ?? targetRefContext.SELF()?.GetText() ?? throw new InvalidOperationException("Target ref has no index or SELF");
         
         if (int.TryParse(targetText, out var index))
         {
-            return Declare.Target(index);
+            return Declare.Operand(index);
         }
         if (targetText == "~")
         {

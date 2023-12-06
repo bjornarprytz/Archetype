@@ -9,14 +9,11 @@ public class CreateCard : EffectPrimitiveDefinition
     public override string Name => "CREATE_CARD";
     public override string ReminderText => "Create a card and place it in a zone.";
 
-    protected override OperandDeclaration<string> OperandDeclaration { get; } = new();
-    protected override TargetDeclaration<IZone> TargetDeclaration { get; } = new();
+    protected override OperandDeclaration<string, IZone> OperandDeclaration { get; } = new();
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var cardName = OperandDeclaration.UnpackOperands(effectPayload);
-        
-        var zone = TargetDeclaration.UnpackTargets(effectPayload);
+        var (cardName, zone) = OperandDeclaration.UnpackOperands(effectPayload);
 
         if (context.MetaGameState.ProtoCards.GetProtoCard(cardName) is not { } protoCard)
             throw new InvalidOperationException($"No card with name {cardName} exists.");

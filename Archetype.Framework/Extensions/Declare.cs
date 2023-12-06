@@ -54,9 +54,9 @@ public static class Declare
     {
         return new KeywordTarget(ctx => ctx.Targets[index]);
     }
-    public static KeywordTarget TargetSource()
+    public static KeywordOperand TargetSource()
     {
-        return new KeywordTarget(ctx => ctx.Source);
+        return new KeywordOperand<IAtom>(ctx => ctx.Source);
     }
     
     public static IReadOnlyList<KeywordOperand> Operands(params KeywordOperand[] operands)
@@ -64,15 +64,9 @@ public static class Declare
         return operands.ToList();
     }
     
-
-    public static KeywordOperand Operand(string value)
+    public static KeywordOperand Operand<T>(T value)
     {
-        return new KeywordOperand<string>(_ => value);
-    }
-    
-    public static KeywordOperand Operand(int value)
-    {
-        return new KeywordOperand<int>(_ => value);
+        return new KeywordOperand<T>(_ => value);
     }
     
     public static KeywordOperand Operand<T>(Func<IResolutionContext, T> getValueFunc)

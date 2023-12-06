@@ -6,38 +6,29 @@ public interface IKeywordDefinition
 {
     string Name { get; }
     string ReminderText { get; }
-    IReadOnlyList<KeywordTargetDescription> Targets { get; }
     IReadOnlyList<IOperandDescription> Operands { get; }
-    IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets);
+    IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands);
 }
 public abstract class KeywordDefinition : IKeywordDefinition
 {
     public abstract string Name { get; } // ID
     public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
     protected virtual OperandDeclaration OperandDeclaration { get; } = new();
-    protected virtual TargetDeclaration TargetDeclaration { get; } = new();
-    public IReadOnlyList<KeywordTargetDescription> Targets => TargetDeclaration;
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
 
-    public IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands, IEnumerable<KeywordTarget> targets)
+    public IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands)
     {
         var operandsList = operands.ToList();
-        var targetsList = targets.ToList();
 
         if (!OperandDeclaration.Validate(operandsList))
         {
             throw new InvalidOperationException($"Invalid operands for keyword {Name}");
-        }
-        if (!TargetDeclaration.Validate(targetsList))
-        {
-            throw new InvalidOperationException($"Invalid targets for keyword {Name}");
         }
         
         return new KeywordInstance 
         {
             Keyword = Name,
             Operands = operandsList,
-            Targets = targetsList,
         };
     }
 }

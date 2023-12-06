@@ -1,9 +1,9 @@
-﻿using Archetype.Framework.Core.Structure;
-using Archetype.Framework.Extensions;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Core.Structure;
 using Archetype.Framework.Interface.Actions;
 using Archetype.Framework.State;
 
-namespace Archetype.Framework.Core.Primitives;
+namespace Archetype.Framework.Extensions;
 
 public static class RuntimeExtensions
 {

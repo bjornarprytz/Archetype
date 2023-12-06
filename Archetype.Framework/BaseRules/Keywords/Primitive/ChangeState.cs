@@ -7,17 +7,14 @@ namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 public abstract class ChangeState<TAtom, T> : EffectPrimitiveDefinition
     where TAtom : IAtom
 {
-    protected override TargetDeclaration<TAtom> TargetDeclaration { get; } = new();
+    protected override OperandDeclaration<TAtom, T> OperandDeclaration { get; } = new();
     
     protected abstract string Property { get; }
-    protected abstract T ProduceValue(IResolutionContext context, EffectPayload effectPayload);
     
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload effectPayload)
     {
-        var atom = TargetDeclaration.UnpackTargets(effectPayload);
-
-        var value = ProduceValue(context, effectPayload);
+        var (atom, value) = OperandDeclaration.UnpackOperands(effectPayload);
 
         if (atom.GetState<T>(Property) is { } existingValue && existingValue.Equals(value))
             return new NonEvent(effectPayload.Source);

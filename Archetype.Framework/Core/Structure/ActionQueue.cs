@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Design;
+using Archetype.Framework.Extensions;
 
 namespace Archetype.Framework.Core.Structure;
 

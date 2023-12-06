@@ -8,11 +8,11 @@ public class ChangeZone : EffectPrimitiveDefinition
     public override string Name => "CHANGE_ZONE";
     public override string ReminderText =>  "Change zone from the existing zone to the target zone.";
 
-    protected override TargetDeclaration<IAtom, IZone> TargetDeclaration { get; } = new();
+    protected override OperandDeclaration<IAtom, IZone> OperandDeclaration { get; } = new();
 
     public override IEvent Resolve(IResolutionContext context, EffectPayload payload)
     {
-        var (atom, to) = TargetDeclaration.UnpackTargets(payload);
+        var (atom, to) = OperandDeclaration.UnpackOperands(payload);
         var from = atom.CurrentZone;
 
         from?.Remove(atom);
