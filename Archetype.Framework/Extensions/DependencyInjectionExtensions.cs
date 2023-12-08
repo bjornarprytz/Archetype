@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Archetype.Framework.Core.Structure;
+using Archetype.Framework.Design;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Framework.Extensions;
@@ -17,7 +18,8 @@ public static class ArchetypeExtensions
             .AddSingleton<IActionQueue, ActionQueue>()
             .AddSingleton<IGameLoop, GameLoop>()
             .AddSingleton<IGameActionHandler, GameActionHandler>()
-            .AddSingleton<IMetaGameState, MetaGameState>();
+            .AddSingleton<IMetaGameState, MetaGameState>()
+            .AddSingleton<IProtoData, ProtoData>();
 
         return serviceProvider;
     }

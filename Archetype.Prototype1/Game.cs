@@ -25,11 +25,24 @@ public static class Game
                 .AddArchetype()
                 .AddSingleton<IGameState, GameState>()
                 .AddSingleton(BasicRules.Create())
-                // TODO: This needs to be a card loader or something.
-                // It needs to be initiated after the ServiceProvider
-                // has been built, and the runtime can decide when it's a good idea to do that work
-                //.AddSingleton<IProtoCards, CardPool>() 
+                .AddSingleton<Bootstrapper>()
             .BuildServiceProvider();
+        
+        var bootstrapper = _serviceProvider.GetService<Bootstrapper>()!;
+        
+        bootstrapper.Bootstrap( // TODO: Make this an actual usable string
+            @"{
+                ""name"": ""Test Set"",
+                ""cards"": [
+                    {
+                        ""name"": ""Test Card"",
+                        ""keywords"": [""Test""],
+                        ""cost"": 1,
+                        ""attack"": 1,
+                        ""health"": 1
+                    }
+                ]
+            }");
         
         return _serviceProvider.GetService<IGameRoot>()!;
     }

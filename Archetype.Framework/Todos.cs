@@ -1,9 +1,13 @@
 ﻿namespace Archetype.Framework;
 
 // TODO: Finish the DependencyInjection tools
+    // - Factories, implement and add to DI
+// TODO: Add state based effects resolver
+// TODO: Write a parser and put it in DI somewhere
 // TODO: Keyword definitions should not have static names, but GUIDs. The parser should refer to them by type, and the internal logic can use the GUIDs, it doesn't have to be human readable. 
 // TODO: Revisit wether cards/abilities need to _be_ an actionBlock, or if they could _have_ an actionBlock.
 // TODO: Phases are atoms, which means they can have characteristics and currentZone. Is this an affordable quirk?
+
 
 // TODO: Future Scope
     /*
