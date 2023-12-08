@@ -36,7 +36,7 @@ public class GameLoopTests
         _actionQueue.ResolveNextKeyword().Returns(null as IEvent);
         
         _gameRoot.Infrastructure.ActionQueue.Returns(_actionQueue);
-        _gameRoot.MetaGameState.Rules.TurnSequence.Returns(new List<IPhase>(){ _firstPhase, _secondPhase, _thirdPhase });
+        _gameRoot.MetaGameState.ProtoData.TurnSequence.Returns(new List<IPhase>(){ _firstPhase, _secondPhase, _thirdPhase });
         
         _thirdPhase.AllowedActions.Returns(new List<ActionDescription>(){ new (ActionType.PassTurn) });
         
@@ -70,20 +70,14 @@ public class GameLoopTests
         var keyword2 = Substitute.For<IKeywordInstance>();
         var keyword3 = Substitute.For<IKeywordInstance>();
         
-        var step1 = Substitute.For<IStep>();
-        step1.Effects.Returns(new List<IKeywordInstance>(){ keyword1, keyword2 });
-        var step2 = Substitute.For<IStep>();
-        step2.Effects.Returns(new List<IKeywordInstance>(){ keyword3 });
-        
-        _firstPhase.Steps.Returns(new List<IStep>(){ step1, step2 });
+        _firstPhase.Steps.Returns(new List<IKeywordInstance>(){ keyword1, keyword2, keyword3 });
         _firstPhase.AllowedActions.Returns(new List<ActionDescription>());
         
         _secondPhase.AllowedActions.Returns(new List<ActionDescription>() { new (ActionType.PassTurn) });
         
         var result = _sut.Advance();
         
-        _actionQueue.Received().Push(Arg.Is<IResolutionFrame>(x => x.Effects == step1.Effects));
-        _actionQueue.Received().Push(Arg.Is<IResolutionFrame>(x => x.Effects == step2.Effects));
+        _actionQueue.Received().Push(Arg.Is<IResolutionFrame>(x => x.Effects == _firstPhase.Steps));
         
         result.AvailableActions.Should().ContainSingle(x => x.Type == ActionType.PassTurn);
     }

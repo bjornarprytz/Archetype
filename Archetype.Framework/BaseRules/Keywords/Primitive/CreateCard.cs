@@ -15,7 +15,7 @@ public class CreateCard : EffectPrimitiveDefinition
     {
         var (cardName, zone) = OperandDeclaration.Unpack(effectPayload);
 
-        if (context.MetaGameState.ProtoCards.GetProtoCard(cardName) is not { } protoCard)
+        if (context.MetaGameState.ProtoData.GetProtoCard(cardName) is not { } protoCard)
             throw new InvalidOperationException($"No card with name {cardName} exists.");
         
         var card = new Card(protoCard)

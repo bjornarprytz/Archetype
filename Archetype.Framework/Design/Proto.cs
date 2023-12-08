@@ -1,10 +1,12 @@
 ﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.State;
 
 namespace Archetype.Framework.Design;
 
-public interface IProtoCards
+public interface IProtoData
 {
     IProtoCard? GetProtoCard(string name);
+    IReadOnlyList<IPhase>? TurnSequence { get; }
 }
 
 public interface IProtoActionBlock

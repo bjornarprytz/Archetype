@@ -8,7 +8,13 @@ namespace Archetype.Framework.Extensions;
 public static class RuntimeExtensions
 {
     
-    public static IResolutionContext CreateAndValidateResolutionContext(this IActionBlock actionBlock, IGameState gameState, IMetaGameState metaGameState, IReadOnlyList<PaymentPayload> payments, IReadOnlyList<IAtom> targets)
+    public static IResolutionContext CreateAndValidateResolutionContext(
+        this IActionBlock actionBlock, 
+        IGameState gameState, 
+        IMetaGameState metaGameState, 
+        IReadOnlyList<PaymentPayload> payments, 
+        IReadOnlyList<IAtom> targets
+        )
     {
         var rules = metaGameState.Rules;
         var conditions = actionBlock.Conditions;

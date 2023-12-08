@@ -5,11 +5,11 @@ namespace Archetype.Framework.Core.Structure;
 public interface IMetaGameState
 {
     IRules Rules { get; }
-    IProtoCards ProtoCards { get; }
+    IProtoData ProtoData { get; }
 }
 
-public class MetaGameState(IRules rules, IProtoCards protoCards) : IMetaGameState
+public class MetaGameState(IRules rules, IProtoData protoData) : IMetaGameState
 {
     public IRules Rules { get; } = rules;
-    public IProtoCards ProtoCards { get; } = protoCards;
+    public IProtoData ProtoData { get; } = protoData;
 }

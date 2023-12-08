@@ -36,7 +36,7 @@ public class CreateCardTests
         // Arrange
         var protoCard = Substitute.For<IProtoCard>();
         protoCard.Name.Returns("TestCard");
-        _context.MetaGameState.ProtoCards.GetProtoCard("TestCard").Returns(protoCard);
+        _context.MetaGameState.ProtoData.GetProtoCard("TestCard").Returns(protoCard);
         
         var payload = new EffectPayload(
             Guid.NewGuid(),

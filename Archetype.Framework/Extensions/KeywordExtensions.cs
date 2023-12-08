@@ -7,11 +7,16 @@ namespace Archetype.Framework.Extensions;
 
 public static class KeywordExtensions
 {
-    public static IRulesBuilder AddBasicKeywords(this IRulesBuilder rules)
+    public static IRulesBuilder AddBasicKeywords(this IRulesBuilder rulesBuilder)
     {
-        foreach (var t in Assembly.GetAssembly(typeof(ChangeZone))!.GetTypes().Where(t => t.IsSubclassOf(typeof(IKeywordDefinition)) && !t.IsAbstract))
+        return rulesBuilder.AddKeywordsFromAssembly(Assembly.GetAssembly(typeof(ChangeZone))!);
+    }
+
+    public static IRulesBuilder AddKeywordsFromAssembly(this IRulesBuilder rulesBuilder, Assembly assembly)
+    {
+        foreach (var t in assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(IKeywordDefinition)) && !t.IsAbstract))
         {
-            if (t == null)
+            if (t is null)
             {
                 throw new InvalidOperationException($"Failed to create instance of {t?.FullName}");
             }
@@ -24,10 +29,10 @@ public static class KeywordExtensions
             }
             
             Console.WriteLine("Adding keyword: " + keywordDefinition.Name);
-            rules.AddKeyword(keywordDefinition);
+            rulesBuilder.AddKeyword(keywordDefinition);
         };
-        
-        return rules;
+
+        return rulesBuilder;
     }
     
     

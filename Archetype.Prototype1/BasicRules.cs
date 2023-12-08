@@ -1,20 +1,53 @@
-﻿using Archetype.Framework.Core.Primitives;
+﻿using System.Reflection;
+using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Definitions;
+using Archetype.Framework.DependencyInjection;
 using Archetype.Framework.Design;
+using Archetype.Framework.Extensions;
+using Archetype.Framework.Interface;
+using Archetype.Framework.Interface.Actions;
 using Archetype.Framework.State;
+using Archetype.Prototype1.Keywords;
 
 namespace Archetype.Prototype1;
 
-public class BasicRules : IRules
+public static class BasicRules
 {
-    public IReadOnlyList<IPhase> TurnSequence { get; }
-    public IKeywordDefinition? GetDefinition(string keyword)
+    public static IRules Create()
     {
-        throw new NotImplementedException();
+        var builder = new RulesBuilder();
+        
+        builder
+            .AddBasicKeywords()
+            .AddKeywordsFromAssembly(Assembly.GetExecutingAssembly());
+        
+        return builder.Build();
     }
+}
 
-    public T? GetDefinition<T>() where T : IKeywordDefinition
+public class MainPhase(IRules rules) : Phase
+{
+    public override string Name { get; } = "Main Phase";
+    public override IReadOnlyList<IKeywordInstance> Steps { get; } = new []
     {
-        throw new NotImplementedException();
-    }
+        rules.GetOrThrow<DrawCard>().CreateInstance()
+    };
+
+    public override IReadOnlyList<ActionDescription> AllowedActions { get; } = new[]
+    {
+        new ActionDescription(ActionType.PlayCard), 
+        new ActionDescription(ActionType.PassTurn), 
+        new ActionDescription(ActionType.UseAbility)
+    };
+}
+
+public class EnemyPhase(IRules rules) : Phase
+{
+    public override string Name { get; } = "Enemy Phase";
+    public override IReadOnlyList<IKeywordInstance> Steps { get; } = new []
+    {
+        rules.GetOrThrow<EnemyPhaseResolver>().CreateInstance()
+    };
+
+    public override IReadOnlyList<ActionDescription> AllowedActions { get; } = ArraySegment<ActionDescription>.Empty;
 }

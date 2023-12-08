@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Core.Structure;
+using Archetype.Framework.DependencyInjection;
 using Archetype.Framework.Design;
 using Archetype.Framework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,11 +24,13 @@ public static class Game
             new ServiceCollection()
                 .AddArchetype()
                 .AddSingleton<IGameState, GameState>()
-                .AddSingleton<IRules, BasicRules>()
-                .AddSingleton<IProtoCards, CardPool>()
-            .BuildServiceProvider()
-            ;
-
+                .AddSingleton(BasicRules.Create())
+                // TODO: This needs to be a card loader or something.
+                // It needs to be initiated after the ServiceProvider
+                // has been built, and the runtime can decide when it's a good idea to do that work
+                //.AddSingleton<IProtoCards, CardPool>() 
+            .BuildServiceProvider();
+        
         return _serviceProvider.GetService<IGameRoot>()!;
     }
 }

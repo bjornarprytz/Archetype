@@ -6,6 +6,16 @@ namespace Archetype.Framework.Extensions;
 
 public static class Declare
 {
+    public static KeywordOperand ToOperand(this object value)
+    {
+        if (value is KeywordOperand operand)
+        {
+            return operand;
+        }
+        
+        return new KeywordOperand(value.GetType(), _ => value);
+    }
+    
     public static IReadOnlyList<IKeywordInstance> KeywordInstances(params IKeywordInstance[] instances)
     {
         return instances.ToList();

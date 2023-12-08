@@ -2,7 +2,6 @@
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface;
-using Archetype.Framework.Interface.Actions;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Core.Structure;
@@ -17,13 +16,9 @@ public interface IGameLoop
 public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameState metaGameState)
     : IGameLoop
 {
-    private readonly IReadOnlyList<IPhase> _phases = metaGameState.Rules.TurnSequence;
-
     private readonly Queue<IPhase> _remainingPhases = new();
-    private readonly Queue<IStep> _remainingSteps = new();
 
-
-    public IPhase? CurrentPhase { get; private set; } = default;
+    public IPhase? CurrentPhase { get; private set; }
 
     public IGameApi Advance()
     {
@@ -33,20 +28,10 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
         
         while (true)
         {
-            
             // Flush the action queue
             if (!ResolveActionQueue())
             {
                 return new PromptApi();
-            }
-            
-            // If we're in a phase, flush the steps
-            if (_remainingSteps.Count > 0)
-            {
-                if (!ResolveSteps())
-                {
-                    return new PromptApi();
-                }
             }
             
             if (CurrentPhase.AllowedActions.Count != 0)
@@ -67,47 +52,21 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
 
     private IPhase MountNextPhase()
     {
-        if (_remainingPhases.Count == 0)
-        {
-            // Next turn
-            foreach (var phase in _phases)
-            {
-                _remainingPhases.Enqueue(phase);
-            }
-        }
+        if (_remainingPhases.Count != 0) return _remainingPhases.Dequeue();
         
-        var nextPhase = _remainingPhases.Dequeue();
-        
-        if (_remainingSteps.Count > 0)
+        // Next turn
+        foreach (var phase in GetTurnSequence())
         {
-            throw new InvalidOperationException("Steps remaining");
+            _remainingPhases.Enqueue(phase);
         }
 
-        foreach (var step in nextPhase.Steps)
-        {
-            _remainingSteps.Enqueue(step);
-        }
-        
-        return nextPhase;
-    }
-
-    private bool ResolveSteps()
-    {
-        while (_remainingSteps.TryDequeue(out var step))
-        {
-            actionQueue.Push(CreateResolutionFrame(step));
-                
-            if (!ResolveActionQueue())
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return _remainingPhases.Dequeue();;
     }
 
     private bool ResolveActionQueue()
     {
+        actionQueue.Push(CreateResolutionFrame());
+        
         while (actionQueue.ResolveNextKeyword() is {} e)
         {
             if (e is PromptEvent)
@@ -119,10 +78,22 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
         return true;
     }
 
-    private IResolutionFrame CreateResolutionFrame(IStep step)
+    private IResolutionFrame CreateResolutionFrame()
     {
-        var resolutionContext = step.CreateAndValidateResolutionContext(gameState, metaGameState, new List<PaymentPayload>(), new List<IAtom>());
+        if (CurrentPhase == null)
+        {
+            throw new InvalidOperationException("No current phase");
+        }
+        
+        var resolutionContext = new ResolutionContext
+        {
+            MetaGameState = metaGameState,
+            GameState = gameState,
+            Source = CurrentPhase
+        };
 
-        return new ResolutionFrame(resolutionContext, Declare.KeywordInstances(), step.Effects);
+        return new ResolutionFrame(resolutionContext, Declare.KeywordInstances(), CurrentPhase.Steps);
     }
+    
+    private IReadOnlyList<IPhase> GetTurnSequence() => metaGameState.ProtoData.TurnSequence ?? throw new InvalidOperationException("No turn sequence defined");
 }

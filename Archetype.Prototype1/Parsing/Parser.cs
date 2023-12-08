@@ -28,15 +28,8 @@ public interface ISetParser
     public IProtoSet ParseSet(string setJson);
 }
 
-public class Parser : ISetParser
+public class Parser(ICardParser cardParser) : ISetParser
 {
-    private readonly ICardParser _cardParser;
-
-    public Parser(ICardParser cardParser)
-    {
-        _cardParser = cardParser;
-    }
-
     public IProtoSet ParseSet(string setJson)
     {
         var setData = JsonSerializer.Deserialize<SetData>(setJson);
@@ -44,7 +37,7 @@ public class Parser : ISetParser
         if (setData is null)
             throw new InvalidOperationException("Could not parse set data");
         
-        var cards = setData.Cards.Select(_cardParser.ParseCard);
+        var cards = setData.Cards.Select(cardParser.ParseCard);
         
         return new ProtoSet
         (

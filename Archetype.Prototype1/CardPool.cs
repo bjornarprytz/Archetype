@@ -1,18 +1,9 @@
 ﻿using Archetype.Framework.Design;
+using Archetype.Framework.Parsing;
 
 namespace Archetype.Prototype1;
 
-public class CardPool : IProtoCards
+public static class CardPool
 {
-    private readonly Dictionary<string, IProtoCard> _cards = new();
 
-    public CardPool()
-    {
-        
-    }
-    
-    public IProtoCard? GetProtoCard(string name)
-    {
-        throw new NotImplementedException();
-    }
 }

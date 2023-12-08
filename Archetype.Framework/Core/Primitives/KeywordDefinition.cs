@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Interface.Actions;
+﻿using Archetype.Framework.Extensions;
+using Archetype.Framework.Interface.Actions;
 
 namespace Archetype.Framework.Core.Primitives;
 
@@ -7,7 +8,7 @@ public interface IKeywordDefinition
     string Name { get; }
     string ReminderText { get; }
     IReadOnlyList<IOperandDescription> Operands { get; }
-    IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands);
+    IKeywordInstance CreateInstance(params object[] operands);
 }
 public abstract class KeywordDefinition : IKeywordDefinition
 {
@@ -16,11 +17,11 @@ public abstract class KeywordDefinition : IKeywordDefinition
     protected virtual OperandDeclaration OperandDeclaration { get; } = new();
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
 
-    public IKeywordInstance CreateInstance(IEnumerable<KeywordOperand> operands)
+    public IKeywordInstance CreateInstance(params object[] operands)
     {
-        var operandsList = operands.ToList();
-
-        if (!OperandDeclaration.Validate(operandsList))
+        var operandList = operands.Select(o => o.ToOperand()).ToList();
+        
+        if (!OperandDeclaration.Validate(operandList))
         {
             throw new InvalidOperationException($"Invalid operands for keyword {Name}");
         }
@@ -28,7 +29,7 @@ public abstract class KeywordDefinition : IKeywordDefinition
         return new KeywordInstance 
         {
             Keyword = Name,
-            Operands = operandsList,
+            Operands = operandList,
         };
     }
 }

@@ -5,7 +5,6 @@ namespace Archetype.Framework.Design;
 
 public interface IRules
 {
-    IReadOnlyList<IPhase> TurnSequence { get; }
     IKeywordDefinition? GetDefinition(string keyword);
     T? GetDefinition<T>() where T : IKeywordDefinition;
 }

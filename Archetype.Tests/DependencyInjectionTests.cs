@@ -16,7 +16,7 @@ public class DependencyInjectionTests
     public void AddArchetype()
     {
         var rules = Substitute.For<IRules>();
-        var protoCards = Substitute.For<IProtoCards>();
+        var protoCards = Substitute.For<IProtoData>();
         var gameState = Substitute.For<IGameState>();
         
         var services = new ServiceCollection();
