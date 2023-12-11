@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.State;
+﻿using Archetype.Framework.Design;
+using Archetype.Framework.State;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Framework.DependencyInjection;
@@ -12,20 +13,6 @@ public class ProtoCardBuilderFactory(IServiceProvider serviceProvider) : IProtoC
 {
     public ProtoCardBuilder CreateBuilder()
     {
-        // Use the DI container to create an instance of ProtoCardBuilder
         return serviceProvider.GetRequiredService<ProtoCardBuilder>();
-    }
-}
-
-public interface IPhaseFactory
-{
-    public TPhase CreatePhase<TPhase>() where TPhase : IPhase;
-}
-
-public class PhaseFactory(IServiceProvider serviceProvider) : IPhaseFactory
-{
-    public TPhase CreatePhase<TPhase>() where TPhase : IPhase
-    {
-        return serviceProvider.GetRequiredService<TPhase>();
     }
 }

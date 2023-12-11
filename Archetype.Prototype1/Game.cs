@@ -1,8 +1,5 @@
 ﻿using Archetype.Framework.Core.Structure;
-using Archetype.Framework.DependencyInjection;
-using Archetype.Framework.Design;
 using Archetype.Framework.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Prototype1;
 
@@ -16,22 +13,7 @@ namespace Archetype.Prototype1;
 
 public static class Game
 {
-    private static IServiceProvider _serviceProvider = null;
-    
-    public static IGameRoot Start()
-    {
-        _serviceProvider = 
-            new ServiceCollection()
-                .AddArchetype()
-                .AddSingleton<IGameState, GameState>()
-                .AddSingleton(BasicRules.Create())
-                .AddSingleton<Bootstrapper>()
-            .BuildServiceProvider();
-        
-        var bootstrapper = _serviceProvider.GetService<Bootstrapper>()!;
-        
-        bootstrapper.Bootstrap( // TODO: Make this an actual usable string
-            @"{
+    private static string corpus = @"{
                 ""name"": ""Test Set"",
                 ""cards"": [
                     {
@@ -42,8 +24,13 @@ public static class Game
                         ""health"": 1
                     }
                 ]
-            }");
-        
-        return _serviceProvider.GetService<IGameRoot>()!;
+            }";
+    
+    public static IGameRoot Start()
+    {
+        var gameRoot = ArchetypeExtensions
+            .InitArchetype<Bootstrapper, GameState>(new Bootstrapper(corpus));
+
+        return gameRoot;
     }
 }

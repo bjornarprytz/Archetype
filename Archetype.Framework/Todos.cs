@@ -1,13 +1,14 @@
 ﻿namespace Archetype.Framework;
 
-// TODO: Finish the DependencyInjection tools
-    // - Factories, implement and add to DI
-// TODO: Add state based effects resolver
-// TODO: Write a parser and put it in DI somewhere
-// TODO: Keyword definitions should not have static names, but GUIDs. The parser should refer to them by type, and the internal logic can use the GUIDs, it doesn't have to be human readable. 
-// TODO: Revisit wether cards/abilities need to _be_ an actionBlock, or if they could _have_ an actionBlock.
-// TODO: Phases are atoms, which means they can have characteristics and currentZone. Is this an affordable quirk?
 
+
+// TODO: Finish Framework
+    // Keyword definitions should not have static names, but GUIDs. The parser should refer to them by type, and the internal logic can use the GUIDs, it doesn't have to be human readable. 
+    // Add state based effects resolver
+    // Figure out how to create the turn order / phases without using the "new" keyword.
+// TODO: Finish Prototype1
+    // Grammar
+    
 
 // TODO: Future Scope
     /*
@@ -21,4 +22,6 @@
      *  - The framework must call into these provided APIs
      *  - Initiate the game loop
      *  - ComputeCount for specific values of a characteristic (e.g. ComputeCount("Health", 10)) 
+     * TODO: Revisit whether cards/abilities need to _be_ an actionBlock, or if they could _have_ an actionBlock.
+     *  - Phases are atoms, which means they can have characteristics and currentZone. Is this an affordable quirk?
      */
