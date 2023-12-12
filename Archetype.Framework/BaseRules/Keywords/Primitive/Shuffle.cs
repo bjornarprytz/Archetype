@@ -1,11 +1,12 @@
 ﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
+[Keyword("SHUFFLE")]
 public class Shuffle : EffectPrimitiveDefinition
 {
-    public override string Name => "SHUFFLE";
     public override string ReminderText => "Shuffle target draw pile.";
 
     protected override OperandDeclaration<IOrderedZone> OperandDeclaration { get; } = new();

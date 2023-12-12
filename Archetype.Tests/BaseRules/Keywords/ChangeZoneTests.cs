@@ -27,12 +27,6 @@ public class ChangeZoneTests
     }
     
     [Test]
-    public void ShouldHaveKeywordName()
-    {
-        _sut.Name.Should().Be("CHANGE_ZONE");
-    }
-
-    [Test]
     public void ShouldChangeZone()
     {
         // Arrange

@@ -22,12 +22,6 @@ public class PromptTests
     }
     
     [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("PROMPT");
-    }
-    
-    [Test]
     public void ShouldReturnEvent()
     {
         // Arrange

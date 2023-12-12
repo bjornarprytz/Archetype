@@ -1,13 +1,14 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
+using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 
 namespace Archetype.Prototype1.Keywords;
 
+[Keyword("DRAW_CARD")]
 public class DrawCard : EffectCompositeDefinition
 {
-    public override string Name { get; } = "Draw Card";
     public override string ReminderText { get; } = "Draw a card.";
     public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {

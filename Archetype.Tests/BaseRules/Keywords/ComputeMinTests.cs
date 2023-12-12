@@ -20,12 +20,6 @@ public class ComputeMinTests
     }
 
     [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("COMPUTE_MIN");
-    }
-
-    [Test]
     public void ShouldComputeMin()
     {
         // Arrange

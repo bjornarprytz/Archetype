@@ -1,11 +1,12 @@
 ﻿using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
+using Archetype.Framework.Meta;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
+[Keyword("COMPUTE_MAX")]
 public class ComputeMax : ComputedValueDefinition
 {
-    public override string Name => "COMPUTE_MAX";
     public override string ReminderText => "Compute the maximum value of the given characteristic across all targets.";
 
     protected override OperandDeclaration<IAtomProvider, string> OperandDeclaration { get; } = new();
@@ -22,9 +23,9 @@ public class ComputeMax : ComputedValueDefinition
     }
 }
 
+[Keyword("COMPUTE_MIN")]
 public class ComputeMin : ComputedValueDefinition
 {
-    public override string Name => "COMPUTE_MIN";
     public override string ReminderText => "Compute the minimum value of the given characteristic across all targets.";
 
     protected override OperandDeclaration<IAtomProvider, string> OperandDeclaration { get; } = new();
@@ -41,9 +42,9 @@ public class ComputeMin : ComputedValueDefinition
     }
 }
 
+[Keyword("COMPUTE_SUM")]
 public class ComputeSum : ComputedValueDefinition
 {
-    public override string Name => "COMPUTE_SUM";
     public override string ReminderText => "Compute the sum of the given characteristic across all targets.";
 
     protected override OperandDeclaration<IAtomProvider, string> OperandDeclaration { get; } = new();
@@ -60,9 +61,9 @@ public class ComputeSum : ComputedValueDefinition
     }
 }
 
+[Keyword("COMPUTE_COUNT")]
 public class ComputeCount : ComputedValueDefinition
 {
-    public override string Name => "COMPUTE_COUNT";
     public override string ReminderText => "Compute the number of targets that have the given characteristic.";
 
     protected override OperandDeclaration<IAtomProvider, string> OperandDeclaration { get; } = new();

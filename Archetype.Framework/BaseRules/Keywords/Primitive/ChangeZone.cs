@@ -1,11 +1,12 @@
 ﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
+[Keyword("CHANGE_ZONE")]
 public class ChangeZone : EffectPrimitiveDefinition
 {
-    public override string Name => "CHANGE_ZONE";
     public override string ReminderText =>  "Change zone from the existing zone to the target zone.";
 
     protected override OperandDeclaration<IAtom, IZone> OperandDeclaration { get; } = new();

@@ -19,11 +19,6 @@ public class ComputeCountTests
         _sut = new ComputeCount();
     }
 
-    [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("COMPUTE_COUNT");
-    }
 
     [Test]
     public void ShouldComputeCount()

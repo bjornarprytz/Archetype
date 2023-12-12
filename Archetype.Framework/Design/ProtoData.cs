@@ -7,6 +7,7 @@ public interface IProtoData
     IProtoCard? GetProtoCard(string name);
     IReadOnlyList<IPhase>? TurnSequence { get; }
     IEnumerable<IProtoSet> Sets { get; }
+    IEnumerable<IProtoCard> Cards { get; }
     
     void AddSet(IProtoSet set);
     void SetTurnSequence(IReadOnlyList<IPhase> turnSequence);
@@ -24,6 +25,7 @@ public class ProtoData : IProtoData
 
     public IReadOnlyList<IPhase>? TurnSequence { get; private set; } = null;
     public IEnumerable<IProtoSet> Sets => _sets.Values;
+    public IEnumerable<IProtoCard> Cards => _cards.Values;
 
     public void AddSet(IProtoSet set)
     {

@@ -5,6 +5,7 @@ namespace Archetype.Framework.Design;
 
 public interface IRules
 {
+    IEnumerable<IKeywordDefinition> Keywords { get; }
     IKeywordDefinition? GetDefinition(string keyword);
     T? GetDefinition<T>() where T : IKeywordDefinition;
 }
@@ -23,6 +24,8 @@ public class Rules : IRules
     }
 
     public IReadOnlyList<IPhase> TurnSequence { get; }
+
+    public IEnumerable<IKeywordDefinition> Keywords => _keywords.Values;
 
     public IKeywordDefinition? GetDefinition(string keyword)
     {

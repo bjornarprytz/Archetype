@@ -25,12 +25,6 @@ public class CreateCardTests
     }
     
     [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("CREATE_CARD");
-    }
-    
-    [Test]
     public void ShouldCreateCard()
     {
         // Arrange

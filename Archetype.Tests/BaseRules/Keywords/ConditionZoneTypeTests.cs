@@ -25,12 +25,6 @@ public class ConditionZoneTypeTests
     }
     
     [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("CONDITION_ZONE_TYPE");
-    }
-    
-    [Test]
     public void ShouldReturnTrue_WhenZoneIsCorrectType()
     {
         // Arrange

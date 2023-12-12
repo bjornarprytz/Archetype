@@ -11,15 +11,8 @@ public interface IKeywordInstance
 
 public record KeywordInstance : IKeywordInstance
 {
-    private readonly string _keyword = "_UNINITIALIZED_";
-    
-    public string Keyword
-    {
-        get => _keyword;
-        init => _keyword = value.ToUpper();
-    }
-
     public Guid Id { get; } = Guid.NewGuid();
+    public required string Keyword { get; init; } = null!;
     public IReadOnlyList<KeywordOperand> Operands { get; init; } = new List<KeywordOperand>();
 }
 

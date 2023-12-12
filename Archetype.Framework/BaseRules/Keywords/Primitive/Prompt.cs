@@ -1,11 +1,12 @@
 ﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
+[Keyword("PROMPT")]
 public class Prompt : EffectPrimitiveDefinition
 {
-    public override string Name => "PROMPT";
     public override string ReminderText => "Prompt the player to make a choice.";
 
     protected override OperandDeclaration<IEnumerable<IAtom>, int, int, string> OperandDeclaration { get; } = new();

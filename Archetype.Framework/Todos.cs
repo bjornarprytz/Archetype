@@ -3,11 +3,12 @@
 
 
 // TODO: Finish Framework
-    // Keyword definitions should not have static names, but GUIDs. The parser should refer to them by type, and the internal logic can use the GUIDs, it doesn't have to be human readable. 
     // Add state based effects resolver
     // Figure out how to create the turn order / phases without using the "new" keyword.
+    // StartGame action
 // TODO: Finish Prototype1
     // Grammar
+    // Game state init
     
 
 // TODO: Future Scope

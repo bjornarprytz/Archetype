@@ -20,12 +20,6 @@ public class ComputeMaxTests
     }
 
     [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("COMPUTE_MAX");
-    }
-
-    [Test]
     public void ShouldComputeMax()
     {
         // Arrange

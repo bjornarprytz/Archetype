@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -66,10 +67,9 @@ public class ChangeStateTests
     }
 
 
-
+    [Keyword("DUMMY")]
     private class DummyChangeState : ChangeState<IAtom, int>
     {
-        public override string Name => "DUMMY";
         public override string ReminderText => "Dummy reminder text";
         protected override string Property => "DUMMY";
     }

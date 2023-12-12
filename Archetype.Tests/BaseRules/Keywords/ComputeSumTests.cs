@@ -19,11 +19,6 @@ public class ComputeSumTests
         _sut = new ComputeSum();
     }
 
-    [Test]
-    public void ShouldHaveCorrectName()
-    {
-        _sut.Name.Should().Be("COMPUTE_SUM");
-    }
 
     [Test]
     public void ShouldComputeSum()

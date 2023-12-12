@@ -28,7 +28,7 @@ public static class KeywordExtensions
                 throw new InvalidOperationException($"Failed to create instance of {t.FullName}");
             }
             
-            Console.WriteLine("Adding keyword: " + keywordDefinition.Name);
+            Console.WriteLine($"Adding keyword: {(keywordDefinition.TryGetKeywordName(out var keywordName) ? keywordName : "Unknown")}");
             rulesBuilder.AddKeyword(keywordDefinition);
         };
 

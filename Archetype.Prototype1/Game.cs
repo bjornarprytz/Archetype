@@ -13,23 +13,10 @@ namespace Archetype.Prototype1;
 
 public static class Game
 {
-    private static string corpus = @"{
-                ""name"": ""Test Set"",
-                ""cards"": [
-                    {
-                        ""name"": ""Test Card"",
-                        ""keywords"": [""Test""],
-                        ""cost"": 1,
-                        ""attack"": 1,
-                        ""health"": 1
-                    }
-                ]
-            }";
-    
-    public static IGameRoot Start()
+    public static IGameRoot Start(string setJson)
     {
         var gameRoot = ArchetypeExtensions
-            .InitArchetype<Bootstrapper, GameState>(new Bootstrapper(corpus));
+            .InitArchetype<GameState>(new Bootstrapper(setJson));
 
         return gameRoot;
     }

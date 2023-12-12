@@ -12,7 +12,9 @@ public interface IKeywordDefinition
 }
 public abstract class KeywordDefinition : IKeywordDefinition
 {
-    public abstract string Name { get; } // ID
+    public string Name => this.TryGetKeywordName(out var keywordName)
+        ? keywordName!
+        : throw new InvalidOperationException("Keyword has no name");
     public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
     protected virtual OperandDeclaration OperandDeclaration { get; } = new();
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
@@ -23,7 +25,7 @@ public abstract class KeywordDefinition : IKeywordDefinition
         
         if (!OperandDeclaration.Validate(operandList))
         {
-            throw new InvalidOperationException($"Invalid operands for keyword {Name}");
+            throw new InvalidOperationException($"Invalid operands for keyword ({(this.TryGetKeywordName(out var keywordName) ? keywordName : "Unknown")})");
         }
         
         return new KeywordInstance 
