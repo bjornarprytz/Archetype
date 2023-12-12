@@ -1,4 +1,4 @@
-grammar ActionBlock;
+grammar BaseGrammar;
 
 cardText:                   name static? effects? abilities?; 
 
@@ -17,8 +17,8 @@ targetSpecs:                '<' filters OPTIONAL? '>';
 conditions:                 '(CONDITIONS' keywordExpression+ ')';
 costs:                      '(COSTS' keywordExpression+ ')';
 
-keywordExpression:          '(' keyword targetRef* operand* ')';
-operand:                    any | STRING | filter | computedValueRef;
+keywordExpression:          '(' keyword operand* ')';
+operand:                    any | targetRef | filter | computedValueRef;
 
 targetRef:                  '<' index '>' | SELF;
 computedValueRef:           '[' index ']';
@@ -29,15 +29,14 @@ filter:                     (filterKey ':' filterValue);
 filterKey:                  keyword;
 filterValue:                any ('|' any)*;
 
-keyword:                    WORD;
+keyword:                    ('DRAW_CARD'|'ENEMY_PHASE'|'RESOLVE_ENCOUNTER'|'CHANGE_ZONE'|'COMPUTE_MAX'|'COMPUTE_MIN'|'COMPUTE_SUM'|'COMPUTE_COUNT'|'CONDITION_ZONE_TYPE'|'CREATE_CARD'|'PROMPT'|'SHUFFLE');
 index:                      NUMBER;
-any:                        WORD | NUMBER;
+any:                        STRING | NUMBER;
 
 STRING: '"' (~["\r\n])* '"';
 NUMBER: DIGIT+;
 SELF: '~';
 OPTIONAL: '?';
-WORD: ([a-zA-Z][a-zA-Z_]*);
 
 fragment DIGIT: [0-9];
 

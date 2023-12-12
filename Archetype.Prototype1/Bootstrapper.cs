@@ -10,7 +10,7 @@ public class Bootstrapper(string setJson) : IBootstrapper
     
     public void Bootstrap(IProtoData protoData, IRules rules)
     {
-        var setParser = new SetParser(new CardParser(rules));
+        var setParser = null as ISetParser;// new SetParser(new CardParser(rules));
         protoData.AddSet(setParser.ParseSet(setJson));
         
         protoData.SetTurnSequence(

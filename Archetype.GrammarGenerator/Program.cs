@@ -1,56 +1,67 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using Archetype.Framework.Meta;
 
-[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-public sealed class KeywordAttribute : Attribute
+if (args.Length == 0)
 {
-    public string Keyword { get; }
-
-    public KeywordAttribute(string keyword)
-    {
-        Keyword = keyword;
-    }
+    Console.WriteLine("Usage: Program.exe assemblyPath baseGrammar.template ...");
+    return;
 }
 
-class Program
+var assemblyPaths = args[0];
+var baseGrammar = args[1];
+var targetGrammarDir = args[2];
+
+
+if (!File.Exists(baseGrammar))
 {
-    static void Main(string[] args)
+    Console.WriteLine($"File not found: {baseGrammar}");
+    return;
+}
+
+if (!File.Exists(assemblyPaths))
+{
+    Console.WriteLine($"File not found: {assemblyPaths}");
+    return;
+}
+
+if (!baseGrammar.EndsWith(".template"))
+{
+    Console.WriteLine($"File must end with .template: {baseGrammar}");
+    return;
+}
+
+var grammarFile = File.ReadAllText(baseGrammar);
+var targetGrammar = Path.Combine(targetGrammarDir, Path.GetFileName(baseGrammar).Replace(".template", ""));
+
+var keywords = GetKeywords(assemblyPaths.Split(';'));
+var antlrKeywordsString = "(" + string.Join("|", keywords) + ")";
+
+grammarFile = grammarFile.Replace("<<<KEYWORD_LIST>>>", antlrKeywordsString);
+
+File.WriteAllText(targetGrammar, grammarFile);
+
+return;
+
+
+static string[] GetKeywords(IEnumerable<string> assemblyPaths)
+{
+    var keywordClasses = new List<Type>();
+    var assemblies = assemblyPaths.Select(Assembly.LoadFrom).ToList();
+    var referencedAssemblies = assemblies.SelectMany(a => a.GetReferencedAssemblies()).ToList();
+    
+    assemblies.AddRange(referencedAssemblies.Select(Assembly.Load));
+    
+
+    foreach (var classesWithKeywordAttribute in assemblies.Select(assembly => assembly.GetTypes()
+                     .Where(type => type.GetCustomAttribute<KeywordAttribute>() != null)))
     {
-        if (args.Length == 0)
-        {
-            Console.WriteLine("Usage: Program.exe assemblyPath1 assemblyPath2 ...");
-            return;
-        }
-
-        var assemblyPaths = args.ToList();
-
-        var keywords = GetKeywords(assemblyPaths);
-        var antlrKeywordsString = "(" + string.Join("|", keywords) + ")";
-        Console.WriteLine(antlrKeywordsString);
+        keywordClasses.AddRange(classesWithKeywordAttribute);
     }
 
-    static string[] GetKeywords(List<string> assemblyPaths)
-    {
-        var keywordClasses = new List<Type>();
-
-        foreach (var assemblyPath in assemblyPaths)
-        {
-            var assembly = Assembly.LoadFrom(assemblyPath);
-
-            var classesWithKeywordAttribute = assembly.GetTypes()
-                .Where(type => type.GetCustomAttribute<KeywordAttribute>() != null);
-
-            keywordClasses.AddRange(classesWithKeywordAttribute);
-        }
-
-        return keywordClasses
-            .Select(type => type.GetCustomAttribute<KeywordAttribute>().Keyword)
-            .ToArray();
-    }
+    return keywordClasses
+        .Where(type => !string.IsNullOrWhiteSpace(type.GetCustomAttribute<KeywordAttribute>()?.Keyword))
+        .Select(type => $"'{type.GetCustomAttribute<KeywordAttribute>()!.Keyword}'")
+        .ToArray();
 }

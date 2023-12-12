@@ -10,4 +10,9 @@
       <ProjectReference Include="..\Archetype.Framework\Archetype.Framework.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Parsing\Generated\" />
+      <Folder Include="Parsing\Grammar\" />
+    </ItemGroup>
+
 </Project>

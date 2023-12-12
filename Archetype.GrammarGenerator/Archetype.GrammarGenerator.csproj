@@ -7,4 +7,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Archetype.Framework\Archetype.Framework.csproj" />
+      <ProjectReference Include="..\Archetype.Prototype1\Archetype.Prototype1.csproj" />
+    </ItemGroup>
+
 </Project>
