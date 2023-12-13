@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using Archetype.Framework.Meta;
+using Archetype.GrammarGenerator;
 
 if (args.Length == 0)
 {
@@ -34,13 +35,11 @@ if (!baseGrammar.EndsWith(".template.g4"))
     return;
 }
 
-var grammarFile = File.ReadAllText(baseGrammar);
+var grammarTemplate = File.ReadAllText(baseGrammar);
 var targetGrammar = Path.Combine(targetGrammarDir, Path.GetFileName(baseGrammar).Replace(".template", ""));
 
-var keywords = GetKeywords(assemblyPaths.Split(';'));
-var antlrKeywordsString = "(" + string.Join("|", keywords) + ")";
-
-grammarFile = grammarFile.Replace("/*KEYWORD_LIST*/", antlrKeywordsString);
+var generatedGrammar =
+    new KeywordAnalyzer(grammarTemplate).GenerateKeywordSyntax(GetAssemblies(assemblyPaths.Split(';')));
 
 if (!Directory.Exists(targetGrammarDir))
 {
@@ -48,28 +47,17 @@ if (!Directory.Exists(targetGrammarDir))
     Console.WriteLine($"Created directory: {targetGrammarDir}");
 }
 
-File.WriteAllText(targetGrammar, grammarFile);
+File.WriteAllText(targetGrammar, generatedGrammar);
 
 return;
 
-
-static string[] GetKeywords(IEnumerable<string> assemblyPaths)
+static Assembly[] GetAssemblies(IEnumerable<string> assemblyPaths)
 {
-    var keywordClasses = new List<Type>();
     var assemblies = assemblyPaths.Select(Assembly.LoadFrom).ToList();
     var referencedAssemblies = assemblies.SelectMany(a => a.GetReferencedAssemblies()).ToList();
     
     assemblies.AddRange(referencedAssemblies.Select(Assembly.Load));
     
-
-    foreach (var classesWithKeywordAttribute in assemblies.Select(assembly => assembly.GetTypes()
-                     .Where(type => type.GetCustomAttribute<KeywordAttribute>() != null)))
-    {
-        keywordClasses.AddRange(classesWithKeywordAttribute);
-    }
-
-    return keywordClasses
-        .Where(type => !string.IsNullOrWhiteSpace(type.GetCustomAttribute<KeywordAttribute>()?.Keyword))
-        .Select(type => $"'{type.GetCustomAttribute<KeywordAttribute>()!.Keyword}'")
-        .ToArray();
+    return assemblies.ToArray();
 }
+

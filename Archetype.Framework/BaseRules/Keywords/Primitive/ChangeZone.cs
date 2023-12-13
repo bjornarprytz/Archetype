@@ -4,7 +4,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
-[Keyword("CHANGE_ZONE")]
+[Keyword("CHANGE_ZONE", typeof(OperandDeclaration<IAtom, IZone>))]
 public class ChangeZone : EffectPrimitiveDefinition
 {
     public override string ReminderText =>  "Change zone from the existing zone to the target zone.";

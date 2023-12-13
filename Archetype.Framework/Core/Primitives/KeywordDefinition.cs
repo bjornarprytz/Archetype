@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface.Actions;
+using Archetype.Framework.Meta;
 
 namespace Archetype.Framework.Core.Primitives;
 
@@ -10,6 +11,13 @@ public interface IKeywordDefinition
     IReadOnlyList<IOperandDescription> Operands { get; }
     IKeywordInstance CreateInstance(params object[] operands);
 }
+
+public abstract class KeywordDefinition<TOperands> : KeywordDefinition
+    where TOperands : OperandDeclaration, new()
+{
+    protected override OperandDeclaration OperandDeclaration { get; } = new TOperands();
+}
+
 public abstract class KeywordDefinition : IKeywordDefinition
 {
     public string Name => this.TryGetKeywordName(out var keywordName)
