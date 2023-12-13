@@ -29,7 +29,7 @@ filter:                     (filterKey ':' filterValue);
 filterKey:                  keyword;
 filterValue:                any ('|' any)*;
 
-keyword:                    <<<KEYWORD_LIST>>>;
+keyword:                    /*KEYWORD_LIST*/;
 index:                      NUMBER;
 any:                        STRING | NUMBER;
 

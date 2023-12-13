@@ -9,6 +9,8 @@ if (args.Length == 0)
     return;
 }
 
+Console.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
+
 var assemblyPaths = args[0];
 var baseGrammar = args[1];
 var targetGrammarDir = args[2];
@@ -26,9 +28,9 @@ if (!File.Exists(assemblyPaths))
     return;
 }
 
-if (!baseGrammar.EndsWith(".template"))
+if (!baseGrammar.EndsWith(".template.g4"))
 {
-    Console.WriteLine($"File must end with .template: {baseGrammar}");
+    Console.WriteLine($"File must end with .template.g4: {baseGrammar}");
     return;
 }
 
@@ -38,7 +40,13 @@ var targetGrammar = Path.Combine(targetGrammarDir, Path.GetFileName(baseGrammar)
 var keywords = GetKeywords(assemblyPaths.Split(';'));
 var antlrKeywordsString = "(" + string.Join("|", keywords) + ")";
 
-grammarFile = grammarFile.Replace("<<<KEYWORD_LIST>>>", antlrKeywordsString);
+grammarFile = grammarFile.Replace("/*KEYWORD_LIST*/", antlrKeywordsString);
+
+if (!Directory.Exists(targetGrammarDir))
+{
+    Directory.CreateDirectory(targetGrammarDir);
+    Console.WriteLine($"Created directory: {targetGrammarDir}");
+}
 
 File.WriteAllText(targetGrammar, grammarFile);
 

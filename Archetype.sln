@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Prototype1", "Arc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.GrammarGenerator", "Archetype.GrammarGenerator\Archetype.GrammarGenerator.csproj", "{5DB19232-94BB-4462-965A-975B8E576FC1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Archetype.Grammar", "Archetype.Grammar\Archetype.Grammar.csproj", "{CB39BB8D-1106-4FA2-B4AD-5C33F59E3693}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{5DB19232-94BB-4462-965A-975B8E576FC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DB19232-94BB-4462-965A-975B8E576FC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DB19232-94BB-4462-965A-975B8E576FC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB39BB8D-1106-4FA2-B4AD-5C33F59E3693}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB39BB8D-1106-4FA2-B4AD-5C33F59E3693}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB39BB8D-1106-4FA2-B4AD-5C33F59E3693}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB39BB8D-1106-4FA2-B4AD-5C33F59E3693}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
