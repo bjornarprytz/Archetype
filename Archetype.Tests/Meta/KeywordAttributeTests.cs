@@ -50,4 +50,15 @@ public class KeywordAttributeTests
         
         duplicateKeywords.Should().BeEmpty();
     }
+    
+    [Test]
+    public void OperandDeclarationMatches()
+    {
+        foreach (var definition in _keywordDefinitions)
+        {
+            var attributeOperandDeclaration = definition.GetCustomAttribute<KeywordAttribute>()?.Operands.GetType();
+            
+            attributeOperandDeclaration.Should().Be(definition);
+        }
+    }
 }

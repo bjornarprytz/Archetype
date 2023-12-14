@@ -4,7 +4,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
-[Keyword("PROMPT")]
+[EffectKeyword("PROMPT", typeof(OperandDeclaration<IEnumerable<IAtom>, int, int, string>))]
 public class Prompt : EffectPrimitiveDefinition
 {
     public override string ReminderText => "Prompt the player to make a choice.";

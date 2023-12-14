@@ -5,7 +5,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
-[Keyword("CREATE_CARD")]
+[EffectKeyword("CREATE_CARD", typeof(OperandDeclaration<string, IZone>))]
 public class CreateCard : EffectPrimitiveDefinition
 {
     public override string ReminderText => "Create a card and place it in a zone.";

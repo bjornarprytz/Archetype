@@ -4,7 +4,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
-[Keyword("CONDITION_ZONE_TYPE")]
+[ConditionKeyword("ZONE_TYPE", typeof(OperandDeclaration<IZone>))]
 public class ConditionZoneType<TZone> : ConditionDefinition
     where TZone : IZone
 {

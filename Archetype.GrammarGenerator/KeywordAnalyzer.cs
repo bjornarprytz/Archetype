@@ -73,7 +73,9 @@ public class KeywordAnalyzer(string fileName)
             var keywordListString = "(" + string.Join("|", keywords) + ")";
             syntaxTemplate = syntaxTemplate!.Replace($"/*{keywordListName}*/", keywordListString);
         }
-        
+
+        return ""; // TODO: Return the generated grammar
+
     }
     
     

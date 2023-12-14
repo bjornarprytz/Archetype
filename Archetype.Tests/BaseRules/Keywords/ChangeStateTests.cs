@@ -67,7 +67,7 @@ public class ChangeStateTests
     }
 
 
-    [Keyword("DUMMY")]
+    [EffectKeyword("DUMMY", typeof(OperandDeclaration<IAtom, int>))]
     private class DummyChangeState : ChangeState<IAtom, int>
     {
         public override string ReminderText => "Dummy reminder text";

@@ -6,7 +6,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Prototype1.Keywords;
 
-[Keyword("DRAW_CARD")]
+[EffectKeyword("DRAW_CARD")]
 public class DrawCard : EffectCompositeDefinition
 {
     public override string ReminderText { get; } = "Draw a card.";

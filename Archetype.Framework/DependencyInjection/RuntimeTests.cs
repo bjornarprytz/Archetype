@@ -17,6 +17,7 @@ internal static class RuntimeTests
         
         keywordDefinitions.EnsureKeywordAttribute();
         keywordDefinitions.EnsureNoDuplicates();
+        keywordDefinitions.EnsureOperandDeclarations();
     }
     
     private static void EnsureNoDuplicates(this IEnumerable<IKeywordDefinition> keywordDefinitions)
@@ -40,5 +41,16 @@ internal static class RuntimeTests
         
         if (keywordDefinitionsWithoutKeywordAttribute.Count != 0)
             throw new InvalidOperationException($"Keyword definitions without {nameof(KeywordAttribute)}: {string.Join(", ", keywordDefinitionsWithoutKeywordAttribute)}");
+    }
+    
+    private static void EnsureOperandDeclarations(this IEnumerable<IKeywordDefinition> keywordDefinitions)
+    {
+        foreach (var definition in keywordDefinitions)
+        {
+            var attributeOperandDeclaration = definition.GetType().GetCustomAttribute<KeywordAttribute>()?.Operands.GetType();
+            
+            if (attributeOperandDeclaration != definition.GetType())
+                throw new InvalidOperationException($"Operand declaration mismatch: {definition.GetType()} != {attributeOperandDeclaration}");
+        }
     }
 }

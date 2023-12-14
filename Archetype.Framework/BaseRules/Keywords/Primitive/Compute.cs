@@ -4,7 +4,7 @@ using Archetype.Framework.Meta;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
-[Keyword("COMPUTE_MAX")]
+[ComputedValueKeyword("COMPUTE_MAX", typeof(OperandDeclaration<IAtomProvider, string>))]
 public class ComputeMax : ComputedValueDefinition
 {
     public override string ReminderText => "Compute the maximum value of the given characteristic across all targets.";
@@ -23,7 +23,7 @@ public class ComputeMax : ComputedValueDefinition
     }
 }
 
-[Keyword("COMPUTE_MIN")]
+[ComputedValueKeyword("COMPUTE_MIN", typeof(OperandDeclaration<IAtomProvider, string>))]
 public class ComputeMin : ComputedValueDefinition
 {
     public override string ReminderText => "Compute the minimum value of the given characteristic across all targets.";
@@ -42,7 +42,7 @@ public class ComputeMin : ComputedValueDefinition
     }
 }
 
-[Keyword("COMPUTE_SUM")]
+[ComputedValueKeyword("COMPUTE_SUM", typeof(OperandDeclaration<IAtomProvider, string>))]
 public class ComputeSum : ComputedValueDefinition
 {
     public override string ReminderText => "Compute the sum of the given characteristic across all targets.";
@@ -61,7 +61,7 @@ public class ComputeSum : ComputedValueDefinition
     }
 }
 
-[Keyword("COMPUTE_COUNT")]
+[ComputedValueKeyword("COMPUTE_COUNT", typeof(OperandDeclaration<IAtomProvider, string>))]
 public class ComputeCount : ComputedValueDefinition
 {
     public override string ReminderText => "Compute the number of targets that have the given characteristic.";

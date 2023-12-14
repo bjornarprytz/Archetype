@@ -3,7 +3,7 @@ using Archetype.Framework.Meta;
 
 namespace Archetype.Prototype1.Keywords;
 
-[Keyword("ENEMY_PHASE")]
+[EffectKeyword("ENEMY_PHASE")]
 public class EnemyPhaseResolver : EffectCompositeDefinition
 {
     public override string ReminderText { get; } = "Resolve an encounter.";
