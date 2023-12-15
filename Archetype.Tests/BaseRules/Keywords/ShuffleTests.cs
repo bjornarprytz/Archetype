@@ -23,12 +23,6 @@ public class ShuffleTests
         }
         
         [Test]
-        public void ShouldHaveKeywordName()
-        {
-            _sut.Name.Should().Be("SHUFFLE");
-        }
-        
-        [Test]
         public void ShouldShuffleZone()
         {
             var resolutionContext = Substitute.For<IResolutionContext>();

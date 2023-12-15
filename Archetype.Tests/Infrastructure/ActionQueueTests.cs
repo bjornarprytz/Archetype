@@ -23,8 +23,8 @@ public class ActionQueueTests
         _rules = Substitute.For<IRules>();
         _primitiveDefinition = Substitute.For<IEffectPrimitiveDefinition>();
         _compositeDefinition = Substitute.For<IEffectCompositeDefinition>();
-        _primitiveDefinition.Name.Returns("PrimitiveTestKeyword");
-        _compositeDefinition.Name.Returns("CompositeTestKeyword");
+        _primitiveDefinition.Keyword.Returns("PrimitiveTestKeyword");
+        _compositeDefinition.Keyword.Returns("CompositeTestKeyword");
         _rules.GetDefinition("CompositeTestKeyword").Returns(_compositeDefinition);
         _rules.GetDefinition("PrimitiveTestKeyword").Returns(_primitiveDefinition);
         
@@ -46,7 +46,7 @@ public class ActionQueueTests
     {
         var definition = Substitute.For<IEffectPrimitiveDefinition>();
         var returnEvent = Substitute.For<IEvent>();
-        definition.Name.Returns("TestKeyword");
+        definition.Keyword.Returns("TestKeyword");
         definition.Resolve(default!, default!).ReturnsForAnyArgs(returnEvent);
         
         var resolutionContext = Substitute.For<IResolutionContext>();
@@ -105,7 +105,7 @@ public class ActionQueueTests
     public void ResolveNextKeyword_CompositeDefinition_PublishesActionBlockEvent()
     {
         var otherCompositeDefinition = Substitute.For<IEffectCompositeDefinition>();
-        otherCompositeDefinition.Name.Returns("OtherCompositeTestKeyword");
+        otherCompositeDefinition.Keyword.Returns("OtherCompositeTestKeyword");
         _rules.GetDefinition("OtherCompositeTestKeyword").Returns(otherCompositeDefinition);
         
         var primitiveKeywordInstance1 = Substitute.For<IKeywordInstance>();

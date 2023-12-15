@@ -1,6 +1,7 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Design;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -32,12 +33,7 @@ public class CreateCardTests
         protoCard.Name.Returns("TestCard");
         _context.MetaGameState.ProtoData.GetProtoCard("TestCard").Returns(protoCard);
         
-        var payload = new EffectPayload(
-            Guid.NewGuid(),
-            Substitute.For<IAtom>(),
-            _sut.Name,
-            new object[] { "TestCard", _targetZone }
-        );
+        var payload = _sut.CreateInstance("TestCard", _targetZone).BindPayload(_context);
 
         // Act
         var result = _sut.Resolve(_context, payload);

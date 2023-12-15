@@ -26,12 +26,14 @@ public class ChangeStateTests
     public void ShouldChangeState()
     {
         // Arrange
+        var context = Substitute.For<IResolutionContext>();
+
         var payload = _sut
             .CreateInstance(_target, 42)
-            .BindPayload(Substitute.For<IResolutionContext>());
+            .BindPayload(context);
         
         // Act
-        var result = _sut.Resolve(Substitute.For<IResolutionContext>(), payload);
+        var result = _sut.Resolve(context, payload);
 
         // Assert
         _target.State["DUMMY"].Should().Be(42);
@@ -46,17 +48,14 @@ public class ChangeStateTests
     public void StateUnchanged_ReturnsNonEvent()
     {
         // Arrange
-        var payload = new EffectPayload(
-            Guid.NewGuid(),
-            Substitute.For<IAtom>(),
-            _sut.Name,
-            new object[] { _target, 1 }
-        );
+        var context = Substitute.For<IResolutionContext>();
+        
+        var payload = _sut.CreateInstance(_target, 1).BindPayload(context);
 
         _target.State.Returns(new Dictionary<string, object> { { "DUMMY", 1 } });
 
         // Act
-        var result = _sut.Resolve(Substitute.For<IResolutionContext>(), payload);
+        var result = _sut.Resolve(context, payload);
 
         // Assert
         _target.State["DUMMY"].Should().Be(1);
@@ -65,10 +64,9 @@ public class ChangeStateTests
     }
 
 
-    [EffectKeyword("DUMMY", typeof(OperandDeclaration<IAtom, int>))]
+    [EffectSyntax("DUMMY", typeof(OperandDeclaration<IAtom, int>))]
     private class DummyChangeState : ChangeState<IAtom, int>
     {
-        public override string ReminderText => "Dummy reminder text";
         protected override string Property => "DUMMY";
     }
 }

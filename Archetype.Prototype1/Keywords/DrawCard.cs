@@ -6,10 +6,9 @@ using Archetype.Framework.State;
 
 namespace Archetype.Prototype1.Keywords;
 
-[EffectKeyword("DRAW_CARD")]
+[EffectSyntax("DRAW_CARD")]
 public class DrawCard : EffectCompositeDefinition
 {
-    public override string ReminderText { get; } = "Draw a card.";
     public override IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload)
     {
         var player = context.GameState.Player;

@@ -34,26 +34,26 @@ public class KeywordAnalyzer(string fileName)
 
         foreach (var keywordType in GetKeywords(targetAssemblies))
         {
-            var keywordAttribute = keywordType.GetCustomAttribute<KeywordAttribute>()!;
+            var keywordAttribute = keywordType.GetCustomAttribute<KeywordSyntaxAttribute>()!;
             
             switch (keywordAttribute)
             {
-                case StaticKeywordAttribute:
+                case StaticSyntaxAttribute:
                     keywordLists["STATIC_KEYWORD_LIST"] = keywordLists["STATIC_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
                     break;
-                case TargetKeywordAttribute:
+                case TargetSyntaxAttribute:
                     keywordLists["TARGET_KEYWORD_LIST"] = keywordLists["TARGET_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
                     break;
-                case ConditionKeywordAttribute:
+                case ConditionSyntaxAttribute:
                     keywordLists["CONDITION_KEYWORD_LIST"] = keywordLists["CONDITION_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
                     break;
-                case ComputedValueKeywordAttribute:
+                case ComputedValueSyntaxAttribute:
                     keywordLists["COMPUTED_VALUE_KEYWORD_LIST"] = keywordLists["COMPUTED_VALUE_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
                     break;
-                case CostKeywordAttribute:
+                case CostSyntaxAttribute:
                     keywordLists["COST_KEYWORD_LIST"] = keywordLists["COST_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
                     break;
-                case EffectKeywordAttribute:
+                case EffectSyntaxAttribute:
                     keywordLists["EFFECT_KEYWORD_LIST"] = keywordLists["EFFECT_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
                     break;
                 default:
@@ -83,13 +83,13 @@ public class KeywordAnalyzer(string fileName)
     {
         var keywordClasses = new List<Type>();
         foreach (var classesWithKeywordAttribute in assemblies.Select(assembly => assembly.GetTypes()
-                     .Where(type => type.GetCustomAttribute<KeywordAttribute>() != null)))
+                     .Where(type => type.GetCustomAttribute<KeywordSyntaxAttribute>() != null)))
         {
             keywordClasses.AddRange(classesWithKeywordAttribute);
         }
 
         return keywordClasses
-            .Where(type => !string.IsNullOrWhiteSpace(type.GetCustomAttribute<KeywordAttribute>()?.Keyword))
+            .Where(type => !string.IsNullOrWhiteSpace(type.GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword))
             .ToArray();
     }
 }

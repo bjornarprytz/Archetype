@@ -23,7 +23,7 @@ internal static class RuntimeTests
     private static void EnsureNoDuplicates(this IEnumerable<IKeywordDefinition> keywordDefinitions)
     {
         var duplicates = keywordDefinitions.Select(d => d.GetType())
-            .GroupBy(t => t.GetCustomAttribute<KeywordAttribute>()?.Keyword)
+            .GroupBy(t => t.GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword)
             .Where(g => g.Count() > 1)
             .Select(g => g.Key)
             .ToList();
@@ -36,18 +36,18 @@ internal static class RuntimeTests
     {
         var keywordDefinitionsWithoutKeywordAttribute = keywordDefinitions
             .Select(d => d.GetType())
-            .Where(t => string.IsNullOrWhiteSpace(t.GetCustomAttribute<KeywordAttribute>()?.Keyword))
+            .Where(t => string.IsNullOrWhiteSpace(t.GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword))
             .ToList();
         
         if (keywordDefinitionsWithoutKeywordAttribute.Count != 0)
-            throw new InvalidOperationException($"Keyword definitions without {nameof(KeywordAttribute)}: {string.Join(", ", keywordDefinitionsWithoutKeywordAttribute)}");
+            throw new InvalidOperationException($"Keyword definitions without {nameof(KeywordSyntaxAttribute)}: {string.Join(", ", keywordDefinitionsWithoutKeywordAttribute)}");
     }
     
     private static void EnsureOperandDeclarations(this IEnumerable<IKeywordDefinition> keywordDefinitions)
     {
         foreach (var definition in keywordDefinitions)
         {
-            var attributeOperandDeclaration = definition.GetType().GetCustomAttribute<KeywordAttribute>()?.Operands.GetType();
+            var attributeOperandDeclaration = definition.GetType().GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType();
             
             if (attributeOperandDeclaration != definition.GetType())
                 throw new InvalidOperationException($"Operand declaration mismatch: {definition.GetType()} != {attributeOperandDeclaration}");

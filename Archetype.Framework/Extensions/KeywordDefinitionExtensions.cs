@@ -8,7 +8,7 @@ public static class KeywordDefinitionExtensions
 {
     public static bool TryGetKeywordName(this IKeywordDefinition keywordDefinition, out string? keywordName)
     {
-        keywordName = keywordDefinition.GetType().GetCustomAttribute<KeywordAttribute>()?.Keyword;
+        keywordName = keywordDefinition.GetType().GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword;
         return keywordName is not null;
     }
 }

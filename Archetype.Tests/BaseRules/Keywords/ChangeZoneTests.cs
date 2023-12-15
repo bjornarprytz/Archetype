@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -32,16 +33,13 @@ public class ChangeZoneTests
         // Arrange
         _atom.CurrentZone.Returns(_from);
         _from.Atoms.Returns(new List<IAtom> { _atom });
+        
+        var resolutionContext = Substitute.For<IResolutionContext>();
 
-        var payload = new EffectPayload(
-            Guid.NewGuid(),
-            Substitute.For<IAtom>(),
-            _sut.Name,
-            new [] { _atom, _to }
-        );
+        var payload = _sut.CreateInstance(_atom, _to).BindPayload(resolutionContext);
 
         // Act
-        var result = _sut.Resolve(Substitute.For<IResolutionContext>(), payload);
+        var result = _sut.Resolve(resolutionContext, payload);
 
         // Assert
         _atom.CurrentZone.Should().Be(_to);
@@ -60,15 +58,12 @@ public class ChangeZoneTests
         // Arrange
         _atom.CurrentZone.Returns((IZone?)null);
 
-        var payload = new EffectPayload(
-            Guid.NewGuid(),
-            Substitute.For<IAtom>(),
-            _sut.Name,
-            new [] { _atom, _to }
-        );
+        var resolutionContext = Substitute.For<IResolutionContext>();
+
+        var payload = _sut.CreateInstance(_atom, _to).BindPayload(resolutionContext);
 
         // Act
-        var result = _sut.Resolve(Substitute.For<IResolutionContext>(), payload);
+        var result = _sut.Resolve(resolutionContext, payload);
 
         // Assert
         _atom.CurrentZone.Should().Be(_to);

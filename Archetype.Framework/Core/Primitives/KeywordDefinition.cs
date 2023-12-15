@@ -1,13 +1,11 @@
 ﻿using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface.Actions;
-using Archetype.Framework.Meta;
 
 namespace Archetype.Framework.Core.Primitives;
 
 public interface IKeywordDefinition
 {
-    string Name { get; }
-    string ReminderText { get; }
+    string Keyword { get; } // ID
     IReadOnlyList<IOperandDescription> Operands { get; }
     IKeywordInstance CreateInstance(params object[] operands);
 }
@@ -20,10 +18,11 @@ public abstract class KeywordDefinition<TOperands> : KeywordDefinition
 
 public abstract class KeywordDefinition : IKeywordDefinition
 {
-    public string Name => this.TryGetKeywordName(out var keywordName)
-        ? keywordName!
-        : throw new InvalidOperationException("Keyword has no name");
-    public abstract string ReminderText { get; } // E.g. "Deal [X] damage to target unit or structure"
+    protected KeywordDefinition()
+    {
+        Keyword =  GetType().Name;
+    }
+    public string Keyword { get; }
     protected virtual OperandDeclaration OperandDeclaration { get; } = new();
     public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
 
@@ -38,7 +37,7 @@ public abstract class KeywordDefinition : IKeywordDefinition
         
         return new KeywordInstance 
         {
-            Keyword = Name,
+            Keyword = Keyword,
             Operands = operandList,
         };
     }

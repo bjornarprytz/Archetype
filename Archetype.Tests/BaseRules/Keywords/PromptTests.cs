@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -33,12 +34,7 @@ public class PromptTests
             Substitute.For<IAtom>(),
         };
         
-        var payload = new EffectPayload(
-            Guid.NewGuid(),
-            Substitute.For<IAtom>(),
-            _sut.Name,
-            new object[] { options, 1, 2, "Pick one or two things among the options" }
-        );
+        var payload = _sut.CreateInstance(options, 1, 2, "Pick one or two things among the options").BindPayload(_context);
 
         // Act
         var result = _sut.Resolve(_context, payload);

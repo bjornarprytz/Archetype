@@ -8,7 +8,7 @@ using FluentAssertions;
 namespace Archetype.Tests.Meta;
 
 [TestFixture]
-public class KeywordAttributeTests
+public class KeywordTests
 {
     private List<Type> _keywordDefinitions = null!;
     
@@ -21,20 +21,10 @@ public class KeywordAttributeTests
     }
     
     [Test]
-    public void AllKeywordDefinitionsHaveKeywordAttribute()
-    {
-        var keywordDefinitionsWithoutKeywordAttribute = _keywordDefinitions
-            .Where(t => t.GetCustomAttribute<KeywordAttribute>() == null)
-            .ToList();
-        
-        keywordDefinitionsWithoutKeywordAttribute.Should().BeEmpty();
-    }
-    
-    [Test]
     public void NoEmptyStringKeywords()
     {
-        var emptyStringKeywords = _keywordDefinitions
-            .Where(t => string.IsNullOrWhiteSpace(t.GetCustomAttribute<KeywordAttribute>()?.Keyword))
+        var emptyStringKeywords = GetKeywordSyntaxAttributes()
+            .Where(a => string.IsNullOrWhiteSpace(a!.Keyword))
             .ToList();
         
         emptyStringKeywords.Should().BeEmpty();
@@ -44,7 +34,21 @@ public class KeywordAttributeTests
     public void NoDuplicateKeywords()
     {
         var duplicateKeywords = _keywordDefinitions
-            .GroupBy(t => t.GetCustomAttribute<KeywordAttribute>()?.Keyword)
+            .Select(t => t.Construct<IKeywordDefinition>())
+            .Where(d => d != null)
+            .GroupBy(d => d!.Keyword)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+        
+        duplicateKeywords.Should().BeEmpty();
+    }
+    
+    [Test]
+    public void NoDuplicateSyntax()
+    {
+        var duplicateKeywords = GetKeywordSyntaxAttributes()
+            .GroupBy(s => s.Keyword)
             .Where(g => g.Count() > 1)
             .Select(g => g.Key)
             .ToList();
@@ -57,13 +61,24 @@ public class KeywordAttributeTests
     {
         foreach (var definition in _keywordDefinitions)
         {
+            var attributeOperandDeclaration = definition.GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType();
+            
+            if (attributeOperandDeclaration == null)
+                continue;
+            
             var instance = definition.Construct<IKeywordDefinition>();
             
             instance.Should().NotBeNull();
             
-            var attributeOperandDeclaration = definition.GetCustomAttribute<KeywordAttribute>()?.Operands.GetType();
             
             attributeOperandDeclaration.Should().Be(instance!.Operands.GetType());
         }
+    }
+    
+    private IEnumerable<KeywordSyntaxAttribute> GetKeywordSyntaxAttributes()
+    {
+        return _keywordDefinitions
+            .Select(t => t.GetCustomAttribute<KeywordSyntaxAttribute>())
+            .Where(a => a != null)!;
     }
 }

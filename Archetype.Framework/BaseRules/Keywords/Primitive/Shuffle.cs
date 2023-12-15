@@ -4,11 +4,8 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Primitive;
 
-[EffectKeyword("SHUFFLE", typeof(OperandDeclaration<IOrderedZone>))]
 public class Shuffle : EffectPrimitiveDefinition
 {
-    public override string ReminderText => "Shuffle target draw pile.";
-
     protected override OperandDeclaration<IOrderedZone> OperandDeclaration { get; } = new();
 
 
