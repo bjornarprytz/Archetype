@@ -22,7 +22,7 @@ operand:                    any | targetRef | computedValueRef;
 targetRef:                  '<' index '>' | SELF;
 computedValueRef:           '[' index ']';
 
-staticKeyword:                 /*KEYWORD_LIST*/;
+staticKeyword:                 /*STATIC_KEYWORD_LIST*/;
 targetKeyword:                 /*TARGET_KEYWORD_LIST*/;
 conditionKeyword:              /*CONDITION_KEYWORD_LIST*/;
 computedValueKeyword:          /*COMPUTED_VALUE_KEYWORD_LIST*/;

@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Text;
+using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Meta;
 
 namespace Archetype.GrammarGenerator;
@@ -22,14 +24,14 @@ public class KeywordAnalyzer(string fileName)
         /*COST_KEYWORD_LIST*/;
         /*EFFECT_KEYWORD_LIST*/;
         
-        var keywordLists = new Dictionary<string, IEnumerable<string>>
+        var keywordLists = new Dictionary<string, List<KeywordSyntaxAttribute>?>
         {
-            {"STATIC_KEYWORD_LIST", new string[]{}},
-            {"TARGET_KEYWORD_LIST", new string[]{}},
-            {"CONDITION_KEYWORD_LIST", new string[]{}},
-            {"COMPUTED_VALUE_KEYWORD_LIST", new string[]{}},
-            {"COST_KEYWORD_LIST", new string[]{}},
-            {"EFFECT_KEYWORD_LIST", new string[]{}}
+            {"STATIC_KEYWORD_LIST", null},
+            {"TARGET_KEYWORD_LIST", null},
+            {"CONDITION_KEYWORD_LIST", null},
+            {"COMPUTED_VALUE_KEYWORD_LIST", null},
+            {"COST_KEYWORD_LIST", null},
+            {"EFFECT_KEYWORD_LIST", null}
         };
 
         foreach (var keywordType in GetKeywords(targetAssemblies))
@@ -39,22 +41,22 @@ public class KeywordAnalyzer(string fileName)
             switch (keywordAttribute)
             {
                 case StaticSyntaxAttribute:
-                    keywordLists["STATIC_KEYWORD_LIST"] = keywordLists["STATIC_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
+                    AppendKeywordSyntax("STATIC_KEYWORD_LIST", keywordAttribute);
                     break;
                 case TargetSyntaxAttribute:
-                    keywordLists["TARGET_KEYWORD_LIST"] = keywordLists["TARGET_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
+                    AppendKeywordSyntax("TARGET_KEYWORD_LIST", keywordAttribute);
                     break;
                 case ConditionSyntaxAttribute:
-                    keywordLists["CONDITION_KEYWORD_LIST"] = keywordLists["CONDITION_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
+                    AppendKeywordSyntax("CONDITION_KEYWORD_LIST", keywordAttribute);
                     break;
                 case ComputedValueSyntaxAttribute:
-                    keywordLists["COMPUTED_VALUE_KEYWORD_LIST"] = keywordLists["COMPUTED_VALUE_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
+                    AppendKeywordSyntax("COMPUTED_VALUE_KEYWORD_LIST", keywordAttribute);
                     break;
                 case CostSyntaxAttribute:
-                    keywordLists["COST_KEYWORD_LIST"] = keywordLists["COST_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
+                    AppendKeywordSyntax("COST_KEYWORD_LIST", keywordAttribute);
                     break;
                 case EffectSyntaxAttribute:
-                    keywordLists["EFFECT_KEYWORD_LIST"] = keywordLists["EFFECT_KEYWORD_LIST"].Append(keywordAttribute.Keyword);
+                    AppendKeywordSyntax("EFFECT_KEYWORD_LIST", keywordAttribute);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -63,19 +65,22 @@ public class KeywordAnalyzer(string fileName)
 
         foreach (var (keywordListName, keywords) in keywordLists)
         {
-            replaceKeywordList(keywordListName, keywords);
+            ReplaceKeywordList(keywordListName, keywords);
         }
-        
-        
-        
-        void replaceKeywordList(string keywordListName, IEnumerable<string> keywords)
+
+        return syntaxTemplate;
+
+        void AppendKeywordSyntax(string keywordListName, KeywordSyntaxAttribute keyword)
         {
-            var keywordListString = "(" + string.Join("|", keywords) + ")";
+            (keywordLists[keywordListName] ??= new List<KeywordSyntaxAttribute>()).Add(keyword);
+        }
+
+        void ReplaceKeywordList(string keywordListName, IEnumerable<KeywordSyntaxAttribute>? keywords)
+        {
+            var keywordListString = keywords == null ? "'NOTHING'" // TODO: Make something more elegant for non-existent lists
+                : "(" + string.Join("|", keywords.Select(ExtractSyntax)) + ")";
             syntaxTemplate = syntaxTemplate!.Replace($"/*{keywordListName}*/", keywordListString);
         }
-
-        return ""; // TODO: Return the generated grammar
-
     }
     
     
@@ -91,5 +96,30 @@ public class KeywordAnalyzer(string fileName)
         return keywordClasses
             .Where(type => !string.IsNullOrWhiteSpace(type.GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword))
             .ToArray();
+    }
+
+    private static string ExtractSyntax(KeywordSyntaxAttribute keywordSyntaxAttribute)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append($"'{keywordSyntaxAttribute.Keyword}");
+        
+        sb.Append("('");
+        sb.Append(string.Join(" ", keywordSyntaxAttribute.Operands.Select(ExtractSyntax)));
+        sb.Append("')'");
+        
+        return sb.ToString();
+    }
+
+    private static string ExtractSyntax(IOperandDescription operandDescription)
+    {
+        var sb = new StringBuilder("operand"); // TODO: Make the type matter here, first we need syntax for the types
+
+        if (operandDescription.IsOptional)
+        {
+            sb.Append('?');
+        }
+
+        return sb.ToString();
     }
 }

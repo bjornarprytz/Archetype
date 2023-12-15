@@ -36,7 +36,7 @@ public abstract class KeywordSyntaxAttribute: Attribute
 
         var type = genericTypes.Length switch
         {
-            0 => typeof(OperandDeclaration).MakeGenericType(genericTypes),
+            0 => typeof(OperandDeclaration),
             1 => typeof(OperandDeclaration<>).MakeGenericType(genericTypes),
             2 => typeof(OperandDeclaration<,>).MakeGenericType(genericTypes),
             3 => typeof(OperandDeclaration<,,>).MakeGenericType(genericTypes),

@@ -35,11 +35,16 @@ if (!baseGrammar.EndsWith(".template.g4"))
     return;
 }
 
-var grammarTemplate = File.ReadAllText(baseGrammar);
+Console.WriteLine($"Reading base grammar: {baseGrammar}");
+
 var targetGrammar = Path.Combine(targetGrammarDir, Path.GetFileName(baseGrammar).Replace(".template", ""));
 
+Console.WriteLine($"Generating grammar from: {assemblyPaths}");
+
 var generatedGrammar =
-    new KeywordAnalyzer(grammarTemplate).GenerateKeywordSyntax(GetAssemblies(assemblyPaths.Split(';')));
+    new KeywordAnalyzer(baseGrammar).GenerateKeywordSyntax(GetAssemblies(assemblyPaths.Split(';')));
+
+Console.WriteLine($"Writing grammar to: {targetGrammar}");
 
 if (!Directory.Exists(targetGrammarDir))
 {
