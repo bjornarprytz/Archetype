@@ -47,7 +47,7 @@ public class OperandDeclaration<T0> : OperandDeclaration
 
     public override bool Validate(IReadOnlyList<KeywordOperand> operands)
     {
-        return operands.Count == 1 && operands[0].Type == typeof(T0);
+        return operands.Count == 1 && operands[0].Type.Implements<T0>();
     }
 
     public T0 Unpack(EffectPayload effectPayload)
@@ -79,7 +79,7 @@ public class OperandDeclaration<T0, T1> : OperandDeclaration
 
     public override bool Validate(IReadOnlyList<KeywordOperand> operands)
     {
-        return operands.Count == 2 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1);
+        return operands.Count == 2 && operands[0].Type.Implements<T0>() && operands[1].Type.Implements<T1>();
     }
 
     public (T0, T1) Unpack(EffectPayload effectPayload)
@@ -112,7 +112,7 @@ public class OperandDeclaration<T0, T1, T2> : OperandDeclaration
 
     public override bool Validate(IReadOnlyList<KeywordOperand> operands)
     {
-        return operands.Count == 3 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2);
+        return operands.Count == 3 && operands[0].Type.Implements<T0>() && operands[1].Type.Implements<T1>() && operands[2].Type.Implements<T2>();
     }
 
     public (T0, T1, T2) Unpack(EffectPayload effectPayload)
@@ -146,7 +146,7 @@ public class OperandDeclaration<T0, T1, T2, T3> : OperandDeclaration
 
     public override bool Validate(IReadOnlyList<KeywordOperand> operands)
     {
-        return operands.Count == 4 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2) && operands[3].Type == typeof(T3);
+        return operands.Count == 4 && operands[0].Type.Implements<T0>() && operands[1].Type.Implements<T1>() && operands[2].Type.Implements<T2>() && operands[3].Type.Implements<T3>();
     }
 
     public (T0, T1, T2, T3) Unpack(EffectPayload effectPayload)
@@ -181,7 +181,7 @@ public class OperandDeclaration<T0, T1, T2, T3, T4> : OperandDeclaration
 
     public override bool Validate(IReadOnlyList<KeywordOperand> operands)
     {
-        return operands.Count == 5 && operands[0].Type == typeof(T0) && operands[1].Type == typeof(T1) && operands[2].Type == typeof(T2) && operands[3].Type == typeof(T3) && operands[4].Type == typeof(T4);
+        return operands.Count == 5 && operands[0].Type.Implements<T0>() && operands[1].Type.Implements<T1>() && operands[2].Type.Implements<T2>() && operands[3].Type.Implements<T3>() && operands[4].Type.Implements<T4>();
     }
 
     public (T0, T1, T2, T3, T4) Unpack(EffectPayload effectPayload)

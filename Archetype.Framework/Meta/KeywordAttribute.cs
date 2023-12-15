@@ -33,13 +33,23 @@ public abstract class KeywordAttribute: Attribute
         }
         
         var genericTypes = operandDeclaration.GetGenericArguments();
-        
-        var type = typeof(OperandDeclaration<>).MakeGenericType(genericTypes);
+
+        var type = genericTypes.Length switch
+        {
+            0 => typeof(OperandDeclaration).MakeGenericType(genericTypes),
+            1 => typeof(OperandDeclaration<>).MakeGenericType(genericTypes),
+            2 => typeof(OperandDeclaration<,>).MakeGenericType(genericTypes),
+            3 => typeof(OperandDeclaration<,,>).MakeGenericType(genericTypes),
+            4 => typeof(OperandDeclaration<,,,>).MakeGenericType(genericTypes),
+            5 => typeof(OperandDeclaration<,,,,>).MakeGenericType(genericTypes),
+            _ => throw new InvalidOperationException(
+                $"OperandDeclaration<> does not support {genericTypes.Length} generic arguments")
+        };
 
         return (genericTypes.Length) switch
         {
             0 => Activator.CreateInstance(type) as OperandDeclaration,
-            1 => Activator.CreateInstance(type, nOptional > 0) as OperandDeclaration,
+            1 => Activator.CreateInstance(type, new object?[] { nOptional > 0 }) as OperandDeclaration,
             _ => Activator.CreateInstance(type, nOptional) as OperandDeclaration
         } ?? throw new InvalidOperationException($"Failed to create OperandDeclaration<> of type {type}");
     }

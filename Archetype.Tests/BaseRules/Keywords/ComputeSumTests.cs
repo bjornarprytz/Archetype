@@ -33,24 +33,11 @@ public class ComputeSumTests
         var atomProvider = Substitute.For<IAtomProvider>();
         atomProvider.ProvideAtoms(context).Returns(new List<IAtom> { target1, target2, target3 });
 
-        var char1 = Substitute.For<IKeywordInstance>();
-        char1.Keyword.Returns("TestProperty");
-        char1.Operands.Returns(Declare.Operands(Declare.Operand(1)));
-        var char2 = Substitute.For<IKeywordInstance>();
-        
-        char2.Keyword.Returns("TestProperty");
-        char2.Operands.Returns(Declare.Operands(Declare.Operand(2)));
-        
-        var char3 = Substitute.For<IKeywordInstance>();
-        
-        char3.Keyword.Returns("OtherProperty");
-        char3.Operands.Returns(Declare.Operands(Declare.Operand(69)));
-
         keywordInstance.Operands.Returns(Declare.Operands(Declare.Operand(atomProvider), Declare.Operand("TestProperty")));
         
-        target1.Characteristics.Returns( new Dictionary<string, IKeywordInstance> { ["TestProperty"] = char1 });
-        target2.Characteristics.Returns( new Dictionary<string, IKeywordInstance> { ["TestProperty"] = char2 });
-        target3.Characteristics.Returns( new Dictionary<string, IKeywordInstance> { ["OtherProperty"] = char3 });
+        target1.SetupCharacteristicReturn("TestProperty", 1); 
+        target2.SetupCharacteristicReturn("TestProperty", 2); 
+        target3.SetupCharacteristicReturn("OtherProperty", 69);
         
         // Act
         

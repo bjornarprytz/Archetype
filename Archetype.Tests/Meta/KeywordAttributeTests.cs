@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.Meta;
 using FluentAssertions;
 
@@ -56,9 +57,13 @@ public class KeywordAttributeTests
     {
         foreach (var definition in _keywordDefinitions)
         {
+            var instance = definition.Construct<IKeywordDefinition>();
+            
+            instance.Should().NotBeNull();
+            
             var attributeOperandDeclaration = definition.GetCustomAttribute<KeywordAttribute>()?.Operands.GetType();
             
-            attributeOperandDeclaration.Should().Be(definition);
+            attributeOperandDeclaration.Should().Be(instance!.Operands.GetType());
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 using FluentAssertions;
@@ -25,13 +26,10 @@ public class ChangeStateTests
     public void ShouldChangeState()
     {
         // Arrange
-        var payload = new EffectPayload(
-            Guid.NewGuid(),
-            Substitute.For<IAtom>(),
-            _sut.Name,
-            new object?[] { _target, 42 }
-        );
-
+        var payload = _sut
+            .CreateInstance(_target, 42)
+            .BindPayload(Substitute.For<IResolutionContext>());
+        
         // Act
         var result = _sut.Resolve(Substitute.For<IResolutionContext>(), payload);
 

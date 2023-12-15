@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -30,16 +31,15 @@ public class ShuffleTests
         [Test]
         public void ShouldShuffleZone()
         {
+            var resolutionContext = Substitute.For<IResolutionContext>();
+            
             // Arrange
-            var payload = new EffectPayload(
-                Guid.NewGuid(),
-                Substitute.For<IAtom>(),
-                _sut.Name,
-                new object[] { _targetZone }
-            );
+            var payload = _sut
+                .CreateInstance(_targetZone)
+                .BindPayload(resolutionContext);
     
             // Act
-            var result = _sut.Resolve(Substitute.For<IResolutionContext>(), payload);
+            var result = _sut.Resolve(resolutionContext, payload);
     
             // Assert
             _targetZone.Received().Shuffle();

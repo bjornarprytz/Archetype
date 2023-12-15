@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -10,17 +11,14 @@ namespace Archetype.Tests.BaseRules;
 [TestFixture]
 public class ConditionZoneTypeTests
 {
-    public interface ISomeZone : IZone { }
-    public interface ISomeOtherZone : IZone { }
-    
-    private ConditionZoneType<ISomeZone> _sut = default!;
+    private ConditionZoneType _sut = default!;
     
     private IResolutionContext _context = default!;
     
     [SetUp]
     public void Setup()
     {
-        _sut = new ();
+        _sut = new ConditionZoneType();
         _context = Substitute.For<IResolutionContext>();
     }
     
@@ -28,10 +26,16 @@ public class ConditionZoneTypeTests
     public void ShouldReturnTrue_WhenZoneIsCorrectType()
     {
         // Arrange
-        _context.Source.CurrentZone.Returns(Substitute.For<ISomeZone>());
+        var zone = Substitute.For<IZone>();
+            zone.SetupCharacteristicReturn("TYPE", "SOME_TYPE");
+        var atom = Substitute.For<IAtom>();
+        atom.CurrentZone.Returns(zone);
+        
+        var keywordInstance = _sut
+            .CreateInstance(atom, "SOME_TYPE");
         
         // Act
-        var result = _sut.Check(_context, Substitute.For<IKeywordInstance>());
+        var result = _sut.Check(_context, keywordInstance);
 
         // Assert
         result.Should().BeTrue();
@@ -41,10 +45,17 @@ public class ConditionZoneTypeTests
     public void ShouldReturnFalse_WhenZoneIsNotCorrectType()
     {
         // Arrange
-        _context.Source.CurrentZone.Returns(Substitute.For<ISomeOtherZone>());
+        var zone = Substitute.For<IZone>();
+            zone.SetupCharacteristicReturn("TYPE", "SOME_OTHER_TYPE");
+        var atom = Substitute.For<IAtom>();
+        atom.CurrentZone.Returns(zone);
         
+        var keywordInstance = _sut
+            .CreateInstance(atom, "SOME_TYPE");
+        
+            
         // Act
-        var result = _sut.Check(_context, Substitute.For<IKeywordInstance>());
+        var result = _sut.Check(_context, keywordInstance);
 
         // Assert
         result.Should().BeFalse();
