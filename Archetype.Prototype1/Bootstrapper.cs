@@ -5,12 +5,10 @@ using Archetype.Prototype1.Proto;
 
 namespace Archetype.Prototype1;
 
-public class Bootstrapper(string setJson) : IBootstrapper
+public class Bootstrapper(ISetParser setParser, IProtoData protoData, IRules rules) : IBootstrapper
 {
-    
-    public void Bootstrap(IProtoData protoData, IRules rules)
+    public void Bootstrap(string setJson)
     {
-        var setParser = null as ISetParser;// new SetParser(new CardParser(rules));
         protoData.AddSet(setParser.ParseSet(setJson));
         
         protoData.SetTurnSequence(

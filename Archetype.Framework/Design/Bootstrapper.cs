@@ -2,5 +2,5 @@
 
 public interface IBootstrapper
 {
-    void Bootstrap(IProtoData protoData, IRules rules);
+    void Bootstrap(string setJson);
 }

@@ -15,39 +15,28 @@ internal static class RuntimeTests
         
         var keywordDefinitions = rules.Keywords.ToList();
         
-        keywordDefinitions.EnsureKeywordAttribute();
         keywordDefinitions.EnsureNoDuplicates();
         keywordDefinitions.EnsureOperandDeclarations();
     }
     
     private static void EnsureNoDuplicates(this IEnumerable<IKeywordDefinition> keywordDefinitions)
     {
-        var duplicates = keywordDefinitions.Select(d => d.GetType())
-            .GroupBy(t => t.GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword)
+        var duplicates = keywordDefinitions
+            .GroupBy(def => def.Keyword)
             .Where(g => g.Count() > 1)
-            .Select(g => g.Key)
             .ToList();
         
         if (duplicates.Count != 0)
-            throw new InvalidOperationException($"Duplicate keywords found: {string.Join(", ", duplicates)}");
-    }
-    
-    private static void EnsureKeywordAttribute(this IEnumerable<IKeywordDefinition> keywordDefinitions)
-    {
-        var keywordDefinitionsWithoutKeywordAttribute = keywordDefinitions
-            .Select(d => d.GetType())
-            .Where(t => string.IsNullOrWhiteSpace(t.GetCustomAttribute<KeywordSyntaxAttribute>()?.Keyword))
-            .ToList();
-        
-        if (keywordDefinitionsWithoutKeywordAttribute.Count != 0)
-            throw new InvalidOperationException($"Keyword definitions without {nameof(KeywordSyntaxAttribute)}: {string.Join(", ", keywordDefinitionsWithoutKeywordAttribute)}");
+            throw new InvalidOperationException($"Duplicate keywords found: {string.Join(", ", duplicates.Select(pair => $"{pair.Key} > {string.Join("|", pair.Select(p => p.GetType()))} "))}");
     }
     
     private static void EnsureOperandDeclarations(this IEnumerable<IKeywordDefinition> keywordDefinitions)
     {
         foreach (var definition in keywordDefinitions)
         {
-            var attributeOperandDeclaration = definition.GetType().GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType();
+            if (definition.GetType().GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType() 
+                is not { } attributeOperandDeclaration)
+                continue;
             
             if (attributeOperandDeclaration != definition.GetType())
                 throw new InvalidOperationException($"Operand declaration mismatch: {definition.GetType()} != {attributeOperandDeclaration}");

@@ -1,7 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Reflection;
-using Archetype.Framework.Meta;
 using Archetype.GrammarGenerator;
 
 if (args.Length == 0)

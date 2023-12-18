@@ -7,11 +7,7 @@
     // Figure out how to create the turn order / phases without using the "new" keyword.
     // StartGame action
 // TODO: Finish Prototype1
-    // Grammar
-        // Not all keywords need a keyword attribute, only the ones exposed in the syntax. That's a one-to-one mapping.
-        // The rest of the keywords are just primitives that are used to build the composite keywords.
-        // So the keywords need an internal ID, and it does not need to be human readable.
-        // TODO: Use the connection between syntax and keyword ID to reference the definition
+    // TODO: Use the connection between syntax and keyword ID to reference the definition
     // Game state init
     
 

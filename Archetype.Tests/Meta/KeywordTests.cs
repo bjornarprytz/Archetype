@@ -47,7 +47,8 @@ public class KeywordTests
     [Test]
     public void NoDuplicateSyntax()
     {
-        var duplicateKeywords = GetKeywordSyntaxAttributes()
+        var attributes = GetKeywordSyntaxAttributes().ToList();
+        var duplicateKeywords = attributes
             .GroupBy(s => s.Keyword)
             .Where(g => g.Count() > 1)
             .Select(g => g.Key)
@@ -61,15 +62,13 @@ public class KeywordTests
     {
         foreach (var definition in _keywordDefinitions)
         {
-            var attributeOperandDeclaration = definition.GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType();
-            
-            if (attributeOperandDeclaration == null)
+            if (definition.GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType() 
+                is not { } attributeOperandDeclaration)
                 continue;
             
             var instance = definition.Construct<IKeywordDefinition>();
             
             instance.Should().NotBeNull();
-            
             
             attributeOperandDeclaration.Should().Be(instance!.Operands.GetType());
         }

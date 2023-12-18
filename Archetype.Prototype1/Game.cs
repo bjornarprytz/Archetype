@@ -16,7 +16,7 @@ public static class Game
     public static IGameRoot Start(string setJson)
     {
         var gameRoot = ArchetypeExtensions
-            .InitArchetype<GameState>(new Bootstrapper(setJson));
+            .InitArchetype<GameState, Bootstrapper>(BasicRules.Create(), setJson);
 
         return gameRoot;
     }
