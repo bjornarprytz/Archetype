@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Archetype.Framework\Archetype.Framework.csproj" />
+      <ProjectReference Include="..\Archetype.Grammar\Archetype.Grammar.csproj" />
     </ItemGroup>
 
 </Project>

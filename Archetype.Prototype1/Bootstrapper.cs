@@ -1,5 +1,4 @@
 ﻿using Archetype.Framework.Design;
-using Archetype.Framework.Parsing;
 using Archetype.Framework.State;
 using Archetype.Prototype1.Proto;
 
@@ -9,7 +8,10 @@ public class Bootstrapper(ISetParser setParser, IProtoData protoData, IRules rul
 {
     public void Bootstrap(string setJson)
     {
-        protoData.AddSet(setParser.ParseSet(setJson));
+        foreach (var set in setParser.ParseSets(setJson))
+        {
+            protoData.AddSet(set);
+        }
         
         protoData.SetTurnSequence(
             new IPhase[]

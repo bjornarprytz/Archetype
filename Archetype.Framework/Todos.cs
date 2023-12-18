@@ -2,6 +2,7 @@
 
 
 
+// TODO: Write CardParser
 // TODO: Finish Framework
     // Add state based effects resolver
     // Figure out how to create the turn order / phases without using the "new" keyword.

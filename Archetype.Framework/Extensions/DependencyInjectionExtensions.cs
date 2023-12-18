@@ -12,9 +12,10 @@ public static class ArchetypeExtensions
     
     // TODO: Use the configure function to add the game state and protoProvider (usually a set parser)
     
-    public static IGameRoot InitArchetype<TGameState, TBootstrapper>(IRules rules, string setJson)
+    public static IGameRoot InitArchetype<TGameState, TBootstrapper, TParser>(IRules rules, string setJson)
         where TGameState : class, IGameState
         where TBootstrapper : class, IBootstrapper
+        where TParser : class, ISetParser
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection
@@ -31,6 +32,7 @@ public static class ArchetypeExtensions
             .AddFactoryProtoCardBuilderFactory()
             .AddSingleton<IBootstrapper, TBootstrapper>()
             .AddSingleton<IGameState, TGameState>()
+            .AddSingleton<ISetParser, TParser>()
             .AddSingleton(rules)
             ;
         

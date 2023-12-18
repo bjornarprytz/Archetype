@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Core.Structure;
 using Archetype.Framework.Extensions;
+using Archetype.Grammar;
 
 namespace Archetype.Prototype1;
 
@@ -16,7 +17,7 @@ public static class Game
     public static IGameRoot Start(string setJson)
     {
         var gameRoot = ArchetypeExtensions
-            .InitArchetype<GameState, Bootstrapper>(BasicRules.Create(), setJson);
+            .InitArchetype<GameState, Bootstrapper, SetParser>(BasicRules.Create(), setJson);
 
         return gameRoot;
     }
