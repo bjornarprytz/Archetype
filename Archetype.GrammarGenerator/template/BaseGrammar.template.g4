@@ -3,7 +3,7 @@ grammar BaseGrammar;
 cardText:                   name static? effects? abilities?; 
 
 static:                     staticKeyword+;
-effects:                    'EFFECT' actionBlock;
+effects:                    actionBlock;
 abilities:                  'ABILITIES' ability+;
 
 ability:                    '{' name static? effects? '}';

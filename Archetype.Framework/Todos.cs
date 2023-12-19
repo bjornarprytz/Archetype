@@ -3,6 +3,8 @@
 
 
 // TODO: Write CardParser
+    // TODO: Write CardParserTests
+    // TODO: What does a targetRef operand look like?
 // TODO: Finish Framework
     // Add state based effects resolver
     // Figure out how to create the turn order / phases without using the "new" keyword.
@@ -26,4 +28,5 @@
      *  - ComputeCount for specific values of a characteristic (e.g. ComputeCount("Health", 10)) 
      * TODO: Revisit whether cards/abilities need to _be_ an actionBlock, or if they could _have_ an actionBlock.
      *  - Phases are atoms, which means they can have characteristics and currentZone. Is this an affordable quirk?
+     * - TODO: Re-add ability to create cross-cutting effects to cards (e.g. a keyword that applies to all cards, or certain types of cards)
      */

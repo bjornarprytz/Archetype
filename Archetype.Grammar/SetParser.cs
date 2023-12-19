@@ -7,11 +7,11 @@ namespace Archetype.Grammar;
 public record SetData(string Name, string Description, IEnumerable<CardData> Cards);
 
 
-public class SetParser(IRules rules, IProtoCardBuilderFactory protoCardBuilderFactory) : ISetParser
+public class SetParser(IRules rules) : ISetParser
 {
     public IEnumerable<IProtoSet> ParseSets(string setData)
     {
-        var cardParser = new CardParser(protoCardBuilderFactory);
+        var cardParser = new CardParser();
         var sets = JsonSerializer.Deserialize<SetData[]>(setData);
         
         if (sets is null)

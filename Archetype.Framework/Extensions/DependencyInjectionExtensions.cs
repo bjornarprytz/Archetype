@@ -29,7 +29,6 @@ public static class ArchetypeExtensions
             .AddSingleton<IGameActionHandler, GameActionHandler>()
             .AddSingleton<IMetaGameState, MetaGameState>()
             .AddSingleton<IProtoData, ProtoData>()
-            .AddFactoryProtoCardBuilderFactory()
             .AddSingleton<IBootstrapper, TBootstrapper>()
             .AddSingleton<IGameState, TGameState>()
             .AddSingleton<ISetParser, TParser>()
@@ -43,13 +42,5 @@ public static class ArchetypeExtensions
         bootstrapper.Bootstrap(setJson);
         
         return _serviceProvider.GetRequiredService<IGameRoot>();
-    }
-    
-    private static IServiceCollection AddFactoryProtoCardBuilderFactory(this IServiceCollection serviceProvider)
-    {
-        serviceProvider.AddTransient<ProtoCardBuilder>();
-        serviceProvider.AddSingleton<IProtoCardBuilderFactory, ProtoCardBuilderFactory>();
-        
-        return serviceProvider;
     }
 }

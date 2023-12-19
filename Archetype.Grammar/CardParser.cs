@@ -5,22 +5,15 @@ namespace Archetype.Grammar;
 
 public record CardData(string RulesText, string ArtLink);
 
-public class CardParser(IProtoCardBuilderFactory builderFactory)
+public class CardParser()
 {
-    BaseGrammarParser _grammarParser = new();
-    
     public IProtoCard ParseCard(CardData cardData)
     {
-        var builder = builderFactory.CreateBuilder();
+        var builder = new ProtoCardBuilder();
 
         var parser = Helper.CreateParser(cardData.RulesText);
-        
-        parser.cardText() // TODO: Continue here
-        
-        var artLink = cardData.ArtLink;
-        
-        var artLinkParser = new ArtLinkParser(artLink, builder);
-        artLinkParser.ParseArtLink();
+
+        var cardTextContext = parser.cardText(); // TODO: Continue here
         
         return builder.Build();
     }

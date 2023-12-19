@@ -33,7 +33,7 @@ public class Card : Atom, ICard
     public IReadOnlyDictionary<string, IAbility> Abilities { get; }
     
     public IAtom Source => this;
-    public IReadOnlyList<CardTargetDescription> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
+    public IReadOnlyList<IKeywordInstance> TargetsDescriptors => _proto.ActionBlock.TargetSpecs;
     public IReadOnlyList<IKeywordInstance> Effects => _proto.ActionBlock.Effects;
     public IReadOnlyList<IKeywordInstance> AfterEffects => _proto.ActionBlock.AfterEffects;
     public IReadOnlyList<IKeywordInstance> Costs => _proto.ActionBlock.Costs;

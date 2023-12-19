@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface.Actions;
+using Archetype.Framework.State;
 
 namespace Archetype.Framework.Core.Primitives;
 
@@ -61,9 +62,7 @@ public abstract class EffectCompositeDefinition : KeywordDefinition, IEffectComp
 public interface IEffectCompositeDefinition : IKeywordDefinition
 {
     IKeywordFrame Compose(IResolutionContext context, EffectPayload effectPayload);
-} 
-
-public abstract class CharacteristicDefinition : KeywordDefinition { } 
+}
 
 public abstract class ConditionDefinition : KeywordDefinition
 {
@@ -80,5 +79,18 @@ public abstract class CostDefinition : EffectCompositeDefinition
 public abstract class ComputedValueDefinition : KeywordDefinition
 {
     public abstract int Compute(IResolutionContext context, IKeywordInstance keywordInstance);
+}
+
+public abstract class TargetSpecificationDefinition : KeywordDefinition
+{
+    protected sealed override OperandDeclaration<bool> OperandDeclaration { get; } = new();
+
+    public bool IsOptional(IResolutionContext context, IKeywordInstance keywordInstance)
+    {
+        var isOptional = OperandDeclaration.Unpack(keywordInstance, context);
+        return isOptional;
+    }
+    public abstract bool Filter(IAtom atom, IResolutionContext context, IKeywordInstance keywordInstance);
+    public abstract IEnumerable<IAtom> GetAtoms(IResolutionContext context, IKeywordInstance keywordInstance);
 }
 

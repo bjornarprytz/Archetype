@@ -12,7 +12,7 @@ public class Ability : IAbility
     
     public required IProtoActionBlock Proto { get; init; }
     public required IAtom Source { get; init; }
-    public IReadOnlyList<CardTargetDescription> TargetsDescriptors => Proto.TargetSpecs;
+    public IReadOnlyList<IKeywordInstance> TargetsDescriptors => Proto.TargetSpecs;
     public IReadOnlyList<IKeywordInstance> Effects => Proto.Effects;
     public IReadOnlyList<IKeywordInstance> AfterEffects => Proto.AfterEffects;
     public IReadOnlyList<IKeywordInstance> Costs => Proto.Costs;

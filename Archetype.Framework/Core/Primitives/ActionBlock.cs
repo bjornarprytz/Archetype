@@ -8,7 +8,7 @@ namespace Archetype.Framework.Core.Primitives;
 public interface IActionBlock
 {
     IAtom Source { get; }
-    IReadOnlyList<CardTargetDescription> TargetsDescriptors { get; }
+    IReadOnlyList<IKeywordInstance> TargetsDescriptors { get; }
     IReadOnlyList<IKeywordInstance> Effects { get; }
     IReadOnlyList<IKeywordInstance> AfterEffects { get; }
     IReadOnlyList<IKeywordInstance> Costs { get; }

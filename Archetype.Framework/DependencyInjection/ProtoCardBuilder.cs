@@ -6,26 +6,14 @@ namespace Archetype.Framework.DependencyInjection;
 
 public class ProtoCardBuilder
 {
-    private readonly IEnumerable<IValidator<IProtoCard>> _validators;
-    private readonly IList<Action<ProtoCard>> _onBuildPlugin = new List<Action<ProtoCard>>();
-    
     private string? _name;
-    private readonly List<CardTargetDescription> _targetSpecs = new();
+    private readonly List<IKeywordInstance> _targetSpecs = new();
     private readonly List<IKeywordInstance> _conditions = new();
     private readonly List<IKeywordInstance> _effects = new();
     private readonly List<IKeywordInstance> _costs = new();
     private readonly List<IKeywordInstance> _computedValues = new();
     private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
     private readonly Dictionary<string, IKeywordInstance> _characteristics = new();
-
-    public ProtoCardBuilder(IEnumerable<IValidator<IProtoCard>> validators, IEnumerable<Action<ProtoCard>> plugins)
-    {
-        _validators = validators;
-        foreach (var plugin in plugins)
-        {
-            _onBuildPlugin.Add(plugin);
-        }
-    }
     
     public IProtoCard Build()
     {
@@ -42,16 +30,6 @@ public class ProtoCardBuilder
             Abilities: _abilities,
             Characteristics: _characteristics
         );
-        
-        foreach (var plugin in _onBuildPlugin)
-        {
-            plugin(protoCard);
-        }
-        
-        foreach (var validator in _validators)
-        {
-            validator.ValidateAndThrow(protoCard);
-        }
         
         return protoCard;
     }
@@ -71,7 +49,7 @@ public class ProtoCardBuilder
     
 
     public void SetActionBlock(
-        List<CardTargetDescription> targetSpecs, 
+        List<IKeywordInstance> targetSpecs, 
         List<IKeywordInstance> costs, 
         List<IKeywordInstance> conditions, 
         List<IKeywordInstance> computedValues, 
@@ -93,7 +71,7 @@ public class ProtoCardBuilder
         ) : IProtoCard;
 
     public record ProtoActionBlock(
-        IReadOnlyList<CardTargetDescription> TargetSpecs,
+        IReadOnlyList<IKeywordInstance> TargetSpecs,
         IReadOnlyList<IKeywordInstance> Conditions,
         IReadOnlyList<IKeywordInstance> Costs,
         IReadOnlyList<IKeywordInstance> Effects,
