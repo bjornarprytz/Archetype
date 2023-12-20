@@ -11,9 +11,17 @@ public class CardParser()
     {
         var builder = new ProtoCardBuilder();
 
+
         var parser = Helper.CreateParser(cardData.RulesText);
 
-        var cardTextContext = parser.cardText(); // TODO: Continue here
+        var cardTextContext = parser.cardText();
+        
+        builder.SetName(cardTextContext.name().STRING().ToString()!);
+        builder.AddCharacteristics(cardTextContext.@static().staticKeyword().Select((staticKwContext =>
+        {
+            staticKwContext. // TOOD: Characteristic syntax (To strive for "TYPE: Creature" instead of "TYPE(Creature)" or Characteristic("TYPE", "Creature"))
+        })));
+        
         
         return builder.Build();
     }

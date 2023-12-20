@@ -104,9 +104,19 @@ public class KeywordAnalyzer(string fileName)
 
         sb.Append($"'{keywordSyntaxAttribute.Keyword}");
         
-        sb.Append("('");
-        sb.Append(string.Join(" ", keywordSyntaxAttribute.Operands.Select(ExtractSyntax)));
-        sb.Append("')'");
+                
+        sb.Append('(');
+        
+        if (keywordSyntaxAttribute.Operands.Count > 0)
+        {
+            sb.Append('\'');
+            sb.Append(string.Join(" ", keywordSyntaxAttribute.Operands.Select(ExtractSyntax)));
+            sb.Append('\'');
+            sb.Append("YO");
+        }
+        
+        sb.Append(")'");
+        
         
         return sb.ToString();
     }
