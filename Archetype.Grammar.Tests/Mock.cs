@@ -15,9 +15,4 @@ public static class Mock
         keywordInstance.Operands.Returns(Declare.Operands(operands.Select(Declare.Operand).ToArray()));
         return keywordInstance;
     }
-    
-    public static KeywordOperand<T> Operand<T>(T value) => new((_ => value));
-    public static KeywordOperand<T> Operand<T>(Func<IResolutionContext?, T> getValue) => new(getValue);
-    public static KeywordOperand Operand(object? value) => new(value?.GetType() ?? typeof(object), (_ => value));
-    public static KeywordOperand Operand(Type type, object? value) => new(type, (_ => value));
 }

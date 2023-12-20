@@ -7,14 +7,12 @@ effects:                    actionBlock;
 abilities:                  'ABILITIES' ability+;
 
 ability:                    '{' name static? effects? '}';
-actionBlock:                '{' costs? conditions? targets? computedValues? effect+ '}';
+actionBlock:                '{' targets? computedValues? costKeyword* conditionKeyword* effect+ '}';
 
-computedValues:             '[' (computedValueSpecs (',' )) ']';
+computedValues:             '[' (computedValueSpecs (',' computedValueSpecs)*) ']';
 computedValueSpecs:         computedValueKeyword;
 targets:                    '<' (targetSpecs (',' targetSpecs)*) '>';
 targetSpecs:                targetKeyword OPTIONAL?;
-conditions:                 (conditionKeyword (',' conditionKeyword)*);
-costs:                      (costKeyword (',' costKeyword)*);
 effect:                     effectKeyword;
 
 operand:                    any | targetRef | computedValueRef;

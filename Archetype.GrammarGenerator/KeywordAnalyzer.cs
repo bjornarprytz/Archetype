@@ -112,7 +112,6 @@ public class KeywordAnalyzer(string fileName)
             sb.Append('\'');
             sb.Append(string.Join(" ", keywordSyntaxAttribute.Operands.Select(ExtractSyntax)));
             sb.Append('\'');
-            sb.Append("YO");
         }
         
         sb.Append(")'");

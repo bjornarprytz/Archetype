@@ -1,5 +1,7 @@
-﻿using Archetype.Framework.DependencyInjection;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.DependencyInjection;
 using Archetype.Framework.Design;
+
 
 namespace Archetype.Grammar;
 
@@ -17,12 +19,20 @@ public class CardParser()
         var cardTextContext = parser.cardText();
         
         builder.SetName(cardTextContext.name().STRING().ToString()!);
-        builder.AddCharacteristics(cardTextContext.@static().staticKeyword().Select((staticKwContext =>
-        {
-            staticKwContext. // TOOD: Characteristic syntax (To strive for "TYPE: Creature" instead of "TYPE(Creature)" or Characteristic("TYPE", "Creature"))
-        })));
+
+        builder.AddCharacteristics(cardTextContext.@static().staticKeyword().Select(ParseExtensions.ParseStaticKeywordContext).ToList());
+        builder.SetActionBlock(
+    cardTextContext.effects().actionBlock().targets().targetSpecs().Select(ParseExtensions.ParseTargetSpecContext).ToList(),
+            cardTextContext.effects().actionBlock().costKeyword().Select(ParseExtensions.ParseCostContext).ToList(),
+    cardTextContext.effects().actionBlock().conditionKeyword().Select(ParseExtensions.ParseConditionContext).ToList(),
+    cardTextContext.effects().actionBlock().computedValues().ParseComputedValueContext().ToList(),
+    cardTextContext.effects().actionBlock().effect().Select(ParseExtensions.ParseEffectContext).ToList()
+            );
         
         
         return builder.Build();
     }
+    
+    
+    
 }

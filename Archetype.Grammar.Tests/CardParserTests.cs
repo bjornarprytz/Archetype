@@ -41,6 +41,7 @@ public class Tests
         card.Characteristics.ShouldContain("TYPE", "Spell");
         card.ActionBlock.Costs.ShouldContain("COST_MANA", 1);
         card.ActionBlock.TargetSpecs.ShouldContain("T_ANY");
-        card.ActionBlock.Effects.ShouldContain("DAMAGE", resolutionContext, Mock.Operand((c) => c.Targets[0]), 3);
+        card.ActionBlock.Effects.ShouldContain("DAMAGE", resolutionContext, new TargetRef(0), 3);
     }
+    // TODO: Test TargetSourceRef
 }
