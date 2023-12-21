@@ -1,34 +1,31 @@
 grammar BaseGrammar;
 
-cardText:                   name static? effects? abilities?; 
+cardText:                   name static* actionBlock? abilities?; 
 
-static:                     staticKeyword+;
-effects:                    actionBlock;
 abilities:                  'ABILITIES' ability+;
 
-ability:                    '{' name static? effects? '}';
-actionBlock:                '{' targets? computedValues? costKeyword* conditionKeyword* effect+ '}';
+ability:                    '{' name static? actionBlock? '}';
+actionBlock:                '{' targets? computedValues? cost* condition* effect+ '}';
 
-computedValues:             '[' (computedValueSpecs (',' computedValueSpecs)*) ']';
-computedValueSpecs:         computedValueKeyword;
+computedValues:             '[' (computedValue (',' computedValue)*) ']';
 targets:                    '<' (targetSpecs (',' targetSpecs)*) '>';
-targetSpecs:                targetKeyword OPTIONAL?;
-effect:                     effectKeyword;
+targetSpecs:                target OPTIONAL?;
 
-operand:                    any | targetRef | computedValueRef;
-
-targetRef:                  '<' index '>' | SELF;
+targetRef:                  '<' index '>';
 computedValueRef:           '[' index ']';
 
-staticKeyword:                 /*STATIC_KEYWORD_LIST*/;
-targetKeyword:                 /*TARGET_KEYWORD_LIST*/;
-conditionKeyword:              /*CONDITION_KEYWORD_LIST*/;
-computedValueKeyword:          /*COMPUTED_VALUE_KEYWORD_LIST*/;
-costKeyword:                   /*COST_KEYWORD_LIST*/;
-effectKeyword:                 /*EFFECT_KEYWORD_LIST*/;
-name:                           STRING;
-index:                          NUMBER;
-any:                            STRING | NUMBER;
+static:                     /*STATIC_KEYWORD_LIST*/;
+target:                     /*TARGET_KEYWORD_LIST*/;
+condition:                  /*CONDITION_KEYWORD_LIST*/;
+computedValue:              /*COMPUTED_VALUE_KEYWORD_LIST*/;
+cost:                       /*COST_KEYWORD_LIST*/;
+effect:                     /*EFFECT_KEYWORD_LIST*/;
+
+name:                       STRING;
+index:                      NUMBER;
+opString:                   STRING;
+opNumber:                   NUMBER | computedValueRef;
+opAtom:                     targetRef | SELF;
 
 STRING: '"' (~["\r\n])* '"';
 NUMBER: DIGIT+;

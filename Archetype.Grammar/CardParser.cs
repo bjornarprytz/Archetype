@@ -18,15 +18,19 @@ public class CardParser()
 
         var cardTextContext = parser.cardText();
         
-        builder.SetName(cardTextContext.name().STRING().ToString()!);
+        builder.SetName(cardTextContext.name().STRING().ToString()!.TrimSTRING());
 
-        builder.AddCharacteristics(cardTextContext.@static().staticKeyword().Select(ParseExtensions.ParseStaticKeywordContext).ToList());
+        var characteristics = cardTextContext.@static().Select(ParseExtensions.ParseStaticKeywordContext).ToList();
+
+        var effects = cardTextContext.actionBlock().effect();
+        
+        builder.AddCharacteristics(characteristics);
         builder.SetActionBlock(
-    cardTextContext.effects().actionBlock().targets().targetSpecs().Select(ParseExtensions.ParseTargetSpecContext).ToList(),
-            cardTextContext.effects().actionBlock().costKeyword().Select(ParseExtensions.ParseCostContext).ToList(),
-    cardTextContext.effects().actionBlock().conditionKeyword().Select(ParseExtensions.ParseConditionContext).ToList(),
-    cardTextContext.effects().actionBlock().computedValues().ParseComputedValueContext().ToList(),
-    cardTextContext.effects().actionBlock().effect().Select(ParseExtensions.ParseEffectContext).ToList()
+    cardTextContext.actionBlock().targets().targetSpecs().Select(ParseExtensions.ParseTargetSpecContext).ToList(),
+            cardTextContext.actionBlock().cost().Select(ParseExtensions.ParseCostContext).ToList(),
+    cardTextContext.actionBlock().condition().Select(ParseExtensions.ParseConditionContext).ToList(),
+    cardTextContext.actionBlock().computedValues().ParseComputedValueContext().ToList(),
+    cardTextContext.actionBlock().effect().Select(ParseExtensions.ParseEffectContext).ToList()
             );
         
         

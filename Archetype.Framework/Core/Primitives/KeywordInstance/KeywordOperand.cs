@@ -19,5 +19,8 @@ public record KeywordOperand<T> : KeywordOperand
     {
         GetTypedValue = getTypedValue;
     }
+    
+    public KeywordOperand(T value) : this(_ => value)
+    { }
     public Func<IResolutionContext, T> GetTypedValue { get; }
 }

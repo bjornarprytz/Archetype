@@ -11,7 +11,7 @@ if (args.Length == 0)
 
 Console.WriteLine("Current directory: " + Directory.GetCurrentDirectory());
 
-var assemblyPaths = args[0];
+var assemblyPaths = args[0].Split(';');
 var baseGrammar = args[1];
 var targetGrammarDir = args[2];
 
@@ -22,7 +22,7 @@ if (!File.Exists(baseGrammar))
     return;
 }
 
-if (!File.Exists(assemblyPaths))
+if (assemblyPaths.All(f => !File.Exists(f)))
 {
     Console.WriteLine($"File not found: {assemblyPaths}");
     return;
@@ -41,7 +41,7 @@ var targetGrammar = Path.Combine(targetGrammarDir, Path.GetFileName(baseGrammar)
 Console.WriteLine($"Generating grammar from: {assemblyPaths}");
 
 var generatedGrammar =
-    new KeywordAnalyzer(baseGrammar).GenerateKeywordSyntax(GetAssemblies(assemblyPaths.Split(';')));
+    new KeywordAnalyzer(baseGrammar).GenerateKeywordSyntax(GetAssemblies(assemblyPaths));
 
 Console.WriteLine($"Writing grammar to: {targetGrammar}");
 

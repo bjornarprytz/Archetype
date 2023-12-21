@@ -7,8 +7,8 @@ using Archetype.Framework.State;
 namespace Archetype.Prototype1.Keywords;
 
 
-[TargetSyntax("T_CARD_IN_NODE")]
-public class TargetCardInNode : Target<ICard>
+[TargetSyntax("T_ANY")]
+public class TargetAny : Target<ICard>
 {
     public override bool Filter(IAtom atom, IResolutionContext context, IKeywordInstance keywordInstance)
     {

@@ -7,6 +7,7 @@ public interface IPlayer : IAtom
 {
     IOrderedZone Deck { get; }
     IZone Hand { get; }
+    IZone DiscardPile { get; }
 }
 
 public class Player : Atom, IPlayer
@@ -18,4 +19,5 @@ public class Player : Atom, IPlayer
 
     public IOrderedZone Deck { get; }
     public IZone Hand { get; }
+    public IZone DiscardPile { get; }
 }

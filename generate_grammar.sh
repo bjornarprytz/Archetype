@@ -6,7 +6,7 @@ parser_dir="$gen_dir/parser"
 
 generator="Archetype.GrammarGenerator"
 base_grammar="$generator/template/BaseGrammar.template.g4"
-target_assembly="$generator/bin/Debug/net8.0/Archetype.Prototype1.dll" # TODO: Change this to the correct path
+target_assembly="$generator/bin/Debug/net8.0/Archetype.Prototype1.dll"
 
 
 dotnet build "$generator" || exit

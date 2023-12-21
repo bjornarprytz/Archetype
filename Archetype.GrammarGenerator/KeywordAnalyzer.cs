@@ -16,14 +16,6 @@ public class KeywordAnalyzer(string fileName)
             throw new Exception($"File not found: {fileName}");
         }
         
-        // TODO: Generate these lists from the keyword classes
-        /*STATIC_KEYWORD_LIST*/
-        /*TARGET_KEYWORD_LIST*/;
-        /*CONDITION_KEYWORD_LIST*/;
-        /*COMPUTED_VALUE_KEYWORD_LIST*/;
-        /*COST_KEYWORD_LIST*/;
-        /*EFFECT_KEYWORD_LIST*/;
-        
         var keywordLists = new Dictionary<string, List<KeywordSyntaxAttribute>?>
         {
             {"STATIC_KEYWORD_LIST", null},
@@ -77,12 +69,11 @@ public class KeywordAnalyzer(string fileName)
 
         void ReplaceKeywordList(string keywordListName, IEnumerable<KeywordSyntaxAttribute>? keywords)
         {
-            var keywordListString = keywords == null ? "'NOTHING'" // TODO: Make something more elegant for non-existent lists
-                : "(" + string.Join("|", keywords.Select(ExtractSyntax)) + ")";
+            var keywordListString = keywords == null ? "'/*N/A*/'"
+                : "(" + string.Join("|", keywords.Select(SyntaxExtensions.GenerateSyntax)) + ")";
             syntaxTemplate = syntaxTemplate!.Replace($"/*{keywordListName}*/", keywordListString);
         }
     }
-    
     
     private static IEnumerable<Type> GetKeywords(IEnumerable<Assembly> assemblies)
     {
@@ -98,37 +89,5 @@ public class KeywordAnalyzer(string fileName)
             .ToArray();
     }
 
-    private static string ExtractSyntax(KeywordSyntaxAttribute keywordSyntaxAttribute)
-    {
-        var sb = new StringBuilder();
-
-        sb.Append($"'{keywordSyntaxAttribute.Keyword}");
-        
-                
-        sb.Append('(');
-        
-        if (keywordSyntaxAttribute.Operands.Count > 0)
-        {
-            sb.Append('\'');
-            sb.Append(string.Join(" ", keywordSyntaxAttribute.Operands.Select(ExtractSyntax)));
-            sb.Append('\'');
-        }
-        
-        sb.Append(")'");
-        
-        
-        return sb.ToString();
-    }
-
-    private static string ExtractSyntax(IOperandDescription operandDescription)
-    {
-        var sb = new StringBuilder("operand"); // TODO: Make the type matter here, first we need syntax for the types
-
-        if (operandDescription.IsOptional)
-        {
-            sb.Append('?');
-        }
-
-        return sb.ToString();
-    }
+    
 }

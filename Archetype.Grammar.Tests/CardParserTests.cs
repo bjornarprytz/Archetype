@@ -22,11 +22,11 @@ public class Tests
     {
         const string cardText = """
                                 "Lightning Bolt"
-                                TYPE: Spell
+                                TYPE: "Spell"
                                 {
-                                    COST_MANA(1)
-                                    <T_ANY>
-                                    DAMAGE(<1> 3)
+                                    <T_ANY()>
+                                    COST_RESOURCES(1)
+                                    DAMAGE(<0> 3)
                                 }
                                 """;
         var card = _sut.ParseCard(new CardData(cardText, ""));
@@ -39,9 +39,8 @@ public class Tests
         
         card.Name.Should().Be("Lightning Bolt");
         card.Characteristics.ShouldContain("TYPE", "Spell");
-        card.ActionBlock.Costs.ShouldContain("COST_MANA", 1);
+        card.ActionBlock.Costs.ShouldContain("COST_RESOURCES", 1);
         card.ActionBlock.TargetSpecs.ShouldContain("T_ANY");
         card.ActionBlock.Effects.ShouldContain("DAMAGE", resolutionContext, new TargetRef(0), 3);
     }
-    // TODO: Test TargetSourceRef
 }
