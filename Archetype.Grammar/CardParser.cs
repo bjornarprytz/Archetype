@@ -21,18 +21,39 @@ public class CardParser()
         builder.SetName(cardTextContext.name().STRING().ToString()!.TrimSTRING());
 
         var characteristics = cardTextContext.@static().Select(ParseExtensions.ParseStaticKeywordContext).ToList();
-
-        var effects = cardTextContext.actionBlock().effect();
         
+        
+        // TODO: Refactor this repeated code
         builder.AddCharacteristics(characteristics);
-        builder.SetActionBlock(
-    cardTextContext.actionBlock().targets().targetSpecs().Select(ParseExtensions.ParseTargetSpecContext).ToList(),
-            cardTextContext.actionBlock().cost().Select(ParseExtensions.ParseCostContext).ToList(),
-    cardTextContext.actionBlock().condition().Select(ParseExtensions.ParseConditionContext).ToList(),
-    cardTextContext.actionBlock().computedValues().ParseComputedValueContext().ToList(),
-    cardTextContext.actionBlock().effect().Select(ParseExtensions.ParseEffectContext).ToList()
+        builder.BuildActionBlock(
+            actionBlockBuilder =>
+            {
+                actionBlockBuilder.AddTargetSpecs(cardTextContext.actionBlock().GetTargetSpecsContext().ParseFunctionLike());
+                actionBlockBuilder.AddCosts(cardTextContext.actionBlock().GetCostContext().ParseFunctionLike());
+                actionBlockBuilder.AddConditions(cardTextContext.actionBlock().GetConditionContext().ParseFunctionLike());
+                actionBlockBuilder.AddComputedValues(cardTextContext.actionBlock().GetComputedValueContext().ParseFunctionLike());
+                actionBlockBuilder.AddEffects(cardTextContext.actionBlock().GetEffectContext().ParseFunctionLike());
+            }
+        );
+
+        foreach (var abilityContext in cardTextContext.GetAbilitiesContext())
+        {
+            var name = abilityContext.name().STRING().ToString()!.TrimSTRING();
+            
+            builder.AddAbility(
+                name,
+                actionBlockBuilder =>
+                {
+                    actionBlockBuilder.AddTargetSpecs(abilityContext.actionBlock().GetTargetSpecsContext().ParseFunctionLike());
+                    actionBlockBuilder.AddCosts(abilityContext.actionBlock().GetCostContext().ParseFunctionLike());
+                    actionBlockBuilder.AddConditions(abilityContext.actionBlock().GetConditionContext().ParseFunctionLike());
+                    actionBlockBuilder.AddComputedValues(abilityContext.actionBlock().GetComputedValueContext().ParseFunctionLike());
+                    actionBlockBuilder.AddEffects(abilityContext.actionBlock().GetEffectContext().ParseFunctionLike());
+                }
             );
-        
+
+        }
+
         
         return builder.Build();
     }

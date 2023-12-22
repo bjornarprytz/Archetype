@@ -4,6 +4,9 @@
     &lt;Project Location="E:\source\repos\Archetype\Archetype.Tests" Presentation="&amp;lt;Archetype.Tests&amp;gt;" /&gt;&#xD;
     &lt;TestAncestor&gt;&#xD;
       &lt;TestId&gt;NUnit3x::9F65A953-AB08-4477-AEB4-D2F68F9F12F8::net8.0::Archetype.Grammar.Tests.Tests.Test1&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::9F65A953-AB08-4477-AEB4-D2F68F9F12F8::net8.0::Archetype.Grammar.Tests.Tests.LibraryOfBallexandria&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::9F65A953-AB08-4477-AEB4-D2F68F9F12F8::net8.0::Archetype.Grammar.Tests.Tests.MasterTheWay&lt;/TestId&gt;&#xD;
+      &lt;TestId&gt;NUnit3x::9F65A953-AB08-4477-AEB4-D2F68F9F12F8::net8.0::Archetype.Grammar.Tests.Tests&lt;/TestId&gt;&#xD;
     &lt;/TestAncestor&gt;&#xD;
   &lt;/Or&gt;&#xD;
 &lt;/SessionState&gt;</s:String>

@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Design;
+using Archetype.Framework.State;
 using FluentValidation;
 
 namespace Archetype.Framework.DependencyInjection;
@@ -7,26 +8,26 @@ namespace Archetype.Framework.DependencyInjection;
 public class ProtoCardBuilder
 {
     private string? _name;
-    private readonly List<IKeywordInstance> _targetSpecs = new();
-    private readonly List<IKeywordInstance> _conditions = new();
-    private readonly List<IKeywordInstance> _effects = new();
-    private readonly List<IKeywordInstance> _costs = new();
-    private readonly List<IKeywordInstance> _computedValues = new();
+    
+    private IProtoActionBlock? _actionBlock;
     private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
     private readonly Dictionary<string, IKeywordInstance> _characteristics = new();
     
     public IProtoCard Build()
     {
+        if (_name is null)
+        {
+            throw new InvalidOperationException("Name must be set before building");
+        }
+        
+        if (_actionBlock is null)
+        {
+            throw new InvalidOperationException("Action block must be set before building");
+        }
+        
         var protoCard = new ProtoCard (
             Name: _name,
-            ActionBlock: new ProtoActionBlock(
-                TargetSpecs: _targetSpecs,
-                Conditions: _conditions,
-                Costs: _costs,
-                Effects: _effects,
-                AfterEffects: Array.Empty<IKeywordInstance>(),
-                ComputedValues: _computedValues
-            ),
+            ActionBlock: _actionBlock,
             Abilities: _abilities,
             Characteristics: _characteristics
         );
@@ -47,20 +48,69 @@ public class ProtoCardBuilder
         }
     }
     
+    public void AddAbility(string name, Action<ActionBlockBuilder> buildAction)
+    {
+        var builder = new ActionBlockBuilder();
+        buildAction(builder);
+        
+        _abilities.Add(name, builder.Build());
+    }
 
-    public void SetActionBlock(
-        List<IKeywordInstance> targetSpecs, 
-        List<IKeywordInstance> costs, 
-        List<IKeywordInstance> conditions, 
-        List<IKeywordInstance> computedValues, 
-        List<IKeywordInstance> effects
+    public void BuildActionBlock(
+        Action<ActionBlockBuilder> buildAction
         )
     {
-        _targetSpecs.AddRange(targetSpecs);
-        _costs.AddRange(costs);
-        _conditions.AddRange(conditions);
-        _computedValues.AddRange(computedValues);
-        _effects.AddRange(effects);
+        var builder = new ActionBlockBuilder();
+        buildAction(builder);
+        
+        _actionBlock = builder.Build();
+    }
+    
+    public class ActionBlockBuilder
+    {
+        private readonly List<IKeywordInstance> _targetSpecs = new();
+        private readonly List<IKeywordInstance> _conditions = new();
+        private readonly List<IKeywordInstance> _effects = new();
+        private readonly List<IKeywordInstance> _costs = new();
+        private readonly List<IKeywordInstance> _computedValues = new();
+        
+        public void AddTargetSpecs(List<IKeywordInstance> targetSpecs)
+        {
+            _targetSpecs.AddRange(targetSpecs);
+        }
+        
+        public void AddConditions(List<IKeywordInstance> conditions)
+        {
+            _conditions.AddRange(conditions);
+        }
+        
+        public void AddEffects(List<IKeywordInstance> effects)
+        {
+            _effects.AddRange(effects);
+        }
+        
+        public void AddCosts(List<IKeywordInstance> costs)
+        {
+            _costs.AddRange(costs);
+        }
+        
+        public void AddComputedValues(List<IKeywordInstance> computedValues)
+        {
+            _computedValues.AddRange(computedValues);
+        }
+        
+        
+        public IProtoActionBlock Build()
+        {
+            return new ProtoActionBlock(
+                TargetSpecs: _targetSpecs,
+                Conditions: _conditions,
+                Costs: _costs,
+                Effects: _effects,
+                AfterEffects: Array.Empty<IKeywordInstance>(),
+                ComputedValues: _computedValues
+            );
+        }
     }
 
     public record ProtoCard(

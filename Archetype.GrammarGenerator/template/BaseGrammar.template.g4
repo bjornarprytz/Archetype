@@ -4,7 +4,7 @@ cardText:                   name static* actionBlock? abilities?;
 
 abilities:                  'ABILITIES' ability+;
 
-ability:                    '{' name static? actionBlock? '}';
+ability:                    '{' name actionBlock '}';
 actionBlock:                '{' targets? computedValues? cost* condition* effect+ '}';
 
 computedValues:             '[' (computedValue (',' computedValue)*) ']';

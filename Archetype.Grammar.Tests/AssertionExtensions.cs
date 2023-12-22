@@ -44,12 +44,12 @@ public static class AssertionExtensions
     
     public static bool IsEquivalentTo(this KeywordOperand operand, KeywordOperand other, IResolutionContext context)
     {
-        return operand.Type == other.Type && operand.GetValue(context) == other.GetValue(context);
+        return operand.Type == other.Type && (operand.GetValue(context)?.Equals(other.GetValue(context)) ?? false);
     }
     
     public static bool IsEquivalentTo(this KeywordOperand operand, KeywordOperand other)
     {
-        return operand.Type == other.Type && operand.GetValue(null) == other.GetValue(null);
+        return operand.Type == other.Type && (operand.GetValue(null)?.Equals(other.GetValue(null)) ?? false);
     }
     
     private static bool IsEquivalentTo(this object? operand, object? other)

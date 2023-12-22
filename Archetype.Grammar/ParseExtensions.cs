@@ -1,21 +1,30 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
 using Archetype.Framework.Core.Primitives;
-using Archetype.Framework.Extensions;
 
 namespace Archetype.Grammar;
 
 public static class ParseExtensions
 {
-    public static IKeywordInstance ParseEffectContext(this BaseGrammarParser.EffectContext effectContext)
+    public static List<IKeywordInstance> ParseFunctionLike(this IEnumerable<ParserRuleContext> contexts)
     {
+        return contexts.Select(ParseFunctionLikeKeyword).Where(k => k != null).ToList()!;
+    }
+    
+    private static IKeywordInstance? ParseFunctionLikeKeyword(this ParserRuleContext keywordContext)
+    {
+        if (keywordContext.children == null)
+        {
+            return null;
+        }
+        
         // TODO: Check for non-existent keywords. Context seems to be just an emtpy string " " when that happens
         
-        var operands = effectContext.ParseOperands().ToList();
-        var effectKeyword = effectContext.ParseKeyword();
+        var operands = keywordContext.ParseOperands().ToList();
+        var keyword = keywordContext.ParseKeyword();
         var keywordInstance = new KeywordInstance
         {
-            Keyword = effectKeyword,
+            Keyword = keyword,
             Operands = operands,
         };
         
@@ -25,46 +34,6 @@ public static class ParseExtensions
     internal static string TrimSTRING(this string s)
     {
         return s.Replace("\"", "");
-    }
-    
-    public static IEnumerable<IKeywordInstance> ParseComputedValueContext(this BaseGrammarParser.ComputedValuesContext? computedValueContext)
-    {
-        if (computedValueContext is null)
-        {
-            return Enumerable.Empty<IKeywordInstance>();
-        }
-        
-        throw new NotImplementedException();
-    }
-    
-    public static IKeywordInstance ParseConditionContext(this BaseGrammarParser.ConditionContext conditionKeywordContext)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public static IKeywordInstance ParseTargetSpecContext(this BaseGrammarParser.TargetSpecsContext targetSpecContext)
-    {
-        var operands = targetSpecContext.ParseOperands().ToList();
-        var keyword = targetSpecContext.ParseKeyword();
-        var keywordInstance = new KeywordInstance
-        {
-            Keyword = keyword,
-            Operands = operands,
-        };
-        
-        return keywordInstance;
-    }
-    public static IKeywordInstance ParseCostContext(this BaseGrammarParser.CostContext costKeywordContext)
-    {
-        var operands = costKeywordContext.ParseOperands().ToList();
-        var keyword = costKeywordContext.ParseKeyword();
-        var keywordInstance = new KeywordInstance
-        {
-            Keyword = keyword,
-            Operands = operands,
-        };
-        
-        return keywordInstance;
     }
     
     public static IKeywordInstance ParseStaticKeywordContext(this BaseGrammarParser.StaticContext staticKeywordContext)
