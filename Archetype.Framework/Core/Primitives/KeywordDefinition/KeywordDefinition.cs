@@ -12,9 +12,11 @@ public interface IKeywordDefinition
 
 public abstract class KeywordDefinition : IKeywordDefinition
 {
-    protected KeywordDefinition()
+    protected KeywordDefinition(Delegate handler)
     {
         Keyword =  GetType().Name;
+
+        var parameters = handler.Method.GetParameters();
     }
     public string Keyword { get; }
     protected virtual OperandDeclaration OperandDeclaration { get; } = new();
@@ -31,7 +33,7 @@ public abstract class KeywordDefinition : IKeywordDefinition
         
         return new KeywordInstance 
         {
-            Keyword = Keyword,
+            ResolveFuncName = Keyword,
             Operands = operandList,
         };
     }

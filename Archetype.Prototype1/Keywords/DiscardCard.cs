@@ -21,14 +21,8 @@ public class DiscardCard : EffectCompositeDefinition
 
         var changeZoneInstance = changeZoneDefinition.CreateInstance(card.ToOperand(), discardPile.ToOperand());
 
-        return new KeywordFrame
-        (
-            new DrawCardEvent(context.Source, card),
-            new List<IKeywordInstance>
-            {
-                changeZoneInstance,
-            }
-        );
+        return new KeywordFrame(changeZoneInstance);
     }
-
 }
+
+public record DiscardCardEvent(IAtom Source, ICard Card) : EventBase(Source);

@@ -34,7 +34,7 @@ public class EventBus : IEventBus, IEventHistory
 
         void AddSubEvents(IEvent e)
         {
-            foreach (var child in e.Children.Where(s => s is not NonEvent))
+            foreach (var child in e.Children)
             {
                 AddSubEvents(child);
                 _keywordEvents.Add(child);

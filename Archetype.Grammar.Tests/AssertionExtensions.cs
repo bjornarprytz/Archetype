@@ -14,12 +14,12 @@ public static class AssertionExtensions
     
     public static void ShouldContain(this IReadOnlyList<IKeywordInstance> keywordInstances, string keyword, IResolutionContext context, params object?[] operands)
     {
-        keywordInstances.Should().Contain(k => k.Keyword == keyword && k.Operands.Zip(operands).All(pair => pair.First.IsEquivalentTo(pair.Second, context)));
+        keywordInstances.Should().Contain(k => k.ResolveFuncName == keyword && k.Operands.Zip(operands).All(pair => pair.First.IsEquivalentTo(pair.Second, context)));
     }
     
     public static void ShouldContain(this IReadOnlyList<IKeywordInstance> keywordInstances, string keyword, params object?[] operands)
     {
-        keywordInstances.Should().Contain(k => k.Keyword == keyword && k.Operands.Zip(operands).All(pair => pair.First.IsEquivalentTo(pair.Second)));
+        keywordInstances.Should().Contain(k => k.ResolveFuncName == keyword && k.Operands.Zip(operands).All(pair => pair.First.IsEquivalentTo(pair.Second)));
     }
     
     public static void ShouldContain(this IReadOnlyList<IKeywordInstance> keywordInstances, IKeywordInstance keywordInstance)
@@ -34,12 +34,12 @@ public static class AssertionExtensions
     
     public static bool IsEquivalentTo(this IKeywordInstance keywordInstance, IKeywordInstance other, IResolutionContext context)
     {
-        return keywordInstance.Keyword == other.Keyword && keywordInstance.Operands.Zip(other.Operands).All(pair => pair.First.IsEquivalentTo(pair.Second, context));
+        return keywordInstance.ResolveFuncName == other.ResolveFuncName && keywordInstance.Operands.Zip(other.Operands).All(pair => pair.First.IsEquivalentTo(pair.Second, context));
     }
     
     public static bool IsEquivalentTo(this IKeywordInstance keywordInstance, IKeywordInstance other)
     {
-        return keywordInstance.Keyword == other.Keyword && keywordInstance.Operands.Zip(other.Operands).All(pair => pair.First.IsEquivalentTo(pair.Second));
+        return keywordInstance.ResolveFuncName == other.ResolveFuncName && keywordInstance.Operands.Zip(other.Operands).All(pair => pair.First.IsEquivalentTo(pair.Second));
     }
     
     public static bool IsEquivalentTo(this KeywordOperand operand, KeywordOperand other, IResolutionContext context)

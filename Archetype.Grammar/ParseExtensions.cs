@@ -24,7 +24,7 @@ public static class ParseExtensions
         var keyword = keywordContext.ParseKeyword();
         var keywordInstance = new KeywordInstance
         {
-            Keyword = keyword,
+            ResolveFuncName = keyword,
             Operands = operands,
         };
         
@@ -48,7 +48,7 @@ public static class ParseExtensions
         
         var keywordInstance = new KeywordInstance
         {
-            Keyword = keyword,
+            ResolveFuncName = keyword,
             Operands = operands,
         };
         

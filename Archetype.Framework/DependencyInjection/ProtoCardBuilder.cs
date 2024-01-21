@@ -44,7 +44,7 @@ public class ProtoCardBuilder
     {
         foreach (var instance in characteristicsInstances)
         {
-            _characteristics.Add(instance.Keyword, instance);
+            _characteristics.Add(instance.ResolveFuncName, instance);
         }
     }
     

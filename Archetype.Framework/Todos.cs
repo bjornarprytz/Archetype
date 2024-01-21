@@ -1,6 +1,9 @@
 ﻿namespace Archetype.Framework;
 
 
+// TODO: Make keyword handlers just functions
+    // TODO: Derive events from EffectPayload
+
 
 // TODO: Write CardParser
     // TODO: Write CardParserTests

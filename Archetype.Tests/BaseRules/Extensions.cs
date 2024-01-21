@@ -11,7 +11,7 @@ public static class CharacteristicsExtensions
     {
         var characteristic = Substitute.For<IKeywordInstance>();
             
-        characteristic.Keyword.Returns(key);
+        characteristic.ResolveFuncName.Returns(key);
         characteristic.Operands.Returns(Declare.Operands(Declare.Operand(value)));
         
         atom.Characteristics.Returns( new Dictionary<string, IKeywordInstance> { [key] = characteristic });

@@ -97,7 +97,7 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         {
             payload = keywordInstance.BindPayload(CurrentFrame!.Context);
             
-            if (rules.GetDefinition(keywordInstance.Keyword) is not IEffectCompositeDefinition compositeDefinition)
+            if (rules.GetDefinition(keywordInstance.ResolveFuncName) is not IEffectCompositeDefinition compositeDefinition)
             {
                 return true;
             }

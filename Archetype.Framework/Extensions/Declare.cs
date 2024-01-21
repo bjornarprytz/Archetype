@@ -6,8 +6,10 @@ namespace Archetype.Framework.Extensions;
 
 public static class Declare
 {
-    public static KeywordOperand ToOperand(this object value)
+    public static KeywordOperand ToOperand(this object? value)
     {
+        ArgumentNullException.ThrowIfNull(value);
+
         if (value is KeywordOperand operand)
         {
             return operand;
@@ -23,19 +25,19 @@ public static class Declare
     
     public static IKeywordInstance KeywordInstance(string keyword, IReadOnlyList<KeywordOperand> operands)
     {
-        return new KeywordInstance { Keyword = keyword, Operands = operands };
+        return new KeywordInstance { ResolveFuncName = keyword, Operands = operands };
     }
     
     public static IKeywordInstance KeywordInstance(string keyword)
     {
-        return new KeywordInstance { Keyword = keyword };
+        return new KeywordInstance { ResolveFuncName = keyword };
     }
     
     public static IReadOnlyDictionary<string, IKeywordInstance> Characteristics(params (string Keyword, string Value)[] characteristics)
     {
         return characteristics
             .Select(c => KeywordInstance(c.Keyword, Operands(Operand(c.Value))))
-            .ToDictionary(kw => kw.Keyword, kw => kw);
+            .ToDictionary(kw => kw.ResolveFuncName, kw => kw);
     }
     public static KeywordOperand TargetSource()
     {

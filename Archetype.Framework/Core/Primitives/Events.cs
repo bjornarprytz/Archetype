@@ -12,12 +12,16 @@ public interface IEvent
 
 public interface IActionBlockEvent : IEvent
 {
-    public IAtom Source { get; }
     public IReadOnlyList<IAtom> Targets { get; }
     public IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; }
     
     public IReadOnlyList<int> ComputedValues { get; }
     public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } 
+}
+
+public interface IEffectEvent : IEvent
+{
+    public EffectPayload EffectPayload { get; }
 }
 
 public abstract record EventBase(IAtom Source) : IEvent
@@ -26,7 +30,7 @@ public abstract record EventBase(IAtom Source) : IEvent
     public IList<IEvent> Children { get; set; } = new List<IEvent>();
 }
 
-public record NonEvent(IAtom Source) : EventBase(Source);
+public record EffectEvent(EffectPayload EffectPayload) : EventBase(EffectPayload.Source) , IEffectEvent { } 
 
 public record ActionBlockEvent
 (

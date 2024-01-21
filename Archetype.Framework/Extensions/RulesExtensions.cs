@@ -8,12 +8,12 @@ public static class RulesExtensions
 {
     public static TDef GetOrThrow<TDef>(this IRules rules, IKeywordInstance keywordInstance) where TDef : IKeywordDefinition
     {
-        return rules.GetOrThrow<TDef>(keywordInstance.Keyword);
+        return rules.GetOrThrow<TDef>(keywordInstance.ResolveFuncName);
     }
     
     public static IKeywordDefinition? GetOrThrow(this IRules rules, IKeywordInstance keywordInstance)
     {
-        return rules.GetDefinition(keywordInstance.Keyword) ?? throw new InvalidOperationException($"Keyword ({keywordInstance.Keyword}) not found");
+        return rules.GetDefinition(keywordInstance.ResolveFuncName) ?? throw new InvalidOperationException($"Keyword ({keywordInstance.ResolveFuncName}) not found");
     }
     
     public static TDef GetOrThrow<TDef>(this IRules rules, string keyword) where TDef : IKeywordDefinition
