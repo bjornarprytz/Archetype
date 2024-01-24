@@ -1,7 +1,5 @@
 ﻿using System.Collections.Immutable;
-using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
-using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface;
 using Archetype.Framework.State;
 
@@ -67,10 +65,10 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
     private bool ResolveActionQueue()
     {
         actionQueue.Push(CreateResolutionFrame());
-        
-        while (actionQueue.ResolveNextKeyword() is {} e)
+         
+        while (actionQueue.ResolveNextKeyword() is IEffectEvent e)
         {
-            if (e is PromptEvent)
+            if (e.Result is IPromptDescription )
             {
                 return false;
             }

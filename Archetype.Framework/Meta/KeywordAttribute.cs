@@ -4,7 +4,7 @@
 [AttributeUsage(AttributeTargets.Method)]
 public class ComputeAttribute : KeywordAttribute
 {
-    public ComputeAttribute(string keyword) : base(keyword)
+    public ComputeAttribute(string? keyword=null) : base(keyword)
     {
     }
 }
@@ -12,15 +12,24 @@ public class ComputeAttribute : KeywordAttribute
 [AttributeUsage(AttributeTargets.Method)]
 public class EffectAttribute : KeywordAttribute
 {
-    public EffectAttribute(string keyword) : base(keyword)
+    public EffectAttribute(string? keyword=null) : base(keyword)
+    {
+    }
+}
+
+
+[AttributeUsage(AttributeTargets.Method)]
+public class TargetRequirementsAttribute : KeywordAttribute
+{
+    public TargetRequirementsAttribute(string? keyword=null) : base(keyword)
     {
     }
 }
 
 [AttributeUsage(AttributeTargets.Method)]
-public class TargetRequirementsAttribute : KeywordAttribute
+public class CostAttribute : KeywordAttribute
 {
-    public TargetRequirementsAttribute(string keyword) : base(keyword)
+    public CostAttribute(string? keyword=null) : base(keyword)
     {
     }
 }
@@ -28,10 +37,10 @@ public class TargetRequirementsAttribute : KeywordAttribute
 
 public abstract class KeywordAttribute : Attribute
 {
-    protected KeywordAttribute(string keyword)
+    protected KeywordAttribute(string? keyword)
     {
         Keyword = keyword;
     }
 
-    public string Keyword { get; }
+    public string? Keyword { get; }
 }

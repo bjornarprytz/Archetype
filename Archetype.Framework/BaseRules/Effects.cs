@@ -3,6 +3,7 @@
 
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
+using Archetype.Framework.Meta;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords;
@@ -13,6 +14,7 @@ namespace Archetype.Framework.BaseRules.Keywords;
  * Each function should be annotated with syntax and other meta information.
  */
 
+[KeywordCollection]
 public static class Effects
 {
     [Effect("CREATE_CARD")]
@@ -87,8 +89,3 @@ public static class Effects
     
 }
 
-[AttributeUsage(AttributeTargets.Method)]
-public class EffectAttribute(string keyword="") : Attribute
-{
-    public string Keyword { get; } = keyword;
-}

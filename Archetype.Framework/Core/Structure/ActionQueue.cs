@@ -14,7 +14,8 @@ public interface IActionQueue
 public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 {
     public IResolutionFrame? CurrentFrame { get; private set; }
-    
+
+    private IEvent? CurrentFrameEventTree;
     // Card scope
     private readonly Queue<IResolutionFrame> _resolutionFrames = new();
     
@@ -30,7 +31,7 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 
     public IEvent? ResolveNextKeyword()
     {
-        if (!TryPopPrimitive(out var payload))
+        if (!TryPopPayload(out var payload))
         {
             return null;
         }
@@ -48,14 +49,21 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     }
     private IEvent Resolve(EffectPayload payload)
     {
-        var definition = rules.GetDefinition(payload.Keyword);
-
-        if (definition is IEffectPrimitiveDefinition primitive)
+        var definition = rules.GetDefinition(payload.EffectId);
+        
+        if (definition == null)
         {
-            return primitive.Resolve(CurrentFrame!.Context, payload);
+            throw new InvalidOperationException($"No definition found for effect {payload.EffectId}");
+        }
+
+        var result = definition.Resolve(CurrentFrame!.Context, payload);
+
+        if (result is IKeywordFrame keywordFrame)
+        {
+            _keywordFrames.Push(keywordFrame);
         }
         
-        throw new InvalidOperationException($"Keyword ({payload.Keyword}) is not an effect");
+        return new EffectEvent(payload, result);
     }
 
     private bool TryAdvanceResolutionFrame()
@@ -85,7 +93,7 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         return true;
     }
 
-    private bool TryPopPrimitive(out EffectPayload payload)
+    private bool TryPopPayload(out EffectPayload payload)
     {
         if (CurrentFrame == null && !TryAdvanceResolutionFrame())
         {
@@ -93,24 +101,11 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
             return false;
         }
 
-        while (_keywordStack.TryPop(out var keywordInstance))
+        if (_keywordStack.TryPop(out var keywordInstance))
         {
             payload = keywordInstance.BindPayload(CurrentFrame!.Context);
-            
-            if (rules.GetDefinition(keywordInstance.ResolveFuncName) is not IEffectCompositeDefinition compositeDefinition)
-            {
-                return true;
-            }
-            
-            var keywordFrame = compositeDefinition.Compose(CurrentFrame.Context, payload);
 
-            PushEvent(payload, keywordFrame.Event);
-            _keywordFrames.Push(keywordFrame);
-            
-            foreach (var instance in keywordFrame.Effects.Reverse())
-            {
-                _keywordStack.Push(instance);
-            }
+            return true;
         }
         
         payload = default!;

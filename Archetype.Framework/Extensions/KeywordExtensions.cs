@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Archetype.Framework.BaseRules.Keywords;
 using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.DependencyInjection;
@@ -9,28 +10,14 @@ public static class KeywordExtensions
 {
     public static IRulesBuilder AddBasicKeywords(this IRulesBuilder rulesBuilder)
     {
-        return rulesBuilder.AddKeywordsFromAssembly(Assembly.GetAssembly(typeof(ChangeZone))!);
+        return rulesBuilder.AddKeywordsFromAssembly(Assembly.GetAssembly(typeof(Effects))!);
     }
 
     public static IRulesBuilder AddKeywordsFromAssembly(this IRulesBuilder rulesBuilder, Assembly assembly)
     {
-        foreach (var t in assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(IKeywordDefinition)) && !t.IsAbstract))
-        {
-            if (t is null)
-            {
-                throw new InvalidOperationException($"Failed to create instance of {t?.FullName}");
-            }
-            
-            var instance = Activator.CreateInstance(t);
-            
-            if (instance is not IKeywordDefinition keywordDefinition)
-            {
-                throw new InvalidOperationException($"Failed to create instance of {t.FullName}");
-            }
-            
-            Console.WriteLine($"Adding keyword: {(keywordDefinition.TryGetKeywordName(out var keywordName) ? keywordName : "Unknown")}");
-            rulesBuilder.AddKeyword(keywordDefinition);
-        };
+        throw new NotImplementedException();
+        
+        // TODO: Scan for all classes which have methods with the Keyword attribute 
 
         return rulesBuilder;
     }

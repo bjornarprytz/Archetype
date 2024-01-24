@@ -5,6 +5,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules.Keywords.Keywords;
 
+[KeywordCollection]
 public static class Target
 {
     [TargetRequirements("CARD")]

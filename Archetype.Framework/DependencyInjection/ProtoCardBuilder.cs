@@ -1,5 +1,6 @@
 ﻿using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Design;
+using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentValidation;
 
@@ -11,7 +12,8 @@ public class ProtoCardBuilder
     
     private IProtoActionBlock? _actionBlock;
     private readonly Dictionary<string, IProtoActionBlock> _abilities = new();
-    private readonly Dictionary<string, IKeywordInstance> _characteristics = new();
+    private readonly Dictionary<string, int> _stats = new();
+    private readonly Dictionary<string, string> _tags = new();
     
     public IProtoCard Build()
     {
@@ -29,7 +31,8 @@ public class ProtoCardBuilder
             Name: _name,
             ActionBlock: _actionBlock,
             Abilities: _abilities,
-            Characteristics: _characteristics
+            Stats: _stats,
+            Tags: _tags
         );
         
         return protoCard;
@@ -40,12 +43,9 @@ public class ProtoCardBuilder
         _name = name;
     }
     
-    public void AddCharacteristics(List<IKeywordInstance> characteristicsInstances)
+    public void AddStats(Dictionary<string, int> stats)
     {
-        foreach (var instance in characteristicsInstances)
-        {
-            _characteristics.Add(instance.ResolveFuncName, instance);
-        }
+        _stats.MergeInPlace(stats);
     }
     
     public void AddAbility(string name, Action<ActionBlockBuilder> buildAction)

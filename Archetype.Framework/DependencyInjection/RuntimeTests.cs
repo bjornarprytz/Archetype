@@ -22,7 +22,7 @@ internal static class RuntimeTests
     private static void EnsureNoDuplicates(this IEnumerable<IKeywordDefinition> keywordDefinitions)
     {
         var duplicates = keywordDefinitions
-            .GroupBy(def => def.Keyword)
+            .GroupBy(def => def.Id)
             .Where(g => g.Count() > 1)
             .ToList();
         
@@ -34,8 +34,7 @@ internal static class RuntimeTests
     {
         foreach (var definition in keywordDefinitions)
         {
-            if (definition.GetType().GetCustomAttribute<KeywordSyntaxAttribute>()?.Operands.GetType() 
-                is not { } attributeOperandDeclaration)
+            if (definition.GetType().GetCustomAttribute<KeywordAttribute>() is not { } attribute) 
                 continue;
             
             if (attributeOperandDeclaration != definition.GetType())

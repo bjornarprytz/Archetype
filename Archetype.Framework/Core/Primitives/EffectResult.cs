@@ -7,6 +7,10 @@ public interface IEffectResult
     bool IsNoOp { get; }
 }
 
+public interface IPaymentResult : IEffectResult
+{
+    bool IsSuccessful { get; }
+}
 
 public interface IAllowedTargets : IEffectResult
 {
@@ -58,6 +62,11 @@ public record PromptDescription(Guid PromptId, IReadOnlyList<Guid> Options, int 
 }
 
 public record AllowedTargets(IReadOnlyList<IAtom> Options) : IAllowedTargets
+{
+    public bool IsNoOp => false;
+}
+
+public record PaymentResult(bool IsSuccessful) : IPaymentResult
 {
     public bool IsNoOp => false;
 }

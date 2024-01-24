@@ -4,38 +4,37 @@ namespace Archetype.Framework.Core.Primitives;
 
 public interface IKeywordDefinition
 {
-    string Keyword { get; } // ID
-    IReadOnlyList<IOperandDescription> Operands { get; }
-    IKeywordInstance CreateInstance(params object[] operands);
+    string Id { get; }
+    IEffectResult Resolve(IResolutionContext context, EffectPayload payload);
 }
 
 
-public abstract class KeywordDefinition : IKeywordDefinition
+public class KeywordDefinition<T> : IKeywordDefinition
 {
-    protected KeywordDefinition(Delegate handler)
+    private Delegate _handler;
+    public KeywordDefinition(Delegate handler)
     {
-        Keyword =  GetType().Name;
+        Id = handler.Method.Name;
+        _handler = handler;
 
         var parameters = handler.Method.GetParameters();
     }
-    public string Keyword { get; }
-    protected virtual OperandDeclaration OperandDeclaration { get; } = new();
-    public IReadOnlyList<IOperandDescription> Operands => OperandDeclaration;
-
-    public IKeywordInstance CreateInstance(params object[] operands)
+    public string Id { get; }
+    public IEffectResult Resolve(IResolutionContext context, EffectPayload payload)
     {
-        var operandList = operands.Select(o => o.ToOperand()).ToList();
+        if (Id != payload.EffectId)
+            throw new InvalidOperationException(
+                $"KeywordInstance ({payload.EffectId}) does not match KeywordDefinition ({Id})");
+
+        var parameters = new List<object>
+            { context }
+            .Append(payload.Operands)
+            .ToArray();
+                
+        if (_handler.DynamicInvoke(parameters) is IEffectResult result)
+            return result;
         
-        if (!OperandDeclaration.Validate(operandList))
-        {
-            throw new InvalidOperationException($"Invalid operands for keyword ({(this.TryGetKeywordName(out var keywordName) ? keywordName : "Unknown")})");
-        }
-        
-        return new KeywordInstance 
-        {
-            ResolveFuncName = Keyword,
-            Operands = operandList,
-        };
+        throw new InvalidOperationException($"KeywordDefinition ({Id}) did not return an {nameof(IEffectResult)}");
     }
 }
 

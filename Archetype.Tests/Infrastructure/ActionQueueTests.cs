@@ -67,7 +67,7 @@ public class ActionQueueTests
         result.Should().NotBeNull();
         result.Should().Be(returnEvent);
         
-        definition.Resolve(resolutionContext, Arg.Is<EffectPayload>( e => e.Keyword == "TestKeyword")).Received(1);
+        definition.Resolve(resolutionContext, Arg.Is<EffectPayload>( e => e.EffectId == "TestKeyword")).Received(1);
     }
     
     [Test]
@@ -98,7 +98,7 @@ public class ActionQueueTests
         result.Should().NotBeNull();
         result.Should().Be(returnEvent);
         
-        _primitiveDefinition.Resolve(resolutionContext, Arg.Is<EffectPayload>( e => e.Keyword == "PrimitiveTestKeyword")).Received(1);
+        _primitiveDefinition.Resolve(resolutionContext, Arg.Is<EffectPayload>( e => e.EffectId == "PrimitiveTestKeyword")).Received(1);
     }
     
     [Test]

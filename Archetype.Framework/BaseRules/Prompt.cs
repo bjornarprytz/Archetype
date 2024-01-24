@@ -1,7 +1,9 @@
 ﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Meta;
 
 namespace Archetype.Framework.BaseRules.Keywords;
 
+[KeywordCollection]
 public static class Prompt
 {
     public static IEffectResult PickBetweenNandM(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, int min, int max, string promptText)

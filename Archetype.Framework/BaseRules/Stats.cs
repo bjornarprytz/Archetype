@@ -1,10 +1,13 @@
-﻿namespace Archetype.Framework.BaseRules.Keywords;
+﻿using Archetype.Framework.Meta;
+
+namespace Archetype.Framework.BaseRules.Keywords;
 
 
 /*
  * Stats are number-based characteristics.
  */
 
+[StatCollection]
 public class Stats
 {
     public int Health { get; }
