@@ -8,11 +8,12 @@ using Archetype.Framework.State;
 namespace Archetype.Framework.BaseRules.Keywords;
 
 /*
- * The idea is to have each keyword represented by a function that takes in the operands and returns an event.
+ * The idea is to have each keyword represented by a function that takes in the operands and returns a result.
+ * The result can be anything useful for the engine to know how to resolve the keyword. Some keywords unravel into other keywords. Some "resolve" into a prompt.
  * Each function should be annotated with syntax and other meta information.
  */
 
-public static class Keywords
+public static class Effects
 {
     [Effect("CREATE_CARD")]
     public static IEffectResult CreateCard(IResolutionContext context, string cardName, IZone zone)
@@ -28,12 +29,6 @@ public static class Keywords
         context.GameState.AddAtom(card);
 
         return EffectResult.Resolved;
-    }
-    
-    [Effect("DEAL_DAMAGE")]
-    public static IEffectResult DealDamage(IResolutionContext context, IAtom source, IAtom target, int amount)
-    {
-        return KeywordFrame.Compose(Instance.Bind(ChangeState, target, "HEALTH", amount));
     }
     
     [Effect]
@@ -60,15 +55,32 @@ public static class Keywords
     }
     
     [Effect]
-    public static IEffectResult DiscardCard(IResolutionContext context, ICard card)
+    public static IEffectResult Shuffle(IResolutionContext context, IOrderedZone zone)
+    {
+        zone.Shuffle();
+        return EffectResult.Resolved;
+    }
+    
+    [Effect]
+    public static IEffectResult ChooseAndDiscardCard(IResolutionContext context)
+    {
+        var player = context.GameState.Player;
+        
+        var promptId = Guid.NewGuid();
+        
+        return KeywordFrame.Compose(
+            Instance.BindArgs(Prompt.PickOne, promptId, player.Hand.ToAtomProvider(), "Choose a card to discard."),
+            Instance.Bind(DiscardCards, new PromptRef<ICard>(promptId)));
+    }
+    
+    [Effect]
+    public static IEffectResult DiscardCards(IResolutionContext context, IEnumerable<ICard> cards)
     {
         var player = context.GameState.Player;
         var discardPile = player.DiscardPile;
-
-        Instance.Bind(ChangeZone, card, discardPile);
         
         return KeywordFrame.Compose(
-            Instance.Bind(ChangeZone, card, discardPile)
+            cards.Select(card => Instance.BindArgs(ChangeZone, card, discardPile)).ToArray()
             );
     }
     

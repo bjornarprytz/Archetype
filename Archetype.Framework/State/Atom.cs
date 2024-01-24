@@ -5,7 +5,8 @@ namespace Archetype.Framework.State;
 public interface IAtom
 {
     Guid Id { get; }
-    IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; }
+    IReadOnlyDictionary<string, int> Stats { get; }
+    IReadOnlyDictionary<string, string> Tags { get; }
     IDictionary<string, object> State { get; }
     IZone? CurrentZone { get; set; }
 }
@@ -14,7 +15,8 @@ public interface IAtom
 public abstract class Atom : IAtom
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public abstract IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; }
+    public abstract IReadOnlyDictionary<string, int> Stats { get; }
+    public abstract IReadOnlyDictionary<string, string> Tags { get; }
     public IDictionary<string, object> State { get; } = new Dictionary<string, object>();
     
     public IZone? CurrentZone { get; set; }

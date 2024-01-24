@@ -18,11 +18,13 @@ public class DrawPile : Zone, IOrderedZone
         base.Remove(atom);
         _cards.Remove((ICard)atom);
     }
-
-    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
-        Declare.Characteristics(
-            ("TYPE", "draw-pile")
-        );
+    
+    public override IReadOnlyDictionary<string, int> Stats { get; } = new Dictionary<string, int>();
+    public override IReadOnlyDictionary<string, string> Tags { get; } = new Dictionary<string, string>
+    {
+        {  "TYPE", "DrawPile" }
+    };
+    
     public void Shuffle()
     {
         _cards.Shuffle();

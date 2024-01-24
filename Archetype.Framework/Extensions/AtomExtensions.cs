@@ -5,18 +5,6 @@ namespace Archetype.Framework.Extensions;
 
 public static class AtomExtensions
 {
-    public static bool HasCharacteristic/*<T>*/(this IAtom atom, string key, string stringValue, IResolutionContext context)
-    {
-        return atom.Characteristics.TryGetValue(key, out var instance) 
-               // && instance is CharacteristicInstance<T> { TypedValue: { } typedValue } 
-               && (stringValue == "any" || instance.Operands[0].GetValue(context) is {} v && v.Equals(stringValue));
-    }
-    
-    public static bool HasCharacteristic(this IAtom atom, string key)
-    {
-        return atom.Characteristics.ContainsKey(key);
-    }
-    
     public static T? GetState<T>(this IAtom atom, string key)
     {
         if (!atom.State.TryGetValue(key, out var value)) return default;
@@ -28,37 +16,28 @@ public static class AtomExtensions
 
     }
     
-    public static IKeywordInstance? GetCharacteristic(this IAtom atom, string key)
+    public static bool HasTag(this IAtom atom, string tag)
     {
-        return !atom.Characteristics.TryGetValue(key, out var value) ? null : value;
+        return atom.Tags.ContainsKey(tag);
+    }
+    public static string? GetTag(this IAtom atom, string tag)
+    {
+        return atom.Tags.TryGetValue(tag, out var value) ? value : null;
     }
     
-    public static int GetCharacteristicValue(this IAtom atom, string key, IResolutionContext context)
+    public static bool HasStat(this IAtom atom, string stat)
     {
-        var keywordInstance = atom.GetCharacteristic(key);
-        if (keywordInstance is null)
-            return 0;
-
-        if (keywordInstance.Operands.Count != 1)
-            throw new InvalidOperationException($"Characteristic {key} does not have exactly one operand");
-        
-        return keywordInstance.Operands[0].GetValue(context) switch
-        {
-            int intValue => intValue,
-            string stringValue when int.TryParse(stringValue, out var intValueFromString) => intValueFromString,
-            _ => throw new InvalidOperationException($"Characteristic {key} is not of type integer, or cannot be parsed as an integer")
-        };
+        return atom.Stats.ContainsKey(stat);
     }
     
-    public static int GetResourceValue(this IAtom atom)
+    public static int? GetStatValue(this IAtom atom, string stat)
     {
-        var value = atom.GetCharacteristic("RESOURCE_VALUE")?.Operands[0].GetValue(null);
-
-        return value switch
-        {
-            int intValue => intValue,
-            string stringValue when int.TryParse(stringValue, out var intValueFromString) => intValueFromString,
-            _ => 0
-        };
+        return atom.Stats.TryGetValue(stat, out var value) ? value : null;
     }
+    
+    public static IAtomProvider ToAtomProvider(this IZone zone)
+    {
+        return new AtomProvider(_ => zone.Atoms, (atom, _) => atom.CurrentZone == zone);
+    }
+    
 }

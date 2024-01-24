@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
+﻿using System.Collections.Immutable;
+using Archetype.Framework.BaseRules.Keywords.Primitive;
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface;
@@ -92,7 +93,7 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
             Source = CurrentPhase
         };
 
-        return new ResolutionFrame(resolutionContext, Declare.KeywordInstances(), CurrentPhase.Steps);
+        return new ResolutionFrame(resolutionContext, ImmutableList<IKeywordInstance>.Empty, CurrentPhase.Steps);
     }
     
     private IReadOnlyList<IPhase> GetTurnSequence() => metaGameState.ProtoData.TurnSequence ?? throw new InvalidOperationException("No turn sequence defined");

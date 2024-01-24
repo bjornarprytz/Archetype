@@ -1,4 +1,6 @@
-﻿namespace Archetype.Framework.Core.Primitives;
+﻿using Archetype.Framework.State;
+
+namespace Archetype.Framework.Core.Primitives;
 
 public interface IEffectResult
 {
@@ -6,11 +8,22 @@ public interface IEffectResult
 }
 
 
+public interface IPromptDescription : IEffectResult
+{
+    public Guid PromptId { get; }
+    public IReadOnlyList<Guid> Options { get; }
+    public int MinPicks { get; }
+    public int MaxPicks { get; }
+    public string PromptText { get; }
+}
+
+// Composition of effects (non-leaf nodes)
 public interface IKeywordFrame : IEffectResult
 {   
     public IReadOnlyList<IKeywordInstance> Effects { get; }
 }
 
+// Execution of state changes (leaf nodes)
 public record EffectResult : IEffectResult
 {
     public bool IsNoOp { get; private init; } = false;
@@ -32,4 +45,9 @@ public record KeywordFrame : IKeywordFrame
         return new KeywordFrame(effects);
     }
 
+}
+
+public record PromptDescription(Guid PromptId, IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks, string PromptText) : IPromptDescription
+{
+    public bool IsNoOp => false;
 }

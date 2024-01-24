@@ -14,8 +14,6 @@ public interface IPhase : IAtom
 
 public abstract class Phase : Atom, IPhase
 {
-    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } =
-        new Dictionary<string, IKeywordInstance>();
     public abstract string Name { get; }
     public abstract IReadOnlyList<IKeywordInstance> Steps { get; }
     public abstract IReadOnlyList<ActionDescription> AllowedActions { get; }

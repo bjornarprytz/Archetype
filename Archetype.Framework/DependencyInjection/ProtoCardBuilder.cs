@@ -114,11 +114,12 @@ public class ProtoCardBuilder
     }
 
     public record ProtoCard(
-        string Name, 
-        IProtoActionBlock ActionBlock,
-        IReadOnlyDictionary<string, IProtoActionBlock> Abilities, 
-        IReadOnlyDictionary<string, IKeywordInstance> Characteristics
-        ) : IProtoCard;
+            string Name,
+            IProtoActionBlock ActionBlock,
+            IReadOnlyDictionary<string, IProtoActionBlock> Abilities,
+            IReadOnlyDictionary<string, int> Stats,
+            IReadOnlyDictionary<string, string> Tags)
+        : IProtoCard;
 
     public record ProtoActionBlock(
         IReadOnlyList<IKeywordInstance> TargetSpecs,

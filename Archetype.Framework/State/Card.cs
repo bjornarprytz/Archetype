@@ -39,7 +39,8 @@ public class Card : Atom, ICard
     public IReadOnlyList<IKeywordInstance> Costs => _proto.ActionBlock.Costs;
     public IReadOnlyList<IKeywordInstance> Conditions => _proto.ActionBlock.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;
-    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics => _proto.Characteristics;
+    public override IReadOnlyDictionary<string, int> Stats => _proto.Stats;
+    public override IReadOnlyDictionary<string, string> Tags => _proto.Tags;
     
 
     public void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext)
@@ -51,6 +52,7 @@ public class Card : Atom, ICard
             _computedValues[index] = keywordDefinition.Compute(resolutionContext, computedValue);
         }
     }
+
 }
 
 

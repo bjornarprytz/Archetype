@@ -9,9 +9,8 @@ public interface IKeywordInstance
     IReadOnlyList<IKeywordOperand> Operands { get; }
 }
 
-public record KeywordInstance : IKeywordInstance
+public record KeywordInstance(string ResolveFuncName, params IKeywordOperand[] KeywordOperands) : IKeywordInstance
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public required string ResolveFuncName { get; init; }
-    public IReadOnlyList<IKeywordOperand> Operands { get; init; } = new List<KeywordOperand>();
+    public IReadOnlyList<IKeywordOperand> Operands => KeywordOperands;
 }

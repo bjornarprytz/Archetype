@@ -8,5 +8,6 @@ public interface IProtoCard
     public IProtoActionBlock ActionBlock { get; }
     public IReadOnlyDictionary<string, IProtoActionBlock> Abilities { get; } // Key is ability name
     
-    public IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } // Key is characteristic keyword
+    public IReadOnlyDictionary<string, int> Stats { get; } // Key is stat keyword
+    public IReadOnlyDictionary<string, string> Tags { get; } // Key is tag keyword
 }

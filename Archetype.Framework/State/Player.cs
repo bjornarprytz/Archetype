@@ -12,10 +12,11 @@ public interface IPlayer : IAtom
 
 public class Player : Atom, IPlayer
 {
-    public override IReadOnlyDictionary<string, IKeywordInstance> Characteristics { get; } = 
-        Declare.Characteristics(
-            ("TYPE", "player")
-        );
+    public override IReadOnlyDictionary<string, int> Stats { get; } = new Dictionary<string, int>();
+    public override IReadOnlyDictionary<string, string> Tags { get; } = new Dictionary<string, string>
+    {
+        {  "TYPE", "Player" }
+    };
 
     public IOrderedZone Deck { get; }
     public IZone Hand { get; }
