@@ -8,6 +8,11 @@ public interface IEffectResult
 }
 
 
+public interface IAllowedTargets : IEffectResult
+{
+    public IReadOnlyList<IAtom> Options { get; }
+}
+
 public interface IPromptDescription : IEffectResult
 {
     public Guid PromptId { get; }
@@ -48,6 +53,11 @@ public record KeywordFrame : IKeywordFrame
 }
 
 public record PromptDescription(Guid PromptId, IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks, string PromptText) : IPromptDescription
+{
+    public bool IsNoOp => false;
+}
+
+public record AllowedTargets(IReadOnlyList<IAtom> Options) : IAllowedTargets
 {
     public bool IsNoOp => false;
 }
