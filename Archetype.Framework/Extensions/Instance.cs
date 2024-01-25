@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Archetype.Framework.BaseRules.Keywords;
 using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Meta;
 
 namespace Archetype.Framework.Extensions;
 

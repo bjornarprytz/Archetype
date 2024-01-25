@@ -37,7 +37,6 @@ public class Card : Atom, ICard
     public IReadOnlyList<IKeywordInstance> Effects => _proto.ActionBlock.Effects;
     public IReadOnlyList<IKeywordInstance> AfterEffects => _proto.ActionBlock.AfterEffects;
     public IReadOnlyList<IKeywordInstance> Costs => _proto.ActionBlock.Costs;
-    public IReadOnlyList<IKeywordInstance> Conditions => _proto.ActionBlock.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;
     public override IReadOnlyDictionary<string, int> Stats => _proto.Stats;
     public override IReadOnlyDictionary<string, string> Tags => _proto.Tags;

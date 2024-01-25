@@ -22,7 +22,7 @@ public interface IActionBlockEvent : IEvent
 public interface IEffectEvent : IEvent
 {
     public IEffectResult Result { get; }
-    public EffectPayload Payload { get; }
+    public IKeywordInstance KeywordInstance { get; }
 }
 
 public abstract record EventBase(IAtom Source) : IEvent
@@ -31,7 +31,7 @@ public abstract record EventBase(IAtom Source) : IEvent
     public IList<IEvent> Children { get; set; } = new List<IEvent>();
 }
 
-public record EffectEvent(EffectPayload Payload, IEffectResult Result) : EventBase(Payload.Source) , IEffectEvent { } 
+public record EffectEvent(IAtom Source, IKeywordInstance KeywordInstance, IEffectResult Result) : EventBase(Source) , IEffectEvent { } 
 
 public record ActionBlockEvent
 (

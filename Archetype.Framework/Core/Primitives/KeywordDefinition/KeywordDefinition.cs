@@ -5,33 +5,26 @@ namespace Archetype.Framework.Core.Primitives;
 public interface IKeywordDefinition
 {
     string Id { get; }
-    IEffectResult Resolve(IResolutionContext context, EffectPayload payload);
+    IEffectResult Resolve(IResolutionContext context, IKeywordInstance keywordInstance);
 }
 
 
-public class KeywordDefinition<T> : IKeywordDefinition
+public class KeywordDefinition<T>(Delegate handler) : IKeywordDefinition
 {
-    private Delegate _handler;
-    public KeywordDefinition(Delegate handler)
-    {
-        Id = handler.Method.Name;
-        _handler = handler;
+    public string Id { get; } = handler.Method.Name;
 
-        var parameters = handler.Method.GetParameters();
-    }
-    public string Id { get; }
-    public IEffectResult Resolve(IResolutionContext context, EffectPayload payload)
+    public IEffectResult Resolve(IResolutionContext context, IKeywordInstance keywordInstance)
     {
-        if (Id != payload.EffectId)
+        if (Id != keywordInstance.Keyword)
             throw new InvalidOperationException(
-                $"KeywordInstance ({payload.EffectId}) does not match KeywordDefinition ({Id})");
+                $"KeywordInstance ({keywordInstance.Keyword}) does not match KeywordDefinition ({Id})");
 
         var parameters = new List<object>
             { context }
-            .Append(payload.Operands)
+            .Append(keywordInstance.Operands.Select(o => o.GetValue(context)))
             .ToArray();
                 
-        if (_handler.DynamicInvoke(parameters) is IEffectResult result)
+        if (handler.DynamicInvoke(parameters) is IEffectResult result)
             return result;
         
         throw new InvalidOperationException($"KeywordDefinition ({Id}) did not return an {nameof(IEffectResult)}");

@@ -52,7 +52,7 @@ public class ActionQueueTests
         var resolutionContext = Substitute.For<IResolutionContext>();
         
         var keywordInstance = Substitute.For<IKeywordInstance>();
-        keywordInstance.ResolveFuncName.Returns("TestKeyword");
+        keywordInstance.Keyword.Returns("TestKeyword");
         keywordInstance.Operands.Returns(ArraySegment<KeywordOperand>.Empty);
         
         var resolutionFrame = Substitute.For<IResolutionFrame>();
@@ -77,14 +77,14 @@ public class ActionQueueTests
         _primitiveDefinition.Resolve(default!, default!).ReturnsForAnyArgs(returnEvent);
         
         var primitiveKeywordInstance = Substitute.For<IKeywordInstance>();
-        primitiveKeywordInstance.ResolveFuncName.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance.Keyword.Returns("PrimitiveTestKeyword");
         
         var keywordFrame = Substitute.For<IKeywordFrame>();
         keywordFrame.Effects.Returns(new List<IKeywordInstance> { primitiveKeywordInstance });
         _compositeDefinition.Compose(default!, default!).ReturnsForAnyArgs(keywordFrame);
         
         var compositeKeywordInstance = Substitute.For<IKeywordInstance>();
-        compositeKeywordInstance.ResolveFuncName.Returns("CompositeTestKeyword");
+        compositeKeywordInstance.Keyword.Returns("CompositeTestKeyword");
         
         var resolutionContext = Substitute.For<IResolutionContext>();
         var resolutionFrame = Substitute.For<IResolutionFrame>();
@@ -109,18 +109,18 @@ public class ActionQueueTests
         _rules.GetDefinition("OtherCompositeTestKeyword").Returns(otherCompositeDefinition);
         
         var primitiveKeywordInstance1 = Substitute.For<IKeywordInstance>();
-        primitiveKeywordInstance1.ResolveFuncName.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance1.Keyword.Returns("PrimitiveTestKeyword");
         primitiveKeywordInstance1.Id.Returns(Guid.NewGuid());
         var primitiveKeywordInstance2 = Substitute.For<IKeywordInstance>();
-        primitiveKeywordInstance2.ResolveFuncName.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance2.Keyword.Returns("PrimitiveTestKeyword");
         primitiveKeywordInstance2.Id.Returns(Guid.NewGuid());
         var primitiveKeywordInstance3 = Substitute.For<IKeywordInstance>();
-        primitiveKeywordInstance3.ResolveFuncName.Returns("PrimitiveTestKeyword");
+        primitiveKeywordInstance3.Keyword.Returns("PrimitiveTestKeyword");
         primitiveKeywordInstance3.Id.Returns(Guid.NewGuid());
         var compositeKeywordInstance = Substitute.For<IKeywordInstance>();
-        compositeKeywordInstance.ResolveFuncName.Returns("CompositeTestKeyword");
+        compositeKeywordInstance.Keyword.Returns("CompositeTestKeyword");
         var otherCompositeKeywordInstance = Substitute.For<IKeywordInstance>();
-        otherCompositeKeywordInstance.ResolveFuncName.Returns("OtherCompositeTestKeyword");
+        otherCompositeKeywordInstance.Keyword.Returns("OtherCompositeTestKeyword");
         
         
         

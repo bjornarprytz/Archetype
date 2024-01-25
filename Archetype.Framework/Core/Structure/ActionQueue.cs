@@ -8,20 +8,20 @@ public interface IActionQueue
 {
     IResolutionFrame? CurrentFrame { get; }
     void Push(IResolutionFrame frame);
-    IEvent? ResolveNextKeyword();
+    IPromptDescription? ResolveNextKeyword();
 }
 
 public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 {
     public IResolutionFrame? CurrentFrame { get; private set; }
 
-    private IEvent? CurrentFrameEventTree;
+    private IEvent? _currentFrameEventTree;
     // Card scope
     private readonly Queue<IResolutionFrame> _resolutionFrames = new();
     
     private readonly QueueStack<IKeywordInstance> _keywordStack = new();
     // Composite keyword scope
-    private readonly Stack<IKeywordFrame> _keywordFrames = new();
+    private readonly Stack<(IKeywordFrame, IEffectEvent)> _keywordFrames = new();
 
 
     public void Push(IResolutionFrame context)
@@ -29,15 +29,18 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         _resolutionFrames.Enqueue(context);
     }
 
-    public IEvent? ResolveNextKeyword()
+    public IPromptDescription? ResolveNextKeyword()
     {
-        if (!TryPopPayload(out var payload))
+        if (!TryPopKeywordInstance(out var payload))
         {
             return null;
         }
 
-        var e = Resolve(payload);
-        PushEvent(payload, e);
+        if (Resolve(payload) is { } promptDescription)
+        {
+            return promptDescription;
+        }
+        
 
         if (_keywordStack.Count == 0)
         {
@@ -45,25 +48,36 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
             CurrentFrame = null;
         }
         
-        return e;
+        return null;
     }
-    private IEvent Resolve(EffectPayload payload)
+    private IPromptDescription? Resolve(IKeywordInstance keywordInstance)
     {
-        var definition = rules.GetDefinition(payload.EffectId);
+        var definition = rules.GetDefinition(keywordInstance.Keyword);
         
         if (definition == null)
         {
-            throw new InvalidOperationException($"No definition found for effect {payload.EffectId}");
+            throw new InvalidOperationException($"No definition found for effect {keywordInstance.Keyword}");
         }
 
-        var result = definition.Resolve(CurrentFrame!.Context, payload);
+        var result = definition.Resolve(CurrentFrame!.Context, keywordInstance);
+        
+        var e = new EffectEvent(CurrentFrame!.Context.Source, keywordInstance, result);
 
         if (result is IKeywordFrame keywordFrame)
         {
-            _keywordFrames.Push(keywordFrame);
+            _keywordFrames.Push((keywordFrame, e));
+
+            return null;
         }
         
-        return new EffectEvent(payload, result);
+        PushEvent(keywordInstance, e);
+        
+        if(result is IPromptDescription promptDescription)
+        {
+            return promptDescription;
+        }
+        
+        return null;
     }
 
     private bool TryAdvanceResolutionFrame()
@@ -93,34 +107,29 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         return true;
     }
 
-    private bool TryPopPayload(out EffectPayload payload)
+    private bool TryPopKeywordInstance(out IKeywordInstance keywordInstance)
     {
+        keywordInstance = default!;
+        
         if (CurrentFrame == null && !TryAdvanceResolutionFrame())
         {
-            payload = default!;
             return false;
         }
 
-        if (_keywordStack.TryPop(out var keywordInstance))
-        {
-            payload = keywordInstance.BindPayload(CurrentFrame!.Context);
-
-            return true;
-        }
-        
-        payload = default!;
-        return false;
+        return _keywordStack.TryPop(out keywordInstance);
     }
 
-    private void PushEvent(EffectPayload payload, IEvent e)
+    private void PushEvent(IKeywordInstance keywordInstance, IEvent e)
     {
-        while (_keywordFrames.TryPop(out var currentKeywordFrame))
+        while (_keywordFrames.TryPop(out var item))
         {
-            if (currentKeywordFrame.Effects.All(ki => ki.Id != payload.Id)) continue;
+            var (currentKeywordFrame, compositeEvent) = item;
             
-            e.Parent = currentKeywordFrame.Event;
-            currentKeywordFrame.Event.Children.Add(e);
-            _keywordFrames.Push(currentKeywordFrame);
+            if (!currentKeywordFrame.Effects.Contains(keywordInstance)) continue;
+            
+            e.Parent = compositeEvent;
+            compositeEvent.Children.Add(e);
+            _keywordFrames.Push(item);
             break;
         }
         

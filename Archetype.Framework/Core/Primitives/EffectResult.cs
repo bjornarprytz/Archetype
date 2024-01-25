@@ -2,15 +2,7 @@
 
 namespace Archetype.Framework.Core.Primitives;
 
-public interface IEffectResult
-{
-    bool IsNoOp { get; }
-}
-
-public interface IPaymentResult : IEffectResult
-{
-    bool IsSuccessful { get; }
-}
+public interface IEffectResult { }
 
 public interface IAllowedTargets : IEffectResult
 {
@@ -37,8 +29,12 @@ public record EffectResult : IEffectResult
 {
     public bool IsNoOp { get; private init; } = false;
     public static IEffectResult Resolved { get; } = new EffectResult();
-    public static IEffectResult NoOp { get; } = new EffectResult { IsNoOp = true };
+    public static IEffectResult NoOp { get; } = new NoOpResult();
+    public static IEffectResult Failed { get; } = new FailureResult();
 }
+
+public record NoOpResult : IEffectResult { }
+public record FailureResult : IEffectResult { }
 
 public record KeywordFrame : IKeywordFrame
 {
@@ -48,6 +44,7 @@ public record KeywordFrame : IKeywordFrame
     }
     public IReadOnlyList<IKeywordInstance> Effects { get; }
     public bool IsNoOp { get; } = false;
+    public bool Failed { get; } = false;
     
     public static IKeywordFrame Compose(params IKeywordInstance[] effects)
     {
@@ -56,17 +53,7 @@ public record KeywordFrame : IKeywordFrame
 
 }
 
-public record PromptDescription(Guid PromptId, IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks, string PromptText) : IPromptDescription
-{
-    public bool IsNoOp => false;
-}
+public record PromptDescription(Guid PromptId, IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks,
+    string PromptText) : IPromptDescription;
 
-public record AllowedTargets(IReadOnlyList<IAtom> Options) : IAllowedTargets
-{
-    public bool IsNoOp => false;
-}
-
-public record PaymentResult(bool IsSuccessful) : IPaymentResult
-{
-    public bool IsNoOp => false;
-}
+public record AllowedTargets(IReadOnlyList<IAtom> Options) : IAllowedTargets;

@@ -18,7 +18,6 @@ public static class RuntimeExtensions
         )
     {
         var rules = metaGameState.Rules;
-        var conditions = actionBlock.Conditions;
         var costs = actionBlock.Costs;
         
         var resolutionContext = new ResolutionContext
@@ -33,26 +32,10 @@ public static class RuntimeExtensions
         
         actionBlock.UpdateComputedValues(rules, resolutionContext);
         
-        if (!rules.CheckPayments(resolutionContext, costs, payments))
-            throw new InvalidOperationException("Invalid payment");
-        
-        if (!rules.CheckConditions(conditions, resolutionContext))
-            throw new InvalidOperationException("Invalid conditions");
-        
         if (!actionBlock.CheckTargets(resolutionContext))
             throw new InvalidOperationException("Invalid targets");
 
         return resolutionContext;
-    }
-
-    public static EffectPayload BindPayload(this IKeywordInstance effectInstance, IResolutionContext context)
-    {
-        return new EffectPayload(
-            effectInstance.Id,
-            context.Source, 
-            effectInstance.ResolveFuncName, 
-            effectInstance.Operands.Select(o => o.GetValue(context)).ToList()
-        );
     }
 
     public static bool CheckTargets(this IActionBlock actionBlock, IResolutionContext context)
@@ -76,8 +59,8 @@ public static class RuntimeExtensions
         bool CheckOptionality(IKeywordInstance keywordInstance)
         {
             var rules = context!.MetaGameState.Rules;
-            if (rules.GetDefinition(keywordInstance.ResolveFuncName) is not TargetSpecificationDefinition definition)
-                throw new InvalidOperationException($"Invalid target filter definition ({keywordInstance.ResolveFuncName})");
+            if (rules.GetDefinition(keywordInstance.Keyword) is not TargetSpecificationDefinition definition)
+                throw new InvalidOperationException($"Invalid target filter definition ({keywordInstance.Keyword})");
             
             return definition.IsOptional(context, keywordInstance);
         }
@@ -85,8 +68,8 @@ public static class RuntimeExtensions
         bool FilterAtom(IAtom atom, IKeywordInstance keywordInstance)
         {
             var rules = context!.MetaGameState.Rules;
-            if (rules.GetDefinition(keywordInstance.ResolveFuncName) is not TargetSpecificationDefinition definition)
-                throw new InvalidOperationException($"Invalid target filter definition ({keywordInstance.ResolveFuncName})");
+            if (rules.GetDefinition(keywordInstance.Keyword) is not TargetSpecificationDefinition definition)
+                throw new InvalidOperationException($"Invalid target filter definition ({keywordInstance.Keyword})");
             
             return definition.Filter(atom, context, keywordInstance);
         }

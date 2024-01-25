@@ -11,13 +11,16 @@ public static class Cost
     [Cost("COST")]
     public static IEffectResult PayResources(IResolutionContext context, PaymentPayload payment)
     {
+        if (payment.Payment.DistinctBy(a => a.Id).Count() != payment.Payment.Count)
+            return EffectResult.Failed;
+        
         var requiredAmount = payment.Amount;
         
         var paidAmount = payment.Payment.Sum(a => a.GetStatValue("VALUE"));
         
         if (paidAmount < requiredAmount)
         {
-            return new PaymentResult(false); // TODO: Should this just be a failure? Because we never return a success.
+            return EffectResult.Failed;
         }
 
         var discardPile = context.GameState.Player.DiscardPile;

@@ -43,8 +43,14 @@ public class ProtoCardBuilder
         _name = name;
     }
     
-    public void AddStats(Dictionary<string, int> stats)
+    public void AddStats(IEnumerable<IKeywordInstance> statKeywordInstances)
     {
+        var stats = statKeywordInstances.ToDictionary(
+            instance => instance.Keyword,
+            instance => instance.Operands.Single().GetValue(null) as int? ??
+                        throw new InvalidOperationException("Stat keyword must have exactly one operand")
+        );
+        
         _stats.MergeInPlace(stats);
     }
     

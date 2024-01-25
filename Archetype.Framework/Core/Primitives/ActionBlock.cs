@@ -12,7 +12,6 @@ public interface IActionBlock
     IReadOnlyList<IKeywordInstance> Effects { get; }
     IReadOnlyList<IKeywordInstance> AfterEffects { get; }
     IReadOnlyList<IKeywordInstance> Costs { get; }
-    IReadOnlyList<IKeywordInstance> Conditions { get; }
     IReadOnlyList<int> ComputedValues { get; }
     
     void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext);

@@ -5,7 +5,6 @@ namespace Archetype.Framework.Design;
 public interface IProtoActionBlock
 {
     public IReadOnlyList<IKeywordInstance> TargetSpecs { get; }
-    public IReadOnlyList<IKeywordInstance> Conditions { get; }
     public IReadOnlyList<IKeywordInstance> Costs { get; }
     public IReadOnlyList<IKeywordInstance> Effects { get; }
     public IReadOnlyList<IKeywordInstance> AfterEffects { get; }

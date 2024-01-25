@@ -11,7 +11,7 @@ public static class Mock
         where T : class, IKeywordInstance
     {
         var keywordInstance = Substitute.For<T>();
-        keywordInstance.ResolveFuncName.Returns(keyword);
+        keywordInstance.Keyword.Returns(keyword);
         keywordInstance.Operands.Returns(Declare.Operands(operands.Select(Declare.Operand).ToArray()));
         return keywordInstance;
     }

@@ -20,13 +20,9 @@ public static class ParseExtensions
         
         // TODO: Check for non-existent keywords. Context seems to be just an emtpy string " " when that happens
         
-        var operands = keywordContext.ParseOperands().ToList();
+        var operands = keywordContext.ParseOperands().ToArray();
         var keyword = keywordContext.ParseKeyword();
-        var keywordInstance = new KeywordInstance
-        {
-            ResolveFuncName = keyword,
-            Operands = operands,
-        };
+        var keywordInstance = new KeywordInstance(keyword, operands);
         
         return keywordInstance;
     }
@@ -39,18 +35,14 @@ public static class ParseExtensions
     public static IKeywordInstance ParseStaticKeywordContext(this BaseGrammarParser.StaticContext staticKeywordContext)
     {
         var keyword = staticKeywordContext.GetText().Split(":")[0];
-        var operands = staticKeywordContext.ParseOperands().ToList();
+        var operands = staticKeywordContext.ParseOperands().ToArray();
         
-        if (operands.Count != 1)
+        if (operands.Length != 1)
         {
-            throw new Exception($"Keywords with Key-Value Syntax must have exactly one operand. keyword: {keyword}, operand count: {operands.Count}");
+            throw new Exception($"Keywords with Key-Value Syntax must have exactly one operand. keyword: {keyword}, operand count: {operands.Length}");
         }
         
-        var keywordInstance = new KeywordInstance
-        {
-            ResolveFuncName = keyword,
-            Operands = operands,
-        };
+        var keywordInstance = new KeywordInstance(keyword, operands);
         
         return keywordInstance;
     }

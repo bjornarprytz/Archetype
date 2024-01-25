@@ -24,7 +24,7 @@ public class CardParser()
         
         
         // TODO: Refactor this repeated code
-        builder.AddCharacteristics(characteristics);
+        builder.AddStats(characteristics);
         builder.BuildActionBlock(
             actionBlockBuilder =>
             {

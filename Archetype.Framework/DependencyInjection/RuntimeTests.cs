@@ -1,8 +1,5 @@
-﻿using System.Reflection;
-using Archetype.Framework.BaseRules.Keywords.Primitive;
-using Archetype.Framework.Core.Primitives;
+﻿using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Design;
-using Archetype.Framework.Meta;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Archetype.Framework.DependencyInjection;
@@ -16,7 +13,6 @@ internal static class RuntimeTests
         var keywordDefinitions = rules.Keywords.ToList();
         
         keywordDefinitions.EnsureNoDuplicates();
-        keywordDefinitions.EnsureOperandDeclarations();
     }
     
     private static void EnsureNoDuplicates(this IEnumerable<IKeywordDefinition> keywordDefinitions)
@@ -30,15 +26,4 @@ internal static class RuntimeTests
             throw new InvalidOperationException($"Duplicate keywords found: {string.Join(", ", duplicates.Select(pair => $"{pair.Key} > {string.Join("|", pair.Select(p => p.GetType()))} "))}");
     }
     
-    private static void EnsureOperandDeclarations(this IEnumerable<IKeywordDefinition> keywordDefinitions)
-    {
-        foreach (var definition in keywordDefinitions)
-        {
-            if (definition.GetType().GetCustomAttribute<KeywordAttribute>() is not { } attribute) 
-                continue;
-            
-            if (attributeOperandDeclaration != definition.GetType())
-                throw new InvalidOperationException($"Operand declaration mismatch: {definition.GetType()} != {attributeOperandDeclaration}");
-        }
-    }
 }

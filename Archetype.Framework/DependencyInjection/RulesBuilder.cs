@@ -19,10 +19,10 @@ public class RulesBuilder : IRulesBuilder
     
     public void AddKeyword(IKeywordDefinition keywordDefinition)
     {
-        if (_keywords.ContainsKey(keywordDefinition.Keyword))
-            throw new InvalidOperationException($"Keyword ({keywordDefinition.Keyword}) already exists");
+        if (_keywords.ContainsKey(keywordDefinition.Id))
+            throw new InvalidOperationException($"Keyword ({keywordDefinition.Id}) already exists");
         
-        _keywords.Add(keywordDefinition.Keyword, keywordDefinition);
+        _keywords.Add(keywordDefinition.Id, keywordDefinition);
     }
 
     public void AddPhase(IPhase phase)

@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
 using Archetype.Framework.BaseRules.Keywords;
-using Archetype.Framework.BaseRules.Keywords.Primitive;
-using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.DependencyInjection;
 
 namespace Archetype.Framework.Extensions;
