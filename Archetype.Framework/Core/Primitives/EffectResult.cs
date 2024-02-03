@@ -4,11 +4,6 @@ namespace Archetype.Framework.Core.Primitives;
 
 public interface IEffectResult { }
 
-public interface IAllowedTargets : IEffectResult
-{
-    public IReadOnlyList<IAtom> Options { get; }
-}
-
 public interface IPromptDescription : IEffectResult
 {
     public Guid PromptId { get; }
@@ -30,11 +25,11 @@ public record EffectResult : IEffectResult
     public bool IsNoOp { get; private init; } = false;
     public static IEffectResult Resolved { get; } = new EffectResult();
     public static IEffectResult NoOp { get; } = new NoOpResult();
-    public static IEffectResult Failed { get; } = new FailureResult();
+    public static IEffectResult Failed(string message) => new FailureResult(message);
 }
 
 public record NoOpResult : IEffectResult { }
-public record FailureResult : IEffectResult { }
+public record FailureResult(string Message) : IEffectResult { }
 
 public record KeywordFrame : IKeywordFrame
 {
@@ -56,4 +51,3 @@ public record KeywordFrame : IKeywordFrame
 public record PromptDescription(Guid PromptId, IReadOnlyList<Guid> Options, int MinPicks, int MaxPicks,
     string PromptText) : IPromptDescription;
 
-public record AllowedTargets(IReadOnlyList<IAtom> Options) : IAllowedTargets;

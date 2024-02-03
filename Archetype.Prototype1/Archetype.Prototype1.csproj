@@ -11,4 +11,9 @@
       <ProjectReference Include="..\Archetype.Grammar\Archetype.Grammar.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Keywords\" />
+      <Folder Include="Proto\" />
+    </ItemGroup>
+
 </Project>

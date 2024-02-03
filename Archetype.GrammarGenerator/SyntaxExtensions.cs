@@ -9,6 +9,8 @@ namespace Archetype.GrammarGenerator;
 
 public static class SyntaxExtensions
 {
+    /*
+     * 
     internal static string GenerateSyntax(this KeywordSyntaxAttribute keywordSyntaxAttribute)
     {
         var sb = new StringBuilder();
@@ -57,7 +59,7 @@ public static class SyntaxExtensions
         return sb.ToString();
     }
     
-    private static string FunctionLikeSyntax(this KeywordSyntaxAttribute keyword)
+    private static string FunctionLikeSyntax(this KeywordAttribute keyword)
     {
         var sb = new StringBuilder();
 
@@ -78,7 +80,7 @@ public static class SyntaxExtensions
         return sb.ToString();
     }
 
-    private static string OperandSyntax(this IOperandDescription operandDescription)
+    private static string OperandSyntax(this IKeywordOperand operandDescription)
     {
         var operandSyntax =  operandDescription.Type == 
                 typeof(string) ? "opString" : 
@@ -97,4 +99,5 @@ public static class SyntaxExtensions
 
         return sb.ToString();
     }
+     */
 }

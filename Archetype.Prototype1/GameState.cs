@@ -5,7 +5,19 @@ namespace Archetype.Prototype1;
 
 public class GameState : IGameState
 {
-    public IDictionary<Guid, IZone> Zones { get; } = new Dictionary<Guid, IZone>();
-    public IDictionary<Guid, IAtom> Atoms { get; } = new Dictionary<Guid, IAtom>();
+    private readonly Dictionary<Guid, IZone> _zones = new();
+    private readonly Dictionary<Guid, IAtom> _atoms = new();
+    
+    public IReadOnlyDictionary<Guid, IZone> Zones => _zones;
+    public IReadOnlyDictionary<Guid, IAtom> Atoms => _atoms;
     public IPlayer Player { get; } = new Player();
+    public void AddAtom(IAtom atom)
+    {
+        _atoms.Add(atom.Id, atom);
+    }
+
+    public void AddZone(IZone zone)
+    {
+        _zones.Add(zone.Id, zone);
+    }
 }

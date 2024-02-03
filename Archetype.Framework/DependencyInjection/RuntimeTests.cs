@@ -18,7 +18,7 @@ internal static class RuntimeTests
     private static void EnsureNoDuplicates(this IEnumerable<IKeywordDefinition> keywordDefinitions)
     {
         var duplicates = keywordDefinitions
-            .GroupBy(def => def.Id)
+            .GroupBy(def => def.Keyword)
             .Where(g => g.Count() > 1)
             .ToList();
         

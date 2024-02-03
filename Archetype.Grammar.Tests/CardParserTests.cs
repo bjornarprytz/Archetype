@@ -36,7 +36,7 @@ public class Tests
         card.Should().NotBeNull();
         
         card.Name.Should().Be("Lightning Bolt");
-        card.Characteristics.ShouldContain("TYPE", "Spell");
+        card.Tags.Should().ContainKey("TYPE").WhoseValue.Should().Be("Spell");
         card.ActionBlock.Costs.ShouldContain("COST_RESOURCES", 1);
         card.ActionBlock.TargetSpecs.ShouldContain("T_ANY");
         card.ActionBlock.Effects.ShouldContain("DAMAGE", resolutionContext, new TargetRef(0), 3);
@@ -56,7 +56,6 @@ public class Tests
                                     "Pilfer" 
                                     {
                                         COST_RESOURCES(1)
-                                        COND_MAX_HAND_SIZE(0)
                                         DRAW_CARD()
                                     }
                                 }
@@ -68,11 +67,10 @@ public class Tests
         
         card.Name.Should().Be("Sea Gate Wreckage");
         
-        card.Characteristics.ShouldContain("TYPE", "Building");
+        card.Tags.Should().ContainKey("TYPE").WhoseValue.Should().Be("Building");
         card.ActionBlock.Costs.ShouldContain("COST_RESOURCES", 2);
         card.Abilities.Should().ContainKey("Pilfer");
         card.Abilities["Pilfer"].Costs.ShouldContain("COST_RESOURCES", 1);
-        card.Abilities["Pilfer"].Conditions.ShouldContain("COND_MAX_HAND_SIZE", 0);
         card.Abilities["Pilfer"].Effects.ShouldContain("DRAW_CARD");
     }
 
@@ -100,7 +98,7 @@ public class Tests
         card.Should().NotBeNull();
         
         card.Name.Should().Be("Master the Way");
-        card.Characteristics.ShouldContain("TYPE", "Spell");
+        card.Tags.Should().ContainKey("TYPE").WhoseValue.Should().Be("Spell");
         card.ActionBlock.TargetSpecs.ShouldContain("T_ANY");
         card.ActionBlock.Costs.ShouldContain("COST_RESOURCES", 3);
         card.ActionBlock.Effects.ShouldContain("DRAW_CARD");
@@ -128,7 +126,7 @@ public class Tests
         
         card.Should().NotBeNull();
         card.Name.Should().Be("Arc Trail");
-        card.Characteristics.ShouldContain("TYPE", "Spell");
+        card.Tags.Should().ContainKey("TYPE").WhoseValue.Should().Be("Spell");
         card.ActionBlock.TargetSpecs.ShouldContain("T_ANY");
         card.ActionBlock.TargetSpecs.Should().HaveCount(2);
         card.ActionBlock.Costs.ShouldContain("COST_RESOURCES", 2);

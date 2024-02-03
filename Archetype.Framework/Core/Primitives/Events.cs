@@ -13,7 +13,7 @@ public interface IEvent
 public interface IActionBlockEvent : IEvent
 {
     public IReadOnlyList<IAtom> Targets { get; }
-    public IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; }
+    public IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments { get; }
     
     public IReadOnlyList<int> ComputedValues { get; }
     public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } 
@@ -37,7 +37,7 @@ public record ActionBlockEvent
 (
     IAtom Source, 
     IReadOnlyList<IAtom> Targets, 
-    IReadOnlyDictionary<CostType, PaymentPayload> Payments,
+    IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments,
     IReadOnlyList<int> ComputedValues,
     IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses
 ) : EventBase(Source), IActionBlockEvent

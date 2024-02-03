@@ -9,20 +9,20 @@ namespace Archetype.Framework.BaseRules.Keywords.Keywords;
 public static class Target
 {
     [TargetRequirements("CARD")]
-    public static IEffectResult Card(IResolutionContext context)
+    public static IEnumerable<ICard> Card(IResolutionContext context, IAtomProvider atomProvider)
     {
         var nodes = context.GameState.Zones.Values.Where(z => z.GetTag("TYPE") == "NODE");
         
         var cardsInNodes = nodes.SelectMany(z => z.Atoms).Where(a => a is ICard).Cast<ICard>().ToList();
         
-        return new AllowedTargets(cardsInNodes);
+        return cardsInNodes;
     }
     
     [TargetRequirements("NODE")]
-    public static IEffectResult Node(IResolutionContext context)
+    public static IEnumerable<IZone> Node(IResolutionContext context)
     {
         var nodes = context.GameState.Zones.Values.Where(z => z.GetTag("TYPE") == "NODE").ToList();
         
-        return new AllowedTargets(nodes);
+        return nodes;
     }
 }

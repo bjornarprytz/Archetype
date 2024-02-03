@@ -1,5 +1,4 @@
-﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
-using Archetype.Framework.Core.Primitives;
+﻿using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Core.Structure;
 using Archetype.Framework.Interface;
 using Archetype.Framework.Interface.Actions;
@@ -33,7 +32,7 @@ public class GameLoopTests
         _firstPhase = Substitute.For<IPhase>();
         _secondPhase = Substitute.For<IPhase>();
         _thirdPhase = Substitute.For<IPhase>();
-        _actionQueue.ResolveNextKeyword().Returns(null as IEvent);
+        _actionQueue.ResolveNextKeyword().Returns( (PromptDescription?) null);
         
         _gameRoot.Infrastructure.ActionQueue.Returns(_actionQueue);
         _gameRoot.MetaGameState.ProtoData.TurnSequence.Returns(new List<IPhase>(){ _firstPhase, _secondPhase, _thirdPhase });
@@ -59,7 +58,7 @@ public class GameLoopTests
     public void Advance_WhenActionQueueReturnsPromptEvent_ReturnsPromptApi()
     {
         _firstPhase.AllowedActions.Returns(new List<ActionDescription>());
-        _actionQueue.ResolveNextKeyword().Returns(new PromptEvent(default!, default!, default!, default!, default!, default!));
+        _actionQueue.ResolveNextKeyword().Returns(new PromptDescription(default!, default!, default!, default!, default!));
         var result = _sut.Advance();
     }
     

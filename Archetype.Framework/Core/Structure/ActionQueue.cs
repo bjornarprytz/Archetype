@@ -6,6 +6,7 @@ namespace Archetype.Framework.Core.Structure;
 
 public interface IActionQueue
 {
+    FailureResult? ResolveCosts(IPaymentContext paymentContext);
     IResolutionFrame? CurrentFrame { get; }
     void Push(IResolutionFrame frame);
     IPromptDescription? ResolveNextKeyword();
@@ -13,6 +14,7 @@ public interface IActionQueue
 
 public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 {
+
     public IResolutionFrame? CurrentFrame { get; private set; }
 
     private IEvent? _currentFrameEventTree;
@@ -23,6 +25,10 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     // Composite keyword scope
     private readonly Stack<(IKeywordFrame, IEffectEvent)> _keywordFrames = new();
 
+    public FailureResult? ResolveCosts(IPaymentContext paymentContext)
+    {
+        throw new NotImplementedException();
+    }
 
     public void Push(IResolutionFrame context)
     {
@@ -52,14 +58,9 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     }
     private IPromptDescription? Resolve(IKeywordInstance keywordInstance)
     {
-        var definition = rules.GetDefinition(keywordInstance.Keyword);
-        
-        if (definition == null)
-        {
-            throw new InvalidOperationException($"No definition found for effect {keywordInstance.Keyword}");
-        }
+        var effectDefinition = rules.GetOrThrow<IEffectDefinition>(keywordInstance.Keyword);
 
-        var result = definition.Resolve(CurrentFrame!.Context, keywordInstance);
+        var result = effectDefinition.Resolve(CurrentFrame!.Context, keywordInstance);
         
         var e = new EffectEvent(CurrentFrame!.Context.Source, keywordInstance, result);
 
@@ -92,11 +93,6 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         if (CurrentFrame.Effects.Count == 0)
         {
             throw new InvalidOperationException("Next resolution frame has no effects");
-        }
-        
-        foreach (var cost in CurrentFrame.Costs)
-        {
-            _keywordStack.Enqueue(cost);
         }
         
         foreach (var effect in CurrentFrame.Effects)

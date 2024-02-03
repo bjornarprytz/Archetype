@@ -12,7 +12,7 @@ public static class Mock
     {
         var keywordInstance = Substitute.For<T>();
         keywordInstance.Keyword.Returns(keyword);
-        keywordInstance.Operands.Returns(Declare.Operands(operands.Select(Declare.Operand).ToArray()));
+        keywordInstance.Operands.Returns(operands.Select(o => o.ToOperand()).ToArray());
         return keywordInstance;
     }
 }

@@ -1,6 +1,5 @@
-﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
+﻿using Archetype.Framework.BaseRules.Keywords;
 using Archetype.Framework.Core.Primitives;
-using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
@@ -10,44 +9,99 @@ namespace Archetype.Tests.BaseRules;
 [TestFixture]
 public class PromptTests
 {
-    
-    private Prompt _sut = default!;
-    
     private IResolutionContext _context = default!;
     
     [SetUp]
     public void Setup()
     {
-        _sut = new Prompt();
         _context = Substitute.For<IResolutionContext>();
     }
     
     [Test]
-    public void ShouldReturnEvent()
+    public void PickBetweenNandM_ShouldReturnCorrectPromptDescription()
     {
         // Arrange
 
-        var options = new IAtom[]
+        var options = new[]
         {
             Substitute.For<IAtom>(),
             Substitute.For<IAtom>(),
             Substitute.For<IAtom>(),
         };
+        var atomProvider = Substitute.For<IAtomProvider>();
+        atomProvider.ProvideAtoms(_context).Returns(options);
         
-        var payload = _sut.CreateInstance(options, 1, 2, "Pick one or two things among the options").BindPayload(_context);
+        var promptGuid = Guid.NewGuid();
 
         // Act
-        var result = _sut.Resolve(_context, payload);
+        
+        var result = Prompt.PickBetweenNandM(_context, promptGuid, atomProvider, 1, 2, "Pick one or two things among the options");
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().BeOfType<PromptEvent>();
-        result.As<PromptEvent>().PromptId.Should().Be(payload.Id);
-        result.As<PromptEvent>().Options.Should().BeEquivalentTo(options.Select(o => o.Id));
-        result.As<PromptEvent>().MinPicks.Should().Be(1);
-        result.As<PromptEvent>().MaxPicks.Should().Be(2);
-        result.As<PromptEvent>().PromptText.Should().Be("Pick one or two things among the options");
-        result.Source.Should().Be(payload.Source);
+        
+        result.PromptText.Should().Be("Pick one or two things among the options");
+        result.PromptId.Should().Be(promptGuid);
+        result.MinPicks.Should().Be(1);
+        result.MaxPicks.Should().Be(2);
+        result.Options.Should().BeEquivalentTo(options.Select(a => a.Id));
+    }
+    
+    [Test]
+    public void PickN_ShouldReturnCorrectPromptDescription()
+    {
+        // Arrange
+
+        var options = new[]
+        {
+            Substitute.For<IAtom>(),
+            Substitute.For<IAtom>(),
+            Substitute.For<IAtom>(),
+        };
+        var atomProvider = Substitute.For<IAtomProvider>();
+        atomProvider.ProvideAtoms(_context).Returns(options);
+        
+        var promptGuid = Guid.NewGuid();
+
+        // Act
+        
+        var result = Prompt.PickN(_context, promptGuid, atomProvider, 2, "Pick two things among the options");
+
+        // Assert
+        
+        result.PromptText.Should().Be("Pick two things among the options");
+        result.PromptId.Should().Be(promptGuid);
+        result.MinPicks.Should().Be(2);
+        result.MaxPicks.Should().Be(2);
+        result.Options.Should().BeEquivalentTo(options.Select(a => a.Id));
+    }
+    
+    [Test]
+    public void PickOne_ShouldReturnCorrectPromptDescription()
+    {
+        // Arrange
+
+        var options = new[]
+        {
+            Substitute.For<IAtom>(),
+            Substitute.For<IAtom>(),
+            Substitute.For<IAtom>(),
+        };
+        var atomProvider = Substitute.For<IAtomProvider>();
+        atomProvider.ProvideAtoms(_context).Returns(options);
+        
+        var promptGuid = Guid.NewGuid();
+
+        // Act
+        
+        var result = Prompt.PickOne(_context, promptGuid, atomProvider, "Pick one thing among the options");
+
+        // Assert
+        
+        result.PromptText.Should().Be("Pick one thing among the options");
+        result.PromptId.Should().Be(promptGuid);
+        result.MinPicks.Should().Be(1);
+        result.MaxPicks.Should().Be(1);
+        result.Options.Should().BeEquivalentTo(options.Select(a => a.Id));
     }
 
     

@@ -23,10 +23,4 @@ public static class GameStateExtensions
         
         throw new InvalidOperationException($"Atom ({id}) not found");
     }
-    
-    public static void AddAtom(this IGameState gameState, IAtom atom)
-    {
-        gameState.Atoms.Add(atom.Id, atom);
-    }
-
 }

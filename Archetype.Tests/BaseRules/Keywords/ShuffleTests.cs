@@ -1,4 +1,4 @@
-﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
+﻿using Archetype.Framework.BaseRules.Keywords;
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
 using Archetype.Framework.State;
@@ -10,35 +10,24 @@ namespace Archetype.Tests.BaseRules;
 [TestFixture]
 public class ShuffleTests
 {
-        
-        private Shuffle _sut = default!;
-        
-        private IOrderedZone _targetZone = default!;
-        
-        [SetUp]
-        public void Setup()
-        {
-            _sut = new Shuffle();
-            _targetZone = Substitute.For<IOrderedZone>();
-        }
-        
-        [Test]
-        public void ShouldShuffleZone()
-        {
-            var resolutionContext = Substitute.For<IResolutionContext>();
-            
-            // Arrange
-            var payload = _sut
-                .CreateInstance(_targetZone)
-                .BindPayload(resolutionContext);
+    private IOrderedZone _targetZone = default!;
+    private IResolutionContext _context = default!;
     
-            // Act
-            var result = _sut.Resolve(resolutionContext, payload);
+    [SetUp]
+    public void Setup()
+    {
+        _targetZone = Substitute.For<IOrderedZone>();
+        _context = Substitute.For<IResolutionContext>();
+    }
     
-            // Assert
-            _targetZone.Received().Shuffle();
-            result.Should().BeOfType<ShuffleEvent>();
-            result.As<ShuffleEvent>().Zone.Should().Be(_targetZone);
-            result.As<ShuffleEvent>().Source.Should().Be(payload.Source);
-        }
+    [Test]
+    public void ShouldShuffleZone()
+    {
+        // Act
+        var result = Effects.Shuffle(_context, _targetZone);
+
+        // Assert
+        _targetZone.Received().Shuffle();
+        result.Should().BeOfType<EffectResult>();
+    }
 }

@@ -46,7 +46,7 @@ public class Card : Atom, ICard
     {
         foreach (var (computedValue, index) in _proto.ActionBlock.ComputedValues.Select((instance, i) => (instance, i)))
         {
-            var keywordDefinition = rules.GetOrThrow<ComputedValueDefinition>(computedValue);
+            var keywordDefinition = rules.GetOrThrow<ComputeDefinition>(computedValue);
             
             _computedValues[index] = keywordDefinition.Compute(resolutionContext, computedValue);
         }

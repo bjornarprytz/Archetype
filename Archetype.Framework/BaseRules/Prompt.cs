@@ -6,7 +6,7 @@ namespace Archetype.Framework.BaseRules.Keywords;
 [KeywordCollection]
 public static class Prompt
 {
-    public static IEffectResult PickBetweenNandM(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, int min, int max, string promptText)
+    public static PromptDescription PickBetweenNandM(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, int min, int max, string promptText)
     {
         var atoms = atomProvider.ProvideAtoms(context).ToList();
 
@@ -15,7 +15,7 @@ public static class Prompt
         return new PromptDescription(promptId, atomIds, min, max, promptText);
     }
     
-    public static IEffectResult PickN(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, int n, string promptText)
+    public static PromptDescription PickN(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, int n, string promptText)
     {
         var atoms = atomProvider.ProvideAtoms(context).ToList();
 
@@ -24,7 +24,7 @@ public static class Prompt
         return new PromptDescription(promptId, atomIds, n, n, promptText);
     }
     
-    public static IEffectResult PickOne(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, string promptText)
+    public static PromptDescription PickOne(IResolutionContext context, Guid promptId, IAtomProvider atomProvider, string promptText)
     {
         var atoms = atomProvider.ProvideAtoms(context).ToList();
 

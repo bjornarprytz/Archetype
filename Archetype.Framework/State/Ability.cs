@@ -16,20 +16,14 @@ public class Ability : IAbility
     public IReadOnlyList<IKeywordInstance> Effects => Proto.Effects;
     public IReadOnlyList<IKeywordInstance> AfterEffects => Proto.AfterEffects;
     public IReadOnlyList<IKeywordInstance> Costs => Proto.Costs;
-    public IReadOnlyList<IKeywordInstance> Conditions => Proto.Conditions;
     public IReadOnlyList<int> ComputedValues => _computedValues;
-
-
-    public object? GetComputedValue(int index)
-    {
-        return _computedValues.Count <= index ? null : _computedValues[index];
-    }
+    
 
     public void UpdateComputedValues(IRules rules, IResolutionContext resolutionContext)
     {
         foreach (var (computedValue, index) in Proto.ComputedValues.Select(((instance, i) => (instance, i))))
         {
-            var keywordDefinition = rules.GetOrThrow<ComputedValueDefinition>(computedValue);
+            var keywordDefinition = rules.GetOrThrow<ComputeDefinition>(computedValue);
             
             _computedValues[index] = keywordDefinition.Compute(resolutionContext, computedValue);
         }

@@ -84,14 +84,9 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
             throw new InvalidOperationException("No current phase");
         }
         
-        var resolutionContext = new ResolutionContext
-        {
-            MetaGameState = metaGameState,
-            GameState = gameState,
-            Source = CurrentPhase
-        };
+        var resolutionContext = new ResolutionContext(metaGameState, gameState, CurrentPhase);
 
-        return new ResolutionFrame(resolutionContext, ImmutableList<IKeywordInstance>.Empty, CurrentPhase.Steps);
+        return new ResolutionFrame(resolutionContext, CurrentPhase.Steps);
     }
     
     private IReadOnlyList<IPhase> GetTurnSequence() => metaGameState.ProtoData.TurnSequence ?? throw new InvalidOperationException("No turn sequence defined");

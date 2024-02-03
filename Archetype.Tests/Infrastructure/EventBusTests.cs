@@ -49,24 +49,10 @@ public class EventBusTests
         
         _sut.KeywordEvents.Should().ContainInOrder(l3Event1, l2Event1, l2Event2, l1Event1, l2Event3, l1Event2, keywordEvent1, keywordEvent2);
     }
-    
-    [Test]
-    public void Publish_WhenCalled_DoesNotPublishNonEvents()
-    {
-        var actionBlockEvent = Substitute.For<IActionBlockEvent>();
-        var keywordEvent1 = new NonEvent(Substitute.For<IAtom>());
-        var keywordEvent2 = Substitute.For<IEvent>();
-        actionBlockEvent.Children.Returns(new List<IEvent> { keywordEvent1, keywordEvent2 });
-        
-        _sut.Publish(actionBlockEvent);
-        
-        _sut.KeywordEvents.Should().NotContain(keywordEvent1);
-    }
 
     [Test]
     public void Subscribe_HandlerIsCalledOnce()
     {
-        
         var actionBlockEvent = Substitute.For<IActionBlockEvent>();
         var keywordEvent1 = Substitute.For<IEvent>();
         actionBlockEvent.Children.Returns(new List<IEvent> { keywordEvent1 });

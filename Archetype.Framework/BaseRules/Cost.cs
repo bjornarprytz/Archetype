@@ -3,30 +3,30 @@ using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Extensions;
 using Archetype.Framework.Interface.Actions;
 using Archetype.Framework.Meta;
+using Archetype.Framework.State;
 
 namespace Archetype.Framework.BaseRules;
 
+[KeywordCollection]
 public static class Cost
 {
     [Cost("COST")]
-    public static IEffectResult PayResources(IResolutionContext context, PaymentPayload payment)
+    public static IEffectResult PayResources(IResolutionContext context, int requiredAmount, List<IAtom> payment)
     {
-        if (payment.Payment.DistinctBy(a => a.Id).Count() != payment.Payment.Count)
-            return EffectResult.Failed;
+        if (payment.DistinctBy(a => a.Id).Count() != payment.Count)
+            return EffectResult.Failed("Duplicate atom in payment");
         
-        var requiredAmount = payment.Amount;
-        
-        var paidAmount = payment.Payment.Sum(a => a.GetStatValue("VALUE"));
+        var paidAmount = payment.Sum(a => a.GetStat("VALUE"));
         
         if (paidAmount < requiredAmount)
         {
-            return EffectResult.Failed;
+            return EffectResult.Failed("Insufficient payment");
         }
 
         var discardPile = context.GameState.Player.DiscardPile;
 
         return KeywordFrame.Compose(
-            payment.Payment.Select(a => Instance.BindArgs(Effects.ChangeZone, a, discardPile)).ToArray()
+            payment.Select(a => Instance.BindArgs(Effects.ChangeZone, a, discardPile)).ToArray()
             );
     }
 }

@@ -2,16 +2,16 @@
 
 namespace Archetype.Framework.Core.Primitives;
 
-public record AtomProvider(Func<IResolutionContext, IEnumerable<IAtom>> ProvideAtomsFunc, Func<IAtom, IResolutionContext, bool> CheckAtomFunc ) : IAtomProvider
+public class AtomProvider(Func<IResolutionContext, IEnumerable<IAtom>> scopeFunc, 
+    params Func<IResolutionContext, IAtom, bool>[] filters) : IAtomProvider
 {
-    public IEnumerable<IAtom> ProvideAtoms(IResolutionContext context) => ProvideAtomsFunc(context);
-
-    public bool CheckAtom(IAtom atom, IResolutionContext context) => CheckAtomFunc(atom, context);
+    public IEnumerable<IAtom> ProvideAtoms(IResolutionContext context) => 
+        scopeFunc(context)
+            .Where(a => 
+                filters.All(f => f(context, a)));
 }
 
 public interface IAtomProvider
 {
     public IEnumerable<IAtom> ProvideAtoms(IResolutionContext context);
-
-    public bool CheckAtom(IAtom atom, IResolutionContext context);
 }

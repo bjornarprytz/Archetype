@@ -1,4 +1,4 @@
-﻿using Archetype.Framework.BaseRules.Keywords.Primitive;
+﻿using Archetype.Framework.BaseRules.Keywords;
 using Archetype.Framework.Core.Primitives;
 using Archetype.Framework.Design;
 using Archetype.Framework.Extensions;
@@ -12,7 +12,6 @@ namespace Archetype.Tests.BaseRules;
 public class CreateCardTests
 {
     
-    private CreateCard _sut = default!;
     
     private IZone _targetZone = default!;
     private IResolutionContext _context = default!;
@@ -20,7 +19,6 @@ public class CreateCardTests
     [SetUp]
     public void Setup()
     {
-        _sut = new CreateCard();
         _targetZone = Substitute.For<IZone>();
         _context = Substitute.For<IResolutionContext>();
     }
@@ -33,17 +31,13 @@ public class CreateCardTests
         protoCard.Name.Returns("TestCard");
         _context.MetaGameState.ProtoData.GetProtoCard("TestCard").Returns(protoCard);
         
-        var payload = _sut.CreateInstance("TestCard", _targetZone).BindPayload(_context);
 
         // Act
-        var result = _sut.Resolve(_context, payload);
-
+        var result = Effects.CreateCard(_context, "TestCard", _targetZone);
+        
         // Assert
-        _targetZone.Received().Add(Arg.Is<ICard>(c => c.Name == "TestCard"));
-        _context.GameState.Atoms.Received().Add(Arg.Any<Guid>(), Arg.Is<ICard>(c => c.Name == "TestCard"));
-        result.Should().BeOfType<CreateCardEvent>();
-        result.As<CreateCardEvent>().Card.Name.Should().Be("TestCard");
-        result.As<CreateCardEvent>().Zone.Should().Be(_targetZone);
-        result.As<CreateCardEvent>().Source.Should().Be(payload.Source);
+        _targetZone.Received(1).Add(Arg.Is<ICard>(c => c.Name == "TestCard"));
+        _context.GameState.Received(1).AddAtom(Arg.Is<ICard>(c => c.Name == "TestCard"));
+        result.Should().BeOfType<EffectResult>();
     }
 }

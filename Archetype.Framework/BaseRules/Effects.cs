@@ -39,18 +39,18 @@ public static class Effects
         if (atom.GetState<T>(property) is { } existingValue && existingValue.Equals(value))
             return EffectResult.NoOp;
         
-        atom.State[property] = value!;
+        atom.SetState(property, value);
         
         return EffectResult.Resolved;
     }
     
     [Effect]
-    public static IEffectResult ChangeZone(IResolutionContext context, IAtom atom, IZone to)
+    public static IEffectResult ChangeZone(IResolutionContext context, IAtom atom, IZone? to)
     {
         var from = atom.CurrentZone;
 
         from?.Remove(atom);
-        to.Add(atom);
+        to?.Add(atom);
         atom.CurrentZone = to;
 
         return EffectResult.Resolved;
@@ -63,15 +63,23 @@ public static class Effects
         return EffectResult.Resolved;
     }
     
-    [Effect]
-    public static IEffectResult ChooseAndDiscardCard(IResolutionContext context)
+    [Effect("DISCARD_CARDS")]
+    public static IEffectResult ChooseAndDiscardCard(IResolutionContext context, int nCards)
     {
-        var player = context.GameState.Player;
+        var hand = context.GameState.Player.Hand;
         
         var promptId = Guid.NewGuid();
         
+        if (nCards == 0)
+            return EffectResult.NoOp;
+        
+        if (nCards >= hand.Atoms.Count)
+            return KeywordFrame.Compose(
+                Instance.BindArgs(DiscardCards, hand.Atoms.Cast<ICard>()),
+                Instance.BindArgs(ChangeZone, hand, context.GameState.Player.DiscardPile));
+        
         return KeywordFrame.Compose(
-            Instance.BindArgs(Prompt.PickOne, promptId, player.Hand.ToAtomProvider(), "Choose a card to discard."),
+            Instance.BindArgs(Prompt.PickN, promptId, hand.ToAtomProvider(), nCards, $"Choose {nCards} card(s) to discard."),
             Instance.Bind(DiscardCards, new PromptRef<ICard>(promptId)));
     }
     

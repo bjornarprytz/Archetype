@@ -1,6 +1,5 @@
 ﻿using Archetype.Framework.Design;
 using Archetype.Framework.State;
-using Archetype.Prototype1.Proto;
 
 namespace Archetype.Prototype1;
 
@@ -12,12 +11,5 @@ public class Bootstrapper(ISetParser setParser, IProtoData protoData, IRules rul
         {
             protoData.AddSet(set);
         }
-        
-        protoData.SetTurnSequence(
-            new IPhase[]
-            {
-                new MainPhase(rules),
-                new EnemyPhase(rules)
-            });
     }
 }

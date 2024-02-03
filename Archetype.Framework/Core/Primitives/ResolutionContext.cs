@@ -10,7 +10,7 @@ public interface IResolutionContext
     public IMetaGameState MetaGameState { get; }
     public IGameState GameState { get; }
     public IAtom Source { get; }
-    public IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; }
+    public IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments { get; }
     public IReadOnlyList<IAtom> Targets { get; }
     public IReadOnlyList<int> ComputedValues { get; }
 
@@ -19,14 +19,10 @@ public interface IResolutionContext
     public IDictionary<string, object> Memory { get; } // TODO: Evaluate if this is needed
 }
 
-public class ResolutionContext : IResolutionContext
+public record ResolutionContext(IMetaGameState MetaGameState, IGameState GameState, IAtom Source) : IResolutionContext
 {
-    public required IMetaGameState MetaGameState { get; init; }
-    public required IGameState GameState { get; init; }
-    public required IAtom Source { get; init; }
-
-    public IReadOnlyDictionary<CostType, PaymentPayload> Payments { get; init; } 
-        = FrozenDictionary<CostType, PaymentPayload>.Empty; 
+    public IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments { get; init; } 
+        = FrozenDictionary<CostType, IReadOnlyList<IAtom>>.Empty; 
     public IReadOnlyList<IAtom> Targets { get; init; } 
         = ArraySegment<IAtom>.Empty;
     public IReadOnlyList<int> ComputedValues { get; init; } 

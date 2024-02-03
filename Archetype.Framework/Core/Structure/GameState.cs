@@ -4,8 +4,11 @@ namespace Archetype.Framework.Core.Structure;
 
 public interface IGameState
 {
-    IDictionary<Guid, IZone> Zones { get; }
-    IDictionary<Guid, IAtom> Atoms { get; }
+    IReadOnlyDictionary<Guid, IZone> Zones { get; }
+    IReadOnlyDictionary<Guid, IAtom> Atoms { get; }
     
     IPlayer Player { get; }
+    
+    void AddAtom(IAtom atom);
+    void AddZone(IZone zone);
 }
