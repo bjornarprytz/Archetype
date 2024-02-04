@@ -9,7 +9,7 @@ public interface IActionQueue
     FailureResult? ResolveCosts(IPaymentContext paymentContext);
     IResolutionFrame? CurrentFrame { get; }
     void Push(IResolutionFrame frame);
-    IPromptDescription? ResolveNextKeyword();
+    IEffectResult? ResolveNextKeyword();
 }
 
 public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
@@ -35,7 +35,7 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         _resolutionFrames.Enqueue(context);
     }
 
-    public IPromptDescription? ResolveNextKeyword()
+    public IEffectResult? ResolveNextKeyword()
     {
         if (!TryPopKeywordInstance(out var payload))
         {

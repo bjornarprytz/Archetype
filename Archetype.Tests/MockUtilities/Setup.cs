@@ -2,9 +2,9 @@
 using Archetype.Framework.Extensions;
 using NSubstitute;
 
-namespace Archetype.Grammar.Tests;
+namespace Archetype.Tests.MockUtilities;
 
-public static class Mock
+public static class Setup
 {
     public static IKeywordInstance KeywordInstance(string keyword, params object?[] operands) => KeywordInstance<IKeywordInstance>(keyword, operands);
     public static T KeywordInstance<T>(string keyword, params object?[] operands)
@@ -15,4 +15,5 @@ public static class Mock
         keywordInstance.Operands.Returns(operands.Select(o => o.ToOperand()).ToArray());
         return keywordInstance;
     }
+    
 }
