@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Core.Structure;
+﻿using Archetype.Framework.Core.Primitives;
+using Archetype.Framework.Core.Structure;
 using Archetype.Framework.Extensions;
 using MediatR;
 
@@ -10,12 +11,12 @@ public class AnswerPromptHandler(IActionQueue actionQueue, IGameState gameState)
 {
     public Task<Unit> Handle(AnswerPromptArgs request, CancellationToken cancellationToken)
     {
-        if (actionQueue.CurrentFrame == null)
-            throw new InvalidOperationException("No prompt to answer");
-        
         var selection = request.Answer.Select(gameState.GetAtom).ToList();
+
+        var result = actionQueue.ResolvePrompt(new PromptContext(request.PromptId, selection));
         
-        actionQueue.CurrentFrame.Context.PromptResponses.Add(request.PromptId, selection);
+        if (result is FailureResult failure)
+            throw new InvalidOperationException(failure.Message);
 
         return Unit.Task;
     }

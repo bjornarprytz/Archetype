@@ -16,7 +16,6 @@ public interface IResolutionContext
 
     public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; }
     public IList<IEvent> Events { get; }
-    public IDictionary<string, object> Memory { get; } // TODO: Evaluate if this is needed
 }
 
 public record ResolutionContext(IMetaGameState MetaGameState, IGameState GameState, IAtom Source) : IResolutionContext
@@ -30,5 +29,4 @@ public record ResolutionContext(IMetaGameState MetaGameState, IGameState GameSta
 
     public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } = new Dictionary<Guid, IReadOnlyList<IAtom>>();
     public IList<IEvent> Events { get; } = new List<IEvent>();
-    public IDictionary<string, object> Memory { get; } = new Dictionary<string, object>();
 }

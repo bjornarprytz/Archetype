@@ -22,11 +22,12 @@ public static class ActionBlockExtensions
         var costs = actionBlock.Costs;
         
         var resolutionContext = actionBlock.CreateAndValidateResolutionContext(gameState, metaGameState, payments, targets);
+
+        var paymentContext = new PaymentContext(resolutionContext, costs, payments);
         
-        var paymentContext = new PaymentContext(resolutionContext, costs);
-        
-        if (actionQueue.ResolveCosts(paymentContext) is { } failure)
+        if (actionQueue.ResolveCosts(paymentContext) is FailureResult failure)
             throw new InvalidOperationException(failure.Message);
+        
         
         actionQueue.Push(new ResolutionFrame(resolutionContext, effects));
     }

@@ -9,7 +9,4 @@ public interface IPaymentContext
     IReadOnlyList<IKeywordInstance> Costs { get; }
 }
 
-public record PaymentContext(IResolutionContext ResolutionContext, IReadOnlyList<IKeywordInstance> Costs) : IPaymentContext
-{
-    public IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments => ResolutionContext.Payments;
-}
+public record PaymentContext(IResolutionContext ResolutionContext, IReadOnlyList<IKeywordInstance> Costs, IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments) : IPaymentContext;

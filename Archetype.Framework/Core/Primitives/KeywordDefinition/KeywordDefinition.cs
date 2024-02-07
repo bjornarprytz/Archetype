@@ -7,6 +7,13 @@ public interface IKeywordDefinition
     string Keyword { get; }
 }
 
+public interface ICostDefinition : IKeywordDefinition
+{
+    CostType CostType { get; }
+    IEffectResult DryRun(IResolutionContext context, IKeywordInstance keywordInstance, IReadOnlyList<IAtom> payment);
+    IEffectResult Pay(IResolutionContext context, IKeywordInstance keywordInstance, IReadOnlyList<IAtom> payment);
+}
+
 public interface IEffectDefinition : IKeywordDefinition
 {
     IEffectResult Resolve(IResolutionContext context, IKeywordInstance keywordInstance);

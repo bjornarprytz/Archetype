@@ -1,46 +1,28 @@
-﻿namespace Archetype.Framework.Meta;
+﻿using Archetype.Framework.Core.Primitives;
+
+namespace Archetype.Framework.Meta;
 
 
 [AttributeUsage(AttributeTargets.Method)]
-public class ComputeAttribute : KeywordAttribute
-{
-    public ComputeAttribute(string? keyword=null) : base(keyword)
-    {
-    }
-}
-
-[AttributeUsage(AttributeTargets.Method)]
-public class EffectAttribute : KeywordAttribute
-{
-    public EffectAttribute(string? keyword=null) : base(keyword)
-    {
-    }
-}
+public class ComputeAttribute(string? keyword = null) : KeywordAttribute(keyword);
 
 
 [AttributeUsage(AttributeTargets.Method)]
-public class TargetRequirementsAttribute : KeywordAttribute
-{
-    public TargetRequirementsAttribute(string? keyword=null) : base(keyword)
-    {
-    }
-}
+public class EffectAttribute(string? keyword = null) : KeywordAttribute(keyword);
+
 
 [AttributeUsage(AttributeTargets.Method)]
-public class CostAttribute : KeywordAttribute
+public class TargetRequirementsAttribute(string? keyword = null) : KeywordAttribute(keyword);
+
+
+[AttributeUsage(AttributeTargets.Method)]
+public class CostAttribute(CostType costType, string? keyword = null) : KeywordAttribute(keyword)
 {
-    public CostAttribute(string? keyword=null) : base(keyword)
-    {
-    }
+    public CostType CostType { get; } = costType;
 }
 
 
-public abstract class KeywordAttribute : Attribute
+public abstract class KeywordAttribute(string? keyword) : Attribute
 {
-    protected KeywordAttribute(string? keyword)
-    {
-        Keyword = keyword;
-    }
-
-    public string? Keyword { get; }
+    public string? Keyword { get; } = keyword;
 }

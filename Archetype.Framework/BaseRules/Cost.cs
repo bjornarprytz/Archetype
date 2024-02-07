@@ -10,7 +10,7 @@ namespace Archetype.Framework.BaseRules;
 [KeywordCollection]
 public static class Cost
 {
-    [Cost("COST")]
+    [Cost( CostType.Resource, "COST")]
     public static IEffectResult PayResources(IResolutionContext context, int requiredAmount, List<IAtom> payment)
     {
         if (payment.DistinctBy(a => a.Id).Count() != payment.Count)

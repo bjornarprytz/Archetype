@@ -6,18 +6,15 @@ namespace Archetype.Framework.Core.Structure;
 
 public interface IActionQueue
 {
-    FailureResult? ResolveCosts(IPaymentContext paymentContext);
-    IResolutionFrame? CurrentFrame { get; }
+    IEffectResult? ResolveCosts(IPaymentContext paymentContext);
+    IEffectResult? ResolvePrompt(IPromptContext promptContext);
     void Push(IResolutionFrame frame);
     IEffectResult? ResolveNextKeyword();
 }
 
 public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 {
-
-    public IResolutionFrame? CurrentFrame { get; private set; }
-
-    private IEvent? _currentFrameEventTree;
+    private IResolutionFrame? _currentFrame;
     // Card scope
     private readonly Queue<IResolutionFrame> _resolutionFrames = new();
     
@@ -25,7 +22,12 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     // Composite keyword scope
     private readonly Stack<(IKeywordFrame, IEffectEvent)> _keywordFrames = new();
 
-    public FailureResult? ResolveCosts(IPaymentContext paymentContext)
+    public IEffectResult? ResolveCosts(IPaymentContext paymentContext)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEffectResult? ResolvePrompt(IPromptContext promptContext)
     {
         throw new NotImplementedException();
     }
@@ -50,8 +52,8 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 
         if (_keywordStack.Count == 0)
         {
-            eventBus.Publish(new ActionBlockEvent(CurrentFrame.Context));
-            CurrentFrame = null;
+            eventBus.Publish(new ActionBlockEvent(_currentFrame.Context));
+            _currentFrame = null;
         }
         
         return null;
@@ -60,9 +62,9 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     {
         var effectDefinition = rules.GetOrThrow<IEffectDefinition>(keywordInstance.Keyword);
 
-        var result = effectDefinition.Resolve(CurrentFrame!.Context, keywordInstance);
+        var result = effectDefinition.Resolve(_currentFrame!.Context, keywordInstance);
         
-        var e = new EffectEvent(CurrentFrame!.Context.Source, keywordInstance, result);
+        var e = new EffectEvent(_currentFrame!.Context.Source, keywordInstance, result);
 
         if (result is IKeywordFrame keywordFrame)
         {
@@ -88,14 +90,14 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
             return false;
         }
         
-        CurrentFrame = nextFrame;
+        _currentFrame = nextFrame;
         
-        if (CurrentFrame.Effects.Count == 0)
+        if (_currentFrame.Effects.Count == 0)
         {
             throw new InvalidOperationException("Next resolution frame has no effects");
         }
         
-        foreach (var effect in CurrentFrame.Effects)
+        foreach (var effect in _currentFrame.Effects)
         {
             _keywordStack.Enqueue(effect);
         }
@@ -107,7 +109,7 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     {
         keywordInstance = default!;
         
-        if (CurrentFrame == null && !TryAdvanceResolutionFrame())
+        if (_currentFrame == null && !TryAdvanceResolutionFrame())
         {
             return false;
         }
@@ -117,6 +119,9 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 
     private void PushEvent(IKeywordInstance keywordInstance, IEvent e)
     {
+        // Figure out which keyword frame the event belongs to
+        // Keyword frames that are "done" are naturally popped off the stack here,
+        // but the current one is pushed back onto the stack
         while (_keywordFrames.TryPop(out var item))
         {
             var (currentKeywordFrame, compositeEvent) = item;
@@ -129,9 +134,11 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
             break;
         }
         
+        // If there are no keyword frames, we've fully resolved a top level keyword,
+        // and that means that e is the root event of that keyword.
         if (_keywordFrames.Count == 0)
         {
-            CurrentFrame!.Context.Events.Add(e);
+            _currentFrame!.Context.Events.Add(e);
         }
     }
 }
