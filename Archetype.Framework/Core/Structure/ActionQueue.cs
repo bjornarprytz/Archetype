@@ -6,9 +6,8 @@ namespace Archetype.Framework.Core.Structure;
 
 public interface IActionQueue
 {
-    IEffectResult? ResolveCosts(IPaymentContext paymentContext);
     IEffectResult? ResolvePrompt(IPromptContext promptContext);
-    void Push(IResolutionFrame frame);
+    IEffectResult? Push(IResolutionFrame resolutionFrame, IPaymentContext paymentContext);
     IEffectResult? ResolveNextKeyword();
 }
 
@@ -22,19 +21,32 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
     // Composite keyword scope
     private readonly Stack<(IKeywordFrame, IEffectEvent)> _keywordFrames = new();
 
-    public IEffectResult? ResolveCosts(IPaymentContext paymentContext)
-    {
-        throw new NotImplementedException();
-    }
 
     public IEffectResult? ResolvePrompt(IPromptContext promptContext)
     {
         throw new NotImplementedException();
     }
 
-    public void Push(IResolutionFrame context)
+    public IEffectResult? Push(IResolutionFrame resolutionFrame, IPaymentContext paymentContext)
     {
-        _resolutionFrames.Enqueue(context);
+        if (paymentContext.MakeDryRuns() is FailureResult failure)
+        {
+            return failure;
+        }
+        
+        if (paymentContext.ResolvePayments() is { } paymentEvents)
+        {
+            var paymentEvent = new PaymentEvent(paymentContext.ResolutionContext.Source)
+            {
+                Children = new List<IEvent>(paymentEvents)
+            };
+            
+            eventBus.Publish(paymentEvent);
+        }
+        
+        _resolutionFrames.Enqueue(resolutionFrame);
+        
+        return EffectResult.Resolved;
     }
 
     public IEffectResult? ResolveNextKeyword()

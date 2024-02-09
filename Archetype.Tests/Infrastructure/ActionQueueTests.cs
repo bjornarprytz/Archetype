@@ -12,12 +12,12 @@ namespace Archetype.Tests.Infrastructure;
 public class ActionQueueTests
 {
     private IResolutionContext _context = default!;
-    private IEventBus _eventBus;
-    private IRules _rules;
-    private IEffectDefinition _primitiveDefinition;
-    private IEffectDefinition _compositeDefinition;
-    private IEffectDefinition _promptDefinition;
-    private ICostDefinition _costDefinition;
+    private IEventBus _eventBus = default!;
+    private IRules _rules = default!;
+    private IEffectDefinition _primitiveDefinition = default!;
+    private IEffectDefinition _compositeDefinition = default!;
+    private IEffectDefinition _promptDefinition = default!;
+    private ICostDefinition _costDefinition = default!;
     
     private ActionQueue _sut = null!;
     
@@ -49,6 +49,8 @@ public class ActionQueueTests
         _costDefinition = Setup.CostDefinition("CostTestKeyword", CostType.Resource, _costResult);
         _rules.GetDefinition("CostTestKeyword").Returns(_costDefinition);
         
+        _context.MetaGameState.Rules.Returns(_rules);
+        
         _eventBus = Substitute.For<IEventBus>();
         
         _sut = new ActionQueue(_eventBus, _rules);
@@ -68,7 +70,7 @@ public class ActionQueueTests
         var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
         var resolutionFrame = Setup.ResolutionFrame(_context, primitiveKeywordInstance);
         
-        _sut.Push(resolutionFrame);
+        _sut.Push(resolutionFrame, Setup.NoCost());
         
         var result = _sut.ResolveNextKeyword();
         
@@ -85,7 +87,7 @@ public class ActionQueueTests
         
         var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
         
-        _sut.Push(resolutionFrame);
+        _sut.Push(resolutionFrame, Setup.NoCost());
         
         var result = _sut.ResolveNextKeyword();
         
@@ -105,7 +107,7 @@ public class ActionQueueTests
         
         var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
         
-        _sut.Push(resolutionFrame);
+        _sut.Push(resolutionFrame, Setup.NoCost());
         
         _ = _sut.ResolveNextKeyword();
         _ = _sut.ResolveNextKeyword();
@@ -133,12 +135,12 @@ public class ActionQueueTests
     }
     
     [Test]
-    public void ResolveCosts_WhenDryRunFails_ReturnsFailureResult()
+    public void Push_WhenDryRunFails_ReturnsFailureResult()
     {
         var paymentContext = Setup.PaymentContext(_context, CostType.Resource, Setup.KeywordInstance("CostTestKeyword"), Substitute.For<IAtom>());
         _costDefinition.DryRun(default!, default!, default!).ReturnsForAnyArgs(new FailureResult("Fail reason"));
         
-        var result = _sut.ResolveCosts(paymentContext);
+        var result = _sut.Push(Substitute.For<IResolutionFrame>(), paymentContext);
 
         _costDefinition.DidNotReceiveWithAnyArgs().Pay(default!, default!, default!);
         result.Should().BeOfType<FailureResult>();
@@ -154,13 +156,35 @@ public class ActionQueueTests
         _costDefinition.DryRun(default!, default!, default!).ReturnsForAnyArgs(EffectResult.Resolved);
         _costDefinition.Pay(default!, default!, default!).ReturnsForAnyArgs(EffectResult.Resolved);
         
-        var result = _sut.ResolveCosts(paymentContext);
+        var result = _sut.Push(Substitute.For<IResolutionFrame>(), paymentContext);
         
         result.Should().Be(EffectResult.Resolved);
         var cost = paymentContext.Costs.Single();
         
         _costDefinition.Received().Pay(_context, cost, payment);
         _costDefinition.Received().Pay(_context, cost, payment);
+    }
+    
+    [Test]
+    public void ResolveCosts_WhenPaymentSucceeds_PublishesPaymentEventToEventBus()
+    {
+        var payment = new [] { Substitute.For<IAtom>() };
+        
+        var paymentContext = Setup.PaymentContext(_context, CostType.Resource, Setup.KeywordInstance("CostTestKeyword"), payment);
+        _costDefinition.DryRun(default!, default!, default!).ReturnsForAnyArgs(EffectResult.Resolved);
+        _costDefinition.Pay(default!, default!, default!).ReturnsForAnyArgs(EffectResult.Resolved);
+        
+        _ = _sut.Push(Substitute.For<IResolutionFrame>(), paymentContext);
+        
+        _eventBus.Received(1).Publish(Arg.Is<PaymentEvent>(e =>
+            e.Parent == null 
+            && e.Source == _context.Source 
+            && e.Children.Count == 1 
+            && e.Children[0] is EffectEvent 
+            && ((EffectEvent) e.Children[0]).KeywordInstance == paymentContext.Costs.Single() 
+            && ((EffectEvent) e.Children[0]).Result == EffectResult.Resolved
+        ));
+        
         
     }
     
@@ -182,7 +206,7 @@ public class ActionQueueTests
     [Test]
     public void ResolveNextKeyword_WhenPromptIsPending_ReturnsFailure()
     {
-        _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")));
+        _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")), Setup.NoCost());
         _ = _sut.ResolveNextKeyword();
         
         var result = _sut.ResolveNextKeyword();
@@ -197,7 +221,7 @@ public class ActionQueueTests
         var promptId = Guid.NewGuid();
         _promptResult.PromptId.Returns(promptId);
         
-        _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")));
+        _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")), Setup.NoCost());
         /* IPromptDescription */ _ = _sut.ResolveNextKeyword();
         
         var promptContext = Setup.PromptContext(promptId);

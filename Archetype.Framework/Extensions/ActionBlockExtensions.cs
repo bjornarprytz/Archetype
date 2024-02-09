@@ -25,11 +25,8 @@ public static class ActionBlockExtensions
 
         var paymentContext = new PaymentContext(resolutionContext, costs, payments);
         
-        if (actionQueue.ResolveCosts(paymentContext) is FailureResult failure)
+        if (actionQueue.Push(new ResolutionFrame(resolutionContext, effects), paymentContext) is FailureResult failure)
             throw new InvalidOperationException(failure.Message);
-        
-        
-        actionQueue.Push(new ResolutionFrame(resolutionContext, effects));
     }
 
 

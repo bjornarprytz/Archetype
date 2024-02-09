@@ -56,6 +56,15 @@ public static class Setup
         return paymentContext;
     }
     
+    public static IPaymentContext NoCost()
+    {
+        var paymentContext = Substitute.For<IPaymentContext>();
+        paymentContext.ResolutionContext.Returns(Substitute.For<IResolutionContext>());
+        paymentContext.Costs.Returns(Array.Empty<IKeywordInstance>());
+        paymentContext.Payments.Returns(new Dictionary<CostType, IReadOnlyList<IAtom>>());
+        return paymentContext;
+    }
+    
     public static IPromptContext PromptContext(Guid promptId, params IAtom[] selection)
     {
         var promptContext = Substitute.For<IPromptContext>();

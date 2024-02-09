@@ -18,7 +18,9 @@ public static class RulesExtensions
     
     public static TDef GetOrThrow<TDef>(this IRules rules, string keyword) where TDef : IKeywordDefinition
     {
-        if (rules.GetDefinition(keyword) is not TDef requiredDefinition)
+        var r = rules.GetDefinition(keyword);
+        
+        if (r is not TDef requiredDefinition)
             throw new InvalidOperationException($"Keyword ({keyword}) is not a {typeof(TDef).Name}");
         
         return requiredDefinition;

@@ -28,10 +28,12 @@ public interface IEffectEvent : IEvent
 public abstract record EventBase(IAtom Source) : IEvent
 {
     public IEvent? Parent { get; set; }
-    public IList<IEvent> Children { get; set; } = new List<IEvent>();
+    public IList<IEvent> Children { get; init; } = new List<IEvent>();
 }
 
+public record PaymentEvent(IAtom Source) : EventBase(Source);
 public record EffectEvent(IAtom Source, IKeywordInstance KeywordInstance, IEffectResult Result) : EventBase(Source) , IEffectEvent { } 
+
 
 public record ActionBlockEvent
 (

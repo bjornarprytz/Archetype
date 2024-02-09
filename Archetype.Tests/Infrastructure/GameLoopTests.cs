@@ -76,7 +76,7 @@ public class GameLoopTests
         
         var result = _sut.Advance();
         
-        _actionQueue.Received().Push(Arg.Is<IResolutionFrame>(x => x.Effects == _firstPhase.Steps));
+        _actionQueue.Received().Push(Arg.Is<IResolutionFrame>(x => x.Effects == _firstPhase.Steps), Arg.Any<IPaymentContext>());
         
         result.AvailableActions.Should().ContainSingle(x => x.Type == ActionType.PassTurn);
     }

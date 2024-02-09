@@ -24,7 +24,7 @@ public class EventBusTests
         
         _sut.Publish(actionBlockEvent);
         
-        _sut.ActionBlockEvents.Should().Contain(actionBlockEvent);
+        _sut.RootEvents.Should().Contain(actionBlockEvent);
     }
     
     [Test]

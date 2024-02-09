@@ -64,7 +64,7 @@ public class GameLoop(IActionQueue actionQueue, IGameState gameState, IMetaGameS
 
     private bool ResolveActionQueue()
     {
-        actionQueue.Push(CreateResolutionFrame());
+        actionQueue.Push(CreateResolutionFrame(), PaymentContext.NoCosts());
          
         while (actionQueue.ResolveNextKeyword() is IEffectEvent e)
         {
