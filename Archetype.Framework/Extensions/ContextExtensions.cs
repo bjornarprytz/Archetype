@@ -6,9 +6,7 @@ public static class ContextExtensions
 {
     public static IEffectResult MakeDryRuns(this IPaymentContext context)
     {
-        var queue = new Queue<IKeywordInstance>(context.Costs);
-
-        while (queue.TryDequeue(out var nextKeyword))
+        foreach (var nextKeyword in context.Costs)
         {
             var costDefinition = context.ResolutionContext.MetaGameState.Rules.GetOrThrow<ICostDefinition>(nextKeyword.Keyword);
             var payment = context.Payments[costDefinition.CostType];
@@ -26,16 +24,18 @@ public static class ContextExtensions
     {
         var source = context.ResolutionContext.Source;
         
-        var queue = new Queue<IKeywordInstance>(context.Costs);
+        var keywordStack = new Stack<IKeywordInstance>(context.Costs);
 
         var eventStack = new Stack<EffectEvent>();
         
-        while (queue.TryDequeue(out var nextKeyword))
+        while (keywordStack.TryPop(out var nextKeyword) && context.ResolutionContext.MetaGameState.Rules.GetDefinition(nextKeyword.Keyword) is { } definition)
         {
-            var costDefinition = context.ResolutionContext.MetaGameState.Rules.GetOrThrow<ICostDefinition>(nextKeyword.Keyword);
-            var payment = context.Payments[costDefinition.CostType];
-
-            var result = costDefinition.Pay(context.ResolutionContext, nextKeyword, payment); 
+            var result = definition switch
+            {
+                ICostDefinition costDefinition => costDefinition.Pay(context.ResolutionContext, nextKeyword, context.Payments[costDefinition.CostType]),
+                IEffectDefinition effectDefinition => effectDefinition.Resolve(context.ResolutionContext, nextKeyword),
+                _ => throw new InvalidOperationException($"Keyword ({nextKeyword.Keyword}) is not a valid definition")
+            };
             
             if (result is FailureResult failure)
             {
@@ -44,9 +44,9 @@ public static class ContextExtensions
             
             if (result is IKeywordFrame { Effects: { } nestedKeywords })
             {
-                foreach (var keywordInstance in nestedKeywords)
+                foreach (var keywordInstance in nestedKeywords.Reverse())
                 {
-                    queue.Enqueue(keywordInstance);
+                    keywordStack.Push(keywordInstance);
                 }
                 
                 eventStack.Push(new EffectEvent(source, nextKeyword, result));
@@ -56,24 +56,28 @@ public static class ContextExtensions
             
             var nextEvent = new EffectEvent(source, nextKeyword, result);
             
-            while (eventStack.TryPop(out var nestedEvent) && nestedEvent.Result is IKeywordFrame keywordFrame)
-            {
-                if (keywordFrame.Effects.Any(e => e.Id == nextKeyword.Id))
-                {
-                    nestedEvent.Children.Add(nextEvent);
-                    nextEvent.Parent = nestedEvent;
-                    
-                    eventStack.Push(nestedEvent);
-                    break;
-                }
-
-                yield return nestedEvent;
-            }
-            
             if (eventStack.Count == 0)
             {
                 yield return nextEvent;
             }
+            
+            while (eventStack.TryPop(out var nestedEvent) && nestedEvent.Result is IKeywordFrame keywordFrame)
+            {
+                if (keywordFrame.Effects.All(e => e.Id != nextKeyword.Id)) 
+                    throw new InvalidOperationException("Nested keyword not found in keyword frame");
+                
+                nestedEvent.Children.Add(nextEvent);
+                nextEvent.Parent = nestedEvent;
+                    
+                if (keywordFrame.Effects.Count > nestedEvent.Children.Count)
+                {
+                    eventStack.Push(nestedEvent);
+                    break;
+                }
+                    
+                yield return nestedEvent;
+            }
+            
         }
     }
 }

@@ -18,6 +18,7 @@ public class ActionQueueTests
     private IEffectDefinition _compositeDefinition = default!;
     private IEffectDefinition _promptDefinition = default!;
     private ICostDefinition _costDefinition = default!;
+    private ICostDefinition _compositeCostDefinition = default!;
     
     private ActionQueue _sut = null!;
     
@@ -25,6 +26,7 @@ public class ActionQueueTests
     private IKeywordFrame _compositeEffectResult = null!;
     private IPromptDescription _promptResult = null!;
     private IEffectResult _costResult = null!;
+    private IKeywordFrame _compositeCostResult = null!;
 
     [SetUp]
     public void SetUp()
@@ -36,6 +38,7 @@ public class ActionQueueTests
         _compositeEffectResult = Substitute.For<IKeywordFrame>();
         _promptResult = Substitute.For<IPromptDescription>();
         _costResult = Substitute.For<IEffectResult>();
+        _compositeCostResult = Substitute.For<IKeywordFrame>();
         
         _primitiveDefinition = Setup.EffectDefinition("PrimitiveTestKeyword", _primitiveEffectResult);
         _rules.GetDefinition("PrimitiveTestKeyword").Returns(_primitiveDefinition);
@@ -49,7 +52,11 @@ public class ActionQueueTests
         _costDefinition = Setup.CostDefinition("CostTestKeyword", CostType.Resource, _costResult);
         _rules.GetDefinition("CostTestKeyword").Returns(_costDefinition);
         
+        _compositeCostDefinition = Setup.CostDefinition("CompositeCostTestKeyword", CostType.Resource, _compositeCostResult);
+        _rules.GetDefinition("CompositeCostTestKeyword").Returns(_compositeCostDefinition);
+        
         _context.MetaGameState.Rules.Returns(_rules);
+        _context.Events.Returns(new List<IEvent>());
         
         _eventBus = Substitute.For<IEventBus>();
         
@@ -70,7 +77,7 @@ public class ActionQueueTests
         var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
         var resolutionFrame = Setup.ResolutionFrame(_context, primitiveKeywordInstance);
         
-        _sut.Push(resolutionFrame, Setup.NoCost());
+        _ = _sut.Push(resolutionFrame, Setup.NoCost());
         
         var result = _sut.ResolveNextKeyword();
         
@@ -87,7 +94,7 @@ public class ActionQueueTests
         
         var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
         
-        _sut.Push(resolutionFrame, Setup.NoCost());
+        _ = _sut.Push(resolutionFrame, Setup.NoCost());
         
         var result = _sut.ResolveNextKeyword();
         
@@ -107,7 +114,7 @@ public class ActionQueueTests
         
         var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
         
-        _sut.Push(resolutionFrame, Setup.NoCost());
+        _ = _sut.Push(resolutionFrame, Setup.NoCost());
         
         _ = _sut.ResolveNextKeyword();
         _ = _sut.ResolveNextKeyword();
@@ -148,7 +155,7 @@ public class ActionQueueTests
     }
     
     [Test]
-    public void ResolveCosts_WhenPaymentSucceeds_ReturnsSuccess()
+    public void Push_WhenPaymentSucceeds_ReturnsSuccess()
     {
         var payment = new [] { Substitute.For<IAtom>() };
         
@@ -166,11 +173,15 @@ public class ActionQueueTests
     }
     
     [Test]
-    public void ResolveCosts_WhenPaymentSucceeds_PublishesPaymentEventToEventBus()
+    public void Push_WhenPaymentSucceeds_PublishesPaymentEventToEventBus()
     {
         var payment = new [] { Substitute.For<IAtom>() };
+        var nestedKeywordInstance1 = Setup.KeywordInstance("PrimitiveTestKeyword");
+        var nestedKeywordInstance2 = Setup.KeywordInstance("PrimitiveTestKeyword");
+        var compositeKeywordInstance = Setup.KeywordInstance("CompositeCostTestKeyword");
+        _compositeCostResult.Effects.Returns(new [] { nestedKeywordInstance1, nestedKeywordInstance2 });
         
-        var paymentContext = Setup.PaymentContext(_context, CostType.Resource, Setup.KeywordInstance("CostTestKeyword"), payment);
+        var paymentContext = Setup.PaymentContext(_context, CostType.Resource, compositeKeywordInstance, payment);
         _costDefinition.DryRun(default!, default!, default!).ReturnsForAnyArgs(EffectResult.Resolved);
         _costDefinition.Pay(default!, default!, default!).ReturnsForAnyArgs(EffectResult.Resolved);
         
@@ -180,12 +191,18 @@ public class ActionQueueTests
             e.Parent == null 
             && e.Source == _context.Source 
             && e.Children.Count == 1 
-            && e.Children[0] is EffectEvent 
-            && ((EffectEvent) e.Children[0]).KeywordInstance == paymentContext.Costs.Single() 
-            && ((EffectEvent) e.Children[0]).Result == EffectResult.Resolved
+            && e.Children[0] is EffectEvent && ((EffectEvent) e.Children[0]).KeywordInstance == compositeKeywordInstance
+            
+            && e.Children[0].Children.Count == 2
+            
+            && e.Children[0].Children[0] is EffectEvent 
+            && ((EffectEvent) e.Children[0].Children[0]).KeywordInstance == nestedKeywordInstance1 
+            && ((EffectEvent) e.Children[0].Children[0]).Result == _primitiveEffectResult
+            
+            && e.Children[0].Children[1] is EffectEvent 
+            && ((EffectEvent) e.Children[0].Children[1]).KeywordInstance == nestedKeywordInstance2 
+            && ((EffectEvent) e.Children[0].Children[1]).Result == _primitiveEffectResult
         ));
-        
-        
     }
     
     [Test]
@@ -221,7 +238,7 @@ public class ActionQueueTests
         var promptId = Guid.NewGuid();
         _promptResult.PromptId.Returns(promptId);
         
-        _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")), Setup.NoCost());
+        _ = _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")), Setup.NoCost());
         /* IPromptDescription */ _ = _sut.ResolveNextKeyword();
         
         var promptContext = Setup.PromptContext(promptId);

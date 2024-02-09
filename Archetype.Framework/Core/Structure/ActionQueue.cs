@@ -51,26 +51,23 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 
     public IEffectResult? ResolveNextKeyword()
     {
-        if (!TryPopKeywordInstance(out var payload))
+        if (!TryPopKeywordInstance(out var keywordInstance))
         {
             return null;
         }
 
-        if (Resolve(payload) is { } promptDescription)
-        {
-            return promptDescription;
-        }
+        var result = Resolve(keywordInstance);
         
-
         if (_keywordStack.Count == 0)
         {
-            eventBus.Publish(new ActionBlockEvent(_currentFrame.Context));
+            var e = new ActionBlockEvent(_currentFrame.Context);
+            eventBus.Publish(e);
             _currentFrame = null;
         }
         
-        return null;
+        return result;
     }
-    private IPromptDescription? Resolve(IKeywordInstance keywordInstance)
+    private IEffectResult? Resolve(IKeywordInstance keywordInstance)
     {
         var effectDefinition = rules.GetOrThrow<IEffectDefinition>(keywordInstance.Keyword);
 
@@ -81,18 +78,23 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         if (result is IKeywordFrame keywordFrame)
         {
             _keywordFrames.Push((keywordFrame, e));
+            
+            if (keywordFrame.Effects.Count == 0)
+            {
+                throw new InvalidOperationException("Keyword frame has no effects");
+            }
 
-            return null;
+            foreach (var nestedKeyword in keywordFrame.Effects)
+            {
+                _keywordStack.Enqueue(nestedKeyword);
+            }
+
+            return Resolve(_keywordStack.Pop());
         }
         
         PushEvent(keywordInstance, e);
-        
-        if(result is IPromptDescription promptDescription)
-        {
-            return promptDescription;
-        }
-        
-        return null;
+
+        return result;
     }
 
     private bool TryAdvanceResolutionFrame()
@@ -134,21 +136,28 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
         // Figure out which keyword frame the event belongs to
         // Keyword frames that are "done" are naturally popped off the stack here,
         // but the current one is pushed back onto the stack
-        while (_keywordFrames.TryPop(out var item))
+        if (_keywordFrames.TryPop(out var item))
         {
             var (currentKeywordFrame, compositeEvent) = item;
             
-            if (!currentKeywordFrame.Effects.Contains(keywordInstance)) continue;
+            if (!currentKeywordFrame.Effects.Contains(keywordInstance))
+            {
+                throw new InvalidOperationException("Keyword instance not found in keyword frame");
+            }
             
             e.Parent = compositeEvent;
             compositeEvent.Children.Add(e);
-            _keywordFrames.Push(item);
-            break;
+            
+            if (currentKeywordFrame.Effects.Count > compositeEvent.Children.Count)
+            {
+                _keywordFrames.Push(item);
+            } 
+            else if (_keywordFrames.Count == 0)
+            {
+                _currentFrame!.Context.Events.Add(compositeEvent);
+            }
         }
-        
-        // If there are no keyword frames, we've fully resolved a top level keyword,
-        // and that means that e is the root event of that keyword.
-        if (_keywordFrames.Count == 0)
+        else
         {
             _currentFrame!.Context.Events.Add(e);
         }
