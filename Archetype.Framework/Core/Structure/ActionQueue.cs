@@ -68,12 +68,22 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 
     public IEffectResult? ResolveNextKeyword()
     {
+        if (_currentFrame?.Context.PromptResponses.Any(x => x.Value.IsPending) == true)
+        {
+            throw new InvalidOperationException("Prompt pending");
+        }
+        
         if (!TryPopKeywordInstance(out var keywordInstance))
         {
             return null;
         }
 
         var result = Resolve(keywordInstance);
+        
+        if (result is IPromptDescription promptDescription)
+        {
+            _currentFrame!.Context.PromptResponses[promptDescription.PromptId] = PromptResponse.Create(promptDescription);
+        }
         
         if (_keywordStack.Count == 0)
         {

@@ -207,23 +207,29 @@ public class ActionQueueTests
     }
 
     [Test]
-    public void ResolvePrompt_WhenPromptIsAlreadyAnswered_ReturnsFailureResult()
+    public void ResolvePrompt_WhenPromptIsAlreadyAnswered_ThrowsInvalidOperationException()
     {
         var promptId = Guid.NewGuid();
-        var prompt = Substitute.For<PromptResponse>();
-        prompt.IsPending.Returns(false);
+        var promptResponse = Substitute.For<IPromptResponse>();
+        promptResponse.IsPending.Returns(false);
 
-        _context.PromptResponses.Returns(new Dictionary<Guid, PromptResponse>()
+        _context.PromptResponses.Returns(new Dictionary<Guid, IPromptResponse>()
         {
-            { promptId, prompt }
+            { promptId, promptResponse }
         });
+        
+        var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
+        var primitiveKeywordInstance2 = Setup.KeywordInstance("PrimitiveTestKeyword");
+        var resolutionFrame = Setup.ResolutionFrame(_context, primitiveKeywordInstance, primitiveKeywordInstance2);
 
-        var promptContext = Setup.PromptContext(promptId, Substitute.For<IAtom>());
+        _ = _sut.Push(resolutionFrame, Setup.NoCost());
+        _ = _sut.ResolveNextKeyword();
 
-        var result = _sut.ResolvePrompt(promptContext);
+        var promptContext = Setup.PromptContext(promptId);
 
-        result.Should().BeOfType<FailureResult>();
-        result.As<FailureResult>().Message.Should().Be("Prompt already answered");
+        Action act = () => _ = _sut.ResolvePrompt(promptContext);
+
+        act.Should().Throw<InvalidOperationException>().WithMessage("Prompt has already been answered");
     }
 
     [Test]
@@ -239,22 +245,27 @@ public class ActionQueueTests
     }
 
     [Test]
-    public void ResolveNextKeyword_WhenPromptIsPending_ReturnsFailure()
+    public void ResolveNextKeyword_WhenPromptIsPending_ThrowsInvalidOperationException()
     {
-        var compositeKeywordInstance = Setup.KeywordInstance("CompositeTestKeyword");
-        var promptKeywordInstance = Setup.KeywordInstance("PromptTestKeyword");
-        var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
-        _compositeEffectResult.Effects.Returns(new[] { promptKeywordInstance, primitiveKeywordInstance });
+        var promptId = Guid.NewGuid();
+        var promptResponse = Substitute.For<IPromptResponse>();
+        promptResponse.IsPending.Returns(true);
 
-        var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
+        _context.PromptResponses.Returns(new Dictionary<Guid, IPromptResponse>()
+        {
+            { promptId, promptResponse }
+        });
+        
+        var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
+        var primitiveKeywordInstance2 = Setup.KeywordInstance("PrimitiveTestKeyword");
+        var resolutionFrame = Setup.ResolutionFrame(_context, primitiveKeywordInstance, primitiveKeywordInstance2);
 
         _ = _sut.Push(resolutionFrame, Setup.NoCost());
         _ = _sut.ResolveNextKeyword();
 
-        var result = _sut.ResolveNextKeyword();
+        Action act = () => _ = _sut.ResolveNextKeyword();
 
-        result.Should().BeOfType<FailureResult>();
-        result.As<FailureResult>().Message.Should().Be("Prompt pending");
+        act.Should().Throw<InvalidOperationException>().WithMessage("Prompt pending");
     }
 
 
@@ -286,12 +297,21 @@ public class ActionQueueTests
     public void ResolvePrompt_WhenResolutionFrameIsNotNullAndPromptIsNotAnswered_ReturnsSuccess()
     {
         var promptId = Guid.NewGuid();
+        var pickGuid = Guid.NewGuid();
         _promptResult.PromptId.Returns(promptId);
+        _context.PromptResponses.Returns(new Dictionary<Guid, IPromptResponse>());
+        
+        var pick = Substitute.For<IAtom>();
+        pick.Id.Returns(pickGuid);
 
         var compositeKeywordInstance = Setup.KeywordInstance("CompositeTestKeyword");
         var promptKeywordInstance = Setup.KeywordInstance("PromptTestKeyword");
         var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
         _compositeEffectResult.Effects.Returns(new[] { promptKeywordInstance, primitiveKeywordInstance });
+        _promptResult.PromptId.Returns(promptId);
+        _promptResult.MaxPicks.Returns(1);
+        _promptResult.MinPicks.Returns(1);
+        _promptResult.Options.Returns(new[] { pickGuid });
 
         var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
 
@@ -299,9 +319,10 @@ public class ActionQueueTests
         /* IPromptDescription */
         _ = _sut.ResolveNextKeyword();
 
-        var promptContext = Setup.PromptContext(promptId);
+        var promptContext = Setup.PromptContext(promptId, pick);
         var result = _sut.ResolvePrompt(promptContext);
 
         result.Should().Be(EffectResult.Resolved);
+        _context.PromptResponses[promptId].Selection.Should().BeEquivalentTo(promptContext.Selection);
     }
 }

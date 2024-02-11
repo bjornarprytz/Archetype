@@ -14,7 +14,7 @@ public interface IResolutionContext
     public IReadOnlyList<IAtom> Targets { get; }
     public IReadOnlyList<int> ComputedValues { get; }
 
-    public IDictionary<Guid, PromptResponse> PromptResponses { get; }
+    public IDictionary<Guid, IPromptResponse> PromptResponses { get; }
     public IList<IEvent> Events { get; }
 }
 
@@ -27,6 +27,6 @@ public record ResolutionContext(IMetaGameState MetaGameState, IGameState GameSta
     public IReadOnlyList<int> ComputedValues { get; init; } 
         = ArraySegment<int>.Empty;
 
-    public IDictionary<Guid, PromptResponse> PromptResponses { get; } = new Dictionary<Guid, PromptResponse>();
+    public IDictionary<Guid, IPromptResponse> PromptResponses { get; } = new Dictionary<Guid, IPromptResponse>();
     public IList<IEvent> Events { get; } = new List<IEvent>();
 }
