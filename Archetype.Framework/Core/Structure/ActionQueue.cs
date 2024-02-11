@@ -24,7 +24,14 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
 
     public IEffectResult? ResolvePrompt(IPromptContext promptContext)
     {
-        throw new NotImplementedException();
+        if (_currentFrame?.Context is not { } context)
+        {
+            throw new InvalidOperationException("No frame/context to resolve prompt");
+        }
+        
+        context.PromptResponses[promptContext.PromptId] = PromptResponse.Create(promptContext.Selection);
+        
+        return EffectResult.Resolved;
     }
 
     public IEffectResult? Push(IResolutionFrame resolutionFrame, IPaymentContext paymentContext)

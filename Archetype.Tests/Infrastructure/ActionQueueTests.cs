@@ -5,6 +5,7 @@ using Archetype.Framework.State;
 using Archetype.Tests.MockUtilities;
 using FluentAssertions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Archetype.Tests.Infrastructure;
 
@@ -221,9 +222,28 @@ public class ActionQueueTests
     }
     
     [Test]
+    public void ResolvePrompt_OutsideResolutionFrame_ThrowsInvalidOperationException()
+    {
+        var promptId = Guid.NewGuid();
+        
+        var promptContext = Setup.PromptContext(promptId, Substitute.For<IAtom>());
+        
+        Action act = () => _ = _sut.ResolvePrompt(promptContext);
+        
+        act.Should().Throw<InvalidOperationException>().WithMessage("No frame/context to resolve prompt");
+    }
+    
+    [Test]
     public void ResolveNextKeyword_WhenPromptIsPending_ReturnsFailure()
     {
-        _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")), Setup.NoCost());
+        var compositeKeywordInstance = Setup.KeywordInstance("CompositeTestKeyword");
+        var promptKeywordInstance = Setup.KeywordInstance("PromptTestKeyword");
+        var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
+        _compositeEffectResult.Effects.Returns(new [] { promptKeywordInstance, primitiveKeywordInstance });
+        
+        var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
+        
+        _ = _sut.Push(resolutionFrame, Setup.NoCost());
         _ = _sut.ResolveNextKeyword();
         
         var result = _sut.ResolveNextKeyword();
@@ -232,13 +252,46 @@ public class ActionQueueTests
         result.As<FailureResult>().Message.Should().Be("Prompt pending");
     }
     
+    
+    [Test]
+    public void ResolveNextKeyword_WhenMultipleResolutionFrames_TheyAreResolvedInOrder()
+    {
+        var keywordInstance1 = Setup.KeywordInstance("PrimitiveTestKeyword");
+        
+        var keywordResult2 = Substitute.For<IEffectResult>();
+        var primitiveDefinition2 = Setup.EffectDefinition("PrimitiveTestKeyword2", keywordResult2);
+        _rules.GetDefinition("PrimitiveTestKeyword2").Returns(primitiveDefinition2);
+        var keywordInstance2 = Setup.KeywordInstance("PrimitiveTestKeyword2");
+        var context2 = Substitute.For<IResolutionContext>();
+        context2.MetaGameState.Rules.Returns(_rules);
+        
+        var resolutionFrame1 = Setup.ResolutionFrame(_context, keywordInstance1);
+        var resolutionFrame2 = Setup.ResolutionFrame(context2, keywordInstance2);
+        
+        _ = _sut.Push(resolutionFrame1, Setup.NoCost());
+        _ = _sut.Push(resolutionFrame2, Setup.NoCost());
+        
+        _ = _sut.ResolveNextKeyword();
+        _primitiveDefinition.Received().Resolve(_context, keywordInstance1);
+        _ = _sut.ResolveNextKeyword();
+        primitiveDefinition2.Received().Resolve(context2, keywordInstance2);
+    }
+    
     [Test]
     public void ResolvePrompt_WhenResolutionFrameIsNotNullAndPromptIsNotAnswered_ReturnsSuccess()
     {
         var promptId = Guid.NewGuid();
         _promptResult.PromptId.Returns(promptId);
         
-        _ = _sut.Push(Setup.ResolutionFrame(_context, Setup.KeywordInstance("PromptTestKeyword")), Setup.NoCost());
+        
+        var compositeKeywordInstance = Setup.KeywordInstance("CompositeTestKeyword");
+        var promptKeywordInstance = Setup.KeywordInstance("PromptTestKeyword");
+        var primitiveKeywordInstance = Setup.KeywordInstance("PrimitiveTestKeyword");
+        _compositeEffectResult.Effects.Returns(new [] { promptKeywordInstance, primitiveKeywordInstance });
+        
+        var resolutionFrame = Setup.ResolutionFrame(_context, compositeKeywordInstance);
+        
+        _ = _sut.Push(resolutionFrame, Setup.NoCost());
         /* IPromptDescription */ _ = _sut.ResolveNextKeyword();
         
         var promptContext = Setup.PromptContext(promptId);

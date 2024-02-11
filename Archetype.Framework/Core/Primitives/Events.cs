@@ -16,7 +16,7 @@ public interface IActionBlockEvent : IEvent
     public IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments { get; }
     
     public IReadOnlyList<int> ComputedValues { get; }
-    public IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses { get; } 
+    public IDictionary<Guid, PromptResponse> PromptResponses { get; } 
 }
 
 public interface IEffectEvent : IEvent
@@ -41,7 +41,7 @@ public record ActionBlockEvent
     IReadOnlyList<IAtom> Targets, 
     IReadOnlyDictionary<CostType, IReadOnlyList<IAtom>> Payments,
     IReadOnlyList<int> ComputedValues,
-    IDictionary<Guid, IReadOnlyList<IAtom>> PromptResponses
+    IDictionary<Guid, PromptResponse> PromptResponses
 ) : EventBase(Source), IActionBlockEvent
 {
     public ActionBlockEvent(IResolutionContext context) : this(context.Source, context.Targets, context.Payments, context.ComputedValues, context.PromptResponses)

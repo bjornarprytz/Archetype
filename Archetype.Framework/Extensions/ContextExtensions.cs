@@ -4,6 +4,7 @@ namespace Archetype.Framework.Extensions;
 
 public static class ContextExtensions
 {
+    
     public static IEffectResult MakeDryRuns(this IPaymentContext context)
     {
         foreach (var nextKeyword in context.Costs)

@@ -1,5 +1,5 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0cc05a9f_002Dae7f_002D4bdd_002Daeaa_002D8f5c31471483/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ResolveNextKeyword_WhenLastKeywordInstanceResolves_PublishesActionBlockEventToEventBus #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=0cc05a9f_002Dae7f_002D4bdd_002Daeaa_002D8f5c31471483/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ResolveNextKeyword_WhenLastKeywordInstanceResolves_PublishesActionBlockEventToEventBus #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net8.0::Archetype.Tests.Infrastructure.ActionQueueTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
@@ -20,7 +20,7 @@
     &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net8.0::Archetype.Tests.Infrastructure.ActionQueueTests.ResolveNextKeyword_WhenLastKeywordInstanceResolves_PublishesActionBlockEventToEventBus&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bc9609b2_002D733a_002D4643_002Da8cc_002D6f4761da8891/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="ResolveNextKeyword_WhenLastKeywordInstanceResolves_PublishesActionBlockEventToEventBus #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bc9609b2_002D733a_002D4643_002Da8cc_002D6f4761da8891/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ResolveNextKeyword_WhenLastKeywordInstanceResolves_PublishesActionBlockEventToEventBus #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;NUnit3x::E8273765-CA01-4557-B27F-29515DE41C5B::net8.0::Archetype.Tests.Infrastructure.ActionQueueTests&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
