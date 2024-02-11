@@ -29,7 +29,17 @@ public class ActionQueue(IEventBus eventBus, IRules rules) : IActionQueue
             throw new InvalidOperationException("No frame/context to resolve prompt");
         }
         
-        context.PromptResponses[promptContext.PromptId] = PromptResponse.Create(promptContext.Selection);
+        if (!context.PromptResponses.TryGetValue(promptContext.PromptId, out var prompt))
+        {
+            throw new InvalidOperationException("Prompt not found in context");
+        }
+        
+        if (!prompt.IsPending)
+        {
+            throw new InvalidOperationException("Prompt has already been answered");
+        }
+        
+        prompt.Answer(promptContext.Selection);
         
         return EffectResult.Resolved;
     }
