@@ -53,7 +53,7 @@ class CardData:
             'stats': self.stats,
             'characteristics': self.characteristics,
             'tags': self.tags,
-            'effects': [e.to_dict() for e in self.effects], # TODO: fix this
+            'effects': [e.to_dict() for e in self.effects],
             'targets': [t.to_dict() for t in self.targets],
             'variables': self.variables
         }
@@ -81,6 +81,9 @@ class Transpiler:
         if 'creature' in types:
             targets = [TargetSpec([{'type': 'node'}])]
             effects = [Effect('move_to(self,t0)')]
+
+        # TODO: Add necessary targets 
+        # and effects for other types (e.g. move instants and sorceries to the discard pile)
 
         return CardData(
             name=name,
