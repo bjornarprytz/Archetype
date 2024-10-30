@@ -35,3 +35,7 @@
     effects:
       - "drawCard()"
       - "damage(t0, {x})"
+  - name: "Grizzly Bear"
+    cost: "1G"
+    type: "creature"
+    pt: "2/2"

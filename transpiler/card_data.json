@@ -1,0 +1,6 @@
+move_to ['self', 't0']
+damage ['t0', ' 1']
+damage ['t1', ' 2']
+drawCard ['']
+damage ['t0', ' {x}']
+move_to ['self', 't0']
