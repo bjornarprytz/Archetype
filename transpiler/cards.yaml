@@ -1,0 +1,37 @@
+﻿cards:
+  - name: "Goblin Rager"
+    cost:
+      red: 1
+    stats:
+      power: 1
+      toughness: 1
+    characteristics:
+      types:
+        - "creature"
+      subtypes:
+        - "goblin"
+        - "warrior"
+    tags:
+      - "haste"
+  - name: "Arc Trail"
+    cost:
+      red: 1
+      generic: 1
+    characteristics:
+      types:
+        - "sorcery"
+    targets:
+      - type: "any"
+      - type: "any"
+    effects:
+      - "damage(t0, 1)"
+      - "damage(t1, 2)"
+  - name: "Master the Way"
+    cost: "3RRU"
+    type: "sorcery"
+    target: "any"
+    variables:
+      - x: "context.hand.count"
+    effects:
+      - "drawCard()"
+      - "damage(t0, {x})"
