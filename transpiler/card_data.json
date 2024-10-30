@@ -1,6 +1,158 @@
-move_to ['self', 't0']
-damage ['t0', ' 1']
-damage ['t1', ' 2']
-drawCard ['']
-damage ['t0', ' {x}']
-move_to ['self', 't0']
+[
+    {
+        "name": "Goblin Rager",
+        "cost": {
+            "red": 1
+        },
+        "stats": {
+            "power": 1,
+            "toughness": 1
+        },
+        "characteristics": {
+            "types": [
+                "creature"
+            ],
+            "subtypes": [
+                "goblin",
+                "warrior"
+            ]
+        },
+        "tags": [
+            "haste"
+        ],
+        "effects": [
+            {
+                "keyword": "move_to",
+                "args": [
+                    "self",
+                    "t0"
+                ]
+            }
+        ],
+        "targets": [
+            {
+                "types": [
+                    {
+                        "type": "node"
+                    }
+                ]
+            }
+        ],
+        "variables": {}
+    },
+    {
+        "name": "Arc Trail",
+        "cost": {
+            "red": 1,
+            "generic": 1
+        },
+        "stats": {},
+        "characteristics": {
+            "types": [
+                "sorcery"
+            ]
+        },
+        "tags": [],
+        "effects": [
+            {
+                "keyword": "damage",
+                "args": [
+                    "t0",
+                    " 1"
+                ]
+            },
+            {
+                "keyword": "damage",
+                "args": [
+                    "t1",
+                    " 2"
+                ]
+            }
+        ],
+        "targets": [
+            {
+                "types": {
+                    "type": "any"
+                }
+            },
+            {
+                "types": {
+                    "type": "any"
+                }
+            }
+        ],
+        "variables": {}
+    },
+    {
+        "name": "Master the Way",
+        "cost": {
+            "c": 3,
+            "r": 2,
+            "u": 1
+        },
+        "stats": {},
+        "characteristics": {
+            "types": [
+                "sorcery"
+            ]
+        },
+        "tags": [],
+        "effects": [
+            {
+                "keyword": "drawCard",
+                "args": [
+                    ""
+                ]
+            },
+            {
+                "keyword": "damage",
+                "args": [
+                    "t0",
+                    " {x}"
+                ]
+            }
+        ],
+        "targets": [],
+        "variables": [
+            {
+                "x": "context.hand.count"
+            }
+        ]
+    },
+    {
+        "name": "Grizzly Bear",
+        "cost": {
+            "c": 1,
+            "g": 1
+        },
+        "stats": {
+            "power": 2,
+            "toughness": 2
+        },
+        "characteristics": {
+            "types": [
+                "creature"
+            ]
+        },
+        "tags": [],
+        "effects": [
+            {
+                "keyword": "move_to",
+                "args": [
+                    "self",
+                    "t0"
+                ]
+            }
+        ],
+        "targets": [
+            {
+                "types": [
+                    {
+                        "type": "node"
+                    }
+                ]
+            }
+        ],
+        "variables": {}
+    }
+]

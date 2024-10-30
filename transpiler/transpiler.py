@@ -19,8 +19,6 @@ class Effect:
         self.keyword = effect.split('(')[0]
         self.args = effect.split('(')[1].split(')')[0].split(',')
 
-        print(self.keyword, self.args)
-
     def to_dict(self):
         return {
             'keyword': self.keyword,
@@ -55,7 +53,7 @@ class CardData:
             'stats': self.stats,
             'characteristics': self.characteristics,
             'tags': self.tags,
-            'effects': [e.to_dict() for e in self.effects],
+            'effects': [e.to_dict() for e in self.effects], # TODO: fix this
             'targets': [t.to_dict() for t in self.targets],
             'variables': self.variables
         }
@@ -136,7 +134,7 @@ class Transpiler:
         return [] if 'tags' not in source else source['tags']
 
     def transpile_effects(self, source) -> list[Effect]:
-        return [] if 'effects' not in source else [Effect(e) for e in source['effects']],
+        return [] if 'effects' not in source else [Effect(e) for e in source['effects']]
     
     def transpile_targets(self, source) -> list[TargetSpec]:
         return [] if 'targets' not in source else [TargetSpec(target) for target in source['targets']]
