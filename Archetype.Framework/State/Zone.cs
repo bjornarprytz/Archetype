@@ -2,34 +2,30 @@
 
 public interface IZone : IAtom
 {
-    IReadOnlyList<IAtom> Atoms { get; }
-    void Add(IAtom atom);
-    void Remove(IAtom atom);
+    int AtomCount { get; }
+    IAtom[] GetAtoms();
+    
+    bool AddAtom(IAtom atom);
+    bool RemoveAtom(IAtom atom);
 }
 
-public interface IOrderedZone : IZone
+public class Zone : Atom, IZone
 {
-    void Shuffle();
-    IAtom? PeekTop();
-}
-
-public abstract class Zone : Atom, IZone
-{
-    protected readonly List<IAtom> InternalAtoms = new();
-    public IReadOnlyList<IAtom> Atoms => InternalAtoms;
-    public virtual void Add(IAtom atom)
+    private Dictionary<Guid, IAtom> _atoms = new();
+    
+    public int AtomCount => _atoms.Count;
+    public IAtom[] GetAtoms()
     {
-        if (InternalAtoms.Contains(atom))
-            throw new InvalidOperationException("Atom already exists in zone.");
-        
-        InternalAtoms.Add(atom);
+        return _atoms.Values.ToArray();
     }
 
-    public virtual void Remove(IAtom atom)
+    public bool AddAtom(IAtom atom)
     {
-        if (!InternalAtoms.Contains(atom))
-            throw new InvalidOperationException("Atom does not exist in zone.");
-        
-        InternalAtoms.Remove(atom);
+        return _atoms.TryAdd(atom.Id, atom);
+    }
+
+    public bool RemoveAtom(IAtom atom)
+    {
+        return _atoms.Remove(atom.Id);
     }
 }

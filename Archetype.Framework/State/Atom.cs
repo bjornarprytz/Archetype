@@ -1,66 +1,83 @@
-﻿using Archetype.Framework.Core.Primitives;
+﻿namespace Archetype.Framework.State;
 
-namespace Archetype.Framework.State;
-
-public interface IAtom
+public interface IHasStats
 {
-    Guid Id { get; }
     int? GetStat(string statKey);
-    string? GetTag(string tagKey);
-    T GetState<T>(string key);
-    void SetState<T>(string key, T value);
-    void RemoveState(string key);
-    void ClearState();
-    IZone? CurrentZone { get; set; }
+    void SetStat(string statKey, int value);
 }
 
+public interface IHasFacets
+{
+    string[]? GetFacet(string facetKey);
+    void SetFacet(string facetKey, string[] value);
+    void RemoveFacet(string facetKey);
+}
+
+public interface IHasTags
+{
+    string[] GetTags();
+    bool HasTag(string tag);
+    void AddTag(string tag);
+    void RemoveTag(string tag);
+}
+
+public interface IAtom : IHasStats, IHasFacets, IHasTags
+{
+    Guid Id { get; }
+    IZone? Zone { get; set; }
+}
 
 public abstract class Atom : IAtom
 {
-    private readonly Dictionary<string, object> _state = new();
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; init; } = Guid.NewGuid();
+    
+    public IZone? Zone { get; set; }
+    
+    protected Dictionary<string, int> _stats = new();
+    protected Dictionary<string, string[]> _facets = new();
+    protected HashSet<string> _tags = new();
     public int? GetStat(string statKey)
     {
-        // TODO: Take state into account
-        return Stats.TryGetValue(statKey, out var res) ? res : default;
+        return _stats.TryGetValue(statKey, out var value) ? value : null;
     }
 
-    public string? GetTag(string tagKey)
+    public void SetStat(string statKey, int value)
     {
-        // TODO: Take state into account
-        return Tags.TryGetValue(tagKey, out var res) ? res : default;
+        _stats[statKey] = value;
     }
 
-    public T GetState<T>(string key)
+    public string[]? GetFacet(string facetKey)
     {
-        if (!_state.TryGetValue(key, out var value)) return default;
-        
-        if (value is T typedValue)
-            return typedValue;
-            
-        throw new InvalidOperationException($"State key {key} is not of type {typeof(T).Name}");
+        return _facets.TryGetValue(facetKey, out var value) ? value : null;
     }
 
-    public void SetState<T>(string key, T value)
+    public void SetFacet(string facetKey, string[] value)
     {
-        if (value == null)
-            throw new ArgumentNullException(nameof(value));
-        
-        _state[key] = value;
-    }
-    
-    public void RemoveState(string key)
-    {
-        _state.Remove(key);
-    }
-    
-    public void ClearState()
-    {
-        _state.Clear();
+        _facets[facetKey] = value;
     }
 
-    public abstract IReadOnlyDictionary<string, int> Stats { get; }
-    public abstract IReadOnlyDictionary<string, string> Tags { get; }
-    
-    public IZone? CurrentZone { get; set; }
+    public void RemoveFacet(string facetKey)
+    {
+        _facets.Remove(facetKey);
+    }
+
+    public string[] GetTags()
+    {
+        return _tags.ToArray();
+    }
+
+    public bool HasTag(string tag)
+    {
+        return _tags.Contains(tag);
+    }
+
+    public void AddTag(string tag)
+    {
+        _tags.Add(tag);
+    }
+
+    public void RemoveTag(string tag)
+    {
+        _tags.Remove(tag);
+    }
 }
