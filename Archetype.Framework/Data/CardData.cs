@@ -11,7 +11,7 @@ public record CardData
     /// "Power" -> 2
     /// "Health" -> 4 
     /// </summary>
-    public required Dictionary<string, int> Stats { get; init; }
+    public required Dictionary<string, Expression> Stats { get; init; }
     /// <summary>
     /// E.g.
     /// <br/>
@@ -35,7 +35,7 @@ public record CardData
     /// "G" -> 1
     /// "C" -> 5
     /// </summary>
-    public required Dictionary<string, int> Costs { get; init; }
+    public required Dictionary<string, Expression> Costs { get; init; }
     
     public required TargetData[] Targets { get; init; }
     
@@ -56,7 +56,11 @@ public record EffectData
 
 public record TargetData
 {
-    public required Expression ConditionalExpression { get; init; }
+    /// <summary>
+    /// E.g.
+    /// "context.hand.count > 0"
+    /// </summary>
+    public required Expression[] ConditionalExpressions { get; init; }
 }
 
 /// <summary>

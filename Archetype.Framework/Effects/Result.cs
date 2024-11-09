@@ -75,7 +75,7 @@ public static class ResultFactory
     {
         _effectMethods ??= GetEffectMethods();
         
-        if (!_effectMethods!.TryGetValue(methodName, out var method))
+        if (!_effectMethods.TryGetValue(methodName, out var method))
         {
             throw new ArgumentException($"No effect method with name {methodName} found.");
         }

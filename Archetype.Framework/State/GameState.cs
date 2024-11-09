@@ -4,25 +4,17 @@ namespace Archetype.Framework.State;
 
 public interface IGameState
 {
-    IAtom? GetAtom(Guid id);
-    IZone[] GetZones();
+    IEnumerable<IZone> GetZones();
     
     IZone GetDrawPile();
     IZone GetHand();
     IZone GetDiscardPile();
     IZone GetExile();
-    
-    void AddAtom(IAtom atom);
 }
 
 public class GameState : IGameState
 {
-    public IAtom? GetAtom(Guid id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IZone[] GetZones()
+    public IEnumerable<IZone> GetZones()
     {
         throw new NotImplementedException();
     }
@@ -43,11 +35,6 @@ public class GameState : IGameState
     }
 
     public IZone GetExile()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void AddAtom(IAtom atom)
     {
         throw new NotImplementedException();
     }
