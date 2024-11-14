@@ -1,14 +1,14 @@
 ﻿using Archetype.Framework.Core;
 using Archetype.Framework.Events;
+using Archetype.Framework.GameLoop;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Resolution;
 
 public interface IResolutionContext
 {
-    IGameState GetGameState();
-    IEventHistory GetEventHistory();
-    int? GetVariable(string name);
+    IScope GetScope();
+    
     IAtom GetSource();
     
     EffectResolver[] GetEffects();
@@ -16,17 +16,7 @@ public interface IResolutionContext
 
 public class ResolutionContext : IResolutionContext
 {
-    public IGameState GetGameState()
-    {
-        throw new NotImplementedException();
-    }
-
-    public IEventHistory GetEventHistory()
-    {
-        throw new NotImplementedException();
-    }
-
-    public int? GetVariable(string name)
+    public IScope GetScope()
     {
         throw new NotImplementedException();
     }
@@ -35,7 +25,7 @@ public class ResolutionContext : IResolutionContext
     {
         throw new NotImplementedException();
     }
-
+    
     public EffectResolver[] GetEffects()
     {
         throw new NotImplementedException();
