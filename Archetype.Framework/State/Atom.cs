@@ -2,12 +2,14 @@
 
 public interface IHasStats
 {
+    [PathPart("stats")]
     int? GetStat(string statKey);
     void SetStat(string statKey, int value);
 }
 
 public interface IHasFacets
 {
+    [PathPart("facets")]
     string[]? GetFacet(string facetKey);
     void SetFacet(string facetKey, string[] value);
     void RemoveFacet(string facetKey);
@@ -15,6 +17,7 @@ public interface IHasFacets
 
 public interface IHasTags
 {
+    [PathPart("tags")]
     string[] GetTags();
     bool HasTag(string tag);
     void AddTag(string tag);
@@ -24,6 +27,7 @@ public interface IHasTags
 public interface IAtom : IHasStats, IHasFacets, IHasTags
 {
     Guid Id { get; }
+    [PathPart("zone")]
     IZone? Zone { get; set; }
 }
 

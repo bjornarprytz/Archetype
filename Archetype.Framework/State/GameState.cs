@@ -4,11 +4,16 @@ namespace Archetype.Framework.State;
 
 public interface IGameState
 {
+    [PathPart("zones")]
     IEnumerable<IZone> GetZones();
     
+    [PathPart("drawPile")]
     IZone GetDrawPile();
+    [PathPart("hand")]
     IZone GetHand();
+    [PathPart("discardPile")]
     IZone GetDiscardPile();
+    [PathPart("exile")]
     IZone GetExile();
 }
 

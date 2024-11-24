@@ -13,6 +13,7 @@ public interface IScope
     
     IRules Rules { get; }
     IGameState State { get; }
+    [PathPart("vars")]
     int? GetVariable(string name);
     void SetVariable(string name, int value);
 
@@ -24,7 +25,8 @@ public enum ScopeLevel
     Game,
     Turn,
     Phase,
-    Action
+    Action,
+    Prompt
 }
 
 public class Game(IRules _rules) : Scope

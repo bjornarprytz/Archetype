@@ -7,55 +7,76 @@ namespace Archetype.Framework.Core;
 public interface ICardProto
 {
     public string Name { get; }
-    public CostResolver Costs { get; }
-    public TargetDescriptor[] Targets { get; }
+    public Dictionary<string, INumber> Costs { get; }
+    public IEnumerable<TargetProto> Targets { get; }
     
-    public Dictionary<string, StatResolver> Stats { get; }
+    public Dictionary<string, INumber> Stats { get; }
     public Dictionary<string, string[]> Facets { get; }
-    public HashSet<string> Tags { get; }
+    public IEnumerable<string> Tags { get; }
     
-    public EffectResolver[] Effects { get; }
-    public Dictionary<string, VariableResolver> Variables { get; }
+    public IEnumerable<EffectProto> Effects { get; }
+    public Dictionary<string, INumber> Variables { get; }
 }
 
 public record CardProto : ICardProto
 {
     public required string Name { get; init; }
-    
-    public required CostResolver Costs { get; init; }
-    public required TargetDescriptor[] Targets { get; init; }
-    
-    public required Dictionary<string, StatResolver> Stats { get; init; }
+    public required Dictionary<string, INumber> Costs { get; init; }
+    public required IEnumerable<TargetProto> Targets { get; init; }
+    public required Dictionary<string, INumber> Stats { get; init; }
     public required Dictionary<string, string[]> Facets { get; init; }
-    public required HashSet<string> Tags { get; init; }
-    
-    public required EffectResolver[] Effects { get; init; }
-    public required Dictionary<string, VariableResolver> Variables { get; init; }
+    public required IEnumerable<string> Tags { get; init; }
+    public required IEnumerable<EffectProto> Effects { get; init; }
+    public required Dictionary<string, INumber> Variables { get; init; }
 }
 
-public record CostResolver
+public enum Whence
 {
-    public Func<IResolutionContext, bool> ValidateCost { get; init; }
-    
-    public Func<IResolutionContext, IEffectResult> ResolveCost { get; init; }
+    /// <summary>
+    /// 1, "Card", etc.
+    /// </summary>
+    Immediate,
+    /// <summary>
+    /// Stats, Facets, Tags, etc.
+    /// </summary>
+    Atom,
+    /// <summary>
+    /// DrawPile, Hand, Battlefield, Graveyard, etc.
+    /// </summary>
+    State,
+    /// <summary>
+    /// Variables, EventHistory, Targets, etc.
+    /// </summary>
+    Scope,
 }
 
-public record StatResolver
+public record EffectProto
 {
-    public Func<IResolutionContext, int> ResolveStat { get; init; }
+    public required string Keyword { get; init; }
+    public required IEnumerable<INumber> Parameters { get; init; }
 }
 
-public record TargetDescriptor
+public record TargetProto
 {
-    public Func<IResolutionContext, IAtom, bool> ValidateTarget { get; init; }
+    public required IEnumerable<IAtomPredicate> Predicates { get; init; }
 }
 
-public record VariableResolver
-{
-    public Func<IResolutionContext, int> ResolveVariable { get; init; }
-} 
 
-public record EffectResolver
+public enum ComparisonOperator
 {
-    public Func<IResolutionContext, IEffectResult> ResolveEffect { get; init; }
+    Equal,
+    NotEqual,
+    GreaterThan,
+    GreaterThanOrEqual,
+    LessThan,
+    LessThanOrEqual,
+    Contains,
+    NotContains,
 }
+public interface IAtomPredicate
+{
+    IValue AtomValue { get; } // This cannot be an immediate, it must be a reference based in an atom
+    ComparisonOperator Operator { get; }
+    IValue CompareValue { get; }
+}
+

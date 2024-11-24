@@ -11,7 +11,7 @@ public interface IResolutionContext
     
     IAtom GetSource();
     
-    EffectResolver[] GetEffects();
+    EffectProto[] GetEffects();
 }
 
 public class ResolutionContext : IResolutionContext
@@ -26,7 +26,7 @@ public class ResolutionContext : IResolutionContext
         throw new NotImplementedException();
     }
     
-    public EffectResolver[] GetEffects()
+    public EffectProto[] GetEffects()
     {
         throw new NotImplementedException();
     }
