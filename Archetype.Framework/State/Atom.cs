@@ -1,4 +1,8 @@
-﻿namespace Archetype.Framework.State;
+﻿using Archetype.Framework.Core;
+using Archetype.Framework.Parsing;
+using Archetype.Framework.Resolution;
+
+namespace Archetype.Framework.State;
 
 public interface IHasStats
 {
@@ -24,7 +28,7 @@ public interface IHasTags
     void RemoveTag(string tag);
 }
 
-public interface IAtom : IHasStats, IHasFacets, IHasTags
+public interface IAtom : IHasStats, IHasFacets, IHasTags, IValueWhence
 {
     Guid Id { get; }
     [PathPart("zone")]

@@ -1,33 +1,32 @@
-﻿using Archetype.Framework.State;
+﻿using Archetype.Framework.Parsing;
+using Archetype.Framework.Resolution;
+using Archetype.Framework.State;
 
 namespace Archetype.Framework.Core;
 
-public interface INumber : IValue
+public interface IValueWhence
 {
-    int? ImmediateValue { get; }
-    
-    new object? Immediate  => ImmediateValue;
-    new Type ValueType => typeof(int);
+    /* Marker interface for types that can be the source of a value accessor */
 }
 
-public interface IWord : IValue
-{
-    string? ImmediateValue { get; }
-    
-    new object? Immediate  => ImmediateValue;
-    new Type ValueType => typeof(string);
-}
+public interface INumber : IValue<IValueWhence, int>;
+public interface IWord : IValue<IValueWhence, string>;
+public interface IGroup : IValue<IValueWhence, IEnumerable<IAtom>>;
+public interface IValue : IValue<IValueWhence, object?> { }
 
-public interface IAtomGroup : IValue
-{
-    new object? Immediate => null;
-    new Type ValueType => typeof(IEnumerable<IAtom>);
-}
 
-public interface IValue
+public interface IContextValue<out TValue> : IValue<IResolutionContext, TValue> { }
+public interface IContextValue : IContextValue<object?> { }
+
+
+public interface IAtomValue<out TValue> : IValue<IAtom, TValue> { }
+public interface IAtomValue : IAtomValue<object?> { }
+
+public interface IValue<in TWhence, out TValue> where TWhence : IValueWhence
 {
     Whence Whence { get; }
-    object? Immediate { get; }
+    TValue? Immediate { get; }
     string[]? Path { get; }
     Type ValueType { get; }
+    TValue GetValue(TWhence context);
 }

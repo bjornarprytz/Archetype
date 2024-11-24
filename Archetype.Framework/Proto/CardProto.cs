@@ -41,13 +41,9 @@ public enum Whence
     /// </summary>
     Atom,
     /// <summary>
-    /// DrawPile, Hand, Battlefield, Graveyard, etc.
+    /// Scope, State, Targets, etc.
     /// </summary>
-    State,
-    /// <summary>
-    /// Variables, EventHistory, Targets, etc.
-    /// </summary>
-    Scope,
+    Context,
 }
 
 public record EffectProto
@@ -75,8 +71,8 @@ public enum ComparisonOperator
 }
 public interface IAtomPredicate
 {
-    IValue AtomValue { get; } // This cannot be an immediate, it must be a reference based in an atom
+    IAtomValue AtomValue { get; }
     ComparisonOperator Operator { get; }
-    IValue CompareValue { get; }
+    IContextValue CompareValue { get; }
 }
 

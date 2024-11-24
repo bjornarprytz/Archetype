@@ -3,6 +3,8 @@
 public interface IZone : IAtom
 {
     int AtomCount { get; }
+    
+    [PathPart("atoms")]
     IAtom[] GetAtoms();
     
     bool AddAtom(IAtom atom);

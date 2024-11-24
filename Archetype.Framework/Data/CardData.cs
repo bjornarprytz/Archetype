@@ -11,7 +11,7 @@ public record CardData
     /// "Power" -> 2
     /// "Health" -> 4 
     /// </summary>
-    public required Dictionary<string, Expression> Stats { get; init; }
+    public required Dictionary<string, ReadExpression> Stats { get; init; }
     /// <summary>
     /// E.g.
     /// <br/>
@@ -35,7 +35,7 @@ public record CardData
     /// "G" -> 1
     /// "C" -> 5
     /// </summary>
-    public required Dictionary<string, Expression> Costs { get; init; }
+    public required Dictionary<string, ReadExpression> Costs { get; init; }
     
     public required TargetData[] Targets { get; init; }
     
@@ -44,14 +44,14 @@ public record CardData
     /// <br/>
     /// "X" -> "context.hand.count"
     /// </summary>
-    public required Dictionary<string, Expression> Variables { get; init; }
+    public required Dictionary<string, ReadExpression> Variables { get; init; }
     public required EffectData[] Effects { get; init; }
 }
 
 public record EffectData
 {
     public required string Keyword { get; init; }
-    public required Expression[] ArgumentExpressions { get; init; }
+    public required ReadExpression[] ArgumentExpressions { get; init; }
 }
 
 public record TargetData
@@ -60,11 +60,11 @@ public record TargetData
     /// E.g.
     /// "context.hand.count > 0"
     /// </summary>
-    public required Expression[] ConditionalExpressions { get; init; }
+    public required ReadExpression[] ConditionalExpressions { get; init; }
 }
 
 /// <summary>
-/// Expression describes a read-only operation (usually) on the context, other objects.
+/// <see cref="ReadExpression"/> describes a read-only operation (usually) on the context, or other objects.
 /// Should return one of the following types:
 /// <br/>
 /// - null
@@ -75,4 +75,4 @@ public record TargetData
 /// - atom[]
 /// </summary>
 /// <param name="Text"></param>
-public record Expression(string Text);
+public record ReadExpression(string Text);
