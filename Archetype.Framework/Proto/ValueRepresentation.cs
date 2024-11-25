@@ -28,5 +28,5 @@ public interface IValue<in TWhence, out TValue> where TWhence : IValueWhence
     TValue? Immediate { get; }
     string[]? Path { get; }
     Type ValueType { get; }
-    TValue GetValue(TWhence context);
+    TValue? GetValue(TWhence context);
 }

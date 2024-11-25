@@ -1,62 +1,70 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Archetype.Framework.Core;
+using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Parsing;
 
 internal static class ReflectionExtensions
 {
-    public static Func<TWhence, TValue> CreateAccessor<TWhence, TValue>(this string[] path)
-        where TWhence : IValueWhence
+    public static TAttribute GetRequiredAttribute<TAttribute>(this MemberInfo member)
+        where TAttribute : Attribute
+    {
+        var attribute = member.GetCustomAttribute<TAttribute>();
+
+        if (attribute is null)
+            throw new InvalidOperationException($"Missing required attribute: {typeof(TAttribute).Name} on {member.Name}");
+
+        return attribute;
+    }
+    
+   public static Func<TWhence, TValue?> CreateAccessor<TWhence, TValue>(this string[] path)
+    where TWhence : IValueWhence
     {
         var rootType = typeof(TWhence);
         
-        // Use Expression Trees to build a chain of calls to the accessor methods.
-        // Then compile the expression tree into a delegate.
-        
-        var rootExpression = Expression.Parameter(rootType, rootType.Name.ToLower());
-        
-        Expression currentExpression = rootExpression;
-        var currentType = rootType;
+        var parameterExpression = Expression.Parameter(rootType, rootType.Name.ToLower());
 
+        var currentType = rootType;
+        Expression bodyExpression = parameterExpression;
         foreach (var part in path)
         {
             var partDetails = part.Split(':');
-
             var pathPart = partDetails[0];
             var partArgs = partDetails.Length > 1 ? partDetails[1].Split(',') : Array.Empty<string>();
-            
+
             var accessorMethod = currentType.GetPartMethod(pathPart);
 
             var partArgIndex = 0;
+            Expression nextExpression;
+
             if (accessorMethod is not null)
             {
                 var args = new Expression[accessorMethod.GetParameters().Length];
-                
                 foreach (var parameter in accessorMethod.GetParameters())
                 {
                     if (parameter.ParameterType == rootType)
                     {
-                        args[parameter.Position] = rootExpression;
+                        args[parameter.Position] = parameterExpression;
                     }
                     else if (parameter.ParameterType == typeof(int))
                     {
                         if (partArgIndex >= partArgs.Length)
                             throw new InvalidOperationException($"Not enough arguments for {part} of {string.Join('.', path)}");
-                        
-                        if (!int.TryParse(partArgs[partArgIndex], out var arg))
+
+                        if (!int.TryParse(partArgs[partArgIndex], out var number))
                             throw new InvalidOperationException($"Invalid type for {partArgs[partArgIndex]} of {string.Join(':', partDetails)} in {string.Join('.', path)}");
-                        
-                        args[parameter.Position] = Expression.Constant(arg);
+
+                        args[parameter.Position] = Expression.Constant(number);
                         partArgIndex++;
                     }
                     else if (parameter.ParameterType == typeof(string))
                     {
-                        if (partArgIndex >= partArgs.Length)
+                        if (partArgIndex >= partArgs.Length || partArgs[partArgIndex] is not { Length: > 0 } word)
                             throw new InvalidOperationException($"Not enough arguments for {part} of {string.Join('.', path)}");
-                        
-                        args[parameter.Position] = Expression.Constant(partArgs[partArgIndex]);
+
+                        args[parameter.Position] = Expression.Constant(word);
                         partArgIndex++;
                     }
                     else
@@ -64,8 +72,8 @@ internal static class ReflectionExtensions
                         throw new InvalidOperationException($"Invalid argument type for {parameter.ParameterType} of {part} of {string.Join('.', path)}");
                     }
                 }
-                
-                currentExpression = Expression.Call(currentExpression, accessorMethod, args);
+
+                nextExpression = Expression.Call(bodyExpression, accessorMethod, args);
             }
             else if (partArgs.Length != 0)
             {
@@ -73,21 +81,26 @@ internal static class ReflectionExtensions
             }
             else
             {
-                var property = rootType.GetPartProperty(part);
-                
+                var property = currentType.GetPartProperty(pathPart);
                 if (property is null)
                     throw new InvalidOperationException($"Invalid path: {part} of {string.Join('.', path)}");
-                
-                currentExpression = Expression.Property(currentExpression, property);
+
+                nextExpression = Expression.Property(bodyExpression, property);
             }
-            
-            currentType = currentExpression.Type;
+
+            bodyExpression = bodyExpression.AddNullCheck(nextExpression);
+
+            currentType = nextExpression.Type;
         }
-        
-        var lambda = Expression.Lambda<Func<TWhence, TValue>>(currentExpression, rootExpression);
-        
+
+        var lambda = Expression.Lambda<Func<TWhence, TValue>>(
+            bodyExpression.ConvertIfNonNullable(),
+            parameterExpression
+        );  
+
         return lambda.Compile();
     }
+
     
     public static Type GetValueType<TWhence>(this string[] path)
         where TWhence : IValueWhence
@@ -106,8 +119,8 @@ internal static class ReflectionExtensions
         
         return currentType;
     }
-    
-    public static Type? GetPartType(this Type type, string part)
+
+    private static Type? GetPartType(this Type type, string part)
     {
         var partAccessorMethod = type.GetPartMethod(part);
         
@@ -124,15 +137,15 @@ internal static class ReflectionExtensions
         var methods = type.GetMethodsNested(); 
         
         return methods
-            .FirstOrDefault(m => m.GetCustomAttributes()
-                .Any(a => a is PathPartAttribute { Name: { } name } && name == part));
+            .FirstOrDefault(m => m.GetCustomAttribute<PathPartAttribute>() is { } attribute 
+                                 && string.Equals(attribute.Name, part, StringComparison.InvariantCultureIgnoreCase));
     }
     
     private static PropertyInfo? GetPartProperty(this Type type, string part)
     {
         return type.GetPropertiesNested()
-            .FirstOrDefault(p => p.GetCustomAttributes()
-                .Any(a => a is PathPartAttribute { Name: { } name } && name == part));
+            .FirstOrDefault(p => p.GetCustomAttribute<PathPartAttribute>() is { } attribute 
+                                 && string.Equals(attribute.Name, part, StringComparison.InvariantCultureIgnoreCase));
     }
     
     private static IEnumerable<MethodInfo> GetMethodsNested(this Type type)
@@ -151,5 +164,34 @@ internal static class ReflectionExtensions
         var nestedTypes = type.GetNestedTypes().Concat(type.GetInterfaces());
 
         return nestedTypes.Aggregate(properties, (current, nestedType) => current.Concat(nestedType.GetPropertiesNested()).ToArray());
+    }
+    
+    private static ConditionalExpression AddNullCheck(this Expression currentExpression, Expression nextExpression)
+    {
+        return Expression.Condition(
+            Expression.Equal(currentExpression, Expression.Constant(null, currentExpression.Type)),
+            Expression.Default(nextExpression.Type.EnsureNullable()),
+            nextExpression.ConvertIfNonNullable());
+    }
+    
+    private static Expression ConvertIfNonNullable(this Expression expression)
+    {
+        return expression.Type.IsNonNullableValueType()
+            ? Expression.Convert(expression, typeof(Nullable<>).MakeGenericType(expression.Type))
+            : expression;
+    }
+    
+    private static Type EnsureNullable(this Type type)
+    {
+        return type.IsNonNullableValueType() ? typeof(Nullable<>).MakeGenericType(type) : type;
+    }
+    
+    private static bool IsNonNullableValueType(this Type type)
+    {
+        return !type.IsNullable();
+    }
+    private static bool IsNullable(this Type type)
+    {
+        return !type.IsValueType || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
     }
 }

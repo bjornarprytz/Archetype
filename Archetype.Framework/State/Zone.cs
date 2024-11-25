@@ -2,6 +2,7 @@
 
 public interface IZone : IAtom
 {
+    [PathPart("count")]
     int AtomCount { get; }
     
     [PathPart("atoms")]

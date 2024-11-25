@@ -12,11 +12,12 @@ namespace Archetype.Framework.Parsing;
 
 public class ExpressionParser
 {
+    // Keyword -> Method
     private readonly Dictionary<string, MethodInfo> _effectMethods;
 
     public ExpressionParser(IEnumerable<MethodInfo> effectMethods)
     {
-        _effectMethods = effectMethods.ToDictionary(m => m.Name);
+        _effectMethods = effectMethods.ToDictionary(m => m.GetRequiredAttribute<EffectAttribute>().Keyword);
     }
     
     public CardProto ParseCard(CardData cardData)
@@ -56,7 +57,7 @@ public class ExpressionParser
     
     private string[] ParsePathExpression(string expression)
     {
-        return expression.Split('.').Select(t => t.ToLower()).ToArray();
+        return expression.Split('.');
     }
 
     private EffectProto ParseEffect(EffectData effectData)
@@ -84,10 +85,6 @@ public class ExpressionParser
         return new AtomPredicate(atomValue, comparisonOperator, compareValue);
     }
     
-    
-
-    
-    
     private static ComparisonOperator ParseComparisonExpression(string text)
     {
         return text switch
@@ -103,9 +100,5 @@ public class ExpressionParser
             _ => throw new InvalidOperationException($"Unknown comparison operator: {text}")
         };
     }
-    
-    
-
-    
 }
 

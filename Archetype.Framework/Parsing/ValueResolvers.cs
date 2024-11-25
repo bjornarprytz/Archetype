@@ -1,11 +1,8 @@
-﻿using System.Reflection;
-using Archetype.Framework.Core;
+﻿using Archetype.Framework.Core;
 using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Parsing;
-
-
 
 internal record AtomPredicate : IAtomPredicate
 {
@@ -49,14 +46,14 @@ internal record ReferenceWord : ContextValue<string>, IWord
 {
     public ReferenceWord(IEnumerable<string> path) : base(path){}
 
-    string IValue<IValueWhence, string>.GetValue(IValueWhence context) => WrapAccessor(context);
+    string? IValue<IValueWhence, string>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
 internal record ReferenceGroup : ContextValue<IEnumerable<IAtom>>, IGroup
 {
     public ReferenceGroup(IEnumerable<string> path) : base(path){}
     
-    IEnumerable<IAtom> IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context); 
+    IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context); 
 }
 
 internal record ReferenceValue : ContextValue<object?>, IContextValue, IValue
@@ -82,7 +79,7 @@ internal record AtomGroup : AtomValue<IEnumerable<IAtom>>, IGroup
 {
     public AtomGroup(IEnumerable<string> path) : base(path){}
 
-    IEnumerable<IAtom> IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context);
+    IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
 internal record AtomNumber : AtomValue<int>, INumber
@@ -96,7 +93,7 @@ internal record AtomWord : AtomValue<string>, IWord
 {
     public AtomWord(IEnumerable<string> path) : base(path){}
 
-    string IValue<IValueWhence, string>.GetValue(IValueWhence context) => WrapAccessor(context);
+    string? IValue<IValueWhence, string>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
 internal record AtomValue : AtomValue<object?>, IAtomValue, IValue{
@@ -107,7 +104,7 @@ internal record AtomValue : AtomValue<object?>, IAtomValue, IValue{
 
 internal abstract record ContextValue<TValue> : IContextValue<TValue>
 {
-    protected readonly Func<IResolutionContext, TValue> ValueAccessor;
+    private readonly Func<IResolutionContext, TValue?> _valueAccessor;
     protected ContextValue(IEnumerable<string> path)
     {
         Path = path.ToArray();
@@ -117,18 +114,18 @@ internal abstract record ContextValue<TValue> : IContextValue<TValue>
         if (valueType != ValueType)
             throw new InvalidOperationException($"Invalid value type for group: {valueType}");
         
-        ValueAccessor = Path.CreateAccessor<IResolutionContext, TValue>();
+        _valueAccessor = Path.CreateAccessor<IResolutionContext, TValue>();
     }
     
     public TValue? Immediate => default;
     public Type ValueType => typeof(TValue);
-    public TValue GetValue(IResolutionContext context) => ValueAccessor(context);
+    public TValue? GetValue(IResolutionContext context) => _valueAccessor(context);
     
 
     public Whence Whence => Whence.Context;
     public string[] Path { get; }
     
-    protected TValue WrapAccessor(IValueWhence whence)
+    protected TValue? WrapAccessor(IValueWhence whence)
     {
         return whence switch
         {
@@ -158,7 +155,7 @@ internal abstract record ImmediateValue<TValue> : IValue<IValueWhence, TValue>
 
 internal abstract record AtomValue<TValue> : IAtomValue<TValue>
 {
-    private readonly Func<IAtom, TValue> _valueAccessor;
+    private readonly Func<IAtom, TValue?> _valueAccessor;
     protected AtomValue(IEnumerable<string> path)
     {
         Path = path.ToArray();
@@ -173,13 +170,13 @@ internal abstract record AtomValue<TValue> : IAtomValue<TValue>
     
     public TValue? Immediate => default;
     public Type ValueType => typeof(TValue);
-    public TValue GetValue(IAtom context) => _valueAccessor(context);
+    public TValue? GetValue(IAtom context) => _valueAccessor(context);
     
 
     public Whence Whence => Whence.Atom;
     public string[] Path { get; }
     
-    protected TValue WrapAccessor(IValueWhence whence)
+    protected TValue? WrapAccessor(IValueWhence whence)
     {
         return whence switch
         {
