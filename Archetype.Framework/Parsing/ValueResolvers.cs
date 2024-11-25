@@ -36,24 +36,24 @@ internal record AtomPredicate : IAtomPredicate
     public IContextValue CompareValue { get; init; }
 }
 
-internal record ReferenceNumber : ContextValue<int>, INumber
+internal record ReferenceNumber : ContextValue<int?>, INumber
 {
     public ReferenceNumber(IEnumerable<string> path) : base(path) { }
-    int IValue<IValueWhence, int>.GetValue(IValueWhence context) => WrapAccessor(context);
+    int? IValue<IValueWhence, int?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
-internal record ReferenceWord : ContextValue<string>, IWord
+internal record ReferenceWord : ContextValue<string?>, IWord
 {
     public ReferenceWord(IEnumerable<string> path) : base(path){}
 
-    string? IValue<IValueWhence, string>.GetValue(IValueWhence context) => WrapAccessor(context);
+    string? IValue<IValueWhence, string?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
 internal record ReferenceGroup : ContextValue<IEnumerable<IAtom>>, IGroup
 {
     public ReferenceGroup(IEnumerable<string> path) : base(path){}
     
-    IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context); 
+    IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>?>.GetValue(IValueWhence context) => WrapAccessor(context); 
 }
 
 internal record ReferenceValue : ContextValue<object?>, IContextValue, IValue
@@ -69,7 +69,7 @@ internal record ImmediateWord : ImmediateValue<string>, IWord
     public ImmediateWord(string value) : base(value) { }
 }
 
-internal record ImmediateNumber : ImmediateValue<int>, INumber
+internal record ImmediateNumber : ImmediateValue<int?>, INumber
 {
     public ImmediateNumber(int value) : base(value) { }
 }
@@ -82,22 +82,22 @@ internal record AtomGroup : AtomValue<IEnumerable<IAtom>>, IGroup
     IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
-internal record AtomNumber : AtomValue<int>, INumber
+internal record AtomNumber : AtomValue<int?>, INumber
 {
     public AtomNumber(IEnumerable<string> path) : base(path){}
 
-    int IValue<IValueWhence, int>.GetValue(IValueWhence context) => WrapAccessor(context);
+    int? IValue<IValueWhence, int?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
-internal record AtomWord : AtomValue<string>, IWord
+internal record AtomWord : AtomValue<string?>, IWord
 {
     public AtomWord(IEnumerable<string> path) : base(path){}
 
-    string? IValue<IValueWhence, string>.GetValue(IValueWhence context) => WrapAccessor(context);
+    string? IValue<IValueWhence, string?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
 internal record AtomValue : AtomValue<object?>, IAtomValue, IValue{
-    public AtomValue(IEnumerable<string> path) : base(path) { }
+    public AtomValue(IEnumerable<string> path) : base(path){ }
     object? IValue<IValueWhence, object?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
@@ -108,17 +108,16 @@ internal abstract record ContextValue<TValue> : IContextValue<TValue>
     protected ContextValue(IEnumerable<string> path)
     {
         Path = path.ToArray();
+        ValueType = Path.GetValueType<IResolutionContext>();
         
-        var valueType = Path.GetValueType<IResolutionContext>();
-        
-        if (valueType != ValueType)
-            throw new InvalidOperationException($"Invalid value type for group: {valueType}");
+        if (!typeof(TValue).IsAssignableFrom(ValueType))
+            throw new InvalidOperationException($"Invalid value type for group: {ValueType}");
         
         _valueAccessor = Path.CreateAccessor<IResolutionContext, TValue>();
     }
     
     public TValue? Immediate => default;
-    public Type ValueType => typeof(TValue);
+    public Type ValueType { get; }
     public TValue? GetValue(IResolutionContext context) => _valueAccessor(context);
     
 
@@ -159,17 +158,16 @@ internal abstract record AtomValue<TValue> : IAtomValue<TValue>
     protected AtomValue(IEnumerable<string> path)
     {
         Path = path.ToArray();
+        ValueType = Path.GetValueType<IAtom>();
         
-        var valueType = Path.GetValueType<IAtom>();
-        
-        if (valueType != ValueType)
-            throw new InvalidOperationException($"Invalid value type for group: {valueType}");
+        if (!typeof(TValue).IsAssignableFrom(ValueType))
+            throw new InvalidOperationException($"Invalid value type for group: {ValueType}");
         
         _valueAccessor = Path.CreateAccessor<IAtom, TValue>();
     }
     
     public TValue? Immediate => default;
-    public Type ValueType => typeof(TValue);
+    public Type ValueType { get; }
     public TValue? GetValue(IAtom context) => _valueAccessor(context);
     
 

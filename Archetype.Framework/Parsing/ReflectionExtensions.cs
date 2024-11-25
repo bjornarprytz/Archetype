@@ -28,12 +28,8 @@ internal static class ReflectionExtensions
 
         var currentType = rootType;
         Expression bodyExpression = parameterExpression;
-        foreach (var part in path)
+        foreach (var (pathPart, partArgs) in path.Select(part => part.SplitPart()))
         {
-            var partDetails = part.Split(':');
-            var pathPart = partDetails[0];
-            var partArgs = partDetails.Length > 1 ? partDetails[1].Split(',') : Array.Empty<string>();
-
             var accessorMethod = currentType.GetPartMethod(pathPart);
 
             var partArgIndex = 0;
@@ -51,25 +47,25 @@ internal static class ReflectionExtensions
                     else if (parameter.ParameterType == typeof(int))
                     {
                         if (partArgIndex >= partArgs.Length)
-                            throw new InvalidOperationException($"Not enough arguments for {part} of {string.Join('.', path)}");
+                            throw new InvalidOperationException($"Not enough arguments for {pathPart} of {string.Join('.', path)}");
 
                         if (!int.TryParse(partArgs[partArgIndex], out var number))
-                            throw new InvalidOperationException($"Invalid type for {partArgs[partArgIndex]} of {string.Join(':', partDetails)} in {string.Join('.', path)}");
+                            throw new InvalidOperationException($"Invalid type for {partArgs[partArgIndex]} of {string.Join(',', partArgs)} in {string.Join('.', path)}");
 
                         args[parameter.Position] = Expression.Constant(number);
                         partArgIndex++;
                     }
                     else if (parameter.ParameterType == typeof(string))
                     {
-                        if (partArgIndex >= partArgs.Length || partArgs[partArgIndex] is not { Length: > 0 } word)
-                            throw new InvalidOperationException($"Not enough arguments for {part} of {string.Join('.', path)}");
+                        if (partArgs == null || partArgIndex >= partArgs.Length || partArgs[partArgIndex] is not { Length: > 0 } word)
+                            throw new InvalidOperationException($"Not enough arguments for {pathPart} of {string.Join('.', path)}");
 
                         args[parameter.Position] = Expression.Constant(word);
                         partArgIndex++;
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Invalid argument type for {parameter.ParameterType} of {part} of {string.Join('.', path)}");
+                        throw new InvalidOperationException($"Invalid argument type for {parameter.ParameterType} of {pathPart} of {string.Join('.', path)}");
                     }
                 }
 
@@ -77,13 +73,13 @@ internal static class ReflectionExtensions
             }
             else if (partArgs.Length != 0)
             {
-                throw new InvalidOperationException($"Invalid path: {part} of {string.Join('.', path)}");
+                throw new InvalidOperationException($"Invalid path: {pathPart} of {string.Join('.', path)}");
             }
             else
             {
                 var property = currentType.GetPartProperty(pathPart);
                 if (property is null)
-                    throw new InvalidOperationException($"Invalid path: {part} of {string.Join('.', path)}");
+                    throw new InvalidOperationException($"Invalid path: {pathPart} of {string.Join('.', path)}");
 
                 nextExpression = Expression.Property(bodyExpression, property);
             }
@@ -109,15 +105,15 @@ internal static class ReflectionExtensions
 
         var currentType = rootType;
         
-        foreach (var part in path)
+        foreach (var (pathPart, _) in path.Select(part => part.SplitPart()))
         {
-            currentType = currentType.GetPartType(part);
+            currentType = currentType.GetPartType(pathPart);
             
             if (currentType is null)
-                throw new InvalidOperationException($"Invalid path: {part} of {string.Join('.', path)}");
+                throw new InvalidOperationException($"Invalid path: {pathPart} of {string.Join('.', path)}");
         }
         
-        return currentType;
+        return currentType.EnsureNullable();
     }
 
     private static Type? GetPartType(this Type type, string part)

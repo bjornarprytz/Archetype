@@ -1,9 +1,7 @@
 ﻿using System.Reflection;
-using Archetype.Framework.Core;
 using Archetype.Framework.Data;
 using Archetype.Framework.Effects;
 using Archetype.Framework.Parsing;
-using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 using FluentAssertions;
 using Xunit;
@@ -27,6 +25,23 @@ public class ParseTests
         var cardData = BaseCardData with
         {
             Name = "TestCard",
+            Targets = new []
+            {
+                new TargetData()
+                {
+                    ConditionalExpressions = new []
+                    {
+                        new ReadExpression("facets:types has 'card'")
+                    }
+                },
+                new TargetData()
+                {
+                    ConditionalExpressions = new []
+                    {
+                        new ReadExpression("facets:types has 'card'")
+                    }
+                }
+            },
             Effects = new[]
             {
                 new EffectData()
@@ -34,6 +49,7 @@ public class ParseTests
                     Keyword = "Keyword1",
                     ArgumentExpressions = new ReadExpression[]
                     {
+                        new ("targets:0"),
                         new ("1")
                     }
                 },
@@ -42,6 +58,7 @@ public class ParseTests
                     Keyword = "Keyword2",
                     ArgumentExpressions = new ReadExpression[]
                     {
+                        new ("targets:1"),
                         new ("state.hand.count")
                     }
                 }
@@ -51,9 +68,8 @@ public class ParseTests
         var card = _sut.ParseCard(cardData);
         
         card.Name.Should().Be("TestCard");
-        card.Effects.Should().HaveCount(1);
-        card.Effects.First().Keyword.Should().Be("Keyword1");
-        
+        card.Targets.Should().HaveCount(2);
+        card.Effects.Should().HaveCount(2);
     }
     
     

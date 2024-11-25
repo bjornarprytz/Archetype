@@ -52,13 +52,19 @@ public class ExpressionParser
             return new ImmediateNumber(immediateValue);
         }
         
-        return new ReferenceNumber(ParsePathExpression(readExpression.Text));
+        return new ReferenceNumber(readExpression.Text.Split('.'));
     }
     
-    private string[] ParsePathExpression(string expression)
+    private IWord ParseWordExpression(ReadExpression readExpression)
     {
-        return expression.Split('.');
+        if (readExpression.Text.TryParseWord(out var word))
+        {
+            return new ImmediateWord(word!);
+        }
+        
+        return new ReferenceWord(readExpression.Text.Split('.'));
     }
+    
 
     private EffectProto ParseEffect(EffectData effectData)
     {
@@ -71,16 +77,19 @@ public class ExpressionParser
     
     private IAtomPredicate ParsePredicate(ReadExpression readExpression)
     {
-        var parts = readExpression.Text.Split(' ').Select(t => t.Trim()).ToArray();
+        var expressions = readExpression.Text.Split(' ').Select(t => t.Trim()).ToArray();
 
-        if (parts.Length != 3)
+        if (expressions.Length != 3)
             throw new InvalidOperationException($"Invalid predicate: {readExpression.Text}");
 
-        var atomValue = new AtomValue(parts[0].Split('.'));
+        var atomValue = new AtomValue(expressions[0].Split('.'));
         
-        var comparisonOperator = ParseComparisonExpression(parts[1]);
+        var comparisonOperator = ParseComparisonExpression(expressions[1]);
 
-        var compareValue = new ReferenceValue(parts[2].Split('.'));
+        // TODO: Untangle this mess
+        IContextValue compareValue = expressions[2].TryParseWord(out var word) ? new ImmediateWord(word!) :
+            int.TryParse(expressions[2], out var number) ? new ImmediateNumber(number) : 
+            new ReferenceValue(expressions[2].Split('.'));
         
         return new AtomPredicate(atomValue, comparisonOperator, compareValue);
     }

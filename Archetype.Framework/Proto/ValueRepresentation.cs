@@ -9,10 +9,11 @@ public interface IValueWhence
     /* Marker interface for types that can be the source of a value accessor */
 }
 
-public interface INumber : IValue<IValueWhence, int>;
-public interface IWord : IValue<IValueWhence, string>;
-public interface IGroup : IValue<IValueWhence, IEnumerable<IAtom>>;
-public interface IValue : IValue<IValueWhence, object?> { }
+public interface INumber : IValue<IValueWhence, int?>;
+public interface IWord : IValue<IValueWhence, string?>;
+public interface IGroup : IValue<IValueWhence, IEnumerable<IAtom>?>;
+
+public interface IValue : IValue<IValueWhence, object?>;
 
 
 public interface IContextValue<out TValue> : IValue<IResolutionContext, TValue> { }
