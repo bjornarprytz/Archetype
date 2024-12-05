@@ -8,6 +8,58 @@ namespace Archetype.Framework.Parsing;
 
 internal static class ReflectionExtensions
 {
+    public static bool Compare<T>(this ComparisonOperator comparisonOperator, T? left, T? right)
+    {
+        comparisonOperator.ValidateOrThrow<T>();
+        
+        if (left is null || right is null)
+            return false;
+
+        return (left, right) switch
+        {
+            (int l, int r) => CompareInt(l, r),
+            (string l, string r) => CompareString(l, r),
+            (IEnumerable<IAtom>l, IAtom r) => CompareGroup(l, r),
+            _ => throw new InvalidOperationException($"Invalid comparison operator: {comparisonOperator}")
+        };
+
+        bool CompareInt(int l, int r)
+        {
+            return comparisonOperator switch
+            {
+                ComparisonOperator.Equal => l == r,
+                ComparisonOperator.NotEqual => l != r,
+                ComparisonOperator.GreaterThan => l > r,
+                ComparisonOperator.GreaterThanOrEqual => l >= r,
+                ComparisonOperator.LessThan => l < r,
+                ComparisonOperator.LessThanOrEqual => l <= r,
+                _ => throw new InvalidOperationException($"Invalid comparison operator: {comparisonOperator}")
+            };
+        }
+        
+        bool CompareString(string l, string r)
+        {
+            return comparisonOperator switch
+            {
+                ComparisonOperator.Equal => string.Equals(l, r, StringComparison.InvariantCultureIgnoreCase),
+                ComparisonOperator.NotEqual => !string.Equals(l, r, StringComparison.InvariantCultureIgnoreCase),
+                ComparisonOperator.Contains => l.Contains(r, StringComparison.InvariantCultureIgnoreCase),
+                ComparisonOperator.NotContains => !l.Contains(r, StringComparison.InvariantCultureIgnoreCase),
+                _ => throw new InvalidOperationException($"Invalid comparison operator: {comparisonOperator}")
+            };
+        }
+        
+        bool CompareGroup(IEnumerable<IAtom> l, IAtom r)
+        {
+            return comparisonOperator switch
+            {
+                ComparisonOperator.Contains => l.Contains(r),
+                ComparisonOperator.NotContains => !l.Contains(r),
+                _ => throw new InvalidOperationException($"Invalid comparison operator: {comparisonOperator}")
+            };
+        }
+    }
+    
     public static TAttribute GetRequiredAttribute<TAttribute>(this MemberInfo member)
         where TAttribute : Attribute
     {

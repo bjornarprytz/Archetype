@@ -11,8 +11,6 @@ namespace Archetype.Tests;
 
 public class ReflectionExtensionsTests
 {
-    
-    
     [Fact]
     public void CreateAccessor_CreatesAccessorForGroup()
     {

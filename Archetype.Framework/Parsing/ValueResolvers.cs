@@ -4,36 +4,41 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.Parsing;
 
-internal record AtomPredicate : IAtomPredicate
+internal record AtomPredicate<T> : IAtomPredicate<T>
 {
-    public AtomPredicate(IAtomValue atomValue, ComparisonOperator @operator, IContextValue compareValue)
+    private readonly IAtomValue<T> _atomValue;
+    private readonly IValue<IValueWhence, T> _compareValue;
+    
+    public AtomPredicate(IAtomValue<T> atomValue, string compareExpression, IValue<IValueWhence, T> compareValue)
     {
-        AtomValue = atomValue;
-        Operator = @operator;
-        CompareValue = compareValue;
+        // TODO: There's still a little messy when comparing groups. That case might need its own record because atomValue and compareValue are different types. (IEnumerable<IAtom> and IAtom)
         
-        if (atomValue.ValueType != compareValue.ValueType)
-            throw new InvalidOperationException($"Mismatched value types: {atomValue.ValueType} != {compareValue.ValueType}");
-
-        if (atomValue.ValueType == typeof(string) && @operator is not (ComparisonOperator.Equal or ComparisonOperator.NotEqual))
-            throw new InvalidOperationException($"Invalid comparison operator for string: {@operator}");
-
-        if (atomValue.ValueType == typeof(int) &&
-            @operator is ComparisonOperator.Contains or ComparisonOperator.NotContains)
-        {
-            throw new InvalidOperationException($"Invalid comparison operator for int: {@operator}");
-        }
+        Operator =  compareExpression.ParseComparisonOperator();
+        Operator.ValidateOrThrow<T>();
         
-        if (atomValue.ValueType == typeof(IEnumerable<IAtom>) &&
-            @operator is not (ComparisonOperator.Contains or ComparisonOperator.NotContains))
-        {
-            throw new InvalidOperationException($"Invalid comparison operator for IEnumerable<IAtom>: {@operator}");
-        }
+        _atomValue = atomValue;
+        _compareValue = compareValue;
     }
 
     public IAtomValue AtomValue { get; init; }
+
+    IAtomValue<T> IAtomPredicate<T>.AtomValue => _atomValue;
+
     public ComparisonOperator Operator { get; init; }
-    public IContextValue CompareValue { get; init; }
+
+    IValue<IValueWhence, T> IAtomPredicate<T>.CompareValue => _compareValue;
+
+    public bool Evaluate(IResolutionContext context, IAtom atom)
+    {
+        var atomValue = _atomValue.GetValue(atom);
+        var compareValue = _compareValue.GetValue(context);
+
+        return Operator.Compare(atomValue, compareValue);
+    }
+
+    public IValue CompareValue { get; init; }
+    
+    
 }
 
 internal record ReferenceNumber : ContextValue<int?>, INumber

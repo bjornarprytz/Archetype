@@ -82,32 +82,42 @@ public class ExpressionParser
         if (expressions.Length != 3)
             throw new InvalidOperationException($"Invalid predicate: {readExpression.Text}");
 
-        var atomValue = new AtomValue(expressions[0].Split('.'));
+        var atomPath = expressions[0].Split('.');
+        var compareExpression = expressions[1];
+        var compareValueExpression = expressions[2];
         
-        var comparisonOperator = ParseComparisonExpression(expressions[1]);
-
-        // TODO: Untangle this mess
-        IContextValue compareValue = expressions[2].TryParseWord(out var word) ? new ImmediateWord(word!) :
-            int.TryParse(expressions[2], out var number) ? new ImmediateNumber(number) : 
-            new ReferenceValue(expressions[2].Split('.'));
+        var type = atomPath.GetValueType<IAtom>();
         
-        return new AtomPredicate(atomValue, comparisonOperator, compareValue);
+        if (type == typeof(int))
+        {
+            var atomValue = new AtomNumber(atomPath);
+            INumber compareValue = int.TryParse(compareValueExpression, out var immediateValue) ?
+                new ImmediateNumber(immediateValue) :
+                new ReferenceNumber(compareValueExpression.Split('.'));
+            
+            return new AtomPredicate<int?>(atomValue, compareExpression, compareValue);
+        }
+        else if (type == typeof(string))
+        {
+            var atomValue = new AtomWord(atomPath);
+            IWord compareValue = compareValueExpression.TryParseWord(out var word) ?
+                new ImmediateWord(word!) :
+                new ReferenceWord(compareValueExpression.Split('.'));
+            
+            return new AtomPredicate<string?>(atomValue, compareExpression, compareValue);
+        }
+        else if (type == typeof(IEnumerable<IAtom>))
+        {
+            
+            var atomValue = new AtomGroup(atomPath);
+            var compareValue = new ReferenceGroup(compareValueExpression.Split('.'));
+            
+            return new AtomPredicate<IEnumerable<IAtom>?>(atomValue, compareExpression, compareValue);
+        }
+        
+        throw new InvalidOperationException($"Invalid type for predicate: {type}");
     }
     
-    private static ComparisonOperator ParseComparisonExpression(string text)
-    {
-        return text switch
-        {
-            ">" => ComparisonOperator.GreaterThan,
-            ">=" => ComparisonOperator.GreaterThanOrEqual,
-            "<" => ComparisonOperator.LessThan,
-            "<=" => ComparisonOperator.LessThanOrEqual,
-            "=" => ComparisonOperator.Equal,
-            "!=" => ComparisonOperator.NotEqual,
-            "has" => ComparisonOperator.Contains,
-            "!has" => ComparisonOperator.NotContains,
-            _ => throw new InvalidOperationException($"Unknown comparison operator: {text}")
-        };
-    }
+    
 }
 

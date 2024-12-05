@@ -69,10 +69,20 @@ public enum ComparisonOperator
     Contains,
     NotContains,
 }
+public interface IAtomPredicate<out T> : IAtomPredicate
+{
+    new IAtomValue<T> AtomValue { get; }
+    new ComparisonOperator Operator { get; }
+    new IValue<IValueWhence, T> CompareValue { get; }
+    
+}
+
 public interface IAtomPredicate
 {
     IAtomValue AtomValue { get; }
     ComparisonOperator Operator { get; }
-    IContextValue CompareValue { get; }
+    IValue CompareValue { get; }
+    public bool Evaluate(IResolutionContext context, IAtom atom);
+    
 }
 
