@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Archetype.Framework.Core;
@@ -106,13 +107,35 @@ public class ExpressionParser
             
             return new AtomPredicate<string?>(atomValue, compareExpression, compareValue);
         }
-        else if (type == typeof(IEnumerable<IAtom>))
+        else if (type.Implements(typeof(IEnumerable)))
         {
+            var itemType = type.GetElementType();
             
-            var atomValue = new AtomGroup(atomPath);
-            var compareValue = new ReferenceGroup(compareValueExpression.Split('.'));
-            
-            return new AtomPredicate<IEnumerable<IAtom>?>(atomValue, compareExpression, compareValue);
+            if (itemType == typeof(int))
+            {
+                var atomValue = new AtomGroup<int?>(atomPath);
+                INumber compareValue = int.TryParse(compareValueExpression, out var immediateValue) ?
+                    new ImmediateNumber(immediateValue) :
+                    new ReferenceNumber(compareValueExpression.Split('.'));
+                
+                return new AtomGroupPredicate<int?>(atomValue, compareExpression, compareValue);
+            }
+            else if (itemType == typeof(string))
+            {
+                var atomValue = new AtomGroup<string>(atomPath);
+                IWord compareValue = compareValueExpression.TryParseWord(out var word) ?
+                    new ImmediateWord(word!) :
+                    new ReferenceWord(compareValueExpression.Split('.'));
+                
+                return new AtomGroupPredicate<string?>(atomValue, compareExpression, compareValue);
+            }
+            else if (itemType.Implements(typeof(IAtom)))
+            {
+                var atomValue = new AtomGroup<IAtom>(atomPath);
+                var compareValue = new ReferenceAtom(compareValueExpression.Split('.'));
+                
+                return new AtomGroupPredicate<IAtom>(atomValue, compareExpression, compareValue);
+            }
         }
         
         throw new InvalidOperationException($"Invalid type for predicate: {type}");

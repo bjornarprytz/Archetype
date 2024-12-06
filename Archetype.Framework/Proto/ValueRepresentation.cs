@@ -11,7 +11,7 @@ public interface IValueWhence
 
 public interface INumber : IValue<IValueWhence, int?>;
 public interface IWord : IValue<IValueWhence, string?>;
-public interface IGroup : IValue<IValueWhence, IEnumerable<IAtom>?>;
+public interface IGroup<out T>: IValue<IValueWhence, IEnumerable<T>?>;
 
 public interface IValue : IValue<IValueWhence, object?>;
 

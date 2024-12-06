@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using Archetype.Framework.Data;
 using Archetype.Framework.Effects;
 using Archetype.Framework.Parsing;
@@ -18,6 +19,7 @@ public class ParseTests
         
         _sut = new ExpressionParser(methods);
     }
+    
     
     [Fact]
     public void ParseCard()

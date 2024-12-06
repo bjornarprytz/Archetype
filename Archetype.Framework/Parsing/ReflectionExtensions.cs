@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections;
+using System.Linq.Expressions;
 using System.Reflection;
 using Archetype.Framework.Core;
 using Archetype.Framework.Resolution;
@@ -8,18 +9,37 @@ namespace Archetype.Framework.Parsing;
 
 internal static class ReflectionExtensions
 {
-    public static bool Compare<T>(this ComparisonOperator comparisonOperator, T? left, T? right)
+    public static bool Implements(this Type? type, Type other)
     {
-        comparisonOperator.ValidateOrThrow<T>();
+        return type?.IsAssignableTo(other) ?? false;
+    }
+    
+    public static bool IsCollectionOf(this Type? type, Type other)
+    {
+        if (type is null || !type.Implements(typeof(IEnumerable)))
+            return false; 
         
+        if (type.IsGenericType && type.GetGenericArguments().Single() is { } elementType1)
+            return other.Implements(elementType1);
+
+        if (type.GetElementType() is { } elementType2)
+            return other.Implements(elementType2);
+        
+        return false;
+    }
+    
+    public static bool Compare(this ComparisonOperator comparisonOperator, object? left, object? right)
+    {
         if (left is null || right is null)
             return false;
+        
+        comparisonOperator.ValidateOrThrow(left.GetType(), right.GetType());
 
         return (left, right) switch
         {
             (int l, int r) => CompareInt(l, r),
             (string l, string r) => CompareString(l, r),
-            (IEnumerable<IAtom>l, IAtom r) => CompareGroup(l, r),
+            (IEnumerable l, { } r) => CompareGroup(l, r),
             _ => throw new InvalidOperationException($"Invalid comparison operator: {comparisonOperator}")
         };
 
@@ -49,12 +69,12 @@ internal static class ReflectionExtensions
             };
         }
         
-        bool CompareGroup(IEnumerable<IAtom> l, IAtom r)
+        bool CompareGroup(IEnumerable l, object r)
         {
             return comparisonOperator switch
             {
-                ComparisonOperator.Contains => l.Contains(r),
-                ComparisonOperator.NotContains => !l.Contains(r),
+                ComparisonOperator.Contains => l.Cast<object>().Any(x => x.Equals(r)),
+                ComparisonOperator.NotContains => !l.Cast<object>().Any(x => x.Equals(r)),
                 _ => throw new InvalidOperationException($"Invalid comparison operator: {comparisonOperator}")
             };
         }

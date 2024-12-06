@@ -6,39 +6,64 @@ namespace Archetype.Framework.Parsing;
 
 internal record AtomPredicate<T> : IAtomPredicate<T>
 {
-    private readonly IAtomValue<T> _atomValue;
-    private readonly IValue<IValueWhence, T> _compareValue;
-    
     public AtomPredicate(IAtomValue<T> atomValue, string compareExpression, IValue<IValueWhence, T> compareValue)
     {
-        // TODO: There's still a little messy when comparing groups. That case might need its own record because atomValue and compareValue are different types. (IEnumerable<IAtom> and IAtom)
-        
         Operator =  compareExpression.ParseComparisonOperator();
-        Operator.ValidateOrThrow<T>();
+        Operator.ValidateOrThrow(atomValue.ValueType, compareValue.ValueType);
         
-        _atomValue = atomValue;
-        _compareValue = compareValue;
+        AtomValue = atomValue;
+        CompareValue = compareValue;
+        
+        LeftType = atomValue.ValueType;
+        RightType = compareValue.ValueType;
     }
 
-    public IAtomValue AtomValue { get; init; }
+    public IAtomValue<T> AtomValue { get; }
 
-    IAtomValue<T> IAtomPredicate<T>.AtomValue => _atomValue;
-
+    public Type LeftType { get; }
     public ComparisonOperator Operator { get; init; }
+    public Type RightType { get; }
 
-    IValue<IValueWhence, T> IAtomPredicate<T>.CompareValue => _compareValue;
+    public IValue<IValueWhence, T> CompareValue { get; }
 
     public bool Evaluate(IResolutionContext context, IAtom atom)
     {
-        var atomValue = _atomValue.GetValue(atom);
-        var compareValue = _compareValue.GetValue(context);
+        var atomValue = AtomValue.GetValue(atom);
+        var compareValue = CompareValue.GetValue(context);
 
         return Operator.Compare(atomValue, compareValue);
     }
+}
 
-    public IValue CompareValue { get; init; }
-    
-    
+internal record AtomGroupPredicate<T> : IAtomGroupPredicate<T>
+{
+    public AtomGroupPredicate(IAtomValue<IEnumerable<T>> atomValue, string compareExpression, IValue<IValueWhence, T> compareValue)
+    {
+        Operator =  compareExpression.ParseComparisonOperator();
+        Operator.ValidateOrThrow(atomValue.ValueType, compareValue.ValueType);
+        
+        AtomValue = atomValue;
+        CompareValue = compareValue;
+        
+        LeftType = atomValue.ValueType;
+        RightType = compareValue.ValueType;
+    }
+
+
+    public Type LeftType { get; }
+    public ComparisonOperator Operator { get; init; }
+    public Type RightType { get; }
+
+    public IAtomValue<IEnumerable<T>> AtomValue { get; }
+    public IValue<IValueWhence, T> CompareValue { get; }
+
+    public bool Evaluate(IResolutionContext context, IAtom atom)
+    {
+        var atomValue = AtomValue.GetValue(atom);
+        var compareValue = CompareValue.GetValue(context);
+
+        return Operator.Compare(atomValue, compareValue);
+    }
 }
 
 internal record ReferenceNumber : ContextValue<int?>, INumber
@@ -54,11 +79,18 @@ internal record ReferenceWord : ContextValue<string?>, IWord
     string? IValue<IValueWhence, string?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
-internal record ReferenceGroup : ContextValue<IEnumerable<IAtom>>, IGroup
+internal record ReferenceAtom : ContextValue<IAtom?>, IValue<IValueWhence, IAtom>
+{
+    public ReferenceAtom(IEnumerable<string> path) : base(path){}
+
+    IAtom? IValue<IValueWhence, IAtom>.GetValue(IValueWhence context) => WrapAccessor(context);
+}
+
+internal record ReferenceGroup<T> : ContextValue<IEnumerable<T>>, IGroup<T>
 {
     public ReferenceGroup(IEnumerable<string> path) : base(path){}
     
-    IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>?>.GetValue(IValueWhence context) => WrapAccessor(context); 
+    IEnumerable<T>? IValue<IValueWhence, IEnumerable<T>?>.GetValue(IValueWhence context) => WrapAccessor(context); 
 }
 
 internal record ReferenceValue : ContextValue<object?>, IContextValue, IValue
@@ -80,11 +112,11 @@ internal record ImmediateNumber : ImmediateValue<int?>, INumber
 }
 
 
-internal record AtomGroup : AtomValue<IEnumerable<IAtom>>, IGroup
+internal record AtomGroup<T> : AtomValue<IEnumerable<T>>, IGroup<T>
 {
     public AtomGroup(IEnumerable<string> path) : base(path){}
 
-    IEnumerable<IAtom>? IValue<IValueWhence, IEnumerable<IAtom>>.GetValue(IValueWhence context) => WrapAccessor(context);
+    IEnumerable<T>? IValue<IValueWhence, IEnumerable<T>?>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
 internal record AtomNumber : AtomValue<int?>, INumber
@@ -115,8 +147,8 @@ internal abstract record ContextValue<TValue> : IContextValue<TValue>
         Path = path.ToArray();
         ValueType = Path.GetValueType<IResolutionContext>();
         
-        if (!typeof(TValue).IsAssignableFrom(ValueType))
-            throw new InvalidOperationException($"Invalid value type for group: {ValueType}");
+        if (!ValueType.Implements(typeof(TValue)))
+            throw new InvalidOperationException($"Invalid value type: {ValueType}. Expected: {typeof(TValue)}");
         
         _valueAccessor = Path.CreateAccessor<IResolutionContext, TValue>();
     }
@@ -165,8 +197,8 @@ internal abstract record AtomValue<TValue> : IAtomValue<TValue>
         Path = path.ToArray();
         ValueType = Path.GetValueType<IAtom>();
         
-        if (!typeof(TValue).IsAssignableFrom(ValueType))
-            throw new InvalidOperationException($"Invalid value type for group: {ValueType}");
+        if (!ValueType.Implements(typeof(TValue)))
+            throw new InvalidOperationException($"Invalid value type: {ValueType}. Expected: {typeof(TValue)}");
         
         _valueAccessor = Path.CreateAccessor<IAtom, TValue>();
     }

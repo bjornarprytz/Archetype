@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Core;
+﻿using System.Collections;
+using Archetype.Framework.Core;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Parsing;
@@ -40,11 +41,11 @@ public static class ParsingExtensions
         if (text.Length > 2 && text[0] == '\'' && text[^1] == '\'')
         {
             word = text[1..^1];
-            return false;
+            return true;
         }
 
         word = null;
-        return true;
+        return false;
     }
     
     
@@ -64,21 +65,23 @@ public static class ParsingExtensions
         };
     }
     
-    public static void ValidateOrThrow<T>(this ComparisonOperator comparisonOperator)
+    public static void ValidateOrThrow(this ComparisonOperator comparisonOperator, Type leftType, Type rightType)
     {
-        if (typeof(T) == typeof(string) && comparisonOperator is not (ComparisonOperator.Equal or ComparisonOperator.NotEqual))
-            throw new InvalidOperationException($"Invalid comparison operator for string: {comparisonOperator}");
+        if (leftType == rightType)
+        {
+            if (leftType == typeof(string) && comparisonOperator is not (ComparisonOperator.Equal or ComparisonOperator.NotEqual))
+                throw new InvalidOperationException($"Invalid comparison operator for string: {comparisonOperator}");
 
-        if (typeof(T) == typeof(int) &&
-            comparisonOperator is ComparisonOperator.Contains or ComparisonOperator.NotContains)
-        {
-            throw new InvalidOperationException($"Invalid comparison operator for int: {comparisonOperator}");
+            if (leftType == typeof(int) &&
+                comparisonOperator is ComparisonOperator.Contains or ComparisonOperator.NotContains)
+            {
+                throw new InvalidOperationException($"Invalid comparison operator for int: {comparisonOperator}");
+            }
         }
-        
-        if (typeof(T) == typeof(IEnumerable<IAtom>) &&
-            comparisonOperator is not (ComparisonOperator.Contains or ComparisonOperator.NotContains))
+        else if (leftType.IsCollectionOf(rightType)
+                 && comparisonOperator is not (ComparisonOperator.Contains or ComparisonOperator.NotContains))
         {
-            throw new InvalidOperationException($"Invalid comparison operator for IEnumerable<IAtom>: {comparisonOperator}");
+            throw new InvalidOperationException($"Invalid comparison operator for IEnumerable: {comparisonOperator}");
         }
     }
 }

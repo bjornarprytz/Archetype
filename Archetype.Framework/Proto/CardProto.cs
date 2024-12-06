@@ -49,7 +49,7 @@ public enum Whence
 public record EffectProto
 {
     public required string Keyword { get; init; }
-    public required IEnumerable<INumber> Parameters { get; init; }
+    public required IEnumerable<INumber> Parameters { get; init; } // TODO: Parameters can be any type
 }
 
 public record TargetProto
@@ -71,17 +71,21 @@ public enum ComparisonOperator
 }
 public interface IAtomPredicate<out T> : IAtomPredicate
 {
-    new IAtomValue<T> AtomValue { get; }
-    new ComparisonOperator Operator { get; }
-    new IValue<IValueWhence, T> CompareValue { get; }
-    
+    IAtomValue<T> AtomValue { get; }
+    IValue<IValueWhence, T> CompareValue { get; }
+}
+
+public interface IAtomGroupPredicate<out T> : IAtomPredicate
+{
+    IAtomValue<IEnumerable<T>> AtomValue { get; }
+    IValue<IValueWhence, T> CompareValue { get; }
 }
 
 public interface IAtomPredicate
 {
-    IAtomValue AtomValue { get; }
+    Type LeftType { get; }
     ComparisonOperator Operator { get; }
-    IValue CompareValue { get; }
+    Type RightType { get; }
     public bool Evaluate(IResolutionContext context, IAtom atom);
     
 }

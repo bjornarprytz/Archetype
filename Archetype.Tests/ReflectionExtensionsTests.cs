@@ -11,6 +11,18 @@ namespace Archetype.Tests;
 
 public class ReflectionExtensionsTests
 {
+    [Theory]
+    [InlineData(typeof(string[]), typeof(string), true)]
+    [InlineData(typeof(string[]), typeof(int), false)]
+    [InlineData(typeof(IEnumerable<int>), typeof(int), true)]
+    [InlineData(typeof(IEnumerable<IAtom>), typeof(IZone), true)]
+    public void IsCollectionOf(Type collectionType, Type itemType, bool expectedResult)
+    {
+        var result = collectionType.IsCollectionOf(itemType);
+        
+        result.Should().Be(expectedResult);
+    }
+    
     [Fact]
     public void CreateAccessor_CreatesAccessorForGroup()
     {
