@@ -9,27 +9,25 @@ public interface IValueWhence
     /* Marker interface for types that can be the source of a value accessor */
 }
 
-public interface INumber : IValue<IValueWhence, int?>;
-public interface IWord : IValue<IValueWhence, string?>;
-
-
-
-public interface IContextValue<out TValue> : IValue<IResolutionContext, TValue> { }
-public interface IContextValue : IContextValue<object?> { }
-
-
-public interface IAtomValue<out TValue> : IValue<IAtom, TValue> { }
-public interface IAtomValue : IAtomValue<object?> { }
-
-
 public interface IGroup<in TWhence, out T>: IValue<TWhence, IEnumerable<T>?>
     where TWhence : IValueWhence;
-public interface IValue : IValue<IValueWhence, object?>;
-public interface IValue<in TWhence, out TValue> where TWhence : IValueWhence
+public interface IValue<in TWhence, out TValue> : IValue<TValue>
+    where TWhence : IValueWhence
+{
+    TValue? GetValue(TWhence context);
+}
+
+public interface IValue<out TValue> : IValue
+{
+    new TValue? GetValue(IValueWhence context);
+    new TValue? Immediate { get; }
+}
+
+public interface IValue
 {
     Whence Whence { get; }
-    TValue? Immediate { get; }
+    object? Immediate { get; }
     string[]? Path { get; }
     Type ValueType { get; }
-    TValue? GetValue(TWhence context);
+    object? GetValue(IValueWhence context);
 }

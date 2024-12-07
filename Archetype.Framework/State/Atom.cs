@@ -1,13 +1,16 @@
-﻿using Archetype.Framework.Core;
+﻿using System.Collections;
+using Archetype.Framework.Core;
 using Archetype.Framework.Parsing;
 using Archetype.Framework.Resolution;
 
 namespace Archetype.Framework.State;
 
-public interface IHasName
+public interface IHasLabels
 {
-    [PathPart("name")]
-    string GetName();
+    [PathPart("label")]
+    string? GetLabel(string labelKey);
+    void SetLabel(string labelKey, string value);
+    void RemoveLabel(string labelKey);
 }
 
 public interface IHasStats
@@ -20,7 +23,7 @@ public interface IHasStats
 public interface IHasFacets
 {
     [PathPart("facets")]
-    string[]? GetFacet(string facetKey);
+    IEnumerable<string>? GetFacet(string facetKey);
     void SetFacet(string facetKey, string[] value);
     void RemoveFacet(string facetKey);
 }
@@ -34,7 +37,7 @@ public interface IHasTags
     void RemoveTag(string tag);
 }
 
-public interface IAtom : IHasStats, IHasFacets, IHasTags, IValueWhence
+public interface IAtom : IHasStats, IHasFacets, IHasTags, IHasLabels, IValueWhence
 {
     Guid Id { get; }
     [PathPart("zone")]
@@ -49,6 +52,7 @@ public abstract class Atom : IAtom
     
     protected Dictionary<string, int> _stats = new();
     protected Dictionary<string, string[]> _facets = new();
+    protected Dictionary<string, string> _labels = new();
     protected HashSet<string> _tags = new();
     public int? GetStat(string statKey)
     {
@@ -60,7 +64,7 @@ public abstract class Atom : IAtom
         _stats[statKey] = value;
     }
 
-    public string[]? GetFacet(string facetKey)
+    public IEnumerable<string>? GetFacet(string facetKey)
     {
         return _facets.TryGetValue(facetKey, out var value) ? value : null;
     }
@@ -93,5 +97,20 @@ public abstract class Atom : IAtom
     public void RemoveTag(string tag)
     {
         _tags.Remove(tag);
+    }
+
+    public string? GetLabel(string labelKey)
+    {
+        return _labels.TryGetValue(labelKey, out var value) ? value : null;
+    }
+
+    public void SetLabel(string labelKey, string value)
+    { 
+        _labels[labelKey] = value;
+    }
+
+    public void RemoveLabel(string labelKey)
+    {
+        _labels.Remove(labelKey);
     }
 }

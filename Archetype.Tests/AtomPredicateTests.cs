@@ -20,7 +20,7 @@ public class AtomPredicateTests
     {
         _card.GetFacet("types").Returns(Types);
         _card.GetStat("strength").Returns(Strength);
-        _card.GetName().Returns(Name);
+        _card.GetLabel("name").Returns(Name);
     }
     
     [Theory]
@@ -28,10 +28,10 @@ public class AtomPredicateTests
     [InlineData("!has", false)]
     public void CollectionContains(string compareOperator, bool expectedResult)
     {
-        var atomValue = new AtomGroup<string>("facets:types".Split('.'));
+        var atomValue = new Group<ICard, string?>("facets:types".Split('.'));
         var compareValue = new ImmediateWord("card");
 
-        var predicate = new AtomGroupPredicate<string?>(atomValue, compareOperator, compareValue);
+        var predicate = new AtomGroupPredicate<ICard, string?>(atomValue, compareOperator, compareValue);
         
         var result = predicate.Evaluate(_context, _card);
         
@@ -56,12 +56,12 @@ public class AtomPredicateTests
     [InlineData(Strength-1, "<=", false)]
     public void CompareNumbers(int value, string compareOperand, bool expectedResult)
     {
-        var atomValue = new AtomValue<int?>("stats:strength".Split('.'));
+        var atomValue = new Value<ICard, int?>("stats:strength".Split('.'));
         var compareValue = new ImmediateNumber(value);
 
-        var predicate = new AtomPredicate<int?>(atomValue, compareOperand, compareValue);
+        var predicate = new AtomPredicate<ICard, int?>(atomValue, compareOperand, compareValue);
         
-        var result = predicate.Evaluate(_context, _card);
+        var result = predicate.EvaluateTyped(_context, _card);
         
         result.Should().Be(expectedResult);
     }
@@ -73,10 +73,10 @@ public class AtomPredicateTests
     [InlineData("NotTestCard", "!=", true)]
     public void CompareStrings(string value, string compareOperand, bool expectedResult)
     {
-        var atomValue = new AtomWord("name".Split('.')); // TODO: It's apparent that because name is not present in atom, but in card, the test will fail. Will need to fix this.
+        var atomValue = new Value<ICard, string?>("label:name".Split('.'));
         var compareValue = new ImmediateWord(value);
 
-        var predicate = new AtomPredicate<string?>(atomValue, compareOperand, compareValue);
+        var predicate = new AtomPredicate<ICard, string?>(atomValue, compareOperand, compareValue);
         
         var result = predicate.Evaluate(_context, _card);
         

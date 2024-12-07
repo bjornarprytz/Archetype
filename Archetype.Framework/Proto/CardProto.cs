@@ -8,30 +8,30 @@ namespace Archetype.Framework.Core;
 public interface ICardProto
 {
     public string Name { get; }
-    public Dictionary<string, INumber> Costs { get; }
+    public Dictionary<string, IValue<int?>> Costs { get; }
     public IEnumerable<TargetProto> Targets { get; }
     
-    public Dictionary<string, INumber> Stats { get; }
+    public Dictionary<string, IValue<int?>> Stats { get; }
     public Dictionary<string, string[]> Facets { get; }
     public IEnumerable<string> Tags { get; }
     
     public IEnumerable<EffectProto> Effects { get; }
-    public Dictionary<string, INumber> Variables { get; }
+    public Dictionary<string, IValue<int?>> Variables { get; }
 }
 
 public record CardProto : ICardProto
 {
     public required string Name { get; init; }
-    public required Dictionary<string, INumber> Costs { get; init; }
+    public required Dictionary<string, IValue<int?>> Costs { get; init; }
     public required IEnumerable<TargetProto> Targets { get; init; }
-    public required Dictionary<string, INumber> Stats { get; init; }
+    public required Dictionary<string, IValue<int?>> Stats { get; init; }
     public required Dictionary<string, string[]> Facets { get; init; }
     public required IEnumerable<string> Tags { get; init; }
     public required IEnumerable<EffectProto> Effects { get; init; }
-    public required Dictionary<string, INumber> Variables { get; init; }
+    public required Dictionary<string, IValue<int?>> Variables { get; init; }
 }
 
-public enum Whence
+public enum Whence // TODO: Evaluate if this is necessary
 {
     /// <summary>
     /// 1, "Card", etc.
@@ -70,16 +70,24 @@ public enum ComparisonOperator
     Contains,
     NotContains,
 }
-public interface IAtomPredicate<out T> : IAtomPredicate
+public interface IAtomPredicate<in TAtom, out TValue> : IAtomPredicate<TAtom>
+    where TAtom : IAtom
 {
-    IValue<IAtom, T> AtomValue { get; }
-    IValue<IValueWhence, T> CompareValue { get; }
+    IValue<TAtom, TValue> AtomValue { get; }
+    IValue<TValue> CompareValue { get; }
 }
 
-public interface IAtomGroupPredicate<out T> : IAtomPredicate
+public interface IAtomGroupPredicate<in TAtom, out TItem> : IAtomPredicate<TAtom>
+    where TAtom : IAtom
 {
-    IAtomValue<IEnumerable<T>?> AtomValue { get; }
-    IValue<IValueWhence, T> CompareValue { get; }
+    IGroup<TAtom, TItem> AtomValue { get; }
+    IValue<TItem> CompareValue { get; }
+}
+
+public interface IAtomPredicate<in TAtom> : IAtomPredicate
+ where TAtom : IAtom
+{
+    public bool EvaluateTyped(IResolutionContext context, TAtom atom);
 }
 
 public interface IAtomPredicate
@@ -87,7 +95,7 @@ public interface IAtomPredicate
     Type LeftType { get; }
     ComparisonOperator Operator { get; }
     Type RightType { get; }
-    public bool Evaluate(IResolutionContext context, IAtom atom);
     
+    public bool Evaluate(IResolutionContext context, IAtom atom);
 }
 

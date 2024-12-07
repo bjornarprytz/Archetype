@@ -2,7 +2,7 @@
 
 namespace Archetype.Framework.State;
 
-public interface ICard : IAtom, IHasName
+public interface ICard : IAtom
 {
     
     // TODO: Something like ActionBlock to describe costs, targets and effects

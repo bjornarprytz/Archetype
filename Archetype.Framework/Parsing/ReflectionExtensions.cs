@@ -14,18 +14,23 @@ internal static class ReflectionExtensions
         return type?.IsAssignableTo(other) ?? false;
     }
     
+    public static Type GetItemsType(this Type type)
+    {
+        if (type.IsGenericType && type.GetGenericArguments().Single() is { } elementType)
+            return elementType;
+
+        if (type.GetElementType() is { } arrayElementType)
+            return arrayElementType;
+        
+        throw new InvalidOperationException($"Type ({type}) does not contain items.");
+    }
+    
     public static bool IsCollectionOf(this Type? type, Type other)
     {
         if (type is null || !type.Implements(typeof(IEnumerable)))
-            return false; 
+            return false;
         
-        if (type.IsGenericType && type.GetGenericArguments().Single() is { } elementType1)
-            return other.Implements(elementType1);
-
-        if (type.GetElementType() is { } elementType2)
-            return other.Implements(elementType2);
-        
-        return false;
+        return other.Implements(type.GetItemsType());
     }
     
     public static bool Compare(this ComparisonOperator comparisonOperator, object? left, object? right)

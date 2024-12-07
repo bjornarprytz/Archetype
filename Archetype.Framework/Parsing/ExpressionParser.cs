@@ -46,24 +46,24 @@ public class ExpressionParser
         };
     }
 
-    private INumber ParseNumberExpression(ReadExpression readExpression)
+    private IValue<int?> ParseNumberExpression(ReadExpression readExpression)
     {
         if (int.TryParse(readExpression.Text, out var immediateValue))
         {
             return new ImmediateNumber(immediateValue);
         }
         
-        return new ReferenceNumber(readExpression.Text.Split('.'));
+        return new Value<IResolutionContext, int?>(readExpression.Text.Split('.'));
     }
     
-    private IWord ParseWordExpression(ReadExpression readExpression)
+    private IValue<string> ParseWordExpression(ReadExpression readExpression)
     {
         if (readExpression.Text.TryParseWord(out var word))
         {
             return new ImmediateWord(word!);
         }
         
-        return new ReferenceWord(readExpression.Text.Split('.'));
+        return new Value<IResolutionContext, string>(readExpression.Text.Split('.'));
     }
     
     private IValue ParseEffectArgumentExpression(ReadExpression readExpression)
@@ -134,50 +134,50 @@ public class ExpressionParser
         
         if (type == typeof(int))
         {
-            var atomValue = new AtomNumber(atomPath);
-            INumber compareValue = int.TryParse(compareValueExpression, out var immediateValue) ?
+            var atomValue = new Value<IAtom, int?>(atomPath);
+            IValue<int?> compareValue = int.TryParse(compareValueExpression, out var immediateValue) ?
                 new ImmediateNumber(immediateValue) :
-                new ReferenceNumber(compareValueExpression.Split('.'));
+                new Value<IAtom, int?>(compareValueExpression.Split('.'));
             
-            return new AtomPredicate<int?>(atomValue, compareExpression, compareValue);
+            return new AtomPredicate<IAtom, int?>(atomValue, compareExpression, compareValue);
         }
         else if (type == typeof(string))
         {
-            var atomValue = new AtomWord(atomPath);
-            IWord compareValue = compareValueExpression.TryParseWord(out var word) ?
+            var atomValue = new Value<IAtom, string>(atomPath);
+            IValue<string> compareValue = compareValueExpression.TryParseWord(out var word) ?
                 new ImmediateWord(word!) :
-                new ReferenceWord(compareValueExpression.Split('.'));
+                new Value<IResolutionContext, string>(compareValueExpression.Split('.'));
             
-            return new AtomPredicate<string?>(atomValue, compareExpression, compareValue);
+            return new AtomPredicate<IAtom, string?>(atomValue, compareExpression, compareValue);
         }
         else if (type.Implements(typeof(IEnumerable)))
         {
-            var itemType = type.GetElementType();
+            var itemType = type.GetItemsType();
             
             if (itemType == typeof(int))
             {
-                var atomValue = new AtomGroup<int?>(atomPath);
-                INumber compareValue = int.TryParse(compareValueExpression, out var immediateValue) ?
+                var atomValue = new Group<IAtom, int?>(atomPath);
+                IValue<int?> compareValue = int.TryParse(compareValueExpression, out var immediateValue) ?
                     new ImmediateNumber(immediateValue) :
-                    new ReferenceNumber(compareValueExpression.Split('.'));
+                    new Value<IResolutionContext, int?>(compareValueExpression.Split('.'));
                 
-                return new AtomGroupPredicate<int?>(atomValue, compareExpression, compareValue);
+                return new AtomGroupPredicate<IAtom, int?>(atomValue, compareExpression, compareValue);
             }
             else if (itemType == typeof(string))
             {
-                var atomValue = new AtomGroup<string>(atomPath);
-                IWord compareValue = compareValueExpression.TryParseWord(out var word) ?
+                var atomValue = new Group<IAtom, string>(atomPath);
+                IValue<string> compareValue = compareValueExpression.TryParseWord(out var word) ?
                     new ImmediateWord(word!) :
-                    new ReferenceWord(compareValueExpression.Split('.'));
+                    new Value<IAtom, string>(compareValueExpression.Split('.'));
                 
-                return new AtomGroupPredicate<string?>(atomValue, compareExpression, compareValue);
+                return new AtomGroupPredicate<IAtom, string?>(atomValue, compareExpression, compareValue);
             }
             else if (itemType.Implements(typeof(IAtom)))
             {
-                var atomValue = new AtomGroup<IAtom>(atomPath);
-                var compareValue = new ReferenceAtom(compareValueExpression.Split('.'));
+                var atomValue = new Group<IAtom, IAtom>(atomPath);
+                var compareValue = new Value<IResolutionContext, IAtom>(compareValueExpression.Split('.'));
                 
-                return new AtomGroupPredicate<IAtom>(atomValue, compareExpression, compareValue);
+                return new AtomGroupPredicate<IAtom, IAtom>(atomValue, compareExpression, compareValue);
             }
         }
         
