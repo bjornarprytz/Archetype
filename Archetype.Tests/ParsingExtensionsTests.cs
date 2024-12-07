@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Parsing;
+using Archetype.Framework.Resolution;
 using FluentAssertions;
 using Xunit;
 

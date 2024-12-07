@@ -66,13 +66,56 @@ public class ExpressionParser
         return new ReferenceWord(readExpression.Text.Split('.'));
     }
     
+    private IValue ParseEffectArgumentExpression(ReadExpression readExpression)
+    {
+        var expression = readExpression.Text;
+        
+        if (int.TryParse(expression, out var immediateValue))
+        {
+            return new ImmediateNumber(immediateValue);
+        }
+        else if (expression.TryParseWord(out var word))
+        {
+            return new ImmediateWord(word!);
+        }
 
+        return expression.Split('.').CreateValueResolver<IResolutionContext>();
+    }
+    
     private EffectProto ParseEffect(EffectData effectData)
     {
+        if (!_effectMethods.TryGetValue(effectData.Keyword, out var method))
+            throw new InvalidOperationException($"Effect method not found: {effectData.Keyword}");
+
+        var effectParameters = new List<IValue>();
+        var nNonContextParameters = 0;
+        
+        foreach (var parameter in method.GetParameters())
+        {
+            var parameterType = parameter.ParameterType; 
+            
+            if (parameterType.Implements(typeof(IResolutionContext))) // The context gets injected automatically, if needed
+            {
+                continue;
+            }
+            
+            if (nNonContextParameters >= effectData.ArgumentExpressions.Length)
+                throw new InvalidOperationException($"Not enough arguments for effect: {effectData.Keyword}: {nNonContextParameters} / {effectData.ArgumentExpressions.Length}");
+            
+            var argumentExpression = effectData.ArgumentExpressions[nNonContextParameters];
+            
+            effectParameters.Add(ParseEffectArgumentExpression(argumentExpression));
+            
+            nNonContextParameters++;
+        }
+        
+        if (nNonContextParameters != effectData.ArgumentExpressions.Length)
+            throw new InvalidOperationException($"Too many arguments for effect: {effectData.Keyword}: {nNonContextParameters} / {effectData.ArgumentExpressions.Length}");
+        
         return new EffectProto()
         {
             Keyword = effectData.Keyword,
-            Parameters = effectData.ArgumentExpressions.Select(ParseNumberExpression).ToArray(),
+            Parameters = effectParameters,
         };
     }
     

@@ -11,9 +11,7 @@ public interface IValueWhence
 
 public interface INumber : IValue<IValueWhence, int?>;
 public interface IWord : IValue<IValueWhence, string?>;
-public interface IGroup<out T>: IValue<IValueWhence, IEnumerable<T>?>;
 
-public interface IValue : IValue<IValueWhence, object?>;
 
 
 public interface IContextValue<out TValue> : IValue<IResolutionContext, TValue> { }
@@ -23,6 +21,10 @@ public interface IContextValue : IContextValue<object?> { }
 public interface IAtomValue<out TValue> : IValue<IAtom, TValue> { }
 public interface IAtomValue : IAtomValue<object?> { }
 
+
+public interface IGroup<in TWhence, out T>: IValue<TWhence, IEnumerable<T>?>
+    where TWhence : IValueWhence;
+public interface IValue : IValue<IValueWhence, object?>;
 public interface IValue<in TWhence, out TValue> where TWhence : IValueWhence
 {
     Whence Whence { get; }

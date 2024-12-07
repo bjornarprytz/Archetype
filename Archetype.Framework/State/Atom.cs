@@ -4,6 +4,12 @@ using Archetype.Framework.Resolution;
 
 namespace Archetype.Framework.State;
 
+public interface IHasName
+{
+    [PathPart("name")]
+    string GetName();
+}
+
 public interface IHasStats
 {
     [PathPart("stats")]

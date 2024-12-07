@@ -6,10 +6,46 @@ namespace Archetype.Framework.Parsing;
 
 public static class ParsingExtensions
 {
+    public static IValue CreateValueResolver<TWhence>(this string[] path)
+        where TWhence : IValueWhence
+    {
+        var valueType = path.GetValueType<TWhence>();
+        
+        if (valueType == typeof(int) || valueType == typeof(int?))
+        {
+            return new Value<TWhence, int?>(path);
+        }
+        else if (valueType == typeof(string))
+        {
+            return new Value<TWhence, string?>(path);
+        }
+        else if (valueType.Implements(typeof(IAtom)))
+        {
+            return new Value<TWhence, IAtom>(path);
+        }
+        else if (valueType.Implements(typeof(IEnumerable)))
+        {
+            var itemType = valueType.GetElementType();
+            
+            if (itemType == typeof(int))
+            {
+                return new Value<TWhence, IEnumerable<int>?>(path);
+            }
+            else if (itemType == typeof(string))
+            {
+                return new Value<TWhence, IEnumerable<string>?>(path);
+            }
+            else if (itemType.Implements(typeof(IAtom)))
+            {
+                return new Value<TWhence, IEnumerable<IAtom>?>(path);
+            }
+        }
+        
+        throw new InvalidOperationException($"Invalid type for value: {valueType}");
+    }
+    
     /// <summary>
     /// Splits a path part into the part identifier and its arguments, separated by a colon (:).
-    ///
-    /// 
     /// </summary>
     /// <example>
     /// "part:arg1,arg2" -> ("part", ["arg1", "arg2"])

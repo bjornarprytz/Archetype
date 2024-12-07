@@ -2,9 +2,8 @@
 
 namespace Archetype.Framework.State;
 
-public interface ICard : IAtom
+public interface ICard : IAtom, IHasName
 {
-    public string GetName();
     
     // TODO: Something like ActionBlock to describe costs, targets and effects
 }

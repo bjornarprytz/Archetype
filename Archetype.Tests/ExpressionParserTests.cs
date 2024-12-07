@@ -74,10 +74,9 @@ public class ParseTests
         card.Effects.Should().HaveCount(2);
     }
     
-    
     private static CardData BaseCardData => new()
     {
-        Name = "NoName",
+        Name = "Default",
         Costs = new Dictionary<string, ReadExpression>(),
         Targets = Array.Empty<TargetData>(),
         Stats = new Dictionary<string, ReadExpression>(),

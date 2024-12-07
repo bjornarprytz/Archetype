@@ -6,7 +6,7 @@ namespace Archetype.Framework.Parsing;
 
 internal record AtomPredicate<T> : IAtomPredicate<T>
 {
-    public AtomPredicate(IAtomValue<T> atomValue, string compareExpression, IValue<IValueWhence, T> compareValue)
+    public AtomPredicate(IValue<IAtom, T> atomValue, string compareExpression, IValue<IValueWhence, T> compareValue)
     {
         Operator =  compareExpression.ParseComparisonOperator();
         Operator.ValidateOrThrow(atomValue.ValueType, compareValue.ValueType);
@@ -18,7 +18,7 @@ internal record AtomPredicate<T> : IAtomPredicate<T>
         RightType = compareValue.ValueType;
     }
 
-    public IAtomValue<T> AtomValue { get; }
+    public IValue<IAtom, T> AtomValue { get; }
 
     public Type LeftType { get; }
     public ComparisonOperator Operator { get; init; }
@@ -66,6 +66,50 @@ internal record AtomGroupPredicate<T> : IAtomGroupPredicate<T>
     }
 }
 
+internal record Value<TWhence, TValue> : IValue
+    where TWhence : IValueWhence
+{
+    private readonly Func<TWhence, TValue?> _valueAccessor;
+    public Value(string[] path)
+    {
+        Path = path;
+
+        if (!ValueType.Implements(path.GetValueType<TWhence>()))
+        {
+            throw new InvalidOperationException($"Invalid value type: {path.GetValueType<TWhence>()}. Expected: {typeof(TValue)}");
+        }
+        
+        _valueAccessor = path.CreateAccessor<TWhence, TValue>();
+        
+        if (typeof(TWhence) == typeof(IResolutionContext))
+            Whence = Whence.Context;
+        else if (typeof(TWhence) == typeof(IAtom))
+            Whence = Whence.Atom;
+        else
+            throw new InvalidOperationException($"Invalid whence type: {typeof(TWhence)}");
+    }
+
+    public Whence Whence { get; }
+    object? IValue<IValueWhence, object?>.Immediate => Immediate;
+
+    public TValue Immediate => throw new InvalidOperationException("Immediate value not available for context values");
+    public string[] Path { get; }
+    public Type ValueType => typeof(TValue);
+    public object? GetValue(IValueWhence context) => WrapAccessor(context);
+
+    public TValue? GetValue(TWhence context) => _valueAccessor(context);
+    
+    private TValue? WrapAccessor(IValueWhence whence)
+    {
+        return whence switch
+        {
+            TWhence typedWhence => GetValue(typedWhence),
+            _ => throw new InvalidOperationException(
+                $"Invalid context type: {whence.GetType()}. Expected: {typeof(TWhence)}")
+        };
+    }
+}
+
 internal record ReferenceNumber : ContextValue<int?>, INumber
 {
     public ReferenceNumber(IEnumerable<string> path) : base(path) { }
@@ -86,7 +130,7 @@ internal record ReferenceAtom : ContextValue<IAtom?>, IValue<IValueWhence, IAtom
     IAtom? IValue<IValueWhence, IAtom>.GetValue(IValueWhence context) => WrapAccessor(context);
 }
 
-internal record ReferenceGroup<T> : ContextValue<IEnumerable<T>>, IGroup<T>
+internal record ReferenceGroup<T> : ContextValue<IEnumerable<T>>, IGroup<IValueWhence, T>
 {
     public ReferenceGroup(IEnumerable<string> path) : base(path){}
     
@@ -112,11 +156,11 @@ internal record ImmediateNumber : ImmediateValue<int?>, INumber
 }
 
 
-internal record AtomGroup<T> : AtomValue<IEnumerable<T>>, IGroup<T>
+internal record AtomGroup<T> : AtomValue<IEnumerable<T>>, IGroup<IAtom, T>
 {
     public AtomGroup(IEnumerable<string> path) : base(path){}
 
-    IEnumerable<T>? IValue<IValueWhence, IEnumerable<T>?>.GetValue(IValueWhence context) => WrapAccessor(context);
+    IEnumerable<T>? IValue<IAtom, IEnumerable<T>?>.GetValue(IAtom context) => WrapAccessor(context);
 }
 
 internal record AtomNumber : AtomValue<int?>, INumber
@@ -139,7 +183,7 @@ internal record AtomValue : AtomValue<object?>, IAtomValue, IValue{
 }
 
 
-internal abstract record ContextValue<TValue> : IContextValue<TValue>
+internal record ContextValue<TValue> : IContextValue<TValue>
 {
     private readonly Func<IResolutionContext, TValue?> _valueAccessor;
     protected ContextValue(IEnumerable<string> path)
@@ -172,7 +216,7 @@ internal abstract record ContextValue<TValue> : IContextValue<TValue>
     }
 }
 
-internal abstract record ImmediateValue<TValue> : IValue<IValueWhence, TValue>
+internal abstract record ImmediateValue<TValue> : IValue
 {
     protected ImmediateValue(TValue value)
     {
@@ -183,16 +227,23 @@ internal abstract record ImmediateValue<TValue> : IValue<IValueWhence, TValue>
     }
 
     public Whence Whence => Whence.Immediate;
+    object? IValue<IValueWhence, object?>.Immediate => Immediate;
+
     public TValue? Immediate { get; }
     public Type ValueType => typeof(TValue);
+    object? IValue<IValueWhence, object?>.GetValue(IValueWhence context)
+    {
+        return GetValue(context);
+    }
+
     public TValue GetValue(IValueWhence context) => Immediate!;
     public string[]? Path => null;
 }
 
-internal abstract record AtomValue<TValue> : IAtomValue<TValue>
+internal record AtomValue<TValue> : IAtomValue<TValue>
 {
     private readonly Func<IAtom, TValue?> _valueAccessor;
-    protected AtomValue(IEnumerable<string> path)
+    public AtomValue(IEnumerable<string> path)
     {
         Path = path.ToArray();
         ValueType = Path.GetValueType<IAtom>();

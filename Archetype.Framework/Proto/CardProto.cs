@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Effects;
+using Archetype.Framework.Parsing;
 using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
@@ -49,7 +50,7 @@ public enum Whence
 public record EffectProto
 {
     public required string Keyword { get; init; }
-    public required IEnumerable<INumber> Parameters { get; init; } // TODO: Parameters can be any type
+    public required IEnumerable<IValue> Parameters { get; init; }
 }
 
 public record TargetProto
@@ -71,13 +72,13 @@ public enum ComparisonOperator
 }
 public interface IAtomPredicate<out T> : IAtomPredicate
 {
-    IAtomValue<T> AtomValue { get; }
+    IValue<IAtom, T> AtomValue { get; }
     IValue<IValueWhence, T> CompareValue { get; }
 }
 
 public interface IAtomGroupPredicate<out T> : IAtomPredicate
 {
-    IAtomValue<IEnumerable<T>> AtomValue { get; }
+    IAtomValue<IEnumerable<T>?> AtomValue { get; }
     IValue<IValueWhence, T> CompareValue { get; }
 }
 

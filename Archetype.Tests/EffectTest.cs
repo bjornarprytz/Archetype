@@ -1,15 +1,14 @@
-﻿using Archetype.Framework.Effects;
-using Archetype.Framework.Effects.Atomic;
+﻿using Archetype.Framework.Effects.Atomic;
 using Archetype.Framework.State;
 using FluentAssertions;
 using NSubstitute;
-using NUnit.Framework;
+using Xunit;
 
 namespace Archetype.Tests;
 
 public class TestTest
 {
-    [Test]
+    [Fact]
     public void Test()
     {
         var atom = Substitute.For<IAtom>();
