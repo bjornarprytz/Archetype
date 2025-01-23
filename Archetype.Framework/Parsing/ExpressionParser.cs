@@ -100,7 +100,7 @@ public class ExpressionParser
             }
             
             if (nNonContextParameters >= effectData.ArgumentExpressions.Length)
-                throw new InvalidOperationException($"Not enough arguments for effect: {effectData.Keyword}: {nNonContextParameters} / {effectData.ArgumentExpressions.Length}");
+                throw new InvalidOperationException($"Not enough arguments for effect: {effectData.Keyword}: {effectData.ArgumentExpressions.Length} / {nNonContextParameters+1}");
             
             var argumentExpression = effectData.ArgumentExpressions[nNonContextParameters];
             
@@ -110,7 +110,7 @@ public class ExpressionParser
         }
         
         if (nNonContextParameters != effectData.ArgumentExpressions.Length)
-            throw new InvalidOperationException($"Too many arguments for effect: {effectData.Keyword}: {nNonContextParameters} / {effectData.ArgumentExpressions.Length}");
+            throw new InvalidOperationException($"Too many arguments for effect: {effectData.Keyword}: {effectData.ArgumentExpressions.Length} / {nNonContextParameters}");
         
         return new EffectProto()
         {

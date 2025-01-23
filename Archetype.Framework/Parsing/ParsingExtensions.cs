@@ -105,8 +105,11 @@ public static class ParsingExtensions
     {
         if (leftType == rightType)
         {
-            if (leftType == typeof(string) && comparisonOperator is not (ComparisonOperator.Equal or ComparisonOperator.NotEqual))
+            if (leftType == typeof(string) &&
+                comparisonOperator is not (ComparisonOperator.Equal or ComparisonOperator.NotEqual))
+            {
                 throw new InvalidOperationException($"Invalid comparison operator for string: {comparisonOperator}");
+            }
 
             if (leftType == typeof(int) &&
                 comparisonOperator is ComparisonOperator.Contains or ComparisonOperator.NotContains)
@@ -114,10 +117,16 @@ public static class ParsingExtensions
                 throw new InvalidOperationException($"Invalid comparison operator for int: {comparisonOperator}");
             }
         }
-        else if (leftType.IsCollectionOf(rightType)
-                 && comparisonOperator is not (ComparisonOperator.Contains or ComparisonOperator.NotContains))
+        else if (leftType.IsCollectionOf(rightType))
         {
-            throw new InvalidOperationException($"Invalid comparison operator for IEnumerable: {comparisonOperator}");
+            if (comparisonOperator is not (ComparisonOperator.Contains or ComparisonOperator.NotContains))
+            {
+                throw new InvalidOperationException($"Invalid comparison operator for IEnumerable: {comparisonOperator}");
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException($"Incompatible types for comparison: {leftType}, {rightType}");
         }
     }
 }

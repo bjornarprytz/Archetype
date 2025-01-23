@@ -31,10 +31,13 @@ public record CardProto : ICardProto
     public required Dictionary<string, IValue<int?>> Variables { get; init; }
 }
 
+/// <summary>
+/// Represents where the getter is rooted. (card) => card.Name, (stats) => stats.Health, etc.
+/// </summary>
 public enum Whence // TODO: Evaluate if this is necessary
 {
     /// <summary>
-    /// 1, "Card", etc.
+    /// 1, "SomeString", etc.
     /// </summary>
     Immediate,
     /// <summary>

@@ -10,7 +10,7 @@ public interface ICard : IAtom
 
 public class Card : Atom, ICard
 {
-    private CardProto _proto;
+    private readonly CardProto _proto;
     
     public Card(CardProto proto)
     {

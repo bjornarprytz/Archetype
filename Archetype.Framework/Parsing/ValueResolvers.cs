@@ -115,7 +115,7 @@ internal record Value<TWhence, TValue> : IValue<TWhence, TValue>
 
     object? IValue.Immediate => Immediate;
 
-    public TValue Immediate => throw new InvalidOperationException("Immediate value not available for context values");
+    public TValue Immediate => default!;
     public string[] Path { get; }
     public Type ValueType => typeof(TValue);
     TValue? IValue<TValue>.GetValue(IValueWhence context) => WrapAccessor(context);

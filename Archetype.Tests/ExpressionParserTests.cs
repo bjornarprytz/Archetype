@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Reflection;
+using Archetype.Framework.Core;
 using Archetype.Framework.Data;
 using Archetype.Framework.Effects;
 using Archetype.Framework.Parsing;
+using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 using FluentAssertions;
 using Xunit;
@@ -70,8 +72,46 @@ public class ParseTests
         var card = _sut.ParseCard(cardData);
         
         card.Name.Should().Be("TestCard");
-        card.Targets.Should().HaveCount(2);
-        card.Effects.Should().HaveCount(2);
+        card.Targets.Should().BeEquivalentTo(new[]
+        {
+            new TargetProto()
+            {
+                Predicates = new []
+                {
+                    new AtomGroupPredicate<IAtom, string?>(new Group<IAtom, string?>(new [] {"facets:types"}), "has", new ImmediateWord("card"))
+                }
+            },
+            new TargetProto()
+            {
+                Predicates = new []
+                {
+                    new AtomGroupPredicate<IAtom, string?>(new Group<IAtom, string?>(new [] {"facets:types"}), "has", new ImmediateWord("card"))
+                }
+            }
+        });
+        card.Effects.Should().BeEquivalentTo(
+            new []
+            {
+                new EffectProto()
+                {
+                    Keyword = "Keyword1",
+                    Parameters = new IValue[]
+                    {
+                        new Value<IResolutionContext, IAtom>(new [] {"targets:0"}),
+                        new ImmediateNumber(1)
+                    }
+                },
+                new EffectProto()
+                {
+                    Keyword = "Keyword2",
+                    Parameters = new IValue[]
+                    {
+                        new Value<IResolutionContext, IAtom>(new [] {"targets:1"}),
+                        new Value<IResolutionContext, int?>(new [] {"state", "hand", "count"})
+                    }
+                }
+            }
+            );
     }
     
     private static CardData BaseCardData => new()

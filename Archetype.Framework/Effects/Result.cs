@@ -54,6 +54,7 @@ file static class ResultExtensions
 
 public static class ResultFactory
 {
+    // MethodName -> MethodInfo
     private static Dictionary<string, MethodInfo>? _effectMethods = null;
     
     public static IEffectResult Atomic(object? result, [CallerMemberName]string methodName=default)

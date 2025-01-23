@@ -1,9 +1,9 @@
 ﻿namespace Archetype.Framework.Effects;
 
 [AttributeUsage(AttributeTargets.Method)]
-public class EffectAttribute(string _keyword) : Attribute
+public class EffectAttribute(string keyword) : Attribute
 {
-    public string Keyword { get; } = _keyword;
+    public string Keyword { get; } = keyword;
 }
 
 [AttributeUsage(AttributeTargets.Class)]
