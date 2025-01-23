@@ -8,7 +8,9 @@ public record CardData
     /// E.g.
     /// <br/>
     /// "Damage" -> 3
+    /// <br/>
     /// "Power" -> 2
+    /// <br/>
     /// "Health" -> 4 
     /// </summary>
     public required Dictionary<string, ReadExpression> Stats { get; init; }
@@ -32,7 +34,9 @@ public record CardData
     /// E.g.
     /// <br/>
     /// "R" -> 1
+    /// <br/>
     /// "G" -> 1
+    /// <br/>
     /// "C" -> 5
     /// </summary>
     public required Dictionary<string, ReadExpression> Costs { get; init; }

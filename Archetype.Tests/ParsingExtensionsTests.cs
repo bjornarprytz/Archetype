@@ -73,14 +73,12 @@ public class ParsingExtensionsTests
     }
     
     [Theory]
-    [InlineData(null, null, false)]
-    [InlineData(typeof(int), null, false)]
     [InlineData(null, typeof(int), false)]
     [InlineData(typeof(int[]), typeof(int), true)]
     [InlineData(typeof(string[]), typeof(string), true)]
     [InlineData(typeof(IAtom[]), typeof(IAtom), true)]
     [InlineData(typeof(IEnumerable<int>), typeof(int), true)]
-    public void IsCollectionOf_ReturnsExpectedResult(Type? leftType, Type? rightType, bool expectedResult)
+    public void IsCollectionOf_ReturnsExpectedResult(Type? leftType, Type rightType, bool expectedResult)
     {
         leftType.IsCollectionOf(rightType).Should().Be(expectedResult);
     }
