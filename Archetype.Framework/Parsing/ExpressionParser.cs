@@ -66,7 +66,7 @@ public class ExpressionParser
         return new Value<IResolutionContext, string>(readExpression.Text.Split('.'));
     }
     
-    private IValue ParseEffectArgumentExpression(ReadExpression readExpression)
+    private IValue ParseUnknownValueExpression(ReadExpression readExpression)
     {
         var expression = readExpression.Text;
         
@@ -104,7 +104,7 @@ public class ExpressionParser
             
             var argumentExpression = effectData.ArgumentExpressions[nNonContextParameters];
             
-            effectParameters.Add(ParseEffectArgumentExpression(argumentExpression));
+            effectParameters.Add(ParseUnknownValueExpression(argumentExpression));
             
             nNonContextParameters++;
         }
