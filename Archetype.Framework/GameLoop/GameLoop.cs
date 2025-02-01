@@ -7,7 +7,7 @@ public interface IGameLoop
     IScope GetCurrentScope();
 }
 
-public class GameLoop(Game game) : IGameLoop
+internal class GameLoop(Game game) : IGameLoop
 {
     public IScope GetCurrentScope()
     {

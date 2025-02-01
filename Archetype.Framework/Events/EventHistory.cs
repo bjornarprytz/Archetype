@@ -4,12 +4,12 @@ namespace Archetype.Framework.Events;
 
 public interface IEventHistory
 {
-    IEnumerable<Event> GetEvents();
+    IEnumerable<IEvent> GetEvents();
 }
 
-public class EventHistory : IEventHistory
+internal class EventHistory : IEventHistory
 {
-    public IEnumerable<Event> GetEvents()
+    public IEnumerable<IEvent> GetEvents()
     {
         throw new NotImplementedException();
     }

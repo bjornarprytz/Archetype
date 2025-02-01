@@ -31,7 +31,7 @@ public enum ScopeLevel
     Prompt
 }
 
-public class Game(IRules rules) : Scope
+internal class Game(IRules rules) : Scope
 {
     private readonly List<Turn> _turns = new();
     private IGameState? _state;
@@ -62,7 +62,7 @@ public class Game(IRules rules) : Scope
     }
 }
 
-public class Turn(Game game) : Scope
+internal class Turn(Game game) : Scope
 {
     private readonly List<Phase> _phases = new();
     
@@ -81,7 +81,7 @@ public class Turn(Game game) : Scope
     }
 }
 
-public class Phase(Turn turn) : Scope
+internal class Phase(Turn turn) : Scope
 {
     private readonly List<Action> _actions = new();
     
@@ -96,7 +96,7 @@ public class Phase(Turn turn) : Scope
     }
 }
 
-public class Action(Phase phase) : Scope
+internal class Action(Phase phase) : Scope
 {
     public override ScopeLevel Level => ScopeLevel.Action;
     public override IScope? Parent => phase;
@@ -105,7 +105,7 @@ public class Action(Phase phase) : Scope
 }
 
 
-public abstract class Scope : IScope
+internal abstract class Scope : IScope
 {
     private Dictionary<string, int> _variables = new();
     

@@ -17,7 +17,7 @@ public interface IGameState
     IZone GetExile();
 }
 
-public class GameState : IGameState
+internal class GameState : IGameState
 {
     public IEnumerable<IZone> GetZones()
     {

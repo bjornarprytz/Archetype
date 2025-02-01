@@ -11,13 +11,13 @@ public interface IEffectResult
     Dictionary<string, object?[]> Results { get; }
 }
 
-public record AtomicResult(string Keyword, object? Result, bool Success = true) : IEffectResult
+internal record AtomicResult(string Keyword, object? Result, bool Success = true) : IEffectResult
 {
     public string[] NestedKeywords { get; } = Array.Empty<string>();
     public Dictionary<string, object?[]> Results { get; } = new() { { Keyword, new [] { Result } } };
 }
 
-public record CompositeResult(string Keyword, object? Result, IEffectResult[] NestedResults,  bool Success = true) : IEffectResult
+internal record CompositeResult(string Keyword, object? Result, IEffectResult[] NestedResults,  bool Success = true) : IEffectResult
 {
     private Dictionary<string, object?[]> _myResults() => new() { { Keyword, new [] { Result } } };
     public Dictionary<string, object?[]> Results =>
@@ -52,7 +52,7 @@ file static class ResultExtensions
     }
 }
 
-public static class ResultFactory
+internal static class ResultFactory
 {
     // MethodName -> MethodInfo
     private static Dictionary<string, MethodInfo>? _effectMethods = null;

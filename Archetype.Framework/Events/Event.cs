@@ -10,7 +10,7 @@ public interface IEvent
     IScope Scope { get; }
 }
 
-public record Event(IEffectResult Result, IScope Scope) : IEvent
+internal record Event(IEffectResult Result, IScope Scope) : IEvent
 {
     public Guid Id { get; } = Guid.NewGuid();
 }

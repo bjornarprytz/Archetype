@@ -12,7 +12,7 @@ public interface IZone : IAtom
     bool RemoveAtom(IAtom atom);
 }
 
-public class Zone : Atom, IZone
+internal class Zone : Atom, IZone
 {
     private readonly Dictionary<Guid, IAtom> _atoms = new();
     

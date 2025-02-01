@@ -44,7 +44,7 @@ public interface IAtom : IHasStats, IHasFacets, IHasTags, IHasLabels, IValueWhen
     IZone? Zone { get; set; }
 }
 
-public abstract class Atom : IAtom
+internal abstract class Atom : IAtom
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     

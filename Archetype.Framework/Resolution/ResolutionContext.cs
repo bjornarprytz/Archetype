@@ -21,7 +21,7 @@ public interface IResolutionContext : IValueWhence
     EffectProto[] GetEffects();
 }
 
-public class ResolutionContext : IResolutionContext
+internal class ResolutionContext : IResolutionContext
 {
     public IGameState GetState()
     {

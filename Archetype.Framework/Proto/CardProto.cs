@@ -19,7 +19,7 @@ public interface ICardProto
     public Dictionary<string, IValue<int?>> Variables { get; }
 }
 
-public record CardProto : ICardProto
+internal record CardProto : ICardProto
 {
     public required string Name { get; init; }
     public required Dictionary<string, IValue<int?>> Costs { get; init; }

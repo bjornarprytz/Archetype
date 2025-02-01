@@ -9,7 +9,7 @@ public interface ICard : IAtom
     // TODO: Something like ActionBlock to describe costs, targets and effects
 }
 
-public class Card : Atom, ICard
+internal class Card : Atom, ICard
 {
     private readonly ICardProto _proto;
     

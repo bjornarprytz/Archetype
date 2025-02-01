@@ -4,7 +4,7 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.Parsing;
 
-public static class ParsingExtensions
+internal static class ParsingExtensions
 {
     public static IValue CreateValueResolver<TWhence>(this string[] path)
         where TWhence : IValueWhence

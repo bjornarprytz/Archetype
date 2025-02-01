@@ -21,7 +21,7 @@ public class ExpressionParser
         _effectMethods = effectMethods.ToDictionary(m => m.GetRequiredAttribute<EffectAttribute>().Keyword);
     }
     
-    public CardProto ParseCard(CardData cardData)
+    public ICardProto ParseCard(CardData cardData)
     {
         return new CardProto()
         {
