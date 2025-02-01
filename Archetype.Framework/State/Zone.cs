@@ -14,7 +14,7 @@ public interface IZone : IAtom
 
 public class Zone : Atom, IZone
 {
-    private Dictionary<Guid, IAtom> _atoms = new();
+    private readonly Dictionary<Guid, IAtom> _atoms = new();
     
     public int AtomCount => _atoms.Count;
     public IAtom[] GetAtoms()

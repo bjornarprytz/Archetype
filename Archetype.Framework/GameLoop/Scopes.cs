@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Events;
+﻿using Archetype.Framework.Effects;
+using Archetype.Framework.Events;
 using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
@@ -30,14 +31,14 @@ public enum ScopeLevel
     Prompt
 }
 
-public class Game(IRules _rules) : Scope
+public class Game(IRules rules) : Scope
 {
     private readonly List<Turn> _turns = new();
     private IGameState? _state;
     
 
     public override IGameState State => _state ?? throw new InvalidOperationException("State not defined. Call Start to initialize the game.");
-    public override IRules Rules => _rules;
+    public override IRules Rules => rules;
     
     public override ScopeLevel Level => ScopeLevel.Game;
     public override IScope? Parent => null;
@@ -51,7 +52,7 @@ public class Game(IRules _rules) : Scope
         return new GameLoop(this);
     }
     
-    public Turn NewTurn()
+    public Turn NextTurn()
     {
         var turn = new Turn(this);
         
@@ -63,12 +64,21 @@ public class Game(IRules _rules) : Scope
 
 public class Turn(Game game) : Scope
 {
-    private readonly List<Turn> _phases = new();
+    private readonly List<Phase> _phases = new();
     
     public override ScopeLevel Level => ScopeLevel.Turn;
     public override IScope? Parent => game;
     public override IEnumerable<IScope> Nested => _phases;
     public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
+    
+    public Phase NextPhase()
+    {
+        var phase = new Phase(this);
+        
+        _phases.Add(phase);
+        
+        return phase;
+    }
 }
 
 public class Phase(Turn turn) : Scope
@@ -79,6 +89,11 @@ public class Phase(Turn turn) : Scope
     public override IScope Parent => turn;
     public override IEnumerable<IScope> Nested => _actions;
     public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
+    
+    public IEnumerable<IEffectResult> Resolve(IResolutionContext context)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class Action(Phase phase) : Scope

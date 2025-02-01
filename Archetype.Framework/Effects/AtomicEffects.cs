@@ -1,4 +1,5 @@
-﻿using Archetype.Framework.Core;
+﻿using System.Security.Cryptography;
+using Archetype.Framework.Core;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Effects.Atomic;
@@ -27,11 +28,19 @@ public static class AtomicEffect
     {
         var currentValue = target.GetStat(stat) ?? 0;
         
+        if (currentValue == value)
+        {
+            return ResultFactory.NoOp();
+        }
+        
         target.SetStat(stat, value);
         
-        return ResultFactory.Atomic(value - currentValue);
+        var change = value - currentValue;
+        
+        return ResultFactory.Atomic(new StatChangeResult(stat, change));
     }
     
+    public record AddTagResult(string Tag);
     [Effect("AddTag")]
     public static IEffectResult AddTag(IHasTags target, string tag)
     {
@@ -42,9 +51,10 @@ public static class AtomicEffect
         
         target.AddTag(tag);
         
-        return ResultFactory.Atomic(tag);
+        return ResultFactory.Atomic(new AddTagResult(tag));
     }
     
+    public record RemoveTagResult(string Tag);
     [Effect("RemoveTag")]
     public static IEffectResult RemoveTag(IHasTags target, string tag)
     {
@@ -55,20 +65,62 @@ public static class AtomicEffect
         
         target.RemoveTag(tag);
         
-        return ResultFactory.Atomic(tag);
+        return ResultFactory.Atomic(new RemoveTagResult(tag));
     }
     
+    public record SetFacetResult(string Key, string[] AddedValues, string[] RemovedValues);
     [Effect("SetFacet")]
-    public static IEffectResult SetFacet(IHasFacets target, string key, string[] value)
+    public static IEffectResult SetFacet(IHasFacets target, string key, string[] values)
     {
-        if (key is not { Length: > 0 } || value is not { Length: > 0 })
+        if (key is not { Length: > 0 } || values is not { Length: > 0 })
         {
             return ResultFactory.NoOp();
         }
         
-        target.SetFacet(key, value);
+        values = values.Distinct().ToArray();
         
-        return ResultFactory.Atomic(value);
+        var currentValues = target.GetFacet(key)?.ToArray() ?? Array.Empty<string>();
+        
+        var addedValues = values.Except(currentValues).ToArray();
+        var removedValues = currentValues.Except(values).ToArray();
+
+        if (addedValues.Length == 0 && removedValues.Length == 0)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        target.SetFacet(key, values);
+        
+        return ResultFactory.Atomic(new SetFacetResult(key, addedValues, removedValues));
+    }
+    
+    public record RemoveFacetsResult(string Key, string[] Value);
+    [Effect("RemoveFacets")]
+    public static IEffectResult RemoveFacets(IHasFacets target, string key, string[] valuesToRemove)
+    {
+        if (key is not { Length: > 0 } || valuesToRemove is not { Length: > 0 })
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        var currentValues = target.GetFacet(key)?.ToArray();
+        
+        if (currentValues is null)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        var newValue = currentValues.Except(valuesToRemove).ToArray();
+        var actuallyRemovedValues = currentValues.Except(newValue).ToArray();
+        
+        if (actuallyRemovedValues.Length == 0)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        target.SetFacet(key, newValue);
+        
+        return ResultFactory.Atomic(new RemoveFacetsResult(key, actuallyRemovedValues));
     }
     
     [Effect("ClearFacet")]
@@ -79,40 +131,19 @@ public static class AtomicEffect
             return ResultFactory.NoOp();
         }
         
-        var value = target.GetFacet(key);
+        var currentValues = target.GetFacet(key)?.ToArray();
         
-        if (value is null)
+        if (currentValues is null || currentValues.Length == 0)
         {
             return ResultFactory.NoOp();
         }
         
         target.RemoveFacet(key);
         
-        return ResultFactory.Atomic(value);
+        return ResultFactory.Atomic(new RemoveFacetsResult(key, currentValues));
     }
     
-    [Effect("RemoveFacets")]
-    public static IEffectResult RemoveFacets(IHasFacets target, string key, string[] valuesToRemove)
-    {
-        if (key is not { Length: > 0 } || valuesToRemove is not { Length: > 0 })
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var values = target.GetFacet(key);
-        
-        if (values is null)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var newValue = values.Except(valuesToRemove).ToArray();
-        
-        target.SetFacet(key, newValue);
-        
-        return ResultFactory.Atomic(valuesToRemove);
-    }
-    
+    public record AddFacetsResult(string Key, string[] Value);
     [Effect("AddFacets")]
     public static IEffectResult AddFacets(IHasFacets target, string key, string[] valuesToAdd)
     {
@@ -121,20 +152,25 @@ public static class AtomicEffect
             return ResultFactory.NoOp();
         }
         
-        var currentValues = target.GetFacet(key);
+        var currentValues = target.GetFacet(key)?.ToArray();
         
         if (currentValues is null)
         {
             return ResultFactory.NoOp();
         }
         
-        var addedValues = valuesToAdd.Except(currentValues).ToArray();
+        var actuallyAddedValues = valuesToAdd.Except(currentValues).Distinct().ToArray();
         
-        var newValue = currentValues.Concat(valuesToAdd).Distinct().ToArray();
+        var updatedValues = currentValues.Concat(actuallyAddedValues).Distinct().ToArray();
         
-        target.SetFacet(key, newValue);
+        if (actuallyAddedValues.Length == 0)
+        {
+            return ResultFactory.NoOp();
+        }
         
-        return ResultFactory.Atomic(addedValues);
+        target.SetFacet(key, updatedValues);
+        
+        return ResultFactory.Atomic(new AddFacetsResult(key, actuallyAddedValues));
     }
     
     public record struct ChangeZoneResult(Guid Target, Guid? From, Guid To);
@@ -159,7 +195,7 @@ public static class AtomicEffect
     
     public record struct CreateCardResult(string Name, Guid Card, Guid Zone);
     [Effect("CreateCard")]
-    public static IEffectResult CreateCard(CardProto proto, IZone zone)
+    public static IEffectResult CreateCard(ICardProto proto, IZone zone)
     {
         var card = new Card(proto)
         {

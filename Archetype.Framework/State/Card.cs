@@ -4,15 +4,16 @@ namespace Archetype.Framework.State;
 
 public interface ICard : IAtom
 {
-    
+    [PathPart("name")]
+    public string GetName();
     // TODO: Something like ActionBlock to describe costs, targets and effects
 }
 
 public class Card : Atom, ICard
 {
-    private readonly CardProto _proto;
+    private readonly ICardProto _proto;
     
-    public Card(CardProto proto)
+    public Card(ICardProto proto)
     {
         _proto = proto;      
     }
