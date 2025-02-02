@@ -5,6 +5,21 @@ using Archetype.Framework.State;
 
 namespace Archetype.Framework.GameLoop;
 
+public interface IGameRoot
+{
+    // What can happen
+    IRules Rules { get; }
+    
+    // How things are
+    IGameState State { get; }
+    
+    // Progression towards the end
+    IGameLoop Loop { get; }
+    
+    // What has happened
+    IGameEvents Events { get; }
+}
+
 public interface IScope
 {
     Guid Id { get; }
@@ -19,7 +34,7 @@ public interface IScope
     int? GetVariable(string name);
     void SetVariable(string name, int value);
 
-    public IScope Exit();
+    internal IScope Exit();
 }
 
 public enum ScopeLevel
@@ -44,13 +59,6 @@ internal class Game(IRules rules) : Scope
     public override IScope? Parent => null;
     public override IEnumerable<IScope> Nested => _turns;
     public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    
-    public IGameLoop Start(int seed)
-    {
-        _state = Rules.InitializeState(seed);
-        
-        return new GameLoop(this);
-    }
     
     public Turn NextTurn()
     {

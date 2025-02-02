@@ -1,21 +1,20 @@
-﻿using Archetype.Framework.State;
+﻿using System.Reflection;
+using Archetype.Framework.Core;
 
 namespace Archetype.Framework.GameLoop;
 
 public interface IRules
 {
-    // How to initialize the game state
-    // How to progress the game loop
+    IEnumerable<IKeyword> GetKeywords();
+    IKeyword? GetKeyword(string keyword);
     
-    // TODO: Express the turn structure as turns phases and prompts, which actions can be taken, and how they progress the game loop
-    
-    public IGameState InitializeState(int seed);
+    IEnumerable<ICardProto> GetCardPool();
+    ICardProto? GetCard(string cardName);
 }
 
-public class Rules : IRules
+public interface IKeyword
 {
-    public IGameState InitializeState(int seed)
-    {
-        throw new NotImplementedException();
-    }
+    public string Keyword { get; }
+    public MethodInfo Method { get; }
+    
 }

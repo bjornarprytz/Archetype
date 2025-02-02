@@ -6,7 +6,6 @@ public interface IGameState
 {
     [PathPart("zones")]
     IEnumerable<IZone> GetZones();
-    
     [PathPart("drawPile")]
     IZone GetDrawPile();
     [PathPart("hand")]
