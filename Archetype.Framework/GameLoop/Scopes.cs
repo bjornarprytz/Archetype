@@ -16,8 +16,11 @@ public interface IGameRoot
     // Progression towards the end
     IGameLoop Loop { get; }
     
-    // What has happened
+    // What happens
     IGameEvents Events { get; }
+    
+    // What can be done
+    // TODO: Something like this? IEnumerable<IAction> GetActions();
 }
 
 public interface IScope

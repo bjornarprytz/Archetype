@@ -16,5 +16,4 @@ public interface IKeyword
 {
     public string Keyword { get; }
     public MethodInfo Method { get; }
-    
 }
