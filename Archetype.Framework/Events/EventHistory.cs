@@ -5,4 +5,6 @@ namespace Archetype.Framework.Events;
 public interface IGameEvents
 {
     IEnumerable<IEvent> GetEvents();
+    
+    internal void PushEvent(IEvent @event);
 }

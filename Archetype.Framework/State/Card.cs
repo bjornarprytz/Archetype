@@ -1,4 +1,6 @@
 ﻿using Archetype.Framework.Core;
+using Archetype.Framework.Events;
+using Archetype.Framework.Resolution;
 
 namespace Archetype.Framework.State;
 
@@ -6,7 +8,8 @@ public interface ICard : IAtom
 {
     [PathPart("name")]
     public string GetName();
-    // TODO: Something like ActionBlock to describe costs, targets and effects
+    
+    public ICardProto GetProto();
 }
 
 internal class Card : Atom, ICard
@@ -21,5 +24,10 @@ internal class Card : Atom, ICard
     public string GetName()
     {
         return _proto.Name;
+    }
+
+    public ICardProto GetProto()
+    {
+        return _proto;
     }
 }

@@ -10,6 +10,8 @@ public interface IZone : IAtom
     
     bool AddAtom(IAtom atom);
     bool RemoveAtom(IAtom atom);
+    
+    internal TAtom? GetAtom<TAtom>(Guid id) where TAtom : IAtom;
 }
 
 internal class Zone : Atom, IZone
@@ -30,5 +32,10 @@ internal class Zone : Atom, IZone
     public bool RemoveAtom(IAtom atom)
     {
         return _atoms.Remove(atom.Id);
+    }
+
+    public TAtom? GetAtom<TAtom>(Guid id) where TAtom : IAtom
+    {
+        return _atoms.TryGetValue(id, out var atom) ? (TAtom)atom : default;
     }
 }

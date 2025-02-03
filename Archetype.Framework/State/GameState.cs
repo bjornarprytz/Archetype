@@ -14,6 +14,9 @@ public interface IGameState
     IZone GetDiscardPile();
     [PathPart("exile")]
     IZone GetExile();
+    
+    internal IAtom? GetAtom(Guid id);
+    internal void AddAtom(IAtom atom);
 }
 
 internal class GameState : IGameState
@@ -39,6 +42,16 @@ internal class GameState : IGameState
     }
 
     public IZone GetExile()
+    {
+        throw new NotImplementedException();
+    }
+
+    public IAtom? GetAtom(Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void AddAtom(IAtom atom)
     {
         throw new NotImplementedException();
     }

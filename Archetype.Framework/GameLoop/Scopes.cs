@@ -7,20 +7,11 @@ namespace Archetype.Framework.GameLoop;
 
 public interface IGameRoot
 {
-    // What can happen
-    IRules Rules { get; }
-    
     // How things are
     IGameState State { get; }
     
-    // Progression towards the end
-    IGameLoop Loop { get; }
-    
-    // What happens
-    IGameEvents Events { get; }
-    
-    // What can be done
-    // TODO: Something like this? IEnumerable<IAction> GetActions();
+    // Player agency
+    IEnumerable<IEvent> TakeAction(IActionArgs actionArgs);
 }
 
 public interface IScope
@@ -38,6 +29,7 @@ public interface IScope
     void SetVariable(string name, int value);
 
     internal IScope Exit();
+    internal bool IsActonAllowed(IActionArgs actionArgs);
 }
 
 public enum ScopeLevel
@@ -56,6 +48,14 @@ internal class Game(IRules rules) : Scope
     
 
     public override IGameState State => _state ?? throw new InvalidOperationException("State not defined. Call Start to initialize the game.");
+    public override bool IsActonAllowed(IActionArgs actionArgs)
+    {
+        return actionArgs switch {
+            StartGameArgs _ => true,
+            _ => false
+        };
+    }
+
     public override IRules Rules => rules;
     
     public override ScopeLevel Level => ScopeLevel.Game;
@@ -81,7 +81,14 @@ internal class Turn(Game game) : Scope
     public override IScope? Parent => game;
     public override IEnumerable<IScope> Nested => _phases;
     public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    
+    public override bool IsActonAllowed(IActionArgs actionArgs)
+    {
+        return actionArgs switch {
+            EndTurnArgs _ => true,
+            _ => false
+        };
+    }
+
     public Phase NextPhase()
     {
         var phase = new Phase(this);
@@ -100,19 +107,34 @@ internal class Phase(Turn turn) : Scope
     public override IScope Parent => turn;
     public override IEnumerable<IScope> Nested => _actions;
     public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    
-    public IEnumerable<IEffectResult> Resolve(IResolutionContext context)
+    public override bool IsActonAllowed(IActionArgs actionArgs)
     {
-        throw new NotImplementedException();
+        return Parent.IsActonAllowed(actionArgs);
+    }
+    
+    public Action NextAction() // TODO: I don't know if these types of methods are a good idea or not
+    {
+        var action = new Action(this);
+        
+        _actions.Add(action);
+        
+        return action;
     }
 }
 
 internal class Action(Phase phase) : Scope
 {
     public override ScopeLevel Level => ScopeLevel.Action;
-    public override IScope? Parent => phase;
+    public override IScope Parent => phase;
     public override IEnumerable<IScope> Nested => Array.Empty<IScope>();
     public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
+    public override bool IsActonAllowed(IActionArgs actionArgs)
+    {
+        return Parent.IsActonAllowed(actionArgs) || actionArgs switch {
+            PlayCardArgs args => true,
+            _ => false
+        };
+    }
 }
 
 
@@ -146,4 +168,6 @@ internal abstract class Scope : IScope
         
         return Parent ?? throw new InvalidOperationException("Cannot exit the root scope");
     }
+
+    public abstract bool IsActonAllowed(IActionArgs actionArgs);
 }

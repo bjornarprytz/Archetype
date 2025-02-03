@@ -18,29 +18,33 @@ public interface IResolutionContext : IValueWhence
     [PathPart("targets")]
     IAtom? GetTarget(int index);
     
-    EffectProto[] GetEffects();
+    internal EffectProto[] GetEffects();
 }
 
-internal class ResolutionContext : IResolutionContext
+internal class ResolutionContext(IScope scope, ICard source, IEnumerable<IAtom> targets) : IResolutionContext
 {
+    private readonly IScope _scope = scope;
+    private readonly ICard _source = source;
+    private readonly IAtom[] _targets = targets.ToArray();
+    
     public IGameState GetState()
     {
-        throw new NotImplementedException();
+        return _scope.State;
     }
 
     public IScope GetScope()
     {
-        throw new NotImplementedException();
+        return _scope;
     }
 
     public IAtom GetSource()
     {
-        throw new NotImplementedException();
+        return _source;
     }
 
     public IAtom? GetTarget(int index)
     {
-        throw new NotImplementedException();
+        return index < _targets.Length ? _targets[index] : null;
     }
 
 
