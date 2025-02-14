@@ -7,27 +7,25 @@ namespace Archetype.Framework;
 
 public static class Bootstrap
 {
-    public static IGameRoot StartGame(IGameState initialState, IRules rules)
+    public static IGameRoot StartGame(IRules rules, ICardPool cardPool)
     {
-        return new GameRoot(initialState, rules);
+        return new GameRoot(rules, cardPool);
     }
 }
 
-file class GameRoot(IGameState initialState, IRules rules) : IGameRoot
+file class GameRoot(IRules rules, ICardPool cardPool) : IGameRoot
 {
-    private readonly IRules _rules = rules;
-    private readonly IGameLoop _loop = new Loop();
-    private readonly IGameEvents _events = new GameEvents();
-
-    public IGameState State { get; } = initialState;
+    public Game RootScope { get; } = new Game();
+    public IGameState? State { get; private set; }
+    public ICardPool CardPool => cardPool;
 
     public IEnumerable<IEvent> TakeAction(IActionArgs actionArgs)
     {
-        var scope = _loop.GetCurrentScope();
-        
-        if (!scope.IsActonAllowed(actionArgs))
+        var scope = RootScope.GetEdgeScope();
+
+        if (!rules.ValidateAction(State, scope, actionArgs, out var error))
         {
-            throw new InvalidOperationException($"Action {{{actionArgs}}} not allowed in current scope: <{scope.Level}>.");
+            throw new InvalidOperationException($"Invalid action <{actionArgs}>. {error}");
         }
         
         return (actionArgs) switch {
@@ -40,25 +38,24 @@ file class GameRoot(IGameState initialState, IRules rules) : IGameRoot
     
     private IEnumerable<IEvent> PlayCard(PlayCardArgs args)
     {
-        var card = State.GetHand().GetAtom<ICard>(args.CardId) ?? throw new ArgumentException($"Invalid card ID <{args.CardId}>. Card was not found in hand.");
-        var targets = args.Targets.Select(targetId => State.GetAtom(targetId) ?? throw new ArgumentException($"Invalid target ID <{targetId}>. Target was not found in game state.")).ToArray();
+        var scope = new GameAction(); // TODO: Create Action context properly based on the current phase
         
-        var context = new ResolutionContext(_loop.GetCurrentScope(), card, targets);
-
-        var events = new List<IEvent>();
+        if (!rules.TryBindContext(State!, scope, args, out var context))
+        {
+            throw new ArgumentException($"Invalid action <{args}>. Could not bind context.");
+        }
 
         // TODO: Resolve costs
 
-        foreach (var effectProto in card.GetProto().Effects)
+        foreach (var effectProto in context!.GetEffects())
         {
-            foreach (var e in  _rules.ResolveEffect(context, effectProto))
+            foreach (var e in  rules.ResolveEffect(context, effectProto))
             {
-                _events.PushEvent(e);
-                events.Add(e);
+                scope.AddEvent(e);
             }
         }
         
-        return events;
+        return scope.Events;
     }
     
     private IEnumerable<IEvent> EndTurn(EndTurnArgs args)
@@ -67,29 +64,6 @@ file class GameRoot(IGameState initialState, IRules rules) : IGameRoot
     }
     
     private IEnumerable<IEvent> StartGame(StartGameArgs args)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-file class GameEvents : IGameEvents
-{
-    private readonly List<IEvent> _events = new();
-    
-    public IEnumerable<IEvent> GetEvents()
-    {
-        return _events;
-    }
-
-    public void PushEvent(IEvent @event)
-    {
-        _events.Add(@event);
-    }
-}
-
-file class Loop : IGameLoop
-{
-    public IScope GetCurrentScope()
     {
         throw new NotImplementedException();
     }

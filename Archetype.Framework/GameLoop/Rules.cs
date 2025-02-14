@@ -2,15 +2,16 @@
 using Archetype.Framework.Core;
 using Archetype.Framework.Events;
 using Archetype.Framework.Resolution;
+using Archetype.Framework.State;
 
 namespace Archetype.Framework.GameLoop;
 
 public interface IRules
 {
-    IEnumerable<IEvent> ResolveEffect(IResolutionContext context, EffectProto effectProto);
+    bool ValidateAction(IGameState? state, IScope scope, IActionArgs actionArgs, out string error);
     
-    IEnumerable<ICardProto> GetCardPool();
-    ICardProto? GetCard(string cardName);
+    bool TryBindContext(IGameState state, IScope scope, IActionArgs actionArgs, out IResolutionContext? resolutionContext);
+    IEnumerable<IEvent> ResolveEffect(IResolutionContext context, EffectProto effectProto);
 }
 
 public interface IKeyword

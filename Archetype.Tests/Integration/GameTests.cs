@@ -13,11 +13,11 @@ public class GameTests
     public void TestGame()
     {
         // Arrange
-        var initialState = Substitute.For<IGameState>();
         var rules = Substitute.For<IRules>();
+        var cardPool = Substitute.For<ICardPool>();
         
         // Act
-        var game = Bootstrap.StartGame(initialState, rules);
+        var game = Bootstrap.StartGame(rules, cardPool);
         
         // Assert
         true.Should().BeFalse(); // TODO: What else?

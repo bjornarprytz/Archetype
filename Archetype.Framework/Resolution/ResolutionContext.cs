@@ -21,15 +21,16 @@ public interface IResolutionContext : IValueWhence
     internal EffectProto[] GetEffects();
 }
 
-internal class ResolutionContext(IScope scope, ICard source, IEnumerable<IAtom> targets) : IResolutionContext
+internal class ResolutionContext(IGameState state, IScope scope, ICard source, IEnumerable<IAtom> targets) : IResolutionContext
 {
+    private readonly IGameState _state = state;
     private readonly IScope _scope = scope;
     private readonly ICard _source = source;
     private readonly IAtom[] _targets = targets.ToArray();
     
     public IGameState GetState()
     {
-        return _scope.State;
+        return _state;
     }
 
     public IScope GetScope()

@@ -7,4 +7,5 @@ public interface IActionArgs
 
 public record StartGameArgs() : IActionArgs;
 public record PlayCardArgs(Guid CardId, Guid[] Targets) : IActionArgs;
+public record AnswerPromptArgs(Guid PromptId, /* TODO: Could a typed Answer be useful? */ object Answer) : IActionArgs;
 public record EndTurnArgs() : IActionArgs;

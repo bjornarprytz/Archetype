@@ -10,6 +10,9 @@ public interface IGameRoot
     // How things are
     IGameState State { get; }
     
+    // Available cards (proto data)
+    ICardPool CardPool { get; }
+    
     // Player agency
     IEnumerable<IEvent> TakeAction(IActionArgs actionArgs);
 }
@@ -17,140 +20,75 @@ public interface IGameRoot
 public interface IScope
 {
     Guid Id { get; }
-    ScopeLevel Level { get; }
     IScope? Parent { get; }
+    IScope? CurrentSubScope { get; }
     IEnumerable<IScope> Nested { get; }
     IEnumerable<IEvent> Events { get; }
     
-    IRules Rules { get; }
-    IGameState State { get; }
     [PathPart("vars")]
     int? GetVariable(string name);
     void SetVariable(string name, int value);
+    
 
-    internal IScope Exit();
-    internal bool IsActonAllowed(IActionArgs actionArgs);
+    void AddEvent(IEvent @event);
+    bool IsClosed { get; }
+    void Exit();
 }
 
-public enum ScopeLevel
+internal class Game() : Scope(null)
 {
-    Game,
-    Turn,
-    Phase,
-    Action,
-    Prompt
+    public IScope GetEdgeScope()
+    {
+        IScope scope = this;
+        var loopDetector = new HashSet<IScope>(){ scope };
+        
+        
+        while (scope.CurrentSubScope != null)
+        {
+            scope = scope.CurrentSubScope;
+            
+            if (!loopDetector.Add(scope))
+            {
+                throw new InvalidOperationException("Scope loop detected");
+            }
+        }
+
+        return scope;
+    }
 }
 
-internal class Game(IRules rules) : Scope
+internal class Turn(Game game) : Scope(game)
 {
-    private readonly List<Turn> _turns = new();
-    private IGameState? _state;
     
-
-    public override IGameState State => _state ?? throw new InvalidOperationException("State not defined. Call Start to initialize the game.");
-    public override bool IsActonAllowed(IActionArgs actionArgs)
-    {
-        return actionArgs switch {
-            StartGameArgs _ => true,
-            _ => false
-        };
-    }
-
-    public override IRules Rules => rules;
-    
-    public override ScopeLevel Level => ScopeLevel.Game;
-    public override IScope? Parent => null;
-    public override IEnumerable<IScope> Nested => _turns;
-    public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    
-    public Turn NextTurn()
-    {
-        var turn = new Turn(this);
-        
-        _turns.Add(turn);
-        
-        return turn;
-    }
 }
 
-internal class Turn(Game game) : Scope
+internal class Phase(Turn turn) : Scope(turn)
 {
-    private readonly List<Phase> _phases = new();
-    
-    public override ScopeLevel Level => ScopeLevel.Turn;
-    public override IScope? Parent => game;
-    public override IEnumerable<IScope> Nested => _phases;
-    public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    public override bool IsActonAllowed(IActionArgs actionArgs)
-    {
-        return actionArgs switch {
-            EndTurnArgs _ => true,
-            _ => false
-        };
-    }
 
-    public Phase NextPhase()
-    {
-        var phase = new Phase(this);
-        
-        _phases.Add(phase);
-        
-        return phase;
-    }
 }
 
-internal class Phase(Turn turn) : Scope
+internal class GameAction(Phase phase) : Scope(phase)
 {
-    private readonly List<Action> _actions = new();
-    
-    public override ScopeLevel Level => ScopeLevel.Phase;
-    public override IScope Parent => turn;
-    public override IEnumerable<IScope> Nested => _actions;
-    public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    public override bool IsActonAllowed(IActionArgs actionArgs)
-    {
-        return Parent.IsActonAllowed(actionArgs);
-    }
-    
-    public Action NextAction() // TODO: I don't know if these types of methods are a good idea or not
-    {
-        var action = new Action(this);
-        
-        _actions.Add(action);
-        
-        return action;
-    }
 }
 
-internal class Action(Phase phase) : Scope
+internal class Prompt(GameAction gameAction) : Scope(gameAction)
 {
-    public override ScopeLevel Level => ScopeLevel.Action;
-    public override IScope Parent => phase;
-    public override IEnumerable<IScope> Nested => Array.Empty<IScope>();
-    public override IEnumerable<IEvent> Events => Array.Empty<IEvent>();
-    public override bool IsActonAllowed(IActionArgs actionArgs)
-    {
-        return Parent.IsActonAllowed(actionArgs) || actionArgs switch {
-            PlayCardArgs args => true,
-            _ => false
-        };
-    }
+    
 }
 
 
-internal abstract class Scope : IScope
+internal abstract class Scope(IScope? parent) : IScope
 {
     private Dictionary<string, int> _variables = new();
+    private List<IEvent> _events = new();
+    private List<IScope> _nested = new();
     
     public Guid Id { get; } = Guid.NewGuid();
     public bool IsClosed { get; private set; }
-    public abstract ScopeLevel Level { get; }
-    public abstract IScope? Parent { get; }
-    public abstract IEnumerable<IScope> Nested { get; }
-    public abstract IEnumerable<IEvent> Events { get; }
-    
-    public virtual IRules Rules => Parent?.Rules ?? throw new InvalidOperationException("Rules not defined");
-    public virtual IGameState State => Parent?.State ?? throw new InvalidOperationException("State not defined");
+    public IScope? Parent => parent;
+    public IScope? CurrentSubScope { get; private set; } 
+    public IEnumerable<IScope> Nested => _nested;
+    public IEnumerable<IEvent> Events => _events;
 
     public int? GetVariable(string name)
     {
@@ -162,12 +100,41 @@ internal abstract class Scope : IScope
         _variables[name] = value;
     }
     
-    public IScope Exit()
+    public void AddEvent(IEvent @event)
     {
-        IsClosed = true;
-        
-        return Parent ?? throw new InvalidOperationException("Cannot exit the root scope");
+        _events.Add(@event);
     }
+    
+    public void EnterSubScope(IScope subScope)
+    {
+        if (IsClosed)
+        {
+            throw new InvalidOperationException("Scope is already closed");
+        }
+        
+        if (CurrentSubScope != null)
+        {
+            throw new InvalidOperationException("Sub scope is already set");
+        }
+        
+        CurrentSubScope = subScope;
+    }
+    
+    public void Exit()
+    {
+        if (IsClosed)
+        {
+            throw new InvalidOperationException("Scope is already closed");
+        }
 
-    public abstract bool IsActonAllowed(IActionArgs actionArgs);
+        if (CurrentSubScope != null)
+        {
+            CurrentSubScope.Exit();
+            _nested.Add(CurrentSubScope);
+        }
+        
+        CurrentSubScope = null;
+
+        IsClosed = true;
+    }
 }
