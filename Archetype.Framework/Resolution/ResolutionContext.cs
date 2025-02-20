@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Core;
+using Archetype.Framework.Events;
 using Archetype.Framework.GameLoop;
 using Archetype.Framework.State;
 
@@ -18,39 +19,72 @@ public interface IResolutionContext : IValueWhence
     [PathPart("targets")]
     IAtom? GetTarget(int index);
     
-    internal EffectProto[] GetEffects();
+    internal IReadOnlyList<EffectProto> Effects { get; }
+    internal IReadOnlyList<TargetProto> TargetDescriptors { get; }
+    internal IReadOnlyList<IAtom> ChosenTargets { get; }
+    internal IEnumerable<IEvent> ResolveEffects();
+    internal void BindResolvers(IRules rules);
 }
 
 internal class ResolutionContext(IGameState state, IScope scope, ICard source, IEnumerable<IAtom> targets) : IResolutionContext
 {
-    private readonly IGameState _state = state;
-    private readonly IScope _scope = scope;
-    private readonly ICard _source = source;
-    private readonly IAtom[] _targets = targets.ToArray();
-    
+    private bool _contextResolved = false;
+    private IEnumerable<Func<IResolutionContext, IEnumerable<IEvent>>>? _resolvers;
     public IGameState GetState()
     {
-        return _state;
+        return state;
     }
 
     public IScope GetScope()
     {
-        return _scope;
+        return scope;
     }
 
     public IAtom GetSource()
     {
-        return _source;
+        return source;
     }
 
     public IAtom? GetTarget(int index)
     {
-        return index < _targets.Length ? _targets[index] : null;
+        return index < ChosenTargets.Count ? ChosenTargets[index] : null;
     }
 
+    public IReadOnlyList<EffectProto> Effects { get; } = source.GetProto().Effects.ToArray();
+    public IReadOnlyList<TargetProto> TargetDescriptors { get; } = source.GetProto().Targets.ToArray();
+    public IReadOnlyList<IAtom> ChosenTargets { get; } = targets.ToArray();
 
-    public EffectProto[] GetEffects()
+    public IEnumerable<IEvent> ResolveEffects()
     {
-        throw new NotImplementedException();
+        if (_resolvers == null)
+            throw new InvalidOperationException("Resolvers have not been bound");
+        
+        if (_contextResolved)
+            throw new InvalidOperationException("Context has already been resolved");
+
+        var events = new List<IEvent>();
+        
+        foreach (var @event in _resolvers.SelectMany(effect => effect.Invoke(this)))
+        {
+            scope.AddEvent(@event);
+            events.Add(@event);
+        }
+        
+        _contextResolved = true;
+
+        return events;
+    }
+
+    public void BindResolvers(IRules rules)
+    {
+        if (_resolvers != null)
+            throw new InvalidOperationException("Resolvers have already been bound");
+        
+        if (_contextResolved)
+            throw new InvalidOperationException("Context has already been resolved");
+        
+        var resolvers = Effects.Select(effect => rules.BindEffectResolver(effect, this)).ToList();
+
+        _resolvers = resolvers;
     }
 }

@@ -1,4 +1,6 @@
-﻿using Archetype.Framework.Events;
+﻿using System.Reflection;
+using Archetype.Framework.Core;
+using Archetype.Framework.Events;
 using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
@@ -7,10 +9,8 @@ namespace Archetype.Framework.GameLoop;
 public interface IRules
 {
     IGameState CreateInitialState();
-    IEnumerable<IEvent> ResolveAction(IScope scope, IActionArgs actionArgs);
-}
-
-public interface IKeyword
-{
-    public string Keyword { get; }
+    IEnumerable<IEvent> ResolveAction(IGameState state, IScope scope, IActionArgs actionArgs);
+    internal Func<IResolutionContext, IEnumerable<IEvent>> BindEffectResolver(EffectProto effectProto, IResolutionContext context); 
+    
+    // TODO: Effect Resolvers might need to be exposed in a more user readable/friendly way, in order to do rules lookup etc.
 }

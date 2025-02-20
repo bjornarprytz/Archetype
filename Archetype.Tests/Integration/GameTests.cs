@@ -13,13 +13,13 @@ public class GameTests
 {
     private readonly IRules _rules = Substitute.For<IRules>();
     private readonly IScope _rootScope = Substitute.For<IScope>();
-    private readonly IGameState _initialState = Substitute.For<IGameState>();
+    private readonly IGameState _state = Substitute.For<IGameState>();
 
     private readonly IGameRoot _game;
     public GameTests()
     {
         _rootScope.CurrentSubScope.Returns(default(IScope));
-        _rules.CreateInitialState().Returns(_initialState);
+        _rules.CreateInitialState().Returns(_state);
         _game = Bootstrap.Init(_rules, _rootScope);
     }
     
@@ -32,7 +32,7 @@ public class GameTests
         _rules.Received(1).CreateInitialState();
         
         _game.RootScope.Should().Be(_rootScope);
-        _game.State.Should().Be(_initialState);
+        _game.State.Should().Be(_state);
     }
     
     [Fact]
@@ -50,7 +50,7 @@ public class GameTests
         _game.TakeAction(actionArgs);
         
         // Assert
-        _rules.Received(1).ResolveAction(edgeScope, actionArgs);
+        _rules.Received(1).ResolveAction(_state, edgeScope, actionArgs);
     }
     
     [Fact]
@@ -63,7 +63,7 @@ public class GameTests
             Substitute.For<IEvent>(),
         };
 
-        _rules.ResolveAction(default!, default!).ReturnsForAnyArgs(events);
+        _rules.ResolveAction(default!, default!, default!).ReturnsForAnyArgs(events);
         
         // Act
         var returnedEvents = _game.TakeAction(Substitute.For<IActionArgs>());

@@ -40,16 +40,38 @@ public interface IScope
 
 internal class Game() : Scope(null)
 {
+    public Turn NewTurn()
+    {
+        var turn = new Turn(this);
+        
+        EnterSubScope(turn);
+        
+        return turn;
+    }
 }
 
 internal class Turn(Game game) : Scope(game)
 {
-    
+    public Phase NewPhase()
+    {
+        var phase = new Phase(this);
+        
+        EnterSubScope(phase);
+        
+        return phase;
+    }
 }
 
 internal class Phase(Turn turn) : Scope(turn)
 {
-
+    public GameAction NewAction()
+    {
+        var action = new GameAction(this);
+        
+        EnterSubScope(action);
+        
+        return action;
+    }
 }
 
 internal class GameAction(Phase phase) : Scope(phase)
