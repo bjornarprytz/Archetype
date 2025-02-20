@@ -114,6 +114,108 @@ public class ParseTests
             );
     }
     
+    [Fact]
+    public void ParseCard_EffectWithResolutionContext_DoesNotIncludeContextAmongItsParameters()
+    {
+        var cardData = BaseCardData with
+        {
+            Effects = new[]
+            {
+                new EffectData()
+                {
+                    Keyword = "Keyword3",
+                    ArgumentExpressions = new ReadExpression[]
+                    {
+                        new ("1"),
+                    }
+                }
+            }
+        };
+        
+        var card = _sut.ParseCard(cardData);
+        
+        card.Effects.Should().BeEquivalentTo(
+            new []
+            {
+                new EffectProto()
+                {
+                    Keyword = "Keyword3",
+                    Parameters = new IValue[]
+                    {
+                        new ImmediateNumber(1)
+                    }
+                }
+            }
+        );
+    }
+    
+    [Fact]
+    public void ParseCard_UnknownEffect_Throws()
+    {
+        var cardData = BaseCardData with
+        {
+            Effects = new[]
+            {
+                new EffectData()
+                {
+                    Keyword = "UnknownEffect",
+                    ArgumentExpressions = new ReadExpression[]
+                    {
+                        new ("1"),
+                    }
+                }
+            }
+        };
+        
+        Action act = () => _sut.ParseCard(cardData);
+        
+        act.Should().Throw<InvalidOperationException>();
+    }
+    
+    [Fact]
+    public void ParseCard_MismatchingParameters_Throws()
+    {
+        var cardData = BaseCardData with
+        {
+            Effects =  new[]
+            {
+                new EffectData()
+                {
+                    Keyword = "Keyword1",
+                    ArgumentExpressions = Array.Empty<ReadExpression>()
+                }
+            }
+        };
+        
+        Action act = () => _sut.ParseCard(cardData);
+        
+        act.Should().Throw<InvalidOperationException>();
+    }
+    
+    [Fact]
+    public void ParseCard_WrongParameterTypes_Throws()
+    {
+        var cardData = BaseCardData with
+        {
+            Effects =  new[]
+            {
+                new EffectData()
+                {
+                    Keyword = "Keyword1",
+                    ArgumentExpressions = new ReadExpression[]
+                    {
+                        new ("1"),
+                        new ("'Some word'")
+                    }
+                }
+            }
+        };
+        
+        Action act = () => _sut.ParseCard(cardData);
+        
+        act.Should().Throw<InvalidOperationException>();
+    }
+    
     private static CardData BaseCardData => new()
     {
         Name = "Default",
@@ -132,18 +234,28 @@ internal static class TestKeywords
     [Effect("Keyword1")]
     public static IEffectResult Keyword1(IHasStats atom, int arg)
     {
-        var current = atom.GetStat("test") ?? 0;
-        atom.SetStat("test", current + arg);
+        var value = atom.GetStat("test") ?? 0 + arg;
+        atom.SetStat("test", value);
         
-        return ResultFactory.Atomic(arg - current);
+        return ResultFactory.Atomic(value);
     }
     
     [Effect("Keyword2")]
     public static IEffectResult Keyword2(IHasStats atom, int arg)
     {
-        var current = atom.GetStat("test") ?? 0;
-        atom.SetStat("test", current - arg);
+        var value = atom.GetStat("test") ?? 0 - arg;
+        atom.SetStat("test", value);
         
-        return ResultFactory.Atomic(arg - current);
+        return ResultFactory.Atomic(value);
+    }
+    
+    [Effect("Keyword3")]
+    public static IEffectResult Keyword3(IResolutionContext resolutionContext, int arg)
+    {
+        var source = resolutionContext.GetSource();
+        
+        source.SetStat("test", arg);
+
+        return ResultFactory.Atomic(arg);
     }
 }

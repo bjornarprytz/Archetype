@@ -104,7 +104,12 @@ public class ExpressionParser
             
             var argumentExpression = effectData.ArgumentExpressions[nNonContextParameters];
             
-            effectParameters.Add(ParseUnknownValueExpression(argumentExpression));
+            var valueExpression = ParseUnknownValueExpression(argumentExpression);
+            
+            if (!valueExpression.ValueType.Implements(parameterType.AsNullable()))
+                throw new InvalidOperationException($"Invalid argument type for effect: {effectData.Keyword}: {valueExpression.ValueType} should implement {parameterType}");
+            
+            effectParameters.Add(valueExpression);
             
             nNonContextParameters++;
         }

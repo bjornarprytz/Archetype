@@ -16,7 +16,6 @@ public interface IGameState
     [PathPart("exile")]
     IZone GetExile();
 
-    [PathPart("cardPool")]
     ICardPool GetCardPool();
     
     internal IAtom? GetAtom(Guid id);

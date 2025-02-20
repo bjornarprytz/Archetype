@@ -14,6 +14,11 @@ internal static class ReflectionExtensions
         return type?.IsAssignableTo(other) ?? false;
     }
     
+    public static Type AsNullable(this Type type)
+    {
+        return type.IsNonNullableValueType() ? typeof(Nullable<>).MakeGenericType(type) : type;
+    }
+    
     public static Type GetItemsType(this Type type)
     {
         if (type.IsGenericType && type.GetGenericArguments().Single() is { } elementType)
@@ -190,7 +195,7 @@ internal static class ReflectionExtensions
                 throw new InvalidOperationException($"Invalid path: {pathPart} of {string.Join('.', path)}");
         }
         
-        return currentType.EnsureNullable();
+        return currentType.AsNullable();
     }
 
     private static Type? GetPartType(this Type type, string part)
@@ -243,7 +248,7 @@ internal static class ReflectionExtensions
     {
         return Expression.Condition(
             Expression.Equal(currentExpression, Expression.Constant(null, currentExpression.Type)),
-            Expression.Default(nextExpression.Type.EnsureNullable()),
+            Expression.Default(nextExpression.Type.AsNullable()),
             nextExpression.ConvertIfNonNullable());
     }
     
@@ -252,11 +257,6 @@ internal static class ReflectionExtensions
         return expression.Type.IsNonNullableValueType()
             ? Expression.Convert(expression, typeof(Nullable<>).MakeGenericType(expression.Type))
             : expression;
-    }
-    
-    private static Type EnsureNullable(this Type type)
-    {
-        return type.IsNonNullableValueType() ? typeof(Nullable<>).MakeGenericType(type) : type;
     }
     
     private static bool IsNonNullableValueType(this Type type)

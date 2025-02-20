@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using Archetype.Framework.Core;
+using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
 namespace Archetype.Framework.Effects.Atomic;
@@ -195,15 +196,22 @@ public static class AtomicEffect
     
     public record struct CreateCardResult(string Name, Guid Card, Guid Zone);
     [Effect("CreateCard")]
-    public static IEffectResult CreateCard(ICardProto proto, IZone zone)
+    public static IEffectResult CreateCard(IResolutionContext context, string cardName, IZone zone)
     {
-        var card = new Card(proto)
+        var cardProto = context.GetState().GetCardPool().GetCard(cardName);
+        
+        if (cardProto is null)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        var card = new Card(cardProto)
         {
             Zone = zone
         };
         
         return !zone.AddAtom(card) 
             ? ResultFactory.NoOp() 
-            : ResultFactory.Atomic(new CreateCardResult(proto.Name, card.Id, zone.Id));
+            : ResultFactory.Atomic(new CreateCardResult(cardName, card.Id, zone.Id));
     }
 }
