@@ -7,11 +7,11 @@ namespace Archetype.Framework.GameLoop;
 
 public interface IGameRoot
 {
+    // Game loop state
+    IScope RootScope { get; }
+    
     // How things are
     IGameState State { get; }
-    
-    // Available cards (proto data)
-    ICardPool CardPool { get; }
     
     // Player agency
     IEnumerable<IEvent> TakeAction(IActionArgs actionArgs);
@@ -21,6 +21,9 @@ public interface IScope
 {
     Guid Id { get; }
     IScope? Parent { get; }
+    /// <summary>
+    /// This is the active sub-scope, if any. It is appended to the nested scopes list when the scope is exited.
+    /// </summary>
     IScope? CurrentSubScope { get; }
     IEnumerable<IScope> Nested { get; }
     IEnumerable<IEvent> Events { get; }
@@ -37,24 +40,6 @@ public interface IScope
 
 internal class Game() : Scope(null)
 {
-    public IScope GetEdgeScope()
-    {
-        IScope scope = this;
-        var loopDetector = new HashSet<IScope>(){ scope };
-        
-        
-        while (scope.CurrentSubScope != null)
-        {
-            scope = scope.CurrentSubScope;
-            
-            if (!loopDetector.Add(scope))
-            {
-                throw new InvalidOperationException("Scope loop detected");
-            }
-        }
-
-        return scope;
-    }
 }
 
 internal class Turn(Game game) : Scope(game)

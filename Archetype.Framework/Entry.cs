@@ -7,64 +7,43 @@ namespace Archetype.Framework;
 
 public static class Bootstrap
 {
-    public static IGameRoot StartGame(IRules rules, ICardPool cardPool)
+    public static IGameRoot Init(IRules rules, IScope? rootScope)
     {
-        return new GameRoot(rules, cardPool);
+        return new GameRoot(rootScope ?? new Game(), rules);
     }
 }
 
-file class GameRoot(IRules rules, ICardPool cardPool) : IGameRoot
+file class GameRoot(IScope rootScope, IRules rules) : IGameRoot
 {
-    public Game RootScope { get; } = new Game();
-    public IGameState? State { get; private set; }
-    public ICardPool CardPool => cardPool;
+    public IScope RootScope => rootScope;
+    public IGameState State { get; } = rules.CreateInitialState();
 
     public IEnumerable<IEvent> TakeAction(IActionArgs actionArgs)
     {
         var scope = RootScope.GetEdgeScope();
 
-        if (!rules.ValidateAction(State, scope, actionArgs, out var error))
-        {
-            throw new InvalidOperationException($"Invalid action <{actionArgs}>. {error}");
-        }
-        
-        return (actionArgs) switch {
-            PlayCardArgs args => PlayCard(args),
-            EndTurnArgs args => EndTurn(args),
-            StartGameArgs args => StartGame(args),
-            _ => throw new NotImplementedException()
-        };
+        return rules.ResolveAction(scope, actionArgs);
     }
-    
-    private IEnumerable<IEvent> PlayCard(PlayCardArgs args)
+}
+
+
+file static class Extensions
+{
+    public static IScope GetEdgeScope(this IScope scope)
     {
-        var scope = new GameAction(); // TODO: Create Action context properly based on the current phase
+        var edgeScope = scope;
+        var loopDetector = new HashSet<IScope>(){ edgeScope };
         
-        if (!rules.TryBindContext(State!, scope, args, out var context))
+        while (edgeScope.CurrentSubScope != null)
         {
-            throw new ArgumentException($"Invalid action <{args}>. Could not bind context.");
-        }
-
-        // TODO: Resolve costs
-
-        foreach (var effectProto in context!.GetEffects())
-        {
-            foreach (var e in  rules.ResolveEffect(context, effectProto))
+            edgeScope = edgeScope.CurrentSubScope;
+            
+            if (!loopDetector.Add(edgeScope))
             {
-                scope.AddEvent(e);
+                throw new InvalidOperationException("Scope loop detected");
             }
         }
-        
-        return scope.Events;
-    }
-    
-    private IEnumerable<IEvent> EndTurn(EndTurnArgs args)
-    {
-        throw new NotImplementedException();
-    }
-    
-    private IEnumerable<IEvent> StartGame(StartGameArgs args)
-    {
-        throw new NotImplementedException();
+
+        return edgeScope;
     }
 }

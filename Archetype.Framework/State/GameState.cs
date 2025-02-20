@@ -1,4 +1,5 @@
 ﻿using Archetype.Framework.Events;
+using Archetype.Framework.GameLoop;
 
 namespace Archetype.Framework.State;
 
@@ -14,6 +15,9 @@ public interface IGameState
     IZone GetDiscardPile();
     [PathPart("exile")]
     IZone GetExile();
+
+    [PathPart("cardPool")]
+    ICardPool GetCardPool();
     
     internal IAtom? GetAtom(Guid id);
     internal void AddAtom(IAtom atom);
@@ -42,6 +46,11 @@ internal class GameState : IGameState
     }
 
     public IZone GetExile()
+    {
+        throw new NotImplementedException();
+    }
+
+    public ICardPool GetCardPool()
     {
         throw new NotImplementedException();
     }
