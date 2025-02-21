@@ -26,15 +26,30 @@ public class ExpressionParser
         return new CardProto()
         {
             Name = cardData.Name,
-            Costs = cardData.Costs.ToDictionary(kvp => kvp.Key, kvp => ParseNumberExpression(kvp.Value)),
+            Costs = cardData.Costs.ToDictionary(
+                kvp => kvp.Key, 
+                kvp => ParseCost(kvp.Key, kvp.Value)),
             Targets = cardData.Targets.Select(ParseTargets).ToArray(),
             
-            Stats = cardData.Stats.ToDictionary(kvp => kvp.Key, kvp => ParseNumberExpression(kvp.Value)),
+            Stats = cardData.Stats.ToDictionary(
+                kvp => kvp.Key, 
+                kvp => ParseNumberExpression(kvp.Value)),
             Facets = cardData.Facets,
             Tags = cardData.Tags,
             
             Effects = cardData.Effects.Select(ParseEffect).ToArray(),
-            Variables = cardData.Variables.ToDictionary(kvp => kvp.Key, kvp => ParseNumberExpression(kvp.Value)),
+            Variables = cardData.Variables.ToDictionary(
+                kvp => kvp.Key, 
+                kvp => ParseNumberExpression(kvp.Value)),
+        };
+    }
+    
+    private CostProto ParseCost(string resourceType, ReadExpression costExpression)
+    {
+        return new CostProto()
+        {
+            ResourceType = resourceType,
+            Amount = ParseNumberExpression(costExpression),
         };
     }
     

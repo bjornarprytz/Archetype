@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Archetype.Framework.Core;
 using Archetype.Framework.Effects;
+using Archetype.Framework.Effects.Atomic;
 using Archetype.Framework.Events;
 using Archetype.Framework.GameLoop;
 using Archetype.Framework.Parsing;
@@ -60,6 +61,17 @@ file class Rules(IEnumerable<MethodInfo> effectResolvers, IEnumerable<CardProto>
         }
         
         return effectProto.BindEffectResolver(resolver);
+    }
+
+    public Func<IResolutionContext, IEvent> BindCostResolver(CostProto costProto)
+    {
+        // TODO: This should probably be more dynamic, and not hardcoded to the PayResource effect, which could enable more interesting costs, and ways of paying.
+        return ctx =>
+        {
+            var result = AtomicEffect.PayResource(ctx, costProto.ResourceType, costProto.Amount.GetValue(ctx) ?? 0);
+            
+            return new Event(result, ctx.GetScope());
+        };
     }
 }
 
@@ -131,13 +143,26 @@ file static class Extensions
     
     private static bool ValidateContext(this IResolutionContext context, out string error)
     {
-        foreach (var (resourceType, value) in context.Costs)
+        foreach (var cost in context.Costs.Values)
         {
-            var playerResource = context.GetState().GetPlayer().GetResouceCount(resourceType);
+            var playerResource = context.GetState().GetPlayer().GetResouceCount(cost.ResourceType);
+            var amountToPay = cost.Amount.GetValue(context);
             
-            if (playerResource < value.GetValue(context))
+            if (playerResource == null)
             {
-                error = $"Insufficient resources: {resourceType} required {value.GetValue(context)}, but player only has {playerResource}";
+                error = $"Resource not found: {cost.ResourceType}";
+                return false;
+            }
+            
+            if (amountToPay == null)
+            {
+                error = $"Invalid amount: {cost.Amount}";
+                return false;
+            }
+            
+            if (playerResource < amountToPay)
+            {
+                error = $"Insufficient resources: {cost.ResourceType} required {cost.Amount.GetValue(context)}, but player only has {playerResource}";
                 return false;
             }
         }

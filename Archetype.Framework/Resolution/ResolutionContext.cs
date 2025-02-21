@@ -22,7 +22,7 @@ public interface IResolutionContext : IValueWhence
     [PathPart("costs")]
     int? GetCost(string resourceKey);
     
-    internal IReadOnlyDictionary<string, IValue<int?>> Costs { get; }
+    internal IReadOnlyDictionary<string, CostProto> Costs { get; }
     internal IReadOnlyList<EffectProto> Effects { get; }
     internal IReadOnlyList<TargetProto> TargetDescriptors { get; }
     internal IReadOnlyList<IAtom> ChosenTargets { get; }
@@ -57,10 +57,10 @@ internal class ResolutionContext(IGameState state, IScope scope, IActionBlock ac
     public int? GetCost(string resourceKey)
     {
         return !actionBlock.Costs.TryGetValue(resourceKey, out var cost) ? null : 
-            cost.GetValue(this);
+            cost.Amount.GetValue(this);
     }
 
-    public IReadOnlyDictionary<string, IValue<int?>> Costs { get; } = actionBlock.Costs;
+    public IReadOnlyDictionary<string, CostProto> Costs { get; } = actionBlock.Costs;
 
     public IReadOnlyList<EffectProto> Effects { get; } = actionBlock.Effects.ToArray();
     public IReadOnlyList<TargetProto> TargetDescriptors { get; } = actionBlock.Targets.ToArray();
@@ -95,10 +95,10 @@ internal class ResolutionContext(IGameState state, IScope scope, IActionBlock ac
         if (_contextResolved)
             throw new InvalidOperationException("Context has already been resolved");
         
-        // TODO: Bind cost resolvers too
+        var costResolvers = Costs.Values.Select(rules.BindCostResolver);
         
-        var resolvers = Effects.Select(rules.BindEffectResolver).ToList();
+        var effectResolvers = Effects.Select(rules.BindEffectResolver);
 
-        _resolvers = resolvers;
+        _resolvers = costResolvers.Concat(effectResolvers);
     }
 }

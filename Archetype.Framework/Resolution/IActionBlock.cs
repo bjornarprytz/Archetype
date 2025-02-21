@@ -6,7 +6,7 @@ namespace Archetype.Framework.Resolution;
 public interface IActionBlock
 {
     public IAtom Source { get; }
-    public IReadOnlyDictionary<string, IValue<int?>> Costs { get; }
+    public IReadOnlyDictionary<string, CostProto> Costs { get; }
     public IEnumerable<TargetProto> Targets { get; }
     public IEnumerable<EffectProto> Effects { get; }
 }

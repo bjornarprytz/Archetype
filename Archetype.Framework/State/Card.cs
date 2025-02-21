@@ -32,7 +32,7 @@ internal class Card : Atom, ICard
     }
 
     public IAtom Source => this;
-    public IReadOnlyDictionary<string, IValue<int?>> Costs => _proto.Costs;
+    public IReadOnlyDictionary<string, CostProto> Costs => _proto.Costs;
     public IEnumerable<TargetProto> Targets => _proto.Targets;
     public IEnumerable<EffectProto> Effects => _proto.Effects;
 }

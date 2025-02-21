@@ -9,7 +9,7 @@ public interface ICardProto
 {
     public string Name { get; }
     
-    public Dictionary<string, IValue<int?>> Costs { get; }
+    public Dictionary<string, CostProto> Costs { get; }
     public IEnumerable<TargetProto> Targets { get; }
     public IEnumerable<EffectProto> Effects { get; }
     
@@ -23,7 +23,7 @@ public interface ICardProto
 internal record CardProto : ICardProto
 {
     public required string Name { get; init; }
-    public required Dictionary<string, IValue<int?>> Costs { get; init; }
+    public required Dictionary<string, CostProto> Costs { get; init; }
     public required IEnumerable<TargetProto> Targets { get; init; }
     public required Dictionary<string, IValue<int?>> Stats { get; init; }
     public required Dictionary<string, string[]> Facets { get; init; }
@@ -49,6 +49,12 @@ public enum Whence // TODO: Evaluate if this is necessary
     /// Scope, State, Targets, etc.
     /// </summary>
     Context,
+}
+
+public record CostProto
+{
+    public required string ResourceType { get; init; }
+    public required IValue<int?> Amount { get; init; }
 }
 
 public record EffectProto
