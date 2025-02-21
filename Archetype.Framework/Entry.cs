@@ -1,6 +1,9 @@
-﻿using Archetype.Framework.Core;
+﻿using System.Reflection;
+using Archetype.Framework.Core;
+using Archetype.Framework.Effects;
 using Archetype.Framework.Events;
 using Archetype.Framework.GameLoop;
+using Archetype.Framework.Parsing;
 using Archetype.Framework.Resolution;
 using Archetype.Framework.State;
 
@@ -27,8 +30,10 @@ file class GameRoot(IScope rootScope, IRules rules) : IGameRoot
     }
 }
 
-file class Rules : IRules
+file class Rules(IEnumerable<MethodInfo> effectResolvers, IEnumerable<CardProto> cardPool) : IRules
 {
+    private readonly Dictionary<string, MethodInfo> _effectResolvers = effectResolvers.ToDictionary(method => method.GetRequiredAttribute<EffectAttribute>().Keyword, method => method);
+    
     public IGameState CreateInitialState()
     {
         return new GameState();
@@ -41,21 +46,66 @@ file class Rules : IRules
         {
             (PlayCardArgs playCardArgs, Phase phase) => playCardArgs.BindContext(this, state, phase.NewAction()).ResolveEffects(),
             
-            // TODO: Add more action resolvers here
+            (EndTurnArgs endTurnArgs, Phase phase) => endTurnArgs.BindContext(this, state, phase.NewAction()).ResolveEffects(),
             
             _ => throw new NotImplementedException($"Unable to resolve action {actionArgs} in scope {edgeScope}")
         };
     }
 
-    public Func<IResolutionContext, IEnumerable<IEvent>> BindEffectResolver(EffectProto effectProto, IResolutionContext context)
+    public Func<IResolutionContext, IEvent> BindEffectResolver(EffectProto effectProto)
     {
-        throw new NotImplementedException();
+        if (!_effectResolvers.TryGetValue(effectProto.Keyword, out var resolver))
+        {
+            throw new InvalidOperationException($"Unable to find resolver for effect {effectProto.Keyword}");
+        }
+        
+        return effectProto.BindEffectResolver(resolver);
     }
 }
 
 
 file static class Extensions
 {
+    public static Func<IResolutionContext, IEvent> BindEffectResolver(this EffectProto effectProto, MethodInfo resolver)
+    {
+        return ctx =>
+        {
+            var effectParameters = new Queue<IValue>(effectProto.Parameters);
+
+            var parameters = resolver.GetParameters().Select(p =>
+            {
+                if (p.ParameterType.Implements(typeof(IResolutionContext)))
+                {
+                    return ctx;
+                }
+                else
+                {
+                    return effectParameters.Dequeue().GetValue(ctx);
+                }
+            })?.ToArray();
+            
+            var result = resolver.Invoke(default, parameters);
+            
+            if (result is IEffectResult effectResult)
+            {
+                return new Event(effectResult, ctx.GetScope());
+            }
+            else
+            {
+                throw new InvalidOperationException("Effect resolver did not return an effect result");
+            }
+
+        };
+    }
+    
+    public static IResolutionContext BindContext(this EndTurnArgs endTurnArgs, IRules rules, IGameState state, GameAction actionScope)
+    {
+        var context = new ResolutionContext(state, actionScope, null, Array.Empty<IAtom>());
+        
+        context.BindResolvers(rules);
+        
+        return context;
+    }
     
     public static IResolutionContext BindContext(this PlayCardArgs playCardArgs, IRules rules, IGameState state, GameAction actionScope)
     {

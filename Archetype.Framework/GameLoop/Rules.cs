@@ -10,7 +10,7 @@ public interface IRules
 {
     IGameState CreateInitialState();
     IEnumerable<IEvent> ResolveAction(IGameState state, IScope scope, IActionArgs actionArgs);
-    internal Func<IResolutionContext, IEnumerable<IEvent>> BindEffectResolver(EffectProto effectProto, IResolutionContext context); 
+    internal Func<IResolutionContext, IEvent> BindEffectResolver(EffectProto effectProto); 
     
     // TODO: Effect Resolvers might need to be exposed in a more user readable/friendly way, in order to do rules lookup etc.
 }

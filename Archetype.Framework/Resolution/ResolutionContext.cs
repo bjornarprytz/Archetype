@@ -29,7 +29,7 @@ public interface IResolutionContext : IValueWhence
 internal class ResolutionContext(IGameState state, IScope scope, ICard source, IEnumerable<IAtom> targets) : IResolutionContext
 {
     private bool _contextResolved = false;
-    private IEnumerable<Func<IResolutionContext, IEnumerable<IEvent>>>? _resolvers;
+    private IEnumerable<Func<IResolutionContext, IEvent>>? _resolvers;
     public IGameState GetState()
     {
         return state;
@@ -64,7 +64,7 @@ internal class ResolutionContext(IGameState state, IScope scope, ICard source, I
 
         var events = new List<IEvent>();
         
-        foreach (var @event in _resolvers.SelectMany(effect => effect.Invoke(this)))
+        foreach (var @event in _resolvers.Select(effect => effect.Invoke(this)))
         {
             scope.AddEvent(@event);
             events.Add(@event);
@@ -83,7 +83,7 @@ internal class ResolutionContext(IGameState state, IScope scope, ICard source, I
         if (_contextResolved)
             throw new InvalidOperationException("Context has already been resolved");
         
-        var resolvers = Effects.Select(effect => rules.BindEffectResolver(effect, this)).ToList();
+        var resolvers = Effects.Select(rules.BindEffectResolver).ToList();
 
         _resolvers = resolvers;
     }
