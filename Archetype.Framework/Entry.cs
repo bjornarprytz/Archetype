@@ -100,6 +100,8 @@ file static class Extensions
     
     public static IResolutionContext BindContext(this EndTurnArgs endTurnArgs, IRules rules, IGameState state, GameAction actionScope)
     {
+        // TODO: Create action block for ending the turn. Resolve enemy moves, upkeep, etc.
+        
         var context = new ResolutionContext(state, actionScope, null, Array.Empty<IAtom>());
         
         context.BindResolvers(rules);
@@ -129,6 +131,17 @@ file static class Extensions
     
     private static bool ValidateContext(this IResolutionContext context, out string error)
     {
+        foreach (var (resourceType, value) in context.Costs)
+        {
+            var playerResource = context.GetState().GetPlayer().GetResouceCount(resourceType);
+            
+            if (playerResource < value.GetValue(context))
+            {
+                error = $"Insufficient resources: {resourceType} required {value.GetValue(context)}, but player only has {playerResource}";
+                return false;
+            }
+        }
+        
         var chosenTargets = context.ChosenTargets;
         var targetDescriptors = context.TargetDescriptors;
         

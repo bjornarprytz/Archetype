@@ -5,14 +5,12 @@ namespace Archetype.Framework.State;
 
 public interface IGameState
 {
+    [PathPart("player")]
+    IPlayer GetPlayer();
+    
     [PathPart("zones")]
     IEnumerable<IZone> GetZones();
-    [PathPart("drawPile")]
-    IZone GetDrawPile();
-    [PathPart("hand")]
-    IZone GetHand();
-    [PathPart("discardPile")]
-    IZone GetDiscardPile();
+    
     [PathPart("exile")]
     IZone GetExile();
 
@@ -24,22 +22,12 @@ public interface IGameState
 
 internal class GameState : IGameState
 {
+    public IPlayer GetPlayer()
+    {
+        throw new NotImplementedException();
+    }
+
     public IEnumerable<IZone> GetZones()
-    {
-        throw new NotImplementedException();
-    }
-
-    public IZone GetDrawPile()
-    {
-        throw new NotImplementedException();
-    }
-
-    public IZone GetHand()
-    {
-        throw new NotImplementedException();
-    }
-
-    public IZone GetDiscardPile()
     {
         throw new NotImplementedException();
     }

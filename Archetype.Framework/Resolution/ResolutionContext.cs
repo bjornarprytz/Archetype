@@ -19,6 +19,10 @@ public interface IResolutionContext : IValueWhence
     [PathPart("targets")]
     IAtom? GetTarget(int index);
     
+    [PathPart("costs")]
+    int? GetCost(string resourceKey);
+    
+    internal IReadOnlyDictionary<string, IValue<int?>> Costs { get; }
     internal IReadOnlyList<EffectProto> Effects { get; }
     internal IReadOnlyList<TargetProto> TargetDescriptors { get; }
     internal IReadOnlyList<IAtom> ChosenTargets { get; }
@@ -26,7 +30,7 @@ public interface IResolutionContext : IValueWhence
     internal void BindResolvers(IRules rules);
 }
 
-internal class ResolutionContext(IGameState state, IScope scope, ICard source, IEnumerable<IAtom> targets) : IResolutionContext
+internal class ResolutionContext(IGameState state, IScope scope, IActionBlock actionBlock, IEnumerable<IAtom> targets) : IResolutionContext
 {
     private bool _contextResolved = false;
     private IEnumerable<Func<IResolutionContext, IEvent>>? _resolvers;
@@ -42,7 +46,7 @@ internal class ResolutionContext(IGameState state, IScope scope, ICard source, I
 
     public IAtom GetSource()
     {
-        return source;
+        return actionBlock.Source;
     }
 
     public IAtom? GetTarget(int index)
@@ -50,8 +54,16 @@ internal class ResolutionContext(IGameState state, IScope scope, ICard source, I
         return index < ChosenTargets.Count ? ChosenTargets[index] : null;
     }
 
-    public IReadOnlyList<EffectProto> Effects { get; } = source.GetProto().Effects.ToArray();
-    public IReadOnlyList<TargetProto> TargetDescriptors { get; } = source.GetProto().Targets.ToArray();
+    public int? GetCost(string resourceKey)
+    {
+        return !actionBlock.Costs.TryGetValue(resourceKey, out var cost) ? null : 
+            cost.GetValue(this);
+    }
+
+    public IReadOnlyDictionary<string, IValue<int?>> Costs { get; } = actionBlock.Costs;
+
+    public IReadOnlyList<EffectProto> Effects { get; } = actionBlock.Effects.ToArray();
+    public IReadOnlyList<TargetProto> TargetDescriptors { get; } = actionBlock.Targets.ToArray();
     public IReadOnlyList<IAtom> ChosenTargets { get; } = targets.ToArray();
 
     public IEnumerable<IEvent> ResolveEffects()
@@ -82,6 +94,8 @@ internal class ResolutionContext(IGameState state, IScope scope, ICard source, I
         
         if (_contextResolved)
             throw new InvalidOperationException("Context has already been resolved");
+        
+        // TODO: Bind cost resolvers too
         
         var resolvers = Effects.Select(rules.BindEffectResolver).ToList();
 

@@ -4,7 +4,7 @@ using Archetype.Framework.Resolution;
 
 namespace Archetype.Framework.State;
 
-public interface ICard : IAtom
+public interface ICard : IAtom, IActionBlock
 {
     [PathPart("name")]
     public string GetName();
@@ -30,4 +30,9 @@ internal class Card : Atom, ICard
     {
         return _proto;
     }
+
+    public IAtom Source => this;
+    public IReadOnlyDictionary<string, IValue<int?>> Costs => _proto.Costs;
+    public IEnumerable<TargetProto> Targets => _proto.Targets;
+    public IEnumerable<EffectProto> Effects => _proto.Effects;
 }

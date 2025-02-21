@@ -28,16 +28,18 @@ public class ReflectionExtensionsTests
     {
         var context = Substitute.For<IResolutionContext>();
         var state = Substitute.For<IGameState>();
+        var player = Substitute.For<IPlayer>();
         var hand = Substitute.For<IZone>();
         var atom = Substitute.For<IAtom>();
         IAtom[] atoms = { atom };
         
         context.GetState().ReturnsForAnyArgs(state);
-        state.GetHand().ReturnsForAnyArgs(hand);
+        state.GetPlayer().ReturnsForAnyArgs(player);
+        player.GetHand().ReturnsForAnyArgs(hand);
         hand.GetAtoms().ReturnsForAnyArgs(atoms);
         
         
-        var path = "state.hand.atoms".Split('.');
+        var path = "state.player.hand.atoms".Split('.');
         
         var accessor = path.CreateAccessor<IResolutionContext, IEnumerable<IAtom>>();
         
@@ -52,14 +54,16 @@ public class ReflectionExtensionsTests
     {
         var context = Substitute.For<IResolutionContext>();
         var state = Substitute.For<IGameState>();
+        var player = Substitute.For<IPlayer>();
         var hand = Substitute.For<IZone>();
         
         context.GetState().ReturnsForAnyArgs(state);
-        state.GetHand().ReturnsForAnyArgs(hand);
+        state.GetPlayer().ReturnsForAnyArgs(player);
+        player.GetHand().ReturnsForAnyArgs(hand);
         hand.AtomCount.Returns(69);
         
         
-        var path = "state.hand.count".Split('.');
+        var path = "state.player.hand.count".Split('.');
         
         var accessor = path.CreateAccessor<IResolutionContext, int?>();
         
@@ -75,7 +79,7 @@ public class ReflectionExtensionsTests
         var context = Substitute.For<IResolutionContext>();
         context.GetState().ReturnsNull();
         
-        var path = "state.hand.count".Split('.');
+        var path = "state.player.hand.count".Split('.');
         
         var accessor = path.CreateAccessor<IResolutionContext, int?>();
         

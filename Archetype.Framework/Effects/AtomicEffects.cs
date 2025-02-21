@@ -214,4 +214,49 @@ public static class AtomicEffect
             ? ResultFactory.NoOp() 
             : ResultFactory.Atomic(new CreateCardResult(cardName, card.Id, zone.Id));
     }
+    
+    public record struct ResourceChangeResult(string ResourceType, int Change, int NewValue);
+    
+    [Effect("PayResource")]
+    public static IEffectResult PayResource(IResolutionContext context, string resourceType, int amount)
+    {
+        if (amount <= 0)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        var player = context.GetState().GetPlayer();
+        
+        var currentResource = player.GetResouceCount(resourceType) ?? 0;
+        
+        if (currentResource < amount)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        var newValue = currentResource - amount;
+        
+        player.SetResourceCount(resourceType, newValue);
+        
+        return ResultFactory.Atomic(new ResourceChangeResult(resourceType, -amount, newValue));
+    }
+    
+    [Effect("GainResource")]
+    public static IEffectResult GainResource(IResolutionContext context, string resourceType, int amount)
+    {
+        if (amount <= 0)
+        {
+            return ResultFactory.NoOp();
+        }
+        
+        var player = context.GetState().GetPlayer();
+        
+        var currentResource = player.GetResouceCount(resourceType) ?? 0;
+        
+        var newValue = currentResource + amount;
+        
+        player.SetResourceCount(resourceType, newValue);
+        
+        return ResultFactory.Atomic(new ResourceChangeResult(resourceType, amount, newValue));
+    }
 }

@@ -8,14 +8,15 @@ namespace Archetype.Framework.Core;
 public interface ICardProto
 {
     public string Name { get; }
+    
     public Dictionary<string, IValue<int?>> Costs { get; }
     public IEnumerable<TargetProto> Targets { get; }
+    public IEnumerable<EffectProto> Effects { get; }
     
     public Dictionary<string, IValue<int?>> Stats { get; }
     public Dictionary<string, string[]> Facets { get; }
     public IEnumerable<string> Tags { get; }
     
-    public IEnumerable<EffectProto> Effects { get; }
     public Dictionary<string, IValue<int?>> Variables { get; }
 }
 
