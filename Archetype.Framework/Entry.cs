@@ -33,7 +33,9 @@ file class GameRoot(IScope rootScope, IRules rules) : IGameRoot
 
 file class Rules(IEnumerable<MethodInfo> effectResolvers, IEnumerable<CardProto> cardPool) : IRules
 {
-    private readonly Dictionary<string, MethodInfo> _effectResolvers = effectResolvers.ToDictionary(method => method.GetRequiredAttribute<EffectAttribute>().Keyword, method => method);
+    private readonly Dictionary<string, KeywordResolver> _keywords = effectResolvers.ToDictionary(method => method.GetRequiredAttribute<EffectAttribute>().Keyword, method => new KeywordResolver(method));
+    private readonly ICardPool _cardPool = new CardPool(cardPool);
+    // TODO: Tests for this implementation
     
     public IGameState CreateInitialState()
     {
@@ -55,12 +57,12 @@ file class Rules(IEnumerable<MethodInfo> effectResolvers, IEnumerable<CardProto>
 
     public Func<IResolutionContext, IEvent> BindEffectResolver(EffectProto effectProto)
     {
-        if (!_effectResolvers.TryGetValue(effectProto.Keyword, out var resolver))
+        if (!_keywords.TryGetValue(effectProto.Keyword, out var keywordData))
         {
             throw new InvalidOperationException($"Unable to find resolver for effect {effectProto.Keyword}");
         }
         
-        return effectProto.BindEffectResolver(resolver);
+        return keywordData.BindResolver(effectProto);
     }
 
     public Func<IResolutionContext, IEvent> BindCostResolver(CostProto costProto)
@@ -75,40 +77,24 @@ file class Rules(IEnumerable<MethodInfo> effectResolvers, IEnumerable<CardProto>
     }
 }
 
+file class CardPool(IEnumerable<ICardProto> cards) : ICardPool
+{
+    private readonly Dictionary<string, ICardProto> _cards = cards.ToDictionary(card => card.Name, card => card);
+    
+    public IEnumerable<ICardProto> GetCards()
+    {
+        return _cards.Values;
+    }
+
+    public ICardProto? GetCard(string cardName)
+    {
+        return _cards.TryGetValue(cardName, out var card) ? card : null;
+    }
+}
+
 
 file static class Extensions
 {
-    public static Func<IResolutionContext, IEvent> BindEffectResolver(this EffectProto effectProto, MethodInfo resolver)
-    {
-        return ctx =>
-        {
-            var effectParameters = new Queue<IValue>(effectProto.Parameters);
-
-            var parameters = resolver.GetParameters().Select(p =>
-            {
-                if (p.ParameterType.Implements(typeof(IResolutionContext)))
-                {
-                    return ctx;
-                }
-                else
-                {
-                    return effectParameters.Dequeue().GetValue(ctx);
-                }
-            })?.ToArray();
-            
-            var result = resolver.Invoke(default, parameters);
-            
-            if (result is IEffectResult effectResult)
-            {
-                return new Event(effectResult, ctx.GetScope());
-            }
-            else
-            {
-                throw new InvalidOperationException("Effect resolver did not return an effect result");
-            }
-
-        };
-    }
     
     public static IResolutionContext BindContext(this EndTurnArgs endTurnArgs, IRules rules, IGameState state, GameAction actionScope)
     {

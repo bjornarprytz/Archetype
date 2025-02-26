@@ -63,7 +63,7 @@ public class ParseTests
                     ArgumentExpressions = new ReadExpression[]
                     {
                         new ("targets:1"),
-                        new ("state.hand.count")
+                        new ("state.player.hand.count")
                     }
                 }
             }
@@ -107,7 +107,7 @@ public class ParseTests
                     Parameters = new IValue[]
                     {
                         new Value<IResolutionContext, IAtom>(new [] {"targets:1"}),
-                        new Value<IResolutionContext, int?>(new [] {"state", "hand", "count"})
+                        new Value<IResolutionContext, int?>(new [] {"state", "player", "hand", "count"})
                     }
                 }
             }
