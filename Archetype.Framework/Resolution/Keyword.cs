@@ -12,11 +12,11 @@ public interface IKeyword
     Func<IResolutionContext, IEvent> BindResolver(EffectProto effectProto);
 }
 
-internal class KeywordResolver : IKeyword
+internal class KeywordBinder : IKeyword
 {
     private readonly MethodInfo _methodInfo;
     
-    public KeywordResolver(MethodInfo methodInfo)
+    public KeywordBinder(MethodInfo methodInfo)
     {
         if (methodInfo.GetCustomAttribute<EffectAttribute>() is not { Keyword: { Length: > 0 } keyword })
         {

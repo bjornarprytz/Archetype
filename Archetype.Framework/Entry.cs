@@ -33,7 +33,7 @@ file class GameRoot(IScope rootScope, IRules rules) : IGameRoot
 
 file class Rules(IEnumerable<MethodInfo> effectResolvers, IEnumerable<CardProto> cardPool) : IRules
 {
-    private readonly Dictionary<string, KeywordResolver> _keywords = effectResolvers.ToDictionary(method => method.GetRequiredAttribute<EffectAttribute>().Keyword, method => new KeywordResolver(method));
+    private readonly Dictionary<string, KeywordBinder> _keywords = effectResolvers.ToDictionary(method => method.GetRequiredAttribute<EffectAttribute>().Keyword, method => new KeywordBinder(method));
     private readonly ICardPool _cardPool = new CardPool(cardPool);
     // TODO: Tests for this implementation
     
