@@ -1,14 +1,12 @@
-﻿namespace Archetype.Tests;
+﻿using Archetype.Framework.Effects;
+
+namespace Archetype.Tests;
 
 public static class ResultAssertions
 {
-    public static Dictionary<string, object?[]> NoOp(string keyword) => new()
-    {
-        { keyword, new object?[] { null } }
-    };
+    public static IEffectResult NoOp(string keyword) => new AtomicResult(keyword, null, false, false);
     
-    public static Dictionary<string, object?[]> Atomic<T>(string keyword, T result) => new()
-    {
-        { keyword, new object?[] { result } }
-    };
+    public static IEffectResult Atomic<T>(string keyword, T result) => new AtomicResult(keyword, result, true, false);
+    
+    public static IEffectResult Failure(string keyword, string? message=default) => new AtomicResult(keyword, message, false, true);
 }

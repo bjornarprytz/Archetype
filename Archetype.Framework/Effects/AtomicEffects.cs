@@ -1,7 +1,4 @@
-﻿using System.Security.Cryptography;
-using Archetype.Framework.Core;
-using Archetype.Framework.Resolution;
-using Archetype.Framework.State;
+﻿using Archetype.Framework.State;
 
 namespace Archetype.Framework.Effects.Atomic;
 
@@ -10,69 +7,79 @@ public static class AtomicEffect
 {
     public record StatChangeResult(string Stat, int Change);
     [Effect("ChangeStat")]
-    public static IEffectResult ChangeStat(IHasStats target, string stat, int change)
+    public static IEffectResult ChangeStat(Atom target, string statKey, int change)
     {
+        var stats = target.BaseState.Stats;
+        
         if (change == 0)
         {
             return ResultFactory.NoOp();
         }
         
-        var currentValue = target.GetStat(stat) ?? 0;
+        var currentValue = stats.GetValueOrDefault(statKey);
         
-        target.SetStat(stat, currentValue + change);
+        stats[statKey] = currentValue + change;
         
-        return ResultFactory.Atomic(new StatChangeResult(stat, change));
+        return ResultFactory.Atomic(new StatChangeResult(statKey, change));
     }
     
     [Effect("SetStat")]
-    public static IEffectResult SetStat(IHasStats target, string stat, int value)
+    public static IEffectResult SetStat(Atom target, string statKey, int value)
     {
-        var currentValue = target.GetStat(stat) ?? 0;
+        var stats = target.BaseState.Stats;
+        
+        var currentValue = stats.GetValueOrDefault(statKey);
+        
+        stats[statKey] = value;
         
         if (currentValue == value)
         {
             return ResultFactory.NoOp();
         }
         
-        target.SetStat(stat, value);
-        
         var change = value - currentValue;
         
-        return ResultFactory.Atomic(new StatChangeResult(stat, change));
+        return ResultFactory.Atomic(new StatChangeResult(statKey, change));
     }
     
     public record AddTagResult(string Tag);
     [Effect("AddTag")]
-    public static IEffectResult AddTag(IHasTags target, string tag)
+    public static IEffectResult AddTag(Atom target, string tag)
     {
-        if (tag is not { Length: > 0 } || target.HasTag(tag))
+        var tags = target.BaseState.Tags;
+        
+        if (tag is not { Length: > 0 } || tags.Contains(tag))
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.Failure();
         }
         
-        target.AddTag(tag);
+        tags.Add(tag);
         
         return ResultFactory.Atomic(new AddTagResult(tag));
     }
     
     public record RemoveTagResult(string Tag);
     [Effect("RemoveTag")]
-    public static IEffectResult RemoveTag(IHasTags target, string tag)
+    public static IEffectResult RemoveTag(Atom target, string tag)
     {
-        if (tag is not { Length: > 0 } || !target.HasTag(tag))
+        var tags = target.BaseState.Tags;
+        
+        if (tag is not { Length: > 0 } || !tags.Contains(tag))
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.Failure();
         }
         
-        target.RemoveTag(tag);
+        tags.Remove(tag);
         
         return ResultFactory.Atomic(new RemoveTagResult(tag));
     }
     
     public record SetFacetResult(string Key, string[] AddedValues, string[] RemovedValues);
     [Effect("SetFacet")]
-    public static IEffectResult SetFacet(IHasFacets target, string key, string[] values)
+    public static IEffectResult SetFacet(Atom target, string key, string[] values)
     {
+        var facets = target.BaseState.Facets;
+        
         if (key is not { Length: > 0 } || values is not { Length: > 0 })
         {
             return ResultFactory.NoOp();
@@ -80,7 +87,7 @@ public static class AtomicEffect
         
         values = values.Distinct().ToArray();
         
-        var currentValues = target.GetFacet(key)?.ToArray() ?? Array.Empty<string>();
+        var currentValues = facets.GetValueOrDefault(key)?.ToArray() ?? Array.Empty<string>();
         
         var addedValues = values.Except(currentValues).ToArray();
         var removedValues = currentValues.Except(values).ToArray();
@@ -90,25 +97,27 @@ public static class AtomicEffect
             return ResultFactory.NoOp();
         }
         
-        target.SetFacet(key, values);
+        facets[key] = values;
         
         return ResultFactory.Atomic(new SetFacetResult(key, addedValues, removedValues));
     }
     
     public record RemoveFacetsResult(string Key, string[] Value);
     [Effect("RemoveFacets")]
-    public static IEffectResult RemoveFacets(IHasFacets target, string key, string[] valuesToRemove)
+    public static IEffectResult RemoveFacets(Atom target, string key, string[] valuesToRemove)
     {
+        var facets = target.BaseState.Facets;
+        
         if (key is not { Length: > 0 } || valuesToRemove is not { Length: > 0 })
         {
             return ResultFactory.NoOp();
         }
         
-        var currentValues = target.GetFacet(key)?.ToArray();
+        var currentValues = facets.GetValueOrDefault(key)?.ToArray();
         
         if (currentValues is null)
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.Failure();
         }
         
         var newValue = currentValues.Except(valuesToRemove).ToArray();
@@ -116,44 +125,56 @@ public static class AtomicEffect
         
         if (actuallyRemovedValues.Length == 0)
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.Failure();
         }
         
-        target.SetFacet(key, newValue);
+        if (newValue.Length == 0)
+        {
+            facets.Remove(key);
+        }
+        else
+        {
+            facets[key] = newValue;
+        }
+        
         
         return ResultFactory.Atomic(new RemoveFacetsResult(key, actuallyRemovedValues));
     }
     
     [Effect("ClearFacet")]
-    public static IEffectResult ClearFacet(IHasFacets target, string key)
+    public static IEffectResult ClearFacet(Atom target, string key)
     {
-        if (key is not { Length: > 0 })
+        var facets = target.BaseState.Facets;
+        
+        if (key is not { Length: > 0 } || !facets.TryGetValue(key, out var value))
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.Failure();
         }
         
-        var currentValues = target.GetFacet(key)?.ToArray();
+        var currentValues = value.ToArray();
         
-        if (currentValues is null || currentValues.Length == 0)
+        facets.Remove(key);
+        
+        if (currentValues.Length == 0)
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.Failure();
         }
-        
-        target.RemoveFacet(key);
         
         return ResultFactory.Atomic(new RemoveFacetsResult(key, currentValues));
     }
     
     public record AddFacetsResult(string Key, string[] Value);
     [Effect("AddFacets")]
-    public static IEffectResult AddFacets(IHasFacets target, string key, string[] valuesToAdd)
+    public static IEffectResult AddFacets(Atom target, string key, string[] valuesToAdd)
     {
+        var facets = target.BaseState.Facets;
+        
         if (key is not { Length: > 0 } || valuesToAdd is not { Length: > 0 })
         {
             return ResultFactory.NoOp();
         }
         
-        var currentValues = target.GetFacet(key)?.ToArray();
+        var currentValues = facets.GetValueOrDefault(key)?.ToArray();
         
         if (currentValues is null)
         {
@@ -169,94 +190,8 @@ public static class AtomicEffect
             return ResultFactory.NoOp();
         }
         
-        target.SetFacet(key, updatedValues);
+        facets[key] = updatedValues;
         
         return ResultFactory.Atomic(new AddFacetsResult(key, actuallyAddedValues));
-    }
-    
-    public record struct ChangeZoneResult(Guid Target, Guid? From, Guid To);
-    [Effect("ChangeZone")]
-    public static IEffectResult ChangeZone(IAtom target, IZone zone)
-    {
-        if (target.Zone == zone)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var currentZone = target.Zone;
-
-        currentZone?.RemoveAtom(target);
-        
-        target.Zone = zone;
-        
-        zone.AddAtom(target);
-        
-        return ResultFactory.Atomic(new ChangeZoneResult(target.Id, currentZone?.Id, zone.Id));
-    }
-    
-    public record struct CreateCardResult(string Name, Guid Card, Guid Zone);
-    [Effect("CreateCard")]
-    public static IEffectResult CreateCard(IResolutionContext context, string cardName, IZone zone)
-    {
-        var cardProto = context.GetState().GetCardPool().GetCard(cardName);
-        
-        if (cardProto is null)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var card = new Card(cardProto)
-        {
-            Zone = zone
-        };
-        
-        return !zone.AddAtom(card) 
-            ? ResultFactory.NoOp() 
-            : ResultFactory.Atomic(new CreateCardResult(cardName, card.Id, zone.Id));
-    }
-    
-    public record struct ResourceChangeResult(string ResourceType, int Change, int NewValue);
-    
-    [Effect("PayResource")]
-    public static IEffectResult PayResource(IResolutionContext context, string resourceType, int amount)
-    {
-        if (amount <= 0)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var player = context.GetState().GetPlayer();
-        
-        var currentResource = player.GetResouceCount(resourceType) ?? 0;
-        
-        if (currentResource < amount)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var newValue = currentResource - amount;
-        
-        player.SetResourceCount(resourceType, newValue);
-        
-        return ResultFactory.Atomic(new ResourceChangeResult(resourceType, -amount, newValue));
-    }
-    
-    [Effect("GainResource")]
-    public static IEffectResult GainResource(IResolutionContext context, string resourceType, int amount)
-    {
-        if (amount <= 0)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var player = context.GetState().GetPlayer();
-        
-        var currentResource = player.GetResouceCount(resourceType) ?? 0;
-        
-        var newValue = currentResource + amount;
-        
-        player.SetResourceCount(resourceType, newValue);
-        
-        return ResultFactory.Atomic(new ResourceChangeResult(resourceType, amount, newValue));
     }
 }

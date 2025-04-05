@@ -7,17 +7,18 @@ namespace Archetype.Framework.Effects;
 public interface IEffectResult
 {
     string Keyword { get; }
-    bool Success { get; }
+    bool MutationSuccess { get; }
+    bool Failure { get; }
     Dictionary<string, object?[]> Results { get; }
 }
 
-internal record AtomicResult(string Keyword, object? Result, bool Success = true) : IEffectResult
+internal record AtomicResult(string Keyword, object? Result, bool MutationSuccess = true, bool Failure = false) : IEffectResult
 {
     public string[] NestedKeywords { get; } = Array.Empty<string>();
     public Dictionary<string, object?[]> Results { get; } = new() { { Keyword, new [] { Result } } };
 }
 
-internal record CompositeResult(string Keyword, object? Result, IEffectResult[] NestedResults,  bool Success = true) : IEffectResult
+internal record CompositeResult(string Keyword, object? Result, IEffectResult[] NestedResults,  bool MutationSuccess = true, bool Failure = false) : IEffectResult
 {
     private Dictionary<string, object?[]> _myResults() => new() { { Keyword, new [] { Result } } };
     public Dictionary<string, object?[]> Results =>
@@ -70,6 +71,11 @@ internal static class ResultFactory
     public static IEffectResult NoOp([CallerMemberName]string methodName=default!)
     {
         return new AtomicResult(GetKeyword(methodName), null, false);
+    }
+    
+    public static IEffectResult Failure(string? message=default, [CallerMemberName]string methodName=default!)
+    {
+        return new AtomicResult(GetKeyword(methodName), message, false, true);
     }
 
     private static string GetKeyword(string methodName)

@@ -7,4 +7,9 @@
         <LangVersion>12</LangVersion>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Jsonata.Net.Native.SystemTextJson" Version="2.8.1" />
+      <PackageReference Include="JsonPatch.Net" Version="3.3.0" />
+    </ItemGroup>
+
 </Project>

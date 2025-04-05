@@ -1,114 +1,66 @@
 ﻿using Archetype.Framework.Core;
+using Json.Patch;
+using Json.Pointer;
+using Jsonata.Net.Native;
 
 namespace Archetype.Framework.State;
 
-
-public interface IHasLabels
+public record TriggeredEffect
 {
-    [PathPart("label")]
-    string? GetLabel(string labelKey);
-    void SetLabel(string labelKey, string value);
-    void RemoveLabel(string labelKey);
+    public required Trigger Trigger { get; init; }
+    public required IReadOnlyList<JsonataQuery> TargetPickers { get; init; } // Get the target(s) for the action block
+    public required ActionBlock ActionBlock { get; init; }
 }
 
-public interface IHasStats
+public record ActionBlock
 {
-    [PathPart("stats")]
-    int? GetStat(string statKey);
-    void SetStat(string statKey, int value);
+    public List<TargetProto> Targets { get; init; } = new();
+    public List<EffectProto> Effects { get; init; } = new();
 }
 
-public interface IHasFacets
+public record Trigger
 {
-    [PathPart("facets")]
-    IEnumerable<string>? GetFacet(string facetKey);
-    void SetFacet(string facetKey, string[] value);
-    void RemoveFacet(string facetKey);
+    public Trigger(JsonPointer JsonPointer, string? RequiredValue)
+    {
+        this.JsonPointer = JsonPointer;
+        this.RequiredValue = RequiredValue;
+        Patch = new(PatchOperation.Test(JsonPointer, RequiredValue ?? string.Empty));
+    }
+
+    private JsonPatch Patch { get; init; }
+    public JsonPointer JsonPointer { get; init; }
+    public string? RequiredValue { get; init; }
+
+    public void Deconstruct(out JsonPointer JsonPointer, out string? RequiredValue)
+    {
+        JsonPointer = this.JsonPointer;
+        RequiredValue = this.RequiredValue;
+    }
 }
 
-public interface IHasTags
+public record Modifier
 {
-    [PathPart("tags")]
-    string[] GetTags();
-    bool HasTag(string tag);
-    void AddTag(string tag);
-    void RemoveTag(string tag);
+    public required Guid SourceId { get; init; }
+    public required JsonPatch Patch { get; init; }
+    public required Trigger? EndTrigger { get; init; }
 }
 
-public interface IAtom : IHasStats, IHasFacets, IHasTags, IHasLabels, IValueWhence
+public record AtomState
 {
-    Guid Id { get; }
-    [PathPart("zone")]
-    IZone? Zone { get; set; }
+    public Dictionary<string, int> Stats { get; init; } = new();
+    public Dictionary<string, string[]> Facets { get; init; } = new();
+    public Dictionary<string, string> Labels { get; init; } = new();
+    public Dictionary<string, Guid> Atoms { get; init; } = new();
+    public Dictionary<string, HashSet<Guid>> AtomGroups { get; init; } = new();
+    public HashSet<string> Tags { get; init; } = new();
 }
 
-internal abstract class Atom : IAtom
+public record Atom
 {
     public Guid Id { get; init; } = Guid.NewGuid();
-    
-    public IZone? Zone { get; set; }
-    
-    protected Dictionary<string, int> _stats = new();
-    protected Dictionary<string, string[]> _facets = new();
-    protected Dictionary<string, string> _labels = new();
-    protected HashSet<string> _tags = new();
-    public int? GetStat(string statKey)
-    {
-        return _stats.TryGetValue(statKey, out var value) ? value : null;
-    }
-
-    public void SetStat(string statKey, int value)
-    {
-        _stats[statKey] = value;
-    }
-
-    public IEnumerable<string>? GetFacet(string facetKey)
-    {
-        return _facets.TryGetValue(facetKey, out var value) ? value : null;
-    }
-
-    public void SetFacet(string facetKey, string[] value)
-    {
-        _facets[facetKey] = value;
-    }
-
-    public void RemoveFacet(string facetKey)
-    {
-        _facets.Remove(facetKey);
-    }
-
-    public string[] GetTags()
-    {
-        return _tags.ToArray();
-    }
-
-    public bool HasTag(string tag)
-    {
-        return _tags.Contains(tag);
-    }
-
-    public void AddTag(string tag)
-    {
-        _tags.Add(tag);
-    }
-
-    public void RemoveTag(string tag)
-    {
-        _tags.Remove(tag);
-    }
-
-    public string? GetLabel(string labelKey)
-    {
-        return _labels.TryGetValue(labelKey, out var value) ? value : null;
-    }
-
-    public void SetLabel(string labelKey, string value)
-    { 
-        _labels[labelKey] = value;
-    }
-
-    public void RemoveLabel(string labelKey)
-    {
-        _labels.Remove(labelKey);
-    }
+    public required string Type { get; init; }
+    public AtomState BaseState { get; } = new();
+    public AtomState ResolvedState { get; } = new();
+    public List<TriggeredEffect> TriggeredEffects { get; } = new();
+    public Dictionary<JsonPointer, Modifier> Modifiers { get; } = new();
 }
