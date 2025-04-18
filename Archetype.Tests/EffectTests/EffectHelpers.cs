@@ -4,9 +4,16 @@ namespace Archetype.Tests;
 
 public static class ResultAssertions
 {
-    public static IEffectResult NoOp(string keyword) => new AtomicResult(keyword, null, false, false);
+    public static EffectResult NoOp(string keyword, params IReadOnlyList<object> parameters) => new ()
+    {
+        Keyword = keyword,
+        Parameters = parameters,
+        NoOp = true
+    };
     
-    public static IEffectResult Atomic<T>(string keyword, T result) => new AtomicResult(keyword, result, true, false);
-    
-    public static IEffectResult Failure(string keyword, string? message=default) => new AtomicResult(keyword, message, false, true);
+    public static EffectResult Atomic(string keyword, params IReadOnlyList<object> parameters) => new()
+    {
+        Keyword = keyword,
+        Parameters = parameters
+    };
 }

@@ -7,5 +7,5 @@ public record Event
 {
     public Guid Id { get; } = Guid.NewGuid();
     
-    public required IEffectResult Result { get; init; }
+    public required EffectResult Result { get; init; }
 }

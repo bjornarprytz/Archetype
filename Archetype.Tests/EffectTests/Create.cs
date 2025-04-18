@@ -4,12 +4,11 @@ namespace Archetype.Tests;
 
 public static class Create
 {
-    internal static Atom AtomWithFacets(string facetKey, string[] facets)
+    internal static Atom AtomWithFacets(string facetKey, params string[] facets)
     {
         var atom = new Atom()
         {
-            Type = "Some Atom",
-            BaseState =
+            State =
             {
                 Facets =
                 {
@@ -23,14 +22,11 @@ public static class Create
     
     internal static Atom AtomWithStats(string statKey, int? value)
     {
-        var atom = new Atom()
-        {
-            Type = "Some Atom",
-        };
+        var atom = Create.BasicAtom();
         
         if (value.HasValue)
         {
-            atom.BaseState.Stats[statKey] = value.Value;
+            atom.State.Stats[statKey] = value.Value;
         }
         
         return atom;
@@ -38,21 +34,15 @@ public static class Create
     
     internal static Atom AtomWithTags(params string[] tags)
     {
-        var atom = new Atom()
-        {
-            Type = "Some Atom"
-        };
+        var atom = new Atom();
         
         foreach (var tag in tags)
         {
-            atom.BaseState.Tags.Add(tag);
+            atom.State.Tags.Add(tag);
         }
         
         return atom;
     }
 
-    internal static Atom BasicAtom() => new Atom()
-    {
-        Type = "Some Atom",
-    };
+    internal static Atom BasicAtom() => new Atom();
 }

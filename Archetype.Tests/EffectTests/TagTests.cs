@@ -15,9 +15,9 @@ public class TagTests
         
         var result = AtomicEffect.AddTag(atom, "someTag");
         
-        result.Should().BeEquivalentTo(ResultAssertions.Atomic("AddTag", new AtomicEffect.AddTagResult("someTag")));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("AddTag", atom, "someTag"));
         
-        atom.BaseState.Tags.Should().Contain("someTag");
+        atom.State.Tags.Should().Contain("someTag");
     }
     
     [Fact]
@@ -27,63 +27,63 @@ public class TagTests
         
         var result = AtomicEffect.RemoveTag(atom, "someTag");
         
-        result.Should().BeEquivalentTo(ResultAssertions.Atomic("RemoveTag", new AtomicEffect.RemoveTagResult("someTag")));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("RemoveTag", atom, "someTag"));
         
-        atom.BaseState.Tags.Should().NotContain("someTag");
+        atom.State.Tags.Should().NotContain("someTag");
     }
     
     
     
     [Fact]
-    public void AddTagEffect_HasTag_ReturnsFailure()
+    public void AddTagEffect_HasTag_ReturnsNoOp()
     {
         var atom = Create.AtomWithTags("someTag");
         
         var result = AtomicEffect.AddTag(atom, "someTag");
         
         result.Should().BeEquivalentTo(
-            ResultAssertions.Failure("AddTag"));
+            ResultAssertions.NoOp("AddTag", atom, "someTag"));
         
-        atom.BaseState.Tags.Should().Contain("someTag");
+        atom.State.Tags.Should().Contain("someTag");
     }
     
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void AddTagEffect_TagIsNullOrEmpty_ReturnsFailure(string? tag)
+    public void AddTagEffect_TagIsNullOrEmpty_ReturnsNoOp(string? tag)
     {
         var atom = Create.BasicAtom();
         
         var result = AtomicEffect.AddTag(atom, tag!);
         
-        result.Should().BeEquivalentTo(ResultAssertions.Failure("AddTag"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("AddTag", atom, tag));
         
-        atom.BaseState.Tags.Should().NotContain(tag);
+        atom.State.Tags.Should().NotContain(tag);
     }
     
     
     [Fact]
-    public void RemoveTagEffect_DoesNotHaveTag_ReturnsFailure()
+    public void RemoveTagEffect_DoesNotHaveTag_ReturnsNoOp()
     {
         var atom = Create.BasicAtom();
         
         var result = AtomicEffect.RemoveTag(atom, "someTag");
         
         result.Should().BeEquivalentTo(
-            ResultAssertions.Failure("RemoveTag"));
+            ResultAssertions.NoOp("RemoveTag", atom, "someTag"));
     }
     
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void RemoveTagEffect_TagIsNullOrEmpty_ReturnsFailure(string? tag)
+    public void RemoveTagEffect_TagIsNullOrEmpty_ReturnsNoOp(string? tag)
     {
         var atom = Create.BasicAtom();
         
         var result = AtomicEffect.RemoveTag(atom, tag!);
         
-        result.Should().BeEquivalentTo(ResultAssertions.Failure("RemoveTag"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("RemoveTag", atom, tag));
         
-        atom.BaseState.Tags.Should().NotContain(tag);
+        atom.State.Tags.Should().NotContain(tag);
     }
 }

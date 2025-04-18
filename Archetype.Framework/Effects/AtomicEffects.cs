@@ -5,128 +5,109 @@ namespace Archetype.Framework.Effects.Atomic;
 [EffectCollection]
 public static class AtomicEffect
 {
-    public record StatChangeResult(string Stat, int Change);
     [Effect("ChangeStat")]
-    public static IEffectResult ChangeStat(Atom target, string statKey, int change)
+    public static EffectResult ChangeStat(Atom target, string statKey, int change)
     {
-        var stats = target.BaseState.Stats;
-        
         if (change == 0)
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.NoOp([target, statKey, change]);
         }
+        
+        var stats = target.State.Stats;
         
         var currentValue = stats.GetValueOrDefault(statKey);
         
         stats[statKey] = currentValue + change;
         
-        return ResultFactory.Atomic(new StatChangeResult(statKey, change));
+        return ResultFactory.Atomic([target, statKey, change]);
     }
     
     [Effect("SetStat")]
-    public static IEffectResult SetStat(Atom target, string statKey, int value)
+    public static EffectResult SetStat(Atom target, string statKey, int value)
     {
-        var stats = target.BaseState.Stats;
+        var stats = target.State.Stats;
         
-        var currentValue = stats.GetValueOrDefault(statKey);
+        if (stats.TryGetValue(statKey, out var currentValue) && currentValue == value)
+        {
+            return ResultFactory.NoOp([target, statKey, value]);
+        }
         
         stats[statKey] = value;
         
-        if (currentValue == value)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        var change = value - currentValue;
-        
-        return ResultFactory.Atomic(new StatChangeResult(statKey, change));
+        return ResultFactory.Atomic([target, statKey, value]);
     }
     
-    public record AddTagResult(string Tag);
     [Effect("AddTag")]
-    public static IEffectResult AddTag(Atom target, string tag)
+    public static EffectResult AddTag(Atom target, string tag)
     {
-        var tags = target.BaseState.Tags;
-        
-        if (tag is not { Length: > 0 } || tags.Contains(tag))
+        if (string.IsNullOrEmpty(tag) || !target.State.Tags.Add(tag))
         {
-            return ResultFactory.Failure();
+            return ResultFactory.NoOp([target, tag]);
         }
-        
-        tags.Add(tag);
-        
-        return ResultFactory.Atomic(new AddTagResult(tag));
-    }
-    
-    public record RemoveTagResult(string Tag);
-    [Effect("RemoveTag")]
-    public static IEffectResult RemoveTag(Atom target, string tag)
-    {
-        var tags = target.BaseState.Tags;
-        
-        if (tag is not { Length: > 0 } || !tags.Contains(tag))
-        {
-            return ResultFactory.Failure();
-        }
-        
-        tags.Remove(tag);
-        
-        return ResultFactory.Atomic(new RemoveTagResult(tag));
-    }
-    
-    public record SetFacetResult(string Key, string[] AddedValues, string[] RemovedValues);
-    [Effect("SetFacet")]
-    public static IEffectResult SetFacet(Atom target, string key, string[] values)
-    {
-        var facets = target.BaseState.Facets;
-        
-        if (key is not { Length: > 0 } || values is not { Length: > 0 })
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        values = values.Distinct().ToArray();
-        
-        var currentValues = facets.GetValueOrDefault(key)?.ToArray() ?? Array.Empty<string>();
-        
-        var addedValues = values.Except(currentValues).ToArray();
-        var removedValues = currentValues.Except(values).ToArray();
 
-        if (addedValues.Length == 0 && removedValues.Length == 0)
-        {
-            return ResultFactory.NoOp();
-        }
-        
-        facets[key] = values;
-        
-        return ResultFactory.Atomic(new SetFacetResult(key, addedValues, removedValues));
+        return ResultFactory.Atomic([target, tag]);
     }
     
-    public record RemoveFacetsResult(string Key, string[] Value);
-    [Effect("RemoveFacets")]
-    public static IEffectResult RemoveFacets(Atom target, string key, string[] valuesToRemove)
+    [Effect("RemoveTag")]
+    public static EffectResult RemoveTag(Atom target, string tag)
     {
-        var facets = target.BaseState.Facets;
-        
-        if (key is not { Length: > 0 } || valuesToRemove is not { Length: > 0 })
+        if (string.IsNullOrEmpty(tag) || !target.State.Tags.Remove(tag))
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.NoOp([target, tag]);
         }
+        
+        return ResultFactory.Atomic([target, tag]);
+    }
+    
+    [Effect("SetFacet")]
+    public static EffectResult SetFacet(Atom target, string key, string[] values)
+    {
+        var facets = target.State.Facets;
+        
+        var distinctValues = values.Distinct().ToArray();
+
+        if (facets.TryGetValue(key, out var currentValues) && currentValues.SequenceEqual(distinctValues))
+        {
+            return ResultFactory.NoOp([target, key, distinctValues]);
+        }
+
+        if (distinctValues.Length == 0)
+        {
+            if (facets.Remove(key))
+            {
+                return ResultFactory.Atomic([target, key, distinctValues]);
+            }
+            else
+            {
+                return ResultFactory.NoOp([target, key, distinctValues]);
+            }
+        }
+        
+        target.State.Facets[key] = distinctValues;
+        
+        return ResultFactory.Atomic([target, key, distinctValues]);
+    }
+    
+    [Effect("RemoveFacets")]
+    public static EffectResult RemoveFacets(Atom target, string key, string[] valuesToRemove)
+    {
+        var facets = target.State.Facets;
         
         var currentValues = facets.GetValueOrDefault(key)?.ToArray();
         
-        if (currentValues is null)
+        if (currentValues is not { Length: > 0})
         {
-            return ResultFactory.Failure();
+            return ResultFactory.NoOp([target, key, valuesToRemove]);
         }
         
-        var newValue = currentValues.Except(valuesToRemove).ToArray();
-        var actuallyRemovedValues = currentValues.Except(newValue).ToArray();
+        var actuallyRemovedValues = currentValues.Intersect(valuesToRemove).Distinct().ToArray();
         
         if (actuallyRemovedValues.Length == 0)
         {
-            return ResultFactory.Failure();
+            return ResultFactory.NoOp([target, key, valuesToRemove]);
         }
+        
+        var newValue = currentValues.Except(valuesToRemove).ToArray();
         
         if (newValue.Length == 0)
         {
@@ -137,48 +118,32 @@ public static class AtomicEffect
             facets[key] = newValue;
         }
         
-        
-        return ResultFactory.Atomic(new RemoveFacetsResult(key, actuallyRemovedValues));
+        return ResultFactory.Atomic([target, key, actuallyRemovedValues]);
     }
     
     [Effect("ClearFacet")]
-    public static IEffectResult ClearFacet(Atom target, string key)
+    public static EffectResult ClearFacet(Atom target, string key)
     {
-        var facets = target.BaseState.Facets;
-        
-        if (key is not { Length: > 0 } || !facets.TryGetValue(key, out var value))
+        var facets = target.State.Facets;
+
+        if (!target.State.Facets.Remove(key))
         {
-            return ResultFactory.Failure();
+            return ResultFactory.NoOp([target, key]);
         }
         
-        var currentValues = value.ToArray();
-        
-        facets.Remove(key);
-        
-        if (currentValues.Length == 0)
-        {
-            return ResultFactory.Failure();
-        }
-        
-        return ResultFactory.Atomic(new RemoveFacetsResult(key, currentValues));
+        return ResultFactory.Atomic([target, key]);
     }
     
-    public record AddFacetsResult(string Key, string[] Value);
     [Effect("AddFacets")]
-    public static IEffectResult AddFacets(Atom target, string key, string[] valuesToAdd)
+    public static EffectResult AddFacets(Atom target, string key, string[] valuesToAdd)
     {
-        var facets = target.BaseState.Facets;
-        
-        if (key is not { Length: > 0 } || valuesToAdd is not { Length: > 0 })
-        {
-            return ResultFactory.NoOp();
-        }
+        var facets = target.State.Facets;
         
         var currentValues = facets.GetValueOrDefault(key)?.ToArray();
         
         if (currentValues is null)
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.NoOp([target, key, valuesToAdd]);
         }
         
         var actuallyAddedValues = valuesToAdd.Except(currentValues).Distinct().ToArray();
@@ -187,11 +152,11 @@ public static class AtomicEffect
         
         if (actuallyAddedValues.Length == 0)
         {
-            return ResultFactory.NoOp();
+            return ResultFactory.NoOp([target, key, valuesToAdd]);
         }
         
         facets[key] = updatedValues;
         
-        return ResultFactory.Atomic(new AddFacetsResult(key, actuallyAddedValues));
+        return ResultFactory.Atomic([target, key, actuallyAddedValues]);
     }
 }

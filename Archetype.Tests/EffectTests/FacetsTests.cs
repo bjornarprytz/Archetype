@@ -1,4 +1,4 @@
-﻿using Archetype.Framework.Core;
+﻿
 using Archetype.Framework.Effects.Atomic;
 using Archetype.Framework.State;
 using FluentAssertions;
@@ -28,14 +28,14 @@ public class FacetsTests
         
         if (expectedRemovals.Length == 0 && expectedAdditions.Length == 0)
         {
-            result.Should().BeEquivalentTo(ResultAssertions.NoOp("SetFacet"));
+            result.Should().BeEquivalentTo(ResultAssertions.NoOp("SetFacet", atom, "someFacet", facetsToSet));
         }
         else
         {
-            result.Should().BeEquivalentTo(ResultAssertions.Atomic("SetFacet", new AtomicEffect.SetFacetResult("someFacet", expectedAdditions, expectedRemovals)));
+            result.Should().BeEquivalentTo(ResultAssertions.Atomic("SetFacet", atom, "someFacet", facetsToSet));
         }
         
-        atom.BaseState.Facets["someFacet"].Should().BeEquivalentTo(facetsToSet);
+        atom.State.Facets["someFacet"].Should().BeEquivalentTo(facetsToSet);
     }
     
     [Fact]
@@ -47,21 +47,21 @@ public class FacetsTests
         
         var result = AtomicEffect.SetFacet(atom, "someFacet", facetsToSet);
         
-        result.Should().BeEquivalentTo(ResultAssertions.Atomic("SetFacet", new AtomicEffect.SetFacetResult("someFacet", facetsToSet.Distinct().ToArray(), Array.Empty<string>())));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("SetFacet", atom, "someFacet", facetsToSet.Distinct().ToArray()));
         
-        atom.BaseState.Facets["someFacet"].Should().BeEquivalentTo(facetsToSet.Distinct());
+        atom.State.Facets["someFacet"].Should().BeEquivalentTo(facetsToSet.Distinct());
     }
     
     [Fact]
-    public void SetFacetEffect_EmptyFacet_ReturnsNoOp()
+    public void SetFacetEffect_EmptyFacet_RemovesFacet()
     {
-        var atom = Create.BasicAtom();
+        var atom = Create.AtomWithFacets("someFacet", "a", "b");
         
-        var result = AtomicEffect.SetFacet(atom, "someFacet", Array.Empty<string>());
+        var result = AtomicEffect.SetFacet(atom, "someFacet", []);
         
-        result.Should().BeEquivalentTo(ResultAssertions.NoOp("SetFacet"));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("SetFacet", atom, "someFacet", Array.Empty<string>()));
         
-        atom.BaseState.Facets.Should().NotContainKey("someFacet");
+        atom.State.Facets.Should().NotContainKey("someFacet");
     }
     
     [Fact]
@@ -76,25 +76,25 @@ public class FacetsTests
         
         var result = AtomicEffect.RemoveFacets(atom, "someFacet", facetsToRemove);
         
-        result.Should().BeEquivalentTo(ResultAssertions.Atomic("RemoveFacets", new AtomicEffect.RemoveFacetsResult("someFacet", expectedRemovals)));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("RemoveFacets", atom, "someFacet", expectedRemovals));
         
-        atom.BaseState.Facets["someFacet"].Should().BeEquivalentTo(expectedRemaining);
+        atom.State.Facets["someFacet"].Should().BeEquivalentTo(expectedRemaining);
     }
     
     [Fact]
-    public void RemoveFacetsEffect_NoFacet_ReturnsFailure()
+    public void RemoveFacetsEffect_NoFacet_ReturnsNoOp()
     {
         var atom = Create.BasicAtom();
         
         var result = AtomicEffect.RemoveFacets(atom, "someFacet", new[] { "a" });
         
-        result.Should().BeEquivalentTo(ResultAssertions.Failure("RemoveFacets"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("RemoveFacets", atom, "someFacet", new[] { "a" }));
         
-        atom.BaseState.Facets.Should().NotContainKey("someFacet");
+        atom.State.Facets.Should().NotContainKey("someFacet");
     }
     
     [Fact]
-    public void RemoveFacetsEffect_NoRemovals_ReturnsFailure()
+    public void RemoveFacetsEffect_NoRemovals_ReturnsNoOp()
     {
         var existingFacets = new[] { "a", "b" };
         
@@ -102,9 +102,9 @@ public class FacetsTests
         
         var result = AtomicEffect.RemoveFacets(atom, "someFacet", new[] { "c" });
         
-        result.Should().BeEquivalentTo(ResultAssertions.Failure("RemoveFacets"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("RemoveFacets", atom, "someFacet", new[] { "c" }));
         
-        atom.BaseState.Facets["someFacet"].Should().BeEquivalentTo(existingFacets);
+        atom.State.Facets["someFacet"].Should().BeEquivalentTo(existingFacets);
     }
     
     [Fact]
@@ -116,21 +116,21 @@ public class FacetsTests
         
         var result = AtomicEffect.ClearFacet(atom, "someFacet");
         
-        result.Should().BeEquivalentTo(ResultAssertions.Atomic("ClearFacet", new AtomicEffect.RemoveFacetsResult("someFacet", existingFacets)));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("ClearFacet", atom, "someFacet"));
         
-        atom.BaseState.Facets.Should().NotContainKey("someFacet");
+        atom.State.Facets.Should().NotContainKey("someFacet");
     }
     
     [Fact]
-    public void ClearFacetEffect_NoFacet_ReturnsFailure()
+    public void ClearFacetEffect_NoFacet_ReturnsNoOp()
     {
         var atom = Create.BasicAtom();
         
         var result = AtomicEffect.ClearFacet(atom, "someFacet");
         
-        result.Should().BeEquivalentTo(ResultAssertions.Failure("ClearFacet"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("ClearFacet", atom, "someFacet"));
         
-        atom.BaseState.Facets.Should().NotContainKey("someFacet");
+        atom.State.Facets.Should().NotContainKey("someFacet");
     }
     
     [Fact]
@@ -145,9 +145,9 @@ public class FacetsTests
         
         var result = AtomicEffect.AddFacets(atom, "someFacet", facetsToAdd);
         
-        result.Should().BeEquivalentTo(ResultAssertions.Atomic("AddFacets", new AtomicEffect.AddFacetsResult("someFacet", expectedAdditions)));
+        result.Should().BeEquivalentTo(ResultAssertions.Atomic("AddFacets", atom, "someFacet", expectedAdditions));
         
-        atom.BaseState.Facets["someFacet"].Should().BeEquivalentTo(expectedRemaining);
+        atom.State.Facets["someFacet"].Should().BeEquivalentTo(expectedRemaining);
     }
     
     [Fact]
@@ -159,8 +159,8 @@ public class FacetsTests
         
         var result = AtomicEffect.AddFacets(atom, "someFacet", new[] { "b" });
         
-        result.Should().BeEquivalentTo(ResultAssertions.NoOp("AddFacets"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("AddFacets", atom, "someFacet", new[] { "b" }));
         
-        atom.BaseState.Facets["someFacet"].Should().BeEquivalentTo(existingFacets);
+        atom.State.Facets["someFacet"].Should().BeEquivalentTo(existingFacets);
     }
 }

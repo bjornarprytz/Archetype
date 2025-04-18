@@ -21,9 +21,9 @@ public class StatTests
         
         result.Should().BeEquivalentTo(
         ResultAssertions.Atomic(
-            "ChangeStat", new AtomicEffect.StatChangeResult(statKey, change)));
+            "ChangeStat", atom, statKey, change));
 
-        atom.BaseState.Stats[statKey].Should().Be(expected);
+        atom.State.Stats[statKey].Should().Be(expected);
     }
     
     [Fact]
@@ -33,16 +33,16 @@ public class StatTests
         
         var result = AtomicEffect.ChangeStat(atom, "someStat", 0);
         
-        result.Should().BeEquivalentTo(ResultAssertions.NoOp("ChangeStat"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("ChangeStat", atom, "someStat", 0));
 
-        atom.BaseState.Stats["someStat"].Should().Be(0);
+        atom.State.Stats["someStat"].Should().Be(0);
     }
     
     [Theory]
-    [InlineData("health", 10, -1, -11)]
-    [InlineData("mana", 0, 1, 1)]
-    [InlineData("mana", null, 2, 2)]
-    public void SetStatEffect(string statName, int? current, int value, int expectedChange)
+    [InlineData("health", 10, -1)]
+    [InlineData("mana", 0, 1)]
+    [InlineData("mana", null, 2)]
+    public void SetStatEffect(string statName, int? current, int value)
     {
         var atom = Create.AtomWithStats(statName, current);
         
@@ -50,25 +50,40 @@ public class StatTests
         
         result.Should().BeEquivalentTo(
             ResultAssertions.Atomic(
-                "SetStat", new AtomicEffect.StatChangeResult(statName, expectedChange
-                    )
+                "SetStat", atom, statName, value
                 )
             );
 
-        atom.BaseState.Stats[statName].Should().Be(value);
+        atom.State.Stats[statName].Should().Be(value);
     }
     
-    [Theory]
-    [InlineData(1, 1)]
-    [InlineData(null, 0)]
-    public void SetStatEffect_NoChange_ReturnsNoOp(int? current, int value)
+    [Fact]
+    public void SetStatEffect_NoChange_ReturnsNoOp()
     {
+        const int current = 1;
+        const int value = 1;
+        
         var atom = Create.AtomWithStats("someStat", current);
         
         var result = AtomicEffect.SetStat(atom, "someStat", value);
         
-        result.Should().BeEquivalentTo(ResultAssertions.NoOp("SetStat"));
+        result.Should().BeEquivalentTo(ResultAssertions.NoOp("SetStat", atom, "someStat", value));
 
-        atom.BaseState.Stats["someStat"].Should().Be(value);
+        atom.State.Stats["someStat"].Should().Be(value);
+    }
+    
+    [Fact]
+    public void SetStatEffect_StatNotFound()
+    {
+        var atom = Create.BasicAtom();
+        
+        var result = AtomicEffect.SetStat(atom, "someStat", 0);
+        
+        result.Should().BeEquivalentTo(
+            ResultAssertions.Atomic(
+                "SetStat", atom, "someStat", 0
+                ));
+
+        atom.State.Stats["someStat"].Should().Be(0);
     }
 }
