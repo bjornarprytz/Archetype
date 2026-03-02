@@ -1,0 +1,1839 @@
+# Archetype — Architecture
+
+## Status
+**Complete. Signed off 2026-03-02.**
+
+All decisions D1–D16 are stable and signed off. Updated same day to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. D17 (Save/Load / `GameStateSnapshot`) is deliberately deferred — its API slot is reserved in `GameSessionBuilder.FromSavedState` and its required content is fully specified in the Open Items.
+
+---
+
+## Decisions
+
+### D1 — Language and Runtime
+
+**Decision:** C# / .NET 10. The engine is a plain .NET class library with no dependency on any game framework.
+
+**Rationale:**
+- Team has C# familiarity from the prior implementation.
+- Strong static typing can enforce the mutation/property keyword distinction at compile time.
+- `async`/`await` maps cleanly onto mid-effect prompt suspension: a block awaits player input via `TaskCompletionSource<T>` without blocking and without threads.
+- Godot 4.x natively supports .NET, so the engine embeds directly into the Godot project as a referenced assembly — no IPC layer required.
+- LINQ gives expressive, readable event log querying.
+
+**Consequences:**
+- The engine targets .NET 10. All NuGet dependencies must be .NET 10-compatible.
+- **WASM constraint.** The target deployment path is Godot → WebAssembly → itch.io. The engine must be WASM-safe:
+  - No `System.Threading.Thread` or `ThreadPool`. WebAssembly is single-threaded in the Godot export context.
+  - `async`/`await` is safe — it compiles to state machines, not threads.
+  - Minimize reflection. Trim-unfriendly code inflates binary size and may fail at runtime under the WASM IL stripper.
+  - No raw file I/O or sockets in the engine core. Those belong in the host/Godot layer.
+- **Godot integration.** Godot C# scripts call the engine's public API directly. No GDScript bindings are required. The engine has no Godot types in its public surface.
+- **Risk: Godot C# WASM export.** C# WASM export in Godot 4 has been maturing; verify the target Godot version fully supports it before committing the playtesting pipeline.
+- **Tooling is separate.** The authoring tool (DSL editor, card/keyword/rule creator) is a standalone desktop application. It produces serialized game definitions that the engine consumes at runtime. It need not be WASM-compatible and may use richer .NET APIs freely.
+- **Serialization boundary.** Because the tooling runs separately from the engine, there is a data serialization boundary between them. Game definitions (keywords, cards, phases, rules) must have a well-defined serialized form. This feeds into the keyword representation and game creator API decisions.
+
+---
+
+### D2 — Keyword Representation
+
+**Decision:** Keywords are represented as interpreted expression trees. The source format is a textual DSL authored by game creators. The tooling parses DSL text into a `KeywordNode` tree and serializes it to JSON. The engine loads JSON and deserializes to trees at startup — it does not contain a parser.
+
+**Tree structure:**
+
+```
+KeywordNode (abstract record)
+  ├── ParameterRef(name: string)
+  │     Refers to a declared parameter by name.
+  ├── Literal(value)
+  │     A hardcoded value: number, boolean, string, or entity reference.
+  └── Invocation(keywordName: string, args: KeywordNode[])
+        Calls another keyword (built-in or game-creator-defined) with argument nodes.
+```
+
+A `KeywordDefinition` contains:
+- `Name: string`
+- `Parameters: ParameterDecl[]` — each with a name and a declared type
+- `Body: KeywordNode` — the expression tree (for composite keywords), or a sentinel marking which engine primitive this is (for primitives)
+- `TextTemplate: string?` — an optional format string with `{paramName}` placeholders, used by the text renderer. If absent, the renderer recurses into the body tree.
+
+`ParameterDecl` types form the engine's type vocabulary: `Entity`, `Number`, `Boolean`, `ConditionName`, `PropertyName`, `ContributionId`, `Lifetime`, `EffectBlock`.
+
+**Serialization boundary.** The tooling (desktop app) owns the parser. It parses DSL text → validates → emits a JSON game definition file. The engine owns the deserializer. It reads JSON → constructs `KeywordDefinition` trees in memory. The engine never sees raw DSL text; the parser is not in the engine assembly. This keeps the WASM binary smaller and the engine free of parser complexity.
+
+**Dual-use.** Two separate interpreters walk the same `KeywordNode` tree:
+- **Execution interpreter** — walks the tree against live `ExecutionContext` (game state, scope, variable bindings), applying mutations and reading values.
+- **Text renderer** — walks the same tree, substituting parameter names and recursing into composite bodies to the depth the game layer requests.
+
+**Rationale:**
+- The tree is pure data: immutable, serializable, inspectable. It satisfies §1.1's dual-use invariant without duplicating definitions.
+- Keeping the parser in the tooling and the deserializer in the engine maintains a clean boundary, reduces engine complexity, and improves WASM binary size.
+- The `TextTemplate` on each definition gives game creators control over rendered text without a separate file; falling back to structural rendering preserves the full composition tree for detailed inspection.
+
+**Consequences:**
+- The JSON schema for `KeywordDefinition` trees is a first-class contract between the tooling and the engine. It must be versioned.
+- The tooling must validate the tree at parse time (type-checking, acyclicity, mutation/property subtype invariants) so the engine can trust what it loads.
+- The text renderer needs a depth parameter or strategy so the game layer can choose between "show top-level text only" and "expand full composition."
+- Built-in (primitive) keywords are registered in the engine at startup, not loaded from JSON. The JSON file references them by name; the engine resolves the name to its built-in implementation.
+
+---
+
+### D3 — Effect Block Execution Model
+
+**Decision:** The block interpreter is an `async` method. Mid-effect prompt suspension is modeled with `TaskCompletionSource<T>`. The engine never uses `Task.Run()` — all async suspension is prompt-driven, not thread-driven.
+
+**Execution flow:**
+
+```
+async Task<BlockResult> ExecuteBlock(EffectBlock block, ExecutionContext ctx)
+  for each Step in block.Steps:
+    args = EvaluateArgs(step.ArgNodes, ctx)   // walks KeywordNode trees synchronously
+    if step is a PromptStep:
+      response = await ctx.PromptChannel.RequestAsync(promptCtx)  // suspends here
+      ctx.Bindings[step.VariableName] = response
+    else:
+      result = DispatchKeyword(step.KeywordName, args, ctx)
+      // mutation keywords append events; property keywords return values
+  return BlockResult
+```
+
+**`ExecutionContext`** is passed through every interpreter call and carries:
+- `GameState` — the mutable game state (entities, accumulators, modifiers, conditions)
+- `Bindings: Dictionary<string, object>` — the block's local variable scope
+- `ScopeIds` — the current `BlockScopeId`, `ActionScopeId`, `TurnScopeId` (used to stamp events and answer scope queries)
+- `PromptChannel: IPromptChannel` — the interface through which the engine requests player input
+
+**`IPromptChannel`** is an engine-defined interface implemented by the host (Godot). The engine `await`s it; Godot presents UI and calls `Complete(response)` on the underlying `TaskCompletionSource<T>` when the player responds.
+
+```
+interface IPromptChannel
+  Task<PromptResponse> RequestAsync(PromptContext ctx)
+```
+
+**Atomicity enforcement.** The `ActionResolver` (see module boundaries) owns a flag `BlockInProgress`. It sets this flag before calling `ExecuteBlock` and clears it when the returned `Task` completes — including after all prompt suspensions. Trigger evaluation and state-based rule execution check this flag and are skipped while it is set. Because execution is single-threaded (Godot's synchronization context; WASM), no locking is required.
+
+**WASM invariant.** No `Task.Run()`, `Thread`, or `ThreadPool` anywhere in the engine. Every `await` in the engine either awaits `IPromptChannel.RequestAsync` (player input) or awaits a child `ExecuteBlock` call (recursive cost/nested block execution). The call stack unwinds cooperatively on the single game thread.
+
+**Rationale:**
+- `async`/`await` in C# compiles to a state machine — this is exactly the hand-rolled continuation approach (Option B) but with readable linear code.
+- Godot's C# synchronization context ensures resumed continuations post back onto the main thread, keeping game state access thread-safe by construction.
+- `IPromptChannel` keeps the engine decoupled from Godot: the engine defines the interface; the host satisfies it.
+
+**Consequences:**
+- All keyword dispatch methods and block executors are `async`-capable but most will complete synchronously (only prompts actually suspend). Callers use `await` uniformly throughout.
+- Cost execution is a separate `ExecuteBlock` call that runs before the main block. Its events are visible in `events.this_action` when the main block runs.
+- The short-circuit rule (§4.2) is handled inside `ExecuteBlock`: before posting a prompt, it counts valid candidates; if ≤ required choices, it auto-binds without calling `IPromptChannel`.
+
+**Addendum — Block Step Return Binding.** Some mutation keywords return values (`apply-modifier` returns a `ContributionId`; `apply-condition` returns a `ContributionId`; `create-card`, `copy-card`, and `create-zone` return an `Entity`). To capture these values for use by later steps in the same block, `EffectBlockStep` carries an optional `BindTo` field:
+
+```
+EffectBlockStep {
+  KeywordName : string
+  ArgNodes    : KeywordNode[]
+  BindTo      : string?    // if non-null, bind the keyword's return value to this variable name
+}
+```
+
+Dispatch logic:
+```
+result = DispatchKeyword(step.KeywordName, args, ctx)
+if step.BindTo != null && result != null:
+  ctx.Bindings[step.BindTo] = result
+```
+
+The bound name is then available to any subsequent step in the block as a `ParameterRef`. Steps whose keywords return void (e.g. `modify-accumulator`) may set `BindTo` or leave it null — both are valid; a null result is never written to bindings. This mechanism also clarifies how the existing `apply-modifier` / `apply-condition` return values reach the game creator's variable scope; the domain model's existing language ("returns a contribution-ID") is fully accounted for here.
+
+---
+
+### D4 — Event Log Structure
+
+**Decision:** Events are tree-structured. Every mutation keyword invocation — composite or primitive — produces a `GameEvent` node whose children are the events produced by its internal invocations. Each scope (block, action, turn) maintains a **local event accumulator** that is live and queryable during execution. Scopes merge their accumulators into their parent scope when they exit. The global log receives finalized event trees only as scopes close.
+
+**`GameEvent` record:**
+
+```
+GameEvent {
+  SequenceNumber : long                         // assigned on finalization; reflects completion order
+  KeywordName    : string                       // the keyword that produced this event
+  BoundArgs      : Dictionary<string, object>   // parameter name → evaluated value at call time
+  Children       : List<GameEvent>              // events from internally invoked mutation keywords
+}
+```
+
+Property keyword invocations produce no events. Arguments that involve property keyword evaluation appear in `BoundArgs` as already-evaluated values, not as sub-events.
+
+**Scope accumulator model.** Four nested accumulators are live at any point during execution:
+
+```
+GameLog          (global, permanent)
+  └── TurnScope  (accumulates until the turn exits, then merges into GameLog)
+        └── ActionScope  (accumulates until the action exits, then merges into TurnScope)
+              └── BlockScope  (accumulates until the block exits, then merges into ActionScope)
+```
+
+Within the execution interpreter, a **parent event stack** tracks the currently-executing composite keyword chain. As a primitive keyword completes, its `GameEvent` is immediately appended to the innermost parent event node's `Children`. When a composite keyword completes, its fully-assembled event node is appended to the next outer parent (or to the block accumulator if at the block's top level). This means completed children are visible in the scope accumulator even before their parent composite finishes — the accumulator exposes the in-progress subtree.
+
+**Scope queries** read from the live accumulator at the appropriate depth, including in-progress subtrees:
+
+| Query | Source |
+|---|---|
+| `events.this_block` | BlockScope accumulator (in-progress subtree included) |
+| `events.this_action` | ActionScope accumulator + current BlockScope |
+| `events.this_turn` | TurnScope accumulator + current ActionScope + current BlockScope |
+| `events.this_game` | GameLog + all live scope accumulators |
+
+This enables patterns like "deal damage equal to total damage dealt this block" — the in-progress event subtree is queryable mid-execution without waiting for the enclosing composite to finalize.
+
+**Trigger conditions** search the event tree to whatever depth they need using the built-in read primitive:
+
+```
+events-matching(scope, keywordName, argPredicate) → Collection<GameEvent>
+```
+
+This searches all events at any depth within the given scope whose `KeywordName` matches and whose `BoundArgs` satisfy `argPredicate`. Trigger conditions evaluate against `events.this_action` or broader scopes (never `events.this_block` — block scope is no longer meaningful once the block exits). In-block references use `events.this_block`. When a predicate is supplied, the reserved name `candidate` refers to the `EventRef` of the event currently being tested within the predicate (§4.3 of the domain model, A10).
+
+**Example.** `attack(goblin, 3)` calls `take_damage(goblin, 1)` which calls `modify-accumulator(goblin, "damage", 1)`:
+
+```
+Event("attack", {target: goblin, amount: 3})
+  └── Event("take_damage", {target: goblin, amount: 1})
+        └── Event("modify-accumulator", {entity: goblin, name: "damage", delta: 1})
+```
+
+Mid-execution — while still inside `take_damage` — the `modify-accumulator` event is already appended to `E_take_damage.Children` and is visible via `events.this_block`. A later keyword in the same block can query `events-matching(this_block, "modify-accumulator", ...)` and find it.
+
+**Rationale:**
+- Scope-local accumulators with deferred merge into the global log give game creators the best of both: live in-scope queries (for effect chaining) and a clean global log (for triggers and history).
+- Tree structure allows triggers to match at the semantic level of game-creator-defined keywords, not just at the primitive level.
+- `BoundArgs` on every node means trigger and in-block queries can inspect any argument of any invocation at any depth without per-keyword event schemas.
+
+**Consequences:**
+- The execution interpreter maintains a parent event stack (current composite chain) alongside the block accumulator. Dispatching any mutation keyword pushes a new node; completing it pops the node and appends it to the parent.
+- `events-matching` is a built-in read primitive in §9.2 of the domain model (resolved as A2).
+- Trigger condition expressions reference `BoundArgs` fields of matched events via `EventRef` and `event-arg` — both are first-class types in the engine's type vocabulary (resolved as A3).
+- `SequenceNumber` is assigned at finalization (pop time), so it reflects completion order within the tree.
+
+---
+
+### D5 — Contribution Tracking
+
+**Decision:** Modifier and condition contributions are separate record types sharing a common `ContributionId`. The engine maintains a global registry for O(1) lookup by ID. Each entity maintains per-property and per-condition indexes for efficient state evaluation. Static effects maintain a list of the contribution IDs they own so cleanup on expiry requires no global scan.
+
+**`ContributionId`:** A monotonically incrementing `long`, incremented by a single counter on `GameState`. Single-threaded execution means no synchronization is needed.
+
+**Record types:**
+
+```
+ModifierContribution {
+  Id           : ContributionId
+  Source       : ContributionSource       // EntityId or StaticEffectId that created this
+  TargetEntity : EntityId
+  PropertyName : string
+  Kind         : Additive | Multiplicative
+  Value        : double
+  Lifetime     : LifetimeSpec?            // null = permanent
+}
+
+ConditionContribution {
+  Id            : ContributionId
+  Source        : ContributionSource
+  TargetEntity  : EntityId
+  ConditionName : string
+  Lifetime      : LifetimeSpec?
+}
+```
+
+**Storage layout:**
+
+- `GameState` holds:
+  - `ContributionRegistry: Dictionary<ContributionId, IContribution>` — global, for O(1) removal by ID (`remove-modifier`)
+- Each entity holds:
+  - `ModifierIndex: Dictionary<string, List<ModifierContribution>>` — keyed by property name; drives modifier evaluation
+  - `ConditionIndex: Dictionary<string, List<ConditionContribution>>` — keyed by condition name; presence = non-empty list
+
+**Modifier evaluation** for a property on an entity:
+```
+computed = (base + Σ additives) × Π multiplicatives
+```
+Both sums iterate `ModifierIndex[propertyName]` — always a small list in practice.
+
+**Condition presence** is `ConditionIndex[name].Count > 0`. Absent condition = key absent or empty list.
+
+**Static effect ownership.** Each `StaticEffect` carries `OwnedContributions: List<ContributionId>`. When a `apply-modifier` or `apply-condition` call is made on behalf of a static effect, the returned `ContributionId` is added to this list. On expiry, the engine removes each ID via the registry and drops it from the entity's index. No global scan required.
+
+**Rationale:**
+- Separate indexes per entity per property/condition keep evaluation fast without requiring a global sweep.
+- Static effect ownership of contribution IDs makes expiry cleanup O(k) where k is the number of contributions that effect owns — typically 1.
+- The global registry is only needed for explicit `remove-modifier`; it's a secondary index, not the source of truth.
+
+**Consequences:**
+- `apply-modifier` and `apply-condition` allocate a `ContributionId`, create the contribution record, insert it into the entity's index and the global registry, and return the ID.
+- `remove-modifier(id)` looks up in the registry, removes from entity index, removes from registry, removes from owning static effect's list if applicable.
+- `remove-condition(entity, name)` removes all entries from `ConditionIndex[name]`, removes each from the registry, and removes from owning static effect lists.
+- Accumulator deltas have no contribution tracking — they merge permanently into a running total per `(entity, name)` pair on the entity. No registry entry.
+
+---
+
+### D6 — Static Effect Lifecycle Management
+
+**Decision:** The engine maintains a single `List<StaticEffect>` of all active static effects. After every effect block resolves, the engine evaluates all while-conditions and removes any expired static effects and their contributions. Turn-timer and trigger-count conditions are checked at their natural moments (turn boundary and trigger fire, respectively).
+
+**`StaticEffect` record:**
+
+```
+StaticEffect {
+  Id                 : StaticEffectId    // allocated from a global monotonic counter shared with ContributionId
+  Origin             : Declarative | Dynamic
+  LifetimeSpec       : LifetimeSpec
+  TriggerFireCount   : int               // incremented by trigger resolution; checked against TriggerCount conditions
+  StateContribution  : ContributionId?   // null if this effect has no state contribution
+  Trigger            : TriggerDefinition?
+  OwnedContributions : List<ContributionId>
+}
+```
+
+**Trigger resolution ordering.** The domain model requires the oldest active static effect to fire first (§5.3). "Oldest" is defined as lowest `StaticEffectId`. Because `StaticEffectId` is allocated from the same global monotonic counter as `ContributionId` — and execution is single-threaded — allocation order is unambiguous at any granularity: two effects created in the same turn, the same action, or even the same block are still totally ordered by their ID. No separate timestamp or turn counter is needed.
+
+**`LifetimeSpec` as data:**
+
+```
+LifetimeSpec {
+  Conditions: List<LifetimeCondition>    // OR'd; empty = permanent
+}
+
+LifetimeCondition (discriminated union):
+  | TurnTimer(turns: int)
+  | TriggerCount(count: int)
+  | WhileCondition(expression: KeywordNode)   // boolean property keyword expression
+```
+
+`LifetimeCondition` is itself a `KeywordNode` expression (a `WhileCondition` wraps a property keyword subtree), so it is serializable through the same JSON schema as keyword definitions.
+
+**Post-block check routine (two-phase, updated for A1).** After every `ExecuteBlock` call returns (including state-based rule blocks), the `ActionResolver` calls `CheckLifetimes(gameState)`:
+
+**Phase 1 — expire active effects:**
+1. Iterate all active static effects.
+2. For each, evaluate its `LifetimeSpec`: check all `WhileCondition` expressions against current game state; check `TurnTimer` conditions against current turn count; check `TriggerCount` against `TriggerFireCount`.
+3. If any condition is satisfied (OR semantics), collect it as expired.
+4. For each expired effect:
+   - Remove all `OwnedContributions` (§D5); remove from `ActiveStaticEffects`.
+   - Classify expiry: **terminal** if any TurnTimer or TriggerCount condition fired; **while-condition expiry** if only a WhileCondition fired.
+   - If while-condition expiry AND `se.Origin == Declarative`: add `DormantDeclarativeEffect { OwnerEntity: se.OwnerEntity, EffectDef: se.SourceDefinition }` to `GameState.DormantDeclarativeEffects`.
+5. If any effects expired, repeat Phase 1 — expiry can cascade (a condition that was true only because of a now-removed contribution may now be false, or vice versa).
+
+**Phase 2 — activate dormant declarative effects:**
+6. Iterate all `DormantDeclarativeEffects`. For each, evaluate its `EffectDef.LifetimeSpec`'s WhileCondition against current game state, with `{ "source": dormant.OwnerEntity }` as the evaluation bindings.
+7. If true: call `InstantiateStaticEffect(dormant.EffectDef, dormant.OwnerEntity)` — allocate a fresh `StaticEffectId`; set `TriggerFireCount = 0`, `TriggerHighWaterMark = 0`; apply any state contribution; add to `ActiveStaticEffects`. Remove from `DormantDeclarativeEffects`.
+8. If any dormant effects activated, return to Phase 1 — new active effects may introduce contributions that change other conditions.
+
+**Turn-timer check** is performed at the same `CheckLifetimes` call — no separate hook needed since the call happens after every block, including phase init/cleanup blocks that mark turn boundaries.
+
+**Trigger-count expiry.** When trigger resolution fires a static effect's trigger (§D7), it increments `TriggerFireCount`. The next `CheckLifetimes` call will catch the satisfied `TriggerCount` condition and expire the effect. Trigger-count expiry does not bypass the normal lifetime check loop.
+
+**Declarative static effect activation (A1).** At card creation, each declarative static effect is provisioned based on its while-condition state:
+- **No while-condition, or while-condition evaluates to true:** instantiate immediately and add to `GameState.ActiveStaticEffects`.
+- **While-condition evaluates to false:** add to `GameState.DormantDeclarativeEffects` without creating a `StaticEffect` instance.
+
+The same logic applies when cards are created during play via `create-card` or `copy-card`. Both paths call a shared `ProvisionDeclarativeEffect(effectDef, ownerEntity, state)` helper.
+
+**Dormant tracking data structure:**
+
+```
+DormantDeclarativeEffect {
+  OwnerEntity : EntityId
+  EffectDef   : StaticEffectDef
+}
+```
+
+`GameState` gains `DormantDeclarativeEffects : List<DormantDeclarativeEffect>` alongside the existing `ActiveStaticEffects` list.
+
+**Re-instantiation rule.** When a `StaticEffect` expires, the expiry is classified before deciding whether to go dormant:
+- **Terminal expiry** — any TurnTimer or TriggerCount condition fired (regardless of while-condition state). Discard permanently. No re-instantiation. This preserves the intent: TurnTimer and TriggerCount are authoring signals that the effect is fundamentally finite.
+- **While-condition expiry** — only a WhileCondition fired (no TurnTimer or TriggerCount also satisfied). If declarative, add to `DormantDeclarativeEffects` for potential re-activation. Dynamic effects are always discarded permanently on expiry.
+
+A declarative effect may later be re-instantiated any number of times. Each re-instantiation produces a new `StaticEffect` with a new identity, fresh `TriggerFireCount = 0`, and fresh `TriggerHighWaterMark = 0`. The expired instance is never resumed.
+
+**Rationale:**
+- A single `List<StaticEffect>` with a post-block sweep is simple, correct, and fast for the expected number of active effects in a card game (tens, not thousands).
+- Cascading the lifetime check handles effects whose expiry depends on other effects' contributions — an important edge case for effects that chain.
+- Placing trigger-count expiry in the normal `CheckLifetimes` loop (rather than inline in trigger resolution) keeps expiry logic in one place.
+- The two-phase sweep (expire then activate dormant) handles declarative re-instantiation without a separate scheduling mechanism. Because `CheckLifetimes` runs on every block boundary already, no additional hooks are needed.
+- Classifying expiry as terminal vs. while-condition honours the domain model's distinction: TurnTimer and TriggerCount signal that an effect is finite; a while-condition is a predicate the effect follows for its lifetime. A TurnTimer expiry coinciding with a false while-condition still discards permanently.
+- Tracking dormant effects as explicit `(ownerEntity, effectDef)` pairs rather than re-scanning all card definitions each sweep keeps Phase 2 O(dormant) rather than O(all_cards × effects_per_card).
+
+**Consequences:**
+- `CheckLifetimes` is called by `ActionResolver` after every block, including cost blocks, state-based rule blocks, and trigger-fired blocks.
+- `WhileCondition` expressions must be evaluable against a `GameState` without an `ExecutionContext` (no variable bindings, no event log scope). The property keyword evaluator needs a state-only evaluation path. This applies equally to Phase 2 dormant activation checks.
+- The cascade loop in `CheckLifetimes` must terminate — guaranteed by the game creator's responsibility for convergence (§8.3 of the domain model).
+- `GameState` gains `DormantDeclarativeEffects : List<DormantDeclarativeEffect>` alongside `ActiveStaticEffects`.
+- `StaticEffect` gains `SourceDefinition : StaticEffectDef?` — non-null for declarative effects, null for dynamic. Used to populate the dormant record on while-condition expiry. See D13 for the canonical updated `StaticEffect` record.
+- Card provisioning (manifest provisioning and `create-card`/`copy-card` implementations) calls a shared `ProvisionDeclarativeEffect(effectDef, ownerEntity, state)` helper that performs the active-vs-dormant split. Both provisioning paths must use this helper to stay in sync.
+- `InstantiateStaticEffect(effectDef, ownerEntity)` is a shared helper called by provisioning and by Phase 2. It allocates a new `StaticEffectId`, sets `TriggerFireCount = 0` and `TriggerHighWaterMark = 0`, applies any state contribution (registering the returned `ContributionId` in `OwnedContributions`), and sets `SourceDefinition = effectDef`.
+
+---
+
+### D7 — State-Based Rule Runner
+
+**Decision:** State-based rules are records pairing a boolean condition expression with an effect block body. They are stored in `GameDefinition` (static game data), not `GameState`. The `ActionResolver` runs a fixpoint loop over them after every effect block. The post-action sequence tracks trigger-resolution batch count and notifies the host via an optional `IEngineObserver` interface after each batch, giving the host the ability to halt a runaway cascade.
+
+**`StateBasedRule` record:**
+
+```
+StateBasedRule {
+  Name      : string         // for debugging; matches action-rule addressing name (§8.3 of domain model)
+  Condition : KeywordNode    // boolean property keyword expression — no side effects, no event log entries
+  Body      : EffectBlockDef // the block that executes if Condition evaluates to true
+}
+```
+
+Rules are registered by the game creator at game setup and stored in `GameDefinition.StateBasedRules: List<StateBasedRule>` in registration order.
+
+**Fixpoint loop:**
+
+```
+async Task RunStateBasedRules(ExecutionContext ctx)
+  loop:
+    triggered = [rule in GameDefinition.StateBasedRules
+                 where EvaluateCondition(rule.Condition, ctx.GameState) == true]
+    if triggered is empty: return
+
+    for each rule in triggered (in registration order):
+      await ExecuteBlock(rule.Body, ctx)   // sets BlockInProgress, clears it, calls CheckLifetimes (D6)
+  // repeat — re-evaluate all conditions after each full pass
+```
+
+All triggered conditions are evaluated before any blocks fire in that pass; rules that fire together all execute before the next condition sweep. `CheckLifetimes` (D6) is called after each individual block inside `ExecuteBlock`.
+
+**Rule ordering.** Registration order. The game creator is responsible for registering rules in an order that yields correct behavior. This is consistent with §8.3's convergence-is-your-responsibility stance.
+
+---
+
+**Post-action sequence.** `ActionResolver` owns the following sequence after every player action:
+
+```
+1.  ExecuteBlock(primaryBlock, ctx) → CheckLifetimes
+2.  RunStateBasedRules(ctx)                          // fixpoint
+    ── cascade loop ──────────────────────────────────────────────
+3.  triggerBatchCount++
+4.  directive = await EngineObserver?.OnTriggerCascade(triggerBatchCount) ?? Continue
+5.  if directive == Halt: break cascade loop
+6.  CollectSatisfiedTriggers → sort by StaticEffectId ascending
+7.  if none: break cascade loop
+8.  for each triggered static effect (oldest first):
+      await ExecuteBlock(triggeredBlock, ctx) → CheckLifetimes
+      RunStateBasedRules(ctx)                        // fixpoint after each trigger-fired block
+    ── repeat from step 3 ────────────────────────────────────────
+9.  Open next player action window
+```
+
+The observer is called *before* trigger collection in each batch (step 4), so the host can halt before more triggers fire. `triggerBatchCount` resets to zero at the start of each new action.
+
+---
+
+**`IEngineObserver` interface:**
+
+```
+interface IEngineObserver
+  Task<CascadeDirective> OnTriggerCascade(int iterationCount)
+
+enum CascadeDirective { Continue, Halt }
+```
+
+- Defined in the engine; implemented by the host (Godot layer or test harness).
+- Injected into `ActionResolver` as a nullable reference. `null` → always `Continue` (simple games need not implement it).
+- `iterationCount` is the count of trigger-resolution batches completed so far in the current action (1-based: first call passes `1`).
+- When the host returns `Halt`, the engine exits the cascade loop cleanly and proceeds to step 9. No partial state is rolled back. State-based rules (step 2) do not re-run after a `Halt` — the loop exits immediately.
+- The interface is `async` (returns `Task<CascadeDirective>`) so the host may present UI (e.g. "Infinite loop detected — player X wins") before the engine proceeds.
+
+**Design note — host boundary.** The host (Godot layer) is a consumer of engine state: it renders, presents UI, and supplies player input. It does not author game logic and cannot invoke engine effects at runtime. `IEngineObserver` is the extent of the host's runtime influence on the engine — it may observe cascade depth and request a halt, but it may not push state changes into the engine. All game mechanics, including any "cascade depth matters" rule, must be expressed in the `GameDefinition` by the game creator (state-based rules, triggers, etc.) and evaluated by the engine itself. This boundary is a firm constraint on the game creator API decision (D9).
+
+**Rationale:**
+- Fixpoint-before-triggers matches the standard card game ordering: mandatory corrections (SBRs) are resolved before optional triggers so that trigger conditions observe a clean game state.
+- A separate `IEngineObserver` rather than extending `IPromptChannel` keeps the input-request and host-notification contracts distinct. Both follow the same pattern: engine-defined interface, host-implemented, injected at construction.
+- Making `IEngineObserver` optional (nullable) avoids burdening simple games with a required implementation.
+- `Halt` without rollback means the game creator remains responsible for convergence — the engine provides the escape hatch, not the guarantee.
+
+**Consequences:**
+- `ActionResolver` requires two injected interfaces: `IPromptChannel` (D3) and `IEngineObserver` (this decision). `IEngineObserver` may be null.
+- The `triggerBatchCount` is a local variable in the `ActionResolver.ResolveAction` method, reset per action. It does not live on `GameState` or `ExecutionContext`.
+- D8 (trigger resolution) will define `CollectSatisfiedTriggers` and the sort ordering referenced in step 6 above.
+- `Halt` terminates only the cascade loop; the action is otherwise complete and the game continues. Win/loss conditions triggered by a `Halt` are the game creator's responsibility via SBRs.
+
+---
+
+---
+
+### D8 — Trigger Resolution
+
+**Decision:** A trigger is defined by a `TriggerDefinition` record on a `StaticEffect`. Collection uses a per-effect high-water mark to guarantee each event fires a given trigger at most once. Conditions are evaluated per-candidate-event with the candidate's `BoundArgs` injected as named values. The triggering event is always available in the fired block's scope as the reserved variable `trigger_event` (typed `EventRef`); `EventBindings` is an optional convenience for pre-binding specific args to friendlier names. Trigger resolution order is a game-level setting with three options: `OldestFirst` (default), `OldestLast`, or `PromptPlayer`.
+
+---
+
+**`TriggerDefinition` record:**
+
+```
+TriggerDefinition {
+  EventKeyword  : string               // required; candidates are events whose KeywordName matches this
+  Scope         : TriggerScope         // visibility granted to the Condition expression
+  EventParams   : List<EventParamDecl> // declares which BoundArgs keys to expose to the Condition
+  Condition     : KeywordNode?         // optional boolean filter on the candidate event; null = match all
+  EventBindings : List<EventBinding>   // optional convenience: maps BoundArgs keys → friendly block variable names
+  FiredBlock    : EffectBlockDef
+}
+
+TriggerScope = ThisAction | ThisTurn | ThisGame
+
+EventParamDecl {
+  ArgName   : string    // key in GameEvent.BoundArgs
+  ParamName : string    // name resolved by ParameterRef nodes in the Condition expression
+  Type      : TypeName
+}
+
+EventBinding {
+  EventArgName : string   // key in GameEvent.BoundArgs
+  BlockVarName : string   // friendly variable name pre-populated in the triggered block's Bindings
+}
+```
+
+`EventKeyword` is required — it is the primary index for efficient candidate lookup. `Condition` is optional; if absent, every event from `EventKeyword` satisfies the trigger. `EventParams` is validated by the tooling against the declared parameters of `EventKeyword` so the condition expression is type-safe.
+
+**`TriggerScope` semantics.** `Scope` governs what event history the `Condition` expression can reference via event-log queries (e.g. `events-matching` inside "only fire if 3 damage events have occurred this turn"). It does not restrict which events are candidates — that is handled entirely by the high-water mark. Trigger conditions may not reference `events.this_block` (block scope ceases to be meaningful once a block exits — see §7 of domain model).
+
+---
+
+**Full triggering event access in fired blocks.** The triggering `GameEvent` is always pre-populated in the fired block's bindings under the reserved name `trigger_event`, typed as `EventRef`. The block can extract any arg from it using the built-in read primitive:
+
+```
+event-arg(event: EventRef, name: string) → value
+```
+
+`EventRef` is a new first-class type in the engine's type vocabulary (alongside `Entity`, `Number`, `Boolean`, etc.). `EventBindings` are an optional convenience on top: they let the game creator pre-bind specific event args to friendly names (so the block can write `ParameterRef("target")` instead of `event-arg(trigger_event, "target")`). The full event is always accessible regardless of what `EventBindings` declares.
+
+**Domain model note.** `EventRef` and `event-arg` are additions to §9.2 (Read Primitives) — resolved as A3. `EventRef` is defined in §7.1; `event-arg` is tabulated in §9.2.
+
+---
+
+**High-water mark.** Each `StaticEffect` carries:
+
+```
+TriggerHighWaterMark : long    // SequenceNumber of the last candidate event evaluated; 0 initially
+```
+
+This is the mechanism for "a trigger fires at most once per event" (§5.3 of domain model). The high-water mark advances past every candidate event seen in a collection pass — whether the condition matched or not — so subsequent passes only see events added *after* this pass (i.e. events from trigger-fired blocks in the current cascade iteration).
+
+---
+
+**Trigger resolution order.** A game-level setting on `GameDefinition`:
+
+```
+GameDefinition {
+  ...
+  TriggerResolutionOrder : TriggerResolutionOrder   // default: OldestFirst
+}
+
+TriggerResolutionOrder = OldestFirst | OldestLast | PromptPlayer
+```
+
+- **`OldestFirst`** (default) — sort by `(se.Id ASC, e.SequenceNumber ASC)`. The oldest active static effect fires first; within a single effect, the earliest matching event fires first.
+- **`OldestLast`** — sort by `(se.Id DESC, e.SequenceNumber ASC)`. The newest active static effect fires first; within a single effect, event order is still ascending.
+- **`PromptPlayer`** — the player chooses the order of effects. `CollectSatisfiedTriggers` groups firings by `StaticEffect`; the engine posts a `TriggerOrderPrompt` via `IPromptChannel` presenting these groups and asking the player to sequence them. Within each group, events still fire in `SequenceNumber ASC` order. The player orders effects, not individual firings.
+
+`PromptPlayer` routes through the existing `IPromptChannel` using a new `TriggerOrderPrompt` variant of `PromptContext` — consistent with the existing pattern; no new interface is needed. The player's response is a permutation of the effect groups, which becomes the firing sequence.
+
+---
+
+**Collection algorithm (`CollectSatisfiedTriggers`):**
+
+```
+async Task<List<TriggerFiring>> CollectSatisfiedTriggers(GameState state)
+  result = []
+  for each active StaticEffect se with a non-null Trigger t:
+    candidates = events in t.Scope
+                   where KeywordName == t.EventKeyword
+                     and SequenceNumber > se.TriggerHighWaterMark
+                   ordered by SequenceNumber ascending
+
+    newHighWater = se.TriggerHighWaterMark
+    for each candidate event e:
+      newHighWater = e.SequenceNumber
+      evalCtx = TriggerEvaluationContext {
+                  EventParams: bind(t.EventParams, e.BoundArgs),
+                  GameState:   state,
+                  LogScope:    t.Scope }
+      if t.Condition == null OR EvaluateCondition(t.Condition, evalCtx):
+        result.Add(TriggerFiring { Effect: se, Event: e })
+
+    se.TriggerHighWaterMark = newHighWater   // advance past all seen, matched or not
+
+  return await Order(result, GameDefinition.TriggerResolutionOrder)
+```
+
+`Order` applies the configured sort (`OldestFirst`/`OldestLast`) or posts a `TriggerOrderPrompt` (`PromptPlayer`) and awaits the player's response. The method is `async` to accommodate the prompt path.
+
+Called at step 6 of the post-action sequence (D7).
+
+---
+
+**Condition evaluation context.** When evaluating a trigger's `Condition` against a candidate event `e`:
+
+- The candidate event's `BoundArgs` are made available as named values by the `EventParams` mapping: `ParameterRef(paramName)` resolves to `e.BoundArgs[argName]`. Resolved before any other binding source.
+- The evaluator has read access to the event log up to the declared `Scope` for `events-matching` queries.
+- The evaluator has read-only `GameState` access for property keyword evaluation.
+- No block-scope `ExecutionContext` bindings exist. The condition may only reference `EventParams`-declared names and game-state/log reads.
+
+This is handled by `TriggerEvaluationContext` — a lightweight struct distinct from `ExecutionContext`.
+
+---
+
+**Firing a trigger:**
+
+```
+async Task FireTrigger(TriggerFiring firing, ExecutionContext parentCtx)
+  se    = firing.Effect
+  event = firing.Event
+
+  // Always pre-populate the reserved trigger_event binding
+  bindings = { "trigger_event": EventRef(event) }
+
+  // Also apply any convenience EventBindings the game creator declared
+  for each b in se.Trigger.EventBindings:
+    bindings[b.BlockVarName] = event.BoundArgs[b.EventArgName]
+
+  // Increment fire count BEFORE executing so CheckLifetimes sees the updated count
+  se.TriggerFireCount++
+
+  // New child action context (new ActionScopeId); inherits GameState and channels
+  ctx = parentCtx.CreateChildActionContext(prePopulatedBindings: bindings)
+
+  // Post-action sequence step 8: execute → CheckLifetimes → RunStateBasedRules
+  await ExecuteBlock(se.Trigger.FiredBlock, ctx)
+  CheckLifetimes(ctx.GameState)
+  await RunStateBasedRules(ctx)
+```
+
+`TriggerFireCount` is incremented before `ExecuteBlock` so the immediately-following `CheckLifetimes` call correctly evaluates any `TriggerCount` lifetime condition.
+
+---
+
+**Domain model gaps flagged by this decision:** Both resolved.
+
+1. **`events-matching` built-in** — resolved as A2. Added to §9.2 with `EventScope` type, optional `candidate`-scoped predicate, and collection primitives (`count`, `any`, `sum-arg`) in §9.4.
+
+2. **`EventRef` type and `event-arg` primitive** — resolved as A3. `EventRef` defined as a first-class value type in §7.1; `event-arg` added to §9.2. `trigger_event` documented as a reserved name in §4.3.
+
+**Rationale:**
+- Per-event evaluation (rather than per-batch) is required by §5.3's "at most once per event" rule. The high-water mark with per-event iteration is the minimal mechanism to guarantee this.
+- Advancing the high-water mark past non-matching events prevents re-evaluation in the next cascade pass, which would cause spurious fires when conditions change.
+- `EventKeyword` as a required field limits candidate evaluation to O(events_for_keyword × triggers_watching_keyword) rather than O(all_events × all_triggers).
+- `TriggerFireCount` is incremented before `ExecuteBlock` — not after — so a `TriggerCount(1)` condition (expire after one fire) is caught by the immediately-following `CheckLifetimes`, not deferred.
+- `PromptPlayer` uses the existing `IPromptChannel` rather than a new interface, consistent with the established pattern that all player-input requests flow through one channel.
+- `trigger_event` as a reserved always-present binding eliminates any case where a fired block is blind to its own cause. `EventBindings` remains as ergonomic sugar, not as the only access path.
+
+**Consequences:**
+- `StaticEffect` gains `TriggerHighWaterMark: long` alongside `TriggerFireCount: int`.
+- `CollectSatisfiedTriggers` is now `async` to accommodate the `PromptPlayer` path.
+- `CollectSatisfiedTriggers` mutates `TriggerHighWaterMark` on all evaluated effects. It must run exactly once per cascade iteration.
+- `PromptContext` becomes a discriminated union with (at minimum) `ChoicePrompt` (existing, for mid-block choices) and `TriggerOrderPrompt` (new). The implementer must handle both in `IPromptChannel` implementations.
+- `TriggerEvaluationContext` is a new lightweight struct: `{ EventParams: Dictionary<string,object>, GameState, LogScope }`. Distinct from `ExecutionContext`.
+- `CreateChildActionContext` allocates a new `ActionScopeId`, copies the `GameState` reference and channel references, and accepts a pre-populated bindings dictionary. It does not inherit parent block-scope bindings.
+- `EventRef` wraps a `GameEvent` reference. It is a value in the type system, not a `KeywordNode` subtype — it is a runtime value that can be stored in bindings and passed to `event-arg`.
+
+---
+
+---
+
+### D9 — Randomness
+
+**Decision:** The engine defines an `IRandomSource` interface. The engine also ships a default `SeededRandom : IRandomSource` implementation wrapping `System.Random(seed)`. The host provides either a seed (engine constructs `SeededRandom(seed)`) or a custom `IRandomSource` (for testing). `IRandomSource` is injected into `ActionResolver` at game construction and flows into every `ExecutionContext`. Two new built-in property keywords expose randomness to game creators: `random-int` and `shuffle`.
+
+---
+
+**`IRandomSource` interface:**
+
+```
+interface IRandomSource
+  int  NextInt(int minInclusive, int maxInclusive)
+  void Shuffle<T>(IList<T> list)   // in-place Fisher-Yates; list is a game-internal list, never external state
+```
+
+The engine ships `SeededRandom : IRandomSource`:
+
+```
+class SeededRandom : IRandomSource
+  Random _rng   // System.Random; constructed once with the provided seed
+
+  int  NextInt(int min, int max)     → _rng.Next(min, max + 1)
+  void Shuffle<T>(IList<T> list)     → Fisher-Yates using _rng
+```
+
+`System.Random` is WASM-safe and single-threaded by construction (no locking needed). Seed is a `long`; `System.Random` in .NET 6+ accepts a 32-bit seed via its constructor — use `(int)(seed ^ seed >> 32)` to fold a `long` down, or use `Random(seed.GetHashCode())`. The implementer should verify the exact .NET 10 constructor signature.
+
+**Injection.** `IRandomSource` is a third construction-time dependency on `ActionResolver` alongside `IPromptChannel` and `IEngineObserver`. It is stored on `ExecutionContext` so that the built-in keyword implementations can reach it during evaluation. `TriggerEvaluationContext` does not carry `IRandomSource` — randomness in trigger conditions is not supported (conditions are pure boolean expressions over game state and the event log; introducing randomness there would make trigger firing non-deterministic in a way that is difficult to audit or replay).
+
+---
+
+**New built-in property keywords:**
+
+| Keyword | Parameters | Returns | Notes |
+|---|---|---|---|
+| `random-int(min, max)` | `min: Number, max: Number` | `Number` | Uniform integer in `[min, max]` inclusive. Consumes one `NextInt` call. |
+| `shuffle(collection)` | `collection: Collection<Entity>` | `Collection<Entity>` | Returns a new shuffled collection. Consumes N calls where N = `collection.Count`. Does not mutate the source collection. |
+
+Both are **property keywords**: they return values, have no side effects on game state, and append nothing to the event log. Their consumed randomness is implicitly captured in the event log through the `BoundArgs` of the mutation keyword that uses the result — e.g. `modify-accumulator(goblin, "damage", random-int(1, 6))` logs `{delta: 4}`, not `{delta: random-int(1,6)}`.
+
+**Domain model note.** `random-int` and `shuffle` are additions to §9.2 (Read Primitives) — resolved as A4. The property keyword invariant ("no side effects") is technically violated in the sense that RNG state advances — however, since RNG is not game state (not queryable, not contribution-tracked, not logged), this is explicitly noted as acceptable in the domain model.
+
+---
+
+**Determinism.** A fixed seed produces a fully deterministic game given the same player inputs. This is valuable for:
+- **Testing** — inject a `MockRandomSource` returning controlled values to test specific branches.
+- **Replay / debugging** — record the seed and player inputs; the game is exactly reproducible.
+- **Fairness** — the host (Godot layer / server) chooses and records the seed; neither player can influence it.
+
+The seed is game-scoped (one `IRandomSource` per `GameSession`). There is no per-block or per-action re-seeding.
+
+**Rationale:**
+- `IRandomSource` over raw seed injection gives the testing path without ceremony: inject a mock that returns `[1, 1, 1, 6]` in sequence to reproduce a specific scenario without reverse-engineering a seed.
+- Property keyword classification keeps the evaluation model clean. Random values flow through the existing argument evaluation path; no new interpreter logic is needed beyond calling `ctx.RandomSource.NextInt(...)`.
+- `Shuffle` as a primitive — rather than composed from `random-int` — avoids requiring game creators to author a Fisher-Yates loop in the DSL, which would be awkward and fragile.
+- Excluding randomness from `TriggerEvaluationContext` keeps trigger conditions deterministic and auditable. A trigger that fires randomly is a design smell; game creators who want probabilistic triggers can use `random-int` inside the *fired block*, not inside the *condition*.
+
+**Consequences:**
+- `ExecutionContext` gains `RandomSource: IRandomSource`.
+- `ActionResolver` constructor signature: `(GameDefinition, IPromptChannel, IRandomSource, IEngineObserver?)`.
+- The host's game-session bootstrap must supply a seed or a custom `IRandomSource`. The engine provides a convenience constructor overload: `ActionResolver(GameDefinition, IPromptChannel, long seed, IEngineObserver?)` that constructs `SeededRandom(seed)` internally.
+- `random-int` and `shuffle` implementations live in the built-in keyword registry alongside other primitives.
+- The game creator API (D10) must expose seed/`IRandomSource` as part of game session construction.
+
+---
+
+---
+
+### D10 — Card Visibility and Orientation (Deliberate Non-Decision)
+
+**Decision:** The engine has no concept of card visibility, face-down orientation, or per-player information asymmetry. These are entirely the game creator's responsibility.
+
+**Rationale:**
+- Face-down-ness is trivially modeled as a game-creator-named condition (e.g. `apply-condition(card, "face-down")`). The built-in condition system (D5) already provides everything needed: apply, remove, query with `is-face-down` as a property keyword composed from `get-state`.
+- "Hidden from opponent" is a property of *zone membership*, not of the card itself. A card in a hand zone is hidden by virtue of being in that zone — the game creator models this via `in-zone` queries, not a visibility flag.
+- Per-player visibility (e.g. "face-down but the owner can still see it") is game-specific, varies widely, and quickly becomes entangled with game rules. No single engine model fits all games.
+- The host (Godot layer) is responsible for rendering decisions: it queries game state (zone, conditions) and decides what each player sees. The engine is single-source-of-truth with no per-player filtering.
+- Prompts: if face-down cards should not be targetable, the game creator writes targeting criteria that exclude them (e.g. `not(get-state(target, "face-down"))`). The engine evaluates criteria; the host renders candidates.
+
+**Consequences:**
+- No built-in `is-face-down` keyword, `flip-face-down` mutation, or visibility-related primitives.
+- No per-player game state views in the engine.
+- Game creators who need orientation track it as a condition; game creators who need visibility track it as a combination of zone membership and conditions.
+- This decision is final. If a future requirement surfaces that genuinely cannot be modeled with conditions and zones, it should be treated as a requirements change and reviewed by the domain modeler before any engine concept is added.
+
+---
+
+---
+
+### D11 — Text Rendering Pipeline
+
+**Decision:** The text renderer is a separate, read-only pass over the same `KeywordNode` trees used by the execution interpreter. It produces a structured `RenderNode` tree rather than a flat string, so the host can traverse and render at whatever depth and format it chooses. Two render modes exist — definition-time (unbound parameters render as labels) and invocation-time (bound parameters render as values) — handled by the same renderer with an optional bindings dictionary. The engine makes no assumptions about language; localization is handled via an optional locale file (a flat string map) injected at renderer construction, with `TextTemplate` serving as a language-neutral fallback.
+
+---
+
+**`RenderNode` tree:**
+
+```
+RenderNode (abstract record)
+  ├── TextSpan(text: string)
+  │     A leaf node: a literal string fragment, a substituted template, or a parameter label.
+  │
+  ├── CompositeNode(summary: RenderNode, body: RenderNode)
+  │     Represents a composite keyword invocation.
+  │     summary — produced from TextTemplate (if present) or a default structural summary.
+  │     body    — always the full recursive expansion of the keyword's composition tree.
+  │     The host chooses whether to show summary only, body only, or summary with expandable body.
+  │
+  └── SequenceNode(items: IReadOnlyList<RenderNode>)
+        An ordered list: effect block steps, argument lists, etc.
+        Separator and list formatting are host responsibilities.
+```
+
+The host's simplest implementation: walk the tree, emit `TextSpan.text` values, ignore `CompositeNode.body`. More capable implementations expand composites on hover, render steps as a numbered list, etc.
+
+---
+
+**Two render modes.** The renderer accepts an optional `IReadOnlyDictionary<string, object>? bindings` parameter:
+
+- **Definition-time** (`bindings == null`): `ParameterRef` nodes render as their declared parameter name, optionally formatted by the enclosing `TextTemplate`'s placeholder. Produces stable card text for display before the card is played. Pre-computable and cacheable.
+- **Invocation-time** (`bindings != null`): `ParameterRef` nodes are substituted with their bound values. `Literal` nodes render as their value. Used for "what just happened" log displays or previewing an effect after targets are chosen.
+
+Both modes produce a `RenderNode` tree. The distinction is only in how `ParameterRef` is resolved.
+
+---
+
+**Template resolution order.** For any `KeywordDefinition`, the renderer resolves a template string as follows:
+
+1. **Locale file** — if a locale file is loaded and contains an entry keyed by `keyword.Name`, use that template.
+2. **`TextTemplate` fallback** — if no locale entry, use the `TextTemplate` string on the definition (if present). This is the game creator's primary-language text and the fallback for any locale that hasn't been translated.
+3. **Structural rendering** — if neither is present, generate a default summary from the keyword name and its rendered arguments (e.g. `"take-damage(goblin, 3)"`).
+
+In all cases, `CompositeNode.body` is always the recursive structural expansion — the locale and template only affect `CompositeNode.summary`.
+
+Primitives have a registered default `TextTemplate` in the built-in keyword registry (step 2). Game creators who want custom text wrap primitives in named composite keywords with their own templates — which is the expected authoring pattern.
+
+---
+
+**`TextRenderer` class:**
+
+```
+class TextRenderer
+  constructor(KeywordRegistry registry)
+
+  RenderNode Render(KeywordNode node,
+                    IReadOnlyDictionary<string, string>? localeStrings,
+                    IReadOnlyDictionary<string, object>? bindings)
+  RenderNode RenderBlock(EffectBlockDef block,
+                         IReadOnlyDictionary<string, string>? localeStrings,
+                         IReadOnlyDictionary<string, object>? bindings)
+  RenderNode RenderStaticEffect(StaticEffectDef effect,
+                                IReadOnlyDictionary<string, string>? localeStrings,
+                                IReadOnlyDictionary<string, object>? bindings)
+  RenderNode RenderLifetimeSpec(LifetimeSpec spec,
+                                IReadOnlyDictionary<string, string>? localeStrings)
+```
+
+`localeStrings` is passed per call — a flat `Dictionary<string, string>` mapping lookup keys to locale-specific template strings for the desired locale. `null` means no locale; the renderer falls through to `TextTemplate` and structural rendering. Passing a different dictionary object is all that is required to switch locale at runtime — the host manages locale file loading and passes the appropriate dictionary on each render call.
+
+`TextRenderer` is stateless beyond its internal cache (see Caching below) and the registry. No `GameState`, no `ExecutionContext`. One instance serves all locales for the lifetime of the game.
+
+`RenderBlock` produces a `SequenceNode` of one `RenderNode` per step in the block.
+
+`RenderStaticEffect` produces a `SequenceNode` containing: the rendered state contribution (if any), the rendered trigger (if any), and the rendered lifetime spec. For declarative static effects, this is what appears as the card's ability text.
+
+`RenderLifetimeSpec` uses reserved engine locale keys (looked up in `localeStrings` first, then falling back to the engine's registered defaults):
+
+| Reserved key | Engine default | Placeholders |
+|---|---|---|
+| `engine.lifetime.turn_timer` | `"for {n} turn(s)"` | `{n}` |
+| `engine.lifetime.trigger_count` | `"(up to {n} time(s))"` | `{n}` |
+| `engine.lifetime.while_condition` | `"while {expr}"` | `{expr}` — the rendered expression |
+| `engine.lifetime.or_separator` | `" or "` | none |
+
+A locale file that wants to localise lifetime descriptions includes entries for these reserved keys alongside keyword name entries. The engine's registered defaults are not prescribed as English — they happen to be English in the reference implementation, but the game creator can override all of them in any locale file, including the "primary" one.
+
+---
+
+**Localization.**
+
+Locale files are flat JSON files — `Dictionary<string, string>` — mapping lookup keys to locale-specific template strings with `{paramName}` placeholders. Keys are either keyword names (matching `KeywordDefinition.Name`) or reserved `engine.*` keys for engine-level strings.
+
+Example locale file (`locale.fr.json`):
+```json
+{
+  "take-damage":                   "inflige {amount} blessure(s) à {target}",
+  "attack":                        "{attacker} attaque {target} pour {amount}",
+  "engine.lifetime.turn_timer":    "pendant {n} tour(s)",
+  "engine.lifetime.while_condition": "tant que {expr}",
+  "engine.lifetime.or_separator":  " ou "
+}
+```
+
+**Separate file per locale.** Each language is a separate file. The host is responsible for loading locale files and managing which dictionary is current. It may load all files upfront, load lazily on first switch, or reload from disk — the engine does not prescribe a loading strategy. The host passes the current locale dictionary on each render call; switching locale mid-session requires no engine interaction beyond passing the new dictionary. If the host passes `null`, the renderer uses `TextTemplate` values as written by the game creator (which may themselves be in any language). For a single-language game, the game creator sets `TextTemplate` directly and never creates a locale file.
+
+**The engine has no default locale.** No language is hardcoded in the engine. The `engine.*` defaults in the built-in registry happen to be English in the reference implementation, but a game creator can override every one of them in their locale files — including whatever they treat as their primary language.
+
+**Static property strings** (card names, entity names, zone names) are not handled by the text renderer — those are static data values on `CardDefinition`, `ZoneDefinition`, etc. If the game creator needs localised names, they author them as locale-keyed properties in the game definition and the host resolves them at render time. This is a tooling convention, not an engine mechanism.
+
+**Tooling implications.** The authoring tool must:
+- Allow game creators to author `TextTemplate` in their primary language.
+- Support adding locale files per language, editing template strings per keyword per locale.
+- Validate that every `{paramName}` placeholder in a locale file string matches a declared parameter name on the corresponding keyword (same validation as `TextTemplate`).
+- Warn when a locale file is missing entries for some keywords (incomplete translation).
+
+---
+
+**Caching.** Definition-time `RenderNode` trees are stable for a given `(KeywordDefinition, localeStrings)` pair. The renderer maintains an internal cache using `ConditionalWeakTable<IReadOnlyDictionary<string,string>, Dictionary<KeywordDefinition, RenderNode>>` — keyed by locale dictionary *reference*. The host creates one dictionary object per locale and reuses it; the same object always hits the same cache bucket. When the host drops a locale dictionary (e.g. it was replaced by another language), its cache entries are automatically eligible for GC — no explicit invalidation needed. The `null` locale (no localization) has its own separate flat cache `Dictionary<KeywordDefinition, RenderNode>`.
+
+Invocation-time renders (with `bindings != null`) are not cached — they vary per call. `ConditionalWeakTable` is available in .NET 10 and is WASM-safe.
+
+---
+
+**What the host does with a `RenderNode` tree.** The Godot layer:
+- For card text display: traverses the tree, emits `TextSpan.text` values, uses `SequenceNode` items as lines or bullet points, and shows `CompositeNode.summary` with an optional expand affordance.
+- For detailed tooltip: shows `CompositeNode.body` recursively when the player hovers or taps.
+- For event log display: calls `Render` in invocation-time mode with the event's `BoundArgs` as bindings, producing text like "take-damage dealt 3 damage to Goblin."
+
+The host does not call the text renderer at game-critical moments (combat resolution, etc.) — rendering is display-only and never on the execution path.
+
+---
+
+**Rationale:**
+- A `RenderNode` tree rather than a flat string preserves the composition structure that D2 deliberately kept — the host can offer "show me how this works" expansion without re-parsing a string.
+- Two modes from one renderer keeps the dual-use invariant (§1.1) tight: the same tree structure, the same renderer class, the same `TextTemplate`s serve both static card text and dynamic log display.
+- `CompositeNode` always carrying both `summary` and `body` means the host never has to re-invoke the renderer to get more detail — the full tree is always present, the host decides what to show.
+- `TextRenderer` being stateless (no `GameState`) keeps it safely usable from the tooling (DSL editor preview) without needing a running game instance.
+
+**Consequences:**
+- `KeywordDefinition` gains a cached `RenderNode? DefinitionRender` field (nullable; populated lazily or at startup by a `GameDefinition` build step).
+- `EffectBlockDef` and `StaticEffectDef` similarly gain cached definition renders.
+- The `TextTemplate` string format (`{paramName}` placeholders) must be validated by the tooling at parse time: every `{name}` must match a declared parameter name.
+- Built-in keyword registrations include a default `TextTemplate` string alongside their C# implementation.
+- `RenderNode` is pure data — no behaviour, no engine dependencies. It can be serialized if needed (e.g. for the tooling preview pipeline).
+
+---
+
+### D12 — Runtime Entity Creation
+
+**Decision:** Three mutation primitives — `create-card`, `copy-card`, and `create-zone` — enable entities to be created during play (for tokens, copies, and dynamic zones). No parameterized card or zone definitions; post-creation mutation via the existing modifier, accumulator, and condition system handles variable properties. All three primitives return an `Entity` value captured via the `BindTo` mechanism added in the D3 addendum.
+
+**New primitives (additions to §9.1 of the domain model):**
+
+| Keyword | Parameters | Returns | Description |
+|---|---|---|---|
+| `create-card` | `zone: Zone, definition-name: CardDefinitionName, owner: Player` | `Entity` | Instantiates a new card from the named definition; places it in the specified zone with the given owner. Owner is set at creation and immutable thereafter. Appends a creation event. |
+| `copy-card` | `source: Entity, destination-zone: Zone, owner: Player` | `Entity` | Instantiates a card using the same definition as `source`. Copies no runtime state — the new card starts fresh (no modifiers, accumulators, or conditions from `source`). Appends a creation event. |
+| `create-zone` | `owner: Player, definition-name: ZoneDefinitionName` | `Entity` | Instantiates a zone from the named zone definition; initially empty. Appends a creation event. |
+
+**`CardDefinitionName` and `ZoneDefinitionName`** are new entries in the type vocabulary — string-valued types that the tooling validates at parse time against the named definitions registered in `GameDefinition`. They are resolved to definition references at game-definition load time; the engine performs no name lookups at execution time.
+
+**Why no parameterized definitions.** Card and zone definitions are design-time data. Adding runtime parameters to them blurs the design-time/runtime boundary established in D2 and propagates complexity into the JSON schema, the tooling, and the text renderer. The post-creation pattern handles variable properties cleanly with existing machinery:
+
+```
+// "Create an X/X Elemental Token"
+new-card = create-card(zone, "elemental-token", owner)   // base attack 0, base health 0
+apply-modifier(new-card, "attack", additive, X, permanent)
+apply-modifier(new-card, "health", additive, X, permanent)
+// get-state(new-card, "attack") now returns X
+```
+
+The one thing post-creation mutation cannot change is a card's *static* properties (name, art, type tags) — those are fixed by the definition. For tokens and dynamic cards this is not an issue: the variable quantities are always mutable properties. If a future game requirement genuinely needs runtime-determined static properties, treat it as a requirements change and route through the domain modeler.
+
+**`copy-card` semantics.** A copy shares the source card's *definition* (same static properties, same effect blocks, same text) but carries no runtime state. This matches the conventional card-game meaning of "copy": mechanically identical to the original but does not inherit counters, damage, conditions, or active static effects. If a game creator needs to transfer runtime state from source to copy, they do so with explicit mutation keywords after creation.
+
+**Domain model gaps flagged by this decision:** All four resolved.
+
+1. `create-card`, `copy-card`, `create-zone` — resolved as A5. Added to §9.1 (Mutation Primitives) with Returns column.
+2. `CardDefinitionName` and `ZoneDefinitionName` — resolved as A6. Defined as string-valued types in §9.1 notes; validated at authoring time, resolved at load time.
+3. Ownership timing — resolved as A7. §2.4 now reads "set at the moment of creation" — immutability is the invariant, not the timing.
+4. Zone lifecycle — resolved as A8. §2.3 now states zones created during play via `create-zone` are never destroyed; inactive zones are modeled via conditions.
+
+**Rationale:**
+- Three primitives cover the three creation patterns that arise in practice (named token, clone, dynamic zone) without over-engineering.
+- Returning `Entity` from all three unifies the usage pattern and follows the same `BindTo` model as `apply-modifier` / `apply-condition`.
+- Deferring parameterized definitions keeps the definition data model clean and avoids propagating new complexity into D2, D11, and the forthcoming game creator API.
+
+**Consequences:**
+- `GameDefinition` carries named `CardDefinition` and `ZoneDefinition` registries (maps from name to definition) alongside the `StateBasedRules` list noted in D7.
+- At game-definition load time, `CardDefinitionName` and `ZoneDefinitionName` values in `KeywordNode` trees are validated against these registries. An unknown name is a load-time error, not a runtime error.
+- `create-card` and `copy-card` log the same `create-card` event type; the resolved definition reference appears in `BoundArgs`. The distinction between the two primitives is an authoring convenience, not an observable event-log difference.
+- Declarative static effects on a card definition are provisioned on any card instance created from that definition — whether at game setup or dynamically during play — using the shared `ProvisionDeclarativeEffect` helper (D6). Effects whose while-condition is initially true activate immediately; effects whose while-condition is initially false begin dormant. The static effect lifecycle (D6) manages all subsequent transitions identically regardless of when the card was created.
+- `create-zone` implies that `ZoneDefinition` is a first-class record in `GameDefinition` alongside `CardDefinition`. The game creator API (D14) will define how both are authored and registered.
+
+---
+
+### D13 — Keyword Parameter Modifications
+
+**Decision:** Static effects may carry a `ParameterModification` that intercepts mutation keyword invocations before execution. There are two variants: `ParameterAdjustment` (modifies argument values) and `Disable` (cancels the invocation entirely). Numeric adjustments follow the same additive-then-multiplicative ordering as the state modifier system (D5), ensuring stacking effects compose without order dependence. A `Disable` produces a `keyword-disabled` engine event in the log rather than the normal event, making suppression observable by triggers and semantically distinct from "the keyword executed with a value of zero."
+
+---
+
+**Motivation.** The contribution system (D5) provides modifiers on *static properties* — values the game creator reads explicitly via property keywords. A "damage reduction" effect modeled as a modifier requires the game creator to always route damage through a composite keyword that reads it. If any path calls `take-damage` directly without consulting the modifier, the effect is silently bypassed. Parameter modification is the engine-level guarantee that the interception applies to every invocation of the named keyword regardless of call depth.
+
+Additionally, multiplying a numeric argument by zero is mechanically equivalent to cancellation but semantically different: the keyword still executed, its event is still logged, and any trigger watching for that keyword will still fire. `Disable` is a distinct concept: the invocation never happens, a `keyword-disabled` event is logged instead, and triggers on the original keyword do not fire.
+
+---
+
+**`ParameterModification` (discriminated union):**
+
+```
+ParameterModification:
+  | ParameterAdjustment {
+      TargetKeyword   : string
+      ArgFilter       : List<EventParamDecl>?   // which args to expose to FilterCondition
+      FilterCondition : KeywordNode?            // optional boolean; if false, skip
+      ParamMods       : List<ParamMod>
+    }
+  | Disable {
+      TargetKeyword   : string
+      ArgFilter       : List<EventParamDecl>?
+      FilterCondition : KeywordNode?
+    }
+```
+
+**`ParamMod`:**
+
+```
+ParamMod {
+  ParamName  : string                       // declared parameter name of the target keyword
+  Kind       : Additive | Multiplicative | Replace
+  Expression : KeywordNode
+}
+```
+
+- **`Additive`** — `Expression` evaluates to a numeric delta. All active additive mods for the same parameter are summed and added to the original invocation value. `ParameterRef("original")` in the expression resolves to the raw invocation argument.
+- **`Multiplicative`** — `Expression` evaluates to a numeric factor. All active multiplicative mods for the same parameter are multiplied together and applied to the post-additive result. `ParameterRef("original")` in the expression also resolves to the raw invocation argument (not the post-additive result).
+- **`Replace`** — `Expression` evaluates to the new value outright. Applied in `StaticEffectId` ascending order after all additive and multiplicative mods; each Replace mod sees the previous result as `ParameterRef("original")`. Valid for numeric and non-numeric parameters.
+
+The formula for a numeric parameter mirrors D5's modifier evaluation:
+
+```
+post_additive      = raw_arg + Σ(additive expressions)
+post_multiplicative = post_additive × Π(multiplicative expressions)
+final              = Replace pipeline applied to post_multiplicative
+```
+
+Within the additive and multiplicative groups, ordering is by `StaticEffectId` ascending, but since addition and multiplication are commutative, that ordering does not affect the result. It matters only for Replace mods (pipeline semantics) and for determinism in logging.
+
+---
+
+`ParameterModification` is a fourth optional field on `StaticEffect` alongside `StateContribution`, `Trigger`, and `LifetimeSpec`.
+
+**`StaticEffect` record (updated from D6):**
+
+```
+StaticEffect {
+  Id                    : StaticEffectId
+  OwnerEntity           : EntityId               // entity this effect is defined on (D13)
+  Origin                : Declarative | Dynamic
+  SourceDefinition      : StaticEffectDef?       // non-null for declarative effects; null for dynamic (A1/D6)
+  LifetimeSpec          : LifetimeSpec
+  TriggerFireCount      : int
+  TriggerHighWaterMark  : long
+  StateContribution     : ContributionId?
+  Trigger               : TriggerDefinition?
+  ParameterModification : ParameterModification? // D13
+  OwnedContributions    : List<ContributionId>
+}
+```
+
+`OwnerEntity` is the entity (card, player, or zone) on which this static effect lives. For declarative effects it is the card instance; for dynamic effects it is the entity in whose effect block the standing-mutation keyword was invoked. This field also resolves the same latent gap in D8's trigger evaluation — see below.
+
+---
+
+**Evaluation context for modification expressions.** When evaluating `FilterCondition` or any `ParamMod.Expression`:
+
+- **`source`** — reserved name; resolves to `OwnerEntity`. Lets a declarative static effect refer to "this card" (e.g. `equal-to(target, source)`).
+- **`original`** — reserved name; resolves to the raw invocation argument for Additive/Multiplicative expressions, or the running result of preceding Replace mods for Replace expressions.
+- **Arg values by name** — the invocation's arguments, exposed via `ArgFilter`'s `ParamName` declarations.
+- **GameState** — for property keyword reads.
+- **No event log access.** Expressions are evaluated synchronously at dispatch time, before the invocation is logged. History-dependent modifications should track state via accumulators.
+
+---
+
+**Where interception happens.** `ApplyParameterModifications` is called in the keyword evaluator at every mutation keyword dispatch point — including nested invocations within composite keywords, not just block-step level.
+
+Updated keyword evaluator (extends D3):
+
+```
+object EvaluateNode(KeywordNode node, EvalContext ctx):
+  ...
+  case Invocation(name, argNodes):
+    args = argNodes.Select(n => EvaluateNode(n, ctx)).ToList()
+    if IsMutationKeyword(name):
+      result = ApplyParameterModifications(name, args, ctx)
+      if result is CANCELED: return void           // Disable fired — do not dispatch
+      return DispatchMutation(name, result, ctx)
+    else:
+      return DispatchProperty(name, args, ctx)
+```
+
+---
+
+**`ApplyParameterModifications` algorithm:**
+
+```
+Result ApplyParameterModifications(string keyword, List<object> args, EvalContext ctx):
+
+  // Collect matching active effects, ordered oldest-first.
+  // Evaluate each filter condition; keep only those that pass.
+  matching = []
+  for each se in ctx.GameState.ActiveStaticEffects
+               where se.ParameterModification?.TargetKeyword == keyword
+               ordered by se.Id ascending:
+    pm = se.ParameterModification
+    evalBindings = { "source": se.OwnerEntity }
+    if pm.ArgFilter != null:
+      for each decl in pm.ArgFilter:
+        evalBindings[decl.ParamName] = args[IndexOf(decl.ArgName, keyword)]
+    if pm.FilterCondition == null
+       OR EvaluateProperty(pm.FilterCondition, evalBindings, ctx.GameState):
+      matching.Add((se, pm, evalBindings))
+
+  // Step 1: Disable check — any matching Disable cancels the invocation.
+  if any (_, pm, _) in matching where pm is Disable:
+    log keyword-disabled event: { keyword: keyword, ...bound args }
+    return CANCELED
+
+  // Step 2: Apply ParameterAdjustments, per parameter, in Additive → Multiplicative → Replace order.
+  for each parameter p declared on keyword:
+    raw = args[IndexOf(p, keyword)]
+
+    // Additive: sum all deltas; each expression sees "original" = raw invocation value
+    additiveSum = Σ( EvaluateProperty(mod.Expression, evalBindings + {"original": raw}, ctx.GameState)
+                     for (se, pm, evalBindings) in matching
+                     for mod in pm.ParamMods
+                     where mod.ParamName == p AND mod.Kind == Additive )
+    result = raw + additiveSum
+
+    // Multiplicative: multiply all factors; each expression also sees "original" = raw invocation value
+    multiplicativeProduct = Π( EvaluateProperty(mod.Expression, evalBindings + {"original": raw}, ctx.GameState)
+                                for (se, pm, evalBindings) in matching
+                                for mod in pm.ParamMods
+                                where mod.ParamName == p AND mod.Kind == Multiplicative )
+    result = result × multiplicativeProduct
+
+    // Replace: pipeline in StaticEffectId order; each expression sees "original" = running result
+    for each (se, pm, evalBindings) in matching:
+      for each mod in pm.ParamMods where mod.ParamName == p AND mod.Kind == Replace:
+        result = EvaluateProperty(mod.Expression, evalBindings + {"original": result}, ctx.GameState)
+
+    args[IndexOf(p, keyword)] = result
+
+  return args
+```
+
+---
+
+**`keyword-disabled` engine event.** When a `Disable` fires, the engine synthesizes and appends a `GameEvent` with `KeywordName: "keyword-disabled"` to the current block scope accumulator. Its `BoundArgs` always contains:
+- `"keyword"` — the name of the suppressed keyword
+- One entry per bound argument of that keyword invocation (same keys as would have appeared in the normal event's `BoundArgs`)
+
+This event uses the same `GameEvent` structure as all other events and is fully visible to the trigger and event-log query systems. Game creators write trigger conditions on `EventKeyword: "keyword-disabled"` with an arg filter on `"keyword"` to react to specific suppressions (e.g., "whenever damage to this card is prevented, its controller draws a card").
+
+---
+
+**Examples.**
+
+"This unit takes 2 less damage" (Additive):
+```
+ParameterAdjustment {
+  TargetKeyword:   "take-damage",
+  ArgFilter:       [ { ArgName: "target", ParamName: "target" } ],
+  FilterCondition: equal-to(target, source),
+  ParamMods: [ { ParamName: "amount", Kind: Additive, Expression: literal(-2) } ]
+}
+```
+
+"This unit takes half damage, rounded down" (Multiplicative):
+```
+ParameterAdjustment {
+  ...same filter...
+  ParamMods: [ { ParamName: "amount", Kind: Multiplicative, Expression: literal(0.5) } ]
+}
+```
+
+Both together (separate static effects, different ages): the formula gives `(original − 2) × 0.5`. The additive reduction applies first because the ordering is structural (Additive before Multiplicative), not age-based — so the result is independent of which effect was created first.
+
+"This unit is immune to `take-damage`" (Disable):
+```
+Disable {
+  TargetKeyword:   "take-damage",
+  ArgFilter:       [ { ArgName: "target", ParamName: "target" } ],
+  FilterCondition: equal-to(target, source)
+}
+```
+
+When suppressed, the engine logs `keyword-disabled { keyword: "take-damage", target: <this-card>, amount: 3 }` instead of the normal `take-damage` event. Any trigger watching for `take-damage` does not fire; a trigger watching for `keyword-disabled` with `keyword == "take-damage"` may fire.
+
+---
+
+**`source` in trigger conditions (addendum to D8).** The same `OwnerEntity` field resolves the equivalent gap in trigger evaluation. A trigger such as "when *this* card deals damage, draw a card" requires the condition to reference the owning entity. `TriggerEvaluationContext` gains:
+
+```
+TriggerEvaluationContext {
+  Source     : EntityId                      // NEW — se.OwnerEntity
+  EventParams: Dictionary<string, object>
+  GameState  : GameState
+  LogScope   : TriggerScope
+}
+```
+
+`ParameterRef("source")` in a trigger condition resolves to `Source`. Existing conditions that do not use `source` are unaffected.
+
+---
+
+**Domain model gaps flagged by this decision:** All four resolved.
+
+1. `ParameterModification` — resolved as A9. Added to §5 as a fourth optional component on a static effect (`ParameterAdjustment` and `Disable` variants, with filter condition). Interception applies at every dispatch point including deep composite invocations.
+2. Reserved binding names — resolved as A10. All four reserved names (`trigger_event`, `candidate`, `source`, `original`) consolidated in §4.3.
+3. `keyword-disabled` engine event — resolved as A11. Defined in §5.4 and tabulated in §7. Bound args: `"keyword"` plus one entry per suppressed invocation argument.
+4. Arithmetic primitives — resolved as A12. `add`, `subtract`, `multiply`, `max`, `min` added to §9.3.
+
+**Rationale:**
+- Additive-then-multiplicative ordering mirrors D5's modifier evaluation. Within each group, stacking effects are commutative, so the result is independent of which effect is older. This gives game creators the same compositional guarantees they have for static property modifiers.
+- `Disable` is semantically distinct from Multiplicative × 0: it prevents the keyword from executing rather than executing it with a zeroed argument. This distinction is observable in the event log (different event type) and in triggers (normal triggers don't fire). It also carries clearer meaning to the player — "immune" is not the same as "takes 0 damage."
+- Intercepting at the evaluator level (every dispatch point) is the only way to make the guarantee hold regardless of composition depth.
+- Excluding event log access from modification expressions keeps the interception path synchronous and avoids re-entrant complexity.
+
+**Consequences:**
+- `StaticEffect` gains `OwnerEntity: EntityId` (D13), `SourceDefinition: StaticEffectDef?` (A1/D6), and `ParameterModification: ParameterModification?` (D13).
+- `TriggerEvaluationContext` gains `Source: EntityId`.
+- `ApplyParameterModifications` is called before every mutation dispatch in the keyword evaluator. For games with no `ParameterModification` static effects active, this is a no-op list scan.
+- `ArgFilter` reuses `EventParamDecl` from D8 — extract into a shared type.
+- `ParamMod.ParamName` validated by tooling against the target keyword's declared parameters. `Kind: Additive | Multiplicative` is valid only on numeric-typed parameters; `Replace` is valid on any type.
+- Arithmetic primitives must be registered in the built-in keyword registry once the domain modeler formalizes them.
+- A `Disable` from any matching effect cancels the invocation entirely; `ParameterAdjustment` mods from other effects are ignored when a Disable fires. If a game needs "bypass immunity" mechanics, the game creator models it via the `Disable` effect's own `FilterCondition` (e.g., checking for absence of a "piercing" condition on the attacker).
+
+---
+
+### D16 — Testing Strategy
+
+**Decision:** Testing is layered: unit tests for isolated components (Layer 1), block-level integration tests as the primary pattern (Layer 2), and full game session scenario tests for end-to-end coverage (Layer 3). The minimal test harness consists of four hand-written helpers — `ScriptedPlayerStrategy`, `MockRandomSource`, `GameStateBuilder`, and assertion helpers — which must be in place before meaningful testing of any layer can begin. No mocking framework is required.
+
+---
+
+**Layer 1 — Unit tests on isolated components.**
+
+Fast and precise. Each test constructs only what its target needs.
+
+| Target | What to cover |
+|---|---|
+| `EvaluateNode` (property keywords) | `Literal`, `ParameterRef`, composite recursion, `GetState`/`GetProperty`/`InZone` |
+| `ApplyParameterModifications` | Additive+multiplicative ordering (result independent of effect age), Replace pipeline, Disable short-circuit, filter conditions, `source` binding |
+| `CollectSatisfiedTriggers` | High-water mark advancement (non-matching events also advance), condition evaluation with `EventParams`, `OldestFirst`/`OldestLast` sort, `PromptPlayer` routing |
+| `CheckLifetimes` | WhileCondition expiry, TurnTimer decrement, TriggerCount expiry, cascade (expiry of one effect causes re-check that expires another), permanent effects unaffected; terminal vs. while-condition expiry classification (TurnTimer/TriggerCount = discard, only-WhileCondition + declarative = dormant); Phase 2 dormant activation (while-condition becomes true → new instance with fresh counters); re-activation cascade (new active effect alters another condition) |
+| `RunStateBasedRules` | Fixpoint termination when no rules trigger, multi-pass when rules cascade, rule registration order respected |
+| `TextRenderer` | `RenderNode` structure, locale > `TextTemplate` > structural resolution order, definition-time vs invocation-time modes, `SequenceNode` for blocks |
+
+---
+
+**Layer 2 — Block-level integration tests (the primary pattern).**
+
+The key harness: construct a `GameState` directly, execute a single `EffectBlockDef` with a scripted strategy, assert the resulting state and event log. This is the fastest path to testing a keyword's correctness and the primary pattern game creators use when verifying their own definitions.
+
+Example structure:
+
+```
+// Arrange
+var state   = new GameStateBuilder()
+    .WithPlayer(PlayerSlot.Player1)
+    .WithZone("hand", PlayerSlot.Player1, out var hand)
+    .WithCard("goblin", hand, PlayerSlot.Player1, out var goblin)
+    .Build();
+
+var strategy = new ScriptedPlayerStrategy();  // no queued inputs needed for this block
+var block    = /* EffectBlockDef: take-damage(goblin, 3) */;
+
+// Act
+await blockExecutor.ExecuteBlock(block, ctx);
+
+// Assert
+AssertAccumulator(state, goblin, "damage", 3);
+AssertEvent(log, "take-damage", ("target", goblin), ("amount", 3));
+```
+
+This pattern covers in a single test:
+- Keyword evaluation (argument nodes resolved correctly)
+- Mutation dispatch (game state changes applied)
+- Event log structure (correct `KeywordName`, correct `BoundArgs`, correct tree nesting)
+- `BindTo` (return values bound to variables for use by later steps)
+- Parameter modifications (if any static effects are pre-loaded via `GameStateBuilder.WithStaticEffect(...)`)
+
+**Testing the dual-use invariant.** Layer 2 is also where the dual-use property (§1.1 of the domain model) is verified: the same `KeywordDefinition` is used for both execution and rendering in the same test.
+
+```
+// Execution path:
+await blockExecutor.ExecuteBlock(blockDef, ctx);
+AssertAccumulator(state, goblin, "damage", 3);
+
+// Rendering path (same definition, same test):
+var rendered = renderer.Render(keywordDef.Body, localeStrings: null, bindings: null);
+AssertRenderContains(rendered, "damage");   // structural fallback present
+AssertRenderContains(rendered, "3");        // literal value in tree
+```
+
+**Testing mid-effect prompts.** Queue a `PromptResponse` in `ScriptedPlayerStrategy` before executing the block. Assert the variable binding is present in scope for subsequent steps. Assert no events were logged during the pause.
+
+---
+
+**Layer 3 — Full game session scenario tests.**
+
+Slower but end-to-end. Use `GameDefinition.CreateBuilder()` + `GameSession.Create(...)` with scripted strategies and a seeded `MockRandomSource`. Each scenario tests a specific mechanic across the full post-action sequence.
+
+| Scenario | What it validates |
+|---|---|
+| Trigger fires after action | Post-action sequence (D7), `CollectSatisfiedTriggers`, `TriggerHighWaterMark` advancement |
+| SBR cascade | Fixpoint loop reaches stable state; SBRs run before triggers |
+| Static effect expires mid-game | `CheckLifetimes` sweep, contribution auto-removal, while-condition evaluated after each block |
+| Declarative effect re-activation | Effect goes dormant on while-condition expiry; card returns to play; next `CheckLifetimes` Phase 2 creates a new instance with `TriggerFireCount = 0` and `TriggerHighWaterMark = 0`; original expired instance's trigger history is not inherited |
+| Trigger-count lifetime | Effect expires after N firings; next `CheckLifetimes` catches it |
+| Win/loss condition | SBR produces outcome; `GameResult` populated correctly |
+| Parameter modification stacking | Two additive effects + one multiplicative: result is `(base + Σ additives) × factor` |
+| Disable prevents trigger | Disabled invocation logs `keyword-disabled`; trigger on the original keyword does not fire; trigger on `keyword-disabled` fires |
+| `PromptPlayer` trigger ordering | Multiple simultaneous triggers prompt the player; scripted response controls order |
+| `copy-card` starts fresh | Copied card has no accumulators, conditions, or static effects from source |
+
+---
+
+**The minimal test harness.**
+
+These four helpers are required before any layer of testing is viable. They live in `Archetype.Tests` and use `InternalsVisibleTo` access to `Archetype.Engine`.
+
+**`ScriptedPlayerStrategy : IPlayerStrategy`**
+
+```
+class ScriptedPlayerStrategy : IPlayerStrategy
+  Queue<PlayerAction?> _actions
+  Queue<PromptResponse> _responses
+
+  ScriptedPlayerStrategy QueueAction(PlayerAction? a)   → self
+  ScriptedPlayerStrategy QueueResponse(PromptResponse r) → self
+
+  Task<PlayerAction?>    SelectActionAsync(...)   → _actions.Dequeue()
+  Task<PromptResponse>   RespondToPromptAsync(...)→ _responses.Dequeue()
+  // Throws InvalidOperationException if queue is empty — test setup error, not engine error
+```
+
+**`MockRandomSource : IRandomSource`**
+
+```
+class MockRandomSource : IRandomSource
+  Queue<int> _values
+
+  MockRandomSource Enqueue(params int[] values) → self
+
+  int  NextInt(int min, int max)    → _values.Dequeue()   // ignores min/max; test controls output
+  void Shuffle<T>(IList<T> list)    → uses _values to permute via Fisher-Yates
+```
+
+**`GameStateBuilder`**
+
+Constructs a `GameState` directly — bypasses manifest provisioning, allocates real `EntityId`s from a fresh counter. Essential for Layer 1 and Layer 2 speed.
+
+```
+class GameStateBuilder
+  .WithPlayer(PlayerSlot, out EntityId id, Dictionary<string,object>? staticProps = null) → self
+  .WithZone(string defName, PlayerSlot owner, out EntityId id)                            → self
+  .WithCard(string defName, EntityId zone, PlayerSlot owner, out EntityId id)             → self
+  .WithAccumulator(EntityId entity, string name, double value)                            → self
+  .WithCondition(EntityId entity, string conditionName)                                   → self
+  .WithModifier(EntityId entity, string prop, ModifierKind kind, double value)            → self
+  .WithStaticEffect(StaticEffectDef def, EntityId ownerEntity)                            → self
+  .Build() → GameState
+```
+
+`WithCard` instantiates declarative static effects from the `CardDefinition` automatically, matching production provisioning behaviour.
+
+**Assertion helpers**
+
+```
+static class Assert
+  // Event log
+  .EventLogged(IReadOnlyList<GameEvent> log, string keyword,
+               params (string param, object value)[] args)
+  .NoEventLogged(log, string keyword)
+  .EventLoggedDisabled(log, string originalKeyword)  // keyword-disabled event
+
+  // Game state
+  .Accumulator(GameStateView state, EntityId entity, string name, double expected)
+  .ConditionPresent(state, EntityId, string conditionName)
+  .ConditionAbsent(state, EntityId, string conditionName)
+  .ComputedProperty(state, EntityId, string propName, double expected)  // modifier-adjusted value
+
+  // Render
+  .RenderContainsText(RenderNode root, string fragment)    // any TextSpan in tree contains fragment
+  .RenderSummary(RenderNode root, string expected)         // top-level CompositeNode.summary text
+```
+
+---
+
+**Domain model gaps flagged by this decision:** None.
+
+**Rationale:**
+- Centring on Layer 2 (block-level integration tests) means the implementer has a runnable test harness as soon as `ExecuteBlock` exists — before `ActionResolver`, phases, or the full session loop are built. This makes test-first development viable from day one.
+- Hand-written harness helpers over a mocking framework: `ScriptedPlayerStrategy` and `MockRandomSource` are simple queue-draining implementations with no framework dependency. They are also easier to read in test output and easier to extend with game-specific helpers.
+- `GameStateBuilder` constructing real `GameState` objects (not mocks) means Layer 1 and Layer 2 tests exercise the actual storage structures — `ModifierIndex`, `ConditionIndex`, contribution registry — not a pretend substitute.
+- Dual-use invariant tests in Layer 2 are the most important tests architecturally: they verify that D2's central promise (one representation, two uses) holds for each keyword definition.
+
+**Consequences:**
+- `Archetype.Tests` is a single test project referencing all four engine assemblies. It has `InternalsVisibleTo` access to `Archetype.Engine` internals. It does not have production code; all four harness types are test infrastructure.
+- If game-specific test projects are added later (e.g. a test project for a specific card game's keywords), they should reference `Archetype.Tests` helpers via a shared `Archetype.Tests.Shared` assembly rather than duplicating them.
+- Layer 1 tests should complete in under one second in aggregate. Layer 2 tests should complete in under five seconds. Layer 3 scenario tests are permitted to be slower but must be deterministic and never flaky — `MockRandomSource` and `ScriptedPlayerStrategy` guarantee this.
+- The `GameStateBuilder.WithCard` method must mirror the manifest provisioning logic (instantiate declarative static effects from the definition). If these diverge, tests will pass against a state that doesn't match production provisioning. A shared provisioning function called by both is the right implementation.
+
+---
+
+### D15 — Module Boundaries
+
+**Decision:** The engine is partitioned into four assemblies. `Archetype.Core` contains all pure data types and interfaces — it has no dependencies beyond the .NET BCL and is WASM-safe by construction. `Archetype.Build`, `Archetype.Text`, and `Archetype.Engine` each depend on `Core` only; none depends on any other of the three. This lets the DSL tooling (a separate desktop application) reference `Core`, `Build`, and `Text` without pulling in the runtime engine.
+
+---
+
+**Dependency graph:**
+
+```
+                      Archetype.Core
+                  (pure data, interfaces)
+                   ↑         ↑         ↑
+        ┌──────────┘  ┌──────┘  ┌──────┘
+        │             │         │
+Archetype.Build  Archetype.Text  Archetype.Engine
+(C# authoring)  (text renderer) (runtime + session API)
+```
+
+No edges exist between `Build`, `Text`, and `Engine`. All lateral coupling goes through `Core`.
+
+---
+
+**`Archetype.Core`** — pure data types, interfaces, built-in keyword metadata.
+
+No NuGet dependencies. No engine logic. WASM-safe by construction.
+
+*Contents:*
+- `KeywordNode` discriminated union (`ParameterRef`, `Literal`, `Invocation`) and `KeywordDefinition`
+- `EffectBlockDef`, `EffectBlockStep` (including `BindTo`)
+- `StaticEffectDef`, `LifetimeSpec`, `LifetimeCondition`
+- `TriggerDefinition`, `EventParamDecl`, `EventBinding`
+- `ParameterModification` discriminated union (`ParameterAdjustment`, `Disable`), `ParamMod`
+- `ModifierContribution`, `ConditionContribution`, `ContributionId`
+- `GameEvent`, `GameResult`
+- `RenderNode` discriminated union (`TextSpan`, `CompositeNode`, `SequenceNode`)
+- All definition records: `CardDefinition`, `ZoneDefinition`, `PhaseDefinition`, `ActionRuleDefinition`, `NamedEffectBlockDef`, `PlayerDefinition`, `CardSet`, `StateBasedRule`
+- `GameDefinition` (the immutable aggregate)
+- `InitManifest`, `ZoneSpec`, `CardSpec`, `PlayerStateSpec`
+- `PlayerAction` discriminated union, `AvailableActions`, `PlayableCardOption`, `ActivatableAbilityOption`
+- `PromptContext` discriminated union (choice prompt, trigger-order prompt — D8), `PromptResponse`
+- Interfaces: `IPlayerStrategy`, `IEngineObserver`, `IRandomSource`
+- Enums: `TriggerResolutionOrder`, `PlayerSlot`, `ModifierKind`, `ParamModKind`, `CascadeDirective`
+- `BuiltInKeywords` — a static registry of all built-in keyword names and their `ParameterDecl[]` signatures (no C# implementations; implementations are in `Engine`). Used by `Build` for authoring validation and by `Engine` for dispatch.
+- `DefinitionException` — thrown by authoring-time validation failures
+
+*What is not here:* any mutable runtime state, any execution logic, any JSON parsing.
+
+---
+
+**`Archetype.Build`** — C# game definition authoring API.
+
+Depends on `Core` only. No engine dependency. WASM-safe (though it is more likely used at desktop/editor time than in a WASM export).
+
+*Contents:*
+- `GameDefinitionBuilder` and sub-builders (`KeywordBuilder`, `CardBuilder`, `ZoneBuilder`, `PhaseBuilder`, `RuleBuilder`, `ActionRuleBuilder`, `PlayerBuilder`, `ManifestBuilder`)
+- `Kw` — static factory class for `KeywordNode` trees; one shorthand per built-in keyword
+- Validation logic: type-checking `KeywordNode` trees, acyclicity checks, name-resolution against `BuiltInKeywords` (from `Core`)
+
+The builder does not produce JSON and does not load JSON. It produces `GameDefinition` values directly.
+
+*Used by:* the DSL tooling (authoring test cards), test projects (assembling in-code game definitions), and any host that wants to construct a game definition programmatically.
+
+---
+
+**`Archetype.Text`** — text rendering.
+
+Depends on `Core` only. No engine dependency. WASM-safe.
+
+*Contents:*
+- `TextRenderer` — walks `KeywordNode` trees and `EffectBlockDef`s; produces `RenderNode` trees (D11)
+- Locale file loading helpers (flat `Dictionary<string, string>` construction from JSON text, if the host does not want to manage locale dictionaries manually)
+
+*Used by:* the DSL tooling (card text preview), the Godot host (card display, event log display), test projects. Because `Text` has no dependency on `Engine`, the tooling can render card text without instantiating a game session.
+
+---
+
+**`Archetype.Engine`** — runtime execution and public session API.
+
+Depends on `Core` only. WASM-safe (no `Thread`, no `ThreadPool`, no raw file I/O; `System.Text.Json` is BCL in .NET 10).
+
+*Public surface (accessible to the Godot host and tests):*
+- `GameSession`, `GameSessionBuilder`
+- `GameStateView` — read-only projection of `GameState`
+- `GameDefinitionLoader.FromJson(Stream) → GameDefinition` — the engine-owned JSON deserialiser (D2); validates against `BuiltInKeywords` from `Core`
+- `SeededRandom` — the default `IRandomSource` implementation (D9)
+
+*Internal (not public; accessible to tests via `InternalsVisibleTo`):*
+- `GameState` — mutable runtime state (entities, contribution registry, active static effects)
+- `ExecutionContext`, `TriggerEvaluationContext`
+- `ActionResolver` — owns the post-action sequence (D7), calls `ExecuteBlock`, `RunStateBasedRules`, `CollectSatisfiedTriggers`, `CheckLifetimes`
+- Block executor (`ExecuteBlock`) and keyword evaluator (`EvaluateNode`, `ApplyParameterModifications`, `DispatchMutation`, `DispatchProperty`)
+- Built-in keyword implementations — registered at startup against names from `BuiltInKeywords`
+- Contribution registry and active static effect list
+- `AvailableActions` computation (activation condition evaluation, cost dry-run, target enumeration)
+
+`[assembly: InternalsVisibleTo("Archetype.Tests")]` is the only mechanism by which test code accesses engine internals. Nothing in `Core`, `Build`, or `Text` has visibility into `Engine` internals.
+
+---
+
+**Consumer reference sets:**
+
+| Consumer | Core | Build | Text | Engine |
+|---|---|---|---|---|
+| DSL tooling (desktop app) | ✓ | ✓ | ✓ | — |
+| Godot host | ✓ | ✓ | ✓ | ✓ |
+| Test projects | ✓ | ✓ | ✓ | ✓ (+ internals) |
+| Game creator code (C# game def) | ✓ | ✓ | — | — |
+
+Game creator code (the card/keyword/rule definitions for a specific game) only needs `Core` and `Build`. It does not need to reference `Engine` or `Text` — those are host concerns.
+
+---
+
+**Domain model gaps flagged by this decision:** None.
+
+**Rationale:**
+- Isolating `Core` as a pure-data assembly with no dependencies is the single most important structural decision: it keeps the WASM binary small, lets the tooling import types without pulling in the runtime, and provides a stable, dependency-free serialisation boundary (D2's JSON schema maps directly to `Core` types).
+- No cross-dependencies between `Build`, `Text`, and `Engine` prevent accidental coupling. The tooling does not need the engine. The renderer does not need the builder. The engine does not need to know about rendering.
+- `BuiltInKeywords` as metadata-only in `Core` (names + signatures, no implementations) lets `Build` validate keyword names at authoring time without depending on `Engine`. The engine registers C# implementations at startup by matching against the same names.
+- Keeping `GameDefinitionLoader.FromJson` in `Engine` (not `Build`) honours D2's commitment that the engine owns the deserialiser and prevents `Build` from needing a JSON dependency.
+- `InternalsVisibleTo("Archetype.Tests")` is the controlled white-box test seam. No other assembly can reach engine internals. External consumers program exclusively against the public session API.
+
+**Consequences:**
+- The `.sln` contains four projects: `Archetype.Core`, `Archetype.Build`, `Archetype.Text`, `Archetype.Engine`. Test projects are a fifth. The tooling is a separate solution (or a separate `.sln` file in the same repo) that references the four engine projects via project references or NuGet packages.
+- `GameDefinition` is defined in `Core`. Both `GameDefinitionBuilder.Build()` (in `Build`) and `GameDefinitionLoader.FromJson()` (in `Engine`) return a `Core`-typed `GameDefinition`. The host does not need to know which path produced it.
+- Built-in keyword implementations in `Engine` must be kept in sync with `BuiltInKeywords` metadata in `Core`. The implementer should enforce this with a startup assertion: on `ActionResolver` construction, verify that every name in `BuiltInKeywords.All` has a registered implementation and no extra names are registered.
+- `Kw` shorthands in `Build` must also be kept in sync with `BuiltInKeywords` in `Core`. Same responsibility, same assertion pattern — a `Kw` shorthand that references an unknown built-in name should throw at the point of the `Kw.Invoke` call, not silently produce a broken `KeywordNode`.
+- The old assembly names (`Archetype.Core`, `Archetype.Engine`, `Archetype.Builder`, `Archetype.Server`, `Archetype.Design`) are retired. The new names are `Archetype.Core`, `Archetype.Build`, `Archetype.Text`, `Archetype.Engine`. No `Server` assembly exists — the engine is embedded directly into the Godot host, not exposed over a network.
+- **GDScript interop note.** The Godot host project will contain C# classes extending Godot's `Resource` (marked `[GlobalClass]`) that wrap engine types for GDScript consumption — e.g. `CardDefinitionResource`, `ZoneResource`, `PlayerStateResource`. These wrappers live entirely in the Godot host layer; the engine has no Godot types in its public surface (D1). The tooling will generate scaffolding for these wrapper classes as a tooling-phase feature, not an engine feature. The consequence for this phase is that `GameStateView` must be designed to be GDScript-friendly: plain C# types, no heavy generics or internal ID types leaking into the projection, so that the wrapper layer can adapt it without fighting the type system.
+
+---
+
+### D14 — Game Creator API
+
+**Decision:** The game creator API centres on a single immutable type, `GameDefinition`, that aggregates all design-time game data. There are two authoring paths — a fluent C# builder and JSON loading from the DSL tooling — both producing identical `GameDefinition` instances. Session-specific initial state is declared via `InitManifest`, a K8s-style desired-state specification the engine provisions without game creators writing creation calls. The host owns the manifest at session creation time; `GameDefinition` provides a `DefaultInitManifest` the host may adopt unchanged or replace. `IPlayerStrategy` is the single per-player interface through which every player interaction flows. A third session-init path — `FromSavedState` — is reserved for the save/load feature (D17).
+
+---
+
+**`GameDefinition` — the immutable aggregate.**
+
+```
+GameDefinition {
+  Keywords               : IReadOnlyDictionary<string, KeywordDefinition>
+  CardDefinitions        : IReadOnlyDictionary<string, CardDefinition>
+  ZoneDefinitions        : IReadOnlyDictionary<string, ZoneDefinition>
+  CardSets               : IReadOnlyDictionary<string, CardSet>
+  StateBasedRules        : IReadOnlyList<StateBasedRule>
+  Phases                 : IReadOnlyList<PhaseDefinition>      // in turn order
+  ActionRules            : IReadOnlyDictionary<string, IReadOnlyList<ActionRuleDefinition>>
+  TriggerResolutionOrder : TriggerResolutionOrder
+  Player1Definition      : PlayerDefinition
+  Player2Definition      : PlayerDefinition
+  DefaultInitManifest    : InitManifest?
+}
+```
+
+Built-in keywords are pre-registered in `Keywords` by the engine at construction time. Game creator keywords are layered on top. No game creator keyword may shadow a built-in; the builder and deserialiser enforce this as a `DefinitionException`.
+
+`PlayerDefinition` carries only design-time static properties (display name, avatar reference, etc.). Initial mutable state (health, resources) belongs in the `InitManifest`, not here.
+
+```
+PlayerDefinition {
+  StaticProperties : IReadOnlyDictionary<string, object>
+}
+```
+
+**`CardDefinition`:**
+
+```
+CardDefinition {
+  Name              : string
+  StaticProperties  : IReadOnlyDictionary<string, object>
+  PrimaryEffect     : EffectBlockDef
+  AdditionalEffects : IReadOnlyList<NamedEffectBlockDef>
+  StaticEffects     : IReadOnlyList<StaticEffectDef>
+}
+
+NamedEffectBlockDef {
+  Name                : string          // how the host routes player choice to this block
+  ActivationCondition : KeywordNode?
+  Cost                : EffectBlockDef?
+  Body                : EffectBlockDef
+}
+```
+
+**`ZoneDefinition`:**
+
+```
+ZoneDefinition {
+  Name             : string
+  StaticProperties : IReadOnlyDictionary<string, object>
+}
+```
+
+**`PhaseDefinition`:**
+
+```
+PhaseDefinition {
+  Name    : string
+  Init    : EffectBlockDef?    // runs at phase start; may be null
+  Cleanup : EffectBlockDef?    // runs at phase end; may be null
+  // The player action window is implicit between Init and Cleanup
+}
+```
+
+**`ActionRuleDefinition`:**
+
+```
+ActionRuleDefinition {
+  Before : EffectBlockDef?
+  After  : EffectBlockDef?
+}
+```
+
+Multiple rules may be registered under the same action name; they are applied in registration order. `ActionRules` maps action names to lists, not single entries.
+
+**`CardSet`:**
+
+```
+CardSet {
+  Name  : string
+  Cards : IReadOnlyList<string>    // card definition names
+}
+```
+
+Card sets are informational groupings for the tooling and meta-game layer. The engine does not use them during execution.
+
+---
+
+**`InitManifest` — declarative desired state for fresh sessions.**
+
+The host declares what should exist and the engine provisions it — no game creator code calls `create-zone` or `create-card` manually. This matches the meta-game use case naturally: the host knows exactly what should exist (from prior runs, loadouts, procedural generation computed outside the engine) and expresses it as data.
+
+```
+InitManifest {
+  Zones        : IReadOnlyList<ZoneSpec>
+  Cards        : IReadOnlyList<CardSpec>
+  PlayerStates : IReadOnlyList<PlayerStateSpec>
+}
+
+ZoneSpec {
+  LocalId      : string         // manifest-scoped reference ID, used by CardSpec.ZoneLocalId
+  Owner        : PlayerSlot     // Player1 | Player2
+  Definition   : string         // ZoneDefinition name
+  Accumulators : IReadOnlyDictionary<string, double>?
+  Conditions   : IReadOnlyList<string>?
+}
+
+CardSpec {
+  Owner        : PlayerSlot
+  ZoneLocalId  : string         // references ZoneSpec.LocalId
+  Definition   : string         // CardDefinition name
+  Accumulators : IReadOnlyDictionary<string, double>?
+  Conditions   : IReadOnlyList<string>?
+}
+
+PlayerStateSpec {
+  Player       : PlayerSlot
+  Accumulators : IReadOnlyDictionary<string, double>?
+  Conditions   : IReadOnlyList<string>?
+}
+
+enum PlayerSlot { Player1, Player2 }
+```
+
+**Provisioning order.** The engine provisions the manifest in this sequence before the first phase:
+1. Both player entities are created from `Player1Definition` / `Player2Definition`.
+2. Zones are created in `Zones` list order; each is assigned a fresh `EntityId`. `LocalId` is a manifest-scoped reference only — it is not an engine `EntityId`.
+3. Cards are created in `Cards` list order, placed in their declared zone, with their declared owner. Declarative static effects from the card definition are instantiated automatically (D6/D12).
+4. Card mutable state overrides (`Accumulators`, `Conditions`) are applied.
+5. Player mutable state overrides from `PlayerStates` are applied.
+
+No events are logged during provisioning — the event log is empty when the first phase begins. The `InitManifest` is entirely a setup mechanism, not a game action.
+
+**Relationship to `GameStateSnapshot` (D17).** `GameStateSnapshot` is the richer save/load type. A save may occur at any prompt suspension — including mid-block, mid-action — so the snapshot must capture:
+
+- Entity state (zones, cards, players — accumulators, modifiers, conditions)
+- Contribution registry and active static effects (with fire counts and high-water marks)
+- Dormant declarative effects (D6) — required for correct re-activation after load
+- Full finalized event log
+- Current scope hierarchy (turn number, phase index, action scope ID)
+- **In-progress block call stack** — each suspended frame carries its step index, its variable bindings, its in-progress event subtree (the unfinalized parent event stack from D4), and the pending prompt context. There may be multiple frames if nested blocks are executing (e.g. cost block inside a main block inside a phase init block)
+- RNG position (how many calls into the `IRandomSource` sequence, for deterministic replay from the save point)
+
+Because the only `await` points in the engine are `strategy.RespondToPromptAsync` calls (D3), a save point always occurs at a well-defined prompt suspension — not mid-computation. There is no need to serialize arbitrary C# execution state; only the per-frame block data above is required.
+
+A snapshot of a freshly provisioned game before any moves would be structurally equivalent to what manifest provisioning produces — the manifest is simply the lighter authoring format for that initial case.
+
+---
+
+**Two authoring paths for `GameDefinition`.**
+
+**Path 1 — C# builder (programmatic / testing):**
+
+```
+GameDefinition.CreateBuilder() → GameDefinitionBuilder
+
+GameDefinitionBuilder
+  .AddKeyword(name, Action<KeywordBuilder>)                → self
+  .AddCard(name, Action<CardBuilder>)                      → self
+  .AddZone(name, Action<ZoneBuilder>)                      → self
+  .AddCardSet(name, params string[] cardNames)             → self
+  .AddStateBasedRule(name, Action<RuleBuilder>)            → self
+  .AddPhase(name, Action<PhaseBuilder>)                    → self
+  .AddActionRule(actionName, Action<ActionRuleBuilder>)    → self
+  .WithTriggerOrder(TriggerResolutionOrder)                → self
+  .WithPlayer1(Action<PlayerBuilder>)                      → self
+  .WithPlayer2(Action<PlayerBuilder>)                      → self
+  .WithDefaultInitManifest(Action<ManifestBuilder>)        → self
+  .Build() → GameDefinition    // validates; throws DefinitionException on failure
+```
+
+**`Kw` — static factory class for `KeywordNode` trees.**
+
+Writing `new Invocation("take-damage", new ParameterRef("target"), new Literal(3))` is unreadable. `Kw` provides named factory methods:
+
+```
+static class Kw
+  Param(name: string)                                → ParameterRef
+  Literal(value: object)                             → Literal
+  Invoke(keyword: string, params KeywordNode[] args) → Invocation
+  // Built-in shorthands — one per built-in keyword, e.g.:
+  And(a, b)  Or(a, b)  Not(p)
+  Add(a, b)  Subtract(a, b)  Multiply(a, b)  Max(a, b)  Min(a, b)
+  LessThan(a, b)  GreaterThan(a, b)  AtLeast(a, b)  AtMost(a, b)  EqualTo(a, b)
+  GetState(entity, field)   GetProperty(entity, field)   InZone(entity, zone)
+  // ... one shorthand per built-in keyword; the pattern is mechanical
+```
+
+`Kw` is the only API surface game creators touch when constructing `KeywordNode` expressions in C#. It is a thin facade with no engine logic.
+
+**Path 2 — JSON loading (tooling output):**
+
+```
+GameDefinition.FromJson(Stream json) → GameDefinition   // throws DefinitionException on failure
+GameDefinition.FromJson(string json) → GameDefinition
+```
+
+The JSON schema is the serialisation contract from D2. The deserialiser runs the same validation as the builder. Both paths produce a `GameDefinition` that is identical at runtime.
+
+---
+
+**`GameSession` and `GameSessionBuilder`.**
+
+```
+GameSession.Create(GameDefinition) → GameSessionBuilder
+
+GameSessionBuilder
+  .WithPlayer1(IPlayerStrategy)          → self   // required
+  .WithPlayer2(IPlayerStrategy)          → self   // required
+  .WithRandomSource(IRandomSource)       → self   // required
+  .WithObserver(IEngineObserver)         → self   // optional
+  .UseDefaultInit()                      → self   // adopt GameDefinition.DefaultInitManifest
+  .WithInitManifest(InitManifest)        → self   // custom manifest (meta-game, computed setup)
+  .WithInitManifest(Action<ManifestBuilder>) → self  // fluent overload
+  .FromSavedState(GameStateSnapshot)     → self   // D17 — deferred; reserved in the API
+  .Build() → GameSession                 // throws if required fields missing
+```
+
+`.UseDefaultInit()`, `.WithInitManifest(...)`, and `.FromSavedState(...)` are mutually exclusive; the last call wins. If none is called the session begins with no entities — valid for games that build state entirely through phase init blocks.
+
+```
+GameSession
+  async Task<GameResult> RunAsync()
+
+GameResult {
+  Outcome  : Player1Wins | Player2Wins | Draw
+  FinalLog : IReadOnlyList<GameEvent>
+}
+```
+
+`RunAsync` provisions the init manifest (if any), then runs the phase sequence — phase init, action window, trigger and SBR resolution, phase cleanup — repeating until a state-based rule produces an outcome.
+
+---
+
+**`IPlayerStrategy` — the unified per-player interface.**
+
+Every interaction a player can have with a running session flows through this interface. The engine calls it; the host implements it.
+
+```
+interface IPlayerStrategy
+
+  // Called when the engine opens an action window for this player.
+  // Return null to pass (close the action window; proceed to phase cleanup).
+  Task<PlayerAction?> SelectActionAsync(
+      AvailableActions  available,
+      GameStateView     state)
+
+  // Called for all engine-initiated prompts:
+  //   — mid-effect target/value prompts (D3)
+  //   — trigger ordering prompts (D8 PromptPlayer mode)
+  //   — any future prompt variant added to PromptContext
+  Task<PromptResponse> RespondToPromptAsync(
+      PromptContext  context,
+      GameStateView  state)
+```
+
+`GameStateView` is a read-only wrapper around `GameState` — a thin projection, not a deep copy. Both methods receive it so every implementation (human UI, AI, test harness) has a uniform access pattern.
+
+`IPlayerStrategy` subsumes `IPromptChannel` from D3. Every call site that previously called `IPromptChannel.RequestAsync(ctx)` becomes `strategy.RespondToPromptAsync(ctx, snapshot)`. The suspension-and-resume mechanics (D3) are unchanged.
+
+**`AvailableActions`** is computed by the engine before calling `SelectActionAsync`. It enumerates every legal action at that moment.
+
+```
+AvailableActions {
+  PlayableCards        : IReadOnlyList<PlayableCardOption>
+  ActivatableAbilities : IReadOnlyList<ActivatableAbilityOption>
+  CanPass              : bool
+}
+
+PlayableCardOption {
+  Card         : EntityId
+  ValidTargets : IReadOnlyList<TargetSet>   // pre-validated combinations
+}
+
+ActivatableAbilityOption {
+  Source       : EntityId
+  EffectName   : string
+  ValidTargets : IReadOnlyList<TargetSet>
+}
+```
+
+**`PlayerAction`** is the discriminated union the strategy returns:
+
+```
+PlayerAction:
+  | PlayCard {
+      Card           : EntityId
+      Targets        : IReadOnlyList<EntityId>
+      CostChoices    : IReadOnlyDictionary<string, object>
+      VariableValues : IReadOnlyDictionary<string, object>
+    }
+  | ActivateAbility {
+      Source         : EntityId
+      EffectName     : string
+      Targets        : IReadOnlyList<EntityId>
+      CostChoices    : IReadOnlyDictionary<string, object>
+      VariableValues : IReadOnlyDictionary<string, object>
+    }
+  | Pass
+```
+
+---
+
+**What the API deliberately does not cover:**
+- AI strategy implementation — the engine defines `IPlayerStrategy`; game creators supply their own.
+- Rendering — the host reads `GameStateView` independently; no render calls inside `GameSession`.
+- Deck building, drafting, card pool management — pre-session concerns for the meta-game layer. The host provides the outcome as an `InitManifest`.
+- Save/load (`GameStateSnapshot`) — reserved in the API surface; specified in D17.
+- Multiplayer networking — the engine is single-process; `IPlayerStrategy` composition over the network is the host's responsibility.
+
+---
+
+**Domain model gaps flagged by this decision:** None new.
+
+**Rationale:**
+- `InitManifest` as a desired-state declaration rather than an imperative init block means the host never has to know the engine's creation primitives. The meta-game layer constructs a data structure; the engine provisions it. Procedural generation happens outside the engine (the host randomises, then hands determined values to the manifest builder).
+- Game-start operations that must run inside the engine (shuffling, dealing) belong in the first phase's init block — part of `GameDefinition` authored at design time, not session setup. This cleanly separates "what entities exist" (manifest, host-owned) from "what happens at game start" (phase init, game-creator-owned).
+- `DefaultInitManifest` on `GameDefinition` lets a simple, fixed-start game ship its starting configuration alongside its rules without requiring the host to supply anything beyond strategies and a random source.
+- `IPlayerStrategy` as a single unified interface with `GameStateView` on every method ensures the AI always has full state access and the human implementation is never surprised by what information is available. Adding a new interaction type in the future requires adding one method here, not a new interface.
+
+**Consequences:**
+- `ActionResolver` constructor: `ActionResolver(GameDefinition, IPlayerStrategy player1, IPlayerStrategy player2, IRandomSource, IEngineObserver?)`. `IPromptChannel` from D3 is retired as a standalone type.
+- `AvailableActions` computation is the most complex single method in the engine: it must evaluate activation conditions, run cost dry-runs, and enumerate valid target sets for every candidate action, all against the current `GameState`. The implementer should plan for this explicitly.
+- `LocalId` in `ZoneSpec` exists only during manifest processing. After provisioning, zones are referenced by their engine-assigned `EntityId`. The manifest builder is responsible for `LocalId` uniqueness within a manifest; the engine validates this at provisioning time.
+- `GameDefinition.Keywords` includes built-ins pre-registered by the engine. The `Kw` shorthands must be kept in sync with the built-in registry; both are the implementer's responsibility to maintain together.
+- `DefinitionException` is the error type for authoring failures (unknown keyword, cyclic definition, type mismatch, missing required field). It is a design-time error, not a runtime game error.
+- `FromSavedState` is reserved in `GameSessionBuilder`'s public API. Until D17 is implemented, calling it throws `NotSupportedException`. Reserving it now prevents the API from diverging in a way that would break callers when D17 lands.
+
+---
+
+## Open Items
+
+- [x] Language and runtime — D1
+- [x] Keyword representation — D2
+- [x] Effect block execution model — D3
+- [x] Event log structure — D4
+- [x] Contribution tracking — D5
+- [x] Static effect lifecycle management — D6
+- [x] State-based rule runner — D7
+- [x] Trigger resolution — D8
+- [x] Randomness — D9
+- [x] Card visibility — D10 (deliberate non-decision)
+- [x] Text rendering pipeline — D11
+- [x] Runtime entity creation — D12
+- [x] Keyword parameter modifications — D13
+- [x] Game creator API — D14
+- [x] Module boundaries — D15
+- [x] Testing strategy — D16
+- [ ] Save/load (`GameStateSnapshot`) — D17. Must cover: entity state, contribution registry, active static effects (with fire counts and high-water marks), dormant declarative effects (D6), full finalized event log, current scope hierarchy (turn number, phase index, action scope ID), in-progress block call stack (one frame per nested executing block — step index, variable bindings, in-progress event subtree, pending prompt context), and RNG position. Save points occur only at prompt suspension boundaries (`strategy.RespondToPromptAsync`), so no arbitrary execution state needs to be serialized.

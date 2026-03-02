@@ -1,11 +1,11 @@
 # Archetype — Domain Model
 
 ## Status
-**Complete. Signed off 2026-03-01.**
+**Complete. Signed off 2026-03-02.**
+
+All seven requirements-phase open items and all thirteen architecture-phase additions (A1–A13) are resolved and incorporated below.
 
 This document is the canonical vocabulary for the Archetype card game engine. It is the source of truth for the architect and implementer roles. It is implementation-agnostic: no data structures, programming languages, or frameworks are specified here.
-
-All seven open items from the requirements have been resolved and are incorporated below.
 
 ---
 
@@ -20,6 +20,24 @@ All seven open items from the requirements have been resolved and are incorporat
 | 5 | Lifetime composition model | A lifetime specification is a set of zero or more primitive conditions combined as OR. Zero conditions = permanent. The three primitive types are turn-timer, trigger-count, and while-condition. Any number of conditions may be OR'd. |
 | 6 | Mid-effect prompt binding | A prompt binds the player's choice to a named variable in the block's local execution scope. The block pauses; the event log is unmodified; the player responds; the variable is bound; the block resumes from the next keyword. |
 | 7 | State-based rule convergence | The engine makes no attempt to detect or terminate infinite loops. Convergence is entirely the game creator's responsibility. |
+
+**Architecture-phase additions** (gaps flagged by D4, D6, D8, D9, D12, D13):
+
+| # | Item | Resolution |
+|---|------|------------|
+| A1 | Declarative static effect re-activation | Declarative while-conditions re-instantiate: each time a while-condition transitions from false to true, a new instance is created with fresh identity and counters. Dynamic effects expire permanently. Defined in §5. |
+| A2 | `events-matching` primitive | Added to §9.2 with `EventScope` type, optional `candidate`-scoped predicate, and collection primitives `count`, `any`, `sum-arg` in new §9.4. |
+| A3 | `EventRef` type and `event-arg` primitive | `EventRef` defined as a first-class read-only value type in §7.1. `event-arg` added to §9.2. `trigger_event` reserved name documented in §5.3. |
+| A4 | `random-int` and `shuffle` primitives | Added to §9.2 as restricted property keywords. Valid only in effect block bodies; prohibited in all deterministic evaluation contexts. RNG non-game-state status documented. |
+| A5 | `create-card`, `copy-card`, `create-zone` primitives | Added to §9.1 with Returns column. `copy-card` copies no runtime state; declarative static effects activate fresh. Both card-creation primitives log the same event type. |
+| A6 | `CardDefinitionName` and `ZoneDefinitionName` types | Defined as string-valued types in §9.1 notes; validated at authoring time, resolved at load time. |
+| A7 | Ownership timing clarification (dynamic creation) | §2.2, §2.3, §2.4 updated: "set at game setup" → "set at the moment of creation." Immutability is the invariant, not the timing. |
+| A8 | Zone destruction (runtime-created zones) | §2.3 updated: zones may be created during play via `create-zone`; once created, a zone is never destroyed. Game creators model inactive zones via conditions. |
+| A9 | `ParameterModification` on static effects | Added as §5.4: `ParameterAdjustment` (additive/multiplicative/replace) and `Disable` variants; filter condition; interception at every dispatch point; `Disable` precedence. |
+| A10 | Reserved binding names (`source`, `original`) | All four reserved names consolidated in new §4.3: `trigger_event`, `candidate`, `source`, `original`. |
+| A11 | `keyword-disabled` engine event | Defined in §5.4 and tabulated in §7 built-in engine events. Bound args: `"keyword"` plus one entry per suppressed invocation arg. |
+| A12 | Arithmetic primitives | `add`, `subtract`, `multiply`, `max`, `min` added to §9.3. |
+| A13 | Trigger resolution order as a game-level setting | §5.3 updated: fixed "oldest first" replaced by game-level setting with three options — oldest first (default), newest first, player choice. |
 
 ---
 
@@ -128,7 +146,7 @@ The engine defines three first-class game entities: **Player**, **Card**, and **
 - A card may be destroyed (removed from the game) via a game-creator-defined mutation keyword.
 
 **Invariants.**
-- Every card has exactly one owner. Owner is set at game setup and never changes.
+- Every card has exactly one owner. Owner is set at the moment of creation and never changes.
 - Every card occupies at most one zone. A card not in any zone is considered destroyed or removed from the game.
 - Card type (creature, spell, etc.) is not an engine concept. Games define their own type taxonomy via static properties and conditions.
 
@@ -139,7 +157,7 @@ The engine defines three first-class game entities: **Player**, **Card**, and **
 **Definition.** A zone is a named container that holds cards. Zones are pure containers — the engine prescribes no inherent behavior. Meaning is assigned to zones by the game creator through rules and property definitions.
 
 **Relationships.**
-- A zone has exactly one owner (a Player). Set at game setup. Immutable.
+- A zone has exactly one owner (a Player). Set at the moment of creation. Immutable.
 - A zone holds zero or more cards at any given time.
 - A card belongs to at most one zone at a time.
 
@@ -154,12 +172,13 @@ The engine defines three first-class game entities: **Player**, **Card**, and **
 2. **Effect scope** — an effect may target or apply to cards based on their current zone.
 
 **Lifecycle.**
-- Created at game setup.
-- Exist for the duration of the game (zones are not created or destroyed mid-game by engine mechanisms).
+- Created at game setup (for zones declared in the game definition) or during play via `create-zone` (§9.1).
+- Once created, a zone exists for the remainder of the game. The engine provides no primitive to destroy a zone. Game creators who need to model an "inactive" or "closed" zone may apply conditions to it; the zone entity itself persists.
 
 **Invariants.**
-- Every zone has exactly one owner. Owner is set at game setup and never changes.
+- Every zone has exactly one owner. Owner is set at the moment of creation and never changes.
 - A card cannot occupy more than one zone simultaneously.
+- A zone is never destroyed by engine mechanisms; it exists until the game ends.
 
 ---
 
@@ -170,7 +189,7 @@ The engine defines three first-class game entities: **Player**, **Card**, and **
 **Invariants.**
 - Every card has exactly one owner.
 - Every zone has exactly one owner.
-- Ownership is set at game setup and is immutable for the life of the entity.
+- Ownership is set at the moment of entity creation and is immutable for the life of the entity.
 - Controller is **not** an engine concept. If a game requires the notion of temporary control by a non-owner, the game creator models it via a condition/tag on the entity.
 
 ---
@@ -287,22 +306,36 @@ All active additive modifiers are summed first; then all active multiplicative m
 
 ---
 
+### 4.3 Reserved Names
+
+The engine reserves the following binding names across all evaluation contexts. Game creators may not declare variables, parameters, or keyword names that clash with these.
+
+| Name | Context | Value |
+|---|---|---|
+| `trigger_event` | Trigger-fired effect block scope | The `EventRef` of the event that satisfied the trigger (§5.3). Always pre-bound; always present. |
+| `candidate` | `events-matching` predicate expression | The `EventRef` of the event currently being tested against the predicate (§9.2). |
+| `source` | Static effect evaluation contexts (parameter modification filter and adjustment expressions; trigger conditions) | The entity on which the static effect is defined — its owning entity (§5.4, §5.3). |
+| `original` | Parameter modification adjustment expressions | In Additive and Multiplicative expressions: the raw invocation argument value before any adjustments. In Replace expressions: the running result of all preceding Replace adjustments (§5.4). |
+
+---
+
 ## 5. Static Effects
 
 **Definition.** A static effect is a persistent engine entity with a lifetime, an optional state contribution, and an optional trigger. Static effects are the mechanism by which temporary state changes and conditional triggers are expressed.
 
 **Origins.** A static effect is created in one of two ways:
 
-- **Declarative static effect** — defined directly on a card's schema. Becomes active according to the conditions defined in its lifetime specification. Does not require invocation; the engine manages it based on the card's existence and the lifetime condition.
+- **Declarative static effect** — defined directly on a card's schema. Does not require invocation; the engine manages activation and re-activation based on the card's existence and its lifetime conditions. A declarative static effect with a while-condition re-instantiates each time the while-condition transitions from false to true: the engine creates a new instance with a new identity, fresh trigger fire count, and fresh high-water mark (see Lifecycle below).
 - **Dynamic static effect** — created at runtime by a standing mutation keyword invocation within an effect block. The invocation is what brings the static effect into existence.
 
-Both origins produce entities of the same kind; the distinction is only in how they come to exist.
+Both origins produce entities of the same kind. They differ in two ways: how they come to exist, and whether they re-instantiate after a while-condition expiry (declarative do; dynamic do not).
 
 **Lifecycle.**
 - Created: either at game setup (declarative) or when a standing mutation keyword is invoked (dynamic).
 - Active: while its lifetime specification is satisfied.
 - Expired: when the first of its lifetime conditions is met (see §5.1).
 - On expiry: all state contributions from this static effect are automatically removed by the engine.
+- **Re-instantiation (declarative effects with a while-condition only):** after a declarative static effect expires because its while-condition evaluated to false, the engine monitors the while-condition on subsequent checks. When the condition evaluates to true again, a new instance of the effect is created — with a new identity, a trigger fire count of zero, and a high-water mark of zero. The original expired instance is not resumed; the new instance and the expired instance are fully distinct entities. Dynamic static effects never re-instantiate; their expiry is permanent.
 
 ---
 
@@ -318,17 +351,18 @@ Both origins produce entities of the same kind; the distinction is only in how t
 |---|---|
 | **Turn timer** | Expires after N turns have elapsed since the static effect became active. |
 | **Trigger count** | Expires after the static effect's attached trigger has fired N times. (Only valid when the static effect has a trigger.) |
-| **While-condition** | Active while a boolean property expression evaluates to true; checked after each effect block resolves. Expires the first time the expression evaluates to false after a check. |
+| **While-condition** | Active while a boolean property expression evaluates to true; checked after each effect block resolves. Expires the first time the expression evaluates to false after a check. For **declarative** static effects, expiry under a while-condition is not permanent: when the expression later evaluates to true again, a new instance is created (see §5 Lifecycle). For **dynamic** static effects, expiry under a while-condition is permanent. |
 
 **Composition.** Any number of primitive conditions may be OR'd in a single lifetime specification. The static effect expires on the first satisfied condition.
 
-**While-condition evaluation timing.** The while-condition is not checked continuously; it is checked after each effect block resolves. A static effect whose while-condition becomes false mid-block does not expire until the block completes.
+**While-condition evaluation timing.** The while-condition is not checked continuously; it is checked after each effect block resolves. A static effect whose while-condition becomes false mid-block does not expire until the block completes. The re-instantiation check for declarative effects occurs at the same moment: after each effect block resolves, the engine both expires declarative instances whose while-conditions have become false and creates new instances of declarative effects whose while-conditions have become true.
 
 **Invariants.**
 - A lifetime specification is immutable after the static effect is created.
 - A turn-timer condition has N ≥ 1.
 - A trigger-count condition has N ≥ 1 and requires the static effect to have a trigger.
 - A while-condition accepts any boolean-valued property expression.
+- A re-instantiated declarative static effect is a distinct entity from its predecessor; it does not inherit the expired instance's trigger fire count, high-water mark, or contribution IDs.
 
 ---
 
@@ -348,13 +382,62 @@ Both origins produce entities of the same kind; the distinction is only in how t
 
 **Optionality.** A static effect may have zero or one trigger.
 
-**Trigger resolution order.** When multiple static effects trigger simultaneously (i.e. the same event log condition satisfies multiple triggers), they resolve in **source-lifetime order — the oldest active static effect fires first**. This gives the engine a deterministic resolution order without requiring player input.
+**Trigger resolution order.** Trigger resolution order is a **game-level setting** — the game creator declares one of three modes when defining the game:
+- **Oldest first** (default) — the oldest active static effect (lowest identity value) fires first. Within a single effect, the earliest matching event fires first. Deterministic without player input.
+- **Newest first** — the newest active static effect fires first. Within a single effect, event order is still chronological. Also deterministic without player input.
+- **Player choice** — when multiple effects trigger simultaneously, the active player orders them before any fire. Within a single effect, event order remains chronological.
+
+The default (`oldest first`) is appropriate for most games and requires no player interaction.
 
 **Trigger timing.** Triggers resolve between actions, never mid-block.
+
+**Triggering event access.** When a trigger fires its effect block, the engine pre-binds the event that satisfied the trigger to the reserved name `trigger_event` in the block's local scope, typed as `EventRef` (§7.1). This binding is always present in a trigger-fired block regardless of what other bindings the game creator declares. The block uses `event-arg(trigger_event, name)` (§9.2) to access the triggering event's bound arguments. Game creators may additionally declare named convenience bindings that map specific event arguments to friendlier variable names; these coexist with `trigger_event` and do not replace it.
 
 **Invariants.**
 - A trigger fires at most once per event that satisfies its condition (it does not fire multiple times for the same event).
 - Trigger resolution occurs between actions in the scope hierarchy.
+- Every trigger-fired block has `trigger_event` pre-bound in its local scope as an `EventRef`. This name is reserved; game creator-declared variables may not use it.
+
+---
+
+### 5.4 Parameter Modification
+
+**Definition.** A parameter modification is a fourth optional component on a static effect. It intercepts mutation keyword invocations before they execute — adjusting argument values or cancelling the invocation entirely. Interception applies at every dispatch point in the execution tree, including invocations deep inside composite keywords, not only at the block-step level.
+
+**Optionality.** A static effect may have zero or one parameter modification.
+
+**Variants.**
+
+**`ParameterAdjustment`** — modifies the argument values of a named mutation keyword before execution proceeds. Three kinds of per-parameter adjustment may be declared:
+- **Additive** — adds a numeric delta to the parameter value. `original` refers to the raw invocation argument.
+- **Multiplicative** — multiplies the parameter value by a numeric factor. `original` also refers to the raw invocation argument.
+- **Replace** — replaces the parameter value outright. `original` refers to the running result of all preceding Replace adjustments.
+
+Evaluation order for a given parameter mirrors §3.2: all active additive adjustments are summed and applied first; then all multiplicative adjustments are multiplied together and applied; then Replace adjustments are applied in oldest-first order, each seeing the previous result as `original`.
+
+**`Disable`** — cancels the target invocation entirely. The keyword does not execute. Its normal event is not logged. A `keyword-disabled` engine event is appended instead (see below). Triggers subscribed to the original keyword do not fire; triggers subscribed to `keyword-disabled` may fire.
+
+If any active static effect's parameter modification is a `Disable` that matches the invocation, the invocation is cancelled — regardless of how many other effects carry `ParameterAdjustment` on the same keyword.
+
+**Filter condition.** Both variants carry an optional boolean filter expression evaluated before interception is applied. If the filter is absent or evaluates to true, the modification is applied; otherwise it is skipped. The filter expression has access to:
+- The reserved name `source` — the entity on which the static effect is defined (§4.3).
+- Named invocation arguments declared by the game creator on the modification.
+- Current game state (via property keywords).
+
+The filter may not invoke mutation keywords and may not access the event log. It is evaluated synchronously at dispatch time, before any event is logged.
+
+**`keyword-disabled` engine event.** When a `Disable` fires, the engine appends a `keyword-disabled` event in place of the suppressed invocation. Its bound arguments always include:
+- `"keyword"` — the name of the suppressed mutation keyword.
+- One entry per bound argument of the suppressed invocation, using the same argument names as the keyword's declared parameters.
+
+This event is fully observable by the trigger system and `events-matching`. Game creators write trigger conditions on `keyword-disabled`, filtering by `"keyword"`, to react to specific suppressions.
+
+**Invariants.**
+- A parameter modification targets exactly one mutation keyword by name.
+- `Disable` takes precedence over any `ParameterAdjustment` modifications active on the same invocation.
+- The filter expression may not invoke mutation keywords and may not access the event log.
+- `source` in any parameter modification expression resolves to the owning entity of the static effect.
+- `original` resolves to the raw invocation argument for Additive and Multiplicative adjustments; to the running post-Replace result for Replace adjustments.
 
 ---
 
@@ -407,10 +490,39 @@ Each scope is a strict subset of all scopes above it.
 
 **Trigger resolution timing.** Triggers resolve between actions, never mid-block. A trigger condition is evaluated against `events.this_action` or broader scopes; `events.this_block` is not a valid scope for trigger conditions (it ceases to be meaningful once the block completes).
 
+**Built-in engine events.** The engine itself appends certain events that are not produced by game-creator-defined keywords. These are fully observable by the trigger system and `events-matching`.
+
+| Event keyword name | When appended | Bound arguments |
+|---|---|---|
+| `keyword-disabled` | When a `Disable` parameter modification (§5.4) cancels a mutation keyword invocation. | `"keyword"` — the suppressed keyword's name; plus one entry per bound argument of the suppressed invocation, using the same argument names as the keyword's declared parameters. |
+
 **Invariants.**
 - The event log is append-only. Events are never modified or removed.
 - Events are structured (they carry enough information for the trigger condition system to evaluate against them).
 - An event is produced by exactly the block that invoked the mutation keyword, not by any containing scope.
+- Built-in engine events follow the same structure as game-creator-defined events and are subject to the same trigger and query mechanisms.
+
+---
+
+### 7.1 EventRef
+
+**Definition.** An `EventRef` is a read-only reference to a specific, already-finalized event in the event log. It is a first-class value type in the engine's type system: it can be stored in block-scope variable bindings, passed as an argument to keywords that accept it, and returned by `events-matching` (§9.2).
+
+**Contents.** An `EventRef` exposes two pieces of information:
+1. The **keyword name** of the event — the name of the mutation keyword that produced it.
+2. The **bound arguments** — the set of named values that were bound to the keyword's parameters at the time of invocation.
+
+**Accessor.** The engine provides a single built-in read primitive for operating on an `EventRef`: `event-arg(event, name)` (§9.2). No other built-in accessors exist. Game creators compose named property keywords on top of `event-arg` to express domain concepts (e.g. `damage-amount(event)` = `event-arg(event, "amount")`).
+
+**Provenance.** `EventRef` values enter a block's scope in three ways:
+1. **`events-matching` result** — each item in the `Collection<EventRef>` returned by `events-matching` is an `EventRef`.
+2. **`trigger_event` binding** — in a trigger-fired effect block, the engine pre-binds the triggering event to the reserved name `trigger_event` as an `EventRef` (see §5.3).
+3. **`event-arg` return** — if an event's bound argument is itself an `EventRef`, `event-arg` returns it typed as `EventRef`.
+
+**Invariants.**
+- An `EventRef` always refers to a finalized event. It never refers to an event that has not yet been appended to the log.
+- An `EventRef` is read-only. Game creators cannot use it to modify the event or the log.
+- Accessing a named argument that does not exist on the referenced event is an authoring-time error, caught by the tooling.
 
 ---
 
@@ -470,29 +582,73 @@ The engine provides a minimal set of primitive keywords. All game-creator-define
 
 ### 9.1 Mutation Primitives
 
-| Keyword | Parameters | Description |
-|---|---|---|
-| `modify-accumulator` | entity, name, delta | Adds delta (positive or negative) to the named accumulator on the entity. Permanent — no lifetime. |
-| `clear-accumulator` | entity, name | Resets the named accumulator on the entity to zero. |
-| `apply-modifier` | entity, property-name, kind, value, lifetime? | Adds a modifier contribution to the named static property on the entity. kind is additive or multiplicative. lifetime is an optional lifetime specification (§5.1); if omitted, the modifier is permanent. Returns a contribution-ID. |
-| `remove-modifier` | contribution-ID | Removes the specific modifier contribution identified by the given ID, regardless of its remaining lifetime. |
-| `apply-condition` | entity, condition-name, lifetime? | Applies a condition/tag contribution to the entity. lifetime is optional; if omitted, the condition is permanent. Returns a contribution-ID. |
-| `remove-condition` | entity, condition-name | Removes all contributions of the named condition on the entity, regardless of remaining lifetimes. |
+| Keyword | Parameters | Returns | Description |
+|---|---|---|---|
+| `modify-accumulator` | entity, name, delta | — | Adds delta (positive or negative) to the named accumulator on the entity. Permanent — no lifetime. |
+| `clear-accumulator` | entity, name | — | Resets the named accumulator on the entity to zero. |
+| `apply-modifier` | entity, property-name, kind, value, lifetime? | ContributionId | Adds a modifier contribution to the named static property on the entity. kind is additive or multiplicative. lifetime is an optional lifetime specification (§5.1); if omitted, the modifier is permanent. |
+| `remove-modifier` | contribution-ID | — | Removes the specific modifier contribution identified by the given ID, regardless of its remaining lifetime. |
+| `apply-condition` | entity, condition-name, lifetime? | ContributionId | Applies a condition/tag contribution to the entity. lifetime is optional; if omitted, the condition is permanent. |
+| `remove-condition` | entity, condition-name | — | Removes all contributions of the named condition on the entity, regardless of remaining lifetimes. |
+| `create-card` | zone: Entity, definition-name: CardDefinitionName, owner: Player | Entity | Instantiates a new card from the named card definition; places it in the specified zone with the given owner. Declarative static effects from the definition are activated immediately. Appends a creation event. |
+| `copy-card` | source: Entity, destination-zone: Entity, owner: Player | Entity | Instantiates a new card using the same definition as `source`. The new card carries no runtime state from `source` — it starts with no modifiers, accumulators, or conditions, and its declarative static effects are activated fresh. Appends a creation event. |
+| `create-zone` | owner: Player, definition-name: ZoneDefinitionName | Entity | Instantiates a zone from the named zone definition; initially empty. Appends a creation event. |
 
 **Notes.**
 - `apply-modifier` and `apply-condition` each accept an optional inline lifetime, so game creators can express "give +2 attack until end of turn" in a single keyword invocation without separately spawning a static effect. The engine manages cleanup automatically.
 - `remove-modifier` removes exactly one contribution (by ID). `remove-condition` removes all contributions of a given name on a given entity. There is no built-in "remove one contribution of a named condition by ID" — if a game needs that granularity, the game creator uses the contribution-ID returned by `apply-condition` and defines their own removal logic around `remove-modifier`'s model.
 - `modify-accumulator` produces no contribution-ID; accumulator deltas merge permanently into the total.
+- `create-card` and `copy-card` both append a creation event of the same keyword name. They are distinct authoring conveniences — `copy-card` derives its definition from a live entity reference rather than a named definition string — but they are not distinguishable by event type alone in the event log.
+- **`CardDefinitionName`** is a string-valued type representing the name of a card definition registered in the game definition. The tooling validates it against the registered card definitions at authoring time. The engine resolves it to a definition reference at game-definition load time; no name lookup occurs at execution time.
+- **`ZoneDefinitionName`** is a string-valued type representing the name of a zone definition registered in the game definition. Same validation and resolution semantics as `CardDefinitionName`.
 
 ---
 
 ### 9.2 Read Primitives
+
+All are property keywords: no state changes, no event log entries.
 
 | Keyword | Parameters | Returns |
 |---|---|---|
 | `get-state` | entity, field | The computed current value of a mutable state field on the entity (modifier-adjusted property value, accumulator total, or condition presence). |
 | `get-property` | entity, field | The design-time static property value of the entity (unmodified base value). |
 | `in-zone` | entity, zone | Boolean: true if the entity is currently in the named zone. |
+| `events-matching` | scope, keyword-name, predicate? | A collection of all events in the given scope, at any depth in the event tree, whose keyword name matches `keyword-name` and (if a predicate is supplied) whose bound arguments satisfy the predicate. Returns `Collection<EventRef>`. See notes below. |
+| `event-arg` | event: EventRef, name: string | The value of the named bound argument on the referenced event. The return type matches the declared parameter type of the keyword that produced the event. Accessing a name that does not exist on the event is an authoring-time error. |
+| `random-int` | min: Number, max: Number | A uniformly distributed integer in the range [min, max] inclusive. See randomness note below. |
+| `shuffle` | collection: Collection\<Entity\> | A new collection containing the same entities as the input in a random order. Does not mutate the source collection. See randomness note below. |
+
+**`events-matching` notes.**
+
+**`scope`** is an `EventScope` value — one of: `this-block`, `this-action`, `this-turn`, `this-game`. Each is a strict superset of the one before it. Trigger conditions may not use `this-block` as the scope: block scope is no longer meaningful once the block exits. All four scopes are valid within an executing effect block.
+
+**`keyword-name`** is a string. Only events whose recorded keyword name exactly matches are considered. The search descends to any depth in the event tree — events produced by internally invoked keywords within a composite keyword are included, not just top-level events in the scope.
+
+**`predicate`** is an optional boolean property expression. If supplied, it is evaluated once per candidate event; only events for which it returns true are included in the result. Within the predicate expression, the reserved name `candidate` refers to the `EventRef` of the event currently being tested. The predicate uses `event-arg(candidate, name)` (§9.2, A3) to access the event's bound arguments. No state changes occur during predicate evaluation; the event log is not modified.
+
+**Invariants.**
+- `events-matching` is a property keyword: it returns a value and produces no side effects.
+- The result reflects the state of the event log at the moment of evaluation. Events appended after the call are not included.
+- A trigger condition must not supply `this-block` as its scope.
+
+**Randomness note** (`random-int`, `shuffle`).
+
+Both `random-int` and `shuffle` are property keywords in that they return values, mutate no game state, and append nothing to the event log. They differ from other property keywords in one respect: each invocation advances the engine's internal random number generator. RNG state is not game state — it is not queryable, not contribution-tracked, and not logged — so this advancement does not violate the property keyword invariant at the domain level.
+
+Because randomness makes evaluation non-repeatable, `random-int` and `shuffle` are **restricted to effect block bodies** (including cost blocks). They may not appear in any deterministic evaluation context:
+- Trigger conditions
+- Lifetime while-conditions
+- State-based rule conditions
+- Activation conditions
+
+Violations are caught at authoring time by the tooling.
+
+The randomness consumed by these primitives is implicitly recorded in the event log: the mutation keyword that receives the random value logs it as a bound argument. For example, `modify-accumulator(goblin, "damage", random-int(1, 6))` logs `{delta: 4}`, not `{delta: random-int(1, 6)}`.
+
+**Invariants.**
+- `min` must be less than or equal to `max` for `random-int`. This is an authoring-time constraint.
+- `shuffle` returns a new collection; the source collection is not modified.
+- Neither primitive may appear in a trigger condition, while-condition, state-based rule condition, or activation condition.
 
 ---
 
@@ -510,6 +666,28 @@ These are property keywords (stateless, no side effects, no event log entries). 
 | `not(p)` | unary boolean | true if p is false |
 | `and(p, q)` | binary boolean | true if both p and q are true |
 | `or(p, q)` | binary boolean | true if at least one of p, q is true |
+| `add(a, b)` | binary numeric | a + b |
+| `subtract(a, b)` | binary numeric | a − b |
+| `multiply(a, b)` | binary numeric | a × b |
+| `max(a, b)` | binary numeric | the greater of a and b |
+| `min(a, b)` | binary numeric | the lesser of a and b |
+
+---
+
+### 9.4 Collection Primitives
+
+These are property keywords that operate on collections returned by `events-matching` (§9.2). All are stateless, produce no side effects, and append nothing to the event log.
+
+| Keyword | Parameters | Returns |
+|---|---|---|
+| `count(collection)` | `Collection<EventRef>` | Number: the number of items in the collection. |
+| `any(collection)` | `Collection<EventRef>` | Boolean: true if the collection contains at least one item. Equivalent to `greater-than(count(collection), 0)` but stated directly for clarity. |
+| `sum-arg(collection, arg-name)` | `Collection<EventRef>`, string | Number: the sum of the named numeric bound argument across all events in the collection. If any event in the collection does not carry the named argument, or if the argument is not numeric, that event contributes zero to the sum. |
+
+**Examples.**
+- "How many creatures died this turn?" → `count(events-matching(this-turn, "creature-died"))`
+- "Did any damage occur this block?" → `any(events-matching(this-block, "take-damage"))`
+- "Total damage dealt this block" → `sum-arg(events-matching(this-block, "modify-accumulator"), "delta")`
 
 ---
 
@@ -568,6 +746,28 @@ These are property keywords (stateless, no side effects, no event log entries). 
 | **Primary effect block** | The designated effect block that fires when a card is played (§6). |
 | **Primitive keyword** | A keyword that invokes engine built-ins directly (§1.1). |
 | **Property keyword** | A keyword subtype that queries state and returns a value; no side effects (§1.3). |
+| **`event-arg`** | A read primitive that returns the value of a named bound argument on an `EventRef` (§9.2). |
+| **`CardDefinitionName`** | A string-valued type naming a card definition registered in the game definition; validated at authoring time, resolved at load time (§9.1). |
+| **`ZoneDefinitionName`** | A string-valued type naming a zone definition registered in the game definition; same semantics as `CardDefinitionName` (§9.1). |
+| **`create-card`** | A mutation primitive that instantiates a card from a named definition and places it in a zone (§9.1). |
+| **`copy-card`** | A mutation primitive that instantiates a fresh card sharing the source entity's definition but carrying no runtime state (§9.1). |
+| **`create-zone`** | A mutation primitive that instantiates a zone from a named definition (§9.1). |
+| **`Disable`** | A parameter modification variant that cancels a named mutation keyword invocation and logs a `keyword-disabled` event instead (§5.4). |
+| **`keyword-disabled`** | A built-in engine event appended when a `Disable` parameter modification cancels an invocation (§5.4, §7). |
+| **`original`** | Reserved binding name in parameter modification adjustment expressions; the raw invocation argument or running Replace result (§4.3, §5.4). |
+| **`ParameterAdjustment`** | A parameter modification variant that adjusts a mutation keyword's argument values before execution (§5.4). |
+| **`ParameterModification`** | A fourth optional component on a static effect that intercepts and adjusts or cancels named mutation keyword invocations (§5.4). |
+| **`source`** | Reserved binding name in static effect evaluation contexts; the entity on which the static effect is defined (§4.3, §5.3, §5.4). |
+| **`random-int`** | A property keyword returning a uniformly distributed integer in [min, max] inclusive; advances RNG state; valid only in effect block bodies (§9.2). |
+| **`shuffle`** | A property keyword returning a new randomly ordered `Collection<Entity>`; advances RNG state; valid only in effect block bodies (§9.2). |
+| **`EventRef`** | A read-only reference to a finalized event in the event log; a first-class value type (§7.1). |
+| **`events-matching`** | A read primitive that queries the event log by scope, keyword name, and optional predicate; returns a `Collection<EventRef>` (§9.2). |
+| **`EventScope`** | An enumeration of the four queryable event log scopes: `this-block`, `this-action`, `this-turn`, `this-game` (§9.2). |
+| **`candidate`** | Reserved binding name within an `events-matching` predicate expression; refers to the `EventRef` of the event currently being tested (§9.2). |
+| **`trigger_event`** | Reserved binding name in every trigger-fired effect block; holds the `EventRef` of the event that satisfied the trigger (§5.3). |
+| **`count`** | Collection primitive: returns the number of items in a `Collection<EventRef>` (§9.4). |
+| **`any`** | Collection primitive: returns true if a `Collection<EventRef>` contains at least one item (§9.4). |
+| **`sum-arg`** | Collection primitive: returns the sum of a named numeric argument across all events in a `Collection<EventRef>` (§9.4). |
 | **Standing mutation** | A mutation keyword that instantiates a static effect entity (§1.2). |
 | **State-based rule** | An effect block that runs automatically after every effect block until game state is stable (§8.3). |
 | **Static effect** | A persistent engine entity with a lifetime, optional state contribution, and optional trigger (§5). |

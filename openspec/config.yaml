@@ -1,0 +1,80 @@
+schema: spec-driven
+
+context: |
+  ## Project
+  Archetype is a card game engine. Its primary goal is a single card definition that drives both:
+  1. Rules execution — the engine resolves game state changes
+  2. Card text rendering — human-readable rules text is generated from the same definition
+
+  Magic: The Gathering is the closest reference point for the kind of card game this engine targets.
+
+  ## Current phase
+  Requirements are complete and signed off (2026-03-01). The project is now in the domain modeling /
+  architecture phase. There is no implementation yet. The `master` branch contains a stale prior
+  prototype; `back-to-basics` is the active branch and starts fresh.
+
+  ## Stable domain vocabulary — use these terms precisely
+  - **Keyword**: the primitive unit of the system. A named function with typed parameters that either
+    mutates game state (an *effect*) or queries it (a *property*). Supports dual-use: execution and
+    human-readable text rendering from the same definition.
+  - **Effect** (keyword subtype): a keyword that mutates game state. Primitive effects call
+    `change-state` directly; composite effects call other effects with derived arguments.
+  - **Property** (keyword subtype): a keyword that queries game state and returns a value. Does not
+    mutate state. Primitive properties read base values; composed properties combine other properties.
+  - **Effect block**: an ordered sequence of effect invocations that executes atomically. No triggers
+    or state-based rules resolve mid-block. Has a scoped view of the event log.
+  - **Action**: the unit of player agency. Activating an effect block is the atomic action unit.
+    Binding-time inputs (targets, cost choices, variable values) are validated before execution.
+    Once bound, resolution does not fail — partial execution is acceptable.
+  - **Activated effect**: an effect block that fires when a player takes an action.
+  - **Static effect**: a persistent condition with a defined lifetime (turn timer, trigger count,
+    while-condition). May have a trigger (event log subscription) that fires an activated effect.
+    Lifetimes compose as OR. All temporary state changes go through static effects.
+  - **Event log**: an append-only log of all effect executions. Queryable by scope:
+    `events.this_block`, `events.this_action`, `events.this_turn`, `events.this_game`.
+  - **Scope hierarchy**: game → turn → phase → action → effect block. Triggers resolve between
+    actions, not mid-block.
+  - **State**: mutable runtime data. Three types: *modifiers* (adjustments to static properties),
+    *accumulators* (independently tracked values), *conditions/tags* (boolean/categorical states).
+    State is a collection of contributions tracked by source; the engine removes contributions
+    automatically when their source expires.
+  - **Cost**: an effect with all-or-nothing semantics. Validated via dry run at bind time. Resolves
+    before the main effect block; its events are in scope for the main block.
+  - **Zone**: a named container for cards. Pure container — no inherent behaviour. Same data model
+    as cards (static properties + state). Zones can be grouped; zone membership is a valid targeting
+    and lifetime criterion.
+  - **Prompt**: a required input initiated mid-effect by the game (not the player). Blocks
+    progression until answered. Only binds variables; does not change state. Block atomicity is
+    preserved while waiting.
+  - **Phase**: phases have init (effect block) / wait (player action window) / cleanup (effect block)
+    structure. Defined by the game creator.
+  - **Action rule**: middleware wrapping a named action type with before/after effect blocks.
+  - **State-based rule**: effect block that runs after every effect block until state is stable.
+  - **Card pool / set**: a set is a named collection of card definitions; the pool is their union.
+  - **Player**: first-class entity with the same state model as cards. Engine targets two participants
+    (human + AI). Ownership is a first-class concept.
+
+  ## Personas
+  Work is organized around five personas (role definitions in docs/personas/):
+  - requirements-analyst — owns docs/requirements.md
+  - domain-modeler — produces the domain model (types, invariants, vocabulary)
+  - technical-architect — produces architecture and ADRs
+  - implementer — writes code
+  - reviewer — validates output against requirements and design
+
+  ## Conventions
+  - All domain terms in artifacts must match the stable vocabulary above
+  - Changes that introduce or redefine domain terms require explicit requirements sign-off
+  - No implementation work until the domain model and architecture are approved
+
+rules:
+  proposal:
+    - Use domain vocabulary from the context precisely; flag any new terms introduced
+    - Include a "Non-goals" section
+    - Identify which persona(s) own the work
+  spec:
+    - Reference the relevant section of docs/requirements.md where applicable
+    - Explicitly state any domain invariants the spec must preserve
+  tasks:
+    - Scope each task to a single persona's concern
+    - Tasks should be completable and reviewable independently
