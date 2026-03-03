@@ -27,7 +27,7 @@ For each module under review, verify all of the following.
 ### Correctness
 - Does the code correctly implement the behavior described in `docs/architecture.md` and `docs/domain-model.md`?
 - Are domain invariants enforced (not just assumed)?
-- Are edge cases handled — empty collections, zero amounts, entities with no contributions, etc.?
+- Are edge cases handled — empty collections, zero amounts, atoms with no contributions, etc.?
 
 ### Architecture conformance
 - Does every decision in `docs/architecture.md` that applies to this module hold in the code?

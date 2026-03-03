@@ -1,9 +1,9 @@
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02.**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections).**
 
-All decisions D1–D16 are stable and signed off. Updated same day to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. D17 (Save/Load / `GameStateSnapshot`) is deliberately deferred — its API slot is reserved in `GameSessionBuilder.FromSavedState` and its required content is fully specified in the Open Items.
+All decisions D1–D18 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15).
 
 ---
 
@@ -45,7 +45,7 @@ KeywordNode (abstract record)
   ├── ParameterRef(name: string)
   │     Refers to a declared parameter by name.
   ├── Literal(value)
-  │     A hardcoded value: number, boolean, string, or entity reference.
+  │     A hardcoded value: number, boolean, string, or atom reference.
   └── Invocation(keywordName: string, args: KeywordNode[])
         Calls another keyword (built-in or game-creator-defined) with argument nodes.
 ```
@@ -56,7 +56,29 @@ A `KeywordDefinition` contains:
 - `Body: KeywordNode` — the expression tree (for composite keywords), or a sentinel marking which engine primitive this is (for primitives)
 - `TextTemplate: string?` — an optional format string with `{paramName}` placeholders, used by the text renderer. If absent, the renderer recurses into the body tree.
 
-`ParameterDecl` types form the engine's type vocabulary: `Entity`, `Number`, `Boolean`, `ConditionName`, `PropertyName`, `ContributionId`, `Lifetime`, `EffectBlock`.
+`ParameterDecl` types form the engine's type vocabulary: `Atom`, `Number`, `Boolean`, `ConditionName`, `PropertyName`, `ContributionId`, `Lifetime`, `EffectBlock`. A14 (domain model) formalized the atom subtype hierarchy — `Atom` with subtypes `Card`, `Zone`, `Player`, `Session` — which extends the type vocabulary and informs type-checking rules described below.
+
+**`ParameterDecl` structure (updated for A14):**
+
+```
+ParameterDecl {
+  Name                : string
+  Type                : TypeName        // declared type; may be Atom or a specific atom kind
+  AtomKindRestriction : AtomKind[]?     // null = unrestricted; non-null = argument's resolved
+                                        // static atom kind must be in this set (authoring-time check)
+  ReturnType          : TypeName        // on KeywordDefinition — must be explicit per §1.4
+  Description         : string          // human-readable; required per §1.4
+}
+```
+
+`AtomKindRestriction` exists because some built-in keywords accept an `Atom`-typed parameter but are further constrained by the domain model to a subset of atom kinds. The canonical example is `owner-of`: declared `atom: Atom` but restricted to `{ Card, Zone }`. The type-checker enforces this restriction when it can resolve the argument's static atom kind:
+
+- If the argument is a `ParameterRef` whose `ParameterDecl` has type `Card` or `Zone` → valid.
+- If the argument is an `Invocation` whose resolved return type is `Card` or `Zone` → valid.
+- If the argument is a `ParameterRef` typed `Player` or `Session` → authoring-time error.
+- If the argument is a `ParameterRef` typed `Atom` (generic) → authoring-time error; the game creator must declare a more specific parameter type. Conservative rejection is correct: `owner-of` requires a guarantee, not a possibility.
+
+`AtomKindRestriction` is stored in `BuiltInKeywords` in `Core` alongside the parameter's declared type. The type-checker in `Archetype.Build` reads it during validation. Game-creator-defined keywords may not declare `AtomKindRestriction` — it is a mechanism for engine built-ins only.
 
 **Serialization boundary.** The tooling (desktop app) owns the parser. It parses DSL text → validates → emits a JSON game definition file. The engine owns the deserializer. It reads JSON → constructs `KeywordDefinition` trees in memory. The engine never sees raw DSL text; the parser is not in the engine assembly. This keeps the WASM binary smaller and the engine free of parser complexity.
 
@@ -74,6 +96,13 @@ A `KeywordDefinition` contains:
 - The tooling must validate the tree at parse time (type-checking, acyclicity, mutation/property subtype invariants) so the engine can trust what it loads.
 - The text renderer needs a depth parameter or strategy so the game layer can choose between "show top-level text only" and "expand full composition."
 - Built-in (primitive) keywords are registered in the engine at startup, not loaded from JSON. The JSON file references them by name; the engine resolves the name to its built-in implementation.
+
+**Addendum — `TextTemplate` cross-reference tag syntax (D18).** `TextTemplate` strings and locale file template strings may contain keyword cross-reference tags alongside `{paramName}` substitutions:
+
+- **Short form:** `[keyword-name]` — the keyword name is used as both the lookup key and the display text.
+- **Long form:** `[display text](keyword-name)` — explicit display text when the prose term differs from the keyword name (e.g. `[damage](take-damage)`).
+
+Both forms produce a `RulesRef` node in the rendered output (see D18). The `keyword-name` in a tag must resolve to an entry in `GameDefinition.Keywords` (built-in or game-creator-defined); this is validated at authoring time — build time for the C# builder, parse time for the DSL tooling, load time for the JSON deserializer. An unknown keyword name in a tag is a `DefinitionException`. Tag parsing occurs after `{paramName}` substitution resolution; a tag may not span a `{paramName}` boundary.
 
 ---
 
@@ -97,7 +126,7 @@ async Task<BlockResult> ExecuteBlock(EffectBlock block, ExecutionContext ctx)
 ```
 
 **`ExecutionContext`** is passed through every interpreter call and carries:
-- `GameState` — the mutable game state (entities, accumulators, modifiers, conditions)
+- `GameState` — the mutable game state (atoms, accumulators, modifiers, conditions)
 - `Bindings: Dictionary<string, object>` — the block's local variable scope
 - `ScopeIds` — the current `BlockScopeId`, `ActionScopeId`, `TurnScopeId` (used to stamp events and answer scope queries)
 - `PromptChannel: IPromptChannel` — the interface through which the engine requests player input
@@ -123,7 +152,7 @@ interface IPromptChannel
 - Cost execution is a separate `ExecuteBlock` call that runs before the main block. Its events are visible in `events.this_action` when the main block runs.
 - The short-circuit rule (§4.2) is handled inside `ExecuteBlock`: before posting a prompt, it counts valid candidates; if ≤ required choices, it auto-binds without calling `IPromptChannel`.
 
-**Addendum — Block Step Return Binding.** Some mutation keywords return values (`apply-modifier` returns a `ContributionId`; `apply-condition` returns a `ContributionId`; `create-card`, `copy-card`, and `create-zone` return an `Entity`). To capture these values for use by later steps in the same block, `EffectBlockStep` carries an optional `BindTo` field:
+**Addendum — Block Step Return Binding.** Some mutation keywords return values (`apply-modifier` returns a `ContributionId`; `apply-condition` returns a `ContributionId`; `create-card`, `copy-card`, and `create-zone` return an `Atom`). To capture these values for use by later steps in the same block, `EffectBlockStep` carries an optional `BindTo` field:
 
 ```
 EffectBlockStep {
@@ -196,7 +225,7 @@ This searches all events at any depth within the given scope whose `KeywordName`
 ```
 Event("attack", {target: goblin, amount: 3})
   └── Event("take_damage", {target: goblin, amount: 1})
-        └── Event("modify-accumulator", {entity: goblin, name: "damage", delta: 1})
+        └── Event("modify-accumulator", {atom: goblin, name: "damage", delta: 1})
 ```
 
 Mid-execution — while still inside `take_damage` — the `modify-accumulator` event is already appended to `E_take_damage.Children` and is visible via `events.this_block`. A later keyword in the same block can query `events-matching(this_block, "modify-accumulator", ...)` and find it.
@@ -216,7 +245,7 @@ Mid-execution — while still inside `take_damage` — the `modify-accumulator` 
 
 ### D5 — Contribution Tracking
 
-**Decision:** Modifier and condition contributions are separate record types sharing a common `ContributionId`. The engine maintains a global registry for O(1) lookup by ID. Each entity maintains per-property and per-condition indexes for efficient state evaluation. Static effects maintain a list of the contribution IDs they own so cleanup on expiry requires no global scan.
+**Decision:** Modifier and condition contributions are separate record types sharing a common `ContributionId`. The engine maintains a global registry for O(1) lookup by ID. Each atom maintains per-property and per-condition indexes for efficient state evaluation. Static effects maintain a list of the contribution IDs they own so cleanup on expiry requires no global scan.
 
 **`ContributionId`:** A monotonically incrementing `long`, incremented by a single counter on `GameState`. Single-threaded execution means no synchronization is needed.
 
@@ -225,8 +254,8 @@ Mid-execution — while still inside `take_damage` — the `modify-accumulator` 
 ```
 ModifierContribution {
   Id           : ContributionId
-  Source       : ContributionSource       // EntityId or StaticEffectId that created this
-  TargetEntity : EntityId
+  Source       : ContributionSource       // AtomId or StaticEffectId that created this
+  TargetAtom : AtomId
   PropertyName : string
   Kind         : Additive | Multiplicative
   Value        : double
@@ -236,7 +265,7 @@ ModifierContribution {
 ConditionContribution {
   Id            : ContributionId
   Source        : ContributionSource
-  TargetEntity  : EntityId
+  TargetAtom  : AtomId
   ConditionName : string
   Lifetime      : LifetimeSpec?
 }
@@ -246,11 +275,11 @@ ConditionContribution {
 
 - `GameState` holds:
   - `ContributionRegistry: Dictionary<ContributionId, IContribution>` — global, for O(1) removal by ID (`remove-modifier`)
-- Each entity holds:
+- Each atom holds:
   - `ModifierIndex: Dictionary<string, List<ModifierContribution>>` — keyed by property name; drives modifier evaluation
   - `ConditionIndex: Dictionary<string, List<ConditionContribution>>` — keyed by condition name; presence = non-empty list
 
-**Modifier evaluation** for a property on an entity:
+**Modifier evaluation** for a property on an atom:
 ```
 computed = (base + Σ additives) × Π multiplicatives
 ```
@@ -258,18 +287,18 @@ Both sums iterate `ModifierIndex[propertyName]` — always a small list in pract
 
 **Condition presence** is `ConditionIndex[name].Count > 0`. Absent condition = key absent or empty list.
 
-**Static effect ownership.** Each `StaticEffect` carries `OwnedContributions: List<ContributionId>`. When a `apply-modifier` or `apply-condition` call is made on behalf of a static effect, the returned `ContributionId` is added to this list. On expiry, the engine removes each ID via the registry and drops it from the entity's index. No global scan required.
+**Static effect ownership.** Each `StaticEffect` carries `OwnedContributions: List<ContributionId>`. When a `apply-modifier` or `apply-condition` call is made on behalf of a static effect, the returned `ContributionId` is added to this list. On expiry, the engine removes each ID via the registry and drops it from the atom's index. No global scan required.
 
 **Rationale:**
-- Separate indexes per entity per property/condition keep evaluation fast without requiring a global sweep.
+- Separate indexes per atom per property/condition keep evaluation fast without requiring a global sweep.
 - Static effect ownership of contribution IDs makes expiry cleanup O(k) where k is the number of contributions that effect owns — typically 1.
 - The global registry is only needed for explicit `remove-modifier`; it's a secondary index, not the source of truth.
 
 **Consequences:**
-- `apply-modifier` and `apply-condition` allocate a `ContributionId`, create the contribution record, insert it into the entity's index and the global registry, and return the ID.
-- `remove-modifier(id)` looks up in the registry, removes from entity index, removes from registry, removes from owning static effect's list if applicable.
-- `remove-condition(entity, name)` removes all entries from `ConditionIndex[name]`, removes each from the registry, and removes from owning static effect lists.
-- Accumulator deltas have no contribution tracking — they merge permanently into a running total per `(entity, name)` pair on the entity. No registry entry.
+- `apply-modifier` and `apply-condition` allocate a `ContributionId`, create the contribution record, insert it into the atom's index and the global registry, and return the ID.
+- `remove-modifier(id)` looks up in the registry, removes from atom index, removes from registry, removes from owning static effect's list if applicable.
+- `remove-condition(atom, name)` removes all entries from `ConditionIndex[name]`, removes each from the registry, and removes from owning static effect lists.
+- Accumulator deltas have no contribution tracking — they merge permanently into a running total per `(atom, name)` pair on the atom. No registry entry.
 
 ---
 
@@ -317,12 +346,12 @@ LifetimeCondition (discriminated union):
 4. For each expired effect:
    - Remove all `OwnedContributions` (§D5); remove from `ActiveStaticEffects`.
    - Classify expiry: **terminal** if any TurnTimer or TriggerCount condition fired; **while-condition expiry** if only a WhileCondition fired.
-   - If while-condition expiry AND `se.Origin == Declarative`: add `DormantDeclarativeEffect { OwnerEntity: se.OwnerEntity, EffectDef: se.SourceDefinition }` to `GameState.DormantDeclarativeEffects`.
+   - If while-condition expiry AND `se.Origin == Declarative`: add `DormantDeclarativeEffect { OwnerAtom: se.OwnerAtom, EffectDef: se.SourceDefinition }` to `GameState.DormantDeclarativeEffects`.
 5. If any effects expired, repeat Phase 1 — expiry can cascade (a condition that was true only because of a now-removed contribution may now be false, or vice versa).
 
 **Phase 2 — activate dormant declarative effects:**
-6. Iterate all `DormantDeclarativeEffects`. For each, evaluate its `EffectDef.LifetimeSpec`'s WhileCondition against current game state, with `{ "source": dormant.OwnerEntity }` as the evaluation bindings.
-7. If true: call `InstantiateStaticEffect(dormant.EffectDef, dormant.OwnerEntity)` — allocate a fresh `StaticEffectId`; set `TriggerFireCount = 0`, `TriggerHighWaterMark = 0`; apply any state contribution; add to `ActiveStaticEffects`. Remove from `DormantDeclarativeEffects`.
+6. Iterate all `DormantDeclarativeEffects`. For each, evaluate its `EffectDef.LifetimeSpec`'s WhileCondition against current game state, with `{ "source": dormant.OwnerAtom }` as the evaluation bindings.
+7. If true: call `InstantiateStaticEffect(dormant.EffectDef, dormant.OwnerAtom)` — allocate a fresh `StaticEffectId`; set `TriggerFireCount = 0`, `TriggerHighWaterMark = 0`; apply any state contribution; add to `ActiveStaticEffects`. Remove from `DormantDeclarativeEffects`.
 8. If any dormant effects activated, return to Phase 1 — new active effects may introduce contributions that change other conditions.
 
 **Turn-timer check** is performed at the same `CheckLifetimes` call — no separate hook needed since the call happens after every block, including phase init/cleanup blocks that mark turn boundaries.
@@ -333,13 +362,13 @@ LifetimeCondition (discriminated union):
 - **No while-condition, or while-condition evaluates to true:** instantiate immediately and add to `GameState.ActiveStaticEffects`.
 - **While-condition evaluates to false:** add to `GameState.DormantDeclarativeEffects` without creating a `StaticEffect` instance.
 
-The same logic applies when cards are created during play via `create-card` or `copy-card`. Both paths call a shared `ProvisionDeclarativeEffect(effectDef, ownerEntity, state)` helper.
+The same logic applies when cards are created during play via `create-card` or `copy-card`. Both paths call a shared `ProvisionDeclarativeEffect(effectDef, ownerAtom, state)` helper.
 
 **Dormant tracking data structure:**
 
 ```
 DormantDeclarativeEffect {
-  OwnerEntity : EntityId
+  OwnerAtom : AtomId
   EffectDef   : StaticEffectDef
 }
 ```
@@ -350,7 +379,7 @@ DormantDeclarativeEffect {
 - **Terminal expiry** — any TurnTimer or TriggerCount condition fired (regardless of while-condition state). Discard permanently. No re-instantiation. This preserves the intent: TurnTimer and TriggerCount are authoring signals that the effect is fundamentally finite.
 - **While-condition expiry** — only a WhileCondition fired (no TurnTimer or TriggerCount also satisfied). If declarative, add to `DormantDeclarativeEffects` for potential re-activation. Dynamic effects are always discarded permanently on expiry.
 
-A declarative effect may later be re-instantiated any number of times. Each re-instantiation produces a new `StaticEffect` with a new identity, fresh `TriggerFireCount = 0`, and fresh `TriggerHighWaterMark = 0`. The expired instance is never resumed.
+A declarative effect may later be re-instantiated any number of times. Each re-instantiation produces a new `StaticEffect` with a new idatom, fresh `TriggerFireCount = 0`, and fresh `TriggerHighWaterMark = 0`. The expired instance is never resumed.
 
 **Rationale:**
 - A single `List<StaticEffect>` with a post-block sweep is simple, correct, and fast for the expected number of active effects in a card game (tens, not thousands).
@@ -358,7 +387,7 @@ A declarative effect may later be re-instantiated any number of times. Each re-i
 - Placing trigger-count expiry in the normal `CheckLifetimes` loop (rather than inline in trigger resolution) keeps expiry logic in one place.
 - The two-phase sweep (expire then activate dormant) handles declarative re-instantiation without a separate scheduling mechanism. Because `CheckLifetimes` runs on every block boundary already, no additional hooks are needed.
 - Classifying expiry as terminal vs. while-condition honours the domain model's distinction: TurnTimer and TriggerCount signal that an effect is finite; a while-condition is a predicate the effect follows for its lifetime. A TurnTimer expiry coinciding with a false while-condition still discards permanently.
-- Tracking dormant effects as explicit `(ownerEntity, effectDef)` pairs rather than re-scanning all card definitions each sweep keeps Phase 2 O(dormant) rather than O(all_cards × effects_per_card).
+- Tracking dormant effects as explicit `(ownerAtom, effectDef)` pairs rather than re-scanning all card definitions each sweep keeps Phase 2 O(dormant) rather than O(all_cards × effects_per_card).
 
 **Consequences:**
 - `CheckLifetimes` is called by `ActionResolver` after every block, including cost blocks, state-based rule blocks, and trigger-fired blocks.
@@ -366,8 +395,8 @@ A declarative effect may later be re-instantiated any number of times. Each re-i
 - The cascade loop in `CheckLifetimes` must terminate — guaranteed by the game creator's responsibility for convergence (§8.3 of the domain model).
 - `GameState` gains `DormantDeclarativeEffects : List<DormantDeclarativeEffect>` alongside `ActiveStaticEffects`.
 - `StaticEffect` gains `SourceDefinition : StaticEffectDef?` — non-null for declarative effects, null for dynamic. Used to populate the dormant record on while-condition expiry. See D13 for the canonical updated `StaticEffect` record.
-- Card provisioning (manifest provisioning and `create-card`/`copy-card` implementations) calls a shared `ProvisionDeclarativeEffect(effectDef, ownerEntity, state)` helper that performs the active-vs-dormant split. Both provisioning paths must use this helper to stay in sync.
-- `InstantiateStaticEffect(effectDef, ownerEntity)` is a shared helper called by provisioning and by Phase 2. It allocates a new `StaticEffectId`, sets `TriggerFireCount = 0` and `TriggerHighWaterMark = 0`, applies any state contribution (registering the returned `ContributionId` in `OwnedContributions`), and sets `SourceDefinition = effectDef`.
+- Card provisioning (manifest provisioning and `create-card`/`copy-card` implementations) calls a shared `ProvisionDeclarativeEffect(effectDef, ownerAtom, state)` helper that performs the active-vs-dormant split. Both provisioning paths must use this helper to stay in sync.
+- `InstantiateStaticEffect(effectDef, ownerAtom)` is a shared helper called by provisioning and by Phase 2. It allocates a new `StaticEffectId`, sets `TriggerFireCount = 0` and `TriggerHighWaterMark = 0`, applies any state contribution (registering the returned `ContributionId` in `OwnedContributions`), and sets `SourceDefinition = effectDef`.
 
 ---
 
@@ -453,7 +482,7 @@ enum CascadeDirective { Continue, Halt }
 - `Halt` without rollback means the game creator remains responsible for convergence — the engine provides the escape hatch, not the guarantee.
 
 **Consequences:**
-- `ActionResolver` requires two injected interfaces: `IPromptChannel` (D3) and `IEngineObserver` (this decision). `IEngineObserver` may be null.
+- `ActionResolver` construction-time dependencies: per-player `IReadOnlyDictionary<string, IPlayerStrategy>`, `IRandomSource`, and `IEngineObserver?` (nullable). `IPromptChannel` from D3 is retired; see D14 for the canonical constructor.
 - The `triggerBatchCount` is a local variable in the `ActionResolver.ResolveAction` method, reset per action. It does not live on `GameState` or `ExecutionContext`.
 - D8 (trigger resolution) will define `CollectSatisfiedTriggers` and the sort ordering referenced in step 6 above.
 - `Halt` terminates only the cascade loop; the action is otherwise complete and the game continues. Win/loss conditions triggered by a `Halt` are the game creator's responsibility via SBRs.
@@ -506,7 +535,7 @@ EventBinding {
 event-arg(event: EventRef, name: string) → value
 ```
 
-`EventRef` is a new first-class type in the engine's type vocabulary (alongside `Entity`, `Number`, `Boolean`, etc.). `EventBindings` are an optional convenience on top: they let the game creator pre-bind specific event args to friendly names (so the block can write `ParameterRef("target")` instead of `event-arg(trigger_event, "target")`). The full event is always accessible regardless of what `EventBindings` declares.
+`EventRef` is a new first-class type in the engine's type vocabulary (alongside `Atom`, `Number`, `Boolean`, etc.). `EventBindings` are an optional convenience on top: they let the game creator pre-bind specific event args to friendly names (so the block can write `ParameterRef("target")` instead of `event-arg(trigger_event, "target")`). The full event is always accessible regardless of what `EventBindings` declares.
 
 **Domain model note.** `EventRef` and `event-arg` are additions to §9.2 (Read Primitives) — resolved as A3. `EventRef` is defined in §7.1; `event-arg` is tabulated in §9.2.
 
@@ -667,7 +696,7 @@ class SeededRandom : IRandomSource
 
 `System.Random` is WASM-safe and single-threaded by construction (no locking needed). Seed is a `long`; `System.Random` in .NET 6+ accepts a 32-bit seed via its constructor — use `(int)(seed ^ seed >> 32)` to fold a `long` down, or use `Random(seed.GetHashCode())`. The implementer should verify the exact .NET 10 constructor signature.
 
-**Injection.** `IRandomSource` is a third construction-time dependency on `ActionResolver` alongside `IPromptChannel` and `IEngineObserver`. It is stored on `ExecutionContext` so that the built-in keyword implementations can reach it during evaluation. `TriggerEvaluationContext` does not carry `IRandomSource` — randomness in trigger conditions is not supported (conditions are pure boolean expressions over game state and the event log; introducing randomness there would make trigger firing non-deterministic in a way that is difficult to audit or replay).
+**Injection.** `IRandomSource` is a construction-time dependency on `ActionResolver` alongside the per-player `IPlayerStrategy` dictionary and `IEngineObserver` (see D14 for the canonical constructor). It is stored on `ExecutionContext` so that the built-in keyword implementations can reach it during evaluation. `TriggerEvaluationContext` does not carry `IRandomSource` — randomness in trigger conditions is not supported (conditions are pure boolean expressions over game state and the event log; introducing randomness there would make trigger firing non-deterministic in a way that is difficult to audit or replay).
 
 ---
 
@@ -676,7 +705,7 @@ class SeededRandom : IRandomSource
 | Keyword | Parameters | Returns | Notes |
 |---|---|---|---|
 | `random-int(min, max)` | `min: Number, max: Number` | `Number` | Uniform integer in `[min, max]` inclusive. Consumes one `NextInt` call. |
-| `shuffle(collection)` | `collection: Collection<Entity>` | `Collection<Entity>` | Returns a new shuffled collection. Consumes N calls where N = `collection.Count`. Does not mutate the source collection. |
+| `shuffle(collection)` | `collection: Collection<Atom>` | `Collection<Atom>` | Returns a new shuffled collection. Consumes N calls where N = `collection.Count`. Does not mutate the source collection. |
 
 Both are **property keywords**: they return values, have no side effects on game state, and append nothing to the event log. Their consumed randomness is implicitly captured in the event log through the `BoundArgs` of the mutation keyword that uses the result — e.g. `modify-accumulator(goblin, "damage", random-int(1, 6))` logs `{delta: 4}`, not `{delta: random-int(1,6)}`.
 
@@ -699,8 +728,8 @@ The seed is game-scoped (one `IRandomSource` per `GameSession`). There is no per
 
 **Consequences:**
 - `ExecutionContext` gains `RandomSource: IRandomSource`.
-- `ActionResolver` constructor signature: `(GameDefinition, IPromptChannel, IRandomSource, IEngineObserver?)`.
-- The host's game-session bootstrap must supply a seed or a custom `IRandomSource`. The engine provides a convenience constructor overload: `ActionResolver(GameDefinition, IPromptChannel, long seed, IEngineObserver?)` that constructs `SeededRandom(seed)` internally.
+- `ActionResolver` constructor signature: `(GameDefinition, IReadOnlyDictionary<string, IPlayerStrategy>, IRandomSource, IEngineObserver?)`. `IPromptChannel` from D3 is retired; this is the canonical form established by D14/A15.
+- The host's game-session bootstrap must supply a seed or a custom `IRandomSource`. The engine provides a convenience constructor overload: `ActionResolver(GameDefinition, IReadOnlyDictionary<string, IPlayerStrategy>, long seed, IEngineObserver?)` that constructs `SeededRandom(seed)` internally.
 - `random-int` and `shuffle` implementations live in the built-in keyword registry alongside other primitives.
 - The game creator API (D10) must expose seed/`IRandomSource` as part of game session construction.
 
@@ -837,7 +866,7 @@ Example locale file (`locale.fr.json`):
 
 **The engine has no default locale.** No language is hardcoded in the engine. The `engine.*` defaults in the built-in registry happen to be English in the reference implementation, but a game creator can override every one of them in their locale files — including whatever they treat as their primary language.
 
-**Static property strings** (card names, entity names, zone names) are not handled by the text renderer — those are static data values on `CardDefinition`, `ZoneDefinition`, etc. If the game creator needs localised names, they author them as locale-keyed properties in the game definition and the host resolves them at render time. This is a tooling convention, not an engine mechanism.
+**Static property strings** (card names, atom names, zone names) are not handled by the text renderer — those are static data values on `CardDefinition`, `ZoneDefinition`, etc. If the game creator needs localised names, they author them as locale-keyed properties in the game definition and the host resolves them at render time. This is a tooling convention, not an engine mechanism.
 
 **Tooling implications.** The authoring tool must:
 - Allow game creators to author `TextTemplate` in their primary language.
@@ -877,17 +906,18 @@ The host does not call the text renderer at game-critical moments (combat resolu
 
 ---
 
-### D12 — Runtime Entity Creation
+### D12 — Runtime Atom Creation
 
-**Decision:** Three mutation primitives — `create-card`, `copy-card`, and `create-zone` — enable entities to be created during play (for tokens, copies, and dynamic zones). No parameterized card or zone definitions; post-creation mutation via the existing modifier, accumulator, and condition system handles variable properties. All three primitives return an `Entity` value captured via the `BindTo` mechanism added in the D3 addendum.
+**Decision:** Three mutation primitives — `create-card`, `copy-card`, and `create-zone` — enable atoms to be created during play (for tokens, copies, and dynamic zones). No parameterized card or zone definitions; post-creation mutation via the existing modifier, accumulator, and condition system handles variable properties. All three primitives return an `Atom` value captured via the `BindTo` mechanism added in the D3 addendum.
 
 **New primitives (additions to §9.1 of the domain model):**
 
 | Keyword | Parameters | Returns | Description |
 |---|---|---|---|
-| `create-card` | `zone: Zone, definition-name: CardDefinitionName, owner: Player` | `Entity` | Instantiates a new card from the named definition; places it in the specified zone with the given owner. Owner is set at creation and immutable thereafter. Appends a creation event. |
-| `copy-card` | `source: Entity, destination-zone: Zone, owner: Player` | `Entity` | Instantiates a card using the same definition as `source`. Copies no runtime state — the new card starts fresh (no modifiers, accumulators, or conditions from `source`). Appends a creation event. |
-| `create-zone` | `owner: Player, definition-name: ZoneDefinitionName` | `Entity` | Instantiates a zone from the named zone definition; initially empty. Appends a creation event. |
+| `create-card` | `zone: Zone, definition-name: CardDefinitionName, owner: Player` | `Atom` | Instantiates a new card from the named definition; places it in the specified zone with the given owner. Owner is set at creation and immutable thereafter. Appends a creation event. |
+| `copy-card` | `source: Atom, destination-zone: Zone, owner: Player` | `Atom` | Instantiates a card using the same definition as `source`. Copies no runtime state — the new card starts fresh (no modifiers, accumulators, or conditions from `source`). Appends a creation event. |
+| `create-zone` | `owner: Player, definition-name: ZoneDefinitionName` | `Atom` | Instantiates a zone from the named zone definition; initially empty. Appends a creation event. |
+| `move-card` | `card: Card, destination: Zone` | `void` | Moves an existing card to the specified zone. Captures `origin = card.ZoneId` before mutation, updates `card.ZoneId = destination`, and appends a `move-card` event with `{ card, origin, destination }` bound args. The card's `AtomId`, owner, accumulators, modifiers, conditions, and active static effects are unchanged. Post-block `CheckLifetimes` re-evaluates `in-zone` while-conditions naturally — no special handling in `move-card`. If `destination` does not resolve to an active zone atom in `GameState`, a runtime `EngineException` is thrown. |
 
 **`CardDefinitionName` and `ZoneDefinitionName`** are new entries in the type vocabulary — string-valued types that the tooling validates at parse time against the named definitions registered in `GameDefinition`. They are resolved to definition references at game-definition load time; the engine performs no name lookups at execution time.
 
@@ -914,7 +944,7 @@ The one thing post-creation mutation cannot change is a card's *static* properti
 
 **Rationale:**
 - Three primitives cover the three creation patterns that arise in practice (named token, clone, dynamic zone) without over-engineering.
-- Returning `Entity` from all three unifies the usage pattern and follows the same `BindTo` model as `apply-modifier` / `apply-condition`.
+- Returning `Atom` from all three unifies the usage pattern and follows the same `BindTo` model as `apply-modifier` / `apply-condition`.
 - Deferring parameterized definitions keeps the definition data model clean and avoids propagating new complexity into D2, D11, and the forthcoming game creator API.
 
 **Consequences:**
@@ -988,7 +1018,7 @@ Within the additive and multiplicative groups, ordering is by `StaticEffectId` a
 ```
 StaticEffect {
   Id                    : StaticEffectId
-  OwnerEntity           : EntityId               // entity this effect is defined on (D13)
+  OwnerAtom           : AtomId               // atom this effect is defined on (D13)
   Origin                : Declarative | Dynamic
   SourceDefinition      : StaticEffectDef?       // non-null for declarative effects; null for dynamic (A1/D6)
   LifetimeSpec          : LifetimeSpec
@@ -1001,13 +1031,13 @@ StaticEffect {
 }
 ```
 
-`OwnerEntity` is the entity (card, player, or zone) on which this static effect lives. For declarative effects it is the card instance; for dynamic effects it is the entity in whose effect block the standing-mutation keyword was invoked. This field also resolves the same latent gap in D8's trigger evaluation — see below.
+`OwnerAtom` is the atom (card, player, or zone) on which this static effect lives. For declarative effects it is the card instance; for dynamic effects it is the atom in whose effect block the standing-mutation keyword was invoked. This field also resolves the same latent gap in D8's trigger evaluation — see below.
 
 ---
 
 **Evaluation context for modification expressions.** When evaluating `FilterCondition` or any `ParamMod.Expression`:
 
-- **`source`** — reserved name; resolves to `OwnerEntity`. Lets a declarative static effect refer to "this card" (e.g. `equal-to(target, source)`).
+- **`source`** — reserved name; resolves to `OwnerAtom`. Lets a declarative static effect refer to "this card" (e.g. `equal-to(target, source)`).
 - **`original`** — reserved name; resolves to the raw invocation argument for Additive/Multiplicative expressions, or the running result of preceding Replace mods for Replace expressions.
 - **Arg values by name** — the invocation's arguments, exposed via `ArgFilter`'s `ParamName` declarations.
 - **GameState** — for property keyword reads.
@@ -1046,7 +1076,7 @@ Result ApplyParameterModifications(string keyword, List<object> args, EvalContex
                where se.ParameterModification?.TargetKeyword == keyword
                ordered by se.Id ascending:
     pm = se.ParameterModification
-    evalBindings = { "source": se.OwnerEntity }
+    evalBindings = { "source": se.OwnerAtom }
     if pm.ArgFilter != null:
       for each decl in pm.ArgFilter:
         evalBindings[decl.ParamName] = args[IndexOf(decl.ArgName, keyword)]
@@ -1132,11 +1162,11 @@ When suppressed, the engine logs `keyword-disabled { keyword: "take-damage", tar
 
 ---
 
-**`source` in trigger conditions (addendum to D8).** The same `OwnerEntity` field resolves the equivalent gap in trigger evaluation. A trigger such as "when *this* card deals damage, draw a card" requires the condition to reference the owning entity. `TriggerEvaluationContext` gains:
+**`source` in trigger conditions (addendum to D8).** The same `OwnerAtom` field resolves the equivalent gap in trigger evaluation. A trigger such as "when *this* card deals damage, draw a card" requires the condition to reference the owning atom. `TriggerEvaluationContext` gains:
 
 ```
 TriggerEvaluationContext {
-  Source     : EntityId                      // NEW — se.OwnerEntity
+  Source     : AtomId                      // NEW — se.OwnerAtom
   EventParams: Dictionary<string, object>
   GameState  : GameState
   LogScope   : TriggerScope
@@ -1161,8 +1191,8 @@ TriggerEvaluationContext {
 - Excluding event log access from modification expressions keeps the interception path synchronous and avoids re-entrant complexity.
 
 **Consequences:**
-- `StaticEffect` gains `OwnerEntity: EntityId` (D13), `SourceDefinition: StaticEffectDef?` (A1/D6), and `ParameterModification: ParameterModification?` (D13).
-- `TriggerEvaluationContext` gains `Source: EntityId`.
+- `StaticEffect` gains `OwnerAtom: AtomId` (D13), `SourceDefinition: StaticEffectDef?` (A1/D6), and `ParameterModification: ParameterModification?` (D13).
+- `TriggerEvaluationContext` gains `Source: AtomId`.
 - `ApplyParameterModifications` is called before every mutation dispatch in the keyword evaluator. For games with no `ParameterModification` static effects active, this is a no-op list scan.
 - `ArgFilter` reuses `EventParamDecl` from D8 — extract into a shared type.
 - `ParamMod.ParamName` validated by tooling against the target keyword's declared parameters. `Kind: Additive | Multiplicative` is valid only on numeric-typed parameters; `Replace` is valid on any type.
@@ -1201,9 +1231,9 @@ Example structure:
 ```
 // Arrange
 var state   = new GameStateBuilder()
-    .WithPlayer(PlayerSlot.Player1)
-    .WithZone("hand", PlayerSlot.Player1, out var hand)
-    .WithCard("goblin", hand, PlayerSlot.Player1, out var goblin)
+    .WithPlayer("player1", out var player1Id)
+    .WithZone("hand", "player1", out var hand)
+    .WithCard("goblin", hand, "player1", out var goblin)
     .Build();
 
 var strategy = new ScriptedPlayerStrategy();  // no queued inputs needed for this block
@@ -1293,18 +1323,21 @@ class MockRandomSource : IRandomSource
 
 **`GameStateBuilder`**
 
-Constructs a `GameState` directly — bypasses manifest provisioning, allocates real `EntityId`s from a fresh counter. Essential for Layer 1 and Layer 2 speed.
+Constructs a `GameState` directly — bypasses manifest provisioning, allocates real `AtomId`s from a fresh counter. Essential for Layer 1 and Layer 2 speed.
 
 ```
 class GameStateBuilder
-  .WithPlayer(PlayerSlot, out EntityId id, Dictionary<string,object>? staticProps = null) → self
-  .WithZone(string defName, PlayerSlot owner, out EntityId id)                            → self
-  .WithCard(string defName, EntityId zone, PlayerSlot owner, out EntityId id)             → self
-  .WithAccumulator(EntityId entity, string name, double value)                            → self
-  .WithCondition(EntityId entity, string conditionName)                                   → self
-  .WithModifier(EntityId entity, string prop, ModifierKind kind, double value)            → self
-  .WithStaticEffect(StaticEffectDef def, EntityId ownerEntity)                            → self
-  .Build() → GameState
+  .WithPlayer(string playerName, out AtomId id,
+              Dictionary<string,object>? staticProps = null)                              → self
+  .WithZone(string defName, string ownerPlayerName, out AtomId id)                     → self
+  .WithCard(string defName, AtomId zone, string ownerPlayerName, out AtomId id)      → self
+  .WithAccumulator(AtomId atom, string name, double value)                            → self
+  .WithCondition(AtomId atom, string conditionName)                                   → self
+  .WithModifier(AtomId atom, string prop, ModifierKind kind, double value)            → self
+  .WithStaticEffect(StaticEffectDef def, AtomId ownerAtom)                           → self
+  .WithSession(out AtomId id, Dictionary<string, double>? accumulators = null,
+               IReadOnlyList<string>? conditions = null)                                  → self
+  .Build() → GameState   // auto-provisions session atom if WithSession not called
 ```
 
 `WithCard` instantiates declarative static effects from the `CardDefinition` automatically, matching production provisioning behaviour.
@@ -1320,10 +1353,10 @@ static class Assert
   .EventLoggedDisabled(log, string originalKeyword)  // keyword-disabled event
 
   // Game state
-  .Accumulator(GameStateView state, EntityId entity, string name, double expected)
-  .ConditionPresent(state, EntityId, string conditionName)
-  .ConditionAbsent(state, EntityId, string conditionName)
-  .ComputedProperty(state, EntityId, string propName, double expected)  // modifier-adjusted value
+  .Accumulator(GameStateView state, AtomId atom, string name, double expected)
+  .ConditionPresent(state, AtomId, string conditionName)
+  .ConditionAbsent(state, AtomId, string conditionName)
+  .ComputedProperty(state, AtomId, string propName, double expected)  // modifier-adjusted value
 
   // Render
   .RenderContainsText(RenderNode root, string fragment)    // any TextSpan in tree contains fragment
@@ -1389,8 +1422,8 @@ No NuGet dependencies. No engine logic. WASM-safe by construction.
 - `PlayerAction` discriminated union, `AvailableActions`, `PlayableCardOption`, `ActivatableAbilityOption`
 - `PromptContext` discriminated union (choice prompt, trigger-order prompt — D8), `PromptResponse`
 - Interfaces: `IPlayerStrategy`, `IEngineObserver`, `IRandomSource`
-- Enums: `TriggerResolutionOrder`, `PlayerSlot`, `ModifierKind`, `ParamModKind`, `CascadeDirective`
-- `BuiltInKeywords` — a static registry of all built-in keyword names and their `ParameterDecl[]` signatures (no C# implementations; implementations are in `Engine`). Used by `Build` for authoring validation and by `Engine` for dispatch.
+- Enums: `TriggerResolutionOrder`, `ModifierKind`, `ParamModKind`, `CascadeDirective` — `PlayerSlot` is retired (A15); players are referenced by string name throughout
+- `BuiltInKeywords` — a static registry of all built-in keyword names and their `ParameterDecl[]` signatures (no C# implementations; implementations are in `Engine`). Used by `Build` for authoring validation and by `Engine` for dispatch. Covers all mutation primitives from D12 (including `move-card`) and all read primitives from §9.2 of the domain model.
 - `DefinitionException` — thrown by authoring-time validation failures
 
 *What is not here:* any mutable runtime state, any execution logic, any JSON parsing.
@@ -1435,7 +1468,7 @@ Depends on `Core` only. WASM-safe (no `Thread`, no `ThreadPool`, no raw file I/O
 - `SeededRandom` — the default `IRandomSource` implementation (D9)
 
 *Internal (not public; accessible to tests via `InternalsVisibleTo`):*
-- `GameState` — mutable runtime state (entities, contribution registry, active static effects)
+- `GameState` — mutable runtime state (atoms, contribution registry, active static effects)
 - `ExecutionContext`, `TriggerEvaluationContext`
 - `ActionResolver` — owns the post-action sequence (D7), calls `ExecuteBlock`, `RunStateBasedRules`, `CollectSatisfiedTriggers`, `CheckLifetimes`
 - Block executor (`ExecuteBlock`) and keyword evaluator (`EvaluateNode`, `ApplyParameterModifications`, `DispatchMutation`, `DispatchProperty`)
@@ -1497,8 +1530,7 @@ GameDefinition {
   Phases                 : IReadOnlyList<PhaseDefinition>      // in turn order
   ActionRules            : IReadOnlyDictionary<string, IReadOnlyList<ActionRuleDefinition>>
   TriggerResolutionOrder : TriggerResolutionOrder
-  Player1Definition      : PlayerDefinition
-  Player2Definition      : PlayerDefinition
+  PlayerDefinitions      : IReadOnlyDictionary<string, PlayerDefinition>   // named registry; minimum one (A15)
   DefaultInitManifest    : InitManifest?
 }
 ```
@@ -1589,14 +1621,14 @@ InitManifest {
 
 ZoneSpec {
   LocalId      : string         // manifest-scoped reference ID, used by CardSpec.ZoneLocalId
-  Owner        : PlayerSlot     // Player1 | Player2
+  Owner        : string         // player name key in GameDefinition.PlayerDefinitions (A15)
   Definition   : string         // ZoneDefinition name
   Accumulators : IReadOnlyDictionary<string, double>?
   Conditions   : IReadOnlyList<string>?
 }
 
 CardSpec {
-  Owner        : PlayerSlot
+  Owner        : string         // player name (A15)
   ZoneLocalId  : string         // references ZoneSpec.LocalId
   Definition   : string         // CardDefinition name
   Accumulators : IReadOnlyDictionary<string, double>?
@@ -1604,26 +1636,25 @@ CardSpec {
 }
 
 PlayerStateSpec {
-  Player       : PlayerSlot
+  Player       : string         // player name (A15)
   Accumulators : IReadOnlyDictionary<string, double>?
   Conditions   : IReadOnlyList<string>?
 }
-
-enum PlayerSlot { Player1, Player2 }
 ```
 
 **Provisioning order.** The engine provisions the manifest in this sequence before the first phase:
-1. Both player entities are created from `Player1Definition` / `Player2Definition`.
-2. Zones are created in `Zones` list order; each is assigned a fresh `EntityId`. `LocalId` is a manifest-scoped reference only — it is not an engine `EntityId`.
-3. Cards are created in `Cards` list order, placed in their declared zone, with their declared owner. Declarative static effects from the card definition are instantiated automatically (D6/D12).
-4. Card mutable state overrides (`Accumulators`, `Conditions`) are applied.
-5. Player mutable state overrides from `PlayerStates` are applied.
+1. The session atom is created (engine-managed; no manifest entry required — see D14 addendum §2).
+2. Player atoms are created from `PlayerDefinitions` in insertion order; each is assigned a fresh `AtomId`.
+3. Zones are created in `Zones` list order; each is assigned a fresh `AtomId`. `LocalId` is a manifest-scoped reference only — it is not an engine `AtomId`.
+4. Cards are created in `Cards` list order, placed in their declared zone, with their declared owner. Declarative static effects from the card definition are instantiated automatically (D6/D12).
+5. Card mutable state overrides (`Accumulators`, `Conditions`) are applied.
+6. Player mutable state overrides from `PlayerStates` are applied.
 
 No events are logged during provisioning — the event log is empty when the first phase begins. The `InitManifest` is entirely a setup mechanism, not a game action.
 
 **Relationship to `GameStateSnapshot` (D17).** `GameStateSnapshot` is the richer save/load type. A save may occur at any prompt suspension — including mid-block, mid-action — so the snapshot must capture:
 
-- Entity state (zones, cards, players — accumulators, modifiers, conditions)
+- Atom state (zones, cards, players — accumulators, modifiers, conditions)
 - Contribution registry and active static effects (with fire counts and high-water marks)
 - Dormant declarative effects (D6) — required for correct re-activation after load
 - Full finalized event log
@@ -1653,8 +1684,7 @@ GameDefinitionBuilder
   .AddPhase(name, Action<PhaseBuilder>)                    → self
   .AddActionRule(actionName, Action<ActionRuleBuilder>)    → self
   .WithTriggerOrder(TriggerResolutionOrder)                → self
-  .WithPlayer1(Action<PlayerBuilder>)                      → self
-  .WithPlayer2(Action<PlayerBuilder>)                      → self
+  .AddPlayer(string name, Action<PlayerBuilder>)           → self   // call once per player; minimum one (A15)
   .WithDefaultInitManifest(Action<ManifestBuilder>)        → self
   .Build() → GameDefinition    // validates; throws DefinitionException on failure
 ```
@@ -1672,7 +1702,10 @@ static class Kw
   And(a, b)  Or(a, b)  Not(p)
   Add(a, b)  Subtract(a, b)  Multiply(a, b)  Max(a, b)  Min(a, b)
   LessThan(a, b)  GreaterThan(a, b)  AtLeast(a, b)  AtMost(a, b)  EqualTo(a, b)
-  GetState(entity, field)   GetProperty(entity, field)   InZone(entity, zone)
+  GetState(atom, field)   GetProperty(atom, field)   InZone(atom, zone)
+  OwnerOf(atom)   // argument must resolve to Card or Zone; enforced at Build() — see D2 addendum
+  MoveCard(card, destination)   // card: Card, destination: Zone; moves card to zone — see D12
+  Session()         // Literal shorthand that resolves to the session reserved reference
   // ... one shorthand per built-in keyword; the pattern is mechanical
 ```
 
@@ -1695,8 +1728,7 @@ The JSON schema is the serialisation contract from D2. The deserialiser runs the
 GameSession.Create(GameDefinition) → GameSessionBuilder
 
 GameSessionBuilder
-  .WithPlayer1(IPlayerStrategy)          → self   // required
-  .WithPlayer2(IPlayerStrategy)          → self   // required
+  .WithPlayerStrategy(string playerName, IPlayerStrategy) → self   // call once per player; all players required
   .WithRandomSource(IRandomSource)       → self   // required
   .WithObserver(IEngineObserver)         → self   // optional
   .UseDefaultInit()                      → self   // adopt GameDefinition.DefaultInitManifest
@@ -1706,14 +1738,14 @@ GameSessionBuilder
   .Build() → GameSession                 // throws if required fields missing
 ```
 
-`.UseDefaultInit()`, `.WithInitManifest(...)`, and `.FromSavedState(...)` are mutually exclusive; the last call wins. If none is called the session begins with no entities — valid for games that build state entirely through phase init blocks.
+`.UseDefaultInit()`, `.WithInitManifest(...)`, and `.FromSavedState(...)` are mutually exclusive; the last call wins. If none is called the session begins with no atoms — valid for games that build state entirely through phase init blocks.
 
 ```
 GameSession
   async Task<GameResult> RunAsync()
 
 GameResult {
-  Outcome  : Player1Wins | Player2Wins | Draw
+  Winner   : string?                   // null = draw; non-null = winning player name (A15)
   FinalLog : IReadOnlyList<GameEvent>
 }
 ```
@@ -1758,12 +1790,12 @@ AvailableActions {
 }
 
 PlayableCardOption {
-  Card         : EntityId
+  Card         : AtomId
   ValidTargets : IReadOnlyList<TargetSet>   // pre-validated combinations
 }
 
 ActivatableAbilityOption {
-  Source       : EntityId
+  Source       : AtomId
   EffectName   : string
   ValidTargets : IReadOnlyList<TargetSet>
 }
@@ -1774,15 +1806,15 @@ ActivatableAbilityOption {
 ```
 PlayerAction:
   | PlayCard {
-      Card           : EntityId
-      Targets        : IReadOnlyList<EntityId>
+      Card           : AtomId
+      Targets        : IReadOnlyList<AtomId>
       CostChoices    : IReadOnlyDictionary<string, object>
       VariableValues : IReadOnlyDictionary<string, object>
     }
   | ActivateAbility {
-      Source         : EntityId
+      Source         : AtomId
       EffectName     : string
-      Targets        : IReadOnlyList<EntityId>
+      Targets        : IReadOnlyList<AtomId>
       CostChoices    : IReadOnlyDictionary<string, object>
       VariableValues : IReadOnlyDictionary<string, object>
     }
@@ -1800,21 +1832,467 @@ PlayerAction:
 
 ---
 
+---
+
+**D14 Addendum — A15: Session atom and player registry generalization.**
+
+A15 introduces two changes that affect this decision.
+
+---
+
+**1. Player registry (named dictionary replaces fixed two-slot pair).**
+
+`GameDefinition.Player1Definition` / `Player2Definition` are replaced by a named registry. `PlayerSlot` enum is retired.
+
+```
+GameDefinition {
+  ...
+  PlayerDefinitions      : IReadOnlyDictionary<string, PlayerDefinition>
+  ...
+}
+```
+
+`Build()` enforces the minimum-one constraint: a `GameDefinition` with zero `PlayerDefinitions` entries is a `DefinitionException`.
+
+`InitManifest` references players by name rather than `PlayerSlot`:
+
+```
+ZoneSpec {
+  LocalId      : string
+  Owner        : string         // player name key in GameDefinition.PlayerDefinitions
+  Definition   : string
+  Accumulators : IReadOnlyDictionary<string, double>?
+  Conditions   : IReadOnlyList<string>?
+}
+
+CardSpec {
+  Owner        : string         // player name
+  ZoneLocalId  : string
+  Definition   : string
+  Accumulators : IReadOnlyDictionary<string, double>?
+  Conditions   : IReadOnlyList<string>?
+}
+
+PlayerStateSpec {
+  Player       : string         // player name
+  Accumulators : IReadOnlyDictionary<string, double>?
+  Conditions   : IReadOnlyList<string>?
+}
+```
+
+`PlayerSlot { Player1, Player2 }` is removed from `Core`. All sites that referenced it use `string` player names.
+
+`GameResult` no longer hard-codes two outcomes:
+
+```
+GameResult {
+  Winner   : string?                   // null = draw; non-null = winning player name
+  FinalLog : IReadOnlyList<GameEvent>
+}
+```
+
+`ActionResolver` and `GameSessionBuilder` accept a strategy per named player:
+
+```
+ActionResolver(
+  GameDefinition,
+  IReadOnlyDictionary<string, IPlayerStrategy> playerStrategies,
+  IRandomSource,
+  IEngineObserver?)
+```
+
+`GameSessionBuilder` fluent API:
+
+```
+.WithPlayerStrategy(string playerName, IPlayerStrategy) → self
+```
+
+May be called once per player name registered in `GameDefinition`. Calling it for an unknown player name is an error at `Build()`. Calling it for fewer players than defined is also an error — every player must have a strategy.
+
+**Consequences for `GameDefinitionBuilder`:**
+
+```
+GameDefinitionBuilder
+  .AddPlayer(string name, Action<PlayerBuilder>) → self
+  // replaces .WithPlayer1(...) / .WithPlayer2(...)
+```
+
+`DefaultInitManifest` player references use the player names established by `AddPlayer` calls.
+
+---
+
+**2. Session atom.**
+
+The engine creates a singleton session atom before the first phase begins. No game creator API is needed to provision it — it is engine-managed.
+
+**Engine behaviour:**
+
+- At game start (before manifest provisioning), the engine allocates a fresh `AtomId` for the session atom and adds it to `GameState`. A reserved field `GameState.SessionAtomId : AtomId` holds this reference.
+- The engine initialises two engine-managed accumulator fields on the session atom:
+  - `turn-number` — set to `1` at game start; incremented by the engine at the start of each turn.
+  - `phase-index` — set to `0` at game start; reset to `0` at each new turn; set to the current phase's 0-based ordinal at the start of each phase.
+- The `session` reserved reference (§4.3 of domain model) resolves to `GameState.SessionAtomId` at execution time. `ParameterRef("session")` or the corresponding `Kw.Session()` literal resolves to this ID.
+- The session atom is otherwise a normal atom: it has accumulators, modifiers, and conditions, all contribution-tracked. Game creators may extend it via the standard type declaration model.
+- **Write protection.** The engine validates at `Build()` (and again at load time for JSON) that no game-creator keyword writes to `turn-number` or `phase-index` via `modify-accumulator`, `apply-modifier`, or `apply-condition` targeting the `session` atom with those reserved field names. This is a `DefinitionException` if detected statically, or a runtime `EngineException` for cases that can only be caught dynamically (e.g. if the field name is computed — though the type system is designed to make all field names statically resolvable).
+
+**No owner.** The session atom has no owner. `owner-of` may not be called on it (enforced by `AtomKindRestriction` as described in the D2 addendum).
+
+**`GameStateBuilder` gains `WithSession`** (for testing contexts that need specific session state):
+
+```
+.WithSession(out AtomId id,
+             Dictionary<string, double>? accumulators = null,
+             IReadOnlyList<string>? conditions = null) → self
+```
+
+The builder initialises `turn-number = 1` and `phase-index = 0` by default if `accumulators` does not override them. Most tests will not call `WithSession` — the session atom is provisioned automatically by `GameStateBuilder.Build()` if it hasn't been declared explicitly.
+
+---
+
+**3. `owner-of` in the `Kw` factory.**
+
+```
+static class Kw
+  ...
+  OwnerOf(atom: KeywordNode) → Invocation   // shorthand for Invoke("owner-of", atom)
+```
+
+The type-checker in `Build` enforces the `AtomKindRestriction { Card, Zone }` when validating the argument (see D2 addendum). `Kw.OwnerOf` itself is a thin factory — it does not validate at call time; validation occurs at `Build()`.
+
+---
+
 **Domain model gaps flagged by this decision:** None new.
 
 **Rationale:**
 - `InitManifest` as a desired-state declaration rather than an imperative init block means the host never has to know the engine's creation primitives. The meta-game layer constructs a data structure; the engine provisions it. Procedural generation happens outside the engine (the host randomises, then hands determined values to the manifest builder).
-- Game-start operations that must run inside the engine (shuffling, dealing) belong in the first phase's init block — part of `GameDefinition` authored at design time, not session setup. This cleanly separates "what entities exist" (manifest, host-owned) from "what happens at game start" (phase init, game-creator-owned).
+- Game-start operations that must run inside the engine (shuffling, dealing) belong in the first phase's init block — part of `GameDefinition` authored at design time, not session setup. This cleanly separates "what atoms exist" (manifest, host-owned) from "what happens at game start" (phase init, game-creator-owned).
 - `DefaultInitManifest` on `GameDefinition` lets a simple, fixed-start game ship its starting configuration alongside its rules without requiring the host to supply anything beyond strategies and a random source.
 - `IPlayerStrategy` as a single unified interface with `GameStateView` on every method ensures the AI always has full state access and the human implementation is never surprised by what information is available. Adding a new interaction type in the future requires adding one method here, not a new interface.
 
 **Consequences:**
-- `ActionResolver` constructor: `ActionResolver(GameDefinition, IPlayerStrategy player1, IPlayerStrategy player2, IRandomSource, IEngineObserver?)`. `IPromptChannel` from D3 is retired as a standalone type.
+- `ActionResolver` constructor: `ActionResolver(GameDefinition, IReadOnlyDictionary<string, IPlayerStrategy> playerStrategies, IRandomSource, IEngineObserver?)`. `IPromptChannel` from D3 is retired as a standalone type. The per-name strategy lookup replaces the former `player1`/`player2` fixed arguments (A15).
 - `AvailableActions` computation is the most complex single method in the engine: it must evaluate activation conditions, run cost dry-runs, and enumerate valid target sets for every candidate action, all against the current `GameState`. The implementer should plan for this explicitly.
-- `LocalId` in `ZoneSpec` exists only during manifest processing. After provisioning, zones are referenced by their engine-assigned `EntityId`. The manifest builder is responsible for `LocalId` uniqueness within a manifest; the engine validates this at provisioning time.
+- `LocalId` in `ZoneSpec` exists only during manifest processing. After provisioning, zones are referenced by their engine-assigned `AtomId`. The manifest builder is responsible for `LocalId` uniqueness within a manifest; the engine validates this at provisioning time.
 - `GameDefinition.Keywords` includes built-ins pre-registered by the engine. The `Kw` shorthands must be kept in sync with the built-in registry; both are the implementer's responsibility to maintain together.
 - `DefinitionException` is the error type for authoring failures (unknown keyword, cyclic definition, type mismatch, missing required field). It is a design-time error, not a runtime game error.
 - `FromSavedState` is reserved in `GameSessionBuilder`'s public API. Until D17 is implemented, calling it throws `NotSupportedException`. Reserving it now prevents the API from diverging in a way that would break callers when D17 lands.
+
+---
+
+### D17 — Save/Load (`GameStateSnapshot`)
+
+**Decision:** Save points are at turn boundaries only — specifically, at the start of each new turn, after all previous-turn cleanup, trigger resolution, and lifetime checks have completed. `GameStateSnapshot` captures this clean inter-turn state. Three implementation concerns beyond routine field serialization are addressed below.
+
+---
+
+**Save point semantics.**
+
+A save point is the moment after the engine has completed all end-of-turn processing for turn N — SBRs settled, all triggers resolved, all lifetime checks run, all turn-timer and trigger-count expirations processed — but before any phase init block for turn N+1 has executed. At this point:
+
+- No block is executing. No `async` continuation is in-flight.
+- `GameState` is fully settled: no partial mutations, no pending triggers, no active scope accumulators.
+- `TriggerHighWaterMark` on every active static effect has advanced past every event in turn N.
+- The turn accumulator has been merged into `FinalizedLog`.
+
+This eliminates the need to capture any execution call stack, block bindings, prompt state, or scope accumulators. The snapshot is purely static state plus the finalized event log.
+
+**Save API.** `IEngineObserver` gains one method:
+
+```
+interface IEngineObserver
+  Task<CascadeDirective> OnTriggerCascade(int iterationCount)   // existing
+  Task OnTurnStart(int turnNumber, GameStateSnapshot snapshot)   // new: called before turn N+1's first phase init
+```
+
+The engine constructs the snapshot and passes it to the observer at the start of each turn (including turn 1, before any play has occurred). The host persists or discards it. No separate `CreateSnapshot()` method on `GameSession` is needed.
+
+**Trade-off.** Progress within a turn is not saved. If the game is interrupted mid-turn, the player resumes from the start of that turn. This is acceptable for card games where turns are short and deterministic given their prompt responses. Games requiring intra-turn saves are out of scope.
+
+---
+
+**Complication 1 — `object`-typed event args have no stable serialized form.**
+
+`GameEvent.BoundArgs` is `Dictionary<string, object>`. The value types that can appear are: `double`, `bool`, `AtomId` (long), `ContributionId` (long), `string`, `EventRef`, and `Collection<T>`. JSON's default `object` deserialization loses type information.
+
+**Resolution: `BoundValue` discriminated union, snapshot-layer only.**
+
+```
+BoundValue (discriminated union — used in snapshot ser/de only):
+  | NumberValue    { Value : double }
+  | BoolValue      { Value : bool }
+  | StringValue    { Value : string }
+  | AtomIdValue  { Id    : long }
+  | ContribIdValue { Id    : long }
+  | EventRefValue  { SequenceNumber : long }   // references finalized event by sequence number
+  | CollectionValue { Items : IReadOnlyList<BoundValue> }
+```
+
+`BoundValue` is used **only during snapshot serialization/deserialization** — `GameEvent.BoundArgs` remains `Dictionary<string, object>` at runtime. The serializer converts `object → BoundValue` when writing and `BoundValue → object` when reading. `System.Text.Json` polymorphic serialization via `[JsonDerivedType]` handles the discriminated union; types live in `Core`.
+
+Live execution bindings (`ExecutionContext.Bindings`) are not in the snapshot at all — turn-boundary saves guarantee no block is executing.
+
+---
+
+**Complication 2 — `System.Random` state is not reproducible across .NET versions.**
+
+`System.Random`'s internal algorithm changed in .NET 6 and is not guaranteed stable across future versions. A snapshot serializing seed + call count could replay differently after a .NET update.
+
+**Resolution: `SeededRandom` uses an engine-owned RNG.**
+
+`SeededRandom` is reimplemented using a simple, engine-owned deterministic algorithm (the implementer documents the chosen algorithm — xoshiro128** or PCG32 are suitable — for save-file forward compatibility). The implementation is not tied to .NET's RNG. The `IRandomSource` interface is unchanged.
+
+```
+RngSnapshot {
+  Seed      : long
+  CallCount : long
+}
+```
+
+At load time: construct a fresh engine RNG from `Seed` and advance it `CallCount` steps. For card-game lengths (hundreds of calls), this fast-forward is negligible.
+
+`FromSavedState` reads the seed from the snapshot directly — the host does not supply a separate `WithRandomSource` call when loading. The `GameSessionBuilder` constructs `SeededRandom(snapshot.Rng.Seed)` and fast-forwards internally.
+
+---
+
+**Complication 3 — Dynamic static effects have no definition reference.**
+
+Declarative static effects (Origin = Declarative) are identified by `(CardDefinitionName, EffectIndex)` and resolved from `GameDefinition` at load time. Dynamic static effects (Origin = Dynamic, created by `apply-modifier`/`apply-condition` with an inline lifetime) have no backing definition.
+
+**Resolution: `StaticEffectSnapshot` carries either a reference or an inline definition.**
+
+```
+StaticEffectSnapshot {
+  Id                   : StaticEffectId
+  Origin               : Declarative | Dynamic
+  OwnerAtomId        : AtomId
+  LifetimeSpec         : LifetimeSpec        // serializable; already a KeywordNode-based structure
+  TriggerFireCount     : int
+  TriggerHighWaterMark : long
+  OwnedContributions   : IReadOnlyList<ContributionId>
+
+  // Exactly one of the following is non-null:
+  DeclarativeRef       : StaticEffectDefRef?   // for Declarative — (CardDefinitionName, EffectIndex)
+  DynamicTrigger       : TriggerDefinition?    // for Dynamic with a trigger; null for Dynamic without one
+}
+
+StaticEffectDefRef {
+  CardDefinitionName : string
+  EffectIndex        : int
+}
+```
+
+For declarative effects the engine resolves the full `StaticEffectDef` from `GameDefinition` at load time using `DeclarativeRef`. For dynamic effects, `DeclarativeRef` is null; the lifetime is always inlined and any trigger is inlined via `DynamicTrigger`. The contributions owned by a dynamic effect are already in the contribution registry.
+
+---
+
+**Full `GameStateSnapshot` structure.**
+
+```
+GameStateSnapshot {
+  // Format metadata
+  Version          : int = 1
+  GameDefinitionId : string      // must match the GameDefinition being loaded into
+
+  // Allocation counters (restored to prevent ID collisions on resume)
+  NextAtomId       : long
+  NextContributionId : long
+  NextStaticEffectId : long
+  NextScopeId        : long
+
+  // Atom state
+  Atoms           : IReadOnlyList<AtomSnapshot>
+  SessionAtomId    : AtomId
+
+  // Contribution registry
+  Contributions      : IReadOnlyList<ContributionSnapshot>
+
+  // Static effects
+  ActiveStaticEffects : IReadOnlyList<StaticEffectSnapshot>
+  DormantEffects      : IReadOnlyList<DormantEffectSnapshot>
+
+  // Event log (all turns completed; no accumulators)
+  FinalizedLog        : IReadOnlyList<GameEvent>
+
+  // RNG
+  Rng                 : RngSnapshot
+}
+
+AtomSnapshot {
+  Id           : AtomId
+  Kind         : AtomKind       // Card | Zone | Player | Session
+  RefName      : string?        // CardDefinition/ZoneDefinition name; player name for Player; null for Session
+  OwnerName    : string?        // null for Player and Session
+  ZoneId       : AtomId?      // non-null for Card only
+  Accumulators : IReadOnlyDictionary<string, double>
+  // Modifiers and conditions are fully described by Contributions; reconstructed on load
+}
+
+ContributionSnapshot (discriminated union):
+  | ModifierContributionSnapshot {
+      Id, SourceAtomId?, SourceStaticEffectId?,
+      TargetAtom, PropertyName, Kind, Value, Lifetime
+    }
+  | ConditionContributionSnapshot {
+      Id, SourceAtomId?, SourceStaticEffectId?,
+      TargetAtom, ConditionName, Lifetime
+    }
+
+DormantEffectSnapshot {
+  OwnerAtomId      : AtomId
+  CardDefinitionName : string
+  EffectIndex        : int
+}
+
+RngSnapshot {
+  Seed      : long
+  CallCount : long
+}
+```
+
+At load time, `ModifierIndex` and `ConditionIndex` on each atom are reconstructed by iterating `Contributions` — they are derived, not stored. `TurnScopeId`, `ActionScopeId`, block accumulators, and the execution call stack are absent because no turn is in progress at a save point.
+
+---
+
+**Public API.**
+
+```
+// Save — received via IEngineObserver.OnTurnStart
+class MyObserver : IEngineObserver
+  async Task OnTurnStart(int turnNumber, GameStateSnapshot snapshot)
+    string json = GameStateSnapshotSerializer.Serialize(snapshot)
+    await File.WriteAllTextAsync("save.json", json)
+
+// Load
+GameStateSnapshot snapshot = GameStateSnapshotSerializer.Deserialize(
+    await File.ReadAllTextAsync("save.json"))
+
+GameSession session = GameSession.Create(gameDefinition)
+  .WithPlayerStrategy("player1", strategy1)
+  .WithPlayerStrategy("player2", strategy2)
+  .WithObserver(myObserver)
+  .FromSavedState(snapshot)   // seed comes from snapshot; no separate WithRandomSource needed
+  .Build()
+await session.RunAsync()   // begins at turn N, first phase init block
+```
+
+`GameStateSnapshotSerializer` lives in `Archetype.Engine`. It uses `System.Text.Json` with `[JsonDerivedType]` on `BoundValue`, `ContributionSnapshot`, and `StaticEffectSnapshot`.
+
+`GameDefinition` gains `Id: string`. `Build()` rejects a definition without one. The loader rejects a snapshot whose `GameDefinitionId` does not match.
+
+---
+
+**Rationale:**
+- Turn-boundary granularity eliminates the hardest serialization problems: no C# continuation capture, no execution call stack, no block idatom (`BlockRef`), no live binding serialization, no scope accumulator bookkeeping. The snapshot is pure settled state.
+- `IEngineObserver.OnTurnStart` as the save point notification rather than a `CreateSnapshot()` method on `GameSession`: the engine constructs the snapshot at exactly the right moment, removing any ambiguity about when it is valid to save.
+- `BoundValue` only in the snapshot layer keeps the runtime `Dictionary<string, object>` unchanged. The conversion happens once per save/load, not on every step.
+- Engine-owned RNG keeps save files reproducible across .NET version upgrades. Seed + call count fast-forward is sufficient at card-game scales.
+
+**Consequences:**
+- `IEngineObserver` gains `Task OnTurnStart(int turnNumber, GameStateSnapshot snapshot)`. Existing implementations that don't need save/load provide an empty stub. `IEngineObserver` remains nullable; `null` → no-op for both methods.
+- `SeededRandom` is reimplemented without `System.Random`. Algorithm must be documented by the implementer. `IRandomSource` interface is unchanged.
+- `GameDefinition` gains `Id: string`. `GameDefinitionBuilder.Build()` and `GameDefinitionLoader.FromJson()` both require it.
+- `GameStateSnapshotSerializer` is a new class in `Archetype.Engine`. D15 module boundaries are unchanged.
+- `LifetimeSpec` and its `KeywordNode`-based conditions serialize using the existing keyword tree JSON schema — no new format.
+- `ExecutionContext` does **not** gain a `BlockCallStack` field. No changes to `ExecuteBlock` for save/load support.
+
+---
+
+### D18 — Keyword Cross-References in Card Text
+
+**Decision:** Card text may contain inline cross-references to keyword definitions. A new `RulesRef` `RenderNode` variant carries the keyword name and display text so the host knows to render the term as a link. `TextRenderer` gains a `Resolve` method the host calls to follow the link and retrieve the linked keyword's rendered definition tree. Cross-references are scoped to keywords only — phases, state-based rules, and action rules are not referenceable from card text.
+
+---
+
+**Motivation.** Without a typed cross-reference node, the host receives a flat `TextSpan` with no signal that a term is linkable. It would have to do brittle string matching to decide what to make interactive. `RulesRef` makes the linkability explicit and structured: the host knows exactly what is a link, and what keyword it resolves to, without any guesswork.
+
+The scope restriction to keywords is deliberate. Every game mechanic a player needs explained (damage, sleep, delirium, trample) is a keyword-defined concept. Phase and rule cross-references are an authoring smell — if a card's behavior depends on a phase, the phase's effect on that card should be expressed in the card's own keyword definitions, not in a prose pointer to a phase description.
+
+---
+
+**`RulesRef` node (addition to `RenderNode` discriminated union):**
+
+```
+RenderNode (abstract record)
+  ├── TextSpan(text: string)
+  ├── CompositeNode(summary: RenderNode, body: RenderNode)
+  ├── SequenceNode(items: IReadOnlyList<RenderNode>)
+  └── RulesRef(key: string, displayText: string)          // NEW
+        key         — keyword name; validated against GameDefinition.Keywords
+        displayText — the text the host renders as a link label
+```
+
+`RulesRef` is a leaf node — it does not carry a pre-rendered body. The host calls `TextRenderer.Resolve` to obtain the body on demand, so the link is lazily resolved (only when the user actually activates it). This avoids eagerly expanding every cross-referenced keyword in every card's render tree on first render.
+
+---
+
+**`TextTemplate` tag syntax.** (See also D2 addendum.) The renderer's template parser recognizes two tag forms when processing any `TextTemplate` or locale string:
+
+- **Short form:** `[take-damage]` → `RulesRef(key: "take-damage", displayText: "take-damage")`
+- **Long form:** `[damage](take-damage)` → `RulesRef(key: "take-damage", displayText: "damage")`
+
+Tags are parsed as part of the template expansion step — after `{paramName}` substitutions — and produce `RulesRef` leaf nodes that are spliced into the `SequenceNode` or `TextSpan` structure at their position. A template like `"Deal {amount} [damage](take-damage) to {target}"` renders as a `SequenceNode` of:
+1. `TextSpan("Deal 3 ")` (after `{amount}` substitution)
+2. `RulesRef(key: "take-damage", displayText: "damage")`
+3. `TextSpan(" to Goblin")` (after `{target}` substitution)
+
+---
+
+**`TextRenderer.Resolve`:**
+
+```
+RenderNode? Resolve(string keywordName,
+                    IReadOnlyDictionary<string, string>? localeStrings,
+                    IReadOnlyDictionary<string, object>?  bindings)
+```
+
+- Looks up `keywordName` in the keyword registry. Returns `null` if the name is not found (should not occur for validated game definitions; the host treats `null` as "no details available" and may suppress the link affordance).
+- Otherwise returns `Render(definition.Body, localeStrings, bindings)` using the same template resolution order as any other keyword render: locale → `TextTemplate` → structural. For primitives, whose `Body` is a sentinel, the renderer uses the primitive's registered `TextTemplate` and does not attempt structural recursion into the sentinel.
+- The host calls this method when the player activates a link (tap, hover, click) — not at initial render time. The result is displayed as a tooltip, modal, sidebar, or however the host chooses.
+- `Resolve` is stateless and re-entrant: it may itself produce `RulesRef` nodes if the resolved keyword's template contains further cross-reference tags, allowing multi-level drill-down (e.g. resolving `attack` produces text that itself links to `take-damage`). The host decides whether to support recursive expansion.
+
+---
+
+**Caching.** `RulesRef` nodes are stable: `key` and `displayText` do not depend on runtime bindings. They are always included in the definition-time `RenderNode` cache (D11). Resolved bodies from `Resolve` calls use the same locale-keyed cache as ordinary renders; no separate cache entry is needed.
+
+---
+
+**Validation (summary).** Three enforcement points:
+
+| Point | What is checked | Error type |
+|---|---|---|
+| `GameDefinitionBuilder.Build()` | Every `[key]` / `[text](key)` in any `TextTemplate` or locale string resolves to a name in `Keywords` | `DefinitionException` |
+| `GameDefinitionLoader.FromJson()` | Same check on deserialized templates | `DefinitionException` |
+| DSL tooling parse time | Same check; editor highlights unknown keys inline | Authoring error |
+
+---
+
+**Tooling additions (extension of D11 tooling section):**
+
+- The DSL editor provides autocomplete for `[` and `](` positions, suggesting keyword names from `GameDefinition.Keywords`.
+- Locale file template strings are subject to the same tag validation as `TextTemplate` strings.
+- The card text preview in the tooling renders `RulesRef` nodes as underlined/styled spans with a "click to expand" affordance, calling `Resolve` on activation to show the linked definition inline.
+
+---
+
+**What this decision does not cover:**
+
+- Cross-references to phases, SBRs, action rules, or glossary entries — deliberately excluded (see Motivation above).
+- `RulesRef` in invocation-time renders (with `bindings != null`) — `RulesRef` nodes are stable and appear regardless of render mode. The host may choose to suppress link affordances in event-log display where interactive expansion is inappropriate.
+
+---
+
+**Rationale:**
+- `RulesRef` as a typed leaf node (rather than a styled `TextSpan`) gives the host structured information about what is linkable without string matching. The host's simplest implementation: walk the tree, render `RulesRef.displayText` as plain text, ignore the link affordance. More capable hosts render it as interactive.
+- Lazy resolution via `Resolve` rather than an eagerly-expanded `body` on `RulesRef` avoids the cost of rendering every transitively-referenced keyword definition at card-display time. Card text for `attack` displays immediately; the `take-damage` definition is only rendered when the player asks for it.
+- Keyword-only scope keeps the key namespace flat and unambiguous: every valid key resolves to exactly one `KeywordDefinition`. No disambiguation between "is this a keyword? a phase? an SBR?" is ever needed.
+- The same `Resolve` path handles both built-in and game-creator-defined keywords identically. A cross-reference to `modify-accumulator` (built-in) works the same as a reference to `take-damage` (game-creator-defined).
+
+**Consequences:**
+- `RulesRef` is a new `RenderNode` variant in `Archetype.Core` (alongside `TextSpan`, `CompositeNode`, `SequenceNode`). The host's `RenderNode` visitor must handle it — existing visitors that don't need link affordances may treat it as a `TextSpan(displayText)`.
+- `TextRenderer.Resolve` is a new public method on `TextRenderer` in `Archetype.Text`. It requires no new state on `TextRenderer`; the existing keyword registry and cache are sufficient.
+- The template parser in the tooling (`Archetype.Build` or DSL tooling) gains a second parse pass for `[...]` and `[...](...)` tags. The engine's text renderer also gains this parsing step when expanding `TextTemplate` strings at render time.
+- The `RulesRef` caching strategy is: include in the definition-time cache (locale-keyed, per D11). Invocation-time renders include `RulesRef` nodes unchanged — their `key` and `displayText` are unaffected by runtime bindings.
+- `BuiltInKeywords` metadata in `Core` must include a `TextTemplate` for each primitive so that `Resolve` calls on built-in names produce meaningful output (D11 already requires this; D18 reinforces it).
 
 ---
 
@@ -1831,9 +2309,10 @@ PlayerAction:
 - [x] Randomness — D9
 - [x] Card visibility — D10 (deliberate non-decision)
 - [x] Text rendering pipeline — D11
-- [x] Runtime entity creation — D12
+- [x] Runtime atom creation — D12
 - [x] Keyword parameter modifications — D13
 - [x] Game creator API — D14
 - [x] Module boundaries — D15
 - [x] Testing strategy — D16
-- [ ] Save/load (`GameStateSnapshot`) — D17. Must cover: entity state, contribution registry, active static effects (with fire counts and high-water marks), dormant declarative effects (D6), full finalized event log, current scope hierarchy (turn number, phase index, action scope ID), in-progress block call stack (one frame per nested executing block — step index, variable bindings, in-progress event subtree, pending prompt context), and RNG position. Save points occur only at prompt suspension boundaries (`strategy.RespondToPromptAsync`), so no arbitrary execution state needs to be serialized.
+- [x] Save/load (`GameStateSnapshot`) — D17.
+- [x] Keyword cross-references in card text — D18.

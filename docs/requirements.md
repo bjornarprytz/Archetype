@@ -1,7 +1,7 @@
 # Archetype — Requirements
 
 ## Status
-**Complete. Signed off 2026-03-01.**
+**Complete. Signed off 2026-03-03.**
 
 ---
 
@@ -115,7 +115,7 @@ The atomic action unit is **activating an effect block**. "Playing a card" is on
 
 ### Action Inputs
 Before an action resolves, the player (or AI) must provide all **binding-time inputs** — inputs declared by the effect block's signature that must be known before execution begins. Types include:
-- **Targets** — one or more game entities meeting declared criteria
+- **Targets** — one or more game atoms meeting declared criteria
 - **Cost payment choices** — how to pay when multiple payment options exist
 - **Variable values** — e.g. choosing X
 
@@ -176,7 +176,7 @@ The three state types (accumulators, modifiers, conditions/tags) are structurall
 
 - **Accumulator primitive** — permanently adds to or subtracts from an independently tracked value (e.g. damage taken). No lifetime involved.
 - **Modifier primitive** — adds an adjustment to a static property. Accepts an **inline lifetime specification**, so a game creator can express "give +2 attack until end of turn" in a single call without spawning a separate static effect. The engine manages cleanup automatically.
-- **Condition/tag primitive** — applies a categorical or boolean state to an entity. Also accepts an inline lifetime specification.
+- **Condition/tag primitive** — applies a categorical or boolean state to an atom. Also accepts an inline lifetime specification.
 
 Explicit removal primitives exist for all three, to support effects that cancel or dispel state contributions before their natural expiry.
 
@@ -184,9 +184,9 @@ Explicit removal primitives exist for all three, to support effects that cancel 
 
 ### Read Primitives
 
-**`get-state(entity, field)`** — reads a mutable runtime state value (modifier, accumulator, or condition/tag) from an entity. All game-creator-defined properties that query runtime state are ultimately composed on top of `get-state`.
+**`get-state(atom, field)`** — reads a mutable runtime state value (modifier, accumulator, or condition/tag) from an atom. All game-creator-defined properties that query runtime state are ultimately composed on top of `get-state`.
 
-**`get-property(entity, field)`** — reads a static design-time property (e.g. base attack, mana cost) from an entity. All game-creator-defined properties that query static data are ultimately composed on top of `get-property`.
+**`get-property(atom, field)`** — reads a static design-time property (e.g. base attack, mana cost) from an atom. All game-creator-defined properties that query static data are ultimately composed on top of `get-property`.
 
 Game creators do not typically call primitives directly; they define named keywords (e.g. `take-damage`, `current-health`, `mana-value`) that compose them with appropriate arguments.
 
@@ -265,11 +265,11 @@ The **card pool** is the union of all card sets available to a game.
 
 ## Players
 
-A player is a first-class engine entity with the same state model as cards: modifiers, accumulators, and conditions/tags, all contribution-tracked and engine-managed.
+A player is a first-class engine atom with the same state model as cards: modifiers, accumulators, and conditions/tags, all contribution-tracked and engine-managed.
 
 The engine targets **two participants** — one human player and one AI. Games are not required to be symmetrical; the game creator determines each participant's starting state, available actions, and rules.
 
-**Ownership** is a first-class concept. Game entities (cards, zones, etc.) have an owner. Ownership is a valid criterion in effects and targeting (e.g. "discard one of your own cards"). The ownership model should be general enough that a game creator could extend it to support multiplayer without engine changes.
+**Ownership** is a first-class concept. Game atoms (cards, zones, etc.) have an owner. Ownership is a valid criterion in effects and targeting (e.g. "discard one of your own cards"). The ownership model should be general enough that a game creator could extend it to support multiplayer without engine changes.
 
 The distinction between *owner* and *controller* (e.g. a card temporarily controlled by the opponent) is noted as potentially necessary but is deferred to the domain modeler.
 
@@ -306,7 +306,27 @@ The tool must support authoring of:
 
 ### Authoring Modality
 
-Effect blocks and keyword definitions are authored in a **DSL with an editor**. The editor must provide **autocomplete** driven by the type system (available keywords, valid parameter types, in-scope properties, etc.). Other structured data (static properties, art, phase ordering) may use a form-based or GUI interface.
+Effect blocks and keyword definitions are authored in a **DSL with an editor**. The editor is the primary authoring environment for game logic. It must:
+
+- Provide **autocomplete** driven by the type system (available keywords, valid parameter types, in-scope properties, etc.)
+- **Flag invalid expressions as errors** — not just surface valid options, but actively identify what is wrong
+- Treat **all keywords as peers**: built-in engine keywords and game-creator-defined keywords are equivalent in the editor. Once a keyword is defined, it is immediately available as a composable expression anywhere its return type fits, with no distinction from built-ins.
+
+Other structured data (static properties, art, phase ordering) may use a form-based or GUI interface.
+
+### Preview and Text Rendering
+
+The tool must include a **preview capability** for rendered card text. A game creator must be able to see how a card's effect block renders as human-readable text, both with and without runtime context. This is a lightweight testing ground for text rendering — not a full interactive simulation. Interactive play-testing is done in Godot.
+
+### GDScript Artifact Generation
+
+The tool must generate **GDScript output files** from the game definition. These artifacts are the integration layer between the Godot game layer (GDScript) and the engine (C#). They must:
+
+- Wrap the engine's public C# API for use from GDScript
+- Wire up signals for state changes
+- Be well-formed and documented
+
+The **game definition is the source of truth**. The generated files are always derived from it and are never hand-edited. When the game definition changes, the artifacts are regenerated. Game creators work in the tool; the GDScript files are output, not input.
 
 ### Set Analysis
 

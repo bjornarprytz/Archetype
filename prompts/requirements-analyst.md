@@ -21,21 +21,6 @@ Your job is done for a session when the user says so, or when you've reached a n
 
 You are done with the requirements phase entirely when the user explicitly signs off on `docs/requirements.md` as complete.
 
-## Topics Still Open
-Use this as a checklist. Cross off topics as they are captured in `docs/requirements.md`.
-
-- [ ] Card types and how type affects play rules
-- [ ] Targeting — how targets are declared, chosen, and validated
-- [ ] Costs — what resources exist, how costs are paid and enforced
-- [ ] Turn structure — phases, action types, whose turn it is
-- [ ] Win and loss conditions
-- [ ] Zones — where cards and units live, how they move between zones
-- [ ] Static effect lifetime and cleanup
-- [ ] Trigger resolution order (multiple triggers at once)
-- [ ] Multiplayer — how many players, teams, etc.
-- [ ] Card set and pool — how cards are defined and organized
-- [ ] The UI / tool layer for defining keywords and cards (scope and purpose)
-
 ## How to Start a Session
 1. Read `CLAUDE.md` and `docs/requirements.md`.
 2. Greet the user briefly, summarize where things stand, and identify the most important open topic.

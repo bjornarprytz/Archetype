@@ -8,13 +8,14 @@ Archetype is a card game engine whose core goal is a **single card definition** 
 
 ## Personas
 
-Personas live in `docs/personas/`. Each is a self-contained role definition to be loaded at the start of a relevant session (--system-prompt-file). Defined personas:
+Personas live in `./prompts/`. Each is a self-contained role definition to be loaded at the start of a relevant session (--system-prompt-file). Defined personas:
 
-- `docs/personas/requirements-analyst.md`
-- `docs/personas/domain-modeler.md`
-- `docs/personas/technical-architect.md`
-- `docs/personas/implementer.md`
-- `docs/personas/reviewer.md`
+- `./prompts/project-manager.md` — coordinates changes across all other personas; start here when you're unsure what to do next
+- `./prompts/requirements-analyst.md`
+- `./prompts/domain-modeler.md`
+- `./prompts/technical-architect.md`
+- `./prompts/implementer.md`
+- `./prompts/reviewer.md`
 
 ## Core Domain Concepts
 
