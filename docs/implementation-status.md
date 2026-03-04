@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-04 (implement-trigger-resolver complete; 19/19 tests green)
+> Last updated: 2026-03-04 (implement-trigger-resolver rework complete — 24/24 tests green)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -60,6 +60,7 @@
 ### `ExecutionContext` ✅
 - Internal; carries `GameState`, `EventLog`, `Bindings`, `Strategies`, `RandomSource`, `Definition`, `ActivePlayerName`
 - `CreateChildActionContext(Dictionary<string,object> extraBindings)` for trigger firing
+- `TriggerEvaluationContext` removed (was dead code; replaced by plain `Dictionary<string,object>` with `"source"` binding)
 
 ### `BlockExecutor` ✅
 - `ExecuteBlock(EffectBlockDef, ExecutionContext) → Task`
@@ -95,13 +96,14 @@
 ### `TriggerResolver` ✅
 - `TriggerFiring` record: `(StaticEffect Effect, GameEvent Event)`
 - `CollectSatisfiedTriggers(GameState, EventLog)`: high-water-mark scan, condition eval, advances mark past ALL candidates (matched or not)
+- `BuildEventParamBindings`: always includes `["source"] = ownerAtom` so trigger conditions can reference `ParameterRef("source")` (D8/D13 addendum); also maps game-creator `EventParams`
 - `OrderTriggerFirings(firings, TriggerResolutionOrder)`: `OldestFirst` (StaticEffectId ASC, seq ASC), `OldestLast` (desc), `PromptPlayer` falls back to `OldestFirst`
 - `FireTrigger(TriggerFiring, ExecutionContext, currentTurn)`: populates `trigger_event` + `EventBindings`, increments `TriggerFireCount` **before** `ExecuteBlock` (D8), manages own action scope, calls `CheckLifetimes`
 
 ### `ActionResolver` ✅
 - `ResolveAction(EffectBlockDef? primaryBlock, GameState, EventLog, string playerName, int turn)`: full D7 post-action sequence — primary block → CheckLifetimes → RunStateBasedRules → cascade loop (observer check → collect → fire each → CheckLifetimes → RunStateBasedRules → repeat)
-- `RunStateBasedRules`: fixpoint loop — all conditions evaluated before any blocks fire in a pass; each SBR block runs in its own action scope to prevent `OpenAction` from discarding uncommitted events
-- `ActionResolver.Create(strategies, random, def, observer?)`: convenience factory that wires a shared `BlockExecutor` between `ActionResolver` and `TriggerResolver`
+- `RunStateBasedRules`: fixpoint loop — all conditions snapshotted (`.ToList()`) before any blocks fire in a pass; each SBR block runs in its own action scope to prevent `OpenAction` from discarding uncommitted events
+- `ActionResolver.Create(strategies, random, def, observer?)`: convenience factory that creates two `BlockExecutor` instances (one shared with `TriggerResolver`, one for primary/SBR blocks); `AssertSync` runs twice per `Create` call
 - `IEngineObserver.OnTriggerCascadeAsync` wired; `null` → always `Continue`
 
 ### `LifetimeChecker` ✅
@@ -136,9 +138,10 @@
 |---|---|---|
 | `MoveCard/MoveCardLayer1Tests.cs` | 7 | ✅ All passing |
 | `MoveCard/MoveCardLayer2Tests.cs` | 3 | ✅ All passing |
-| `TriggerResolution/TriggerResolutionTests.cs` | 9 | ✅ All passing |
+| `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
+| `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 
-**Total: 19 tests, 19 passing.**
+**Total: 24 tests, 24 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -152,7 +155,7 @@
 ### Layer 2 (block integration)
 - `CheckLifetimes_ExpiresActiveEffect_WhenCardLeavesWhileConditionZone`
 - `CheckLifetimes_ActivatesDormantEffect_WhenCardEntersWhileConditionZone`
-- `CompositeKeyword_CallingMoveCard_ProducesNestedEventTree_AndTriggerFires` *(refactored: now uses real `ActionResolver`)*
+- `CompositeKeyword_CallingMoveCard_ProducesNestedEventTree_AndTriggerFires`
 
 ### Trigger resolution (full D7/D8 lifecycle)
 - `TriggerFires_WhenEventMatchesKeywordAndNoCondition`
@@ -162,8 +165,15 @@
 - `TriggerChain_SecondTriggerFiresInNextBatch`
 - `TriggerFiring_FireCount_CausesExpiry_ViaTriggerCount`
 - `OldestFirst_OrdersMultipleTriggers`
-- `TriggerEvent_Binding_IsAvailableInFiredBlock`
+- `TriggerEvent_Binding_IsAvailableInFiredBlock` *(rewritten: fired block calls `event-arg` and uses AtomId as modify-accumulator target)*
 - `NullObserver_DoesNotHaltCascade`
+- `TriggerCondition_CanReferenceSourceBinding` *(new: verifies `["source"]` binding in condition evaluation)*
+
+### State-based rules (fixpoint loop, D7)
+- `SBR_Fires_WhenConditionIsTrue`
+- `SBR_DoesNotFire_WhenConditionIsFalse`
+- `SBR_FixpointLoop_SBR2_FiresInSecondPass`
+- `SBR_AllConditionsSnapshotted_BeforeAnyBlockFires`
 
 ---
 
@@ -173,20 +183,6 @@
 2. **Text renderer** — `Archetype.Text` project is scaffolded; no implementation.
 3. **`GameSessionBuilder` / `GameSession`** — Tier 4 API surface not started. `ActionResolver` is ready to be consumed.
 4. **`ResolveAction` takes `EffectBlockDef?` not `PlayerAction`** — `GameSession` will translate `PlayCard`/`ActivateAbility`/`Pass` → `EffectBlockDef?` before calling `ResolveAction`. This is a Tier 4 responsibility.
-
-### Resolved (implement-trigger-resolver)
-- ✅ `TriggerResolver` (`CollectSatisfiedTriggers`, `OrderTriggerFirings`, `FireTrigger`)
-- ✅ `ActionResolver` (`ResolveAction`, `RunStateBasedRules`)
-- ✅ `event-arg` built-in + `EventRef` type
-- ✅ `GameEvent.SelfAndDescendants()` — recursive event tree traversal
-- ✅ Composite parent stack in `EventLog` — child events nest, not duplicated
-- ✅ Layer 2 test 6.7 now uses real `ActionResolver` (was manual simulation)
-
-### Resolved (add-move-card-primitive reviewer findings)
-- ✅ `MoveCard` uses `RequireAtomOfKind` for consistent validation
-- ✅ Test covers Zone-as-card guard (`MoveCard_CardArgIsZone_ThrowsEngineException`)
-- ✅ Test 6.7b asserts `draw-card` has exactly one child (`move-card`)
-- ✅ `EvaluateComposite` uses push/pop composite stack (no event duplication)
 
 ---
 
@@ -198,3 +194,27 @@
 | `GameSessionBuilder` | Needs `GameSession` |
 | Text renderer | No blockers — can start any time |
 | Persistence | Deferred (D17) |
+
+---
+
+## Resolved Issues
+
+### implement-trigger-resolver rework (2026-03-04)
+- ✅ **BLOCKER resolved**: `RunStateBasedRules` now has 4 tests covering all D7 fixpoint invariants
+- ✅ **MINOR.1 resolved**: `source` binding always populated in `BuildEventParamBindings`; `TriggerEvaluationContext` removed
+- ✅ **MINOR.2 resolved**: Test 6.8 now calls `event-arg(trigger_event, "card")` and uses the result as modify-accumulator's atom arg
+- ✅ **MINOR.3 resolved**: `ActionResolver.Create` doc comment correctly describes two-executor behaviour
+
+### implement-trigger-resolver (2026-03-04)
+- ✅ `TriggerResolver` (`CollectSatisfiedTriggers`, `OrderTriggerFirings`, `FireTrigger`)
+- ✅ `ActionResolver` (`ResolveAction`, `RunStateBasedRules`)
+- ✅ `event-arg` built-in + `EventRef` type
+- ✅ `GameEvent.SelfAndDescendants()` — recursive event tree traversal
+- ✅ Composite parent stack in `EventLog` — child events nest, not duplicated
+- ✅ Layer 2 test 6.7 uses real `ActionResolver`
+
+### add-move-card-primitive (2026-03-04)
+- ✅ `MoveCard` uses `RequireAtomOfKind` for consistent validation
+- ✅ Test covers Zone-as-card guard (`MoveCard_CardArgIsZone_ThrowsEngineException`)
+- ✅ Test 6.7b asserts `draw-card` has exactly one child (`move-card`)
+- ✅ `EvaluateComposite` uses push/pop composite stack (no event duplication)
