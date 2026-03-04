@@ -93,23 +93,8 @@ internal sealed class ExecutionContext
             : throw new EngineException($"No strategy registered for player '{ActivePlayerName}'.");
 }
 
-/// <summary>
-/// Lightweight evaluation context for trigger conditions.  Distinct from
-/// <see cref="ExecutionContext"/> because trigger condition evaluation is
-/// purely read-only (no mutations, no prompts, no event log writes).
-/// </summary>
-internal sealed class TriggerEvaluationContext
-{
-    /// <summary>The owning atom of the static effect being evaluated.</summary>
-    public AtomId Source { get; init; }
-
-    /// <summary>Event parameters extracted from the candidate event's BoundArgs.</summary>
-    public IReadOnlyDictionary<string, object> EventParams { get; init; } =
-        new Dictionary<string, object>();
-
-    /// <summary>Read-only access to game state for property keyword evaluation.</summary>
-    public GameState GameState { get; init; } = null!;
-
-    /// <summary>The scope visibility granted to this trigger's condition.</summary>
-    public TriggerScope LogScope { get; init; }
-}
+// TriggerEvaluationContext was removed: trigger condition evaluation uses a plain
+// Dictionary<string, object> populated by TriggerResolver.BuildEventParamBindings,
+// which always includes "source" = ownerAtom plus any game-creator EventParams.
+// BlockExecutor.EvaluateCondition already accepts IReadOnlyDictionary<string, object>,
+// so no wrapper class is needed.

@@ -99,8 +99,9 @@ internal sealed class TriggerResolver
                 // Advance past this candidate unconditionally — matched or not.
                 newHighWater = ev.SequenceNumber;
 
-                // Build condition bindings from EventParams mapping.
-                var evalBindings = BuildEventParamBindings(trigger, ev);
+                // Build condition bindings: "source" is always the owning atom (D8/D13),
+                // plus any game-creator EventParams mappings from the candidate event.
+                var evalBindings = BuildEventParamBindings(trigger, ev, se.OwnerAtom);
 
                 // null Condition = match all events of this keyword.
                 bool matches = trigger.Condition is null ||
@@ -216,14 +217,29 @@ internal sealed class TriggerResolver
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// Maps <see cref="TriggerDefinition.EventParams"/> onto the candidate
-    /// event's <see cref="GameEvent.BoundArgs"/> to produce condition bindings.
+    /// Builds the bindings dictionary for trigger condition evaluation.
+    /// <para>
+    /// Always includes <c>"source"</c> bound to <paramref name="ownerAtom"/> so
+    /// that conditions can reference the owning atom via
+    /// <see cref="ParameterRef">ParameterRef("source")</see> — enabling patterns
+    /// like "when <em>this</em> card does X" (D8/D13 addendum).
+    /// </para>
+    /// <para>
+    /// Additionally maps any <see cref="TriggerDefinition.EventParams"/> onto the
+    /// candidate event's <see cref="GameEvent.BoundArgs"/> by their declared names.
+    /// </para>
     /// </summary>
     private static Dictionary<string, object> BuildEventParamBindings(
         TriggerDefinition trigger,
-        GameEvent ev)
+        GameEvent ev,
+        AtomId ownerAtom)
     {
-        var bindings = new Dictionary<string, object>(StringComparer.Ordinal);
+        // "source" is the owning atom — always present; game-creator EventParams
+        // may override it (though that would be unusual).
+        var bindings = new Dictionary<string, object>(StringComparer.Ordinal)
+        {
+            ["source"] = ownerAtom,
+        };
         foreach (var decl in trigger.EventParams)
         {
             if (ev.BoundArgs.TryGetValue(decl.ArgName, out var val))

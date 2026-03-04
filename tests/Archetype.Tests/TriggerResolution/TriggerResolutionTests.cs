@@ -331,36 +331,31 @@ public sealed class TriggerResolutionTests
 
     // -----------------------------------------------------------------------
     //  6.8 — trigger_event binding is available in fired block via event-arg
+    //
+    //  The fired block calls event-arg(trigger_event, "card") to extract the
+    //  moved card's AtomId from the triggering move-card event, then uses that
+    //  AtomId as the atom argument to modify-accumulator.  The accumulator ends
+    //  up on the card itself, proving the EventRef/event-arg plumbing works
+    //  end-to-end within a triggered block.
     // -----------------------------------------------------------------------
 
     [Fact]
     public async Task TriggerEvent_Binding_IsAvailableInFiredBlock()
     {
-        // Arrange: "move-card" produces a bound arg "card".
-        // The trigger's fired block reads that arg via event-arg and stores
-        // it in the session's "seen-card" accumulator (not a real use case, but
-        // it verifies the EventRef/event-arg plumbing end-to-end).
-        //
-        // Since we can't store an AtomId in an accumulator (which is double),
-        // we instead verify the trigger fired by using trigger_event to obtain
-        // the AtomId, compare it with the expected card ID, and store 1 or 0.
         var (state, card, deck, hand) = BuildState();
         var log = new EngineEventLog();
 
-        // Fired block: reads trigger_event.card and increments "got-card-arg".
-        // We confirm the arg is not null/missing by the fact that event-arg
-        // does not throw — if "card" were absent, it would throw EngineException.
+        // Fired block: call event-arg(trigger_event, "card") to extract the
+        // moved card's AtomId, then use it as the atom for modify-accumulator.
+        // The accumulator is set on the card — NOT on session — which proves
+        // that event-arg returned the correct AtomId and it was accepted as an
+        // argument by modify-accumulator.
         var firedBlock = new EffectBlockDef([
             new EffectBlockStep("modify-accumulator", [
-                new Invocation("session"),
-                new Literal("got-card-arg"),
-                // Use event-arg to read "card" from the triggering event.
-                // The result is an AtomId; we can't add it to an accumulator,
-                // so we use a boolean equal-to check to produce 1 if it matches,
-                // 0 if not (as a float, for the accumulator).
-                // Since we cannot cast AtomId → double in the keyword system,
-                // we just confirm event-arg succeeds by incrementing by 1 and
-                // letting the literal be our "proof of life."
+                // event-arg reads "card" from the trigger_event EventRef.
+                // move-card logs BoundArgs["card"] = the moved card's AtomId.
+                new Invocation("event-arg", new ParameterRef("trigger_event"), new Literal("card")),
+                new Literal("trigger-visited"),
                 new Literal(1.0),
             ]),
         ]);
@@ -369,16 +364,63 @@ public sealed class TriggerResolutionTests
 
         await BuildResolver().ResolveAction(MoveBlock(card, hand), state, log, "p1", 1);
 
-        // The fired block ran and incremented "got-card-arg".
-        var gotCardArg = state.GetAtom(state.SessionAtomId).Accumulators
-            .TryGetValue("got-card-arg", out var v) ? v : 0.0;
-        Assert.Equal(1.0, gotCardArg);
+        // The fired block extracted card's AtomId via event-arg and incremented
+        // "trigger-visited" on the card atom itself.
+        var triggerVisited = state.GetAtom(card).Accumulators
+            .TryGetValue("trigger-visited", out var v) ? v : 0.0;
+        Assert.Equal(1.0, triggerVisited);
 
-        // Verify separately: the trigger_event binding was populated correctly
-        // by checking the event in the log has the "card" arg matching our card.
+        // Confirm the move-card event logged the "card" arg that event-arg reads.
         var moveCardEvent = log.ThisGame.First(e => e.KeywordName == "move-card");
         Assert.True(moveCardEvent.BoundArgs.TryGetValue("card", out var argCard));
         Assert.Equal(card, argCard);
+    }
+
+    // -----------------------------------------------------------------------
+    //  6.10 — trigger condition can reference "source" (the owning atom)
+    //
+    //  Without the source binding fix, ParameterRef("source") throws a
+    //  KeyNotFoundException.  This test verifies the binding is populated and
+    //  the condition evaluates correctly.
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public async Task TriggerCondition_CanReferenceSourceBinding()
+    {
+        // card1 is the trigger owner and stays in deck throughout the action.
+        // card2 is moved by the primary block.
+        // The trigger condition uses ParameterRef("source") — bound to card1 —
+        // to check in-zone(source, deck).  Because card1 never leaves deck,
+        // the condition is true and the trigger should fire.
+        var state = new GameStateBuilder()
+            .WithPlayer("p1", out _)
+            .WithZone("deck", "p1", out var deck)
+            .WithZone("hand", "p1", out var hand)
+            .WithCard("card1", deck, "p1", out var card1)   // trigger owner; stays in deck
+            .WithCard("card2", deck, "p1", out var card2)   // moved by primary block
+            .Build();
+        var log = new EngineEventLog();
+
+        // Condition: in-zone(source, deck) — resolves "source" → card1.
+        var condition = new Invocation("in-zone",
+            new ParameterRef("source"),
+            new Literal(deck));
+
+        AddTrigger(state, card1, "move-card", IncrementBlock("fire-count"), condition: condition);
+
+        // Primary block: move card2 to hand; card1 stays in deck.
+        var primaryBlock = new EffectBlockDef([
+            new EffectBlockStep("move-card", [new Literal(card2), new Literal(hand)]),
+        ]);
+
+        await BuildResolver().ResolveAction(primaryBlock, state, log, "p1", 1);
+
+        // card1 stayed in deck — condition was true → trigger fired.
+        ArchAssert.InZone(state, card1, deck);
+        ArchAssert.InZone(state, card2, hand);
+        var fireCount = state.GetAtom(state.SessionAtomId).Accumulators
+            .TryGetValue("fire-count", out var fc) ? fc : 0.0;
+        Assert.Equal(1.0, fireCount);
     }
 
     // -----------------------------------------------------------------------

@@ -63,12 +63,21 @@ internal sealed class ActionResolver
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// Convenience factory: constructs a single <see cref="BlockExecutor"/> and
-    /// <see cref="LifetimeChecker"/>, creates a <see cref="TriggerResolver"/> from
-    /// them, then returns a fully wired <see cref="ActionResolver"/>.
+    /// Convenience factory: constructs a <see cref="BlockExecutor"/> shared with
+    /// <see cref="TriggerResolver"/>, then returns a fully wired
+    /// <see cref="ActionResolver"/> (which creates its own second executor for
+    /// primary and SBR blocks).
     /// <para>
-    /// Use this in tests and <c>GameSession</c> bootstrap.  The shared executor
-    /// ensures the built-in handler sync assertion runs exactly once.
+    /// Use this in tests and <c>GameSession</c> bootstrap.
+    /// </para>
+    /// <para>
+    /// <b>Note on <c>AssertSync</c>:</b> Each <see cref="BlockExecutor"/> runs
+    /// <c>AssertSync</c> at construction time.  <c>Create</c> produces two
+    /// instances — one passed to <see cref="TriggerResolver"/> and one created
+    /// by the <see cref="ActionResolver"/> constructor — so <c>AssertSync</c>
+    /// effectively runs twice per <c>Create</c> call.  This is intentional: both
+    /// executors are stateless beyond handler registration, and the double-check
+    /// is harmless.
     /// </para>
     /// </summary>
     public static ActionResolver Create(
