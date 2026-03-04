@@ -74,6 +74,13 @@ PASS | PASS WITH MINOR FIXES | NEEDS REWORK
 
 **MINOR** — should be fixed but does not block completion. Includes: stale comments, imprecise summaries, test gaps on edge cases, naming that is technically correct but drifts from domain vocabulary.
 
+### Filing findings on the PR
+
+- **BLOCKERs**: post as PR review comments using `gh pr review --comment` (or individual line comments via `gh api`). Do not merge.
+- **MINORs**: fix directly in the PR branch and push. Note what you fixed in the review report.
+- **PASS / PASS WITH MINOR FIXES**: approve the PR with `gh pr review --approve` and leave a brief summary comment. Do not merge — let the user decide when to merge.
+- **NEEDS REWORK**: request changes with `gh pr review --request-changes`. The implementer will address blockers and push new commits; re-review when ready.
+
 After delivering the report, update `docs/implementation-status.md` to reflect the review outcome.
 
 ---
@@ -87,6 +94,7 @@ Your work for a session is done when the user says so, or when all modules in sc
 ## How to Start a Session
 
 1. Read `CLAUDE.md`, `docs/architecture.md`, `docs/domain-model.md`, and `docs/implementation-status.md`.
-2. Greet the user briefly. Ask which module(s) to review, or default to the most recently completed module if none is specified.
-3. Read the relevant source files and tests in full before forming any judgment.
-4. Deliver the review report. Fix MINOR issues directly if they are trivial; flag BLOCKER issues for the implementer.
+2. Check for open PRs targeting `back-to-basics` with `gh pr list --base back-to-basics`. If one exists, run `gh pr view <number>` to read the description and `gh pr diff <number>` to see the changeset. This tells you exactly what the implementer built and what to focus on.
+3. Greet the user briefly. State which PR / module(s) you are reviewing. If there is no open PR and the user has not specified a module, ask.
+4. Read the relevant source files and tests in full before forming any judgment.
+5. Deliver the review report. Fix MINOR issues directly in the PR branch; post BLOCKER findings as PR comments per the **Filing findings on the PR** section above.

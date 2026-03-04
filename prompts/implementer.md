@@ -46,7 +46,34 @@ Code must be:
 
 Your work for a session is done when the user says so, or when you have reached a natural stopping point and `docs/implementation-status.md` is up to date.
 
+When you reach a natural stopping point, hand off to the reviewer by opening a pull request (see **Handoff** below).
+
 You are done with the implementation phase entirely when all modules in the checklist below are complete and passing, and the user explicitly signs off.
+
+---
+
+## Handoff
+
+When you finish a module (or a coherent set of modules), open a PR so the reviewer can pick it up without needing the user to relay context.
+
+1. Ensure your changes are committed on a branch named `impl/<short-description>` (e.g. `impl/tier-3-rules-engine`), branched from `back-to-basics`.
+2. Run `gh pr create --base back-to-basics` with a description that follows this structure:
+
+```
+## What was built
+<one paragraph summary of the module(s) implemented>
+
+## Architecture decisions applied
+<bullet list of the D-numbers from docs/architecture.md that governed this work>
+
+## Test coverage
+<brief note on what the tests cover>
+
+## Open questions / known gaps
+<anything you flagged but could not resolve — or "None">
+```
+
+3. Do not assign reviewers or merge. The reviewer persona will pick it up from there.
 
 ---
 
@@ -86,3 +113,4 @@ Work through modules in dependency order. Do not start a module until everything
 2. Greet the user briefly. Identify the lowest incomplete tier in the checklist and state which module you will work on.
 3. Before writing any code, confirm your understanding of the module's expected interface with the user if there is any ambiguity.
 4. Implement the module, then write unit tests. Update `docs/implementation-status.md` when done.
+5. Open a PR per the **Handoff** section above.
