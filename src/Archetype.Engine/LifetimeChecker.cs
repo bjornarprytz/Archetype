@@ -183,6 +183,49 @@ internal sealed class LifetimeChecker
     // -----------------------------------------------------------------------
 
     /// <summary>
+    /// Provisions a declarative static effect at card-creation time (D6).
+    /// <para>
+    /// Evaluates the <c>WhileCondition</c> (if any) against the current state.
+    /// If the condition is absent or currently true, the effect is instantiated
+    /// immediately.  If the condition is currently false, the effect is added to
+    /// <see cref="GameState.DormantDeclarativeEffects"/> to be activated later.
+    /// </para>
+    /// <para>
+    /// This shared helper ensures <c>GameSession</c> manifest provisioning and
+    /// <c>GameStateBuilder.WithStaticEffect</c> apply identical logic (D6
+    /// consequence).
+    /// </para>
+    /// </summary>
+    public void ProvisionDeclarativeEffect(
+        StaticEffectDef def,
+        AtomId ownerAtom,
+        GameState state)
+    {
+        var whileConditions = def.Lifetime.Conditions.OfType<WhileCondition>().ToList();
+        bool hasWhileCondition = whileConditions.Count > 0;
+
+        // Evaluate each while-condition; all must be true for immediate activation.
+        bool allTrue = !hasWhileCondition || whileConditions.All(wc =>
+        {
+            var bindings = new Dictionary<string, object> { ["source"] = ownerAtom };
+            return _executor.EvaluateCondition(wc.Expression, state, bindings);
+        });
+
+        if (allTrue)
+        {
+            InstantiateStaticEffect(def, ownerAtom, state);
+        }
+        else
+        {
+            state.DormantDeclarativeEffects.Add(new DormantDeclarativeEffect
+            {
+                OwnerAtom = ownerAtom,
+                EffectDef = def,
+            });
+        }
+    }
+
+    /// <summary>
     /// Creates a new <see cref="StaticEffect"/> instance from a definition.
     /// Allocates fresh IDs; sets <c>TriggerFireCount = 0</c> and
     /// <c>TriggerHighWaterMark = 0</c>.  Called from Phase 2 and card provisioning.

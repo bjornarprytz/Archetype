@@ -194,4 +194,20 @@ public static class Kw
     /// Use <c>Kw.Param("trigger_event")</c> as the <paramref name="ev"/> argument inside fired blocks.
     /// </summary>
     public static Invocation EventArg(KeywordNode ev, KeywordNode name) => new("event-arg", ev, name);
+
+    // -----------------------------------------------------------------------
+    //  Game outcome shorthands
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>declare-winner(player)</c> — ends the game with the given player atom
+    /// as the winner.  Typically used inside a state-based rule body.
+    /// </summary>
+    public static Invocation DeclareWinner(KeywordNode player) => new("declare-winner", player);
+
+    /// <summary>
+    /// <c>declare-draw()</c> — ends the game as a draw.
+    /// Typically used inside a state-based rule body.
+    /// </summary>
+    public static Invocation DeclareDraw() => new("declare-draw");
 }

@@ -152,6 +152,11 @@ internal sealed class ActionResolver
 
         while (true)
         {
+            // Exit the cascade if the game ended (e.g. declare-winner in a trigger
+            // body), so we don't collect further triggers or call the observer
+            // after the game is already decided.
+            if (state.GameIsOver) break;
+
             triggerBatchCount++;
 
             // Step 4: ask the observer whether to continue.  null → always Continue.
@@ -178,6 +183,9 @@ internal sealed class ActionResolver
             {
                 await _triggers.FireTrigger(firing, ctx, currentTurn);
                 await RunStateBasedRules(ctx, currentTurn);
+                // If a trigger or its resulting SBRs ended the game, stop firing
+                // remaining triggers in this batch — they belong to a game that's over.
+                if (state.GameIsOver) break;
             }
             // Loop back to collect triggers produced by the blocks just fired.
         }
@@ -202,6 +210,12 @@ internal sealed class ActionResolver
     {
         while (true)
         {
+            // If the game ended mid-pass (e.g. declare-winner/declare-draw was
+            // called by a rule body), stop immediately.  The condition that fired
+            // the terminal rule may still evaluate true, which would otherwise
+            // produce an infinite loop.
+            if (ctx.GameState.GameIsOver) return;
+
             // Snapshot satisfied rules BEFORE firing to avoid mid-pass re-evaluation.
             var triggered = ctx.Definition.StateBasedRules
                 .Where(rule => _executor.EvaluateCondition(rule.Condition, ctx.GameState))

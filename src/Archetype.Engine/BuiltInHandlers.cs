@@ -35,6 +35,8 @@ internal static class BuiltInHandlers
         mutations.Register("copy-card",          CopyCard);
         mutations.Register("create-zone",        CreateZone);
         mutations.Register("move-card",          MoveCard);
+        mutations.Register("declare-winner",     DeclareWinner);
+        mutations.Register("declare-draw",       DeclareDraw);
 
         // ── Property (read) primitives ───────────────────────────────────
 
@@ -361,6 +363,59 @@ internal static class BuiltInHandlers
         });
 
         return null; // void
+    }
+
+    // -----------------------------------------------------------------------
+    //  Game outcome primitives
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>declare-winner(player)</c> — sets the game outcome to a win for the
+    /// given player atom.  The session loop exits after the current
+    /// post-action sequence completes.  First call wins; subsequent calls
+    /// to either <c>declare-winner</c> or <c>declare-draw</c> are no-ops.
+    /// </summary>
+    private static object? DeclareWinner(object[] args, ExecutionContext ctx)
+    {
+        var playerAtomId = RequireAtomOfKind(
+            args, 0, "declare-winner", "player", AtomKind.Player, ctx.GameState);
+
+        // Resolve the player's string name from the registry built during provisioning.
+        if (!ctx.GameState.TryGetPlayerName(playerAtomId, out var winnerName))
+            throw new EngineException(
+                $"declare-winner: atom {playerAtomId} is not a registered player name. " +
+                "Ensure the player was provisioned via ManifestProvisioner or GameStateBuilder.");
+
+        ctx.GameState.DeclareOutcome(winnerName);
+
+        ctx.EventLog.Append(new GameEvent
+        {
+            KeywordName = "declare-winner",
+            BoundArgs   = new Dictionary<string, object>
+            {
+                ["player"] = playerAtomId,
+                ["winner"] = winnerName,
+            },
+        });
+
+        return null;
+    }
+
+    /// <summary>
+    /// <c>declare-draw()</c> — sets the game outcome to a draw.
+    /// The session loop exits after the current post-action sequence completes.
+    /// </summary>
+    private static object? DeclareDraw(object[] args, ExecutionContext ctx)
+    {
+        ctx.GameState.DeclareOutcome(winner: null);
+
+        ctx.EventLog.Append(new GameEvent
+        {
+            KeywordName = "declare-draw",
+            BoundArgs   = new Dictionary<string, object>(),
+        });
+
+        return null;
     }
 
     // -----------------------------------------------------------------------
