@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Archetype.Build/Archetype.Build.csproj" />
+    <Project Path="src/Archetype.Core/Archetype.Core.csproj" />
+    <Project Path="src/Archetype.Engine/Archetype.Engine.csproj" />
+    <Project Path="src/Archetype.Text/Archetype.Text.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Archetype.Tests/Archetype.Tests.csproj" />
+  </Folder>
+</Solution>
