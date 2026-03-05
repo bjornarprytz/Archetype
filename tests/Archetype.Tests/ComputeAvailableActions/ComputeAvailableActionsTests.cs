@@ -269,6 +269,117 @@ public sealed class ComputeAvailableActionsTests
         Assert.True(capturing.CapturedActions.CanPass);
     }
 
+    /// <summary>
+    /// 3.7  Ability activation is offered for a card in a non-playable zone (D19 step 4).
+    ///      The ability loop is independent of the PlayCard zone filter, so abilities
+    ///      must appear even when the card's zone is not in <c>PlayableZoneNames</c>.
+    /// </summary>
+    [Fact]
+    public async Task ComputeAvailableActions_OffersAbility_EvenWhenCardIsInNonPlayableZone()
+    {
+        var capturing = new CapturingPlayerStrategy();
+
+        // Card is in the "discard" zone, which is NOT in PlayableZoneNames.
+        // It carries an ability with no activation condition, so the ability
+        // should always be offered regardless of the card's zone.
+        var def = BuildMinimalDef(
+            playableZoneNames: ["hand"],
+            cards: new Dictionary<string, CardDefinition>
+            {
+                ["soldier"] = new CardDefinition(
+                    Name: "soldier",
+                    StaticProperties: new Dictionary<string, object>(),
+                    PrimaryEffect: DrawBlock(),
+                    AdditionalEffects:
+                    [
+                        new NamedEffectBlockDef(
+                            Name:                "charge",
+                            ActivationCondition: null,    // no condition — always activatable
+                            Cost:                null,
+                            Body:                DrawBlock()),
+                    ],
+                    StaticEffects: []),
+            },
+            manifest: new InitManifest(
+                Zones:
+                [
+                    new ZoneSpec("p1-hand",    "p1", "hand"),
+                    new ZoneSpec("p1-discard", "p1", "discard"),
+                ],
+                Cards:
+                [
+                    // Card is in discard (non-playable) — PlayCard should be absent,
+                    // but the "charge" ability must still be offered.
+                    new CardSpec("p1", "p1-discard", "soldier"),
+                ],
+                PlayerStates: []));
+
+        await EngineGameSession.Create(def)
+            .WithPlayerStrategy("p1", capturing)
+            .WithRandomSource(new MockRandomSource())
+            .UseDefaultInit()
+            .Build()
+            .RunAsync();
+
+        Assert.NotNull(capturing.CapturedActions);
+        // Card is in discard → no PlayCard option.
+        Assert.Empty(capturing.CapturedActions!.PlayableCards);
+        // But the ability must still be present (D19 step 4: zone is irrelevant for abilities).
+        Assert.Single(capturing.CapturedActions.ActivatableAbilities);
+        Assert.Equal("charge", capturing.CapturedActions.ActivatableAbilities[0].EffectName);
+    }
+
+    /// <summary>
+    /// 3.8  A card owned by p1 that resides in p2's "hand" zone is NOT offered as
+    ///      playable by p1 (D19 step 2: zone owner must equal active player).
+    /// </summary>
+    [Fact]
+    public async Task ComputeAvailableActions_ExcludesCards_InOpponentOwnedZone()
+    {
+        var capturing = new CapturingPlayerStrategy();
+
+        // Two-player game.  The "hand" zone definition is playable.
+        // p1 owns the card, but the card resides in p2's hand zone.
+        // Because p2 owns the zone, the zone-owner check must exclude it
+        // from p1's PlayableCards even though the zone type is "hand".
+        var def = BuildTwoPlayerDef(
+            playableZoneNames: ["hand"],
+            cards: new Dictionary<string, CardDefinition>
+            {
+                ["goblin"] = new CardDefinition(
+                    Name: "goblin",
+                    StaticProperties: new Dictionary<string, object>(),
+                    PrimaryEffect: DrawBlock(),
+                    AdditionalEffects: [],
+                    StaticEffects: []),
+            },
+            manifest: new InitManifest(
+                Zones:
+                [
+                    new ZoneSpec("p1-hand", "p1", "hand"),
+                    new ZoneSpec("p2-hand", "p2", "hand"),  // p2 owns this zone
+                ],
+                Cards:
+                [
+                    // p1 owns the goblin, but it is sitting in p2's hand zone.
+                    new CardSpec("p1", "p2-hand", "goblin"),
+                ],
+                PlayerStates: []));
+
+        await EngineGameSession.Create(def)
+            .WithPlayerStrategy("p1", capturing)
+            .WithPlayerStrategy("p2", new PassPlayerStrategy())
+            .WithRandomSource(new MockRandomSource())
+            .UseDefaultInit()
+            .Build()
+            .RunAsync();
+
+        Assert.NotNull(capturing.CapturedActions);
+        // Zone is p2's — p1 must not see the card as playable.
+        Assert.Empty(capturing.CapturedActions!.PlayableCards);
+        Assert.True(capturing.CapturedActions.CanPass);
+    }
+
     // -----------------------------------------------------------------------
     //  Helpers
     // -----------------------------------------------------------------------
@@ -326,6 +437,47 @@ public sealed class ComputeAvailableActionsTests
             DefaultInitManifest:    manifest,
             PlayableZoneNames:      playableZoneNames);
     }
+
+    /// <summary>
+    /// Builds a <see cref="GameDefinition"/> for two players ("p1" and "p2") with
+    /// one phase ("main"), the given playable zone names, card definitions,
+    /// and an always-true SBR that fires <c>declare-draw()</c> to end the game.
+    /// Used for tests that require zone-owner checks across players.
+    /// </summary>
+    private static GameDefinition BuildTwoPlayerDef(
+        IReadOnlyList<string> playableZoneNames,
+        IReadOnlyDictionary<string, CardDefinition> cards,
+        InitManifest manifest)
+    {
+        var alwaysTrue = Kw.AtLeast(new Literal(1.0), new Literal(1.0));
+
+        return new GameDefinition(
+            Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
+            CardDefinitions:        cards,
+            ZoneDefinitions: new Dictionary<string, ZoneDefinition>
+            {
+                ["hand"] = new ZoneDefinition("hand", new Dictionary<string, object>()),
+            },
+            CardSets:               new Dictionary<string, CardSet>(),
+            StateBasedRules:
+            [
+                new StateBasedRule("end-game", alwaysTrue,
+                    new EffectBlockDef([new EffectBlockStep("declare-draw", [])])),
+            ],
+            Phases:
+            [
+                new PhaseDefinition("main"),
+            ],
+            ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
+            TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
+            PlayerDefinitions: new Dictionary<string, PlayerDefinition>
+            {
+                ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
+                ["p2"] = new PlayerDefinition(new Dictionary<string, object>()),
+            },
+            DefaultInitManifest:    manifest,
+            PlayableZoneNames:      playableZoneNames);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -352,4 +504,25 @@ file sealed class CapturingPlayerStrategy : IPlayerStrategy
     public Task<PromptResponse> RespondToPromptAsync(
         PromptContext context, GameStateView state, CancellationToken ct = default)
         => throw new InvalidOperationException("CapturingPlayerStrategy: no prompt handler.");
+}
+
+// ---------------------------------------------------------------------------
+//  Test-local helper: PassPlayerStrategy
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// A minimal player strategy that always passes.  Used for the second player
+/// in two-player tests where only one player's actions need to be inspected.
+/// </summary>
+file sealed class PassPlayerStrategy : IPlayerStrategy
+{
+    /// <summary>Always returns <see cref="Pass"/>.</summary>
+    public Task<PlayerAction?> SelectActionAsync(
+        AvailableActions available, GameStateView state, CancellationToken ct = default)
+        => Task.FromResult<PlayerAction?>(new Pass());
+
+    /// <summary>Not expected to be called in pass-only scenarios.</summary>
+    public Task<PromptResponse> RespondToPromptAsync(
+        PromptContext context, GameStateView state, CancellationToken ct = default)
+        => throw new InvalidOperationException("PassPlayerStrategy: no prompt handler.");
 }

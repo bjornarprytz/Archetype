@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (D19 complete — get-atoms-in-zone + ComputeAvailableActions zone/condition filter — 43/43 tests green)
+> Last updated: 2026-03-05 (D19 review blockers resolved — 45/45 tests passing)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -140,7 +140,7 @@
 - **Round-robin active player**: `(turn-1) % playerCount` over `PlayerDefinitions` insertion order
 - **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest`
 - **`ProvisionManifest(InitManifest)`**: zones → cards (with `ProvisionDeclarativeEffect`) → card overrides → player overrides
-- **`ComputeAvailableActions`**: simplified — returns all cards owned by active player as playable; no cost/condition/target checks (open gap, see below)
+- **`ComputeAvailableActions`**: two independent passes — Pass 1 (PlayCard, zone-filtered + activation condition); Pass 2 (abilities, all owned cards regardless of zone); cost pre-flight deferred (D19 D-C)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
 
 ### `get-atoms-in-zone` built-in ✅
@@ -149,12 +149,12 @@
 - `GetAllAtoms()` added to `GameState` to support the handler
 - `BlockExecutor.EvaluateProperty(node, state, bindings?)` added (internal) for testing non-boolean primitive results
 
-### `ComputeAvailableActions` ✅ (was placeholder)
-- Zone filter: `GameDefinition.PlayableZoneNames`; cards not in a playable zone excluded
-- Activation condition filter: `CardDefinition.ActivationCondition` evaluated pure via `BlockExecutor.EvaluateCondition` with `["source"] = cardAtomId` injected (D13 / architect note)
-- Ability activation: `NamedEffectBlockDef.ActivationCondition` evaluated the same way; `["source"] = cardAtomId` injected
-- `Pass` always included (D19 design D-D)
-- `ActionResolver.EvaluateCondition(...)` exposed as `public` to avoid GameSession needing its own `BlockExecutor`
+### `ComputeAvailableActions` ✅
+- Zone filter (D19 step 2): checks zone definition name ∈ `PlayableZoneNames` **and** zone owner == active player; prevents cross-player zone exploitation
+- Activation condition (D19): `source` injected manually per D13 (no `StaticEffect` wrapper on this path)
+- Ability loop (D19 step 4): independent second pass over all owned cards, ignores zone membership entirely; zone restrictions expressed via ability's own `ActivationCondition`
+- Tests: 9 tests covering get-atoms-in-zone (3), zone filter, activation condition, source injection, ability-in-non-playable-zone, zone-owner restriction, pass-always-present
+- **Open gap (pre-existing)**: runtime-created atoms (`create-card`/`create-zone`) are invisible to `ComputeAvailableActions` — `_atomDefinitionNames` is only populated during `ProvisionManifest`
 
 ### `declare-winner` / `declare-draw` built-ins ✅
 - Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
@@ -189,9 +189,9 @@
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
-| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 7 | ✅ All passing |
+| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 7 | ⚠️ Passing but missing tests for D19 steps 2 & 4 invariants |
 
-**Total: 43 tests, 43 passing.**
+**Total: 43 tests, 43 passing. (D19 invariant tests missing — see blockers.)**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

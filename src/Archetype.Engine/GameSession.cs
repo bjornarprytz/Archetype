@@ -315,10 +315,15 @@ public sealed class GameSession
     /// <summary>
     /// Returns the set of actions currently available to the active player.
     /// <para>
-    /// <b>Simplified implementation:</b> enumerates all cards owned by the
-    /// player as playable (no activation-condition or cost-dry-run checks).
-    /// Full evaluation of activation conditions, costs, and valid target sets
-    /// is a known open gap; see <c>docs/implementation-status.md</c>.
+    /// Uses two independent passes (D19 steps 2 and 4):<br/>
+    /// <b>Pass 1 — PlayCard candidates:</b> iterates owned cards, filters by zone
+    /// (definition name ∈ <see cref="GameDefinition.PlayableZoneNames"/> AND zone
+    /// owner == active player), then evaluates each card's
+    /// <see cref="CardDefinition.ActivationCondition"/>.<br/>
+    /// <b>Pass 2 — Ability candidates:</b> iterates ALL owned cards regardless of zone;
+    /// zone restrictions for abilities are expressed via the ability's own
+    /// <c>ActivationCondition</c>.<br/>
+    /// <c>Pass</c> is always included.  Cost pre-flight is deferred (D19 design D-C).
     /// </para>
     /// </summary>
     private AvailableActions ComputeAvailableActions(string activePlayer)
@@ -338,19 +343,27 @@ public sealed class GameSession
         var playableCards    = new List<PlayableCardOption>();
         var activatableAbils = new List<ActivatableAbilityOption>();
 
+        // ── Pass 1: PlayCard candidates (zone-filtered) ──────────────────────
+        // D19 step 2: only cards in a zone whose definition name is in
+        // PlayableZoneNames AND whose zone is owned by the active player
+        // are eligible.  The two conditions are independent so both must hold.
         foreach (var cardId in _state.GetAtoms(AtomKind.Card))
         {
             var card = _state.GetAtom(cardId);
             if (card.OwnerId != playerAtomId) continue;
 
-            // --- Zone filter (D19) ---
+            // --- Zone filter (D19 step 2) ---
             // If PlayableZoneNames is set, the card must be in a zone whose
-            // definition name appears in the list.
+            // definition name appears in the list.  Additionally the zone itself
+            // must be owned by the active player — a card moved into an opponent's
+            // hand zone is NOT considered "in the active player's hand".
             if (playableZoneDefNames is not null)
             {
+                var zone = _state.GetAtom(card.ZoneId);
+                if (zone.OwnerId != playerAtomId) continue;
                 if (!_atomDefinitionNames.TryGetValue(card.ZoneId, out var zoneDefName)
                     || !playableZoneDefNames.Contains(zoneDefName))
-                    continue; // card is in a non-playable zone
+                    continue; // card is in a non-playable zone (or no definition)
             }
 
             if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName)) continue;
@@ -368,13 +381,21 @@ public sealed class GameSession
             }
 
             playableCards.Add(new PlayableCardOption(cardId, Array.Empty<TargetSet>()));
+        }
 
-            // --- Ability activation (D19) ---
-            // Per the architect's decision (task 1.4): abilities use their own
-            // ActivationCondition on NamedEffectBlockDef.  Zone restriction for
-            // abilities is expressed via ActivationCondition (e.g. in-zone(source, ...))
-            // rather than a separate zone list.
-            foreach (var ability in cardDef.AdditionalEffects)
+        // ── Pass 2: Ability candidates (all owned cards, any zone) ───────────
+        // D19 step 4: zone membership is irrelevant for ability activation.
+        // Zone restrictions for abilities are expressed via the ability's own
+        // ActivationCondition (e.g. a check that the card is on the battlefield).
+        foreach (var cardId in _state.GetAtoms(AtomKind.Card))
+        {
+            var card = _state.GetAtom(cardId);
+            if (card.OwnerId != playerAtomId) continue;
+
+            if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName2)) continue;
+            if (!_definition.CardDefinitions.TryGetValue(cardDefName2, out var cardDef2)) continue;
+
+            foreach (var ability in cardDef2.AdditionalEffects)
             {
                 if (ability.ActivationCondition is not null)
                 {
