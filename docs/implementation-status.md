@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (Tier 4 GameSession/GameSessionBuilder complete — 35/35 tests green)
+> Last updated: 2026-03-05 (Tier 4 under review — NEEDS REWORK; 1 blocker open on PR #4)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -141,13 +141,14 @@
 - **`ComputeAvailableActions`**: simplified — returns all cards owned by active player as playable; no cost/condition/target checks (open gap, see below)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
 
-### `declare-winner` / `declare-draw` built-ins ✅
+### `declare-winner` / `declare-draw` built-ins ⚠️ (BLOCKER — see PR #4)
 - Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
 - **Resolution**: added `declare-winner(player)` and `declare-draw()` as primitives (32 total built-ins)
 - `GameState.DeclareOutcome(string?)`: first-call-wins; sets `GameIsOver` and `PendingWinner`
 - `GameState.RegisterPlayerName` / `TryGetPlayerName`: player atom → name registry used by `declare-winner`
 - `RunStateBasedRules` exits immediately at loop top when `GameIsOver` is true (prevents infinite loop when an always-true SBR fired the terminal rule)
 - Cascade loop breaks when `GameIsOver` is true; per-trigger `GameIsOver` check stops mid-batch firing
+- **⚠️ BLOCKER (PR #4)**: `declare-winner` winner-name resolution is untested. No test asserts `GameResult.Winner == "p1"`. Implementer must add end-to-end coverage (see PR #4 review comment for approach).
 
 ### Text renderer ❌ Not started (`Archetype.Text` project scaffolded but empty)
 
@@ -238,16 +239,17 @@
 
 ## Resolved Issues
 
-### Tier 4 — GameSession / GameSessionBuilder (2026-03-05)
+### Tier 4 — GameSession / GameSessionBuilder (2026-03-05) — NEEDS REWORK (PR #4)
 - ✅ `GameSessionBuilder`: fluent builder with full player-strategy validation
 - ✅ `GameSession.RunAsync`: turn/phase loop, `GameIsOver` propagation, manifest provisioning
-- ✅ `declare-winner` / `declare-draw` primitives resolve D14 architecture gap
+- ✅ `declare-draw` end-to-end verified (7 of 11 Layer 3 tests use it)
 - ✅ `LifetimeChecker.ProvisionDeclarativeEffect`: while-condition-aware provisioning used by manifest
 - ✅ `RunStateBasedRules` exits early on `GameIsOver` (prevents infinite loop from always-true terminal SBRs)
 - ✅ Cascade loop and per-trigger checks also break on `GameIsOver`
 - ✅ `Kw.DeclareWinner` / `Kw.DeclareDraw` shorthands added to `Archetype.Build`
 - ✅ `GameStateView` constructor made `public` (was `internal`; needed cross-assembly from Engine)
-- ✅ 11 Layer 3 end-to-end tests; 35/35 total passing
+- ✅ 35/35 tests passing (after MINOR renames)
+- ⚠️ **BLOCKER open**: `declare-winner` winner-name resolution untested — no test asserts `GameResult.Winner == "p1"`. Implementer to add and push; reviewer will re-review.
 
 ### implement-trigger-resolver rework (2026-03-04)
 - ✅ **BLOCKER resolved**: `RunStateBasedRules` now has 4 tests covering all D7 fixpoint invariants
