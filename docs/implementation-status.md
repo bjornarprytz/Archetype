@@ -189,9 +189,9 @@
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
-| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 7 | ⚠️ Passing but missing tests for D19 steps 2 & 4 invariants |
+| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
 
-**Total: 43 tests, 43 passing. (D19 invariant tests missing — see blockers.)**
+**Total: 45 tests, 45 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -244,8 +244,9 @@
 
 1. **`PromptChannel` untested** — the `IPlayerStrategy` prompt dispatch exists but no test exercises a mid-block prompt (`choose`, target selection).
 2. **Text renderer** — `Archetype.Text` project is scaffolded; no implementation.
-3. **`ComputeAvailableActions` cost pre-flight deferred** — zone filtering and activation-condition evaluation are now implemented (D19). Cost pre-flight (checking whether a card's cost can be paid) remains deferred per the D19 design doc; no current game definition requires it.
+3. **`ComputeAvailableActions` cost pre-flight deferred** — zone filtering and activation-condition evaluation are implemented (D19). Cost pre-flight (checking whether a card's cost can be paid) remains deferred per the D19 design doc; no current game definition requires it.
 4. **`declare-winner` architecture gap** — D14 didn't specify how a game-ending primitive signals `GameSession`. Resolved by adding `declare-winner(player)` / `declare-draw()` built-ins; decision documented here and in source XML docs. Architecture doc should be updated to ratify this (open item for architect).
+5. **Runtime-created atoms invisible to `ComputeAvailableActions`** — `_atomDefinitionNames` is populated only during `ProvisionManifest`; cards/zones created at runtime via `create-card`/`create-zone` would be silently skipped. Pre-existing gap, not introduced by D19.
 
 ---
 
