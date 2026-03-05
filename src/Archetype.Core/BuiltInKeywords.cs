@@ -363,7 +363,7 @@ public static class BuiltInKeywords
     public static readonly KeywordDefinition DeclareWinner = new(
         Name: "declare-winner",
         Parameters: [
-            new("player", TypeName.Player, new[] { AtomKind.Player }),
+            new("player", TypeName.Player), // TypeName.Player already restricts to Player atoms; AtomKindRestriction not needed (D2)
         ],
         ReturnType:  TypeName.Boolean, // void — return value is meaningless
         Description: "Declares the given player as the winner, ending the game.",

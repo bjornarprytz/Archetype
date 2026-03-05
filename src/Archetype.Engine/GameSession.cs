@@ -190,9 +190,13 @@ public sealed class GameSession
     /// A <see cref="GameResult"/> with the winner's name (or <c>null</c> for a
     /// draw) and the finalized event log.
     /// </returns>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if the game has no phases and no mechanism to end.
-    /// </exception>
+    /// <remarks>
+    /// The loop runs until a state-based rule calls <c>declare-winner</c> or
+    /// <c>declare-draw</c>.  If the game definition contains no phases and no
+    /// SBR that can end the game, <see cref="RunAsync"/> will loop indefinitely.
+    /// Convergence is entirely the game creator's responsibility (per §1.7 /
+    /// Open Item 7 in the domain model).
+    /// </remarks>
     public async Task<GameResult> RunAsync(CancellationToken ct = default)
     {
         // Phase 1: provision session atom + init manifest.

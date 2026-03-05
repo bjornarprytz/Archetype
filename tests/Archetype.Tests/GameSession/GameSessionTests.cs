@@ -107,13 +107,13 @@ public sealed class GameSessionTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public async Task DeclareWinner_InPhaseInit_ReturnsResultWithCorrectWinner()
+    public async Task DeclareDraw_ViaSBR_OnTurnOne_ReturnsDrawResult()
     {
-        // Arrange: game definition whose Init block calls declare-winner with "p1".
-        // To reference the player atom by value, we use a SBR that fires after provisioning.
-        // Since we don't have a "look up player by name" keyword, we use a state-based rule:
-        // always-true SBR whose body calls declare-winner by fetching the p1 atom from
-        // the session state.  Simplest approach: single-phase game with an SBR that always fires.
+        // Originally drafted as a declare-winner test, but referencing a player AtomId
+        // in a keyword definition before provisioning is not possible (AtomIds are
+        // allocated at runtime).  The test was rewritten to use declare-draw via an
+        // always-true SBR on turn 1.  See GameSessionTests for the BLOCKER note about
+        // the missing end-to-end declare-winner coverage.
 
         // Approach: define an SBR with condition=true and body=declare-winner(owner-of(session)).
         // But that's complex. Simpler: use a custom keyword "win" that wraps declare-winner
@@ -317,11 +317,11 @@ public sealed class GameSessionTests
     }
 
     // -----------------------------------------------------------------------
-    //  Test 6: declare-winner — player name resolved from atom registry
+    //  Test 6: manifest card provisioning with declare-draw SBR
     // -----------------------------------------------------------------------
 
     [Fact]
-    public async Task DeclareWinner_PlayerNameResolvedCorrectly()
+    public async Task ManifestCardProvisioning_WithDeclareDraw_CompletesGame()
     {
         // Arrange: a game whose SBR fires declare-winner pointing to the p1 player atom.
         // We can reference the player atom via owner-of + a card, but for simplicity
