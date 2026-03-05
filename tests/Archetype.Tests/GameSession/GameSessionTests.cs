@@ -544,6 +544,60 @@ public sealed class GameSessionTests
             Archetype.Engine.GameSession.Create(def)
                 .FromSavedState(new object()));
     }
+
+    // -----------------------------------------------------------------------
+    //  Test 10: declare-winner end-to-end — GameResult.Winner is resolved correctly
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Verifies the full declare-winner → GameResult.Winner path.
+    /// An SBR uses <c>player-by-name("p1")</c> to obtain the player atom at
+    /// runtime and passes it to <c>declare-winner</c>.  The session must
+    /// return a <see cref="GameResult"/> with <c>Winner == "p1"</c>.
+    /// <para>
+    /// This test is the canonical coverage for the PR #4 blocker: confirm
+    /// that <c>declare-winner</c>'s name-resolution path (atom → registered
+    /// name) is exercised by a passing test.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public async Task DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName()
+    {
+        // SBR body: declare-winner(player-by-name("p1"))
+        // player-by-name is the new primitive that reverse-looks up a player
+        // atom from its name string — the only way to reference a player atom
+        // in a static KeywordNode tree before the session is provisioned.
+        var declareWinnerBlock = new EffectBlockDef([
+            new EffectBlockStep("declare-winner", [
+                new Invocation("player-by-name", new Literal("p1")),
+            ]),
+        ]);
+
+        var def = SinglePlayerSinglePhase(initBlock: null) with
+        {
+            StateBasedRules = new List<StateBasedRule>
+            {
+                new("p1-always-wins",
+                    Condition: new Literal(true),   // fires on the very first pass
+                    Body: declareWinnerBlock),
+            },
+        };
+
+        // Player passes once; the SBR fires immediately in the post-pass sequence.
+        var strategy = new ScriptedPlayerStrategy().QueueAction(null);
+
+        var session = Archetype.Engine.GameSession.Create(def)
+            .WithPlayerStrategy("p1", strategy)
+            .WithRandomSource(new MockRandomSource())
+            .Build();
+
+        // Act
+        var result = await session.RunAsync();
+
+        // Assert: game ended with "p1" as the winner — not a draw.
+        Assert.False(result.IsDraw,  "Expected a winner, not a draw.");
+        Assert.Equal("p1", result.Winner);
+    }
 }
 
 // ---------------------------------------------------------------------------

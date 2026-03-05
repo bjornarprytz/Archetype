@@ -169,14 +169,20 @@ internal sealed class GameState : Core.IGameStateReadable
     //  Player name registry (populated by manifest provisioning)
     // -----------------------------------------------------------------------
 
-    private readonly Dictionary<AtomId, string> _playerNames = new();
+    private readonly Dictionary<AtomId, string> _playerNames    = new();
+    private readonly Dictionary<string, AtomId> _playerAtomsByName = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Registers a player name keyed by their atom ID.  Called during manifest
     /// provisioning so that <c>declare-winner</c> can resolve a player atom to
-    /// the string name stored in <see cref="GameResult"/>.
+    /// the string name stored in <see cref="GameResult"/>, and
+    /// <c>player-by-name</c> can reverse-look-up an atom from a name string.
     /// </summary>
-    public void RegisterPlayerName(AtomId id, string name) => _playerNames[id] = name;
+    public void RegisterPlayerName(AtomId id, string name)
+    {
+        _playerNames[id]       = name;
+        _playerAtomsByName[name] = id;
+    }
 
     /// <summary>
     /// Attempts to resolve a player atom ID to its registered name.
@@ -184,6 +190,14 @@ internal sealed class GameState : Core.IGameStateReadable
     /// </summary>
     public bool TryGetPlayerName(AtomId id, out string name) =>
         _playerNames.TryGetValue(id, out name!);
+
+    /// <summary>
+    /// Attempts to resolve a player name string to its atom ID.
+    /// Returns <c>false</c> if no player with that name was registered.
+    /// Used by the <c>player-by-name</c> primitive.
+    /// </summary>
+    public bool TryGetPlayerAtomByName(string name, out AtomId id) =>
+        _playerAtomsByName.TryGetValue(name, out id);
 
     // -----------------------------------------------------------------------
     //  Game outcome (set by declare-winner / declare-draw)

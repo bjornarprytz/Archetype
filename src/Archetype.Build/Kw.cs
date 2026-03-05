@@ -196,6 +196,21 @@ public static class Kw
     public static Invocation EventArg(KeywordNode ev, KeywordNode name) => new("event-arg", ev, name);
 
     // -----------------------------------------------------------------------
+    //  Player lookup shorthands
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>player-by-name(name)</c> — returns the player atom registered under
+    /// the given name string.
+    /// <para>
+    /// The idiomatic way to pass a player reference to
+    /// <c>declare-winner</c> from a state-based rule body, where the atom ID
+    /// is not known at definition time.
+    /// </para>
+    /// </summary>
+    public static Invocation PlayerByName(KeywordNode name) => new("player-by-name", name);
+
+    // -----------------------------------------------------------------------
     //  Game outcome shorthands
     // -----------------------------------------------------------------------
 

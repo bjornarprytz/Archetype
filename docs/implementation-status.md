@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (Tier 4 under review — NEEDS REWORK; 1 blocker open on PR #4)
+> Last updated: 2026-03-05 (Tier 4 rework complete — 36/36 tests green; PR #4 blocker resolved)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -141,14 +141,19 @@
 - **`ComputeAvailableActions`**: simplified — returns all cards owned by active player as playable; no cost/condition/target checks (open gap, see below)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
 
-### `declare-winner` / `declare-draw` built-ins ⚠️ (BLOCKER — see PR #4)
+### `declare-winner` / `declare-draw` built-ins ✅
 - Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
-- **Resolution**: added `declare-winner(player)` and `declare-draw()` as primitives (32 total built-ins)
+- **Resolution**: added `declare-winner(player)` and `declare-draw()` as primitives (33 total built-ins)
 - `GameState.DeclareOutcome(string?)`: first-call-wins; sets `GameIsOver` and `PendingWinner`
-- `GameState.RegisterPlayerName` / `TryGetPlayerName`: player atom → name registry used by `declare-winner`
+- `GameState.RegisterPlayerName` / `TryGetPlayerName` / `TryGetPlayerAtomByName`: bidirectional player name registry
 - `RunStateBasedRules` exits immediately at loop top when `GameIsOver` is true (prevents infinite loop when an always-true SBR fired the terminal rule)
 - Cascade loop breaks when `GameIsOver` is true; per-trigger `GameIsOver` check stops mid-batch firing
-- **⚠️ BLOCKER (PR #4)**: `declare-winner` winner-name resolution is untested. No test asserts `GameResult.Winner == "p1"`. Implementer must add end-to-end coverage (see PR #4 review comment for approach).
+
+### `player-by-name` built-in ✅
+- `player-by-name(name: PropertyName) → Player` — reverse-looks up a player atom from its registered name string
+- The idiomatic way to pass a player reference to `declare-winner` from a static `KeywordNode` tree (where the atom ID is not known at definition time)
+- Added to `BuiltInKeywords.All` (33 total), `BuiltInHandlers`, and `Kw.PlayerByName`
+- End-to-end test `DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName` asserts `GameResult.Winner == "p1"` (resolves PR #4 blocker)
 
 ### Text renderer ❌ Not started (`Archetype.Text` project scaffolded but empty)
 
@@ -168,9 +173,9 @@
 | `MoveCard/MoveCardLayer2Tests.cs` | 3 | ✅ All passing |
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
-| `GameSession/GameSessionTests.cs` | 11 | ✅ All passing |
+| `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 
-**Total: 35 tests, 35 passing.**
+**Total: 36 tests, 36 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -239,17 +244,17 @@
 
 ## Resolved Issues
 
-### Tier 4 — GameSession / GameSessionBuilder (2026-03-05) — NEEDS REWORK (PR #4)
+### Tier 4 — GameSession / GameSessionBuilder (2026-03-05) — rework complete
 - ✅ `GameSessionBuilder`: fluent builder with full player-strategy validation
 - ✅ `GameSession.RunAsync`: turn/phase loop, `GameIsOver` propagation, manifest provisioning
-- ✅ `declare-draw` end-to-end verified (7 of 11 Layer 3 tests use it)
+- ✅ `declare-winner` / `declare-draw` end-to-end verified; `GameResult.Winner == "p1"` asserted
+- ✅ `player-by-name(name)` primitive added — resolves the "how to pass a player atom to declare-winner" gap
 - ✅ `LifetimeChecker.ProvisionDeclarativeEffect`: while-condition-aware provisioning used by manifest
 - ✅ `RunStateBasedRules` exits early on `GameIsOver` (prevents infinite loop from always-true terminal SBRs)
 - ✅ Cascade loop and per-trigger checks also break on `GameIsOver`
-- ✅ `Kw.DeclareWinner` / `Kw.DeclareDraw` shorthands added to `Archetype.Build`
+- ✅ `Kw.DeclareWinner` / `Kw.DeclareDraw` / `Kw.PlayerByName` shorthands added to `Archetype.Build`
 - ✅ `GameStateView` constructor made `public` (was `internal`; needed cross-assembly from Engine)
-- ✅ 35/35 tests passing (after MINOR renames)
-- ⚠️ **BLOCKER open**: `declare-winner` winner-name resolution untested — no test asserts `GameResult.Winner == "p1"`. Implementer to add and push; reviewer will re-review.
+- ✅ 36/36 tests passing
 
 ### implement-trigger-resolver rework (2026-03-04)
 - ✅ **BLOCKER resolved**: `RunStateBasedRules` now has 4 tests covering all D7 fixpoint invariants

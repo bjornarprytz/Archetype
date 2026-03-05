@@ -63,8 +63,9 @@ internal static class BuiltInHandlers
         properties.Register("at-most",      Compare((a, b) => a <= b), ComparePure((a, b) => a <= b));
         properties.Register("equal-to",     Compare((a, b) => a == b), ComparePure((a, b) => a == b));
 
-        properties.Register("random-int",   RandomInt); // no pure variant — randomness not in conditions
-        properties.Register("event-arg",    EventArg, EventArgPure);
+        properties.Register("random-int",    RandomInt); // no pure variant — randomness not in conditions
+        properties.Register("event-arg",     EventArg, EventArgPure);
+        properties.Register("player-by-name", PlayerByName, PlayerByNamePure);
     }
 
     // -----------------------------------------------------------------------
@@ -416,6 +417,29 @@ internal static class BuiltInHandlers
         });
 
         return null;
+    }
+
+    // -----------------------------------------------------------------------
+    //  Player lookup
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>player-by-name(name)</c> — reverse-looks up a player atom from its
+    /// registered name string.  The idiomatic way to pass a player reference
+    /// to <c>declare-winner</c> from a state-based rule body, where the atom
+    /// ID is not known at definition time.
+    /// </summary>
+    private static object? PlayerByName(object[] args, ExecutionContext ctx) =>
+        PlayerByNamePure(args, ctx.GameState, ctx.Bindings);
+
+    private static object? PlayerByNamePure(
+        object[] args, GameState state, IReadOnlyDictionary<string, object> _)
+    {
+        var name = RequireString(args, 0, "player-by-name", "name");
+        if (!state.TryGetPlayerAtomByName(name, out var atomId))
+            throw new EngineException(
+                $"player-by-name: no player named '{name}' is registered in this session.");
+        return atomId;
     }
 
     // -----------------------------------------------------------------------

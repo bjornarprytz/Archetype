@@ -342,6 +342,28 @@ public static class BuiltInKeywords
         PrimitiveSentinel: "session");
 
     // -----------------------------------------------------------------------
+    //  Player lookup
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Returns the player atom registered under the given name string.
+    /// <para>Signature: <c>player-by-name(name: PropertyName) → Player</c></para>
+    /// <para>
+    /// This primitive is the idiomatic way to pass a player atom to
+    /// <c>declare-winner</c> from a state-based rule body, where the atom ID
+    /// is not known at definition time.
+    /// </para>
+    /// </summary>
+    public static readonly KeywordDefinition PlayerByName = new(
+        Name: "player-by-name",
+        Parameters: [
+            new("name", TypeName.PropertyName, AtomKindRestriction: null),
+        ],
+        ReturnType:  TypeName.Player,
+        Description: "Returns the player atom registered under the given name string.",
+        PrimitiveSentinel: "player-by-name");
+
+    // -----------------------------------------------------------------------
     //  Game outcome primitives
     // -----------------------------------------------------------------------
 
@@ -420,6 +442,7 @@ public static class BuiltInKeywords
         RandomInt,
         EventArg,
         Session,
+        PlayerByName,
         DeclareWinner,
         DeclareDraw,
     ];
