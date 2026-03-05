@@ -199,6 +199,21 @@ public static class Kw
     //  Player lookup shorthands
     // -----------------------------------------------------------------------
 
+    // -----------------------------------------------------------------------
+    //  Zone query shorthands (D19)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>get-atoms-in-zone(zone)</c> — returns all atoms currently in the
+    /// given zone as a <see cref="TypeName.Collection"/> of atom IDs.
+    /// <para>Pure read; no state mutation or event logging.</para>
+    /// </summary>
+    public static Invocation GetAtomsInZone(KeywordNode zone) => new("get-atoms-in-zone", zone);
+
+    // -----------------------------------------------------------------------
+    //  Player lookup shorthands
+    // -----------------------------------------------------------------------
+
     /// <summary>
     /// <c>player-by-name(name)</c> — returns the player atom registered under
     /// the given name string.

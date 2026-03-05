@@ -63,6 +63,7 @@ internal static class BuiltInHandlers
         properties.Register("at-most",      Compare((a, b) => a <= b), ComparePure((a, b) => a <= b));
         properties.Register("equal-to",     Compare((a, b) => a == b), ComparePure((a, b) => a == b));
 
+        properties.Register("get-atoms-in-zone", GetAtomsInZone, GetAtomsInZonePure);
         properties.Register("random-int",    RandomInt); // no pure variant — randomness not in conditions
         properties.Register("event-arg",     EventArg, EventArgPure);
         properties.Register("player-by-name", PlayerByName, PlayerByNamePure);
@@ -417,6 +418,32 @@ internal static class BuiltInHandlers
         });
 
         return null;
+    }
+
+    // -----------------------------------------------------------------------
+    //  Zone query (D19)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>get-atoms-in-zone(zone)</c> — returns all atoms whose current
+    /// <c>ZoneId</c> equals the given zone atom ID.
+    /// <para>
+    /// Pure read; no state mutation or event logging.  Callers that only
+    /// want cards should filter by <see cref="AtomKind.Card"/> themselves.
+    /// </para>
+    /// </summary>
+    private static object? GetAtomsInZone(object[] args, ExecutionContext ctx) =>
+        GetAtomsInZonePure(args, ctx.GameState, ctx.Bindings);
+
+    private static object? GetAtomsInZonePure(
+        object[] args, GameState state, IReadOnlyDictionary<string, object> _)
+    {
+        var zoneId = RequireAtomOfKind(args, 0, "get-atoms-in-zone", "zone", AtomKind.Zone, state);
+        // Return every atom whose ZoneId matches — all atom kinds included.
+        // The Zone atom itself has ZoneId == AtomId.None, so it won't appear in results.
+        return (IReadOnlyList<AtomId>)state.GetAllAtoms()
+            .Where(id => state.GetAtom(id).ZoneId == zoneId)
+            .ToList();
     }
 
     // -----------------------------------------------------------------------

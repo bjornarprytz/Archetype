@@ -329,14 +329,67 @@ public sealed class GameSession
                 Array.Empty<ActivatableAbilityOption>(),
                 CanPass: true);
 
-        var playableCards = _state.GetAtoms(AtomKind.Card)
-            .Where(cardId => _state.GetAtom(cardId).OwnerId == playerAtomId)
-            .Select(cardId => new PlayableCardOption(cardId, Array.Empty<TargetSet>()))
-            .ToList();
+        // Build a set of playable zone definition names for O(1) lookup.
+        // null PlayableZoneNames = no zone filter (any zone is playable).
+        var playableZoneDefNames = _definition.PlayableZoneNames is { Count: > 0 } names
+            ? new HashSet<string>(names, StringComparer.Ordinal)
+            : null;
 
+        var playableCards    = new List<PlayableCardOption>();
+        var activatableAbils = new List<ActivatableAbilityOption>();
+
+        foreach (var cardId in _state.GetAtoms(AtomKind.Card))
+        {
+            var card = _state.GetAtom(cardId);
+            if (card.OwnerId != playerAtomId) continue;
+
+            // --- Zone filter (D19) ---
+            // If PlayableZoneNames is set, the card must be in a zone whose
+            // definition name appears in the list.
+            if (playableZoneDefNames is not null)
+            {
+                if (!_atomDefinitionNames.TryGetValue(card.ZoneId, out var zoneDefName)
+                    || !playableZoneDefNames.Contains(zoneDefName))
+                    continue; // card is in a non-playable zone
+            }
+
+            if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName)) continue;
+            if (!_definition.CardDefinitions.TryGetValue(cardDefName, out var cardDef)) continue;
+
+            // --- Activation condition (D19) ---
+            // Evaluated pure (no mutation, no log).  The card atom is injected
+            // as "source" per D13 — the ActivationCondition path has no StaticEffect
+            // to provide it automatically, so we must supply it manually here.
+            if (cardDef.ActivationCondition is not null)
+            {
+                var bindings = new Dictionary<string, object> { ["source"] = cardId };
+                if (!_resolver.EvaluateCondition(cardDef.ActivationCondition, _state, bindings))
+                    continue; // condition false — card not playable right now
+            }
+
+            playableCards.Add(new PlayableCardOption(cardId, Array.Empty<TargetSet>()));
+
+            // --- Ability activation (D19) ---
+            // Per the architect's decision (task 1.4): abilities use their own
+            // ActivationCondition on NamedEffectBlockDef.  Zone restriction for
+            // abilities is expressed via ActivationCondition (e.g. in-zone(source, ...))
+            // rather than a separate zone list.
+            foreach (var ability in cardDef.AdditionalEffects)
+            {
+                if (ability.ActivationCondition is not null)
+                {
+                    var bindings = new Dictionary<string, object> { ["source"] = cardId };
+                    if (!_resolver.EvaluateCondition(ability.ActivationCondition, _state, bindings))
+                        continue;
+                }
+                activatableAbils.Add(new ActivatableAbilityOption(cardId, ability.Name, Array.Empty<TargetSet>()));
+            }
+        }
+
+        // Pass is always available — a player must never be stuck (D19 design D-D).
         return new AvailableActions(
             PlayableCards:        playableCards,
-            ActivatableAbilities: Array.Empty<ActivatableAbilityOption>(),
+            ActivatableAbilities: activatableAbils,
             CanPass:              true);
     }
 

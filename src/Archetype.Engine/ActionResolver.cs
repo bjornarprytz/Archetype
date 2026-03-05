@@ -80,6 +80,18 @@ internal sealed class ActionResolver
     /// is harmless.
     /// </para>
     /// </summary>
+    /// <summary>
+    /// Evaluates a pure <see cref="KeywordNode"/> boolean expression against
+    /// the given state and optional bindings.  Delegates to the internal
+    /// <see cref="BlockExecutor"/> so callers (e.g. <c>GameSession</c>) can
+    /// evaluate activation conditions without access to the private executor.
+    /// </summary>
+    public bool EvaluateCondition(
+        KeywordNode expression,
+        GameState state,
+        IReadOnlyDictionary<string, object>? bindings = null) =>
+        _executor.EvaluateCondition(expression, state, bindings);
+
     public static ActionResolver Create(
         IReadOnlyDictionary<string, IPlayerStrategy> strategies,
         IRandomSource randomSource,

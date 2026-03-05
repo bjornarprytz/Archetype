@@ -129,6 +129,13 @@ internal sealed class GameState : Core.IGameStateReadable
     public IReadOnlyList<AtomId> GetAtoms(AtomKind kind) =>
         _atoms.Values.Where(a => a.Kind == kind).Select(a => a.Id).ToList();
 
+    /// <summary>
+    /// All atom IDs in state, regardless of kind.
+    /// Used by <c>get-atoms-in-zone</c> to enumerate every atom whose zone matches.
+    /// </summary>
+    public IReadOnlyList<AtomId> GetAllAtoms() =>
+        _atoms.Keys.ToList();
+
     // -----------------------------------------------------------------------
     //  Contribution registry (D5)
     // -----------------------------------------------------------------------

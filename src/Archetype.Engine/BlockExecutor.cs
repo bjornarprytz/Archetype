@@ -123,4 +123,20 @@ internal sealed class BlockExecutor
         var result = _evaluator.EvaluatePropertyNode(expression, b, state);
         return result is bool boolResult && boolResult;
     }
+
+    /// <summary>
+    /// Evaluates any property expression and returns its raw runtime value.
+    /// <para>
+    /// Use when the expected result is not boolean — e.g. to retrieve a
+    /// <see cref="TypeName.Collection"/> from <c>get-atoms-in-zone</c> in tests.
+    /// </para>
+    /// </summary>
+    internal object? EvaluateProperty(
+        KeywordNode expression,
+        GameState state,
+        IReadOnlyDictionary<string, object>? bindings = null)
+    {
+        var b = bindings ?? new Dictionary<string, object>();
+        return _evaluator.EvaluatePropertyNode(expression, b, state);
+    }
 }
