@@ -194,4 +194,35 @@ public static class Kw
     /// Use <c>Kw.Param("trigger_event")</c> as the <paramref name="ev"/> argument inside fired blocks.
     /// </summary>
     public static Invocation EventArg(KeywordNode ev, KeywordNode name) => new("event-arg", ev, name);
+
+    // -----------------------------------------------------------------------
+    //  Player lookup shorthands
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>player-by-name(name)</c> — returns the player atom registered under
+    /// the given name string.
+    /// <para>
+    /// The idiomatic way to pass a player reference to
+    /// <c>declare-winner</c> from a state-based rule body, where the atom ID
+    /// is not known at definition time.
+    /// </para>
+    /// </summary>
+    public static Invocation PlayerByName(KeywordNode name) => new("player-by-name", name);
+
+    // -----------------------------------------------------------------------
+    //  Game outcome shorthands
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>declare-winner(player)</c> — ends the game with the given player atom
+    /// as the winner.  Typically used inside a state-based rule body.
+    /// </summary>
+    public static Invocation DeclareWinner(KeywordNode player) => new("declare-winner", player);
+
+    /// <summary>
+    /// <c>declare-draw()</c> — ends the game as a draw.
+    /// Typically used inside a state-based rule body.
+    /// </summary>
+    public static Invocation DeclareDraw() => new("declare-draw");
 }

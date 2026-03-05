@@ -167,7 +167,12 @@ public sealed class GameStateView
 {
     private readonly IGameStateReadable _inner;
 
-    internal GameStateView(IGameStateReadable inner) => _inner = inner;
+    /// <summary>
+    /// Wraps an <see cref="IGameStateReadable"/> in a read-only view.
+    /// Callers outside the engine assembly obtain this through
+    /// <see cref="IPlayerStrategy"/> callbacks; the engine constructs it here.
+    /// </summary>
+    public GameStateView(IGameStateReadable inner) => _inner = inner;
 
     /// <summary>Returns the accumulated value for the named property on an atom.</summary>
     public double GetAccumulator(AtomId atom, string name) =>

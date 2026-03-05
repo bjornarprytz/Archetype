@@ -166,6 +166,67 @@ internal sealed class GameState : Core.IGameStateReadable
     }
 
     // -----------------------------------------------------------------------
+    //  Player name registry (populated by manifest provisioning)
+    // -----------------------------------------------------------------------
+
+    private readonly Dictionary<AtomId, string> _playerNames    = new();
+    private readonly Dictionary<string, AtomId> _playerAtomsByName = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Registers a player name keyed by their atom ID.  Called during manifest
+    /// provisioning so that <c>declare-winner</c> can resolve a player atom to
+    /// the string name stored in <see cref="GameResult"/>, and
+    /// <c>player-by-name</c> can reverse-look-up an atom from a name string.
+    /// </summary>
+    public void RegisterPlayerName(AtomId id, string name)
+    {
+        _playerNames[id]       = name;
+        _playerAtomsByName[name] = id;
+    }
+
+    /// <summary>
+    /// Attempts to resolve a player atom ID to its registered name.
+    /// Returns <c>false</c> if the atom was not registered as a player.
+    /// </summary>
+    public bool TryGetPlayerName(AtomId id, out string name) =>
+        _playerNames.TryGetValue(id, out name!);
+
+    /// <summary>
+    /// Attempts to resolve a player name string to its atom ID.
+    /// Returns <c>false</c> if no player with that name was registered.
+    /// Used by the <c>player-by-name</c> primitive.
+    /// </summary>
+    public bool TryGetPlayerAtomByName(string name, out AtomId id) =>
+        _playerAtomsByName.TryGetValue(name, out id);
+
+    // -----------------------------------------------------------------------
+    //  Game outcome (set by declare-winner / declare-draw)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>true</c> when a game-outcome primitive has fired.
+    /// The session loop exits after the current post-action sequence completes.
+    /// </summary>
+    public bool GameIsOver { get; private set; }
+
+    /// <summary>
+    /// The winning player's name, or <c>null</c> for a draw.
+    /// Meaningful only when <see cref="GameIsOver"/> is <c>true</c>.
+    /// </summary>
+    public string? PendingWinner { get; private set; }
+
+    /// <summary>
+    /// Records the game outcome.  Safe to call multiple times; first caller wins
+    /// (subsequent calls are no-ops to avoid clobbering an already-decided result).
+    /// </summary>
+    public void DeclareOutcome(string? winner)
+    {
+        if (GameIsOver) return; // first declaration wins
+        GameIsOver    = true;
+        PendingWinner = winner;
+    }
+
+    // -----------------------------------------------------------------------
     //  IGameStateReadable implementation (for GameStateView)
     // -----------------------------------------------------------------------
 

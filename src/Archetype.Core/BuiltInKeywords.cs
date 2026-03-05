@@ -342,6 +342,67 @@ public static class BuiltInKeywords
         PrimitiveSentinel: "session");
 
     // -----------------------------------------------------------------------
+    //  Player lookup
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Returns the player atom registered under the given name string.
+    /// <para>Signature: <c>player-by-name(name: PropertyName) → Player</c></para>
+    /// <para>
+    /// This primitive is the idiomatic way to pass a player atom to
+    /// <c>declare-winner</c> from a state-based rule body, where the atom ID
+    /// is not known at definition time.
+    /// </para>
+    /// </summary>
+    public static readonly KeywordDefinition PlayerByName = new(
+        Name: "player-by-name",
+        Parameters: [
+            new("name", TypeName.PropertyName, AtomKindRestriction: null),
+        ],
+        ReturnType:  TypeName.Player,
+        Description: "Returns the player atom registered under the given name string.",
+        PrimitiveSentinel: "player-by-name");
+
+    // -----------------------------------------------------------------------
+    //  Game outcome primitives
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Declares a winner and ends the game.  Typically called from a
+    /// state-based rule body.
+    /// <para>
+    /// After this executes the session loop exits after the current
+    /// post-action sequence finishes.  No further actions are processed.
+    /// </para>
+    /// <para>Signature: <c>declare-winner(player: Player) → void</c></para>
+    /// </summary>
+    /// <remarks>
+    /// <b>Open gap (flagged):</b> the architecture (D14) states that
+    /// state-based rules "produce an outcome" but does not specify the
+    /// mechanism.  This primitive is the engine's resolution of that gap.
+    /// Confirm with the architect before relying on this in game definitions.
+    /// </remarks>
+    public static readonly KeywordDefinition DeclareWinner = new(
+        Name: "declare-winner",
+        Parameters: [
+            new("player", TypeName.Player), // TypeName.Player already restricts to Player atoms; AtomKindRestriction not needed (D2)
+        ],
+        ReturnType:  TypeName.Boolean, // void — return value is meaningless
+        Description: "Declares the given player as the winner, ending the game.",
+        PrimitiveSentinel: "declare-winner");
+
+    /// <summary>
+    /// Declares a draw and ends the game.  Takes no parameters.
+    /// <para>Signature: <c>declare-draw() → void</c></para>
+    /// </summary>
+    public static readonly KeywordDefinition DeclareDraw = new(
+        Name: "declare-draw",
+        Parameters: [],
+        ReturnType:  TypeName.Boolean, // void
+        Description: "Declares a draw, ending the game with no winner.",
+        PrimitiveSentinel: "declare-draw");
+
+    // -----------------------------------------------------------------------
     //  Registry — the complete set (used for sync assertion at startup)
     // -----------------------------------------------------------------------
 
@@ -381,6 +442,9 @@ public static class BuiltInKeywords
         RandomInt,
         EventArg,
         Session,
+        PlayerByName,
+        DeclareWinner,
+        DeclareDraw,
     ];
 
     // -----------------------------------------------------------------------

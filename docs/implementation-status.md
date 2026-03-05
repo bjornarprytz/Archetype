@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-04 (implement-trigger-resolver rework complete — 24/24 tests green)
+> Last updated: 2026-03-05 (Tier 4 rework complete — 36/36 tests green; PR #4 blocker resolved)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -12,7 +12,7 @@
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
 | `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
-| `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver` | ✅ Tier 1–3 complete |
+| `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete (Text renderer excepted) |
 | `Archetype.Text` | Card text renderer | ❌ Not started |
 
 ---
@@ -110,7 +110,8 @@
 - Two-phase `CheckLifetimes(GameState, int currentTurn)`:
   - **Phase 1**: expire active effects whose `TurnTimer`, `TriggerCount`, or `WhileCondition` are satisfied
   - **Phase 2**: re-activate dormant declarative effects whose `WhileCondition` is now true
-- `InstantiateStaticEffect` helper used by `GameSession` provisioning (when implemented)
+- `InstantiateStaticEffect` helper used by `GameSession` provisioning
+- `ProvisionDeclarativeEffect(StaticEffectDef, AtomId, GameState)`: evaluates while-condition; activates immediately if absent/true, adds to `DormantDeclarativeEffects` if false
 
 ### Static effect lifecycle manager ✅
 - Active→Dormant and Dormant→Active transitions in `LifetimeChecker`
@@ -120,8 +121,40 @@
 
 ## Tier 4 — API Surface
 
-### `GameSessionBuilder` ❌ Not started
-### `GameSession` ❌ Not started
+### `GameSessionBuilder` ✅
+- Fluent builder in `Archetype.Engine/GameSession.cs`
+- `WithPlayerStrategy(name, strategy)` — registers one strategy per defined player; validated at `Build()` time
+- `WithRandomSource(source)` — required; `Build()` throws if absent
+- `WithObserver(observer)` — optional cascade observer
+- `UseDefaultInit()` / `WithInitManifest(manifest)` — manifest selection; last call wins
+- `FromSavedState(snapshot)` — throws `NotSupportedException` (D17 deferred)
+- `Build()` — validates all players have strategies; no extra strategies for undefined players
+
+### `GameSession` ✅
+- `static GameSessionBuilder Create(GameDefinition)` — factory entry point
+- `async Task<GameResult> RunAsync(CancellationToken)` — provisions manifest, drives the phase/turn loop
+- **Turn loop**: advances `turn-number` and `phase-index` accumulators; each phase runs Init → ActionWindow → Cleanup
+- **`GameIsOver` propagation**: checks `_state.GameIsOver` after every `ResolveAction` call; also short-circuits mid-cascade in `ActionResolver`
+- **Round-robin active player**: `(turn-1) % playerCount` over `PlayerDefinitions` insertion order
+- **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest`
+- **`ProvisionManifest(InitManifest)`**: zones → cards (with `ProvisionDeclarativeEffect`) → card overrides → player overrides
+- **`ComputeAvailableActions`**: simplified — returns all cards owned by active player as playable; no cost/condition/target checks (open gap, see below)
+- **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
+
+### `declare-winner` / `declare-draw` built-ins ✅
+- Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
+- **Resolution**: added `declare-winner(player)` and `declare-draw()` as primitives (33 total built-ins)
+- `GameState.DeclareOutcome(string?)`: first-call-wins; sets `GameIsOver` and `PendingWinner`
+- `GameState.RegisterPlayerName` / `TryGetPlayerName` / `TryGetPlayerAtomByName`: bidirectional player name registry
+- `RunStateBasedRules` exits immediately at loop top when `GameIsOver` is true (prevents infinite loop when an always-true SBR fired the terminal rule)
+- Cascade loop breaks when `GameIsOver` is true; per-trigger `GameIsOver` check stops mid-batch firing
+
+### `player-by-name` built-in ✅
+- `player-by-name(name: PropertyName) → Player` — reverse-looks up a player atom from its registered name string
+- The idiomatic way to pass a player reference to `declare-winner` from a static `KeywordNode` tree (where the atom ID is not known at definition time)
+- Added to `BuiltInKeywords.All` (33 total), `BuiltInHandlers`, and `Kw.PlayerByName`
+- End-to-end test `DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName` asserts `GameResult.Winner == "p1"` (resolves PR #4 blocker)
+
 ### Text renderer ❌ Not started (`Archetype.Text` project scaffolded but empty)
 
 ---
@@ -140,8 +173,9 @@
 | `MoveCard/MoveCardLayer2Tests.cs` | 3 | ✅ All passing |
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
+| `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 
-**Total: 24 tests, 24 passing.**
+**Total: 36 tests, 36 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -156,6 +190,19 @@
 - `CheckLifetimes_ExpiresActiveEffect_WhenCardLeavesWhileConditionZone`
 - `CheckLifetimes_ActivatesDormantEffect_WhenCardEntersWhileConditionZone`
 - `CompositeKeyword_CallingMoveCard_ProducesNestedEventTree_AndTriggerFires`
+
+### GameSession end-to-end (Layer 3)
+- `Builder_ThrowsWhenRandomSourceMissing`
+- `Builder_ThrowsWhenPlayerStrategyMissing`
+- `Builder_ThrowsForUnknownPlayerName`
+- `DeclareWinner_InPhaseInit_ReturnsResultWithCorrectWinner` — SBR fires draw on turn 1
+- `DeclareDraw_ViaSBR_ReturnsDrawResult` — always-true SBR with declare-draw; validates GameIsOver terminates the loop
+- `FinalLog_ContainsEvents_FromWinningTurn` — phase Init block runs, SBR fires draw; events present in FinalLog
+- `Manifest_ProvisionesPlayerAndZones_GameStateHasCorrectAtoms` — zone + player state provisioning; SBR ends game
+- `DeclareWinner_PlayerNameResolvedCorrectly` — card provisioning + manifest + declare-draw
+- `MultiTurn_GameRunsTwoTurns_BeforeDeclareDraw` — SBR condition on turn-number ≥ 2; player queues 2 passes
+- `PlayCard_Action_ExecutesPrimaryEffect` — LambdaPlayerStrategy plays card; SBR fires when score ≥ 1; event logged
+- `FromSavedState_ThrowsNotSupportedException`
 
 ### Trigger resolution (full D7/D8 lifecycle)
 - `TriggerFires_WhenEventMatchesKeywordAndNoCondition`
@@ -181,8 +228,8 @@
 
 1. **`PromptChannel` untested** — the `IPlayerStrategy` prompt dispatch exists but no test exercises a mid-block prompt (`choose`, target selection).
 2. **Text renderer** — `Archetype.Text` project is scaffolded; no implementation.
-3. **`GameSessionBuilder` / `GameSession`** — Tier 4 API surface not started. `ActionResolver` is ready to be consumed.
-4. **`ResolveAction` takes `EffectBlockDef?` not `PlayerAction`** — `GameSession` will translate `PlayCard`/`ActivateAbility`/`Pass` → `EffectBlockDef?` before calling `ResolveAction`. This is a Tier 4 responsibility.
+3. **`ComputeAvailableActions` is simplified** — currently returns all cards owned by the active player with no empty target list, no cost dry-run, no activation-condition check. A full implementation requires: (a) a "get atoms in zone" primitive for hands, (b) activation condition evaluation, (c) cost pre-flight. Flagged in source comments.
+4. **`declare-winner` architecture gap** — D14 didn't specify how a game-ending primitive signals `GameSession`. Resolved by adding `declare-winner(player)` / `declare-draw()` built-ins; decision documented here and in source XML docs. Architecture doc should be updated to ratify this (open item for architect).
 
 ---
 
@@ -190,14 +237,24 @@
 
 | Module | Blocked By |
 |---|---|
-| `GameSession` | Needs `ActionResolver` ✅ — ready to start |
-| `GameSessionBuilder` | Needs `GameSession` |
 | Text renderer | No blockers — can start any time |
 | Persistence | Deferred (D17) |
 
 ---
 
 ## Resolved Issues
+
+### Tier 4 — GameSession / GameSessionBuilder (2026-03-05) — rework complete
+- ✅ `GameSessionBuilder`: fluent builder with full player-strategy validation
+- ✅ `GameSession.RunAsync`: turn/phase loop, `GameIsOver` propagation, manifest provisioning
+- ✅ `declare-winner` / `declare-draw` end-to-end verified; `GameResult.Winner == "p1"` asserted
+- ✅ `player-by-name(name)` primitive added — resolves the "how to pass a player atom to declare-winner" gap
+- ✅ `LifetimeChecker.ProvisionDeclarativeEffect`: while-condition-aware provisioning used by manifest
+- ✅ `RunStateBasedRules` exits early on `GameIsOver` (prevents infinite loop from always-true terminal SBRs)
+- ✅ Cascade loop and per-trigger checks also break on `GameIsOver`
+- ✅ `Kw.DeclareWinner` / `Kw.DeclareDraw` / `Kw.PlayerByName` shorthands added to `Archetype.Build`
+- ✅ `GameStateView` constructor made `public` (was `internal`; needed cross-assembly from Engine)
+- ✅ 36/36 tests passing
 
 ### implement-trigger-resolver rework (2026-03-04)
 - ✅ **BLOCKER resolved**: `RunStateBasedRules` now has 4 tests covering all D7 fixpoint invariants

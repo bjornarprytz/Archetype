@@ -35,6 +35,8 @@ internal static class BuiltInHandlers
         mutations.Register("copy-card",          CopyCard);
         mutations.Register("create-zone",        CreateZone);
         mutations.Register("move-card",          MoveCard);
+        mutations.Register("declare-winner",     DeclareWinner);
+        mutations.Register("declare-draw",       DeclareDraw);
 
         // ── Property (read) primitives ───────────────────────────────────
 
@@ -61,8 +63,9 @@ internal static class BuiltInHandlers
         properties.Register("at-most",      Compare((a, b) => a <= b), ComparePure((a, b) => a <= b));
         properties.Register("equal-to",     Compare((a, b) => a == b), ComparePure((a, b) => a == b));
 
-        properties.Register("random-int",   RandomInt); // no pure variant — randomness not in conditions
-        properties.Register("event-arg",    EventArg, EventArgPure);
+        properties.Register("random-int",    RandomInt); // no pure variant — randomness not in conditions
+        properties.Register("event-arg",     EventArg, EventArgPure);
+        properties.Register("player-by-name", PlayerByName, PlayerByNamePure);
     }
 
     // -----------------------------------------------------------------------
@@ -361,6 +364,82 @@ internal static class BuiltInHandlers
         });
 
         return null; // void
+    }
+
+    // -----------------------------------------------------------------------
+    //  Game outcome primitives
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>declare-winner(player)</c> — sets the game outcome to a win for the
+    /// given player atom.  The session loop exits after the current
+    /// post-action sequence completes.  First call wins; subsequent calls
+    /// to either <c>declare-winner</c> or <c>declare-draw</c> are no-ops.
+    /// </summary>
+    private static object? DeclareWinner(object[] args, ExecutionContext ctx)
+    {
+        var playerAtomId = RequireAtomOfKind(
+            args, 0, "declare-winner", "player", AtomKind.Player, ctx.GameState);
+
+        // Resolve the player's string name from the registry built during provisioning.
+        if (!ctx.GameState.TryGetPlayerName(playerAtomId, out var winnerName))
+            throw new EngineException(
+                $"declare-winner: atom {playerAtomId} is not a registered player name. " +
+                "Ensure the player was provisioned via ManifestProvisioner or GameStateBuilder.");
+
+        ctx.GameState.DeclareOutcome(winnerName);
+
+        ctx.EventLog.Append(new GameEvent
+        {
+            KeywordName = "declare-winner",
+            BoundArgs   = new Dictionary<string, object>
+            {
+                ["player"] = playerAtomId,
+                ["winner"] = winnerName,
+            },
+        });
+
+        return null;
+    }
+
+    /// <summary>
+    /// <c>declare-draw()</c> — sets the game outcome to a draw.
+    /// The session loop exits after the current post-action sequence completes.
+    /// </summary>
+    private static object? DeclareDraw(object[] args, ExecutionContext ctx)
+    {
+        ctx.GameState.DeclareOutcome(winner: null);
+
+        ctx.EventLog.Append(new GameEvent
+        {
+            KeywordName = "declare-draw",
+            BoundArgs   = new Dictionary<string, object>(),
+        });
+
+        return null;
+    }
+
+    // -----------------------------------------------------------------------
+    //  Player lookup
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>player-by-name(name)</c> — reverse-looks up a player atom from its
+    /// registered name string.  The idiomatic way to pass a player reference
+    /// to <c>declare-winner</c> from a state-based rule body, where the atom
+    /// ID is not known at definition time.
+    /// </summary>
+    private static object? PlayerByName(object[] args, ExecutionContext ctx) =>
+        PlayerByNamePure(args, ctx.GameState, ctx.Bindings);
+
+    private static object? PlayerByNamePure(
+        object[] args, GameState state, IReadOnlyDictionary<string, object> _)
+    {
+        var name = RequireString(args, 0, "player-by-name", "name");
+        if (!state.TryGetPlayerAtomByName(name, out var atomId))
+            throw new EngineException(
+                $"player-by-name: no player named '{name}' is registered in this session.");
+        return atomId;
     }
 
     // -----------------------------------------------------------------------
