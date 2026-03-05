@@ -315,10 +315,15 @@ public sealed class GameSession
     /// <summary>
     /// Returns the set of actions currently available to the active player.
     /// <para>
-    /// <b>Simplified implementation:</b> enumerates all cards owned by the
-    /// player as playable (no activation-condition or cost-dry-run checks).
-    /// Full evaluation of activation conditions, costs, and valid target sets
-    /// is a known open gap; see <c>docs/implementation-status.md</c>.
+    /// Uses two independent passes (D19 steps 2 and 4):<br/>
+    /// <b>Pass 1 — PlayCard candidates:</b> iterates owned cards, filters by zone
+    /// (definition name ∈ <see cref="GameDefinition.PlayableZoneNames"/> AND zone
+    /// owner == active player), then evaluates each card's
+    /// <see cref="CardDefinition.ActivationCondition"/>.<br/>
+    /// <b>Pass 2 — Ability candidates:</b> iterates ALL owned cards regardless of zone;
+    /// zone restrictions for abilities are expressed via the ability's own
+    /// <c>ActivationCondition</c>.<br/>
+    /// <c>Pass</c> is always included.  Cost pre-flight is deferred (D19 design D-C).
     /// </para>
     /// </summary>
     private AvailableActions ComputeAvailableActions(string activePlayer)
@@ -329,14 +334,83 @@ public sealed class GameSession
                 Array.Empty<ActivatableAbilityOption>(),
                 CanPass: true);
 
-        var playableCards = _state.GetAtoms(AtomKind.Card)
-            .Where(cardId => _state.GetAtom(cardId).OwnerId == playerAtomId)
-            .Select(cardId => new PlayableCardOption(cardId, Array.Empty<TargetSet>()))
-            .ToList();
+        // Build a set of playable zone definition names for O(1) lookup.
+        // null PlayableZoneNames = no zone filter (any zone is playable).
+        var playableZoneDefNames = _definition.PlayableZoneNames is { Count: > 0 } names
+            ? new HashSet<string>(names, StringComparer.Ordinal)
+            : null;
 
+        var playableCards    = new List<PlayableCardOption>();
+        var activatableAbils = new List<ActivatableAbilityOption>();
+
+        // ── Pass 1: PlayCard candidates (zone-filtered) ──────────────────────
+        // D19 step 2: only cards in a zone whose definition name is in
+        // PlayableZoneNames AND whose zone is owned by the active player
+        // are eligible.  The two conditions are independent so both must hold.
+        foreach (var cardId in _state.GetAtoms(AtomKind.Card))
+        {
+            var card = _state.GetAtom(cardId);
+            if (card.OwnerId != playerAtomId) continue;
+
+            // --- Zone filter (D19 step 2) ---
+            // If PlayableZoneNames is set, the card must be in a zone whose
+            // definition name appears in the list.  Additionally the zone itself
+            // must be owned by the active player — a card moved into an opponent's
+            // hand zone is NOT considered "in the active player's hand".
+            if (playableZoneDefNames is not null)
+            {
+                var zone = _state.GetAtom(card.ZoneId);
+                if (zone.OwnerId != playerAtomId) continue;
+                if (!_atomDefinitionNames.TryGetValue(card.ZoneId, out var zoneDefName)
+                    || !playableZoneDefNames.Contains(zoneDefName))
+                    continue; // card is in a non-playable zone (or no definition)
+            }
+
+            if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName)) continue;
+            if (!_definition.CardDefinitions.TryGetValue(cardDefName, out var cardDef)) continue;
+
+            // --- Activation condition (D19) ---
+            // Evaluated pure (no mutation, no log).  The card atom is injected
+            // as "source" per D13 — the ActivationCondition path has no StaticEffect
+            // to provide it automatically, so we must supply it manually here.
+            if (cardDef.ActivationCondition is not null)
+            {
+                var bindings = new Dictionary<string, object> { ["source"] = cardId };
+                if (!_resolver.EvaluateCondition(cardDef.ActivationCondition, _state, bindings))
+                    continue; // condition false — card not playable right now
+            }
+
+            playableCards.Add(new PlayableCardOption(cardId, Array.Empty<TargetSet>()));
+        }
+
+        // ── Pass 2: Ability candidates (all owned cards, any zone) ───────────
+        // D19 step 4: zone membership is irrelevant for ability activation.
+        // Zone restrictions for abilities are expressed via the ability's own
+        // ActivationCondition (e.g. a check that the card is on the battlefield).
+        foreach (var cardId in _state.GetAtoms(AtomKind.Card))
+        {
+            var card = _state.GetAtom(cardId);
+            if (card.OwnerId != playerAtomId) continue;
+
+            if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName2)) continue;
+            if (!_definition.CardDefinitions.TryGetValue(cardDefName2, out var cardDef2)) continue;
+
+            foreach (var ability in cardDef2.AdditionalEffects)
+            {
+                if (ability.ActivationCondition is not null)
+                {
+                    var bindings = new Dictionary<string, object> { ["source"] = cardId };
+                    if (!_resolver.EvaluateCondition(ability.ActivationCondition, _state, bindings))
+                        continue;
+                }
+                activatableAbils.Add(new ActivatableAbilityOption(cardId, ability.Name, Array.Empty<TargetSet>()));
+            }
+        }
+
+        // Pass is always available — a player must never be stuck (D19 design D-D).
         return new AvailableActions(
             PlayableCards:        playableCards,
-            ActivatableAbilities: Array.Empty<ActivatableAbilityOption>(),
+            ActivatableAbilities: activatableAbils,
             CanPass:              true);
     }
 

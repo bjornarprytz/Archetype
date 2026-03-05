@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (Tier 4 rework complete — 36/36 tests green; PR #4 blocker resolved)
+> Last updated: 2026-03-05 (D19 review blockers resolved — 45/45 tests passing)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -26,7 +26,7 @@
 - `EffectBlockDef` / `EffectBlockStep` for block-level composition
 
 ### `BuiltInKeywords` registry ✅
-- 30 entries: all mutation primitives, property queries, arithmetic, logic, `move-card`, and `event-arg`
+- 34 entries: all mutation primitives, property queries, arithmetic, logic, `move-card`, `event-arg`, `declare-winner`, `declare-draw`, `player-by-name`, `get-atoms-in-zone`
 - `BuiltInKeywords.All` list enforces sync invariant with Engine dispatch
 
 ### `EventLog` and `GameEvent` ✅
@@ -46,6 +46,8 @@
 
 ### `GameDefinition` ✅
 - `CardDefinition`, `ZoneDefinition`, `PhaseDefinition`, `ActionRuleDefinition`, `StateBasedRule`, `CardSet`, `PlayerDefinition`, `GameDefinition`
+- `CardDefinition.ActivationCondition: KeywordNode?` (D19) — optional pure condition evaluated before offering PlayCard; card atom injected as `source`
+- `GameDefinition.PlayableZoneNames: IReadOnlyList<string>?` (D19) — zone definition names from which cards may be played; `null` = no zone filter
 
 ### Interfaces ✅
 - `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTriggerCascadeAsync` → `CascadeDirective`)
@@ -138,8 +140,21 @@
 - **Round-robin active player**: `(turn-1) % playerCount` over `PlayerDefinitions` insertion order
 - **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest`
 - **`ProvisionManifest(InitManifest)`**: zones → cards (with `ProvisionDeclarativeEffect`) → card overrides → player overrides
-- **`ComputeAvailableActions`**: simplified — returns all cards owned by active player as playable; no cost/condition/target checks (open gap, see below)
+- **`ComputeAvailableActions`**: two independent passes — Pass 1 (PlayCard, zone-filtered + activation condition); Pass 2 (abilities, all owned cards regardless of zone); cost pre-flight deferred (D19 D-C)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
+
+### `get-atoms-in-zone` built-in ✅
+- `get-atoms-in-zone(zone: Zone) → Collection` — pure read; returns all atoms whose `ZoneId` matches the given zone atom
+- Used by `ComputeAvailableActions` (via equivalent internal `GetAllAtoms()` read) and composable in keyword trees
+- `GetAllAtoms()` added to `GameState` to support the handler
+- `BlockExecutor.EvaluateProperty(node, state, bindings?)` added (internal) for testing non-boolean primitive results
+
+### `ComputeAvailableActions` ✅
+- Zone filter (D19 step 2): checks zone definition name ∈ `PlayableZoneNames` **and** zone owner == active player; prevents cross-player zone exploitation
+- Activation condition (D19): `source` injected manually per D13 (no `StaticEffect` wrapper on this path)
+- Ability loop (D19 step 4): independent second pass over all owned cards, ignores zone membership entirely; zone restrictions expressed via ability's own `ActivationCondition`
+- Tests: 9 tests covering get-atoms-in-zone (3), zone filter, activation condition, source injection, ability-in-non-playable-zone, zone-owner restriction, pass-always-present
+- **Open gap (pre-existing)**: runtime-created atoms (`create-card`/`create-zone`) are invisible to `ComputeAvailableActions` — `_atomDefinitionNames` is only populated during `ProvisionManifest`
 
 ### `declare-winner` / `declare-draw` built-ins ✅
 - Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
@@ -174,8 +189,9 @@
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
+| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 7 | ⚠️ Passing but missing tests for D19 steps 2 & 4 invariants |
 
-**Total: 36 tests, 36 passing.**
+**Total: 43 tests, 43 passing. (D19 invariant tests missing — see blockers.)**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -228,7 +244,7 @@
 
 1. **`PromptChannel` untested** — the `IPlayerStrategy` prompt dispatch exists but no test exercises a mid-block prompt (`choose`, target selection).
 2. **Text renderer** — `Archetype.Text` project is scaffolded; no implementation.
-3. **`ComputeAvailableActions` is simplified** — currently returns all cards owned by the active player with no empty target list, no cost dry-run, no activation-condition check. A full implementation requires: (a) a "get atoms in zone" primitive for hands, (b) activation condition evaluation, (c) cost pre-flight. Flagged in source comments.
+3. **`ComputeAvailableActions` cost pre-flight deferred** — zone filtering and activation-condition evaluation are now implemented (D19). Cost pre-flight (checking whether a card's cost can be paid) remains deferred per the D19 design doc; no current game definition requires it.
 4. **`declare-winner` architecture gap** — D14 didn't specify how a game-ending primitive signals `GameSession`. Resolved by adding `declare-winner(player)` / `declare-draw()` built-ins; decision documented here and in source XML docs. Architecture doc should be updated to ratify this (open item for architect).
 
 ---

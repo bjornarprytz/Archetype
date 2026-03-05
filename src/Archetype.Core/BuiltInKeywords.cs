@@ -342,6 +342,29 @@ public static class BuiltInKeywords
         PrimitiveSentinel: "session");
 
     // -----------------------------------------------------------------------
+    //  Zone query (D19)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Returns all atoms currently residing in the given zone.
+    /// <para>Signature: <c>get-atoms-in-zone(zone: Zone) → Collection</c></para>
+    /// <para>
+    /// Pure read — no state mutation, no event log entry.  The returned
+    /// collection contains every atom whose <c>ZoneId</c> equals the
+    /// given zone atom ID.  Callers that only want cards should filter by
+    /// <see cref="AtomKind.Card"/> themselves.
+    /// </para>
+    /// </summary>
+    public static readonly KeywordDefinition GetAtomsInZone = new(
+        Name: "get-atoms-in-zone",
+        Parameters: [
+            new("zone", TypeName.Zone, AtomKindRestriction: null),
+        ],
+        ReturnType:  TypeName.Collection,
+        Description: "Returns all atoms currently in the given zone.",
+        PrimitiveSentinel: "get-atoms-in-zone");
+
+    // -----------------------------------------------------------------------
     //  Player lookup
     // -----------------------------------------------------------------------
 
@@ -442,6 +465,7 @@ public static class BuiltInKeywords
         RandomInt,
         EventArg,
         Session,
+        GetAtomsInZone,
         PlayerByName,
         DeclareWinner,
         DeclareDraw,
