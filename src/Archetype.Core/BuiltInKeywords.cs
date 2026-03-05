@@ -33,7 +33,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.ContributionId,
         Description: "Adds delta to a named accumulator on the target atom.",
-        PrimitiveSentinel: "modify-accumulator");
+        PrimitiveSentinel: "modify-accumulator",
+        TextTemplate: "modify {name} on {atom} by {delta}");
 
     /// <summary>
     /// Applies a numeric modifier (additive or multiplicative) to a named
@@ -51,7 +52,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.ContributionId,
         Description: "Applies a modifier contribution to a property on the target atom.",
-        PrimitiveSentinel: "apply-modifier");
+        PrimitiveSentinel: "apply-modifier",
+        TextTemplate: "apply modifier to {name} on {atom}");
 
     /// <summary>
     /// Removes a modifier contribution by ID.
@@ -64,7 +66,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean, // void modelled as void-like; returns nothing meaningful
         Description: "Removes a modifier contribution by ID.",
-        PrimitiveSentinel: "remove-modifier");
+        PrimitiveSentinel: "remove-modifier",
+        TextTemplate: "remove modifier {id}");
 
     /// <summary>
     /// Applies a named condition to an atom and returns the contribution ID.
@@ -79,7 +82,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.ContributionId,
         Description: "Applies a condition contribution to the target atom.",
-        PrimitiveSentinel: "apply-condition");
+        PrimitiveSentinel: "apply-condition",
+        TextTemplate: "apply condition {name} to {atom}");
 
     /// <summary>
     /// Removes all contributions of a named condition from an atom.
@@ -93,7 +97,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean,
         Description: "Removes all condition contributions of the given name from the target atom.",
-        PrimitiveSentinel: "remove-condition");
+        PrimitiveSentinel: "remove-condition",
+        TextTemplate: "remove condition {name} from {atom}");
 
     /// <summary>
     /// Creates a new card atom from the named definition and places it in the
@@ -109,7 +114,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Atom,
         Description: "Instantiates a new card from the named definition and places it in the specified zone.",
-        PrimitiveSentinel: "create-card");
+        PrimitiveSentinel: "create-card",
+        TextTemplate: "create {definition-name} in {zone}");
 
     /// <summary>
     /// Creates a copy of a card (same definition, no runtime state copied) and
@@ -125,7 +131,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Atom,
         Description: "Instantiates a card using the same definition as source; places it in destination-zone with no runtime state from source.",
-        PrimitiveSentinel: "copy-card");
+        PrimitiveSentinel: "copy-card",
+        TextTemplate: "copy {source} to {destination-zone}");
 
     /// <summary>
     /// Creates a new zone atom from the named definition.
@@ -140,7 +147,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Atom,
         Description: "Instantiates a new zone from the named definition.",
-        PrimitiveSentinel: "create-zone");
+        PrimitiveSentinel: "create-zone",
+        TextTemplate: "create zone {definition-name} for {owner}");
 
     /// <summary>
     /// Moves a card to a different zone.  Captures <c>origin = card.ZoneId</c>
@@ -167,7 +175,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean, // void — return value is meaningless
         Description: "Moves a card to the specified destination zone, logging a move-card event with origin captured before mutation.",
-        PrimitiveSentinel: "move-card");
+        PrimitiveSentinel: "move-card",
+        TextTemplate: "move {card} to {destination}");
 
     // -----------------------------------------------------------------------
     //  §9.2  Read primitives (property keywords — no side effects)
@@ -185,7 +194,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Number,
         Description: "Returns the accumulated value of the named property on the atom.",
-        PrimitiveSentinel: "get-state");
+        PrimitiveSentinel: "get-state",
+        TextTemplate: "{atom}.{name}");
 
     /// <summary>
     /// Returns the modifier-adjusted computed value of a named property on an atom.
@@ -199,7 +209,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Number,
         Description: "Returns the modifier-adjusted value of the named property on the atom.",
-        PrimitiveSentinel: "get-property");
+        PrimitiveSentinel: "get-property",
+        TextTemplate: "{atom}.{name}");
 
     /// <summary>
     /// Returns <c>true</c> if the card is currently in the specified zone.
@@ -213,7 +224,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean,
         Description: "Returns true if the card currently occupies the specified zone.",
-        PrimitiveSentinel: "in-zone");
+        PrimitiveSentinel: "in-zone",
+        TextTemplate: "{card} in {zone}");
 
     /// <summary>
     /// Returns <c>true</c> if the named condition is active on the atom.
@@ -227,7 +239,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean,
         Description: "Returns true if the named condition is active on the atom.",
-        PrimitiveSentinel: "has-condition");
+        PrimitiveSentinel: "has-condition",
+        TextTemplate: "{atom} has {name}");
 
     /// <summary>
     /// Returns the owner atom of a card or zone.
@@ -240,53 +253,55 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Atom,
         Description: "Returns the owner of a card or zone atom.",
-        PrimitiveSentinel: "owner-of");
+        PrimitiveSentinel: "owner-of",
+        TextTemplate: "owner of {atom}");
 
     // -----------------------------------------------------------------------
     //  §9.3  Arithmetic primitives (A12)
     // -----------------------------------------------------------------------
 
     /// <summary><c>add(a, b) → Number</c></summary>
-    public static readonly KeywordDefinition Add = Arithmetic("add", "Returns a + b.");
+    public static readonly KeywordDefinition Add      = Arithmetic("add",      "Returns a + b.",            "{a} + {b}");
     /// <summary><c>subtract(a, b) → Number</c></summary>
-    public static readonly KeywordDefinition Subtract = Arithmetic("subtract", "Returns a - b.");
+    public static readonly KeywordDefinition Subtract = Arithmetic("subtract", "Returns a - b.",            "{a} - {b}");
     /// <summary><c>multiply(a, b) → Number</c></summary>
-    public static readonly KeywordDefinition Multiply = Arithmetic("multiply", "Returns a × b.");
+    public static readonly KeywordDefinition Multiply = Arithmetic("multiply", "Returns a × b.",            "{a} × {b}");
     /// <summary><c>max(a, b) → Number</c></summary>
-    public static readonly KeywordDefinition Max = Arithmetic("max", "Returns the larger of a and b.");
+    public static readonly KeywordDefinition Max      = Arithmetic("max",      "Returns the larger of a and b.",  "max({a}, {b})");
     /// <summary><c>min(a, b) → Number</c></summary>
-    public static readonly KeywordDefinition Min = Arithmetic("min", "Returns the smaller of a and b.");
+    public static readonly KeywordDefinition Min      = Arithmetic("min",      "Returns the smaller of a and b.", "min({a}, {b})");
 
     // -----------------------------------------------------------------------
     //  §9.3  Boolean primitives
     // -----------------------------------------------------------------------
 
     /// <summary><c>and(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition And = Bool2("and", "Returns a AND b.");
+    public static readonly KeywordDefinition And = Bool2("and", "Returns a AND b.", "{a} and {b}");
     /// <summary><c>or(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition Or  = Bool2("or",  "Returns a OR b.");
+    public static readonly KeywordDefinition Or  = Bool2("or",  "Returns a OR b.",  "{a} or {b}");
     /// <summary><c>not(p) → Boolean</c></summary>
     public static readonly KeywordDefinition Not = new(
         Name: "not",
         Parameters: [ new("p", TypeName.Boolean, AtomKindRestriction: null) ],
         ReturnType:  TypeName.Boolean,
         Description: "Returns NOT p.",
-        PrimitiveSentinel: "not");
+        PrimitiveSentinel: "not",
+        TextTemplate: "not {p}");
 
     // -----------------------------------------------------------------------
     //  §9.3  Comparison primitives
     // -----------------------------------------------------------------------
 
     /// <summary><c>less-than(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition LessThan    = Compare("less-than",    "Returns a < b.");
+    public static readonly KeywordDefinition LessThan    = Compare("less-than",    "Returns a < b.",  "{a} < {b}");
     /// <summary><c>greater-than(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition GreaterThan = Compare("greater-than", "Returns a > b.");
+    public static readonly KeywordDefinition GreaterThan = Compare("greater-than", "Returns a > b.",  "{a} > {b}");
     /// <summary><c>at-least(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition AtLeast     = Compare("at-least",     "Returns a >= b.");
+    public static readonly KeywordDefinition AtLeast     = Compare("at-least",     "Returns a >= b.", "{a} >= {b}");
     /// <summary><c>at-most(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition AtMost      = Compare("at-most",      "Returns a <= b.");
+    public static readonly KeywordDefinition AtMost      = Compare("at-most",      "Returns a <= b.", "{a} <= {b}");
     /// <summary><c>equal-to(a, b) → Boolean</c></summary>
-    public static readonly KeywordDefinition EqualTo     = Compare("equal-to",     "Returns a == b.");
+    public static readonly KeywordDefinition EqualTo     = Compare("equal-to",     "Returns a == b.", "{a} = {b}");
 
     // -----------------------------------------------------------------------
     //  §9.2  Randomness read primitives (A4)
@@ -301,7 +316,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Number,
         Description: "Returns a uniformly random integer in [min, max] inclusive.",
-        PrimitiveSentinel: "random-int");
+        PrimitiveSentinel: "random-int",
+        TextTemplate: "random({min} to {max})");
 
     // -----------------------------------------------------------------------
     //  §9.2  Event access primitives (D8 — trigger_event binding)
@@ -324,7 +340,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Atom, // return type varies; modelled as Atom (loosely typed at runtime)
         Description: "Extracts a named bound argument from a GameEvent reference.",
-        PrimitiveSentinel: "event-arg");
+        PrimitiveSentinel: "event-arg",
+        TextTemplate: "event.{name}");
 
     // -----------------------------------------------------------------------
     //  Session reference
@@ -339,7 +356,8 @@ public static class BuiltInKeywords
         Parameters: [],
         ReturnType:  TypeName.Atom,
         Description: "Returns the singleton session atom.",
-        PrimitiveSentinel: "session");
+        PrimitiveSentinel: "session",
+        TextTemplate: "session");
 
     // -----------------------------------------------------------------------
     //  Zone query (D19)
@@ -362,7 +380,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Collection,
         Description: "Returns all atoms currently in the given zone.",
-        PrimitiveSentinel: "get-atoms-in-zone");
+        PrimitiveSentinel: "get-atoms-in-zone",
+        TextTemplate: "atoms in {zone}");
 
     // -----------------------------------------------------------------------
     //  Player lookup
@@ -384,7 +403,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Player,
         Description: "Returns the player atom registered under the given name string.",
-        PrimitiveSentinel: "player-by-name");
+        PrimitiveSentinel: "player-by-name",
+        TextTemplate: "player {name}");
 
     // -----------------------------------------------------------------------
     //  Game outcome primitives
@@ -412,7 +432,8 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean, // void — return value is meaningless
         Description: "Declares the given player as the winner, ending the game.",
-        PrimitiveSentinel: "declare-winner");
+        PrimitiveSentinel: "declare-winner",
+        TextTemplate: "declare winner: {player}");
 
     /// <summary>
     /// Declares a draw and ends the game.  Takes no parameters.
@@ -423,7 +444,8 @@ public static class BuiltInKeywords
         Parameters: [],
         ReturnType:  TypeName.Boolean, // void
         Description: "Declares a draw, ending the game with no winner.",
-        PrimitiveSentinel: "declare-draw");
+        PrimitiveSentinel: "declare-draw",
+        TextTemplate: "declare draw");
 
     // -----------------------------------------------------------------------
     //  Registry — the complete set (used for sync assertion at startup)
@@ -475,7 +497,7 @@ public static class BuiltInKeywords
     //  Private helpers for concise definition of symmetric primitives
     // -----------------------------------------------------------------------
 
-    private static KeywordDefinition Arithmetic(string name, string desc) => new(
+    private static KeywordDefinition Arithmetic(string name, string desc, string template) => new(
         Name: name,
         Parameters: [
             new("a", TypeName.Number, AtomKindRestriction: null),
@@ -483,9 +505,10 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Number,
         Description: desc,
-        PrimitiveSentinel: name);
+        PrimitiveSentinel: name,
+        TextTemplate: template);
 
-    private static KeywordDefinition Compare(string name, string desc) => new(
+    private static KeywordDefinition Compare(string name, string desc, string template) => new(
         Name: name,
         Parameters: [
             new("a", TypeName.Number, AtomKindRestriction: null),
@@ -493,9 +516,10 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean,
         Description: desc,
-        PrimitiveSentinel: name);
+        PrimitiveSentinel: name,
+        TextTemplate: template);
 
-    private static KeywordDefinition Bool2(string name, string desc) => new(
+    private static KeywordDefinition Bool2(string name, string desc, string template) => new(
         Name: name,
         Parameters: [
             new("a", TypeName.Boolean, AtomKindRestriction: null),
@@ -503,5 +527,6 @@ public static class BuiltInKeywords
         ],
         ReturnType:  TypeName.Boolean,
         Description: desc,
-        PrimitiveSentinel: name);
+        PrimitiveSentinel: name,
+        TextTemplate: template);
 }

@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (D19 review blockers resolved — 45/45 tests passing)
+> Last updated: 2026-03-05 (Text renderer complete — 70/70 tests passing)
 > Branch: `back-to-basics`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -12,8 +12,8 @@
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
 | `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
-| `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete (Text renderer excepted) |
-| `Archetype.Text` | Card text renderer | ❌ Not started |
+| `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
+| `Archetype.Text` | Card text renderer | ✅ Complete (D11, D18) |
 
 ---
 
@@ -170,7 +170,24 @@
 - Added to `BuiltInKeywords.All` (33 total), `BuiltInHandlers`, and `Kw.PlayerByName`
 - End-to-end test `DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName` asserts `GameResult.Winner == "p1"` (resolves PR #4 blocker)
 
-### Text renderer ❌ Not started (`Archetype.Text` project scaffolded but empty)
+### Text renderer ✅
+- **`RenderNode` discriminated union** in `Archetype.Core/RenderNode.cs`:
+  - `TextSpan(Text)` — leaf, literal string fragment
+  - `CompositeNode(Summary, Body)` — keyword invocation; summary from locale/template, body always full recursive structural expansion
+  - `SequenceNode(Items)` — ordered list of nodes (block steps, static effect parts)
+  - `RulesRef(Key, DisplayText)` — D18 cross-reference leaf; host calls `Resolve` to expand
+- **`TextRenderer`** in `Archetype.Text/TextRenderer.cs`:
+  - `Render(KeywordNode, locale?, bindings?)` — definition-time (bindings=null) or invocation-time modes
+  - `RenderBlock(EffectBlockDef, locale?, bindings?)` — `SequenceNode` of step renders; single-step returns node directly
+  - `RenderStaticEffect(StaticEffectDef, locale?, bindings?)` — contribution block + trigger + lifetime
+  - `RenderLifetimeSpec(LifetimeSpec, locale?)` — uses reserved `engine.lifetime.*` keys with OR-separation
+  - `Resolve(keywordName, locale?, bindings?)` — D18 link resolution; returns null for unknown keywords
+  - `FlattenToText(RenderNode)` — public static helper for collapsing trees to strings
+- **Template resolution order**: locale → `TextTemplate` → structural `"keyword(arg, arg)"` fallback
+- **`TextTemplate` values** added to all 34 built-in keyword definitions in `BuiltInKeywords.cs`
+- **Definition-time caching**: body renders cached per `(KeywordDefinition, locale)` via `ConditionalWeakTable`; invocation-time not cached
+- **D18 cross-reference tag parsing**: `[display](key)` (long form) and `[key]` (short form) in template strings produce `RulesRef` leaf nodes
+- **25 tests** covering: ParameterRef def/inv modes, Literal, Invocation+TextTemplate, structural fallback, locale override, cross-ref tags (both forms), RenderBlock single/multi, RenderLifetimeSpec (all condition types + OR join + locale override + permanent), RenderStaticEffect, Resolve (primitive/composite/unknown), caching (cached/uncached), dual-use invariant (D2 §1.1, Layer 2)
 
 ---
 
@@ -190,8 +207,9 @@
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 | `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
+| `TextRenderer/TextRendererTests.cs` | 25 | ✅ All passing |
 
-**Total: 45 tests, 45 passing.**
+**Total: 70 tests, 70 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
