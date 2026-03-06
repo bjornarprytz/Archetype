@@ -58,9 +58,14 @@ public sealed class TextRenderer
     //   [key]                 — short-form cross-reference (D18)
     // Capture group 1 captures the token text so Regex.Split returns it
     // interleaved with the plain-text segments.
+    //
+    // RegexOptions.Compiled is intentionally omitted: Reflection.Emit is not
+    // available in Godot's WebAssembly export context (D1 WASM constraint).
+    // Interpreted mode is sufficient for a template parser that is never on
+    // the hot execution path.
     private static readonly Regex TemplateTokenRegex = new(
         @"(\{[\w-]+\}|\[[^\]]+\]\([^)]+\)|\[[^\]]+\])",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        RegexOptions.CultureInvariant);
 
     // Reserved engine locale keys and their built-in English defaults.
     private static readonly IReadOnlyDictionary<string, string> _engineDefaults =
@@ -146,8 +151,9 @@ public sealed class TextRenderer
 
     /// <summary>
     /// Renders an <see cref="EffectBlockDef"/> as a <see cref="SequenceNode"/>
-    /// with one child per step.  A block with a single step returns that step's
-    /// <see cref="RenderNode"/> directly (no unnecessary wrapper).
+    /// with one child per step (D11).  Always returns a
+    /// <see cref="SequenceNode"/> — including for single-step blocks — so that
+    /// callers can pattern-match or iterate uniformly without a special case.
     /// </summary>
     /// <param name="block">The effect block to render.</param>
     /// <param name="localeStrings">Optional locale string map.</param>
@@ -166,7 +172,9 @@ public sealed class TextRenderer
                 bindings))
             .ToList();
 
-        return items.Count == 1 ? items[0] : new SequenceNode(items);
+        // Always wrap in SequenceNode — even for a single step — so that hosts
+        // can iterate steps uniformly without a special case (D11 API contract).
+        return new SequenceNode(items);
     }
 
     /// <summary>

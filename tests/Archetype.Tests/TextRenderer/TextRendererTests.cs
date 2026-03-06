@@ -305,12 +305,10 @@ public sealed class TextRendererTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// T7  RenderBlock with two steps produces a SequenceNode with two children.
-    ///     A single-step block returns the single CompositeNode directly
-    ///     (no unnecessary wrapper).
+    /// T7a  RenderBlock with two steps produces a SequenceNode with two children.
     /// </summary>
     [Fact]
-    public void RenderBlock_MultiStep_ProducesSequenceNode()
+    public void RenderBlock_MultiStep_ProducesSequenceNodeWithTwoItems()
     {
         var renderer = Renderer();
         var twoStepBlock = new EffectBlockDef([
@@ -324,8 +322,13 @@ public sealed class TextRendererTests
         Assert.Equal(2, seq.Items.Count);
     }
 
+    /// <summary>
+    /// T7b  RenderBlock with a single step still produces a SequenceNode
+    ///      (with one item), not the inner node directly.  This is the D11
+    ///      API contract: hosts can always iterate steps uniformly.
+    /// </summary>
     [Fact]
-    public void RenderBlock_SingleStep_ReturnsSingleNodeDirectly()
+    public void RenderBlock_SingleStep_AlwaysReturnsSequenceNode()
     {
         var renderer = Renderer();
         var oneStepBlock = new EffectBlockDef([
@@ -334,8 +337,11 @@ public sealed class TextRendererTests
 
         var result = renderer.RenderBlock(oneStepBlock, localeStrings: null, bindings: null);
 
-        // No SequenceNode wrapper for a single step.
-        Assert.IsType<CompositeNode>(result);
+        // D11: always a SequenceNode so callers can iterate uniformly.
+        var seq = Assert.IsType<SequenceNode>(result);
+        var singleItem = Assert.Single(seq.Items);
+        // The single item is still a CompositeNode (the rendered Invocation).
+        Assert.IsType<CompositeNode>(singleItem);
     }
 
     // -----------------------------------------------------------------------
@@ -477,6 +483,64 @@ public sealed class TextRendererTests
         Assert.Contains(seq.Items, item => Flat(item).Contains("when add:"));
     }
 
+    /// <summary>
+    /// T8h  RenderStaticEffect with a StateContributionBlock includes that
+    ///      block's rendered node as the first item in the SequenceNode.
+    /// </summary>
+    [Fact]
+    public void RenderStaticEffect_WithStateContributionBlock_IncludesContributionInSequence()
+    {
+        var renderer = Renderer();
+
+        var contributionBlock = new EffectBlockDef([
+            new EffectBlockStep("modify-accumulator", [
+                new ParameterRef("source"),
+                new Literal("attack"),
+                new Literal(2.0),
+            ]),
+        ]);
+
+        var effect = new StaticEffectDef(
+            Lifetime: LifetimeSpec.Permanent,
+            StateContributionBlock: contributionBlock);
+
+        var result = renderer.RenderStaticEffect(effect, localeStrings: null, bindings: null);
+
+        var seq = Assert.IsType<SequenceNode>(result);
+        // Contribution block renders as a SequenceNode (even single-step — D11 contract).
+        Assert.Contains(seq.Items, item => item is SequenceNode);
+    }
+
+    /// <summary>
+    /// T8i  RenderStaticEffect with a non-permanent lifetime includes the
+    ///      rendered lifetime node in the SequenceNode.
+    /// </summary>
+    [Fact]
+    public void RenderStaticEffect_WithNonPermanentLifetime_IncludesLifetimeNode()
+    {
+        var renderer = Renderer();
+
+        var firedBlock = new EffectBlockDef([
+            new EffectBlockStep("add", [new Literal(1.0), new Literal(0.0)]),
+        ]);
+
+        var effect = new StaticEffectDef(
+            Lifetime: new LifetimeSpec([new TurnTimer(3)]),
+            Trigger: new TriggerDefinition(
+                EventKeyword:  "add",
+                Scope:         TriggerScope.ThisAction,
+                EventParams:   [],
+                Condition:     null,
+                EventBindings: [],
+                FiredBlock:    firedBlock));
+
+        var result = renderer.RenderStaticEffect(effect, localeStrings: null, bindings: null);
+
+        var seq = Assert.IsType<SequenceNode>(result);
+        // Must include a lifetime entry ("for 3 turn(s)").
+        Assert.Contains(seq.Items, item => Flat(item).Contains("for 3 turn(s)"));
+    }
+
     // -----------------------------------------------------------------------
     //  T9 — Resolve (D18)
     // -----------------------------------------------------------------------
@@ -529,6 +593,27 @@ public sealed class TextRendererTests
         Assert.NotNull(result);
         // Body is Invocation("add", x, x) → renders as CompositeNode with "x + x"
         Assert.Contains("x", Flat(result!));
+    }
+
+    /// <summary>
+    /// T9d  Resolve respects a non-null locale dictionary: the locale entry for
+    ///      the keyword overrides its TextTemplate in the resolved summary.
+    /// </summary>
+    [Fact]
+    public void Resolve_WithLocale_LocaleOverridesTextTemplate()
+    {
+        var renderer = Renderer();
+        // "add" has TextTemplate "{a} + {b}"; locale overrides it.
+        var locale = new Dictionary<string, string>
+        {
+            ["add"] = "{a} plus {b}",
+        };
+
+        var result = renderer.Resolve("add", localeStrings: locale);
+
+        Assert.NotNull(result);
+        // ParameterRef labels are "a" and "b", so locale template → "a plus b".
+        Assert.Equal("a plus b", Flat(Summary(result!)));
     }
 
     // -----------------------------------------------------------------------

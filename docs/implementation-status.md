@@ -1,7 +1,7 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (Text renderer complete — 70/70 tests passing)
-> Branch: `back-to-basics`
+> Last updated: 2026-03-06 (Text renderer rework complete — 73/73 tests passing)
+> Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
 ---
@@ -13,7 +13,7 @@
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
 | `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
-| `Archetype.Text` | Card text renderer | ✅ Complete (D11, D18) |
+| `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
 
 ---
 
@@ -187,7 +187,7 @@
 - **`TextTemplate` values** added to all 34 built-in keyword definitions in `BuiltInKeywords.cs`
 - **Definition-time caching**: body renders cached per `(KeywordDefinition, locale)` via `ConditionalWeakTable`; invocation-time not cached
 - **D18 cross-reference tag parsing**: `[display](key)` (long form) and `[key]` (short form) in template strings produce `RulesRef` leaf nodes
-- **25 tests** covering: ParameterRef def/inv modes, Literal, Invocation+TextTemplate, structural fallback, locale override, cross-ref tags (both forms), RenderBlock single/multi, RenderLifetimeSpec (all condition types + OR join + locale override + permanent), RenderStaticEffect, Resolve (primitive/composite/unknown), caching (cached/uncached), dual-use invariant (D2 §1.1, Layer 2)
+- **28 tests** covering: ParameterRef def/inv modes, Literal, Invocation+TextTemplate, structural fallback, locale override, cross-ref tags (both forms), RenderBlock single/multi (single now asserts `SequenceNode` with one item — D11 fix), RenderLifetimeSpec (all condition types + OR join + locale override + permanent), RenderStaticEffect (trigger + contribution block + non-permanent lifetime), Resolve (primitive/composite/unknown, with locale), caching (cached/uncached), dual-use invariant (D2 §1.1, Layer 2)
 
 ---
 
@@ -207,9 +207,9 @@
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 | `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
-| `TextRenderer/TextRendererTests.cs` | 25 | ✅ All passing |
+| `TextRenderer/TextRendererTests.cs` | 28 | ✅ All passing |
 
-**Total: 70 tests, 70 passing.**
+**Total: 73 tests, 73 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
