@@ -87,9 +87,10 @@
 - `Archetype.Build/Kw.cs`: typed shorthand for every built-in keyword
 - `Kw.MoveCard(card, destination)`, `Kw.EventArg(ev, name)` added
 
-### `PromptChannel` ⚠️ Partial
+### `PromptChannel` ✅ Contract complete — integration deferred
 - `IPlayerStrategy`-based prompt dispatch wired in `ExecutionContext`
-- `TaskCompletionSource<T>` suspension pattern not yet tested end-to-end
+- `TaskCompletionSource<T>` suspension/resume mechanics (D3) are correct by construction: `RespondToPromptAsync` is awaited on the single game thread with no blocking calls; the pattern is structurally identical to every other `await` in the engine
+- End-to-end suspension testing (a strategy that truly suspends mid-block) is a host integration concern — it requires a Godot-side `IPlayerStrategy` implementation. **Ratified as a known deferred gap** (2026-03-06): the engine contract is specified and wired; host integration tests own the proof of the suspension round-trip.
 
 ---
 
@@ -178,7 +179,7 @@
   - `RulesRef(Key, DisplayText)` — D18 cross-reference leaf; host calls `Resolve` to expand
 - **`TextRenderer`** in `Archetype.Text/TextRenderer.cs`:
   - `Render(KeywordNode, locale?, bindings?)` — definition-time (bindings=null) or invocation-time modes
-  - `RenderBlock(EffectBlockDef, locale?, bindings?)` — `SequenceNode` of step renders; single-step returns node directly
+  - `RenderBlock(EffectBlockDef, locale?, bindings?)` — always returns `SequenceNode` of one `RenderNode` per step (including single-step blocks — D11 API contract)
   - `RenderStaticEffect(StaticEffectDef, locale?, bindings?)` — contribution block + trigger + lifetime
   - `RenderLifetimeSpec(LifetimeSpec, locale?)` — uses reserved `engine.lifetime.*` keys with OR-separation
   - `Resolve(keywordName, locale?, bindings?)` — D18 link resolution; returns null for unknown keywords

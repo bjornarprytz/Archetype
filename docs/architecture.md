@@ -1,7 +1,7 @@
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract).**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern).**
 
 All decisions D1–D19 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15). Updated 2026-03-05 to ratify game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) and their `GameIsOver` propagation contract (D7 amendments and D14 addendum), and to add D19 (`ComputeAvailableActions` contract — `get-atoms-in-zone` primitive, `CardDefinition.ActivationCondition`, `GameDefinition.PlayableZoneNames`).
 
@@ -834,7 +834,7 @@ class TextRenderer
 
 `RenderBlock` produces a `SequenceNode` of one `RenderNode` per step in the block.
 
-`RenderStaticEffect` produces a `SequenceNode` containing: the rendered state contribution (if any), the rendered trigger (if any), and the rendered lifetime spec. For declarative static effects, this is what appears as the card's ability text.
+`RenderStaticEffect` produces a `SequenceNode` containing: the rendered state contribution (if any), the rendered trigger (if any), and the rendered lifetime spec (if non-permanent). A permanent `LifetimeSpec` (no conditions) produces no lifetime node in the sequence — permanent effects carry no user-facing duration text. For declarative static effects, this is what appears as the card's ability text.
 
 `RenderLifetimeSpec` uses reserved engine locale keys (looked up in `localeStrings` first, then falling back to the engine's registered defaults):
 
