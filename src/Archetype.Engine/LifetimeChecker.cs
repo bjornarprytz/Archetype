@@ -114,8 +114,10 @@ internal sealed class LifetimeChecker
         {
             state.DormantDeclarativeEffects.Add(new DormantDeclarativeEffect
             {
-                OwnerAtom = se.OwnerAtom,
-                EffectDef = se.SourceDefinition,
+                OwnerAtom          = se.OwnerAtom,
+                EffectDef          = se.SourceDefinition,
+                CardDefinitionName = se.CardDefinitionName,
+                EffectIndex        = se.EffectIndex,
             });
         }
     }
@@ -157,7 +159,9 @@ internal sealed class LifetimeChecker
         foreach (var dormant in toActivate)
         {
             state.DormantDeclarativeEffects.Remove(dormant);
-            InstantiateStaticEffect(dormant.EffectDef, dormant.OwnerAtom, state);
+            InstantiateStaticEffect(dormant.EffectDef, dormant.OwnerAtom, state,
+                cardDefinitionName: dormant.CardDefinitionName,
+                effectIndex: dormant.EffectIndex);
         }
 
         return toActivate.Count > 0;
@@ -196,10 +200,20 @@ internal sealed class LifetimeChecker
     /// consequence).
     /// </para>
     /// </summary>
+    /// <param name="cardDefinitionName">
+    /// The name of the <see cref="CardDefinition"/> that owns this effect.
+    /// Stored on the <see cref="StaticEffect"/> so snapshot serialization can
+    /// produce a <see cref="StaticEffectDefRef"/> without a linear scan (D17).
+    /// </param>
+    /// <param name="effectIndex">
+    /// 0-based index of this effect in <c>CardDefinition.StaticEffects</c>.
+    /// </param>
     public void ProvisionDeclarativeEffect(
         StaticEffectDef def,
         AtomId ownerAtom,
-        GameState state)
+        GameState state,
+        string? cardDefinitionName = null,
+        int effectIndex = 0)
     {
         var whileConditions = def.Lifetime.Conditions.OfType<WhileCondition>().ToList();
         bool hasWhileCondition = whileConditions.Count > 0;
@@ -213,7 +227,8 @@ internal sealed class LifetimeChecker
 
         if (allTrue)
         {
-            InstantiateStaticEffect(def, ownerAtom, state);
+            InstantiateStaticEffect(def, ownerAtom, state,
+                cardDefinitionName: cardDefinitionName, effectIndex: effectIndex);
         }
         else
         {
@@ -221,6 +236,8 @@ internal sealed class LifetimeChecker
             {
                 OwnerAtom = ownerAtom,
                 EffectDef = def,
+                CardDefinitionName = cardDefinitionName,
+                EffectIndex = effectIndex,
             });
         }
     }
@@ -230,10 +247,18 @@ internal sealed class LifetimeChecker
     /// Allocates fresh IDs; sets <c>TriggerFireCount = 0</c> and
     /// <c>TriggerHighWaterMark = 0</c>.  Called from Phase 2 and card provisioning.
     /// </summary>
+    /// <param name="cardDefinitionName">
+    /// Optional: the card definition name for declarative effects (D17 snapshot).
+    /// </param>
+    /// <param name="effectIndex">
+    /// Optional: 0-based index in <c>CardDefinition.StaticEffects</c> (D17 snapshot).
+    /// </param>
     public StaticEffect InstantiateStaticEffect(
         StaticEffectDef def,
         AtomId ownerAtom,
-        GameState state)
+        GameState state,
+        string? cardDefinitionName = null,
+        int effectIndex = 0)
     {
         var se = new StaticEffect
         {
@@ -241,6 +266,8 @@ internal sealed class LifetimeChecker
             OwnerAtom        = ownerAtom,
             IsDeclarative    = true,
             SourceDefinition = def,
+            CardDefinitionName = cardDefinitionName,
+            EffectIndex      = effectIndex,
             Lifetime         = def.Lifetime,
             Trigger          = def.Trigger,
             ParameterModification = def.ParameterModification,

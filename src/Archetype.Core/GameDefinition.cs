@@ -92,6 +92,12 @@ public sealed record PlayerDefinition(
 /// may not shadow built-ins.
 /// </para>
 /// <para>
+/// <b>Id (D17):</b> a non-empty string that uniquely identifies this game definition.
+/// Required by <c>GameSessionBuilder.Build()</c>.  Stored in
+/// <see cref="GameStateSnapshot"/> so the load path can validate that the snapshot
+/// was produced by the same game definition.
+/// </para>
+/// <para>
 /// <b>PlayableZoneNames (D19):</b> zone definition names from which cards may
 /// be played.  <c>null</c> = no zone filter.  Specify one or more names
 /// (e.g. <c>"hand"</c>) to enforce zone restrictions on <c>PlayCard</c>.
@@ -108,7 +114,8 @@ public sealed record GameDefinition(
     TriggerResolutionOrder TriggerResolutionOrder,
     IReadOnlyDictionary<string, PlayerDefinition> PlayerDefinitions,
     InitManifest? DefaultInitManifest = null,
-    IReadOnlyList<string>? PlayableZoneNames = null);
+    IReadOnlyList<string>? PlayableZoneNames = null,
+    string? Id = null);
 
 /// <summary>Determines the order in which simultaneous triggers resolve (D8).</summary>
 public enum TriggerResolutionOrder

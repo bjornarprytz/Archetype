@@ -36,13 +36,30 @@ public interface IPlayerStrategy
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Optional host interface for observing trigger cascade depth.  The engine
-/// calls <see cref="OnTriggerCascadeAsync"/> before each trigger-resolution
+/// Optional host interface for observing engine lifecycle events.
+/// <para>
+/// <b>OnTurnStart (D17):</b> called at the start of each turn with a complete
+/// <see cref="GameStateSnapshot"/>, giving the host the opportunity to persist
+/// the snapshot.  Called before any phase init block for that turn executes,
+/// so the snapshot captures fully settled end-of-prior-turn state.
+/// </para>
+/// <para>
+/// <b>OnTriggerCascadeAsync (D7):</b> called before each trigger-resolution
 /// batch.  Returning <see cref="CascadeDirective.Halt"/> exits the cascade
 /// loop cleanly.
+/// </para>
 /// </summary>
 public interface IEngineObserver
 {
+    /// <summary>
+    /// Called at the start of each turn before any phase init block executes.
+    /// The snapshot captures fully settled state (all end-of-prior-turn processing
+    /// complete).  The host may persist the snapshot for save/load purposes.
+    /// </summary>
+    /// <param name="turnNumber">The 1-based turn number about to begin.</param>
+    /// <param name="snapshot">The settled game state at this turn boundary.</param>
+    Task OnTurnStart(int turnNumber, GameStateSnapshot snapshot);
+
     /// <summary>
     /// Called before each trigger-resolution batch.
     /// </summary>

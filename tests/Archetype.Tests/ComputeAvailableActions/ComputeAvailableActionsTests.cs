@@ -435,7 +435,8 @@ public sealed class ComputeAvailableActionsTests
                 ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
             },
             DefaultInitManifest:    manifest,
-            PlayableZoneNames:      playableZoneNames);
+            PlayableZoneNames:      playableZoneNames,
+            Id:                     "test-game");
     }
 
     /// <summary>
@@ -476,7 +477,8 @@ public sealed class ComputeAvailableActionsTests
                 ["p2"] = new PlayerDefinition(new Dictionary<string, object>()),
             },
             DefaultInitManifest:    manifest,
-            PlayableZoneNames:      playableZoneNames);
+            PlayableZoneNames:      playableZoneNames,
+            Id:                     "test-game");
     }
 }
 

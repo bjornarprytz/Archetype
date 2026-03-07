@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Archetype.Core;
 
 // ---------------------------------------------------------------------------
@@ -56,6 +58,8 @@ public sealed record EventBinding(string EventArgName, string BlockVarName);
 /// Intercepts a mutation keyword invocation either to adjust argument values
 /// or to cancel the invocation entirely.
 /// </summary>
+[JsonDerivedType(typeof(ParameterAdjustment), typeDiscriminator: "adj")]
+[JsonDerivedType(typeof(Disable),             typeDiscriminator: "dis")]
 public abstract record ParameterModification(
     string TargetKeyword,
     IReadOnlyList<EventParamDecl>? ArgFilter,

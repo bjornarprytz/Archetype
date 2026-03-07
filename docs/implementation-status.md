@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-06 (Text renderer rework complete — 73/73 tests passing)
+> Last updated: 2026-03-07 (D17 save/load complete — 84/84 tests passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -50,7 +50,7 @@
 - `GameDefinition.PlayableZoneNames: IReadOnlyList<string>?` (D19) — zone definition names from which cards may be played; `null` = no zone filter
 
 ### Interfaces ✅
-- `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTriggerCascadeAsync` → `CascadeDirective`)
+- `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTurnStart` + `OnTriggerCascadeAsync` → `CascadeDirective`)
 - Player action types: `PlayCard`, `ActivateAbility`, `Pass`
 - Prompt types: `PromptContext`, `PromptResponse`, `ChoicePrompt`, `TriggerOrderPrompt`
 - `GameStateView` (public read-only view), `IGameStateReadable`
@@ -130,8 +130,8 @@
 - `WithRandomSource(source)` — required; `Build()` throws if absent
 - `WithObserver(observer)` — optional cascade observer
 - `UseDefaultInit()` / `WithInitManifest(manifest)` — manifest selection; last call wins
-- `FromSavedState(snapshot)` — throws `NotSupportedException` (D17 deferred)
-- `Build()` — validates all players have strategies; no extra strategies for undefined players
+- `FromSavedState(GameStateSnapshot snapshot)` — load path; `Build()` skips `WithRandomSource` requirement, validates `GameDefinitionId`, derives RNG from snapshot
+- `Build()` — validates `GameDefinition.Id` non-empty; validates all players have strategies; no extra strategies for undefined players
 
 ### `GameSession` ✅
 - `static GameSessionBuilder Create(GameDefinition)` — factory entry point
@@ -194,7 +194,21 @@
 
 ## Tier 5 — Persistence
 
-### `GameStateSnapshot` ❌ Deferred (per D17)
+### D17 Save/Load ✅
+
+- **`GameDefinition.Id`**: required non-empty string; `GameSessionBuilder.Build()` throws `DefinitionException` if absent.
+- **`IEngineObserver.OnTurnStart(int turnNumber, GameStateSnapshot snapshot)`**: called before each turn's first phase init block; host persists snapshot.
+- **`SeededRandom`** (new): xoshiro128** implementation, independent of `System.Random`. Seeded via splitmix64. `Snapshot()` / `FromSnapshot(RngSnapshot)` for deterministic replay. `_callCount` tracks every raw `NextRaw()` invocation (including rejection-sampled values) for bit-for-bit replay.
+- **`GameStateSnapshot`** type hierarchy in `Archetype.Core/Snapshot.cs`: `BoundValue` (7 subtypes), `RngSnapshot`, `StaticEffectDefRef`, `DormantEffectSnapshot`, `AtomSnapshotData`, `ContributionSnapshot` (2 subtypes), `StaticEffectSnapshot`, `GameStateSnapshot`.
+- **`GameState.ToSnapshot()`**: captures atoms, contributions, active static effects (declarative by ref / dynamic inlined), dormant effects, player names, finalized log, RNG state.
+- **`GameState.LoadFromSnapshot()`**: restores ID counters, atoms, player registries, player order, contributions (reconstructs `ModifierIndex`/`ConditionIndex` — Decision 7), active static effects, dormant effects.
+- **`GameStateSnapshotSerializer`** in `Archetype.Engine`: `Serialize(GameStateSnapshot) → string` / `Deserialize(string) → GameStateSnapshot`. Uses `System.Text.Json` + `[JsonDerivedType]`. `GameEvent.BoundArgs` round-trips via `GameEventDto` + `BoundValue` union. `EventRefValue` resolved via sequence-number index. Custom `LiteralConverter` handles `Literal.Value : object` (tags: `d`/`b`/`s`/`atom`). Custom struct converters for `AtomId`, `ContributionId`, `StaticEffectId`.
+- **`GameSessionBuilder.FromSavedState(GameStateSnapshot)`**: sets load path; `Build()` skips `WithRandomSource` requirement, validates `GameDefinitionId`, derives `SeededRandom.FromSnapshot(snapshot.Rng)`.
+- **`GameSession.RunAsync`**: on load path, calls `LoadFromSnapshot` then starts loop at `snapshot.TurnNumber`; calls `OnTurnStart` before each turn's first phase init.
+- **`[JsonDerivedType]` added** to: `ContributionSource`, `LifetimeCondition`, `KeywordNode`, `ParameterModification`.
+- **`AtomIdCounter.PeekNext()/Restore(long)`** and **`ContributionIdCounter.PeekNext()/Restore(long)`** added for snapshot capture/restore.
+- **`StaticEffect.CardDefinitionName`/`EffectIndex`** and **`DormantDeclarativeEffect.CardDefinitionName`/`EffectIndex`** stored at instantiation time so snapshot capture can produce `StaticEffectDefRef` without scanning definitions.
+- **`LifetimeChecker.ProvisionDeclarativeEffect`/`InstantiateStaticEffect`** updated to accept optional `cardDefinitionName`/`effectIndex` and propagate through the effect lifecycle (`ActivatePass`, `Expire`).
 
 ---
 
@@ -209,8 +223,9 @@
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 | `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
 | `TextRenderer/TextRendererTests.cs` | 28 | ✅ All passing |
+| `SaveLoad/SaveLoadTests.cs` | 12 | ✅ All passing |
 
-**Total: 73 tests, 73 passing.**
+**Total: 84 tests, 84 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -237,7 +252,7 @@
 - `DeclareWinner_PlayerNameResolvedCorrectly` — card provisioning + manifest + declare-draw
 - `MultiTurn_GameRunsTwoTurns_BeforeDeclareDraw` — SBR condition on turn-number ≥ 2; player queues 2 passes
 - `PlayCard_Action_ExecutesPrimaryEffect` — LambdaPlayerStrategy plays card; SBR fires when score ≥ 1; event logged
-- `FromSavedState_ThrowsNotSupportedException`
+- `DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName`
 
 ### Trigger resolution (full D7/D8 lifecycle)
 - `TriggerFires_WhenEventMatchesKeywordAndNoCondition`
@@ -273,12 +288,31 @@
 
 | Module | Blocked By |
 |---|---|
-| Text renderer | No blockers — can start any time |
-| Persistence | Deferred (D17) |
+| (none) | — |
 
 ---
 
 ## Resolved Issues
+
+### SaveLoad tests (D17) — 12 tests (2026-03-07)
+- `SeededRandom_SameSeed_ProducesSameSequence`
+- `SeededRandom_FastForward_ProducesCorrectNextValue`
+- `Snapshot_RoundTrip_PreservesAtomState`
+- `Snapshot_RoundTrip_PreservesActiveStaticEffects`
+- `Snapshot_RoundTrip_BoundArgs_AtomIdPreservesType`
+- `Snapshot_RoundTrip_BoundArgs_EventRefResolvesCorrectly`
+- `FromSavedState_ResumesAtCorrectTurn`
+- `FromSavedState_GameDefinitionIdMismatch_ThrowsDefinitionException`
+- `FromSavedState_DoesNotRequireWithRandomSource`
+- `OnTurnStart_CalledBeforeFirstPhaseInit`
+- `GameDefinitionBuilder_Build_ThrowsWhenIdMissing`
+- `ModifierIndex_ReconstructedCorrectly_AfterLoad`
+
+### Text renderer review — PASS (2026-03-07)
+- ✅ BLOCKER 1 resolved (`1a49699`): `RenderBlock` now always returns `SequenceNode` (D11 API contract)
+- ✅ MINOR 1 resolved (fixed directly in initial review): `RegexOptions.Compiled` removed (D1 WASM constraint)
+- ✅ Three additional tests added: T8h (StateContributionBlock), T8i (non-permanent lifetime), T9d (Resolve with locale)
+- ✅ 73/73 tests passing. Review verdict: **PASS**
 
 ### Tier 4 — GameSession / GameSessionBuilder (2026-03-05) — rework complete
 - ✅ `GameSessionBuilder`: fluent builder with full player-strategy validation

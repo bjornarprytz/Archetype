@@ -19,6 +19,8 @@ public sealed class GameSessionBuilder
     private IRandomSource? _randomSource;
     private IEngineObserver? _observer;
     private InitManifest? _manifest;
+    // Non-null when FromSavedState was called; drives the load path in Build().
+    private GameStateSnapshot? _snapshot;
 
     internal GameSessionBuilder(GameDefinition definition) => _definition = definition;
 
@@ -74,26 +76,59 @@ public sealed class GameSessionBuilder
     }
 
     /// <summary>
-    /// Reserved for the save/load feature (D17).  Currently throws
-    /// <see cref="NotSupportedException"/>.
+    /// Loads a previously saved session from a <see cref="GameStateSnapshot"/>.
+    /// Mutually exclusive with <see cref="UseDefaultInit"/> and
+    /// <see cref="WithInitManifest(InitManifest)"/>; last call wins.
+    /// <para>
+    /// When this is set, <c>Build()</c> does not require <see cref="WithRandomSource"/>
+    /// — the RNG is seeded from the snapshot.  <c>Build()</c> validates that
+    /// <see cref="GameStateSnapshot.GameDefinitionId"/> matches
+    /// <see cref="GameDefinition.Id"/> and throws <see cref="DefinitionException"/>
+    /// on mismatch.
+    /// </para>
     /// </summary>
-    public GameSessionBuilder FromSavedState(object snapshot) =>
-        throw new NotSupportedException(
-            "Save/load (FromSavedState) is deferred per D17 and not yet implemented.");
+    public GameSessionBuilder FromSavedState(GameStateSnapshot snapshot)
+    {
+        _snapshot = snapshot;
+        return this;
+    }
 
     /// <summary>
     /// Builds and returns a <see cref="GameSession"/> ready to run.
     /// </summary>
+    /// <exception cref="DefinitionException">
+    /// Thrown if <see cref="GameDefinition.Id"/> is null or empty, or if
+    /// <see cref="FromSavedState"/> was called and the snapshot's
+    /// <see cref="GameStateSnapshot.GameDefinitionId"/> does not match.
+    /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if <see cref="WithRandomSource"/> was not called, or if any
-    /// player defined in <see cref="GameDefinition.PlayerDefinitions"/> does
-    /// not have a corresponding strategy registered.
+    /// Thrown if <see cref="WithRandomSource"/> was not called (and no snapshot
+    /// is set), or if any player defined in
+    /// <see cref="GameDefinition.PlayerDefinitions"/> does not have a
+    /// corresponding strategy registered.
     /// </exception>
     public GameSession Build()
     {
-        if (_randomSource is null)
+        // D17: every definition must have a non-empty Id so snapshots can be
+        // validated against the definition that produced them.
+        if (string.IsNullOrEmpty(_definition.Id))
+            throw new DefinitionException(
+                "GameSessionBuilder.Build(): GameDefinition.Id must be set to a non-empty string. " +
+                "This is required for save/load snapshot validation (D17).");
+
+        // When loading from a snapshot the RNG is derived from the snapshot;
+        // WithRandomSource is not required.
+        if (_snapshot is null && _randomSource is null)
             throw new InvalidOperationException(
                 "GameSessionBuilder.Build(): WithRandomSource is required.");
+
+        // Validate snapshot compatibility — must come from the same game definition.
+        if (_snapshot is not null &&
+            !string.Equals(_snapshot.GameDefinitionId, _definition.Id, StringComparison.Ordinal))
+            throw new DefinitionException(
+                $"GameSessionBuilder.Build(): snapshot GameDefinitionId '{_snapshot.GameDefinitionId}' " +
+                $"does not match GameDefinition.Id '{_definition.Id}'. " +
+                "Cannot load a snapshot from a different game definition.");
 
         // Every defined player needs a strategy.
         foreach (var name in _definition.PlayerDefinitions.Keys)
@@ -113,7 +148,12 @@ public sealed class GameSessionBuilder
                     "Not defined in GameDefinition.PlayerDefinitions.");
         }
 
-        return new GameSession(_definition, _strategies, _randomSource, _observer, _manifest);
+        // Derive RNG: from snapshot on the load path, from caller on the fresh path.
+        var rng = _snapshot is not null
+            ? SeededRandom.FromSnapshot(_snapshot.Rng)
+            : _randomSource!;
+
+        return new GameSession(_definition, _strategies, rng, _observer, _manifest, _snapshot);
     }
 }
 
@@ -136,6 +176,8 @@ public sealed class GameSession
     private readonly IRandomSource _randomSource;
     private readonly IEngineObserver? _observer;
     private readonly InitManifest? _manifest;
+    // Non-null when the session was constructed via FromSavedState (D17 load path).
+    private readonly GameStateSnapshot? _loadSnapshot;
 
     // These are constructed once and shared across the whole session.
     private readonly GameState _state;
@@ -155,13 +197,15 @@ public sealed class GameSession
         IReadOnlyDictionary<string, IPlayerStrategy> strategies,
         IRandomSource randomSource,
         IEngineObserver? observer,
-        InitManifest? manifest)
+        InitManifest? manifest,
+        GameStateSnapshot? loadSnapshot = null)
     {
         _definition   = definition;
         _strategies   = strategies;
         _randomSource = randomSource;
         _observer     = observer;
         _manifest     = manifest;
+        _loadSnapshot = loadSnapshot;
 
         _state    = new GameState();
         _eventLog = new EventLog();
@@ -199,16 +243,34 @@ public sealed class GameSession
     /// </remarks>
     public async Task<GameResult> RunAsync(CancellationToken ct = default)
     {
-        // Phase 1: provision session atom + init manifest.
-        ProvisionSession();
+        int turn;
 
-        int turn = 1;
+        if (_loadSnapshot is not null)
+        {
+            // D17 load path: restore state from snapshot; skip provisioning.
+            _state.LoadFromSnapshot(_loadSnapshot, _definition, _atomDefinitionNames, _playerAtomIds, _playerOrder);
+            turn = _loadSnapshot.TurnNumber;
+        }
+        else
+        {
+            // Fresh path: provision session atom + init manifest.
+            ProvisionSession();
+            turn = 1;
+        }
 
         while (true)
         {
             // Update the engine-managed turn-number accumulator on the session atom.
             SetSessionAccumulator("turn-number", turn);
             SetSessionAccumulator("phase-index",  0);
+
+            // D17: notify observer with a snapshot before any phase init block for this turn.
+            // The snapshot captures fully settled state (prior-turn processing is complete).
+            if (_observer is not null)
+            {
+                var snapshot = CreateSnapshot(turn);
+                await _observer.OnTurnStart(turn, snapshot);
+            }
 
             _eventLog.OpenTurn();
             try
@@ -538,10 +600,15 @@ public sealed class GameSession
             _atomDefinitionNames[cardId] = cardSpec.Definition;
 
             // Provision declarative static effects from the card definition (D6/D12).
+            // Pass cardDefinitionName and effectIndex so D17 snapshots can produce
+            // StaticEffectDefRef without scanning all definitions.
             if (_definition.CardDefinitions.TryGetValue(cardSpec.Definition, out var cardDef))
             {
-                foreach (var effectDef in cardDef.StaticEffects)
-                    lifetimes.ProvisionDeclarativeEffect(effectDef, cardId, _state);
+                for (int ei = 0; ei < cardDef.StaticEffects.Count; ei++)
+                    lifetimes.ProvisionDeclarativeEffect(
+                        cardDef.StaticEffects[ei], cardId, _state,
+                        cardDefinitionName: cardSpec.Definition,
+                        effectIndex: ei);
             }
 
             // -- Step 5: mutable state overrides --
@@ -595,6 +662,33 @@ public sealed class GameSession
 
     private void SetSessionAccumulator(string name, double value) =>
         _state.GetAtom(_state.SessionAtomId).Accumulators[name] = value;
+
+    // -----------------------------------------------------------------------
+    //  Snapshot creation (D17)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Captures a <see cref="GameStateSnapshot"/> at the current turn boundary.
+    /// Called before each turn's first phase init block (D17 Decision 1 and 5).
+    /// </summary>
+    private GameStateSnapshot CreateSnapshot(int turnNumber)
+    {
+        // Only SeededRandom can produce a meaningful snapshot; other
+        // IRandomSource implementations (e.g. MockRandomSource in tests) are
+        // not snapshotable.  If the caller has not supplied a SeededRandom,
+        // we emit a zero-state snapshot (Seed=0, CallCount=0) which signals
+        // that RNG replay is not available.
+        var rngSnapshot = _randomSource is SeededRandom sr
+            ? sr.Snapshot()
+            : new RngSnapshot(0, 0);
+
+        return _state.ToSnapshot(
+            gameDefinitionId: _definition.Id!,
+            turnNumber:       turnNumber,
+            finalizedLog:     _eventLog.Finalised,
+            rng:              rngSnapshot,
+            atomDefinitionNames: _atomDefinitionNames);
+    }
 
     // -----------------------------------------------------------------------
     //  Result construction
