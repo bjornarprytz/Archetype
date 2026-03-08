@@ -129,6 +129,13 @@ internal sealed class GameState : Core.IGameStateReadable
     public IReadOnlyList<AtomId> GetAtoms(AtomKind kind) =>
         _atoms.Values.Where(a => a.Kind == kind).Select(a => a.Id).ToList();
 
+    /// <summary>
+    /// All atom IDs in state, regardless of kind.
+    /// Used by <c>get-atoms-in-zone</c> to enumerate every atom whose zone matches.
+    /// </summary>
+    public IReadOnlyList<AtomId> GetAllAtoms() =>
+        _atoms.Keys.ToList();
+
     // -----------------------------------------------------------------------
     //  Contribution registry (D5)
     // -----------------------------------------------------------------------
@@ -227,6 +234,252 @@ internal sealed class GameState : Core.IGameStateReadable
     }
 
     // -----------------------------------------------------------------------
+    //  Snapshot capture and restore (D17)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Captures a <see cref="GameStateSnapshot"/> of the current settled state.
+    /// Called at each turn boundary before any phase init block executes (D17
+    /// Decision 1).
+    /// </summary>
+    /// <param name="gameDefinitionId">From <see cref="GameDefinition.Id"/>.</param>
+    /// <param name="turnNumber">The 1-based turn number about to begin.</param>
+    /// <param name="finalizedLog">The finalized event log at this point.</param>
+    /// <param name="rng">The RNG state at this point.</param>
+    /// <param name="atomDefinitionNames">
+    /// Maps each atom ID to its definition name (e.g. card def name, zone def name).
+    /// Null entries are omitted; session and player atoms have no definition name.
+    /// </param>
+    public GameStateSnapshot ToSnapshot(
+        string gameDefinitionId,
+        int    turnNumber,
+        IReadOnlyList<GameEvent> finalizedLog,
+        RngSnapshot rng,
+        IReadOnlyDictionary<AtomId, string> atomDefinitionNames)
+    {
+        // Capture atoms.
+        var atomData = _atoms.Values.Select(a => new AtomSnapshotData(
+            Id:           a.Id,
+            Kind:         a.Kind,
+            RefName:      atomDefinitionNames.TryGetValue(a.Id, out var defName) ? defName : null,
+            OwnerId:      a.OwnerId,
+            ZoneId:       a.ZoneId,
+            Accumulators: new Dictionary<string, double>(a.Accumulators)
+        )).ToList();
+
+        // Capture contributions from the registry.
+        var contributions = ContributionRegistry.Values.Select<IContribution, ContributionSnapshot>(c =>
+        {
+            return c switch
+            {
+                ModifierContributionWrapper { Inner: var mc } =>
+                    new ModifierContributionSnapshot(
+                        mc.Id, mc.Source, mc.TargetAtom, mc.PropertyName,
+                        mc.Kind, mc.Value, mc.Lifetime),
+                ConditionContributionWrapper { Inner: var cc } =>
+                    new ConditionContributionSnapshot(
+                        cc.Id, cc.Source, cc.TargetAtom, cc.ConditionName, cc.Lifetime),
+                _ => throw new InvalidOperationException(
+                    $"Unknown contribution type: {c.GetType().Name}")
+            };
+        }).ToList();
+
+        // Capture active static effects.
+        var activeEffects = ActiveStaticEffects.Select(se =>
+        {
+            var snap = new StaticEffectSnapshot
+            {
+                Id                  = se.Id,
+                IsDeclarative       = se.IsDeclarative,
+                OwnerAtomId         = se.OwnerAtom,
+                Lifetime            = se.Lifetime,
+                TriggerFireCount    = se.TriggerFireCount,
+                TriggerHighWaterMark = se.TriggerHighWaterMark,
+                OwnedContributions  = se.OwnedContributions.ToList(),
+                // Declarative effects are stored by reference; dynamic ones inline their trigger.
+                DeclarativeRef = se.IsDeclarative && se.CardDefinitionName is not null
+                    ? new StaticEffectDefRef(se.CardDefinitionName, se.EffectIndex)
+                    : null,
+                DynamicTrigger = !se.IsDeclarative ? se.Trigger : null,
+            };
+            snap.ValidateExclusive();
+            return snap;
+        }).ToList();
+
+        // Capture dormant effects.
+        var dormantEffects = DormantDeclarativeEffects
+            .Where(d => d.CardDefinitionName is not null)
+            .Select(d => new DormantEffectSnapshot(
+                d.OwnerAtom,
+                d.CardDefinitionName!,
+                d.EffectIndex))
+            .ToList();
+
+        // Capture player name registry for restore.
+        var playerNames = _playerNames.ToDictionary(
+            kv => kv.Key.Value,
+            kv => kv.Value);
+
+        return new GameStateSnapshot(
+            Version:            GameStateSnapshot.CurrentVersion,
+            GameDefinitionId:   gameDefinitionId,
+            TurnNumber:         turnNumber,
+            NextAtomId:         _atomIds.PeekNext(),
+            NextContributionId: _contribIds.PeekNext(),
+            SessionAtomId:      SessionAtomId,
+            Atoms:              atomData,
+            Contributions:      contributions,
+            ActiveStaticEffects: activeEffects,
+            DormantEffects:     dormantEffects,
+            PlayerNames:        playerNames,
+            FinalizedLog:       finalizedLog,
+            Rng:                rng);
+    }
+
+    /// <summary>
+    /// Restores game state from a <see cref="GameStateSnapshot"/>.
+    /// Populates <paramref name="atomDefinitionNames"/>,
+    /// <paramref name="playerAtomIds"/>, and <paramref name="playerOrder"/>
+    /// so <see cref="GameSession"/> can drive the action window as if the
+    /// session had been provisioned normally.
+    /// </summary>
+    /// <param name="snapshot">The snapshot to restore from.</param>
+    /// <param name="definition">The game definition to use for resolving declarative effect refs.</param>
+    /// <param name="atomDefinitionNames">Output: map from atom ID to definition name.</param>
+    /// <param name="playerAtomIds">Output: map from player name to player atom ID.</param>
+    /// <param name="playerOrder">Output: ordered list of player names (insertion order).</param>
+    public void LoadFromSnapshot(
+        GameStateSnapshot snapshot,
+        GameDefinition definition,
+        Dictionary<AtomId, string> atomDefinitionNames,
+        Dictionary<string, AtomId> playerAtomIds,
+        List<string> playerOrder)
+    {
+        // Restore ID counters so new allocations continue from where the
+        // snapshot left off without collisions.
+        _atomIds.Restore(snapshot.NextAtomId);
+        _contribIds.Restore(snapshot.NextContributionId);
+        SessionAtomId = snapshot.SessionAtomId;
+
+        // Restore atoms.
+        foreach (var data in snapshot.Atoms)
+        {
+            var atom = new AtomSnapshot
+            {
+                Id      = data.Id,
+                Kind    = data.Kind,
+                OwnerId = data.OwnerId,
+                ZoneId  = data.ZoneId,
+            };
+            foreach (var (k, v) in data.Accumulators)
+                atom.Accumulators[k] = v;
+
+            _atoms[data.Id] = atom;
+
+            // Rebuild _atomDefinitionNames from the RefName stored in the snapshot.
+            if (data.RefName is not null)
+                atomDefinitionNames[data.Id] = data.RefName;
+        }
+
+        // Restore player name registries and player order.
+        foreach (var (idValue, name) in snapshot.PlayerNames)
+        {
+            var atomId = new AtomId(idValue);
+            RegisterPlayerName(atomId, name);
+            playerAtomIds[name] = atomId;
+        }
+
+        // Player order = insertion order of PlayerDefinitions (preserved across snapshot).
+        foreach (var name in definition.PlayerDefinitions.Keys)
+            if (playerAtomIds.ContainsKey(name))
+                playerOrder.Add(name);
+
+        // Restore contributions and build ModifierIndex / ConditionIndex per atom
+        // (Decision 7: indices are NOT stored in the snapshot — reconstructed here).
+        foreach (var cs in snapshot.Contributions)
+        {
+            switch (cs)
+            {
+                case ModifierContributionSnapshot m:
+                {
+                    var mc = new ModifierContribution(
+                        m.Id, m.Source, m.TargetAtom, m.PropertyName,
+                        m.Kind, m.Value, m.Lifetime);
+                    var atom = GetAtom(m.TargetAtom);
+                    if (!atom.ModifierIndex.TryGetValue(m.PropertyName, out var list))
+                        atom.ModifierIndex[m.PropertyName] = list = new List<ModifierContribution>();
+                    list.Add(mc);
+                    ContributionRegistry[m.Id] = new ModifierContributionWrapper(mc);
+                    break;
+                }
+                case ConditionContributionSnapshot c:
+                {
+                    var cc = new ConditionContribution(
+                        c.Id, c.Source, c.TargetAtom, c.ConditionName, c.Lifetime);
+                    var atom = GetAtom(c.TargetAtom);
+                    if (!atom.ConditionIndex.TryGetValue(c.ConditionName, out var list))
+                        atom.ConditionIndex[c.ConditionName] = list = new List<ConditionContribution>();
+                    list.Add(cc);
+                    ContributionRegistry[c.Id] = new ConditionContributionWrapper(cc);
+                    break;
+                }
+            }
+        }
+
+        // Restore active static effects.
+        foreach (var ses in snapshot.ActiveStaticEffects)
+        {
+            StaticEffectDef? sourceDef = null;
+            string? cardDefName = null;
+            int effectIndex = 0;
+
+            if (ses.DeclarativeRef is not null)
+            {
+                // Resolve the StaticEffectDef from the definition.
+                cardDefName = ses.DeclarativeRef.CardDefinitionName;
+                effectIndex = ses.DeclarativeRef.EffectIndex;
+                if (definition.CardDefinitions.TryGetValue(cardDefName, out var cardDef)
+                    && effectIndex < cardDef.StaticEffects.Count)
+                    sourceDef = cardDef.StaticEffects[effectIndex];
+            }
+
+            var se = new StaticEffect
+            {
+                Id                   = ses.Id,
+                OwnerAtom            = ses.OwnerAtomId,
+                IsDeclarative        = ses.IsDeclarative,
+                SourceDefinition     = sourceDef,
+                CardDefinitionName   = cardDefName,
+                EffectIndex          = effectIndex,
+                Lifetime             = ses.Lifetime,
+                TriggerFireCount     = ses.TriggerFireCount,
+                TriggerHighWaterMark = ses.TriggerHighWaterMark,
+                Trigger              = sourceDef?.Trigger ?? ses.DynamicTrigger,
+                ParameterModification = sourceDef?.ParameterModification,
+            };
+            se.OwnedContributions.AddRange(ses.OwnedContributions);
+            ActiveStaticEffects.Add(se);
+        }
+
+        // Restore dormant effects.
+        foreach (var ds in snapshot.DormantEffects)
+        {
+            if (!definition.CardDefinitions.TryGetValue(ds.CardDefinitionName, out var cardDef))
+                continue; // unknown card definition — skip gracefully
+            if (ds.EffectIndex >= cardDef.StaticEffects.Count)
+                continue; // index out of range — skip gracefully
+
+            DormantDeclarativeEffects.Add(new DormantDeclarativeEffect
+            {
+                OwnerAtom          = ds.OwnerAtomId,
+                EffectDef          = cardDef.StaticEffects[ds.EffectIndex],
+                CardDefinitionName = ds.CardDefinitionName,
+                EffectIndex        = ds.EffectIndex,
+            });
+        }
+    }
+
+    // -----------------------------------------------------------------------
     //  IGameStateReadable implementation (for GameStateView)
     // -----------------------------------------------------------------------
 
@@ -276,6 +529,20 @@ internal sealed class StaticEffect
     /// <summary>Non-null for declarative effects; used to repopulate the dormant list.</summary>
     public StaticEffectDef? SourceDefinition { get; init; }
 
+    /// <summary>
+    /// For declarative effects: the name of the card definition that owns this
+    /// static effect.  Stored at creation so snapshot serialization can produce
+    /// a <see cref="StaticEffectDefRef"/> without scanning all card definitions.
+    /// </summary>
+    public string? CardDefinitionName { get; init; }
+
+    /// <summary>
+    /// For declarative effects: the 0-based index of this effect in
+    /// <c>CardDefinition.StaticEffects</c>.  Paired with
+    /// <see cref="CardDefinitionName"/> to form a <see cref="StaticEffectDefRef"/>.
+    /// </summary>
+    public int EffectIndex { get; init; }
+
     public LifetimeSpec Lifetime { get; init; } = LifetimeSpec.Permanent;
 
     public int TriggerFireCount { get; set; }
@@ -297,4 +564,17 @@ internal sealed class DormantDeclarativeEffect
 {
     public AtomId OwnerAtom { get; init; }
     public StaticEffectDef EffectDef { get; init; } = null!;
+
+    /// <summary>
+    /// The card definition name for snapshot serialization (D17).
+    /// Non-null when this effect was provisioned via manifest/card-creation.
+    /// </summary>
+    public string? CardDefinitionName { get; init; }
+
+    /// <summary>
+    /// 0-based index of this effect in <c>CardDefinition.StaticEffects</c>.
+    /// Used together with <see cref="CardDefinitionName"/> to produce a
+    /// <see cref="StaticEffectDefRef"/> during snapshot capture (D17).
+    /// </summary>
+    public int EffectIndex { get; init; }
 }

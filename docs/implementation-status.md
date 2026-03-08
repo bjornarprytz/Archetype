@@ -1,7 +1,7 @@
 # Implementation Status
 
-> Last updated: 2026-03-05 (Tier 4 rework complete — 36/36 tests green; PR #4 blocker resolved)
-> Branch: `back-to-basics`
+> Last updated: 2026-03-07 (D17 save/load complete — 84/84 tests passing)
+> Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
 ---
@@ -12,8 +12,8 @@
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
 | `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
-| `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete (Text renderer excepted) |
-| `Archetype.Text` | Card text renderer | ❌ Not started |
+| `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
+| `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
 
 ---
 
@@ -26,7 +26,7 @@
 - `EffectBlockDef` / `EffectBlockStep` for block-level composition
 
 ### `BuiltInKeywords` registry ✅
-- 30 entries: all mutation primitives, property queries, arithmetic, logic, `move-card`, and `event-arg`
+- 34 entries: all mutation primitives, property queries, arithmetic, logic, `move-card`, `event-arg`, `declare-winner`, `declare-draw`, `player-by-name`, `get-atoms-in-zone`
 - `BuiltInKeywords.All` list enforces sync invariant with Engine dispatch
 
 ### `EventLog` and `GameEvent` ✅
@@ -46,9 +46,11 @@
 
 ### `GameDefinition` ✅
 - `CardDefinition`, `ZoneDefinition`, `PhaseDefinition`, `ActionRuleDefinition`, `StateBasedRule`, `CardSet`, `PlayerDefinition`, `GameDefinition`
+- `CardDefinition.ActivationCondition: KeywordNode?` (D19) — optional pure condition evaluated before offering PlayCard; card atom injected as `source`
+- `GameDefinition.PlayableZoneNames: IReadOnlyList<string>?` (D19) — zone definition names from which cards may be played; `null` = no zone filter
 
 ### Interfaces ✅
-- `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTriggerCascadeAsync` → `CascadeDirective`)
+- `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTurnStart` + `OnTriggerCascadeAsync` → `CascadeDirective`)
 - Player action types: `PlayCard`, `ActivateAbility`, `Pass`
 - Prompt types: `PromptContext`, `PromptResponse`, `ChoicePrompt`, `TriggerOrderPrompt`
 - `GameStateView` (public read-only view), `IGameStateReadable`
@@ -85,9 +87,10 @@
 - `Archetype.Build/Kw.cs`: typed shorthand for every built-in keyword
 - `Kw.MoveCard(card, destination)`, `Kw.EventArg(ev, name)` added
 
-### `PromptChannel` ⚠️ Partial
+### `PromptChannel` ✅ Contract complete — integration deferred
 - `IPlayerStrategy`-based prompt dispatch wired in `ExecutionContext`
-- `TaskCompletionSource<T>` suspension pattern not yet tested end-to-end
+- `TaskCompletionSource<T>` suspension/resume mechanics (D3) are correct by construction: `RespondToPromptAsync` is awaited on the single game thread with no blocking calls; the pattern is structurally identical to every other `await` in the engine
+- End-to-end suspension testing (a strategy that truly suspends mid-block) is a host integration concern — it requires a Godot-side `IPlayerStrategy` implementation. **Ratified as a known deferred gap** (2026-03-06): the engine contract is specified and wired; host integration tests own the proof of the suspension round-trip.
 
 ---
 
@@ -127,8 +130,8 @@
 - `WithRandomSource(source)` — required; `Build()` throws if absent
 - `WithObserver(observer)` — optional cascade observer
 - `UseDefaultInit()` / `WithInitManifest(manifest)` — manifest selection; last call wins
-- `FromSavedState(snapshot)` — throws `NotSupportedException` (D17 deferred)
-- `Build()` — validates all players have strategies; no extra strategies for undefined players
+- `FromSavedState(GameStateSnapshot snapshot)` — load path; `Build()` skips `WithRandomSource` requirement, validates `GameDefinitionId`, derives RNG from snapshot
+- `Build()` — validates `GameDefinition.Id` non-empty; validates all players have strategies; no extra strategies for undefined players
 
 ### `GameSession` ✅
 - `static GameSessionBuilder Create(GameDefinition)` — factory entry point
@@ -138,8 +141,21 @@
 - **Round-robin active player**: `(turn-1) % playerCount` over `PlayerDefinitions` insertion order
 - **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest`
 - **`ProvisionManifest(InitManifest)`**: zones → cards (with `ProvisionDeclarativeEffect`) → card overrides → player overrides
-- **`ComputeAvailableActions`**: simplified — returns all cards owned by active player as playable; no cost/condition/target checks (open gap, see below)
+- **`ComputeAvailableActions`**: two independent passes — Pass 1 (PlayCard, zone-filtered + activation condition); Pass 2 (abilities, all owned cards regardless of zone); cost pre-flight deferred (D19 D-C)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
+
+### `get-atoms-in-zone` built-in ✅
+- `get-atoms-in-zone(zone: Zone) → Collection` — pure read; returns all atoms whose `ZoneId` matches the given zone atom
+- Used by `ComputeAvailableActions` (via equivalent internal `GetAllAtoms()` read) and composable in keyword trees
+- `GetAllAtoms()` added to `GameState` to support the handler
+- `BlockExecutor.EvaluateProperty(node, state, bindings?)` added (internal) for testing non-boolean primitive results
+
+### `ComputeAvailableActions` ✅
+- Zone filter (D19 step 2): checks zone definition name ∈ `PlayableZoneNames` **and** zone owner == active player; prevents cross-player zone exploitation
+- Activation condition (D19): `source` injected manually per D13 (no `StaticEffect` wrapper on this path)
+- Ability loop (D19 step 4): independent second pass over all owned cards, ignores zone membership entirely; zone restrictions expressed via ability's own `ActivationCondition`
+- Tests: 9 tests covering get-atoms-in-zone (3), zone filter, activation condition, source injection, ability-in-non-playable-zone, zone-owner restriction, pass-always-present
+- **Open gap (pre-existing)**: runtime-created atoms (`create-card`/`create-zone`) are invisible to `ComputeAvailableActions` — `_atomDefinitionNames` is only populated during `ProvisionManifest`
 
 ### `declare-winner` / `declare-draw` built-ins ✅
 - Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
@@ -155,13 +171,44 @@
 - Added to `BuiltInKeywords.All` (33 total), `BuiltInHandlers`, and `Kw.PlayerByName`
 - End-to-end test `DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName` asserts `GameResult.Winner == "p1"` (resolves PR #4 blocker)
 
-### Text renderer ❌ Not started (`Archetype.Text` project scaffolded but empty)
+### Text renderer ✅
+- **`RenderNode` discriminated union** in `Archetype.Core/RenderNode.cs`:
+  - `TextSpan(Text)` — leaf, literal string fragment
+  - `CompositeNode(Summary, Body)` — keyword invocation; summary from locale/template, body always full recursive structural expansion
+  - `SequenceNode(Items)` — ordered list of nodes (block steps, static effect parts)
+  - `RulesRef(Key, DisplayText)` — D18 cross-reference leaf; host calls `Resolve` to expand
+- **`TextRenderer`** in `Archetype.Text/TextRenderer.cs`:
+  - `Render(KeywordNode, locale?, bindings?)` — definition-time (bindings=null) or invocation-time modes
+  - `RenderBlock(EffectBlockDef, locale?, bindings?)` — always returns `SequenceNode` of one `RenderNode` per step (including single-step blocks — D11 API contract)
+  - `RenderStaticEffect(StaticEffectDef, locale?, bindings?)` — contribution block + trigger + lifetime
+  - `RenderLifetimeSpec(LifetimeSpec, locale?)` — uses reserved `engine.lifetime.*` keys with OR-separation
+  - `Resolve(keywordName, locale?, bindings?)` — D18 link resolution; returns null for unknown keywords
+  - `FlattenToText(RenderNode)` — public static helper for collapsing trees to strings
+- **Template resolution order**: locale → `TextTemplate` → structural `"keyword(arg, arg)"` fallback
+- **`TextTemplate` values** added to all 34 built-in keyword definitions in `BuiltInKeywords.cs`
+- **Definition-time caching**: body renders cached per `(KeywordDefinition, locale)` via `ConditionalWeakTable`; invocation-time not cached
+- **D18 cross-reference tag parsing**: `[display](key)` (long form) and `[key]` (short form) in template strings produce `RulesRef` leaf nodes
+- **28 tests** covering: ParameterRef def/inv modes, Literal, Invocation+TextTemplate, structural fallback, locale override, cross-ref tags (both forms), RenderBlock single/multi (single now asserts `SequenceNode` with one item — D11 fix), RenderLifetimeSpec (all condition types + OR join + locale override + permanent), RenderStaticEffect (trigger + contribution block + non-permanent lifetime), Resolve (primitive/composite/unknown, with locale), caching (cached/uncached), dual-use invariant (D2 §1.1, Layer 2)
 
 ---
 
 ## Tier 5 — Persistence
 
-### `GameStateSnapshot` ❌ Deferred (per D17)
+### D17 Save/Load ✅
+
+- **`GameDefinition.Id`**: required non-empty string; `GameSessionBuilder.Build()` throws `DefinitionException` if absent.
+- **`IEngineObserver.OnTurnStart(int turnNumber, GameStateSnapshot snapshot)`**: called before each turn's first phase init block; host persists snapshot.
+- **`SeededRandom`** (new): xoshiro128** implementation, independent of `System.Random`. Seeded via splitmix64. `Snapshot()` / `FromSnapshot(RngSnapshot)` for deterministic replay. `_callCount` tracks every raw `NextRaw()` invocation (including rejection-sampled values) for bit-for-bit replay.
+- **`GameStateSnapshot`** type hierarchy in `Archetype.Core/Snapshot.cs`: `BoundValue` (7 subtypes), `RngSnapshot`, `StaticEffectDefRef`, `DormantEffectSnapshot`, `AtomSnapshotData`, `ContributionSnapshot` (2 subtypes), `StaticEffectSnapshot`, `GameStateSnapshot`.
+- **`GameState.ToSnapshot()`**: captures atoms, contributions, active static effects (declarative by ref / dynamic inlined), dormant effects, player names, finalized log, RNG state.
+- **`GameState.LoadFromSnapshot()`**: restores ID counters, atoms, player registries, player order, contributions (reconstructs `ModifierIndex`/`ConditionIndex` — Decision 7), active static effects, dormant effects.
+- **`GameStateSnapshotSerializer`** in `Archetype.Engine`: `Serialize(GameStateSnapshot) → string` / `Deserialize(string) → GameStateSnapshot`. Uses `System.Text.Json` + `[JsonDerivedType]`. `GameEvent.BoundArgs` round-trips via `GameEventDto` + `BoundValue` union. `EventRefValue` resolved via sequence-number index. Custom `LiteralConverter` handles `Literal.Value : object` (tags: `d`/`b`/`s`/`atom`). Custom struct converters for `AtomId`, `ContributionId`, `StaticEffectId`.
+- **`GameSessionBuilder.FromSavedState(GameStateSnapshot)`**: sets load path; `Build()` skips `WithRandomSource` requirement, validates `GameDefinitionId`, derives `SeededRandom.FromSnapshot(snapshot.Rng)`.
+- **`GameSession.RunAsync`**: on load path, calls `LoadFromSnapshot` then starts loop at `snapshot.TurnNumber`; calls `OnTurnStart` before each turn's first phase init.
+- **`[JsonDerivedType]` added** to: `ContributionSource`, `LifetimeCondition`, `KeywordNode`, `ParameterModification`.
+- **`AtomIdCounter.PeekNext()/Restore(long)`** and **`ContributionIdCounter.PeekNext()/Restore(long)`** added for snapshot capture/restore.
+- **`StaticEffect.CardDefinitionName`/`EffectIndex`** and **`DormantDeclarativeEffect.CardDefinitionName`/`EffectIndex`** stored at instantiation time so snapshot capture can produce `StaticEffectDefRef` without scanning definitions.
+- **`LifetimeChecker.ProvisionDeclarativeEffect`/`InstantiateStaticEffect`** updated to accept optional `cardDefinitionName`/`effectIndex` and propagate through the effect lifecycle (`ActivatePass`, `Expire`).
 
 ---
 
@@ -174,8 +221,11 @@
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
+| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
+| `TextRenderer/TextRendererTests.cs` | 28 | ✅ All passing |
+| `SaveLoad/SaveLoadTests.cs` | 12 | ✅ All passing |
 
-**Total: 36 tests, 36 passing.**
+**Total: 84 tests, 84 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -202,7 +252,7 @@
 - `DeclareWinner_PlayerNameResolvedCorrectly` — card provisioning + manifest + declare-draw
 - `MultiTurn_GameRunsTwoTurns_BeforeDeclareDraw` — SBR condition on turn-number ≥ 2; player queues 2 passes
 - `PlayCard_Action_ExecutesPrimaryEffect` — LambdaPlayerStrategy plays card; SBR fires when score ≥ 1; event logged
-- `FromSavedState_ThrowsNotSupportedException`
+- `DeclareWinner_ViaPlayerByName_ReturnsCorrectWinnerName`
 
 ### Trigger resolution (full D7/D8 lifecycle)
 - `TriggerFires_WhenEventMatchesKeywordAndNoCondition`
@@ -228,8 +278,9 @@
 
 1. **`PromptChannel` untested** — the `IPlayerStrategy` prompt dispatch exists but no test exercises a mid-block prompt (`choose`, target selection).
 2. **Text renderer** — `Archetype.Text` project is scaffolded; no implementation.
-3. **`ComputeAvailableActions` is simplified** — currently returns all cards owned by the active player with no empty target list, no cost dry-run, no activation-condition check. A full implementation requires: (a) a "get atoms in zone" primitive for hands, (b) activation condition evaluation, (c) cost pre-flight. Flagged in source comments.
+3. **`ComputeAvailableActions` cost pre-flight deferred** — zone filtering and activation-condition evaluation are implemented (D19). Cost pre-flight (checking whether a card's cost can be paid) remains deferred per the D19 design doc; no current game definition requires it.
 4. **`declare-winner` architecture gap** — D14 didn't specify how a game-ending primitive signals `GameSession`. Resolved by adding `declare-winner(player)` / `declare-draw()` built-ins; decision documented here and in source XML docs. Architecture doc should be updated to ratify this (open item for architect).
+5. **Runtime-created atoms invisible to `ComputeAvailableActions`** — `_atomDefinitionNames` is populated only during `ProvisionManifest`; cards/zones created at runtime via `create-card`/`create-zone` would be silently skipped. Pre-existing gap, not introduced by D19.
 
 ---
 
@@ -237,12 +288,31 @@
 
 | Module | Blocked By |
 |---|---|
-| Text renderer | No blockers — can start any time |
-| Persistence | Deferred (D17) |
+| (none) | — |
 
 ---
 
 ## Resolved Issues
+
+### SaveLoad tests (D17) — 12 tests (2026-03-07)
+- `SeededRandom_SameSeed_ProducesSameSequence`
+- `SeededRandom_FastForward_ProducesCorrectNextValue`
+- `Snapshot_RoundTrip_PreservesAtomState`
+- `Snapshot_RoundTrip_PreservesActiveStaticEffects`
+- `Snapshot_RoundTrip_BoundArgs_AtomIdPreservesType`
+- `Snapshot_RoundTrip_BoundArgs_EventRefResolvesCorrectly`
+- `FromSavedState_ResumesAtCorrectTurn`
+- `FromSavedState_GameDefinitionIdMismatch_ThrowsDefinitionException`
+- `FromSavedState_DoesNotRequireWithRandomSource`
+- `OnTurnStart_CalledBeforeFirstPhaseInit`
+- `GameDefinitionBuilder_Build_ThrowsWhenIdMissing`
+- `ModifierIndex_ReconstructedCorrectly_AfterLoad`
+
+### Text renderer review — PASS (2026-03-07)
+- ✅ BLOCKER 1 resolved (`1a49699`): `RenderBlock` now always returns `SequenceNode` (D11 API contract)
+- ✅ MINOR 1 resolved (fixed directly in initial review): `RegexOptions.Compiled` removed (D1 WASM constraint)
+- ✅ Three additional tests added: T8h (StateContributionBlock), T8i (non-permanent lifetime), T9d (Resolve with locale)
+- ✅ 73/73 tests passing. Review verdict: **PASS**
 
 ### Tier 4 — GameSession / GameSessionBuilder (2026-03-05) — rework complete
 - ✅ `GameSessionBuilder`: fluent builder with full player-strategy validation

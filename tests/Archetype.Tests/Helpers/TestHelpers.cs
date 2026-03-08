@@ -207,7 +207,8 @@ public static class TestDefinition
             Phases:                 new List<PhaseDefinition>(),
             ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
             TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
-            PlayerDefinitions:      new Dictionary<string, PlayerDefinition>());
+            PlayerDefinitions:      new Dictionary<string, PlayerDefinition>(),
+            Id:                     "test-game");
     }
 
     /// <summary>Returns a new definition with the supplied keyword added.</summary>

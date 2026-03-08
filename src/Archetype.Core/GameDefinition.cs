@@ -7,13 +7,22 @@ namespace Archetype.Core;
 /// <summary>
 /// Static, design-time definition of a card.  Instantiated into an atom at
 /// game setup or when <c>create-card</c> / <c>copy-card</c> is invoked.
+/// <para>
+/// <b>ActivationCondition (D19):</b> optional guard evaluated in pure mode
+/// before offering <c>PlayCard</c> for this card.  <c>null</c> means always
+/// playable (subject to zone filter).  The card atom is pre-bound as
+/// <c>source</c> (D13) — <c>ComputeAvailableActions</c> must inject this
+/// binding explicitly; the <c>WhileCondition</c> path has a <c>StaticEffect</c>
+/// to do so, but the activation-condition path does not.
+/// </para>
 /// </summary>
 public sealed record CardDefinition(
     string Name,
     IReadOnlyDictionary<string, object> StaticProperties,
     EffectBlockDef PrimaryEffect,
     IReadOnlyList<NamedEffectBlockDef> AdditionalEffects,
-    IReadOnlyList<StaticEffectDef> StaticEffects);
+    IReadOnlyList<StaticEffectDef> StaticEffects,
+    KeywordNode? ActivationCondition = null);
 
 /// <summary>
 /// A named, activatable effect block on a card (e.g. an activated ability).
@@ -82,6 +91,17 @@ public sealed record PlayerDefinition(
 /// <see cref="BuiltInKeywords"/> at construction time.  Game-creator keywords
 /// may not shadow built-ins.
 /// </para>
+/// <para>
+/// <b>Id (D17):</b> a non-empty string that uniquely identifies this game definition.
+/// Required by <c>GameSessionBuilder.Build()</c>.  Stored in
+/// <see cref="GameStateSnapshot"/> so the load path can validate that the snapshot
+/// was produced by the same game definition.
+/// </para>
+/// <para>
+/// <b>PlayableZoneNames (D19):</b> zone definition names from which cards may
+/// be played.  <c>null</c> = no zone filter.  Specify one or more names
+/// (e.g. <c>"hand"</c>) to enforce zone restrictions on <c>PlayCard</c>.
+/// </para>
 /// </summary>
 public sealed record GameDefinition(
     IReadOnlyDictionary<string, KeywordDefinition> Keywords,
@@ -93,7 +113,9 @@ public sealed record GameDefinition(
     IReadOnlyDictionary<string, IReadOnlyList<ActionRuleDefinition>> ActionRules,
     TriggerResolutionOrder TriggerResolutionOrder,
     IReadOnlyDictionary<string, PlayerDefinition> PlayerDefinitions,
-    InitManifest? DefaultInitManifest = null);
+    InitManifest? DefaultInitManifest = null,
+    IReadOnlyList<string>? PlayableZoneNames = null,
+    string? Id = null);
 
 /// <summary>Determines the order in which simultaneous triggers resolve (D8).</summary>
 public enum TriggerResolutionOrder

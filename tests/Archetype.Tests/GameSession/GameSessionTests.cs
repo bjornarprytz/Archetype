@@ -39,7 +39,8 @@ public sealed class GameSessionTests
             PlayerDefinitions:      new Dictionary<string, PlayerDefinition>
             {
                 ["p1"] = new(new Dictionary<string, object>()),
-            });
+            },
+            Id:                     "test-game");
 
     /// <summary>
     /// Single block: <c>declare-winner(session param "p1-atom")</c> — ends the
@@ -153,7 +154,8 @@ public sealed class GameSessionTests
             PlayerDefinitions:      new Dictionary<string, PlayerDefinition>
             {
                 ["p1"] = new(new Dictionary<string, object>()),
-            });
+            },
+            Id:                     "test-game");
 
         var strategy = new ScriptedPlayerStrategy()
             .QueueAction(null); // player passes immediately (action window opens before SBR fires but SBR fires first in the post-action sequence from Pass)
@@ -299,7 +301,8 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: manifest);
+            DefaultInitManifest: manifest,
+            Id:                  "test-game");
 
         var strategy = new ScriptedPlayerStrategy().QueueAction(null);
 
@@ -388,7 +391,8 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: manifest);
+            DefaultInitManifest: manifest,
+            Id:                  "test-game");
 
         var strategy = new ScriptedPlayerStrategy().QueueAction(null);
 
@@ -495,7 +499,8 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: manifest);
+            DefaultInitManifest: manifest,
+            Id:                  "test-game");
 
         // Strategy: we don't know the card AtomId until after provisioning,
         // so we use a custom strategy that looks at available actions to find it.
@@ -532,18 +537,10 @@ public sealed class GameSessionTests
     }
 
     // -----------------------------------------------------------------------
-    //  Test 9: FromSavedState throws NotSupportedException (D17 deferred)
+    //  Test 9: (removed — FromSavedState is now implemented in D17)
     // -----------------------------------------------------------------------
-
-    [Fact]
-    public void FromSavedState_ThrowsNotSupportedException()
-    {
-        var def = SinglePlayerSinglePhase();
-
-        Assert.Throws<NotSupportedException>(() =>
-            Archetype.Engine.GameSession.Create(def)
-                .FromSavedState(new object()));
-    }
+    // The old test expecting NotSupportedException has been removed.
+    // D17 save/load tests are in SaveLoad/SaveLoadTests.cs.
 
     // -----------------------------------------------------------------------
     //  Test 10: declare-winner end-to-end — GameResult.Winner is resolved correctly

@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace Archetype.Core;
 
 // ---------------------------------------------------------------------------
@@ -10,6 +13,9 @@ namespace Archetype.Core;
 /// text rendering (via <c>TextRenderer</c> in <c>Archetype.Text</c>), satisfying
 /// the dual-use invariant in §1.1.
 /// </summary>
+[JsonDerivedType(typeof(ParameterRef), typeDiscriminator: "ref")]
+[JsonDerivedType(typeof(Literal),      typeDiscriminator: "lit")]
+[JsonDerivedType(typeof(Invocation),   typeDiscriminator: "inv")]
 public abstract record KeywordNode;
 
 /// <summary>
@@ -26,7 +32,104 @@ public sealed record ParameterRef(string Name) : KeywordNode;
 /// <see cref="AtomId"/> referencing a known atom.
 /// </summary>
 /// <param name="Value">The literal value.</param>
+[JsonConverter(typeof(LiteralConverter))]
 public sealed record Literal(object Value) : KeywordNode;
+
+// ---------------------------------------------------------------------------
+//  LiteralConverter — custom JSON converter for Literal.Value : object
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// Custom <see cref="JsonConverter{T}"/> for <see cref="Literal"/>.
+/// <para>
+/// <see cref="Literal.Value"/> is typed as <c>object</c> but in practice
+/// holds one of: <c>double</c>, <c>bool</c>, <c>string</c>, or
+/// <see cref="AtomId"/>.  This converter writes a discriminated JSON object
+/// so that round-trips preserve the concrete type.
+/// </para>
+/// </summary>
+internal sealed class LiteralConverter : JsonConverter<Literal>
+{
+    // Tag names used in JSON.
+    private const string TypeTag  = "t";
+    private const string ValueTag = "v";
+
+    public override Literal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartObject)
+            throw new JsonException("Expected StartObject for Literal.");
+
+        string? tag   = null;
+        object? value = null;
+
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+        {
+            if (reader.TokenType != JsonTokenType.PropertyName) continue;
+            var propName = reader.GetString();
+            reader.Read();
+
+            if (propName == TypeTag)
+                tag = reader.GetString();
+            else if (propName == ValueTag)
+            {
+                // Defer value parsing until we know the type tag.
+                // Use a raw value to re-parse after we've seen the tag.
+                // Since JSON objects have no guaranteed property order, we
+                // read both properties in one pass by capturing a JsonElement.
+                value = JsonElement.ParseValue(ref reader);
+            }
+        }
+
+        if (tag is null)
+            throw new JsonException("Literal JSON missing 't' (type tag).");
+
+        var element = (JsonElement)(value ?? throw new JsonException("Literal JSON missing 'v' (value)."));
+        object boxed = tag switch
+        {
+            "d"    => (object)element.GetDouble(),
+            "b"    => element.GetBoolean(),
+            "s"    => element.GetString() ?? string.Empty,
+            "atom" => new AtomId(element.GetInt64()),
+            _      => throw new JsonException($"Unknown Literal type tag '{tag}'.")
+        };
+
+        return new Literal(boxed);
+    }
+
+    public override void Write(Utf8JsonWriter writer, Literal value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteString(TypeTag, GetTag(value.Value));
+        writer.WritePropertyName(ValueTag);
+        WriteValue(writer, value.Value);
+        writer.WriteEndObject();
+    }
+
+    private static string GetTag(object v) => v switch
+    {
+        double   => "d",
+        bool     => "b",
+        string   => "s",
+        AtomId   => "atom",
+        _        => throw new JsonException(
+                        $"Literal holds unsupported type {v?.GetType().Name ?? "null"}. " +
+                        "Allowed: double, bool, string, AtomId.")
+    };
+
+    private static void WriteValue(Utf8JsonWriter writer, object v)
+    {
+        switch (v)
+        {
+            case double d:  writer.WriteNumberValue(d); break;
+            case bool   b:  writer.WriteBooleanValue(b); break;
+            case string s:  writer.WriteStringValue(s); break;
+            case AtomId a:  writer.WriteNumberValue(a.Value); break;
+            default:
+                throw new JsonException(
+                    $"Literal holds unsupported type {v?.GetType().Name ?? "null"}.");
+        }
+    }
+}
 
 /// <summary>
 /// Calls another keyword (built-in or game-creator-defined) with the given

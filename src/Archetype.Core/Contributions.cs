@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Archetype.Core;
 
 /// <summary>
@@ -32,9 +34,23 @@ public sealed class ContributionIdCounter
 
     /// <summary>Allocates the next <see cref="StaticEffectId"/>.</summary>
     public StaticEffectId NextStaticEffect() => new(_next++);
+
+    /// <summary>
+    /// Returns the next value that would be allocated without advancing
+    /// the counter.  Used by snapshot capture.
+    /// </summary>
+    public long PeekNext() => _next;
+
+    /// <summary>
+    /// Restores the counter to <paramref name="next"/>.
+    /// Used by snapshot load to reproduce the exact ID sequence.
+    /// </summary>
+    public void Restore(long next) => _next = next;
 }
 
 /// <summary>Identifies the source of a contribution: either an atom or a static effect.</summary>
+[JsonDerivedType(typeof(AtomSource),          typeDiscriminator: "atom")]
+[JsonDerivedType(typeof(StaticEffectSource),  typeDiscriminator: "se")]
 public abstract record ContributionSource;
 
 /// <summary>Contribution created directly by a keyword invocation on behalf of an atom.</summary>
@@ -98,6 +114,9 @@ public sealed record LifetimeSpec(IReadOnlyList<LifetimeCondition> Conditions)
 }
 
 /// <summary>Base type for conditions that can terminate a lifetime.</summary>
+[JsonDerivedType(typeof(TurnTimer),      typeDiscriminator: "turn")]
+[JsonDerivedType(typeof(TriggerCount),   typeDiscriminator: "trig")]
+[JsonDerivedType(typeof(WhileCondition), typeDiscriminator: "while")]
 public abstract record LifetimeCondition;
 
 /// <summary>Expires after the given number of turns.</summary>

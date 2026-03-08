@@ -63,6 +63,18 @@ internal sealed class ActionResolver
     // -----------------------------------------------------------------------
 
     /// <summary>
+    /// Evaluates a pure <see cref="KeywordNode"/> boolean expression against
+    /// the given state and optional bindings.  Delegates to the internal
+    /// <see cref="BlockExecutor"/> so callers (e.g. <c>GameSession</c>) can
+    /// evaluate activation conditions without access to the private executor.
+    /// </summary>
+    public bool EvaluateCondition(
+        KeywordNode expression,
+        GameState state,
+        IReadOnlyDictionary<string, object>? bindings = null) =>
+        _executor.EvaluateCondition(expression, state, bindings);
+
+    /// <summary>
     /// Convenience factory: constructs a <see cref="BlockExecutor"/> shared with
     /// <see cref="TriggerResolver"/>, then returns a fully wired
     /// <see cref="ActionResolver"/> (which creates its own second executor for

@@ -46,4 +46,16 @@ public sealed class AtomIdCounter
 
     /// <summary>Allocates the next <see cref="AtomId"/>.</summary>
     public AtomId Next() => new(_next++);
+
+    /// <summary>
+    /// Returns the next ID that would be allocated without advancing the counter.
+    /// Used by snapshot capture to record the counter state.
+    /// </summary>
+    public long PeekNext() => _next;
+
+    /// <summary>
+    /// Restores the counter to <paramref name="next"/>.
+    /// Used by snapshot load to reproduce the exact ID sequence.
+    /// </summary>
+    public void Restore(long next) => _next = next;
 }

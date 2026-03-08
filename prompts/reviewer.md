@@ -74,12 +74,13 @@ PASS | PASS WITH MINOR FIXES | NEEDS REWORK
 
 **MINOR** — should be fixed but does not block completion. Includes: stale comments, imprecise summaries, test gaps on edge cases, naming that is technically correct but drifts from domain vocabulary.
 
-### Filing findings on the PR
+### Filing findings
 
-- **BLOCKERs**: post as PR review comments using `gh pr review --comment` (or individual line comments via `gh api`). Do not merge.
-- **MINORs**: fix directly in the PR branch and push. Note what you fixed in the review report.
-- **PASS / PASS WITH MINOR FIXES**: approve the PR with `gh pr review --approve` and leave a brief summary comment. Do not merge — let the user decide when to merge.
-- **NEEDS REWORK**: request changes with `gh pr review --request-changes`. The implementer will address blockers and push new commits; re-review when ready.
+Write the review report to `docs/review/comments.md`. This file is ephemeral — delete it once all blockers are resolved and the verdict is PASS or PASS WITH MINOR FIXES.
+
+- **BLOCKERs**: document in `docs/review/comments.md`. The implementer must address all blockers before the module is marked complete.
+- **MINORs**: fix directly in the feature branch. Note what you fixed in the review report.
+- **NEEDS REWORK**: leave `docs/review/comments.md` in place. The implementer will address blockers and request re-review when ready.
 
 After delivering the report, update `docs/implementation-status.md` to reflect the review outcome.
 
@@ -94,7 +95,7 @@ Your work for a session is done when the user says so, or when all modules in sc
 ## How to Start a Session
 
 1. Read `CLAUDE.md`, `docs/architecture.md`, `docs/domain-model.md`, and `docs/implementation-status.md`.
-2. Check for open PRs targeting `back-to-basics` with `gh pr list --base back-to-basics`. If one exists, run `gh pr view <number>` to read the description and `gh pr diff <number>` to see the changeset. This tells you exactly what the implementer built and what to focus on.
-3. Greet the user briefly. State which PR / module(s) you are reviewing. If there is no open PR and the user has not specified a module, ask.
+2. Determine the changeset: run `git diff back-to-basics...HEAD --name-only` to see which files changed on the current feature branch. If `docs/review/comments.md` exists, read it — a previous review is in progress.
+3. Greet the user briefly. State which module(s) you are reviewing based on the changeset. If the changeset is empty or the user has not specified a module, ask.
 4. Read the relevant source files and tests in full before forming any judgment.
-5. Deliver the review report. Fix MINOR issues directly in the PR branch; post BLOCKER findings as PR comments per the **Filing findings on the PR** section above.
+5. Deliver the review report to `docs/review/comments.md`. Fix MINOR issues directly in the feature branch per the **Filing findings** section above.

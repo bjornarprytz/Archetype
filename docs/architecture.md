@@ -1,9 +1,9 @@
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections).**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern).**
 
-All decisions D1–D18 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15).
+All decisions D1–D19 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15). Updated 2026-03-05 to ratify game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) and their `GameIsOver` propagation contract (D7 amendments and D14 addendum), and to add D19 (`ComputeAvailableActions` contract — `get-atoms-in-zone` primitive, `CardDefinition.ActivationCondition`, `GameDefinition.PlayableZoneNames`).
 
 ---
 
@@ -421,6 +421,7 @@ Rules are registered by the game creator at game setup and stored in `GameDefini
 ```
 async Task RunStateBasedRules(ExecutionContext ctx)
   loop:
+    if ctx.GameState.GameIsOver: return              // terminal early-exit — prevents infinite loops on always-true SBRs (D14 addendum)
     triggered = [rule in GameDefinition.StateBasedRules
                  where EvaluateCondition(rule.Condition, ctx.GameState) == true]
     if triggered is empty: return
@@ -442,19 +443,20 @@ All triggered conditions are evaluated before any blocks fire in that pass; rule
 1.  ExecuteBlock(primaryBlock, ctx) → CheckLifetimes
 2.  RunStateBasedRules(ctx)                          // fixpoint
     ── cascade loop ──────────────────────────────────────────────
-3.  triggerBatchCount++
-4.  directive = await EngineObserver?.OnTriggerCascade(triggerBatchCount) ?? Continue
-5.  if directive == Halt: break cascade loop
-6.  CollectSatisfiedTriggers → sort by StaticEffectId ascending
-7.  if none: break cascade loop
-8.  for each triggered static effect (oldest first):
+3.  if GameIsOver: break cascade loop                // terminal early-exit (D14 addendum)
+4.  triggerBatchCount++
+5.  directive = await EngineObserver?.OnTriggerCascade(triggerBatchCount) ?? Continue
+6.  if directive == Halt: break cascade loop
+7.  CollectSatisfiedTriggers → sort by StaticEffectId ascending
+8.  if none: break cascade loop
+9.  for each triggered static effect (oldest first):
       await ExecuteBlock(triggeredBlock, ctx) → CheckLifetimes
       RunStateBasedRules(ctx)                        // fixpoint after each trigger-fired block
     ── repeat from step 3 ────────────────────────────────────────
-9.  Open next player action window
+10. Open next player action window
 ```
 
-The observer is called *before* trigger collection in each batch (step 4), so the host can halt before more triggers fire. `triggerBatchCount` resets to zero at the start of each new action.
+The observer is called *before* trigger collection in each batch (step 5), so the host can halt before more triggers fire. `triggerBatchCount` resets to zero at the start of each new action.
 
 ---
 
@@ -470,7 +472,7 @@ enum CascadeDirective { Continue, Halt }
 - Defined in the engine; implemented by the host (Godot layer or test harness).
 - Injected into `ActionResolver` as a nullable reference. `null` → always `Continue` (simple games need not implement it).
 - `iterationCount` is the count of trigger-resolution batches completed so far in the current action (1-based: first call passes `1`).
-- When the host returns `Halt`, the engine exits the cascade loop cleanly and proceeds to step 9. No partial state is rolled back. State-based rules (step 2) do not re-run after a `Halt` — the loop exits immediately.
+- When the host returns `Halt`, the engine exits the cascade loop cleanly and proceeds to step 10. No partial state is rolled back. State-based rules (step 2) do not re-run after a `Halt` — the loop exits immediately.
 - The interface is `async` (returns `Task<CascadeDirective>`) so the host may present UI (e.g. "Infinite loop detected — player X wins") before the engine proceeds.
 
 **Design note — host boundary.** The host (Godot layer) is a consumer of engine state: it renders, presents UI, and supplies player input. It does not author game logic and cannot invoke engine effects at runtime. `IEngineObserver` is the extent of the host's runtime influence on the engine — it may observe cascade depth and request a halt, but it may not push state changes into the engine. All game mechanics, including any "cascade depth matters" rule, must be expressed in the `GameDefinition` by the game creator (state-based rules, triggers, etc.) and evaluated by the engine itself. This boundary is a firm constraint on the game creator API decision (D9).
@@ -598,7 +600,7 @@ async Task<List<TriggerFiring>> CollectSatisfiedTriggers(GameState state)
 
 `Order` applies the configured sort (`OldestFirst`/`OldestLast`) or posts a `TriggerOrderPrompt` (`PromptPlayer`) and awaits the player's response. The method is `async` to accommodate the prompt path.
 
-Called at step 6 of the post-action sequence (D7).
+Called at step 7 of the post-action sequence (D7).
 
 ---
 
@@ -633,7 +635,7 @@ async Task FireTrigger(TriggerFiring firing, ExecutionContext parentCtx)
   // New child action context (new ActionScopeId); inherits GameState and channels
   ctx = parentCtx.CreateChildActionContext(prePopulatedBindings: bindings)
 
-  // Post-action sequence step 8: execute → CheckLifetimes → RunStateBasedRules
+  // Post-action sequence step 9: execute → CheckLifetimes → RunStateBasedRules
   await ExecuteBlock(se.Trigger.FiredBlock, ctx)
   CheckLifetimes(ctx.GameState)
   await RunStateBasedRules(ctx)
@@ -832,7 +834,7 @@ class TextRenderer
 
 `RenderBlock` produces a `SequenceNode` of one `RenderNode` per step in the block.
 
-`RenderStaticEffect` produces a `SequenceNode` containing: the rendered state contribution (if any), the rendered trigger (if any), and the rendered lifetime spec. For declarative static effects, this is what appears as the card's ability text.
+`RenderStaticEffect` produces a `SequenceNode` containing: the rendered state contribution (if any), the rendered trigger (if any), and the rendered lifetime spec (if non-permanent). A permanent `LifetimeSpec` (no conditions) produces no lifetime node in the sequence — permanent effects carry no user-facing duration text. For declarative static effects, this is what appears as the card's ability text.
 
 `RenderLifetimeSpec` uses reserved engine locale keys (looked up in `localeStrings` first, then falling back to the engine's registered defaults):
 
@@ -1423,7 +1425,7 @@ No NuGet dependencies. No engine logic. WASM-safe by construction.
 - `PromptContext` discriminated union (choice prompt, trigger-order prompt — D8), `PromptResponse`
 - Interfaces: `IPlayerStrategy`, `IEngineObserver`, `IRandomSource`
 - Enums: `TriggerResolutionOrder`, `ModifierKind`, `ParamModKind`, `CascadeDirective` — `PlayerSlot` is retired (A15); players are referenced by string name throughout
-- `BuiltInKeywords` — a static registry of all built-in keyword names and their `ParameterDecl[]` signatures (no C# implementations; implementations are in `Engine`). Used by `Build` for authoring validation and by `Engine` for dispatch. Covers all mutation primitives from D12 (including `move-card`) and all read primitives from §9.2 of the domain model.
+- `BuiltInKeywords` — a static registry of all built-in keyword names and their `ParameterDecl[]` signatures (no C# implementations; implementations are in `Engine`). Used by `Build` for authoring validation and by `Engine` for dispatch. Covers all mutation primitives from D12 (including `move-card`), the game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) from the D14 addendum, the zone query primitive (`get-atoms-in-zone`) from D19, and all read primitives from §9.2 of the domain model.
 - `DefinitionException` — thrown by authoring-time validation failures
 
 *What is not here:* any mutable runtime state, any execution logic, any JSON parsing.
@@ -1532,6 +1534,7 @@ GameDefinition {
   TriggerResolutionOrder : TriggerResolutionOrder
   PlayerDefinitions      : IReadOnlyDictionary<string, PlayerDefinition>   // named registry; minimum one (A15)
   DefaultInitManifest    : InitManifest?
+  PlayableZoneNames      : IReadOnlyList<string>?   // D19: zone definition names from which cards may be played; null = no zone filter
 }
 ```
 
@@ -1549,11 +1552,12 @@ PlayerDefinition {
 
 ```
 CardDefinition {
-  Name              : string
-  StaticProperties  : IReadOnlyDictionary<string, object>
-  PrimaryEffect     : EffectBlockDef
-  AdditionalEffects : IReadOnlyList<NamedEffectBlockDef>
-  StaticEffects     : IReadOnlyList<StaticEffectDef>
+  Name                : string
+  StaticProperties    : IReadOnlyDictionary<string, object>
+  ActivationCondition : KeywordNode?    // D19: optional; evaluated pure before PlayCard is offered; null = always playable (subject to zone filter)
+  PrimaryEffect       : EffectBlockDef
+  AdditionalEffects   : IReadOnlyList<NamedEffectBlockDef>
+  StaticEffects       : IReadOnlyList<StaticEffectDef>
 }
 
 NamedEffectBlockDef {
@@ -1750,7 +1754,7 @@ GameResult {
 }
 ```
 
-`RunAsync` provisions the init manifest (if any), then runs the phase sequence — phase init, action window, trigger and SBR resolution, phase cleanup — repeating until a state-based rule produces an outcome.
+`RunAsync` provisions the init manifest (if any), then runs the phase sequence — phase init, action window, trigger and SBR resolution, phase cleanup — repeating until `GameState.GameIsOver` becomes true (set by `declare-winner` or `declare-draw`). After every `ResolveAction` call, `RunAsync` checks `GameIsOver` and exits the turn loop immediately if true. See D14 addendum (game outcome primitives) for the full propagation contract.
 
 ---
 
@@ -1976,6 +1980,73 @@ The type-checker in `Build` enforces the `AtomKindRestriction { Card, Zone }` wh
 - `GameDefinition.Keywords` includes built-ins pre-registered by the engine. The `Kw` shorthands must be kept in sync with the built-in registry; both are the implementer's responsibility to maintain together.
 - `DefinitionException` is the error type for authoring failures (unknown keyword, cyclic definition, type mismatch, missing required field). It is a design-time error, not a runtime game error.
 - `FromSavedState` is reserved in `GameSessionBuilder`'s public API. Until D17 is implemented, calling it throws `NotSupportedException`. Reserving it now prevents the API from diverging in a way that would break callers when D17 lands.
+
+---
+
+---
+
+**D14 Addendum — Game Outcome Primitives.**
+
+D14 originally described the termination condition of `RunAsync` as "repeat until a state-based rule produces an outcome" without specifying the signalling mechanism. The implementation resolved this gap with a terminal-flag pattern using three new built-in primitives. This addendum ratifies those decisions.
+
+---
+
+**Three new built-in primitives:**
+
+| Keyword | Parameters | Returns | Description |
+|---|---|---|---|
+| `declare-winner` | `player: Player` | `void` | Terminates the game. Sets `GameState.GameIsOver = true` and `GameState.PendingWinner` to the name of `player`. First-call-wins (see below). |
+| `declare-draw` | *(none)* | `void` | Terminates the game with no winner. Sets `GameState.GameIsOver = true` and `GameState.PendingWinner = null`. First-call-wins. |
+| `player-by-name` | `name: PropertyName` | `Player` | Resolves a player atom at runtime from a name string registered during session provisioning. Returns the `AtomId` of the matching player atom. Throws `EngineException` if the name is not registered. |
+
+`declare-winner` and `declare-draw` are mutation keywords (they mutate `GameState`). `player-by-name` is a property keyword (pure read, no event log entry). All three are registered in `BuiltInKeywords.All`.
+
+**`Kw` shorthands:**
+```
+Kw.DeclareWinner(player: KeywordNode) → Invocation
+Kw.DeclareDraw()                      → Invocation
+Kw.PlayerByName(name: KeywordNode)    → Invocation
+```
+
+---
+
+**`GameState` fields:**
+
+```
+GameState {
+  ...
+  GameIsOver     : bool       // false initially; set to true by the first DeclareOutcome call
+  PendingWinner  : string?    // null = draw; non-null = winning player name
+}
+```
+
+`DeclareOutcome(winner: string?)` is the internal method called by both primitives:
+```
+void DeclareOutcome(string? winner):
+  if GameIsOver: return          // first-call-wins: all subsequent calls are no-ops
+  GameIsOver    = true
+  PendingWinner = winner
+```
+
+**First-call-wins invariant.** During a trigger cascade, multiple triggers may fire `declare-winner` before any `GameIsOver` check runs. The first call sets the outcome; all subsequent calls are silently ignored. This gives the highest-priority rule (first to fire by `StaticEffectId` ordering) authority over the outcome. Both `declare-winner` and `declare-draw` calls are logged to the event log regardless of whether they take effect, so post-hoc analysis can detect conflicts.
+
+---
+
+**`GameIsOver` propagation contract.** `GameIsOver` is checked at three points:
+
+1. **`RunAsync` turn loop** — after every `ResolveAction` call returns, `RunAsync` checks `GameIsOver` and exits immediately if true. `GameResult` is populated from `PendingWinner`.
+2. **Cascade loop in `ActionResolver`** — step 3 of the post-action sequence breaks the cascade loop before firing a new trigger batch when `GameIsOver` is true.
+3. **`RunStateBasedRules` fixpoint loop** — at the top of each iteration, exits immediately if `GameIsOver` is true. This prevents an always-true terminal SBR from looping infinitely after it fires `declare-winner`.
+
+---
+
+**`player-by-name` as the authoring-time → runtime player reference bridge.** A card's `KeywordNode` tree is authored statically before atom IDs are assigned at runtime. There is no way to embed a concrete player atom ID in a keyword tree that says "player Alice wins." `player-by-name` bridges authoring-time names and runtime atoms, analogous to how zone definition names work in `move-card` targets. The canonical pattern for a state-based rule that declares Alice the winner is:
+
+```
+declare-winner(player-by-name("alice"))
+```
+
+`GameSessionBuilder.Build()` validates that every `PlayerDefinition` in `GameDefinition.PlayerDefinitions` has a matching player atom provisioned. An unregistered name at runtime throws `EngineException` — this indicates a game-definition bug detectable at build time.
 
 ---
 
@@ -2296,6 +2367,133 @@ RenderNode? Resolve(string keywordName,
 
 ---
 
+---
+
+### D19 — `ComputeAvailableActions` Contract
+
+**Decision:** `ComputeAvailableActions` filters the active player's playable cards by zone membership (using `GameDefinition.PlayableZoneNames`) and then by per-card activation condition (using `CardDefinition.ActivationCondition`). Ability activation uses only the existing `ActivationCondition` on `NamedEffectBlockDef`; no separate zone restriction mechanism is needed. Cost pre-flight is explicitly deferred. `Pass` is always included. A new built-in property query — `get-atoms-in-zone` — supports zone-based filtering.
+
+---
+
+**`get-atoms-in-zone` built-in property keyword:**
+
+| Keyword | Parameters | Returns | Notes |
+|---|---|---|---|
+| `get-atoms-in-zone` | `zone: Zone` | `Atom[]` | Pure read; no state mutation; no event log entry. Returns all atom IDs whose current `ZoneId` equals the given zone atom's ID. Throws `EngineException` if the argument is not a Zone atom. An empty zone returns an empty collection. |
+
+`get-atoms-in-zone` is a property keyword. It is registered in `BuiltInKeywords.All` alongside the existing read primitives. Its `Kw` shorthand:
+```
+Kw.GetAtomsInZone(zone: KeywordNode) → Invocation
+```
+
+`ComputeAvailableActions` uses the equivalent internal read — iterating `GameState` atoms by `ZoneId` — rather than dispatching the keyword through the full interpreter, since it is pure C# code with direct state access. The built-in exists so game creators can also use zone queries in their own keyword trees (activation conditions, SBRs, trigger conditions).
+
+---
+
+**`CardDefinition.ActivationCondition`** (new field, added to D14):
+
+```
+CardDefinition {
+  ...
+  ActivationCondition : KeywordNode?    // optional; evaluated pure before PlayCard is offered; null = always playable (subject to zone filter)
+  ...
+}
+```
+
+Evaluated using the same pure condition evaluation path as `WhileCondition` and trigger conditions (`EvaluateCondition` / `BlockExecutor.EvaluateCondition`): no state mutation, no event logging. The evaluation context provides read-only `GameState` access. No variable bindings are in scope (the condition may only reference `GameState` reads and literals). `null` means the card is always playable (no per-card condition).
+
+---
+
+**`GameDefinition.PlayableZoneNames`** (new field, added to D14):
+
+```
+GameDefinition {
+  ...
+  PlayableZoneNames : IReadOnlyList<string>?   // zone definition names from which cards may be played; null = no zone filter
+  ...
+}
+```
+
+A list of zone definition names (matching `ZoneDefinition.Name`). `ComputeAvailableActions` filters the active player's owned card atoms to those whose current `ZoneId` resolves to a zone whose definition name appears in this list. `null` or empty list = no zone filter (all owned cards are zone-eligible candidates). Validated at `Build()`: every name in `PlayableZoneNames` must appear in `GameDefinition.ZoneDefinitions`; unknown names are a `DefinitionException`.
+
+---
+
+**`ComputeAvailableActions` algorithm:**
+
+```
+AvailableActions ComputeAvailableActions(string activePlayer, GameState state)
+
+  result = new AvailableActions()
+
+  // Step 1: PlayCard candidates
+  ownedCards = atoms in state where Kind == Card AND OwnerName == activePlayer
+
+  // Step 2: Zone filter
+  if GameDefinition.PlayableZoneNames != null AND PlayableZoneNames.Count > 0:
+    playableZoneIds = zones in state
+                        where ZoneDefinition.Name ∈ PlayableZoneNames
+                        AND OwnerName == activePlayer   // restrict to the active player's own zones
+    ownedCards = ownedCards where ZoneId ∈ playableZoneIds
+
+  // Step 3: Activation condition filter
+  for each card in ownedCards:
+    cardDef = GameDefinition.CardDefinitions[card.RefName]
+    if cardDef.ActivationCondition == null
+       OR EvaluateCondition(cardDef.ActivationCondition, state):
+      result.PlayableCards.Add(PlayableCardOption { Card: card.Id })
+
+  // Step 4: Ability candidates
+  for each card in (all active player's cards, regardless of zone):
+    cardDef = GameDefinition.CardDefinitions[card.RefName]
+    for each ability in cardDef.AdditionalEffects:
+      if ability.ActivationCondition == null
+         OR EvaluateCondition(ability.ActivationCondition, state):
+        result.ActivatableAbilities.Add(ActivatableAbilityOption {
+          Source: card.Id, EffectName: ability.Name })
+
+  // Step 5: Pass is always available
+  result.CanPass = true
+
+  return result
+```
+
+**Notes on ability zone filtering (step 4).** There is no separate zone restriction mechanism for abilities. If a game requires "abilities can only be activated from the battlefield," the game creator expresses this via `ActivationCondition` on the relevant `NamedEffectBlockDef` (e.g., `in-zone(source, battlefield-zone-id)`). The condition evaluation context for abilities provides `source` as the owning card atom (consistent with the `source` reserved binding in static effect evaluation — D13). The engine does not need a global ability-zone designation because ability restrictions vary too much per card and per ability to be usefully captured as a game-level policy.
+
+**Cost pre-flight is deferred.** `ValidTargets` enumeration and cost dry-runs are not part of the minimum viable `ComputeAvailableActions`. When a game definition requires cost filtering, it will be specified as a separate architectural amendment. Until then, `PlayableCardOption.ValidTargets` and `ActivatableAbilityOption.ValidTargets` are empty lists — `IPlayerStrategy` implementations that rely on them must not assume they are populated.
+
+---
+
+**`GameDefinitionBuilder` additions:**
+
+```
+GameDefinitionBuilder
+  .WithPlayableZones(params string[] zoneDefinitionNames) → self
+```
+
+`CardBuilder` gains:
+```
+CardBuilder
+  .WithActivationCondition(KeywordNode condition) → self
+```
+
+---
+
+**Rationale:**
+- `PlayableZoneNames` as a game-level list (rather than per-player or per-card) handles the common case (all players play from "hand") in one setting and requires no special convention on `ZoneDefinition`. Games with asymmetric playable zones (different players, different zone definitions) use `ActivationCondition` on individual cards to add the extra restriction.
+- `ActivationCondition` on `CardDefinition` follows the established pattern from `NamedEffectBlockDef` — same field name, same evaluation semantics. No new evaluation path is needed.
+- `get-atoms-in-zone` as a named built-in keeps zone queries composable within keyword trees. `ComputeAvailableActions` uses the equivalent internal state read directly for performance, but the primitive's existence means game creators can write activation conditions and SBRs that query zones without a bespoke C# API.
+- Reusing `ActivationCondition` on `NamedEffectBlockDef` for ability zone restrictions avoids a second zone-designation mechanism at the cost of slightly more verbose authoring for the common "battlefield only" case. This trade-off is acceptable given that ability activation restrictions are typically more varied than card-play restrictions.
+
+**Consequences:**
+- `CardDefinition` gains `ActivationCondition: KeywordNode?`. The `CardBuilder.WithActivationCondition` method and JSON deserialization both respect this field. Existing `CardDefinition` instances without the field are treated as `null` (always playable).
+- `GameDefinition` gains `PlayableZoneNames: IReadOnlyList<string>?`. `GameDefinitionBuilder.Build()` validates all names against `ZoneDefinitions`. `null` is a valid value (no zone filter); the builder default is `null`.
+- `BuiltInKeywords.All` gains `get-atoms-in-zone`. The startup assertion in `ActionResolver` (every built-in name has a registered handler) will catch any mismatch.
+- `Kw` gains `GetAtomsInZone`. Kept in sync with `BuiltInKeywords` per the D15 consequence.
+- `ComputeAvailableActions` is no longer a placeholder. The implementer must rewrite it to match the algorithm above. Existing tests that relied on the placeholder behaviour (all owned cards always available) should be updated to reflect zone and condition filtering.
+- The `source` reserved name must be populated in the activation-condition evaluation context for `NamedEffectBlockDef` conditions. For `CardDefinition.ActivationCondition`, `source` is the card atom itself.
+
+---
+
 ## Open Items
 
 - [x] Language and runtime — D1
@@ -2314,5 +2512,6 @@ RenderNode? Resolve(string keywordName,
 - [x] Game creator API — D14
 - [x] Module boundaries — D15
 - [x] Testing strategy — D16
-- [x] Save/load (`GameStateSnapshot`) — D17.
-- [x] Keyword cross-references in card text — D18.
+- [x] Save/load (`GameStateSnapshot`) — D17
+- [x] Keyword cross-references in card text — D18
+- [x] `ComputeAvailableActions` contract — D19
