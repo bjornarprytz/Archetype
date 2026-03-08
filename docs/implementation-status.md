@@ -223,7 +223,7 @@
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 | `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
 | `TextRenderer/TextRendererTests.cs` | 28 | ✅ All passing |
-| `SaveLoad/SaveLoadTests.cs` | 13 | ✅ All passing |
+| `SaveLoad/SaveLoadTests.cs` | 13 | ✅ All passing (T13 added for BLOCKER 1 regression) |
 
 **Total: 85 tests, 85 passing.**
 
@@ -294,7 +294,7 @@
 
 ## Resolved Issues
 
-### SaveLoad tests (D17) — 12 tests (2026-03-07)
+### SaveLoad tests (D17) — 13 tests — review verdict: PASS (2026-03-08)
 - `SeededRandom_SameSeed_ProducesSameSequence`
 - `SeededRandom_FastForward_ProducesCorrectNextValue`
 - `Snapshot_RoundTrip_PreservesAtomState`
@@ -307,6 +307,7 @@
 - `OnTurnStart_CalledBeforeFirstPhaseInit`
 - `GameDefinitionBuilder_Build_ThrowsWhenIdMissing`
 - `ModifierIndex_ReconstructedCorrectly_AfterLoad`
+- `ManifestProvisionedCondition_SurvivesSnapshotRoundTrip` (T13 — BLOCKER 1 regression test)
 
 ### Text renderer review — PASS (2026-03-07)
 - ✅ BLOCKER 1 resolved (`1a49699`): `RenderBlock` now always returns `SequenceNode` (D11 API contract)

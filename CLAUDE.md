@@ -61,3 +61,33 @@ game
 The same keyword/effect-block definition must support both:
 1. **Execution** — resolving game state changes
 2. **Text rendering** — generating human-readable card text, with the full composition tree available so the game layer can decide what level of detail to show the player
+
+## Artifact Conventions
+
+### Status Frontmatter
+
+Every artifact in `docs/` must begin with a YAML frontmatter block before the `#` title:
+
+```yaml
+---
+status: signed-off        # draft | in-progress | signed-off
+owner: domain-modeler     # persona responsible for this artifact
+signed-off: 2026-03-02    # omit if not yet signed off
+last-updated: 2026-03-08
+depends-on: []            # paths of artifacts this one depends on
+---
+```
+
+Agents read the frontmatter to assess artifact status without reading body content. The prose `## Status` section may remain for human-readable history.
+
+### Task Annotations
+
+Each task in `tasks.md` should carry `reads:` and `writes:` annotations on indented lines immediately below:
+
+```markdown
+- [ ] 1.1 Add `Id: string` to `GameDefinition` record
+  - reads: `docs/architecture.md#D17`, `src/Archetype.Core/GameDefinition.cs`
+  - writes: `src/Archetype.Core/GameDefinition.cs`
+```
+
+Use document anchor notation (`#section`) for large docs. An agent reads only the listed files before starting a task — nothing more.
