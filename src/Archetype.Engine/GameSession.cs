@@ -657,6 +657,9 @@ public sealed class GameSession
             if (!atom.ConditionIndex.TryGetValue(cond, out var list))
                 atom.ConditionIndex[cond] = list = new List<ConditionContribution>();
             list.Add(contribution);
+            // Register in ContributionRegistry so ToSnapshot() captures this condition.
+            // Matches the pattern in BuiltInHandlers.cs ApplyCondition handler (line 209).
+            _state.ContributionRegistry[id] = new ConditionContributionWrapper(contribution);
         }
     }
 

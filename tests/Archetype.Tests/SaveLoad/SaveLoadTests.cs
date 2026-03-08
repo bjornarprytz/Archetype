@@ -621,6 +621,117 @@ public sealed class SaveLoadTests
     }
 
     // -----------------------------------------------------------------------
+    //  7.13 Manifest-provisioned conditions survive snapshot round-trip
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Regression test for BLOCKER 1: <see cref="GameSession.ApplyConditions"/> must
+    /// register <see cref="ConditionContribution"/> objects in
+    /// <see cref="GameState.ContributionRegistry"/> so that <c>ToSnapshot()</c>
+    /// captures them. Before the fix, conditions set via <see cref="CardSpec.Conditions"/>
+    /// were written to <c>ConditionIndex</c> but omitted from the registry, making them
+    /// invisible to the snapshot serializer and causing <c>HasCondition</c> to return
+    /// false after a load.
+    /// </summary>
+    [Fact]
+    public async Task ManifestProvisionedCondition_SurvivesSnapshotRoundTrip()
+    {
+        // Arrange: a game with a card that starts with a condition applied via manifest.
+        const string conditionName = "poisoned";
+
+        var cardDef = new CardDefinition(
+            Name:                "test-card",
+            StaticProperties:    new Dictionary<string, object>(),
+            PrimaryEffect:       EffectBlockDef.Empty,
+            AdditionalEffects:   new List<NamedEffectBlockDef>(),
+            StaticEffects:       new List<StaticEffectDef>(),
+            ActivationCondition: null);
+
+        var zoneDef = new ZoneDefinition(Name: "hand", StaticProperties: new Dictionary<string, object>());
+
+        var manifest = new InitManifest(
+            Zones: new List<ZoneSpec>
+            {
+                new ZoneSpec(LocalId: "hand", Owner: "p1", Definition: "hand"),
+            },
+            Cards: new List<CardSpec>
+            {
+                // The card starts the game with the "poisoned" condition.
+                new CardSpec(
+                    Owner:      "p1",
+                    ZoneLocalId: "hand",
+                    Definition:  "test-card",
+                    Conditions:  new List<string> { conditionName }),
+            },
+            PlayerStates: new List<PlayerStateSpec>());
+
+        var drawBlock = new EffectBlockDef([
+            new EffectBlockStep("declare-draw", Array.Empty<KeywordNode>()),
+        ]);
+
+        var def = new GameDefinition(
+            Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
+            CardDefinitions:        new Dictionary<string, CardDefinition> { ["test-card"] = cardDef },
+            ZoneDefinitions:        new Dictionary<string, ZoneDefinition> { ["hand"] = zoneDef },
+            CardSets:               new Dictionary<string, CardSet>(),
+            StateBasedRules:        new List<StateBasedRule>
+            {
+                new("draw", Condition: new Literal(true), Body: drawBlock),
+            },
+            Phases:                 new List<PhaseDefinition> { new("main", Init: null, Cleanup: null) },
+            ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
+            TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
+            PlayerDefinitions:      new Dictionary<string, PlayerDefinition>
+            {
+                ["p1"] = new(new Dictionary<string, object>()),
+            },
+            DefaultInitManifest:    manifest,
+            Id:                     "save-load-test");
+
+        var observer = new CapturingObserver();
+        var strategy = new ScriptedPlayerStrategy().QueueAction(null);
+
+        var session = EngineGameSession.Create(def)
+            .WithPlayerStrategy("p1", strategy)
+            .WithRandomSource(new SeededRandom(1L))
+            .WithObserver(observer)
+            .UseDefaultInit()
+            .Build();
+
+        await session.RunAsync();
+
+        Assert.True(observer.Captured.Count >= 1,
+            "Expected at least one OnTurnStart call.");
+
+        var original = observer.Captured[0].Snapshot;
+
+        // Act: round-trip the snapshot through the serializer.
+        var json     = GameStateSnapshotSerializer.Serialize(original);
+        var restored = GameStateSnapshotSerializer.Deserialize(json);
+
+        // The condition contribution must be present in the snapshot.
+        Assert.True(
+            restored.Contributions.OfType<ConditionContributionSnapshot>()
+                    .Any(c => c.ConditionName == conditionName),
+            $"Snapshot should contain a ConditionContributionSnapshot for '{conditionName}'. " +
+            "If missing, ApplyConditions did not register it in ContributionRegistry.");
+
+        // Load the snapshot into a fresh GameState and verify HasCondition.
+        var loadedState    = new GameState();
+        var atomDefNames   = new Dictionary<AtomId, string>();
+        var playerAtomIds  = new Dictionary<string, AtomId>(StringComparer.Ordinal);
+        var playerOrder    = new List<string>();
+        loadedState.LoadFromSnapshot(restored, def, atomDefNames, playerAtomIds, playerOrder);
+
+        // Find the card atom and assert the condition survived.
+        var cardAtomId = loadedState.GetAtoms(AtomKind.Card).First();
+        Assert.True(
+            loadedState.GetAtom(cardAtomId).HasCondition(conditionName),
+            $"HasCondition(\"{conditionName}\") should be true after loading a snapshot " +
+            "that was created from a session provisioned with that condition via CardSpec.");
+    }
+
+    // -----------------------------------------------------------------------
     //  Internal helper: build a minimal GameStateSnapshot for unit tests
     // -----------------------------------------------------------------------
 

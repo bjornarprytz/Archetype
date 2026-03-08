@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-07 (D17 save/load complete — 84/84 tests passing)
+> Last updated: 2026-03-08 (D17 save/load BLOCKER 1 fixed — 85/85 tests passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -194,7 +194,7 @@
 
 ## Tier 5 — Persistence
 
-### D17 Save/Load ✅
+### D17 Save/Load ✅ PASS (BLOCKER 1 fixed 2026-03-08)
 
 - **`GameDefinition.Id`**: required non-empty string; `GameSessionBuilder.Build()` throws `DefinitionException` if absent.
 - **`IEngineObserver.OnTurnStart(int turnNumber, GameStateSnapshot snapshot)`**: called before each turn's first phase init block; host persists snapshot.
@@ -223,9 +223,9 @@
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
 | `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
 | `TextRenderer/TextRendererTests.cs` | 28 | ✅ All passing |
-| `SaveLoad/SaveLoadTests.cs` | 12 | ✅ All passing |
+| `SaveLoad/SaveLoadTests.cs` | 13 | ✅ All passing |
 
-**Total: 84 tests, 84 passing.**
+**Total: 85 tests, 85 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
