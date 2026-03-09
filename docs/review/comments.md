@@ -105,3 +105,137 @@ All 85 tests pass.
 **PASS**
 
 BLOCKER 1 resolved: `ApplyConditions` now registers each `ConditionContribution` in `ContributionRegistry` (`GameSession.cs:662`), matching the `BuiltInHandlers.cs:209` pattern. Regression test T13 (`ManifestProvisionedCondition_SurvivesSnapshotRoundTrip`) correctly catches the defect — it would fail at the `ConditionContributionSnapshot` assertion if the registry call were absent. All 85 tests pass. No outstanding defects remain.
+
+---
+
+## Review: action-args-and-cost-model — D20–D25 (impl/text-renderer)
+
+Initial review: 2026-03-09.
+
+Changeset: `src/Archetype.Core/Diagnostics.cs` (new), `src/Archetype.Core/ActionArgs.cs` (new), `src/Archetype.Core/GameDefinition.cs` (CostDef, CardDefinition.Cost, NamedEffectBlockDef.Cost), `src/Archetype.Core/Interfaces.cs` (AvailableActions.ValidateActionArgs, IEngineObserver.OnDiagnostic, PlayCard/ActivateAbility CostChoices), `src/Archetype.Engine/BuiltInHandlers.cs` (assert handler), `src/Archetype.Engine/ExecutionContext.cs` (IsCostBody), `src/Archetype.Engine/CostValidator.cs` (new), `src/Archetype.Engine/GameState.cs` (CloneForValidation), `src/Archetype.Engine/ActionResolver.cs` (costBlocks param), `src/Archetype.Engine/GameSession.cs` (ownership filter removal, ValidateActionArgs delegate, ResolveCostBlocks), `src/Archetype.Build/Kw.cs` (Assert, OwnedByActivePlayer, OwnerOf, Session, CostDefBuilder), `tests/Archetype.Tests/BuiltIns/AssertTests.cs` (new, 7 tests), `tests/Archetype.Tests/CostModel/CostModelTests.cs` (new, 7 tests), `tests/Archetype.Tests/ComputeAvailableActions/ComputeAvailableActionsTests.cs` (updated + 3 new D24 tests).
+
+---
+
+### Reviewer Checklist Results
+
+#### 10.1 — `assert` in cost body always panics silently regardless of call-site args
+
+`BuiltInHandlers.Assert` (line 450): checks `ctx.IsCostBody` before reading `on_fail`/`notify` args. When true, immediately throws `EngineException` with no observer call. Call-site `on_fail`/`notify` values are never read. `ActionResolver.ResolveAction` sets `ctx.IsCostBody = true` before iterating cost blocks and resets to `false` after (lines 157–160, and in `finally` at line 169). Test 9.5 (`Assert_InsideCostBody_AlwaysPanicsNoNotify_RegardlessOfArguments`) directly exercises this with `continue/on` args and expects `EngineException` + no `OnDiagnostic` call.
+
+**PASS**
+
+#### 10.2 — `OnDiagnostic` called BEFORE `EngineException` on `panic/on`; NOT called on `notify: off`
+
+`BuiltInHandlers.Assert` (lines 468–488): `notify == NotifyFlag.On` guard calls `ctx.Observer?.OnDiagnostic(diagnostic)` unconditionally before the `onFail switch`. The `switch` arm for `OnFail.Panic` is only reached after the notify call has already been made. For `notify: off` the `if (notify == NotifyFlag.On)` block is skipped entirely; only the `switch` executes. Tests 9.3 and 9.4 cover both cases.
+
+**PASS**
+
+#### 10.3 — `assert` never appends to `EventLog`
+
+`BuiltInHandlers.Assert` never calls `ctx.EventLog.*` directly or indirectly. The handler returns `null` (for `continue`), throws `BlockHaltException` (for `stop`), or throws `EngineException` (for `panic`). None of these paths invoke the event log. `BlockExecutor.ExecuteStep` only appends events through `KeywordEvaluator.EvaluateInvocation` when `_mutations.Has(step.KeywordName)` returns true; `assert` is registered in `_mutations` but its handler does not call `LogEvent`. Test 9.6 (`Assert_NeverAppendsToEventLog`) asserts `ThisGame` contains no `"assert"` keyword name event for both passing and failing conditions.
+
+**PASS**
+
+#### 10.4 — `GameState.CloneForValidation` includes/excludes the right fields
+
+`GameState.CloneForValidation` (GameState.cs lines 259–301):
+- **Included**: atom table with full deep-copy of `Accumulators`, `ModifierIndex`, `ConditionIndex`, `ZoneId`, `OwnerId`, `Kind`. Session atom ID. Player name registry.
+- **Excluded**: `ContributionRegistry` (not copied, NOTE comment at line 296). `ActiveStaticEffects`/`DormantDeclarativeEffects` (new `GameState()` initialises these empty). `GameIsOver`/`PendingWinner` (new `GameState()` leaves false/null). `EventLog` is not part of `GameState`.
+
+This satisfies D21. The `CostValidator` supplies its own fresh `EventLog` (lines 66–67 of `CostValidator.cs`), ensuring the clone execution writes to a throw-away log.
+
+**PASS**
+
+#### 10.5 — `ValidateActionArgs` captures a state snapshot, not a live reference
+
+`GameSession.ComputeAvailableActions` (lines 495–509):
+- `stateSnapshot = _state.CloneForValidation()` — a separate object; mutations on `_state` after this point do not affect `stateSnapshot`.
+- `defSnapshot = _definition` — immutable; safe to capture.
+- `strategiesSnapshot = _strategies` — immutable reference; safe to capture.
+- `randomSnapshot = _randomSource` — read-only random source; safe to capture.
+- `ResolveCostsForAction(action, defSnapshot)` inside the lambda uses `_atomDefinitionNames` (a live instance field). This map is populated only during `ProvisionManifest` and `create-card`; within a single `SelectActionAsync` call no new entries can appear (the action window is serial). The definition lookup is done against `defSnapshot` (correct). This is an acceptable design trade-off documented in the engine source.
+
+**PASS**
+
+#### 10.6 — Cost bodies execute within the existing action scope; cost events appear in `events.this_action`
+
+`ActionResolver.ResolveAction` (lines 151–171): `eventLog.OpenAction()` is called once, before any cost body or primary block executes. Cost bodies run inside this scope (`ctx.IsCostBody = true`; each body passed to `executor.ExecuteBlock`). The primary block then runs in the same scope. `eventLog.CloseAction()` is called in `finally`. No separate `OpenAction`/`CloseAction` pair wraps the cost blocks. Test 9.16 (`PlayCard_WithCost_CostBodyExecutesBeforeEffect`) verifies that `"cost-paid"` events appear before `"effect-fired"` events in `result.FinalLog`.
+
+**PASS**
+
+#### 10.7 — No ownership predicate in `ComputeAvailableActions` steps 1 or 2
+
+Pass 1 (lines 443–469): iterates `_state.GetAtoms(AtomKind.Card)` with no owner check. Zone filter uses `playableZoneDefNames.Contains(zoneDefName)` (definition name only). No `OwnerId` comparison appears. Pass 2 (lines 475–490): iterates the same atom set with no zone or owner filter. The zone-owner guard present in the pre-D24 implementation has been entirely removed. Tests 9.13 (`ComputeAvailableActions_CardInPlayableZone_IncludedRegardlessOfOwner`) and 9.14 (`ComputeAvailableActions_AbilityOnUnownedCard_Included`) assert that opponent-owned cards and abilities appear in p1's results.
+
+**PASS**
+
+#### 10.8 — `Kw.OwnedByActivePlayer()` XML doc states the `"active-player"` session state requirement
+
+`Kw.cs` (lines 295–320): the XML `<summary>` explicitly states:
+> "Requirement: the game must declare a session state field named `"active-player"` whose value is the atom ID of the currently active player. If this field is absent at runtime, `EvaluateCondition` will throw."
+
+The expansion in the doc comment uses `Kw.EqualTo`/`Kw.OwnerOf`/`Kw.GetState`/`Kw.Session()`, which matches the actual implementation and the D24 decision. The migration guidance is also present: "This shorthand is the migration path from the old implicit ownership filter that was removed from `ComputeAvailableActions` in D24."
+
+**PASS**
+
+#### 10.9 — All `IEngineObserver` implementations have `OnDiagnostic`
+
+Two implementations exist in the codebase:
+- `AssertTests.RecordingObserver` (`AssertTests.cs:36`): implements `void OnDiagnostic(DiagnosticEvent e)` — appends to `Diagnostics` list.
+- `SaveLoadTests.CapturingObserver` (`SaveLoadTests.cs:25`): implements `void OnDiagnostic(DiagnosticEvent e) { /* no-op in tests */ }` at line 42.
+
+No other `IEngineObserver` implementations exist in the repository (confirmed via search). The codebase compiles cleanly (102/102 tests pass with 0 errors).
+
+**PASS**
+
+#### 10.10 — All new tests pass; existing `ComputeAvailableActions` tests updated; net test count increases
+
+- Prior total: 85 tests.
+- New tests added: 7 in `AssertTests.cs`, 7 in `CostModelTests.cs` (9.7–9.12 + 9.16), 3 in `ComputeAvailableActionsTests.cs` (9.13–9.15 via tests 3.8 updated + 9.13, 9.14, 9.15 added).
+- Current total: 102 tests, all passing.
+- Existing test 3.8 (`ComputeAvailableActions_CardInOpponentOwnedZone_IsIncluded_D24`) correctly documents the D24 behaviour change (the old test name `ComputeAvailableActions_ExcludesCards_FromOpponentOwnedZone` was inverted — the new assertion checks that the card IS included).
+- Net increase: +17 tests.
+
+**PASS**
+
+---
+
+### Defects
+
+None found.
+
+---
+
+### Minor Fixes Applied Directly
+
+#### [MINOR 1] `CloneForValidation` XML doc listed "Player name registry, session atom" as excluded when they are actually copied — `GameState.cs:248–254`
+
+The "Excluded (per D21)" bullet point incorrectly listed "Player name registry, session atom, game outcome flags" among the excluded items. The code at lines 263–294 clearly copies both `SessionAtomId` and the player name registry (both needed for cost-body keyword resolution). Only game outcome flags (`GameIsOver`, `PendingWinner`) are truly excluded.
+
+**Fixed in place:** added an "Also copied" section listing `SessionAtomId` and the player name registry with rationale; corrected the "Excluded" bullet to read "Game outcome flags (`GameIsOver`, `PendingWinner`)".
+
+#### [MINOR 2] Dead variable `sessionEnergyBefore` in `ComputeAvailableActionsTests.cs:512`
+
+`CS0219` warning: `var sessionEnergyBefore = double.NaN` assigned but never used. The variable was a planning artifact (the test comment references it but the assertion was never written against it).
+
+**Fixed in place:** variable and its associated comment removed. The test still verifies non-mutation via the `result.IsDraw` assertion and the `ValidateActionArgs` return-value check.
+
+---
+
+### Observations
+
+- **`CostValidator.Validate` short-circuit wastes one `ResolveCostTexts` call.** Lines 43 and 47: `ResolveCostTexts(costs, action)` is called and the result stored in `costTexts` even when `costs is null or empty`, but then `ValidationResult.Empty` (with empty `CostTexts`) is returned and `costTexts` is discarded. The result is functionally correct — empty costs → empty text list — and the wasted call is trivially O(0). Not a defect, but a clarity opportunity: move the `Count == 0` guard above the `ResolveCostTexts` call or inline `Array.Empty<string>()` there.
+
+- **`ResolveCostsForAction` in the `ValidateActionArgs` closure captures live `_atomDefinitionNames`.** The closure at `GameSession.cs:501–509` captures `_atomDefinitionNames` as a live field. Within a single `SelectActionAsync` call this is safe (the action window is serial; no new atoms can be provisioned between `ComputeAvailableActions` and the strategy call). The `defSnapshot` reference correctly captures the immutable definition. This is an acceptable known trade-off and the comment at line 492 acknowledges the snapshot pattern.
+
+- **`NamedEffectBlockDef.Cost` accepts `null` as well as an empty list.** The type is `IReadOnlyList<CostDef>?` (nullable). `ResolveCostBlocks` and `ResolveCostsForAction` both handle null with `?.Cost` and null-coalesce patterns. D20 says "Cost: IReadOnlyList<CostDef>" with no null mention; the nullable annotation is a pragmatic construction-time convenience for the common `Cost: null` shorthand in test helpers. This is consistent and handled everywhere.
+
+- **No test exercises `Kw.OwnedByActivePlayer()` end-to-end.** The shorthand compiles correctly and its expansion is the only definition of `owner-of` + `get-state(session(), ...)`. No integration test provisions a session with an `"active-player"` state field and verifies that cards with this condition are filtered. This is a coverage gap for the migration path documented in D24, though the underlying primitives (`owner-of`, `equal-to`, `get-state`) are individually exercised. Noted for the implementer's awareness; not a blocker.
+
+---
+
+### Verdict
+
+**PASS**
+
+All ten reviewer checks (10.1–10.10) pass. No blockers found. Two minor issues fixed directly: doc comment inaccuracy in `CloneForValidation` and dead variable in test. 102/102 tests pass with zero compiler warnings.

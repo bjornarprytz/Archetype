@@ -508,10 +508,7 @@ public sealed class ComputeAvailableActionsTests
                 : AtomId.None;
         });
 
-        // Card has a cost that consumes 3 energy; player starts with 5 energy.
-        var sessionEnergyBefore = double.NaN;
-
-        // We capture energy via a recording observer on the session.
+        // Card has a cost that consumes 3 energy.
         // Use a simple always-terminate SBR so RunAsync ends immediately.
         var alwaysTrue = Kw.AtLeast(new Literal(1.0), new Literal(1.0));
 

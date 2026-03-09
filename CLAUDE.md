@@ -92,6 +92,10 @@ Each task in `tasks.md` should carry `reads:` and `writes:` annotations on inden
 
 Use document anchor notation (`#section`) for large docs. An agent reads only the listed files before starting a task — nothing more.
 
+### File Naming
+
+Each file should contain exactly one primary type, named after that type (`ValidationResult.cs` for `ValidationResult`, etc.). When writing task annotations, use the correct target file name — do not group unrelated types under a generic name like `ActionArgs.cs`.
+
 ### Summaries and Responses
 
 When summarising completed work or presenting proposals to the user, always include relative file links (with `#anchor` where applicable) so the user can navigate directly to the relevant sections. Example:

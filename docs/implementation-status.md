@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-09 (D20–D25 action-args-and-cost-model — 102/102 tests passing)
+> Last updated: 2026-03-09 (D20–D25 action-args-and-cost-model — 102/102 tests passing — Reviewer: PASS)
 > Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -149,7 +149,7 @@
 - **Round-robin active player**: `(turn-1) % playerCount` over `PlayerDefinitions` insertion order
 - **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest`
 - **`ProvisionManifest(InitManifest)`**: zones → cards (with `ProvisionDeclarativeEffect`) → card overrides → player overrides
-- **`ComputeAvailableActions`**: two independent passes — Pass 1 (PlayCard, zone-filtered + activation condition); Pass 2 (abilities, all owned cards regardless of zone); cost pre-flight deferred (D19 D-C)
+- **`ComputeAvailableActions`**: two independent passes — Pass 1 (PlayCard, zone-filtered + activation condition, no ownership predicate — D24); Pass 2 (abilities, all card atoms regardless of zone or owner — D24); `ValidateActionArgs` delegate captures state clone at compute time (D22)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
 
 ### `get-atoms-in-zone` built-in ✅
@@ -164,6 +164,10 @@
 - Ability loop (D19 step 4): independent second pass over all owned cards, ignores zone membership entirely; zone restrictions expressed via ability's own `ActivationCondition`
 - Tests: 9 tests covering get-atoms-in-zone (3), zone filter, activation condition, source injection, ability-in-non-playable-zone, zone-owner restriction, pass-always-present
 - **Open gap (pre-existing)**: runtime-created atoms (`create-card`/`create-zone`) are invisible to `ComputeAvailableActions` — `_atomDefinitionNames` is only populated during `ProvisionManifest`
+- **`CostValidator`**: combined-block validation against lightweight `GameState` clone (D21); `IsCostBody=true` enforces panic/off assert semantics; always resolves `CostTexts` regardless of outcome
+- **Cost execution (D23)**: `ActionResolver.ResolveAction` accepts optional `costBlocks`; each cost body runs with `IsCostBody=true` before the primary block within the same action scope
+- **`Kw.Assert`** (D20): `Kw.Assert(condition, onFail, notify)` shorthand; encodes `OnFail`/`NotifyFlag` as `double` literals
+- **`Kw.OwnedByActivePlayer()`** (D24): expands to `EqualTo(OwnerOf(Param("source")), GetState(Session(), "active-player"))`; XML doc states `"active-player"` session state requirement
 
 ### `declare-winner` / `declare-draw` built-ins ✅
 - Architecture gap: D14 says "repeat until state-based rule produces outcome" but didn't specify mechanism
@@ -229,11 +233,13 @@
 | `TriggerResolution/TriggerResolutionTests.cs` | 10 | ✅ All passing |
 | `StateBasedRules/StateBasedRuleTests.cs` | 4 | ✅ All passing |
 | `GameSession/GameSessionTests.cs` | 12 | ✅ All passing |
-| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 9 | ✅ All passing |
+| `ComputeAvailableActions/ComputeAvailableActionsTests.cs` | 12 | ✅ All passing (3 new D24 tests: 9.13, 9.14, 9.15) |
 | `TextRenderer/TextRendererTests.cs` | 28 | ✅ All passing |
 | `SaveLoad/SaveLoadTests.cs` | 13 | ✅ All passing (T13 added for BLOCKER 1 regression) |
+| `BuiltIns/AssertTests.cs` | 7 | ✅ All passing (new — D20 assert semantics) |
+| `CostModel/CostModelTests.cs` | 7 | ✅ All passing (new — D21 cost validation + D23 sequencing) |
 
-**Total: 85 tests, 85 passing.**
+**Total: 102 tests, 102 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -301,6 +307,14 @@
 ---
 
 ## Resolved Issues
+
+### action-args-and-cost-model (D20–D25) — 102 tests — review verdict: PASS (2026-03-09)
+
+All ten reviewer checks (10.1–10.10) passed with no blockers. Two minor issues fixed directly by reviewer:
+- `CloneForValidation` XML doc inaccurately listed "Player name registry, session atom" as excluded; corrected to "Also copied (required for cost-body keyword resolution)" (`GameState.cs`).
+- Dead variable `sessionEnergyBefore` removed from `ComputeAvailableActionsTests.cs:512` (CS0219 warning eliminated).
+
+No functional changes. 102/102 tests pass with zero compiler warnings.
 
 ### SaveLoad tests (D17) — 13 tests — review verdict: PASS (2026-03-08)
 - `SeededRandom_SameSeed_ProducesSameSequence`

@@ -245,12 +245,17 @@ internal sealed class GameState : Core.IGameStateReadable
     ///   <item>Modifier index (deep-copy structure, shallow contribution refs)</item>
     ///   <item>Condition index (deep-copy structure, shallow contribution refs)</item>
     /// </list>
+    /// Also copied (required for cost-body keyword resolution):
+    /// <list type="bullet">
+    ///   <item>Session atom ID — so <c>get-state(session(), ...)</c> works in cost bodies</item>
+    ///   <item>Player name registry — so player lookups resolve in cost bodies</item>
+    /// </list>
     /// Excluded (per D21):
     /// <list type="bullet">
     ///   <item><c>EventLog</c> — not part of <c>GameState</c></item>
     ///   <item><c>ActiveStaticEffects</c> and <c>DormantDeclarativeEffects</c></item>
     ///   <item><c>ContributionRegistry</c></item>
-    ///   <item>Player name registry, session atom, game outcome flags</item>
+    ///   <item>Game outcome flags (<c>GameIsOver</c>, <c>PendingWinner</c>)</item>
     /// </list>
     /// The clone shares the same <see cref="AtomIdCounter"/> position; new
     /// allocations on the clone will not conflict with the original because
