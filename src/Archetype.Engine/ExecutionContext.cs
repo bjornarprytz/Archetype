@@ -35,6 +35,13 @@ internal sealed class ExecutionContext
     /// <summary>The random source injected at session construction.</summary>
     public IRandomSource RandomSource { get; }
 
+    /// <summary>
+    /// Optional engine observer, used by the <c>assert</c> built-in to deliver
+    /// <see cref="DiagnosticEvent"/> notifications when <c>notify: on</c>.
+    /// May be <c>null</c> — all observer call sites must null-check.
+    /// </summary>
+    public IEngineObserver? Observer { get; }
+
     /// <summary>The complete game definition (immutable reference data).</summary>
     public GameDefinition Definition { get; }
 
@@ -43,6 +50,16 @@ internal sealed class ExecutionContext
     /// Used to dispatch prompts to the correct strategy.
     /// </summary>
     public string ActivePlayerName { get; }
+
+    /// <summary>
+    /// When <c>true</c>, the current block is a <see cref="CostDef.Body"/> execution.
+    /// Under this flag, every <c>assert</c> call ignores its <c>on_fail</c> and
+    /// <c>notify</c> arguments and behaves as <c>panic / off</c>: raises
+    /// <see cref="EngineException"/> silently without calling
+    /// <see cref="IEngineObserver.OnDiagnostic"/>.
+    /// This ensures cost bodies always fail hard and silently on unaffordable state.
+    /// </summary>
+    public bool IsCostBody { get; set; }
 
     // -----------------------------------------------------------------------
 
@@ -53,7 +70,8 @@ internal sealed class ExecutionContext
         IReadOnlyDictionary<string, IPlayerStrategy> strategies,
         IRandomSource randomSource,
         GameDefinition definition,
-        string activePlayerName)
+        string activePlayerName,
+        IEngineObserver? observer = null)
     {
         GameState        = gameState;
         EventLog         = eventLog;
@@ -62,13 +80,16 @@ internal sealed class ExecutionContext
         RandomSource     = randomSource;
         Definition       = definition;
         ActivePlayerName = activePlayerName;
+        Observer         = observer;
     }
 
     /// <summary>
     /// Creates a child context for a new action scope (used when firing a
     /// trigger).  The new context inherits GameState, EventLog, Strategies,
-    /// RandomSource, and Definition but has a fresh Bindings dictionary
-    /// pre-populated with <paramref name="prePopulated"/>.
+    /// RandomSource, Definition, Observer, and ActivePlayerName but has a fresh
+    /// Bindings dictionary pre-populated with <paramref name="prePopulated"/>.
+    /// <c>IsCostBody</c> is always <c>false</c> on the child — cost-body mode
+    /// does not propagate across action scopes.
     /// </summary>
     public ExecutionContext CreateChildActionContext(
         Dictionary<string, object>? prePopulated = null)
@@ -80,7 +101,9 @@ internal sealed class ExecutionContext
             Strategies,
             RandomSource,
             Definition,
-            ActivePlayerName);
+            ActivePlayerName,
+            Observer);
+        // IsCostBody defaults to false — intentionally not propagated.
     }
 
     /// <summary>

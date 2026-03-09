@@ -448,6 +448,53 @@ public static class BuiltInKeywords
         TextTemplate: "declare draw");
 
     // -----------------------------------------------------------------------
+    //  §9.4  assert — D20 built-in
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Evaluates a boolean condition and signals a failure according to
+    /// <paramref name="on_fail"/> and <paramref name="notify"/> when the
+    /// condition is false.
+    /// <para>
+    /// <b>Semantics outside a cost body</b> (see D20 decision table):
+    /// <list type="bullet">
+    ///   <item><c>on_fail=continue / notify=on</c>: calls <see cref="IEngineObserver.OnDiagnostic"/>, continues.</item>
+    ///   <item><c>on_fail=stop / notify=on</c>: calls <see cref="IEngineObserver.OnDiagnostic"/>, halts block.</item>
+    ///   <item><c>on_fail=panic / notify=on</c>: calls <see cref="IEngineObserver.OnDiagnostic"/>, then raises <see cref="EngineException"/>.</item>
+    ///   <item>Any <c>notify=off</c>: does NOT call <see cref="IEngineObserver.OnDiagnostic"/>; applies <c>on_fail</c> behaviour.</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// <b>Semantics inside a cost body</b> (<c>IsCostBody = true</c>):
+    /// always raises <see cref="EngineException"/> silently, regardless of
+    /// call-site <c>on_fail</c> / <c>notify</c> arguments.
+    /// </para>
+    /// <para>
+    /// <c>assert</c> NEVER appends to the event log under any outcome.
+    /// </para>
+    /// <para>Signature: <c>assert(condition: Boolean, on_fail: Number, notify: Number) → void</c></para>
+    /// <para>
+    /// <c>on_fail</c> and <c>notify</c> are numeric literals corresponding to
+    /// <see cref="OnFail"/> and <see cref="NotifyFlag"/> enum values.  They are
+    /// inline-literal-only — game creators may not declare keyword parameters
+    /// of these enum types.
+    /// </para>
+    /// </summary>
+    public static readonly KeywordDefinition Assert = new(
+        Name: "assert",
+        Parameters: [
+            new("condition", TypeName.Boolean, AtomKindRestriction: null),
+            // on_fail and notify are numeric literals (enum ordinals); modelled as Number.
+            // Default: on_fail=0 (continue), notify=0 (on).
+            new("on_fail",   TypeName.Number,  AtomKindRestriction: null),
+            new("notify",    TypeName.Number,  AtomKindRestriction: null),
+        ],
+        ReturnType:  TypeName.Boolean, // void — return value is meaningless
+        Description: "Evaluates condition; on failure behaves according to on_fail/notify flags. Never appends to event log.",
+        PrimitiveSentinel: "assert",
+        TextTemplate: "assert {condition}");
+
+    // -----------------------------------------------------------------------
     //  Registry — the complete set (used for sync assertion at startup)
     // -----------------------------------------------------------------------
 
@@ -491,6 +538,7 @@ public static class BuiltInKeywords
         PlayerByName,
         DeclareWinner,
         DeclareDraw,
+        Assert,
     ];
 
     // -----------------------------------------------------------------------

@@ -37,6 +37,7 @@ internal static class BuiltInHandlers
         mutations.Register("move-card",          MoveCard);
         mutations.Register("declare-winner",     DeclareWinner);
         mutations.Register("declare-draw",       DeclareDraw);
+        mutations.Register("assert",             Assert);
 
         // ── Property (read) primitives ───────────────────────────────────
 
@@ -418,6 +419,73 @@ internal static class BuiltInHandlers
         });
 
         return null;
+    }
+
+    // -----------------------------------------------------------------------
+    //  assert — D20
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>assert(condition, on_fail, notify)</c> — evaluates a boolean condition
+    /// and signals failure according to the <c>on_fail</c> / <c>notify</c> args.
+    /// <para>
+    /// <b>Cost-body hardwiring:</b> when <see cref="ExecutionContext.IsCostBody"/>
+    /// is <c>true</c>, the on_fail and notify arguments are ignored.  The handler
+    /// always raises <see cref="EngineException"/> silently (no observer call),
+    /// ensuring cost affordability failures are always hard and silent.
+    /// </para>
+    /// <para>
+    /// <b>Invariant:</b> never appends to the event log regardless of outcome.
+    /// </para>
+    /// </summary>
+    private static object? Assert(object[] args, ExecutionContext ctx)
+    {
+        var condition = RequireBool(args, 0, "assert", "condition");
+
+        // condition is true — nothing to do (common path)
+        if (condition) return null;
+
+        // condition is false — determine behaviour
+        // Cost-body mode overrides all call-site arguments: always panic silently.
+        if (ctx.IsCostBody)
+            throw new EngineException(
+                "assert: cost body affordability check failed. " +
+                "The action is not affordable in the current game state.");
+
+        var onFail = args.Length > 1
+            ? (OnFail)(int)RequireDouble(args, 1, "assert", "on_fail")
+            : OnFail.Continue;
+        var notify = args.Length > 2
+            ? (NotifyFlag)(int)RequireDouble(args, 2, "assert", "notify")
+            : NotifyFlag.On;
+
+        // Construct the diagnostic event regardless of notify flag
+        // (we build it lazily only when needed below).
+        // The ConditionNode is not available from here (args are already evaluated);
+        // pass null per the D25 spec ("null if unavailable").
+        var location = $"assert @ {ctx.ActivePlayerName}";
+
+        if (notify == NotifyFlag.On)
+        {
+            var diagnostic = new DiagnosticEvent(
+                Kind:          DiagnosticKind.AssertionFailed,
+                Message:       $"assert condition evaluated to false (on_fail: {onFail})",
+                ConditionNode: null, // condition AST node not available post-evaluation
+                OnFail:        onFail,
+                Location:      location);
+
+            // Call OnDiagnostic BEFORE raising any exception (D25).
+            ctx.Observer?.OnDiagnostic(diagnostic);
+        }
+
+        return onFail switch
+        {
+            OnFail.Continue => null,             // continue execution — no exception
+            OnFail.Stop     => throw new BlockHaltException(),  // halt block cleanly
+            OnFail.Panic    => throw new EngineException(
+                $"assert: condition failed with on_fail:panic at '{location}'."),
+            _ => null,
+        };
     }
 
     // -----------------------------------------------------------------------

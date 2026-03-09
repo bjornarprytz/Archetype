@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-08 (D17 save/load BLOCKER 1 fixed — 85/85 tests passing)
+> Last updated: 2026-03-09 (D20–D25 action-args-and-cost-model — 102/102 tests passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -26,7 +26,8 @@
 - `EffectBlockDef` / `EffectBlockStep` for block-level composition
 
 ### `BuiltInKeywords` registry ✅
-- 34 entries: all mutation primitives, property queries, arithmetic, logic, `move-card`, `event-arg`, `declare-winner`, `declare-draw`, `player-by-name`, `get-atoms-in-zone`
+- 35 entries: all mutation primitives, property queries, arithmetic, logic, `move-card`, `event-arg`, `declare-winner`, `declare-draw`, `player-by-name`, `get-atoms-in-zone`, `assert` (D20)
+- `assert(condition: Boolean, on_fail: Number, notify: Number) → void` — never appends to event log; IsCostBody-aware panic/off override
 - `BuiltInKeywords.All` list enforces sync invariant with Engine dispatch
 
 ### `EventLog` and `GameEvent` ✅
@@ -47,11 +48,18 @@
 ### `GameDefinition` ✅
 - `CardDefinition`, `ZoneDefinition`, `PhaseDefinition`, `ActionRuleDefinition`, `StateBasedRule`, `CardSet`, `PlayerDefinition`, `GameDefinition`
 - `CardDefinition.ActivationCondition: KeywordNode?` (D19) — optional pure condition evaluated before offering PlayCard; card atom injected as `source`
+- `CardDefinition.Cost: IReadOnlyList<CostDef>?` (D20) — cost definitions; empty = no cost
 - `GameDefinition.PlayableZoneNames: IReadOnlyList<string>?` (D19) — zone definition names from which cards may be played; `null` = no zone filter
+- `CostDef` record (D20) — `Body: EffectBlockDef`, `Parameters: ParameterDecl[]`, `TextTemplate: string?`; no separate EvaluationFunction
+- `NamedEffectBlockDef.Cost` changed from `EffectBlockDef?` to `IReadOnlyList<CostDef>?` (D20/D25 breaking change)
+- `ValidationResult` record (D21/D22) — `IsValid: bool`, `CostTexts: IReadOnlyList<string>`, static `Empty` and `Invalid` factories
+- `OnFail` enum (`Continue | Stop | Panic`) and `NotifyFlag` enum (`On | Off`) — inline-literal-only (D20)
+- `DiagnosticKind` enum and `DiagnosticEvent` record (D25)
 
 ### Interfaces ✅
-- `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTurnStart` + `OnTriggerCascadeAsync` → `CascadeDirective`)
-- Player action types: `PlayCard`, `ActivateAbility`, `Pass`
+- `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTurnStart` + `OnTriggerCascadeAsync` → `CascadeDirective` + `OnDiagnostic(DiagnosticEvent)` D25)
+- Player action types: `PlayCard` (+ `CostChoices`, `Targets`), `ActivateAbility` (+ `CostChoices`, `Targets`), `Pass`
+- `AvailableActions` now carries `ValidateActionArgs: Func<PlayerAction, ValidationResult>` (D22)
 - Prompt types: `PromptContext`, `PromptResponse`, `ChoicePrompt`, `TriggerOrderPrompt`
 - `GameStateView` (public read-only view), `IGameStateReadable`
 

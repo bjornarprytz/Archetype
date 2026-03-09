@@ -234,6 +234,73 @@ internal sealed class GameState : Core.IGameStateReadable
     }
 
     // -----------------------------------------------------------------------
+    //  Validation clone (D21)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Creates a lightweight clone of the current state suitable for cost
+    /// validation.  The clone is a shallow copy of:
+    /// <list type="bullet">
+    ///   <item>The atom table (with copied Accumulators, ZoneId, OwnerId, Kind)</item>
+    ///   <item>Modifier index (deep-copy structure, shallow contribution refs)</item>
+    ///   <item>Condition index (deep-copy structure, shallow contribution refs)</item>
+    /// </list>
+    /// Excluded (per D21):
+    /// <list type="bullet">
+    ///   <item><c>EventLog</c> — not part of <c>GameState</c></item>
+    ///   <item><c>ActiveStaticEffects</c> and <c>DormantDeclarativeEffects</c></item>
+    ///   <item><c>ContributionRegistry</c></item>
+    ///   <item>Player name registry, session atom, game outcome flags</item>
+    /// </list>
+    /// The clone shares the same <see cref="AtomIdCounter"/> position; new
+    /// allocations on the clone will not conflict with the original because
+    /// the clone is discarded after validation.
+    /// </summary>
+    internal GameState CloneForValidation()
+    {
+        var clone = new GameState();
+
+        // Copy session atom ID so get-state(session(), ...) works in cost bodies.
+        clone.SessionAtomId = SessionAtomId;
+
+        // Deep-copy atom snapshots — each atom gets its own Accumulators/ModifierIndex/ConditionIndex.
+        foreach (var (id, src) in _atoms)
+        {
+            var dst = new AtomSnapshot
+            {
+                Id      = src.Id,
+                Kind    = src.Kind,
+                OwnerId = src.OwnerId,
+                ZoneId  = src.ZoneId,
+            };
+
+            // Copy accumulators (value semantics).
+            foreach (var (k, v) in src.Accumulators)
+                dst.Accumulators[k] = v;
+
+            // Copy modifier index (list of refs — contributions not tracked in clone).
+            foreach (var (prop, mods) in src.ModifierIndex)
+                dst.ModifierIndex[prop] = new List<ModifierContribution>(mods);
+
+            // Copy condition index (list of refs — contributions not tracked in clone).
+            foreach (var (cond, contribs) in src.ConditionIndex)
+                dst.ConditionIndex[cond] = new List<ConditionContribution>(contribs);
+
+            clone._atoms[id] = dst;
+        }
+
+        // Copy player name registry so player lookups work in cost bodies.
+        foreach (var (atomId, name) in _playerNames)
+            clone.RegisterPlayerName(atomId, name);
+
+        // NOTE: ContributionRegistry, ActiveStaticEffects, DormantDeclarativeEffects,
+        // and GameIsOver are NOT copied per D21 — the clone is read-only for those.
+        // The ID counters start at 0 on the clone; any new contributions created
+        // during validation will be discarded with the clone.
+        return clone;
+    }
+
+    // -----------------------------------------------------------------------
     //  Snapshot capture and restore (D17)
     // -----------------------------------------------------------------------
 

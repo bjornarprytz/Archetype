@@ -2,6 +2,25 @@ using Archetype.Core;
 
 namespace Archetype.Engine;
 
+// ---------------------------------------------------------------------------
+//  BlockHaltException — internal control-flow signal for assert(on_fail:stop)
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// Thrown internally by the <c>assert</c> built-in handler when
+/// <c>on_fail: stop</c> is in effect.  Caught by <see cref="BlockExecutor.ExecuteBlock"/>
+/// to halt the current block cleanly without propagating as an
+/// <see cref="EngineException"/>.
+/// <para>
+/// This exception is strictly a control-flow mechanism — never surfaced to
+/// callers of <c>ExecuteBlock</c>.
+/// </para>
+/// </summary>
+internal sealed class BlockHaltException : Exception
+{
+    public BlockHaltException() : base("Block halted by assert(on_fail: stop).") { }
+}
+
 /// <summary>
 /// Executes <see cref="EffectBlockDef"/> values against an
 /// <see cref="ExecutionContext"/>.
@@ -55,6 +74,11 @@ internal sealed class BlockExecutor
         {
             foreach (var step in block.Steps)
                 await ExecuteStep(step, ctx);
+        }
+        catch (BlockHaltException)
+        {
+            // assert(on_fail:stop) halted the block gracefully — swallow the signal
+            // here so callers never see it. Block-close still runs in finally.
         }
         finally
         {

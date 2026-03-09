@@ -1,9 +1,18 @@
+---
+status: signed-off
+owner: domain-modeler
+signed-off: 2026-03-09
+last-updated: 2026-03-09
+depends-on:
+  - docs/requirements.md
+---
+
 # Archetype — Domain Model
 
 ## Status
-**Signed off 2026-03-02. Updated and re-signed off 2026-03-03. Updated 2026-03-03 (A15, A16).**
+**Signed off 2026-03-02. Updated and re-signed off 2026-03-03. Updated 2026-03-03 (A15, A16). Updated and re-signed off 2026-03-09 (A17–A22).**
 
-All seven requirements-phase open items and all sixteen architecture-phase additions (A1–A16) are resolved and incorporated below. A fourteenth addition (A14) incorporates the sharpened Tool Layer type-system requirement: keyword signatures now include explicit return types and human-readable descriptions; a formal type system is defined (§1.4); atom type definitions and shared schemas are introduced (§2.6–2.7). §1.4, §2.6, and §2.7 have been reviewed against the signed-off requirements and are consistent with them. A fifteenth addition (A15) introduces Session as a fourth first-class atom kind and generalises the player model to a named registry.
+All seven requirements-phase open items and all sixteen architecture-phase additions (A1–A16) are resolved and incorporated below. A fourteenth addition (A14) incorporates the sharpened Tool Layer type-system requirement: keyword signatures now include explicit return types and human-readable descriptions; a formal type system is defined (§1.4); atom type definitions and shared schemas are introduced (§2.6–2.7). §1.4, §2.6, and §2.7 have been reviewed against the signed-off requirements and are consistent with them. A fifteenth addition (A15) introduces Session as a fourth first-class atom kind and generalises the player model to a named registry. Six further additions (A17–A22) introduce the cost model (`CostDef`, `assert`), the combined-block validation algorithm, the `ValidateActionArgs` host callback, and the ownership-filter removal from available-action computation.
 
 This document is the canonical vocabulary for the Archetype card game engine. It is the source of truth for the architect and implementer roles. It is implementation-agnostic: no data structures, programming languages, or frameworks are specified here.
 
@@ -41,6 +50,12 @@ This document is the canonical vocabulary for the Archetype card game engine. It
 | A14 | Type system formalization | Added §1.4: formal type system with primitive type enumeration, atom subtyping, type compatibility rules, and type resolution for `get-state` and `get-property`. Added §2.6–2.7: atom type definitions (static property declarations + state map declarations) and shared schemas (reusable declaration sets, universal schemas per atom kind). Keyword signatures now require a declared return type and a human-readable description. §9.1–9.2 updated with formal parameter and return types. |
 | A15 | Session atom and player registry | Session is a fourth first-class atom kind — a singleton engine atom created before the first phase, carrying engine-managed `turn-number` and `phase-index` state fields (read-only to game creators) and extensible by game creators via the standard declaration model. `session` is a reserved atom reference (§4.3). Players generalised from a fixed two-slot pair to a named registry with a minimum-one constraint; "whose turn it is" is session state, not an engine concept. `owner-of` added as a built-in property keyword in §9.2. Defined in §1.4 (Session type), §2.1 (player registry), §2.4 (Session atom), §2.7 (universal session schema), §4.3 (`session` reserved name), §9.2 (`owner-of`). |
 | A16 | Zone movement primitive | `move-card(card: Card, destination: Zone) → Void` added to §9.1. Moves an existing card to the specified zone; appends a `move-card` event with `{ card, origin, destination }` bound args. Card idatom, owner, and all runtime state are unaffected. Post-block `CheckLifetimes` re-evaluates any `in-zone` while-conditions naturally. |
+| A17 | CostDef as a first-class type | `CostDef` introduced in §6.1: a distinct type from `EffectBlockDef` with a `Body` (EffectBlockDef), `Parameters` (ParameterDecl list), and optional `TextTemplate`. Affordability is signalled inside the body via `assert`. `CardDefinition` and `NamedEffectBlockDef` each carry `Cost: CostDef[]` (empty = no cost). §6 cost description rewritten accordingly. |
+| A18 | `assert` built-in mutation keyword | `assert(condition: Boolean) → Void` added to §9.1. Context-sensitive semantics: in cost bodies, hardwired to `on_fail: panic, notify: off` — raises `EngineException`, no observer notification, no event logged. In all other effect blocks, configurable via `on_fail` (continue \| stop \| panic, default continue) and `notify` (on \| off, default on). On success in any context: silent. `assert` never appends to the event log in any context; failure notification goes to `IEngineObserver.OnDiagnostic(DiagnosticEvent)`. `DiagnosticEvent` and `NotifyFlag` defined. |
+| A19 | `source` in cost body execution contexts | §4.3 reserved-names table extended: `source` is bound to the card or ability atom in cost body execution contexts (both real execution and clone-based validation), alongside `CostArgs` entries. |
+| A20 | CostArgs binding model | §4.1 extended: `CostArgs` defined as a third category of binding-time player input — player-supplied values for each `ParameterDecl` declared on a `CostDef`, keyed by parameter name, entered into the same binding map as `source`. Design open question resolved: cost parameter names and `source` share the same binding namespace. |
+| A21 | Combined-block validation and clone boundary | §6.2 added: `ValidateActionArgs` combines all `CostDef.Body` blocks into a single composite `EffectBlockDef` and executes it against a lightweight game state clone. Clone scope defined. Known boundary stated. `ValidationResult` concept defined. |
+| A22 | Ownership is not a built-in playability filter | §2.5 and §6 amended: the engine does not filter available actions by ownership. All playability restrictions, including ownership, are expressed exclusively via `ActivationCondition`. |
 
 ---
 
@@ -76,7 +91,7 @@ This document is the canonical vocabulary for the Archetype card game engine. It
 - **Direct mutation** — immediately changes a state value upon invocation (e.g. adds N to an accumulator, applies a modifier with a permanent or inline-specified lifetime, applies a condition).
 - **Standing mutation** — instantiates a static effect atom (§5) upon invocation. The state contribution and optional trigger are managed by that static effect for its lifetime.
 
-**Event logging.** Every mutation keyword invocation appends one or more structured events to the event log (§7). This is how other keywords and triggers observe the outcomes of mutation.
+**Event logging.** Every mutation keyword invocation appends one or more structured events to the event log (§7). This is how other keywords and triggers observe the outcomes of mutation. One built-in exception: `assert` (§9.1) never appends to the event log under any outcome — assertion failure is not a state change. On failure, `assert` may notify the engine observer via `IEngineObserver.OnDiagnostic`; on success it is entirely silent.
 
 **Invariant.** A mutation keyword may not be used as a property expression (it may not appear where a return value is expected). Mutation keywords are invoked for their side effects only.
 
@@ -131,6 +146,8 @@ The signature is fixed at authoring time and immutable.
 | `CardDefinitionName` | String-valued type naming a registered card definition. Validated at authoring time; resolved at load time. |
 | `ZoneDefinitionName` | String-valued type naming a registered zone definition. Same validation and resolution semantics as `CardDefinitionName`. |
 | `Collection<T>` | An ordered collection of values of type T. T must be non-`Void`. Game creators receive collections as return values from certain property keywords; they do not construct collection literals directly. |
+| `OnFail` | Enumeration: `continue`, `stop`, or `panic`. Controls `assert` failure behaviour in non-cost-body contexts. Default: `continue`. `continue` — notify if `notify: on`, then continue execution. `stop` — notify if `notify: on`, then gracefully halt the current block (no exception). `panic` — raise `EngineException` immediately; whether `notify` is consulted before raising is an open question for the architect (see §9.1 notes). |
+| `NotifyFlag` | Enumeration: `on` or `off`. Controls whether `assert` calls `IEngineObserver.OnDiagnostic` on failure. Default: `on`. Consulted for `continue` and `stop` outcomes. Whether it is consulted when `on_fail: panic` is an open question for the architect (see §9.1 notes). Does not affect the event log — `assert` never appends to the event log in any context. |
 
 **Atom subtyping.** The type system has exactly one subtype hierarchy: `Player`, `Card`, `Zone`, and `Session` are each subtypes of `Atom`. No other subtype relationships exist.
 
@@ -302,6 +319,7 @@ Game creators may read these fields via `get-state(session, "turn-number")` and 
 - Every zone has exactly one owner.
 - Ownership is set at the moment of atom creation and is immutable for the life of the atom.
 - Controller is **not** an engine concept. If a game requires the notion of temporary control by a non-owner, the game creator models it via a condition/tag on the atom.
+- Ownership is **not** an implicit playability filter. The engine does not exclude cards or abilities from the available-action set based on which player owns them. Games that require ownership-based restrictions on playing or activating declare them via `ActivationCondition` on the `CardDefinition` or `NamedEffectBlockDef`.
 
 ---
 
@@ -439,11 +457,14 @@ All active additive modifiers are summed first; then all active multiplicative m
 - **Binding-time variables** — bound before the block begins executing, from targets, cost payment choices, or explicit variable values (e.g. X) supplied by the player as action inputs.
 - **Mid-execution variables** — bound during execution via a mid-effect prompt (§4.2).
 
+**CostArgs.** Cost payment choices are supplied by the player as a map of named values — one entry per `ParameterDecl` declared on each `CostDef` (§6.1) — keyed by parameter name. This map is called the **CostArgs** binding. During cost body execution (both real execution and clone-based validation), each `CostArgs` entry is bound into the execution context by its parameter name, in the same namespace as the reserved name `source` (§4.3). Missing a required CostArgs entry raises `EngineException`. Design open question resolved: cost parameter names and `source` share the same binding namespace; a parameter name that shadows `source` is an authoring-time error.
+
 **Invariants.**
 - A variable is local to the block it is declared in.
 - A variable may be referenced by any keyword that appears after its binding point in the block.
 - A variable may not be referenced before it is bound.
 - Variables cease to exist when the block completes.
+- A `CostDef` parameter name must not be `source`, `session`, `trigger_event`, `candidate`, or `original` — the five reserved names (§4.3).
 
 ---
 
@@ -473,7 +494,7 @@ The engine reserves the following binding names across all evaluation contexts. 
 | `session` | All keyword expressions | Always resolves to the singleton session atom (§2.4), typed as `Session`. It is not a parameter name and cannot be declared as one. |
 | `trigger_event` | Trigger-fired effect block scope | The `EventRef` of the event that satisfied the trigger (§5.3). Always pre-bound; always present. |
 | `candidate` | `events-matching` predicate expression | The `EventRef` of the event currently being tested against the predicate (§9.2). |
-| `source` | Static effect evaluation contexts (parameter modification filter and adjustment expressions; trigger conditions) | The atom on which the static effect is defined — its owning atom (§5.4, §5.3). |
+| `source` | Static effect evaluation contexts (parameter modification filter and adjustment expressions; trigger conditions); cost body execution contexts | In static effect contexts: the atom on which the static effect is defined — its owning atom (§5.4, §5.3). In cost body execution contexts (both real execution and clone-based validation): the card or ability atom whose cost is being paid. |
 | `original` | Parameter modification adjustment expressions | In Additive and Multiplicative expressions: the raw invocation argument value before any adjustments. In Replace expressions: the running result of all preceding Replace adjustments (§5.4). |
 
 ---
@@ -608,16 +629,72 @@ This event is fully observable by the trigger system and `events-matching`. Game
 - **Directly activatable** — the player may activate this effect block as an action. Subject to an activation condition and a cost.
 - **Triggered-only** — fires only via a trigger on a static effect. Cannot be activated directly by the player.
 
-**Activation condition** *(directly activatable only).* A boolean property expression that must evaluate to true for the player to activate the effect. Evaluated at binding time.
+**Activation condition** *(directly activatable only).* A boolean property expression that must evaluate to true for the player to activate the effect. Evaluated at binding time. Ownership and all other playability restrictions are expressed here — the engine imposes no implicit ownership filter on available actions (see §2.5, A22).
 
-**Cost** *(directly activatable only).* An effect block with all-or-nothing semantics. Validated via dry run at binding time; if validation fails, the action cannot be taken. Cost resolves before the main effect block. Events generated by cost resolution are in scope for the main block.
+**Cost** *(directly activatable only).* An ordered list of zero or more `CostDef` entries (§6.1). An empty list means no cost. Costs are paid before the main effect block executes. Events generated by cost payment appear in `events.this_action` alongside the main effect's events. Pre-validation of affordability is performed via the `ValidateActionArgs` host callback (§6.2); the engine does not automatically pre-validate on submission.
 
 **Primary effect block.** One effect block per card is designated the **primary effect block** — the one that fires when the card is played. A card may have additional effect blocks (activated abilities, modal choices); those are the game creator's responsibility to present and route to.
 
 **Invariants.**
 - Every card has exactly one primary effect block.
 - A directly activatable effect may not be activated unless its activation condition evaluates to true.
-- A cost must fully resolve (all-or-nothing) or the action does not proceed.
+- Ownership is not an implicit engine-level playability filter. Games that require ownership-based restrictions declare them via `ActivationCondition`.
+- If any step in the combined cost block raises `EngineException` during real execution (e.g. via `assert` with `on_fail: panic`, which is hardwired in cost bodies), the action fails and the exception propagates. No rollback occurs. It is the host's responsibility to call `ValidateActionArgs` before submitting an action.
+
+---
+
+### 6.1 CostDef
+
+**Definition.** A `CostDef` is a distinct type from `EffectBlockDef` that models a single payment that must be made before a directly activatable effect can resolve. It has three parts:
+
+| Field | Description |
+|---|---|
+| `Body` | An `EffectBlockDef` that pays the cost and signals un-affordability via `assert` (§9.1). Executed before the main effect. |
+| `Parameters` | An ordered list of `ParameterDecl` entries — player-supplied values the cost body needs (e.g. which card to discard). Supplied as `CostArgs` at action submission time (§4.1). |
+| `TextTemplate` | An optional string for localized cost description, with `{paramName}` placeholders. Used to populate the `ValidationResult` display text (§6.2). |
+
+**Affordability signalling.** There is no separate evaluation function. Affordability is enforced inside `Body` by one or more `assert` invocations (§9.1). If the condition passed to `assert` is false, `assert` raises `EngineException` because cost bodies are hardwired to `on_fail: panic, log: off` — halting the cost block immediately with no event appended. Game creators compose reusable cost keywords by pairing an `assert` guard with the payment steps:
+
+```
+energy_cost(x) → [assert(at-least(energy(source), x)), modify-accumulator(source, "energy", subtract(0, x))]
+discard_cost(card) → [assert(in-hand(card)), move-card(card, discard-zone)]
+```
+
+**Execution.** When the `ActionResolver` executes a `PlayCard` or `ActivateAbility` action, all `CostDef.Body` blocks are combined in declaration order into a single composite `EffectBlockDef` and executed within the same action scope as the primary effect. Cost events appear in `events.this_action`.
+
+**Invariants.**
+- A `CostDef` may not itself carry a `CostDef` — there are no recursive cost chains.
+- `CostDef.Parameters` names must not clash with the reserved names `source`, `session`, `trigger_event`, `candidate`, or `original` (§4.3).
+- `CardDefinition.Cost` and `NamedEffectBlockDef.Cost` are each an ordered list of zero or more `CostDef` entries. An empty list is equivalent to no cost.
+
+---
+
+### 6.2 ValidateActionArgs and the Affordability Check
+
+**Definition.** `ValidateActionArgs` is a host-callable affordability check: a pure operation that executes the combined cost block against a temporary game state clone and returns a `ValidationResult`. The real game state is never mutated.
+
+**How it is provided.** The engine constructs `ValidateActionArgs` as part of `AvailableActions`, capturing the game state at the moment `ComputeAvailableActions` is called. The host may call it as many times as needed before submitting a `PlayerAction`. It is synchronous and produces no side effects on real game state.
+
+**Algorithm.** All `CostDef.Body` blocks for the action are concatenated in declaration order into a single composite `EffectBlockDef`. This combined block is executed against a lightweight clone of the current game state. If the block completes without `EngineException`, costs are affordable. If `EngineException` is raised (by `assert` or any other runtime failure), costs are not affordable.
+
+**Clone scope.** The clone covers:
+- Mutable atom state: accumulator totals, zone membership, condition presence, modifier-adjusted property values.
+
+The clone excludes:
+- Event log.
+- Active static effects and their lifetimes.
+- Contribution registries (contribution IDs are not tracked on the clone).
+
+**Known boundary.** Because the event log is excluded from the clone, any cost body step that reads the event log via `events-matching` will see the real log at the time of the `ValidateActionArgs` call, not the log as it would appear mid-clone execution. Game creators should not write cost bodies that rely on events produced by earlier steps within the same cost block being visible to `events-matching`. In practice, cost bodies use `assert` against accumulator state (energy, hand size, etc.) and are not expected to query the event log.
+
+**`ValidationResult`.** The result of `ValidateActionArgs` contains:
+- `IsValid: Boolean` — true if the combined cost block completed without exception; false otherwise.
+- `CostTexts` — one resolved string per `CostDef` in declaration order, always populated regardless of validation outcome. Each string is resolved from the corresponding `CostDef.TextTemplate` using the active locale (or the raw template if no locale is provided). These strings are for host-facing display; the engine does not interpret them.
+
+**Invariants.**
+- `ValidateActionArgs` never mutates real game state. Each call is independent.
+- `CostTexts` always has exactly as many entries as the action's `CostDef` list, regardless of pass or fail.
+- The combined-block execution path used for validation is semantically identical to the path used for real cost payment — both execute the same single composite `EffectBlockDef`. What validation and real execution produce will be consistent provided game state has not changed between the two calls.
 
 ---
 
@@ -625,7 +702,7 @@ This event is fully observable by the trigger system and `events-matching`. Game
 
 **Definition.** The event log is an append-only record of everything that happens in a game. It is the primary mechanism for inter-keyword communication within a scope and for trigger conditions on static effects.
 
-**What is logged.** Every mutation keyword invocation appends one or more structured events. Property keyword invocations do not append events.
+**What is logged.** Every mutation keyword invocation appends one or more structured events. Property keyword invocations do not append events. Exception: `assert` (§9.1) never appends to the event log in any context or under any outcome — assertion failure is not a state change. On failure, `assert` may notify the engine observer via `IEngineObserver.OnDiagnostic` (controlled by the `notify` parameter), but that notification is outside the event log.
 
 **Queryable scopes.**
 
@@ -753,6 +830,7 @@ The engine provides a minimal set of primitive keywords. All game-creator-define
 | `copy-card` | source: Card, destination-zone: Zone, owner: Player | Card | Instantiates a new card using the same definition as `source`. The new card carries no runtime state from `source` — it starts with no modifiers, accumulators, or conditions, and its declarative static effects are activated fresh. Appends a creation event. |
 | `create-zone` | owner: Player, definition-name: ZoneDefinitionName | Zone | Instantiates a zone from the named zone definition; initially empty. Appends a creation event. |
 | `move-card` | card: Card, destination: Zone | Void | Moves an existing card to the specified zone. Captures the card's current zone as `origin` before updating, then appends a `move-card` event with `{ card, origin, destination }` as bound arguments. The card's idatom, owner, accumulated state, modifiers, conditions, and active static effects are unaffected by the move. |
+| `assert` | condition: Boolean, on_fail?: OnFail, notify?: NotifyFlag | Void | Guards execution with a boolean condition. `assert` never appends to the event log in any context. On success (condition true): silent — no notification, execution continues. On failure (condition false): behaviour depends on context. **In a cost body:** hardwired to `on_fail: panic, notify: off` — raises `EngineException` immediately; no observer notification. The `on_fail` and `notify` parameters are ignored in cost body contexts. **In all other effect blocks:** `on_fail` controls failure behaviour (`continue` = subsequent steps run, default; `stop` = graceful early exit, block halts, no exception; `panic` = raises `EngineException`); `notify` controls whether `IEngineObserver.OnDiagnostic(DiagnosticEvent)` is called on failure for `continue` and `stop` outcomes (`on` = notify, default; `off` = suppress). Whether `notify` is consulted when `on_fail: panic` is an open question for the architect (see notes below). |
 
 **Notes.**
 - `move-card` changes only zone membership. All other card state — accumulators, modifiers, conditions, active static effects — is unaffected. While-condition lifetime checks that reference zone membership (e.g. `in-zone(source, X)`) are re-evaluated by the engine's post-block `CheckLifetimes` sweep; `move-card` itself does not trigger this sweep directly.
@@ -762,6 +840,14 @@ The engine provides a minimal set of primitive keywords. All game-creator-define
 - `create-card` and `copy-card` both append a creation event of the same keyword name. They are distinct authoring conveniences — `copy-card` derives its definition from a live atom reference rather than a named definition string — but they are not distinguishable by event type alone in the event log.
 - **`CardDefinitionName`** is a string-valued type representing the name of a card definition registered in the game definition. The tooling validates it against the registered card definitions at authoring time. The engine resolves it to a definition reference at game-definition load time; no name lookup occurs at execution time.
 - **`ZoneDefinitionName`** is a string-valued type representing the name of a zone definition registered in the game definition. Same validation and resolution semantics as `CardDefinitionName`.
+- **`assert` — context-sensitive behaviour.** `assert` is a mutation keyword permitted in any effect block composition, but its behaviour differs by context. It never appends to the event log in any context under any outcome — an assertion failure is not a state change and must not appear in the game record.
+  - **Cost body context:** the engine hardwires `on_fail: panic, notify: off`. The `on_fail` and `notify` parameters have no effect. An `assert` failure immediately raises `EngineException` with no observer notification. This is what makes combined-block clone validation work: a failure during validation causes `ValidateActionArgs` to report `IsValid: false`; a failure during real execution propagates immediately. Game creators must not rely on `on_fail`/`notify` having any effect inside a `CostDef.Body`.
+  - **All other contexts:** `on_fail` and `notify` take effect. Three `on_fail` values: `continue` (default) — subsequent steps run after failure; `stop` — graceful early exit, block halts immediately with no exception (the engine signals this via an internal marker on the execution context, observable by callers that need to distinguish graceful-stop from normal completion); `panic` — raises `EngineException`, propagating to the caller. For `continue` and `stop`, `notify: on` (default) calls `IEngineObserver.OnDiagnostic(DiagnosticEvent)` on failure; `notify: off` suppresses the call.
+  - **Open question for architect:** when `on_fail: panic` is used in a non-cost-body context, should the engine consult `notify` and call `OnDiagnostic` before raising `EngineException`? The domain model does not decide this; the architect must resolve it.
+- **`assert` never appends an event on success** in any context. An `assert` invocation that passes is entirely silent.
+- **`DiagnosticEvent`** is a value type delivered to `IEngineObserver.OnDiagnostic`. It carries enough context to identify what fired and why — at minimum: a description of the condition that failed, the `on_fail` mode in effect, and a location hint (e.g. the containing keyword or block name). Exact fields are for the architect to specify. `DiagnosticEvent` is intentionally general: it may carry other future engine diagnostic signals beyond assertions.
+- **`OnFail`** is an enumeration type with values `continue`, `stop`, and `panic`. Default when omitted: `continue`.
+- **`NotifyFlag`** is an enumeration type with values `on` and `off`. Default when omitted: `on`. Consulted for `continue` and `stop` outcomes in non-cost-body contexts; ignored in cost body contexts; architect decision required for `panic` in non-cost-body contexts. Controls observer notification only — not the event log.
 
 ---
 
@@ -960,3 +1046,11 @@ These are property keywords that operate on collections returned by `events-matc
 | **Trigger count** | A lifetime condition that expires after the trigger has fired N times (§5.1). |
 | **While-condition** | A lifetime condition that holds while a boolean property expression is true (§5.1). |
 | **Zone** | A named container for cards; has the same state model as cards (§2.3). |
+| **`assert`** | A built-in mutation keyword that guards execution with a boolean condition. Never appends to the event log in any context. On success: silent. On failure: context-sensitive — in cost bodies, hardwired to `on_fail: panic, notify: off` (raises `EngineException`, no observer notification); in other contexts, configurable via `on_fail` (`continue`, `stop`, or `panic`) and `notify` parameters (§9.1). |
+| **`DiagnosticEvent`** | A value type delivered to `IEngineObserver.OnDiagnostic` when `assert` fails with `notify: on`. Carries enough context to identify what fired and why (condition description, `on_fail` mode, location hint). Intentionally general — may carry future engine diagnostics beyond assertions. Exact fields are for the architect to specify (§9.1). |
+| **`CostDef`** | A first-class type representing a single payment required before a directly activatable effect resolves. Comprises a `Body` (EffectBlockDef), `Parameters` (ParameterDecl list), and optional `TextTemplate`. Affordability is signalled inside the body via `assert` (§6.1). |
+| **CostArgs** | The binding-time map of player-supplied values for a `CostDef`'s declared parameters, keyed by parameter name. Entered into the cost body execution context alongside `source` (§4.1). |
+| **`ValidateActionArgs`** | A host-callable, pure affordability check provided in `AvailableActions`. Combines all `CostDef.Body` blocks into a single composite `EffectBlockDef` and executes it against a lightweight game state clone. Returns a `ValidationResult`. Does not mutate real game state (§6.2). |
+| **`ValidationResult`** | The outcome of `ValidateActionArgs`: `IsValid` (boolean) plus `CostTexts` (one resolved display string per `CostDef`, always populated) (§6.2). |
+| **`OnFail`** | Enumeration type for the `assert` `on_fail` parameter: `continue` (default — subsequent steps run after failure), `stop` (graceful early exit — block halts, no exception), or `panic` (raises `EngineException`). Cost bodies are hardwired to `panic` regardless of this parameter (§1.4, §9.1). |
+| **`NotifyFlag`** | Enumeration type for the `assert` `notify` parameter: `on` (default — call `IEngineObserver.OnDiagnostic` on failure) or `off` (suppress). Controls observer notification only, not the event log. Consulted for `continue` and `stop` outcomes in non-cost-body contexts. Whether consulted for `panic` is an open architect question (§1.4, §9.1). |

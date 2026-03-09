@@ -362,12 +362,44 @@ public sealed class GameSession
                 return;
             }
 
-            var block = TranslatePlayerAction(action);
-            if (block is null) continue; // unknown action kind — skip silently
+            // Resolve the primary effect and the cost blocks separately.
+            // Costs run with IsCostBody=true before the primary effect, all within
+            // the same action scope (D23).
+            var primaryBlock = TranslatePlayerAction(action);
+            var costBlocks   = ResolveCostBlocks(action);
 
-            await _resolver.ResolveAction(block, _state, _eventLog, activePlayer, turn);
+            await _resolver.ResolveAction(primaryBlock, _state, _eventLog, activePlayer, turn,
+                costBlocks: costBlocks);
             if (_state.GameIsOver) return;
         }
+    }
+
+    /// <summary>
+    /// Returns the cost blocks (one <see cref="EffectBlockDef"/> per
+    /// <see cref="CostDef"/>) for the given action in declaration order,
+    /// or <c>null</c> when the action has no costs.
+    /// </summary>
+    private IReadOnlyList<EffectBlockDef>? ResolveCostBlocks(PlayerAction action)
+    {
+        IReadOnlyList<CostDef>? costs = action switch
+        {
+            PlayCard pc =>
+                _atomDefinitionNames.TryGetValue(pc.Card, out var defName) &&
+                _definition.CardDefinitions.TryGetValue(defName, out var cardDef)
+                    ? cardDef.Cost
+                    : null,
+            ActivateAbility aa =>
+                _atomDefinitionNames.TryGetValue(aa.Source, out var defName2) &&
+                _definition.CardDefinitions.TryGetValue(defName2, out var cardDef2)
+                    ? cardDef2.AdditionalEffects
+                              .FirstOrDefault(e => string.Equals(e.Name, aa.EffectName, StringComparison.Ordinal))
+                              ?.Cost
+                    : null,
+            _ => null,
+        };
+
+        if (costs is null || costs.Count == 0) return null;
+        return costs.Select(c => c.Body).ToList();
     }
 
     // -----------------------------------------------------------------------
@@ -378,24 +410,24 @@ public sealed class GameSession
     /// Returns the set of actions currently available to the active player.
     /// <para>
     /// Uses two independent passes (D19 steps 2 and 4):<br/>
-    /// <b>Pass 1 — PlayCard candidates:</b> iterates owned cards, filters by zone
-    /// (definition name ∈ <see cref="GameDefinition.PlayableZoneNames"/> AND zone
-    /// owner == active player), then evaluates each card's
-    /// <see cref="CardDefinition.ActivationCondition"/>.<br/>
-    /// <b>Pass 2 — Ability candidates:</b> iterates ALL owned cards regardless of zone;
-    /// zone restrictions for abilities are expressed via the ability's own
-    /// <c>ActivationCondition</c>.<br/>
-    /// <c>Pass</c> is always included.  Cost pre-flight is deferred (D19 design D-C).
+    /// <b>Pass 1 — PlayCard candidates (D24):</b> iterates ALL card atoms regardless
+    /// of owner.  If <see cref="GameDefinition.PlayableZoneNames"/> is non-empty,
+    /// filters to cards in zones whose definition name is in the list (zone
+    /// ownership is NOT checked — D24 removes the zone-owner predicate).  Then
+    /// evaluates each card's <see cref="CardDefinition.ActivationCondition"/>.
+    /// Games that want owner-restricted play add
+    /// <c>ActivationCondition: Kw.OwnedByActivePlayer()</c>.<br/>
+    /// <b>Pass 2 — Ability candidates (D24):</b> iterates ALL card atoms regardless
+    /// of zone or owner.  Zone / ownership restrictions are expressed via the
+    /// ability's own <c>ActivationCondition</c>.<br/>
+    /// <c>Pass</c> is always included.<br/>
+    /// <b>ValidateActionArgs (D22):</b> a delegate is captured over the current
+    /// state snapshot so the caller can validate cost affordability without
+    /// a direct reference to <see cref="GameSession"/>.
     /// </para>
     /// </summary>
     private AvailableActions ComputeAvailableActions(string activePlayer)
     {
-        if (!_playerAtomIds.TryGetValue(activePlayer, out var playerAtomId))
-            return new AvailableActions(
-                Array.Empty<PlayableCardOption>(),
-                Array.Empty<ActivatableAbilityOption>(),
-                CanPass: true);
-
         // Build a set of playable zone definition names for O(1) lookup.
         // null PlayableZoneNames = no zone filter (any zone is playable).
         var playableZoneDefNames = _definition.PlayableZoneNames is { Count: > 0 } names
@@ -405,36 +437,28 @@ public sealed class GameSession
         var playableCards    = new List<PlayableCardOption>();
         var activatableAbils = new List<ActivatableAbilityOption>();
 
-        // ── Pass 1: PlayCard candidates (zone-filtered) ──────────────────────
-        // D19 step 2: only cards in a zone whose definition name is in
-        // PlayableZoneNames AND whose zone is owned by the active player
-        // are eligible.  The two conditions are independent so both must hold.
+        // ── Pass 1: PlayCard candidates (D24 — no ownership predicate) ───────
+        // D24: iterate ALL card atoms.  Zone filter only checks definition name;
+        // zone ownership is no longer a gate (ownership is expressed via ActivationCondition).
         foreach (var cardId in _state.GetAtoms(AtomKind.Card))
         {
             var card = _state.GetAtom(cardId);
-            if (card.OwnerId != playerAtomId) continue;
 
-            // --- Zone filter (D19 step 2) ---
-            // If PlayableZoneNames is set, the card must be in a zone whose
-            // definition name appears in the list.  Additionally the zone itself
-            // must be owned by the active player — a card moved into an opponent's
-            // hand zone is NOT considered "in the active player's hand".
+            // --- Zone filter (D24 — definition name only, no zone-owner check) ---
             if (playableZoneDefNames is not null)
             {
-                var zone = _state.GetAtom(card.ZoneId);
-                if (zone.OwnerId != playerAtomId) continue;
                 if (!_atomDefinitionNames.TryGetValue(card.ZoneId, out var zoneDefName)
                     || !playableZoneDefNames.Contains(zoneDefName))
-                    continue; // card is in a non-playable zone (or no definition)
+                    continue; // card is in a non-playable zone (or no definition name)
             }
 
             if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName)) continue;
             if (!_definition.CardDefinitions.TryGetValue(cardDefName, out var cardDef)) continue;
 
-            // --- Activation condition (D19) ---
+            // --- Activation condition (D19 / D24) ---
             // Evaluated pure (no mutation, no log).  The card atom is injected
-            // as "source" per D13 — the ActivationCondition path has no StaticEffect
-            // to provide it automatically, so we must supply it manually here.
+            // as "source" per D13.  Games that want ownership filtering add
+            // ActivationCondition: Kw.OwnedByActivePlayer() (D24).
             if (cardDef.ActivationCondition is not null)
             {
                 var bindings = new Dictionary<string, object> { ["source"] = cardId };
@@ -445,15 +469,11 @@ public sealed class GameSession
             playableCards.Add(new PlayableCardOption(cardId, Array.Empty<TargetSet>()));
         }
 
-        // ── Pass 2: Ability candidates (all owned cards, any zone) ───────────
-        // D19 step 4: zone membership is irrelevant for ability activation.
-        // Zone restrictions for abilities are expressed via the ability's own
-        // ActivationCondition (e.g. a check that the card is on the battlefield).
+        // ── Pass 2: Ability candidates (D24 — all card atoms, no ownership guard) ──
+        // D24: zone membership and ownership are irrelevant.  Ownership / zone
+        // restrictions are expressed via the ability's own ActivationCondition.
         foreach (var cardId in _state.GetAtoms(AtomKind.Card))
         {
-            var card = _state.GetAtom(cardId);
-            if (card.OwnerId != playerAtomId) continue;
-
             if (!_atomDefinitionNames.TryGetValue(cardId, out var cardDefName2)) continue;
             if (!_definition.CardDefinitions.TryGetValue(cardDefName2, out var cardDef2)) continue;
 
@@ -469,11 +489,56 @@ public sealed class GameSession
             }
         }
 
+        // D22: capture a snapshot of the current state for cost validation.
+        // The delegate is safe to call multiple times before returning an action.
+        // The snapshot is a lightweight clone (no event log, no static effects).
+        var stateSnapshot       = _state.CloneForValidation();
+        var strategiesSnapshot  = _strategies;   // immutable reference; safe to capture
+        var randomSnapshot      = _randomSource; // read-only; safe to capture
+        var defSnapshot         = _definition;   // immutable; safe to capture
+        var activePlayerCapture = activePlayer;
+
+        Func<PlayerAction, ValidationResult> validateDelegate = (action) =>
+            CostValidator.Validate(
+                costs: ResolveCostsForAction(action, defSnapshot),
+                action: action,
+                state:  stateSnapshot,
+                definition: defSnapshot,
+                strategies: strategiesSnapshot,
+                randomSource: randomSnapshot,
+                activePlayerName: activePlayerCapture);
+
         // Pass is always available — a player must never be stuck (D19 design D-D).
         return new AvailableActions(
             PlayableCards:        playableCards,
             ActivatableAbilities: activatableAbils,
-            CanPass:              true);
+            CanPass:              true,
+            ValidateActionArgs:   validateDelegate);
+    }
+
+    /// <summary>
+    /// Returns the cost list relevant for the given action, or null when the
+    /// action type has no costs or the card/ability definition cannot be found.
+    /// </summary>
+    private IReadOnlyList<CostDef>? ResolveCostsForAction(
+        PlayerAction action, GameDefinition def)
+    {
+        return action switch
+        {
+            PlayCard pc =>
+                _atomDefinitionNames.TryGetValue(pc.Card, out var defName) &&
+                def.CardDefinitions.TryGetValue(defName, out var cardDef)
+                    ? cardDef.Cost
+                    : null,
+            ActivateAbility aa =>
+                _atomDefinitionNames.TryGetValue(aa.Source, out var defName2) &&
+                def.CardDefinitions.TryGetValue(defName2, out var cardDef2)
+                    ? cardDef2.AdditionalEffects
+                              .FirstOrDefault(e => string.Equals(e.Name, aa.EffectName, StringComparison.Ordinal))
+                              ?.Cost
+                    : null,
+            _ => null,
+        };
     }
 
     // -----------------------------------------------------------------------

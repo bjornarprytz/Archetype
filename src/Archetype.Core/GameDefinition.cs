@@ -15,6 +15,12 @@ namespace Archetype.Core;
 /// binding explicitly; the <c>WhileCondition</c> path has a <c>StaticEffect</c>
 /// to do so, but the activation-condition path does not.
 /// </para>
+/// <para>
+/// <b>Cost (D20):</b> an ordered list of cost definitions that must be paid
+/// before the <see cref="PrimaryEffect"/> executes.  Empty = no cost.
+/// Each <see cref="CostDef.Body"/> runs in declaration order within the same
+/// action scope as the primary effect (D23).
+/// </para>
 /// </summary>
 public sealed record CardDefinition(
     string Name,
@@ -22,15 +28,22 @@ public sealed record CardDefinition(
     EffectBlockDef PrimaryEffect,
     IReadOnlyList<NamedEffectBlockDef> AdditionalEffects,
     IReadOnlyList<StaticEffectDef> StaticEffects,
-    KeywordNode? ActivationCondition = null);
+    KeywordNode? ActivationCondition = null,
+    IReadOnlyList<CostDef>? Cost = null);
 
 /// <summary>
 /// A named, activatable effect block on a card (e.g. an activated ability).
+/// <para>
+/// <b>Cost (D20):</b> an ordered list of cost definitions.  Empty = no cost.
+/// Replaces the prior <c>Cost: EffectBlockDef?</c> field (D25 breaking change).
+/// Each <see cref="CostDef.Body"/> runs in declaration order within the same
+/// action scope as <see cref="Body"/> (D23).
+/// </para>
 /// </summary>
 public sealed record NamedEffectBlockDef(
     string Name,
     KeywordNode? ActivationCondition,
-    EffectBlockDef? Cost,
+    IReadOnlyList<CostDef>? Cost,
     EffectBlockDef Body);
 
 /// <summary>

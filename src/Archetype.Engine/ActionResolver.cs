@@ -125,30 +125,48 @@ internal sealed class ActionResolver
     /// The current turn number; forwarded to <c>CheckLifetimes</c> for
     /// <see cref="TurnTimer"/> evaluation.
     /// </param>
+    /// <param name="costBlocks">
+    /// Optional cost bodies to execute before <paramref name="primaryBlock"/>
+    /// within the same action scope (D23).  Each cost body runs with
+    /// <c>IsCostBody = true</c>.
+    /// </param>
     public async Task ResolveAction(
         EffectBlockDef? primaryBlock,
         GameState state,
         EventLog eventLog,
         string activePlayerName,
-        int currentTurn)
+        int currentTurn,
+        IReadOnlyList<EffectBlockDef>? costBlocks = null)
     {
         var ctx = new ExecutionContext(
             state, eventLog,
             new Dictionary<string, object>(),
             _strategies, _randomSource, _definition,
-            activePlayerName);
+            activePlayerName,
+            observer: _observer);
 
-        // ── Step 1: primary block ────────────────────────────────────────────
-        // Each primary block runs inside its own action scope so its events
-        // are committed to the turn accumulator before trigger collection.
+        // ── Step 1: cost bodies then primary block ───────────────────────────
+        // All run inside the same action scope so cost events and primary events
+        // share events.this_action (D23).
         eventLog.OpenAction();
         try
         {
+            // Execute cost bodies first, with IsCostBody = true (D20).
+            if (costBlocks is { Count: > 0 })
+            {
+                ctx.IsCostBody = true;
+                foreach (var costBlock in costBlocks)
+                    await _executor.ExecuteBlock(costBlock, ctx);
+                ctx.IsCostBody = false;
+            }
+
             if (primaryBlock is not null)
                 await _executor.ExecuteBlock(primaryBlock, ctx);
         }
         finally
         {
+            // Always reset IsCostBody and close the action scope.
+            ctx.IsCostBody = false;
             eventLog.CloseAction();
         }
 

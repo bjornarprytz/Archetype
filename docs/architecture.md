@@ -2494,6 +2494,243 @@ CardBuilder
 
 ---
 
+### D20 — `CostDef` type and extended `assert` built-in
+
+**Decision:** `CostDef` is a first-class record with no separate evaluation function — affordability is expressed entirely through the `assert` built-in inside the cost body. The `assert` built-in signature is:
+
+```
+assert(condition: Boolean, on_fail: OnFail = continue, notify: NotifyFlag = on) → Void
+```
+
+`OnFail` and `NotifyFlag` are inline-literal-only enum types — game creators cannot declare keyword parameters of these types, but they can pass the literals `continue`, `stop`, or `panic` (for `OnFail`) and `on` or `off` (for `NotifyFlag`) at call sites.
+
+**`assert` semantics:**
+
+| Context | `on_fail` | `notify` | Effect on failure |
+|---|---|---|---|
+| Inside any cost body | hardwired `panic` | hardwired `off` | Raises `EngineException`; `OnDiagnostic` is NOT called |
+| Other effects (default) | `continue` | `on` | Continues execution; calls `OnDiagnostic` |
+| Other effects (explicit) | any | any | Per literal values at call site |
+
+`on_fail` and `notify` are orthogonal:
+- `notify: on` — calls `IEngineObserver.OnDiagnostic(DiagnosticEvent)` when the condition fails; this happens BEFORE raising `EngineException` when `on_fail: panic`
+- `on_fail: stop` — halts the block gracefully (no exception, no further steps); distinct from `panic` (which raises `EngineException`) and `continue` (which does nothing and proceeds)
+- `assert` NEVER appends to the event log under any outcome — assertion failure is not a state change
+
+The hardwiring of cost-body assert semantics is enforced by the `BlockExecutor`: when executing a block that was opened as a cost body (a flag on `ExecutionContext`), any `assert` call within that scope ignores `on_fail` and `notify` arguments and behaves as `panic`/`off`. This avoids the game creator needing to remember the cost-body convention and prevents cost bodies from silently continuing past an unaffordable state.
+
+**`CostDef` record:**
+```
+CostDef {
+  Body         : EffectBlockDef    // mutating — pays the cost; assert() signals un-affordability
+  Parameters   : ParameterDecl[]  // player-provided args (e.g. which card to discard)
+  TextTemplate : string?           // localized cost description; {paramName} placeholders
+}
+```
+
+`CostDef` cannot itself carry a `CostDef` (no recursive costs). `Body` is a normal `EffectBlockDef`.
+
+**`CardDefinition` updated:**
+```
+CardDefinition {
+  ...
+  Cost                : IReadOnlyList<CostDef>   // empty = no cost
+  ActivationCondition : KeywordNode?
+  PrimaryEffect       : EffectBlockDef?
+  ...
+}
+```
+
+**`NamedEffectBlockDef` updated:**
+```
+NamedEffectBlockDef {
+  Name                : string
+  ActivationCondition : KeywordNode?
+  Cost                : IReadOnlyList<CostDef>   // replaces Cost: EffectBlockDef?
+  Body                : EffectBlockDef
+}
+```
+
+**Rationale:** A separate `EvaluationFunction` per cost introduces a novel interleaving of pure checks and mutations between cost body executions. `CheckLifetimes` cannot run between steps, creating a subtle inconsistency between validation and real execution. The `assert`-in-body approach uses the same single-block execution path for both validation and real execution. The extended `on_fail`/`notify` parameters make `assert` a general diagnostic tool without adding a new keyword — the cost-body restriction is a safety rail, not a semantic distinction.
+
+**Consequences:**
+- `BuiltInKeywords` gains `assert` with three parameters; the keyword descriptor carries `IsCostBodyOnly: false` (the hardwiring is enforced by execution context, not by registration).
+- `Kw` gains `Assert(condition: KeywordNode, onFail: OnFail = OnFail.Continue, notify: NotifyFlag = NotifyFlag.On) → Invocation`.
+- `OnFail` and `NotifyFlag` are C# enums in `Archetype.Core`; they are NOT `KeywordNode` parameter types (no `ParameterType.OnFail` or `ParameterType.NotifyFlag`).
+- `ExecutionContext` gains a `bool IsCostBody` flag; `BlockExecutor` sets this true before executing any `CostDef.Body`.
+- `NamedEffectBlockDef.Cost` changes from `EffectBlockDef?` to `IReadOnlyList<CostDef>` — this is a **breaking change** (see D25).
+- `CardDefinition.Cost` is new; existing definitions without it default to empty list.
+
+---
+
+### D21 — Combined cost block validation via state clone
+
+**Decision:** When `ValidateActionArgs` is invoked, all `CostDef.Body` blocks for the action are concatenated in declaration order into a single composite `EffectBlockDef`, then executed against a lightweight clone of `GameState` with `IsCostBody = true`. If the combined block completes without throwing `EngineException`, all costs are affordable and `ValidationResult.IsValid` is true. If `EngineException` is thrown (by an `assert` in a cost body or any other runtime failure), `IsValid` is false.
+
+**Lightweight clone scope:**
+
+| Included | Excluded |
+|---|---|
+| Atom table (mutable copy) | `EventLog` |
+| Accumulator maps (mutable copy) | Active static effects |
+| Zone membership | Contribution registries |
+| Condition presence | Observer reference |
+
+The clone is shallow-copy-safe because cost bodies that use `assert` only read accumulator state, zone membership, and condition presence — none of which depend on event log or contribution data.
+
+**`ValidationResult`:**
+```
+ValidationResult {
+  IsValid   : bool
+  CostTexts : IReadOnlyList<string>   // one per CostDef, always populated; resolved from TextTemplate
+}
+```
+
+`CostTexts` is always resolved (from `CostDef.TextTemplate` + locale parameters from `PlayerAction.CostChoices`) regardless of validation outcome, for player-facing display. The combined-block approach does not yield a per-cost failure index; `IsValid` is the sole pass/fail signal.
+
+**Rationale:** Single-block execution against a clone is the minimum path consistent with real execution semantics. Sequential evaluation-function + body per cost requires a novel interleaving not present anywhere else in the engine. Full-clone including event log and effects is accurate but expensive and unnecessary for the cost affordability check.
+
+**Consequences:**
+- `GameState` gains an internal `CloneForValidation()` method; its result is an independent copy with no shared mutable references to the original.
+- `CostValidator` (new class in `Archetype.Engine`) implements `Validate(IReadOnlyList<CostDef> costs, PlayerAction action, GameState state, GameDefinition def) → ValidationResult`.
+- If a cost body calls a keyword that reads the event log (e.g. a trigger condition inside a cost), the clone's empty log will produce a different result than real execution. This is a known acceptable limitation; game creators must not write cost bodies that depend on event log state.
+
+---
+
+### D22 — `ValidateActionArgs` callback placement
+
+**Decision:** `ValidateActionArgs` is a `Func<PlayerAction, ValidationResult>` field on `AvailableActions`. The host may call it as many times as needed before returning a `PlayerAction` from `IPlayerStrategy.SelectActionAsync`. It is synchronous (cost bodies contain no prompts and no async keywords).
+
+```
+AvailableActions {
+  PlayableCards        : IReadOnlyList<PlayableCardOption>
+  ActivatableAbilities : IReadOnlyList<ActivatableAbilityOption>
+  CanPass              : bool
+  ValidateActionArgs   : Func<PlayerAction, ValidationResult>   // NEW
+}
+```
+
+The delegate is constructed by the engine at `ComputeAvailableActions` time. It captures a snapshot of `GameState` (the clone-for-validation) and `GameDefinition`. The host does not need a direct reference to `GameSession`.
+
+**Rationale:** A delegate on `AvailableActions` keeps the strategy interface self-contained — the host receives everything it needs to reason about actions in one object. A public method on `GameSession` would require strategies to hold a session reference, increasing coupling. A static helper would have no access to current state.
+
+**Consequences:**
+- `AvailableActions` gains `ValidateActionArgs` — this is a **breaking change** for any code constructing `AvailableActions` directly (see D25).
+- The delegate is not nullable; the engine always supplies a working implementation. If the action has no costs, the delegate returns `ValidationResult { IsValid = true, CostTexts = [] }` immediately.
+
+---
+
+### D23 — Cost execution sequencing at action time
+
+**Decision:** When `ActionResolver` executes a `PlayCard` or `ActivateAbility` action, cost bodies run before the primary effect in declaration order. Each `CostDef.Body` runs as its own `EffectBlockDef` within the same action scope as the primary effect (not a separate action scope). Cost events therefore appear in `events.this_action`. The `BlockExecutor` sets `IsCostBody = true` for each cost body execution, enforcing the hardwired `panic`/`off` assert semantics.
+
+If any cost body raises `EngineException`, the action fails and the exception propagates. It is the host's responsibility to call `ValidateActionArgs` before submitting an action; the engine does not perform automatic rollback on cost failure.
+
+**Rationale:** A separate action scope per cost splits cost events from effect events, complicating event-log queries. Rollback on cost failure is expensive and semantically complex; the intended usage is the pre-validated path via `ValidateActionArgs`.
+
+**Consequences:**
+- `ActionResolver` (or `GameSession.TranslatePlayerAction`) inserts a loop over `CostDef.Body` blocks before dispatching the primary `EffectBlockDef`. The cost args from `PlayerAction.CostChoices` are bound into the execution context before each cost body runs.
+- Event log ordering: cost events will always precede primary effect events within `events.this_action`. Tests that assert on event ordering within an action must account for this.
+
+---
+
+### D24 — `ComputeAvailableActions` ownership filter removal
+
+**Decision:** The hard-coded `zone.OwnerId == activePlayer` predicate is removed from `ComputeAvailableActions`. Zone membership and `ActivationCondition` are the sole filtering mechanisms. The `activePlayer` parameter is retained as the canonical "who is acting" identifier, but it is no longer used as an ownership filter inside the engine.
+
+**Updated algorithm:**
+```
+ComputeAvailableActions(string activePlayer, GameState state):
+
+  // Step 1: PlayCard candidates — all card atoms (no owner filter)
+  candidates = all card atoms in state
+  if PlayableZoneNames is non-empty:
+    candidates = candidates where zone.DefinitionName ∈ PlayableZoneNames
+  for each candidate:
+    source = candidate
+    if cardDef.ActivationCondition == null
+       OR EvaluateCondition(cardDef.ActivationCondition, state, {source}):
+      add PlayableCardOption(Card: candidate.Id)
+
+  // Step 2: Abilities — all card atoms, all zones (no owner filter)
+  for each card atom in state:
+    for each ability in cardDef.AdditionalEffects:
+      source = card atom
+      if ability.ActivationCondition == null
+         OR EvaluateCondition(ability.ActivationCondition, state, {source}):
+        add ActivatableAbilityOption(Source: card.Id, EffectName: ability.Name)
+
+  // Step 3: Pass is always available
+  result.CanPass = true
+
+  // Step 4: Attach validator
+  result.ValidateActionArgs = (action) => CostValidator.Validate(CostsFor(action), action, state, def)
+
+  return result
+```
+
+**Migration helper — `Kw.OwnedByActivePlayer()`:**
+
+Added to `Archetype.Build`. Expands to:
+```
+Kw.Eq(Kw.OwnerOf(Kw.Param("source")), Kw.GetState(Kw.Session(), "active-player"))
+```
+
+This helper requires the game to declare a session state field named `"active-player"` (a `string` value holding the current active player's identifier). Games that do not declare this field will receive a `DefinitionException` at `Build()` time. Document this requirement in the `Archetype.Build` XML doc and the game creator guide.
+
+**Rationale:** Ownership is a game-specific concept, not an engine primitive. The D19 ownership filter was an implicit assumption about game structure. `ActivationCondition` is the principled place for game-specific playability constraints. `Kw.OwnedByActivePlayer()` makes migration a one-liner for the common case.
+
+**Consequences:**
+- `ComputeAvailableActions` no longer has an implicit ownership requirement — this is a **breaking behaviour change** for existing game definitions that relied on it. Existing tests must be audited; those that assumed only the active player's cards appear in `PlayableCards` must add an explicit `ActivationCondition` or update their assertions (see D25).
+- `Kw.OwnedByActivePlayer()` is the only provided shorthand; games with more complex ownership semantics write their own `ActivationCondition` expression.
+- `Kw.OwnerOf` and `Kw.GetState(Kw.Session(), ...)` must already exist in `Archetype.Build`; if they do not, add them as part of this change.
+
+---
+
+### D25 — Breaking changes catalogue for action-args-and-cost-model
+
+**Decision:** The following interfaces and types change in ways that require mechanical migration. All changes are introduced together in one branch; no phased rollout.
+
+| Component | Breaking change |
+|---|---|
+| `IEngineObserver` | New method `void OnDiagnostic(DiagnosticEvent e)` — existing implementations must add the method |
+| `AvailableActions` | New field `ValidateActionArgs: Func<PlayerAction, ValidationResult>` — existing struct literals must supply the field |
+| `NamedEffectBlockDef` | `Cost: EffectBlockDef?` → `Cost: IReadOnlyList<CostDef>` — all construction and pattern-match sites must update |
+| `PlayCard` / `ActivateAbility` action handling | Cost sequencing is now enforced before the primary effect — tests that observed effect events without prior cost events must add cost definitions or update expectations |
+| `ComputeAvailableActions` | Ownership filter removed — callers that expected only the active player's cards must add `ActivationCondition: Kw.OwnedByActivePlayer()` |
+
+**`DiagnosticEvent` shape:**
+```
+DiagnosticEvent {
+  Kind          : DiagnosticKind   // enum; AssertionFailed is the first value
+  Message       : string
+  ConditionNode : KeywordNode?     // the condition AST node that failed; null if not available
+  OnFail        : OnFail           // the on_fail value in effect when the diagnostic was generated
+  Location      : string           // human-readable, e.g. "energy_cost @ PlayCard"
+}
+```
+
+`DiagnosticKind` is an extensible enum (int-backed, not a closed set) so future diagnostic kinds can be added without a breaking change to the observer interface.
+
+**`IEngineObserver.OnDiagnostic`:**
+- Signature: `void OnDiagnostic(DiagnosticEvent e)`
+- Called synchronously by `BlockExecutor` when an `assert` fails with `notify: on`
+- Called BEFORE raising `EngineException` when `on_fail: panic`
+- A null observer reference means no-op (same guard pattern as existing observer methods)
+- Does NOT write to the event log
+- Must not throw; any exception propagates out of `BlockExecutor` and is treated as an engine error
+
+**Rationale:** Cataloguing breaking changes in a single decision ensures the implementer audits every affected site before merging. Placing `DiagnosticEvent` and `OnDiagnostic` here (rather than in D20) keeps D20 focused on `assert` semantics and keeps the observer contract in one place.
+
+**Consequences:**
+- `DiagnosticEvent` and `DiagnosticKind` are new types in `Archetype.Core`.
+- `OnFail` and `NotifyFlag` enums are in `Archetype.Core` (shared between `assert` descriptor and `DiagnosticEvent`).
+- All existing `IEngineObserver` implementations (including test fakes) must add `OnDiagnostic`. If the project uses a base class or adapter, add the default no-op there.
+- The implementer must search for all `new AvailableActions {` struct literals and add `ValidateActionArgs`.
+- The implementer must search for all `Cost:` assignments on `NamedEffectBlockDef` and migrate from `EffectBlockDef?` to `IReadOnlyList<CostDef>`.
+
+---
+
 ## Open Items
 
 - [x] Language and runtime — D1
@@ -2515,3 +2752,9 @@ CardBuilder
 - [x] Save/load (`GameStateSnapshot`) — D17
 - [x] Keyword cross-references in card text — D18
 - [x] `ComputeAvailableActions` contract — D19
+- [x] `CostDef` type and extended `assert` built-in — D20
+- [x] Combined cost block validation via state clone — D21
+- [x] `ValidateActionArgs` callback placement — D22
+- [x] Cost execution sequencing at action time — D23
+- [x] `ComputeAvailableActions` ownership filter removal — D24
+- [x] Breaking changes catalogue for action-args-and-cost-model — D25

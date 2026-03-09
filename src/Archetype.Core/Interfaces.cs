@@ -48,6 +48,13 @@ public interface IPlayerStrategy
 /// batch.  Returning <see cref="CascadeDirective.Halt"/> exits the cascade
 /// loop cleanly.
 /// </para>
+/// <para>
+/// <b>OnDiagnostic (D25):</b> called by the engine when an <c>assert</c>
+/// built-in fails with <c>notify: on</c>.  Called BEFORE raising
+/// <see cref="EngineException"/> when <c>on_fail: panic</c>.  Must not throw;
+/// any exception is treated as an engine error.  Does NOT write to the event
+/// log.
+/// </para>
 /// </summary>
 public interface IEngineObserver
 {
@@ -68,6 +75,21 @@ public interface IEngineObserver
     /// (1-based on the first call).
     /// </param>
     Task<CascadeDirective> OnTriggerCascadeAsync(int iterationCount);
+
+    /// <summary>
+    /// Called when an <c>assert</c> built-in fails with <c>notify: on</c>.
+    /// <para>
+    /// When <c>on_fail: panic</c>, this is called BEFORE the
+    /// <see cref="EngineException"/> is raised.  This method is sync void;
+    /// it must not throw (the caller treats any exception as an engine error).
+    /// </para>
+    /// <para>
+    /// This method is NOT called when <c>notify: off</c> or when inside a
+    /// cost body (<c>IsCostBody = true</c>).
+    /// </para>
+    /// </summary>
+    /// <param name="e">The diagnostic event describing the assertion failure.</param>
+    void OnDiagnostic(DiagnosticEvent e);
 }
 
 /// <summary>Directive returned by <see cref="IEngineObserver"/>.</summary>
@@ -107,11 +129,38 @@ public interface IRandomSource
 /// <summary>A player action submitted through <see cref="IPlayerStrategy"/>.</summary>
 public abstract record PlayerAction;
 
-/// <summary>The player plays a card from hand.</summary>
-public sealed record PlayCard(AtomId Card) : PlayerAction;
+/// <summary>
+/// The player plays a card from hand.
+/// <para>
+/// <b>CostChoices (D21):</b> player-provided arguments that bind into
+/// <see cref="CostDef.Parameters"/> for each cost on this card.  May be empty
+/// if no cost declares parameters.
+/// </para>
+/// <para>
+/// <b>Targets (D19 deferred):</b> target selections; currently always empty.
+/// </para>
+/// </summary>
+public sealed record PlayCard(
+    AtomId Card,
+    IReadOnlyDictionary<string, object>? CostChoices = null,
+    IReadOnlyList<AtomId>? Targets = null) : PlayerAction;
 
-/// <summary>The player activates a named ability on an atom.</summary>
-public sealed record ActivateAbility(AtomId Source, string EffectName) : PlayerAction;
+/// <summary>
+/// The player activates a named ability on an atom.
+/// <para>
+/// <b>CostChoices (D21):</b> player-provided arguments that bind into
+/// <see cref="CostDef.Parameters"/> for each cost on this ability.  May be empty
+/// if no cost declares parameters.
+/// </para>
+/// <para>
+/// <b>Targets (D19 deferred):</b> target selections; currently always empty.
+/// </para>
+/// </summary>
+public sealed record ActivateAbility(
+    AtomId Source,
+    string EffectName,
+    IReadOnlyDictionary<string, object>? CostChoices = null,
+    IReadOnlyList<AtomId>? Targets = null) : PlayerAction;
 
 /// <summary>The player passes (ends their action window).</summary>
 public sealed record Pass : PlayerAction;
@@ -119,11 +168,19 @@ public sealed record Pass : PlayerAction;
 /// <summary>
 /// The set of actions available to the active player at a given decision point.
 /// Computed by the engine before calling <see cref="IPlayerStrategy.SelectActionAsync"/>.
+/// <para>
+/// <b>ValidateActionArgs (D22):</b> a delegate that validates cost affordability
+/// for a candidate action.  The delegate is constructed at
+/// <c>ComputeAvailableActions</c> time; it captures a snapshot of the current
+/// <see cref="GameState"/> and is safe to call multiple times before returning
+/// an action from <see cref="IPlayerStrategy.SelectActionAsync"/>.
+/// </para>
 /// </summary>
 public sealed record AvailableActions(
     IReadOnlyList<PlayableCardOption> PlayableCards,
     IReadOnlyList<ActivatableAbilityOption> ActivatableAbilities,
-    bool CanPass);
+    bool CanPass,
+    Func<PlayerAction, ValidationResult> ValidateActionArgs);
 
 /// <summary>A card option presented to the player.</summary>
 public sealed record PlayableCardOption(AtomId Card, IReadOnlyList<TargetSet> ValidTargets);

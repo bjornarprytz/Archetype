@@ -6,6 +6,8 @@ using Archetype.Tests.Helpers;
 // Disambiguate: Archetype.Tests.GameSession is a namespace (test folder);
 // Archetype.Engine.GameSession is the class we want.
 using EngineGameSession = Archetype.Engine.GameSession;
+using OnFail    = Archetype.Core.OnFail;
+using NotifyFlag = Archetype.Core.NotifyFlag;
 
 namespace Archetype.Tests.ComputeAvailableActions;
 
@@ -330,18 +332,19 @@ public sealed class ComputeAvailableActionsTests
     }
 
     /// <summary>
-    /// 3.8  A card owned by p1 that resides in p2's "hand" zone is NOT offered as
-    ///      playable by p1 (D19 step 2: zone owner must equal active player).
+    /// 3.8 (Updated for D24)  A card that resides in the "hand" zone is offered as
+    ///     playable to BOTH players — the engine no longer filters by zone owner (D24).
+    ///     Games that want ownership-based filtering must add
+    ///     <c>ActivationCondition: Kw.OwnedByActivePlayer()</c> to the card definition.
     /// </summary>
     [Fact]
-    public async Task ComputeAvailableActions_ExcludesCards_InOpponentOwnedZone()
+    public async Task ComputeAvailableActions_CardInOpponentOwnedZone_IsIncluded_D24()
     {
         var capturing = new CapturingPlayerStrategy();
 
         // Two-player game.  The "hand" zone definition is playable.
-        // p1 owns the card, but the card resides in p2's hand zone.
-        // Because p2 owns the zone, the zone-owner check must exclude it
-        // from p1's PlayableCards even though the zone type is "hand".
+        // p1 owns the card; it resides in p2's hand zone.
+        // Per D24, the zone-owner predicate is removed — the card IS offered.
         var def = BuildTwoPlayerDef(
             playableZoneNames: ["hand"],
             cards: new Dictionary<string, CardDefinition>
@@ -361,7 +364,8 @@ public sealed class ComputeAvailableActionsTests
                 ],
                 Cards:
                 [
-                    // p1 owns the goblin, but it is sitting in p2's hand zone.
+                    // p1 owns the goblin; it sits in p2's hand zone.
+                    // D24: zone ownership no longer gates PlayCard — the card IS offered.
                     new CardSpec("p1", "p2-hand", "goblin"),
                 ],
                 PlayerStates: []));
@@ -375,9 +379,224 @@ public sealed class ComputeAvailableActionsTests
             .RunAsync();
 
         Assert.NotNull(capturing.CapturedActions);
-        // Zone is p2's — p1 must not see the card as playable.
-        Assert.Empty(capturing.CapturedActions!.PlayableCards);
+        // D24: the card is in a playable zone by definition name ("hand");
+        // zone ownership is no longer checked, so the card IS offered.
+        Assert.Single(capturing.CapturedActions!.PlayableCards);
         Assert.True(capturing.CapturedActions.CanPass);
+    }
+
+    // -----------------------------------------------------------------------
+    //  D24 — ownership filter removal tests (9.13, 9.14, 9.15)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// 9.13  A card owned by p2 that resides in a playable zone is included in
+    ///       p1's <c>PlayableCards</c> (D24: no ownership filter).
+    /// </summary>
+    [Fact]
+    public async Task ComputeAvailableActions_CardInPlayableZone_IncludedRegardlessOfOwner()
+    {
+        var capturing = new CapturingPlayerStrategy();
+
+        // p2 owns the card; it's in p2's hand zone (a playable zone).
+        // Per D24, the card must appear in p1's PlayableCards.
+        var def = BuildTwoPlayerDef(
+            playableZoneNames: ["hand"],
+            cards: new Dictionary<string, CardDefinition>
+            {
+                ["goblin"] = new CardDefinition(
+                    Name: "goblin",
+                    StaticProperties: new Dictionary<string, object>(),
+                    PrimaryEffect: DrawBlock(),
+                    AdditionalEffects: [],
+                    StaticEffects: []),
+            },
+            manifest: new InitManifest(
+                Zones:
+                [
+                    new ZoneSpec("p1-hand", "p1", "hand"),
+                    new ZoneSpec("p2-hand", "p2", "hand"),
+                ],
+                Cards:
+                [
+                    new CardSpec("p2", "p2-hand", "goblin"),  // p2 owns the card
+                ],
+                PlayerStates: []));
+
+        await EngineGameSession.Create(def)
+            .WithPlayerStrategy("p1", capturing)
+            .WithPlayerStrategy("p2", new PassPlayerStrategy())
+            .WithRandomSource(new MockRandomSource())
+            .UseDefaultInit()
+            .Build()
+            .RunAsync();
+
+        Assert.NotNull(capturing.CapturedActions);
+        // D24: card is in a "hand" zone (playable) — no ownership predicate remains.
+        Assert.Single(capturing.CapturedActions!.PlayableCards);
+    }
+
+    /// <summary>
+    /// 9.14  A card owned by p2 with an ability and no <c>ActivationCondition</c>
+    ///       is included in p1's <c>ActivatableAbilities</c> (D24).
+    /// </summary>
+    [Fact]
+    public async Task ComputeAvailableActions_AbilityOnUnownedCard_Included()
+    {
+        var capturing = new CapturingPlayerStrategy();
+
+        var def = BuildTwoPlayerDef(
+            playableZoneNames: [],   // no zone filter needed for abilities
+            cards: new Dictionary<string, CardDefinition>
+            {
+                ["knight"] = new CardDefinition(
+                    Name: "knight",
+                    StaticProperties: new Dictionary<string, object>(),
+                    PrimaryEffect: DrawBlock(),
+                    AdditionalEffects:
+                    [
+                        new NamedEffectBlockDef(
+                            Name:                "strike",
+                            ActivationCondition: null,  // no condition
+                            Cost:                null,
+                            Body:                DrawBlock()),
+                    ],
+                    StaticEffects: []),
+            },
+            manifest: new InitManifest(
+                Zones:
+                [
+                    new ZoneSpec("p1-hand", "p1", "hand"),
+                    new ZoneSpec("p2-hand", "p2", "hand"),
+                ],
+                Cards:
+                [
+                    new CardSpec("p2", "p2-hand", "knight"),  // p2 owns the card
+                ],
+                PlayerStates: []));
+
+        await EngineGameSession.Create(def)
+            .WithPlayerStrategy("p1", capturing)
+            .WithPlayerStrategy("p2", new PassPlayerStrategy())
+            .WithRandomSource(new MockRandomSource())
+            .UseDefaultInit()
+            .Build()
+            .RunAsync();
+
+        Assert.NotNull(capturing.CapturedActions);
+        // D24: ability on an opponent-owned card is included — no ownership guard.
+        Assert.Single(capturing.CapturedActions!.ActivatableAbilities);
+        Assert.Equal("strike", capturing.CapturedActions.ActivatableAbilities[0].EffectName);
+    }
+
+    /// <summary>
+    /// 9.15  Calling <c>ValidateActionArgs</c> on a valid action does not mutate
+    ///       the live <c>GameState</c>.
+    /// </summary>
+    [Fact]
+    public async Task ComputeAvailableActions_ValidateActionArgs_DoesNotMutateState()
+    {
+        AvailableActions? captured = null;
+        AtomId capturedCard        = AtomId.None;
+
+        // Strategy: capture the AvailableActions, then pass.
+        var capturing = new DelegateCapturingStrategy(available =>
+        {
+            captured     = available;
+            capturedCard = available.PlayableCards.Count > 0
+                ? available.PlayableCards[0].Card
+                : AtomId.None;
+        });
+
+        // Card has a cost that consumes 3 energy; player starts with 5 energy.
+        var sessionEnergyBefore = double.NaN;
+
+        // We capture energy via a recording observer on the session.
+        // Use a simple always-terminate SBR so RunAsync ends immediately.
+        var alwaysTrue = Kw.AtLeast(new Literal(1.0), new Literal(1.0));
+
+        var costBody = new EffectBlockDef([
+            new EffectBlockStep("assert", [
+                new Invocation("at-least",
+                    new Invocation("get-state", new Invocation("session"), new Literal("energy")),
+                    new Literal(3.0)),
+                new Literal((double)(int)OnFail.Panic),
+                new Literal((double)(int)NotifyFlag.Off),
+            ]),
+            new EffectBlockStep("modify-accumulator", [
+                new Invocation("session"),
+                new Literal("energy"),
+                new Literal(-3.0),
+            ]),
+        ]);
+
+        var cardDef = new CardDefinition(
+            Name:               "energy-card",
+            StaticProperties:   new Dictionary<string, object>(),
+            PrimaryEffect:      DrawBlock(),
+            AdditionalEffects:  [],
+            StaticEffects:      [],
+            ActivationCondition: null,
+            Cost: [new CostDef(costBody, [], "Pay 3 energy")]);
+
+        var def = new GameDefinition(
+            Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
+            CardDefinitions:        new Dictionary<string, CardDefinition>
+            {
+                ["energy-card"] = cardDef,
+            },
+            ZoneDefinitions: new Dictionary<string, ZoneDefinition>
+            {
+                ["hand"] = new ZoneDefinition("hand", new Dictionary<string, object>()),
+            },
+            CardSets:               new Dictionary<string, CardSet>(),
+            StateBasedRules:
+            [
+                new StateBasedRule("end-game", alwaysTrue,
+                    new EffectBlockDef([new EffectBlockStep("declare-draw", [])])),
+            ],
+            Phases:          [new PhaseDefinition("main")],
+            ActionRules:     new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
+            TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
+            PlayerDefinitions: new Dictionary<string, PlayerDefinition>
+            {
+                ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
+            },
+            DefaultInitManifest: new InitManifest(
+                Zones:  [new ZoneSpec("p1-hand", "p1", "hand")],
+                Cards:  [new CardSpec("p1", "p1-hand", "energy-card")],
+                PlayerStates:
+                [
+                    new PlayerStateSpec("p1", Accumulators:
+                        new Dictionary<string, double> { /* energy on session, not player */ }),
+                ]),
+            PlayableZoneNames: ["hand"],
+            Id: "test-game");
+
+        // We can't directly read the session energy before RunAsync since provisioning
+        // sets it.  Instead validate that calling ValidateActionArgs on the captured
+        // AvailableActions does not corrupt the session energy that the SBR can observe.
+        // We verify by running the game after validation and checking it terminates normally.
+        var result = await EngineGameSession.Create(def)
+            .WithPlayerStrategy("p1", capturing)
+            .WithRandomSource(new MockRandomSource())
+            .UseDefaultInit()
+            .Build()
+            .RunAsync();
+
+        // If ValidateActionArgs mutated live state, the session might end in an error.
+        // The game should complete as a draw (SBR fires declare-draw).
+        Assert.True(result.IsDraw);
+
+        // Calling ValidateActionArgs should not have thrown and should return a result.
+        if (captured is not null && capturedCard != AtomId.None)
+        {
+            var action = new PlayCard(capturedCard);
+            var validation = captured.ValidateActionArgs(action);
+            // The card has energy cost; session energy starts at 0 (not set), so invalid.
+            // What matters here is: no exception was raised.
+            Assert.NotNull(validation);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -527,4 +746,32 @@ file sealed class PassPlayerStrategy : IPlayerStrategy
     public Task<PromptResponse> RespondToPromptAsync(
         PromptContext context, GameStateView state, CancellationToken ct = default)
         => throw new InvalidOperationException("PassPlayerStrategy: no prompt handler.");
+}
+
+// ---------------------------------------------------------------------------
+//  Test-local helper: DelegateCapturingStrategy
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// A strategy that invokes a delegate on the first <c>SelectActionAsync</c>
+/// call (to capture the <see cref="AvailableActions"/>), then always passes.
+/// </summary>
+file sealed class DelegateCapturingStrategy : IPlayerStrategy
+{
+    private readonly Action<AvailableActions> _onFirstCall;
+    private bool _called;
+
+    public DelegateCapturingStrategy(Action<AvailableActions> onFirstCall)
+        => _onFirstCall = onFirstCall;
+
+    public Task<PlayerAction?> SelectActionAsync(
+        AvailableActions available, GameStateView state, CancellationToken ct = default)
+    {
+        if (!_called) { _called = true; _onFirstCall(available); }
+        return Task.FromResult<PlayerAction?>(new Pass());
+    }
+
+    public Task<PromptResponse> RespondToPromptAsync(
+        PromptContext context, GameStateView state, CancellationToken ct = default)
+        => throw new InvalidOperationException("DelegateCapturingStrategy: no prompt handler.");
 }

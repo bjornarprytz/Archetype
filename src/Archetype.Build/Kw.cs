@@ -2,6 +2,10 @@ using Archetype.Core;
 
 namespace Archetype.Build;
 
+// Bring OnFail and NotifyFlag into scope for the Assert shorthand.
+using OnFail = Archetype.Core.OnFail;
+using NotifyFlag = Archetype.Core.NotifyFlag;
+
 /// <summary>
 /// Static factory class for <see cref="KeywordNode"/> expression trees.
 /// <para>
@@ -240,4 +244,78 @@ public static class Kw
     /// Typically used inside a state-based rule body.
     /// </summary>
     public static Invocation DeclareDraw() => new("declare-draw");
+
+    // -----------------------------------------------------------------------
+    //  assert shorthand (D20)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// <c>assert(condition, on_fail, notify)</c> — evaluates <paramref name="condition"/>
+    /// and signals a failure according to <paramref name="onFail"/> and
+    /// <paramref name="notify"/> when the condition is false.
+    /// <para>
+    /// <b>Cost-body behaviour:</b> when executed inside a cost body
+    /// (<c>IsCostBody = true</c>), the engine ignores <paramref name="onFail"/>
+    /// and <paramref name="notify"/> and always raises <see cref="Core.EngineException"/>
+    /// silently (panic / off).
+    /// </para>
+    /// <para>
+    /// <b>Outside cost bodies</b> — failure behaviour:
+    /// <list type="bullet">
+    ///   <item><see cref="OnFail.Continue"/> / <see cref="NotifyFlag.On"/>: calls <c>OnDiagnostic</c>, continues.</item>
+    ///   <item><see cref="OnFail.Stop"/> / <see cref="NotifyFlag.On"/>: calls <c>OnDiagnostic</c>, halts block.</item>
+    ///   <item><see cref="OnFail.Panic"/> / <see cref="NotifyFlag.On"/>: calls <c>OnDiagnostic</c>, raises exception.</item>
+    ///   <item>Any + <see cref="NotifyFlag.Off"/>: skips <c>OnDiagnostic</c>, applies <paramref name="onFail"/>.</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// <c>assert</c> NEVER appends to the event log under any outcome.
+    /// </para>
+    /// </summary>
+    /// <param name="condition">The boolean condition to test.</param>
+    /// <param name="onFail">
+    /// What to do on failure.  Defaults to <see cref="OnFail.Continue"/>.
+    /// </param>
+    /// <param name="notify">
+    /// Whether to call <c>OnDiagnostic</c>.  Defaults to <see cref="NotifyFlag.On"/>.
+    /// </param>
+    public static Invocation Assert(
+        KeywordNode condition,
+        OnFail onFail = OnFail.Continue,
+        NotifyFlag notify = NotifyFlag.On) =>
+        new("assert",
+            condition,
+            new Literal((double)(int)onFail),
+            new Literal((double)(int)notify));
+
+    // -----------------------------------------------------------------------
+    //  Ownership condition shorthand (D24)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Returns a condition that is true when the <c>source</c> binding is owned
+    /// by the current active player.
+    /// <para>
+    /// Expands to:
+    /// <code>Kw.EqualTo(Kw.OwnerOf(Kw.Param("source")), Kw.GetState(Kw.Session(), "active-player"))</code>
+    /// </para>
+    /// <para>
+    /// <b>Requirement:</b> the game must declare a session state field named
+    /// <c>"active-player"</c> whose value is the atom ID of the currently active
+    /// player.  If this field is absent at runtime, <c>EvaluateCondition</c> will
+    /// throw.  Use this shorthand together with game-level initialization that sets
+    /// the session <c>"active-player"</c> field at the start of each turn.
+    /// </para>
+    /// <para>
+    /// This shorthand is the migration path from the old implicit ownership filter
+    /// that was removed from <c>ComputeAvailableActions</c> in D24.  Add it to
+    /// <see cref="Core.CardDefinition.ActivationCondition"/> or
+    /// <see cref="Core.NamedEffectBlockDef.ActivationCondition"/> on any card or
+    /// ability that should only be playable by the card's owner.
+    /// </para>
+    /// </summary>
+    public static Invocation OwnedByActivePlayer() =>
+        EqualTo(
+            OwnerOf(Param("source")),
+            GetState(Session(), Str("active-player")));
 }

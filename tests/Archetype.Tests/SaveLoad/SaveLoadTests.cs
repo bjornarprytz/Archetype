@@ -37,6 +37,9 @@ public sealed class SaveLoadTests
 
         public Task<CascadeDirective> OnTriggerCascadeAsync(int iterationCount)
             => Task.FromResult(CascadeDirective.Continue);
+
+        /// <inheritdoc/>
+        public void OnDiagnostic(DiagnosticEvent e) { /* no-op in tests */ }
     }
 
     /// <summary>

@@ -91,3 +91,12 @@ Each task in `tasks.md` should carry `reads:` and `writes:` annotations on inden
 ```
 
 Use document anchor notation (`#section`) for large docs. An agent reads only the listed files before starting a task — nothing more.
+
+### Summaries and Responses
+
+When summarising completed work or presenting proposals to the user, always include relative file links (with `#anchor` where applicable) so the user can navigate directly to the relevant sections. Example:
+
+```
+- Updated [`docs/architecture.md#D25`](docs/architecture.md) with DiagnosticEvent shape
+- Tasks written to [`openspec/changes/foo/tasks.md`](openspec/changes/foo/tasks.md)
+```
