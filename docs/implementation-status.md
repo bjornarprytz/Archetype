@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-11 (tooling sidecar Groups 3–4 — 132/132 tests passing)
+> Last updated: 2026-03-11 (tooling sidecar D27/D28 bug-fix pass — 142/142 tests passing; 10 new tests covering all 6 bug fixes)
 > Branch: `impl/text-renderer`
 > All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`.
 
@@ -255,6 +255,15 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 - `GameDefinitionExporter.Export(state, force)` — hard-error gate → missing-translation gate (D31) → build `GameDefinition` → serialize JSON
 - `GodotClassGenerator.Generate(state)` → `filename → content` map; `DeriveSignalSet` implements D30 signal inclusion rules
 - Generates: `ArchetypeCard.gd`, `ArchetypeZone.gd`, `ArchetypePlayer.gd`, `ArchetypeSession.gd`, `ArchetypeCardImporter.gd`, `ArchetypeInterop.gd`
+- `GameDefinitionJsonOptions` (in `Archetype.Core`) — `KeywordNodeConverter` + `StripKeywordNodePolymorphism` modifier; works around `[JsonDerivedType]` + `[JsonConverter]` incompatibility in .NET 8+ for full `GameDefinition` serialization
+
+**D27/D28 bug fixes (2026-03-11)**:
+- **Fix 1** — `KeywordEntry.ReturnType : TypeName?` added; `ProjectFileLoader` reads `"returnType"`; `GameDefinitionExporter` and `RenderCardTextHandler` use `entry.ReturnType ?? TypeName.Atom`; `Validator` emits error for null `ReturnType`; `LiteralConverter` promoted to `public`
+- **Fix 2** — `ArtCropRegion : float[]?` (already in `CardEntry`); `ProjectFileSerializer` now serializes it; `ProjectFileLoader` reads it via `LoadArtCropRegion`
+- **Fix 3** — `StaticEffectEntry` gains `LifetimeNode : LifetimeSpec?`, `TriggerEventKeyword`, `TriggerScope`; `LifetimeDsl` parser+serializer added; `ProjectFileLoader` parses all static effect fields; `GameDefinitionExporter` maps entries to real `StaticEffectDef` (not empty stub)
+- **Fix 4** — `RenameEntryHandler.RewriteKeywordRefs` now also rewrites all `*Dsl` source strings across all entry kinds using token-boundary-aware `RewriteDsl`
+- **Fix 5** — `ProjectFileSerializer.SerializeInitManifest` zone `"definition"` field corrected to `z.Definition` (was `z.LocalId`); `ProjectFileLoader` constructor args corrected to use named params
+- **Fix 6** — `GetSymbolInfoHandler.referencedBy` already returns only `{ entryName }` (confirmed by test; no code change needed)
 
 **Remaining** (Groups 2, 5–7): Electron scaffold, IPC bridge, UI panels, and packaging — these are TypeScript/React work outside the C# assemblies.
 
@@ -296,11 +305,11 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `CostModel/CostModelTests.cs` | 7 | ✅ All passing (new — D21 cost validation + D23 sequencing) |
 | `HostManifest/HostManifestTests.cs` | 9 | ✅ All passing (new — D29 HostManifest + InitManifest enforcement) |
 | `GameSession/LastActionEventsTests.cs` | 4 | ✅ All passing (new — D30 LastActionEvents) |
-| `Tooling/ProjectFileLoaderTests.cs` | 5 | ✅ All passing (new — sidecar loader, Group 3.7) |
-| `Tooling/ValidatorTests.cs` | 3 | ✅ All passing (new — sidecar validator, Group 3.7) |
-| `Tooling/RpcHandlerTests.cs` | 9 | ✅ All passing (new — sidecar RPC handlers, Group 4.7) |
+| `Tooling/ProjectFileLoaderTests.cs` | 8 | ✅ All passing (3 new: returnType round-trip, ArtCropRegion round-trip, ZoneSpec definition/localId) |
+| `Tooling/ValidatorTests.cs` | 5 | ✅ All passing (2 new: missing-ReturnType error, ReturnType-present no error) |
+| `Tooling/RpcHandlerTests.cs` | 15 | ✅ All passing (6 new: export ReturnType, export static effect, rename DSL rewrite, rename round-trip, GetSymbolInfo shape) |
 
-**Total: 132 tests, 132 passing.**
+**Total: 142 tests, 142 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

@@ -268,6 +268,10 @@ public static class ProjectFileLoader
             Parameters   = LoadParameterDecls(el),
             BodyDsl      = el.TryGetString("body") ?? "",
             TextTemplate = el.TryGetString("textTemplate"),
+            // D27: returnType is mandatory; null here triggers a validator error.
+            ReturnType   = el.TryGetString("returnType") is { } rtStr &&
+                           Enum.TryParse<TypeName>(rtStr, ignoreCase: true, out var rt)
+                           ? rt : (TypeName?)null,
         };
 
         // Parse signal behaviour from annotations
@@ -302,6 +306,8 @@ public static class ProjectFileLoader
             PrimaryEffectDsl = el.TryGetString("primaryEffect") ?? "",
             FlavourText      = el.TryGetString("flavourText"),
             ArtPath          = el.TryGetString("artPath"),
+            // D27: art crop region [x, y, width, height] normalised 0..1; null = full image.
+            ArtCropRegion    = LoadArtCropRegion(el),
         };
 
         // Parse activation condition
@@ -344,7 +350,74 @@ public static class ProjectFileLoader
         // Card-level costs
         entry.Costs = LoadCostEntries(el, "card", name, entry.Diagnostics);
 
+        // Static effects
+        if (el.TryGetProperty("staticEffects", out var staticEffects))
+            entry.StaticEffects = LoadStaticEffectEntries(staticEffects, name, entry.Diagnostics);
+
         return entry;
+    }
+
+    private static List<StaticEffectEntry> LoadStaticEffectEntries(
+        JsonElement el, string cardName, List<ProjectDiagnostic> diagnostics)
+    {
+        var list = new List<StaticEffectEntry>();
+        foreach (var se in el.EnumerateArray())
+        {
+            var triggerScope = TriggerScope.ThisAction;
+            if (se.TryGetString("triggerScope") is { } scopeStr &&
+                Enum.TryParse<TriggerScope>(scopeStr, ignoreCase: true, out var parsedScope))
+                triggerScope = parsedScope;
+
+            var entry = new StaticEffectEntry
+            {
+                ContributionDsl      = se.TryGetString("contribution") ?? "",
+                TriggerConditionDsl  = se.TryGetString("triggerCondition"),
+                TriggerEventKeyword  = se.TryGetString("triggerEventKeyword"),
+                TriggerScope         = triggerScope,
+                TriggerBodyDsl       = se.TryGetString("triggerBody"),
+                LifetimeDsl          = se.TryGetString("lifetime"),
+            };
+
+            // Parse contribution block (mandatory).
+            if (entry.ContributionDsl.Length > 0)
+            {
+                var r = DslParser.ParseBlock(entry.ContributionDsl);
+                entry.ContributionNode = r.IsSuccess ? r.Block : null;
+                AddBlockDiagnostics(r, "card", cardName, "staticEffect.contribution", diagnostics);
+            }
+
+            // Parse optional trigger condition.
+            if (entry.TriggerConditionDsl is { Length: > 0 } tcdsl)
+            {
+                var r = DslParser.Parse(tcdsl);
+                if (r.IsSuccess) entry.TriggerConditionNode = r.Node;
+                else diagnostics.Add(ParseError("card", cardName,
+                    r.ErrorMessage!, r.ErrorOffset, null));
+            }
+
+            // Parse optional trigger body.
+            if (entry.TriggerBodyDsl is { Length: > 0 } tbdsl)
+            {
+                var r = DslParser.ParseBlock(tbdsl);
+                entry.TriggerBodyNode = r.IsSuccess ? r.Block : null;
+                AddBlockDiagnostics(r, "card", cardName, "staticEffect.triggerBody", diagnostics);
+            }
+
+            // Parse optional lifetime DSL.  Null / empty = permanent (D27).
+            if (entry.LifetimeDsl is { Length: > 0 } ldsl)
+            {
+                var lifetime = LifetimeDsl.Parse(ldsl);
+                if (lifetime is not null)
+                    entry.LifetimeNode = lifetime;
+                else
+                    diagnostics.Add(new ProjectDiagnostic(
+                        "card", cardName, "error",
+                        $"[staticEffect.lifetime] Could not parse lifetime DSL: '{ldsl}'."));
+            }
+
+            list.Add(entry);
+        }
+        return list;
     }
 
     private static List<CostEntry> LoadCostEntries(
@@ -379,11 +452,15 @@ public static class ProjectFileLoader
         {
             foreach (var z in zones.EnumerateArray())
             {
-                var owner = z.TryGetString("owner") ?? "";
+                var owner   = z.TryGetString("owner") ?? "";
                 var localId = z.TryGetString("localId");
-                // ZoneSpec needs the definition name and the owner player name
+                // D27: "definition" is the zone definition name (key from ZoneDefinitions);
+                // "localId" is the unique instance identifier. They may differ.
                 var defName = z.TryGetString("definition") ?? z.TryGetString("name") ?? "";
-                entry.Zones.Add(new ZoneSpec(owner, defName, localId ?? defName));
+                entry.Zones.Add(new ZoneSpec(
+                    LocalId:    localId ?? defName,
+                    Owner:      owner,
+                    Definition: defName));
             }
         }
 
@@ -465,6 +542,26 @@ public static class ProjectFileLoader
                 entryKind, entryName, "error",
                 $"[{fieldName}] {d.Message}",
                 new DslRange(d.Start, d.End)));
+    }
+
+    /// <summary>
+    /// Reads the optional <c>artCropRegion</c> JSON array into a <c>float[4]</c>.
+    /// Returns null if the property is absent or malformed.
+    /// </summary>
+    private static float[]? LoadArtCropRegion(JsonElement el)
+    {
+        if (!el.TryGetProperty("artCropRegion", out var prop)) return null;
+        if (prop.ValueKind != JsonValueKind.Array) return null;
+
+        var values = new List<float>();
+        foreach (var item in prop.EnumerateArray())
+        {
+            if (item.TryGetSingle(out var f))
+                values.Add(f);
+        }
+
+        // Must be exactly 4 floats: [x, y, width, height].
+        return values.Count == 4 ? values.ToArray() : null;
     }
 }
 

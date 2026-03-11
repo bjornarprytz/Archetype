@@ -19,10 +19,10 @@ namespace Archetype.Tooling.Server.Export;
 /// </summary>
 public static class GameDefinitionExporter
 {
-    private static readonly JsonSerializerOptions _opts = new()
-    {
-        WriteIndented = true,
-    };
+    // D27: GameDefinition export requires LiteralConverter to be registered for
+    // correct KeywordNode polymorphic serialisation (see GameDefinitionJsonOptions).
+    private static readonly JsonSerializerOptions _opts =
+        GameDefinitionJsonOptions.Build(writeIndented: true);
 
     /// <summary>
     /// Attempts to export the project as a <c>GameDefinition</c> JSON string.
@@ -71,10 +71,11 @@ public static class GameDefinitionExporter
                 throw new InvalidOperationException(
                     $"Keyword '{name}' has parse errors; cannot export.");
 
+            // D27: use the declared ReturnType; hardcoding Atom is incorrect.
             keywords[name] = new KeywordDefinition(
                 Name:         name,
                 Parameters:   kw.Parameters.ToArray(),
-                ReturnType:   TypeName.Atom,
+                ReturnType:   kw.ReturnType ?? TypeName.Atom,
                 Description:  "",
                 Body:         kw.BodyNode,
                 TextTemplate: kw.TextTemplate);
@@ -108,12 +109,14 @@ public static class GameDefinitionExporter
                 .Select(c => new CostDef(c.BodyNode!, [], c.TextTemplate))
                 .ToList();
 
+            var staticEffects = BuildStaticEffectDefs(card.StaticEffects);
+
             cards[name] = new CardDefinition(
                 Name:               name,
                 StaticProperties:   card.StaticProperties,
                 PrimaryEffect:      card.PrimaryEffectNode,
                 AdditionalEffects:  additionalEffects,
-                StaticEffects:      [], // Static effects require LifetimeSpec parsing (not yet implemented)
+                StaticEffects:      staticEffects,
                 ActivationCondition: card.ActivationConditionNode,
                 Cost:               costs.Count > 0 ? costs : null);
         }
@@ -179,6 +182,49 @@ public static class GameDefinitionExporter
             PlayableZoneNames:     state.PlayableZoneNames.Count > 0
                                         ? state.PlayableZoneNames : null,
             Id:                    state.Id);
+    }
+
+    // -----------------------------------------------------------------------
+    //  Static effect mapping
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Maps <see cref="StaticEffectEntry"/> values to <see cref="StaticEffectDef"/> values.
+    /// Entries whose <see cref="StaticEffectEntry.ContributionNode"/> is null are skipped
+    /// (parse error — validator should have already reported this).
+    /// Trigger is omitted when either <see cref="StaticEffectEntry.TriggerConditionNode"/>
+    /// or <see cref="StaticEffectEntry.TriggerBodyNode"/> is null (D27).
+    /// </summary>
+    private static List<StaticEffectDef> BuildStaticEffectDefs(
+        IReadOnlyList<StaticEffectEntry> entries)
+    {
+        var result = new List<StaticEffectDef>();
+        foreach (var e in entries)
+        {
+            // ContributionNode is required; skip broken entries.
+            if (e.ContributionNode is null) continue;
+
+            // Build trigger only when both condition node and body node are present.
+            TriggerDefinition? trigger = null;
+            if (e.TriggerConditionNode is not null &&
+                e.TriggerBodyNode is not null &&
+                e.TriggerEventKeyword is { Length: > 0 })
+            {
+                trigger = new TriggerDefinition(
+                    EventKeyword:  e.TriggerEventKeyword,
+                    Scope:         e.TriggerScope,
+                    EventParams:   [],
+                    Condition:     e.TriggerConditionNode,
+                    EventBindings: [],
+                    FiredBlock:    e.TriggerBodyNode);
+            }
+
+            result.Add(new StaticEffectDef(
+                Lifetime:               e.LifetimeNode ?? LifetimeSpec.Permanent,
+                StateContributionBlock: e.ContributionNode,
+                Trigger:                trigger));
+        }
+        return result;
     }
 
     // -----------------------------------------------------------------------

@@ -20,6 +20,7 @@ public sealed class ValidatorTests
         state.Keywords["give-damage"] = new KeywordEntry
         {
             Name       = "give-damage",
+            ReturnType = Archetype.Core.TypeName.Atom,
             Parameters = [new("target", Archetype.Core.TypeName.Card),
                           new("amount", Archetype.Core.TypeName.Number)],
             BodyDsl    = "modify-accumulator(target, \"damage\", amount)",
@@ -84,5 +85,55 @@ public sealed class ValidatorTests
         Assert.Contains(errors,
             e => e.EntryName == "modify-accumulator" &&
                  e.Message.Contains("conflicts with a built-in"));
+    }
+
+    // -----------------------------------------------------------------------
+    //  BUG-FIX-1  Missing ReturnType → error diagnostic (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Validate_KeywordMissingReturnType_ErrorDiagnostic()
+    {
+        // A keyword with no ReturnType must produce an error-severity diagnostic.
+        var state = new ProjectState();
+        state.Keywords["no-return"] = new KeywordEntry
+        {
+            Name       = "no-return",
+            ReturnType = null, // explicitly absent
+            BodyDsl    = "",
+        };
+
+        ReferenceGraph.Build(state);
+        Validator.Validate(state);
+
+        var errors = state.Diagnostics.Where(d => d.Severity == "error").ToList();
+        Assert.Contains(errors,
+            e => e.EntryName == "no-return" &&
+                 e.Message.Contains("missing a return type declaration"));
+    }
+
+    // -----------------------------------------------------------------------
+    //  BUG-FIX-1b  ReturnType present → no missing-return-type error (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Validate_KeywordWithReturnType_NoReturnTypeError()
+    {
+        var state = new ProjectState();
+        state.Keywords["has-return"] = new KeywordEntry
+        {
+            Name       = "has-return",
+            ReturnType = Archetype.Core.TypeName.Number,
+            BodyDsl    = "get-accumulator(has-return, \"score\")",
+            BodyNode   = DslParser.Parse("get-accumulator(has-return, \"score\")").Node,
+        };
+
+        ReferenceGraph.Build(state);
+        Validator.Validate(state);
+
+        // Must not produce a missing-return-type error for this keyword.
+        Assert.DoesNotContain(state.Diagnostics,
+            d => d.EntryName == "has-return" &&
+                 d.Message.Contains("missing a return type declaration"));
     }
 }

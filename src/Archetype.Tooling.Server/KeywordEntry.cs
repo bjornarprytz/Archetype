@@ -19,6 +19,13 @@ public sealed class KeywordEntry
     /// <summary>Declared parameters in declaration order.</summary>
     public List<ParameterDecl> Parameters { get; set; } = [];
 
+    /// <summary>
+    /// Return type of this keyword (mandatory — D27).
+    /// The <see cref="Validator"/> emits an error-severity diagnostic for any
+    /// keyword entry that has no return type declared.
+    /// </summary>
+    public TypeName? ReturnType { get; set; }
+
     /// <summary>Raw DSL source text; canonical form stored in the project file.</summary>
     public string BodyDsl { get; set; } = "";
 

@@ -21,6 +21,7 @@ public sealed class ProjectFileLoaderTests
           "id": "test-game",
           "keywords": {
             "take-damage": {
+              "returnType": "Atom",
               "parameters": [
                 { "name": "target", "type": "Card" },
                 { "name": "amount", "type": "Number" }
@@ -164,5 +165,114 @@ public sealed class ProjectFileLoaderTests
         Assert.Contains("lastOpenedCard", output);
         Assert.Contains("goblin",         output);
         Assert.Contains("expandedSections", output);
+    }
+
+    // -----------------------------------------------------------------------
+    //  BUG-FIX-1  returnType round-trips through load → save (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Load_ReturnType_IsDeserialisedAndSerialised()
+    {
+        const string json = """
+        {
+          "keywords": {
+            "score-query": {
+              "returnType": "Number",
+              "parameters": [],
+              "body": "get-accumulator(score-query, \"score\")"
+            }
+          }
+        }
+        """;
+
+        var state = ProjectFileLoader.Load(json);
+        var kw = state.Keywords["score-query"];
+
+        // ReturnType must be parsed from the JSON field.
+        Assert.Equal(Archetype.Core.TypeName.Number, kw.ReturnType);
+
+        // Serialise and re-parse to confirm round-trip.
+        var output = ProjectFileSerializer.Serialize(state);
+        var state2 = ProjectFileLoader.Load(output);
+        Assert.Equal(Archetype.Core.TypeName.Number, state2.Keywords["score-query"].ReturnType);
+    }
+
+    // -----------------------------------------------------------------------
+    //  BUG-FIX-2  ArtCropRegion round-trips through load → save → load (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Load_ArtCropRegion_SurvivesRoundTrip()
+    {
+        const string json = """
+        {
+          "cards": {
+            "goblin": {
+              "primaryEffect": "modify-accumulator(goblin, \"damage\", goblin)",
+              "artPath": "art/goblin.png",
+              "artCropRegion": [0.1, 0.2, 0.8, 0.6]
+            }
+          }
+        }
+        """;
+
+        // Load → confirm in-memory state.
+        var state = ProjectFileLoader.Load(json);
+        var card = state.Cards["goblin"];
+        Assert.NotNull(card.ArtCropRegion);
+        Assert.Equal(4, card.ArtCropRegion!.Length);
+        Assert.Equal(0.1f, card.ArtCropRegion[0], precision: 4);
+        Assert.Equal(0.2f, card.ArtCropRegion[1], precision: 4);
+        Assert.Equal(0.8f, card.ArtCropRegion[2], precision: 4);
+        Assert.Equal(0.6f, card.ArtCropRegion[3], precision: 4);
+
+        // Save → reload → confirm the crop region survived.
+        var serialized = ProjectFileSerializer.Serialize(state);
+        var state2 = ProjectFileLoader.Load(serialized);
+        var card2 = state2.Cards["goblin"];
+        Assert.NotNull(card2.ArtCropRegion);
+        Assert.Equal(card.ArtCropRegion[0], card2.ArtCropRegion![0], precision: 4);
+        Assert.Equal(card.ArtCropRegion[1], card2.ArtCropRegion![1], precision: 4);
+        Assert.Equal(card.ArtCropRegion[2], card2.ArtCropRegion![2], precision: 4);
+        Assert.Equal(card.ArtCropRegion[3], card2.ArtCropRegion![3], precision: 4);
+    }
+
+    // -----------------------------------------------------------------------
+    //  BUG-FIX-5  ZoneSpec definition vs LocalId (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Load_ZoneSpec_DefinitionNameDistinctFromLocalId_SurvivesRoundTrip()
+    {
+        // When LocalId differs from the zone definition name, the serializer
+        // must write the definition name (not LocalId) into the "definition" field.
+        const string json = """
+        {
+          "initManifest": {
+            "zones": [
+              { "owner": "p1", "definition": "battlefield", "localId": "p1-field" }
+            ],
+            "cards": [],
+            "players": []
+          }
+        }
+        """;
+
+        var state = ProjectFileLoader.Load(json);
+        var zone = state.InitManifest!.Zones[0];
+
+        // Confirm in-memory: definition name and localId are distinct.
+        Assert.Equal("battlefield", zone.Definition);
+        Assert.Equal("p1-field", zone.LocalId);
+
+        // Serialise and reload.
+        var serialized = ProjectFileSerializer.Serialize(state);
+        var state2 = ProjectFileLoader.Load(serialized);
+        var zone2 = state2.InitManifest!.Zones[0];
+
+        // After round-trip both fields must remain correct.
+        Assert.Equal("battlefield", zone2.Definition);
+        Assert.Equal("p1-field", zone2.LocalId);
     }
 }

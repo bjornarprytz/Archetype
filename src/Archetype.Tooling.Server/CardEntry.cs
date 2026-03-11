@@ -106,6 +106,17 @@ public sealed class StaticEffectEntry
     /// <summary>Parsed trigger condition; null when not set or on error.</summary>
     public KeywordNode? TriggerConditionNode { get; set; }
 
+    /// <summary>
+    /// The keyword name that this trigger subscribes to (e.g. <c>"take-damage"</c>).
+    /// Required when a trigger is defined; null otherwise.
+    /// </summary>
+    public string? TriggerEventKeyword { get; set; }
+
+    /// <summary>
+    /// How far into the event log the trigger condition can look (default: <c>ThisAction</c>).
+    /// </summary>
+    public TriggerScope TriggerScope { get; set; } = TriggerScope.ThisAction;
+
     /// <summary>DSL source for the triggered block (optional).</summary>
     public string? TriggerBodyDsl { get; set; }
 
@@ -114,4 +125,13 @@ public sealed class StaticEffectEntry
 
     /// <summary>DSL source for the lifetime spec (optional).</summary>
     public string? LifetimeDsl { get; set; }
+
+    /// <summary>
+    /// Parsed lifetime spec; null when <see cref="LifetimeDsl"/> is not set,
+    /// is empty, or failed to parse.  Null means permanent (D27).
+    /// </summary>
+    public LifetimeSpec? LifetimeNode { get; set; }
+
+    /// <summary>Per-entry diagnostics. Reset on each validation pass.</summary>
+    public List<ProjectDiagnostic> Diagnostics { get; set; } = [];
 }

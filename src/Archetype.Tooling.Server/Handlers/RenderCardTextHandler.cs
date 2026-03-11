@@ -62,12 +62,14 @@ public sealed class RenderCardTextHandler(SidecarState sidecar)
         foreach (var (name, kw) in state.Keywords)
         {
             if (kw.BodyNode is null) continue;
+            // D27: use the declared ReturnType; hardcoding Atom is incorrect even
+            // for rendering (some composites return non-Atom values).
             dict[name] = new KeywordDefinition(
                 Name:          name,
                 Parameters:    kw.Parameters.ToArray(),
-                ReturnType:    TypeName.Atom, // return type not needed for rendering
+                ReturnType:    kw.ReturnType ?? TypeName.Atom,
                 Description:   "",
-                Body:          kw.BodyNode,  // KeywordNode? — the composite body
+                Body:          kw.BodyNode,
                 TextTemplate:  kw.TextTemplate);
         }
 

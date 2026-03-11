@@ -47,13 +47,19 @@ public sealed record Literal(object Value) : KeywordNode;
 /// <see cref="AtomId"/>.  This converter writes a discriminated JSON object
 /// so that round-trips preserve the concrete type.
 /// </para>
+/// <para>
+/// Exposed as <c>public</c> so that assemblies serialising a full
+/// <see cref="GameDefinition"/> can register it in their options.
+/// See <see cref="GameDefinitionJsonOptions.Build"/> for a ready-to-use options instance.
+/// </para>
 /// </summary>
-internal sealed class LiteralConverter : JsonConverter<Literal>
+public sealed class LiteralConverter : JsonConverter<Literal>
 {
     // Tag names used in JSON.
     private const string TypeTag  = "t";
     private const string ValueTag = "v";
 
+    /// <inheritdoc />
     public override Literal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.StartObject)
@@ -96,6 +102,7 @@ internal sealed class LiteralConverter : JsonConverter<Literal>
         return new Literal(boxed);
     }
 
+    /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, Literal value, JsonSerializerOptions options)
     {
         writer.WriteStartObject();

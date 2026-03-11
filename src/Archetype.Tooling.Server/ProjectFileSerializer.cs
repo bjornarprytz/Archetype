@@ -42,6 +42,9 @@ public static class ProjectFileSerializer
         foreach (var (name, kw) in state.Keywords)
         {
             var kwObj = new JsonObject();
+            // D27: returnType is mandatory; omit only when null (e.g. draft entries).
+            if (kw.ReturnType is { } rt)
+                kwObj["returnType"] = rt.ToString();
             kwObj["body"] = kw.BodyDsl;
             if (kw.TextTemplate is not null)
                 kwObj["textTemplate"] = kw.TextTemplate;
@@ -73,6 +76,13 @@ public static class ProjectFileSerializer
                 cardObj["flavourText"] = card.FlavourText;
             if (card.ArtPath is not null)
                 cardObj["artPath"] = card.ArtPath;
+            // D27: artCropRegion round-trip — omitting this causes silent data loss on save.
+            if (card.ArtCropRegion is { } crop && crop.Length == 4)
+            {
+                var arr = new JsonArray();
+                foreach (var f in crop) arr.Add(f);
+                cardObj["artCropRegion"] = arr;
+            }
 
             // Static properties
             if (card.StaticProperties.Count > 0)
@@ -105,6 +115,10 @@ public static class ProjectFileSerializer
                 }
                 cardObj["additionalEffects"] = ae;
             }
+
+            // Static effects (D27: not a stub — serialize all fields including lifetime).
+            if (card.StaticEffects.Count > 0)
+                cardObj["staticEffects"] = SerializeStaticEffectEntries(card.StaticEffects);
 
             cards[name] = cardObj;
         }
@@ -245,6 +259,28 @@ public static class ProjectFileSerializer
         return arr;
     }
 
+    private static JsonArray SerializeStaticEffectEntries(List<StaticEffectEntry> effects)
+    {
+        var arr = new JsonArray();
+        foreach (var se in effects)
+        {
+            var seObj = new JsonObject { ["contribution"] = se.ContributionDsl };
+            if (se.TriggerConditionDsl is not null)
+                seObj["triggerCondition"] = se.TriggerConditionDsl;
+            if (se.TriggerEventKeyword is not null)
+                seObj["triggerEventKeyword"] = se.TriggerEventKeyword;
+            if (se.TriggerScope != TriggerScope.ThisAction)
+                seObj["triggerScope"] = se.TriggerScope.ToString();
+            if (se.TriggerBodyDsl is not null)
+                seObj["triggerBody"] = se.TriggerBodyDsl;
+            // D27: LifetimeDsl is the canonical form; use the DSL string directly.
+            if (se.LifetimeDsl is not null)
+                seObj["lifetime"] = se.LifetimeDsl;
+            arr.Add(seObj);
+        }
+        return arr;
+    }
+
     private static JsonObject SerializeInitManifest(InitManifestEntry im)
     {
         var obj = new JsonObject();
@@ -252,10 +288,12 @@ public static class ProjectFileSerializer
         var zones = new JsonArray();
         foreach (var z in im.Zones)
         {
+            // D27: "definition" must hold the zone definition name (key from
+            // GameDefinition.ZoneDefinitions), NOT the LocalId.
             var zObj = new JsonObject
             {
                 ["owner"]      = z.Owner,
-                ["definition"] = z.LocalId,
+                ["definition"] = z.Definition,
                 ["localId"]    = z.LocalId,
             };
             zones.Add(zObj);

@@ -95,13 +95,13 @@ public sealed class RenameEntryHandler(SidecarState sidecar)
     /// Rewrites every <see cref="Invocation"/> node in all keyword bodies and
     /// card effect trees that references <paramref name="oldName"/> to
     /// <paramref name="newName"/>.
-    /// The DSL source strings are NOT rewritten here (they are stale until the
-    /// game creator next edits the field); the node trees are updated so
-    /// subsequent validation and export use the new name.
+    /// Also rewrites all <c>*Dsl</c> source strings so the project file saved
+    /// to disk does not contain stale references (D27 — DSL text is canonical).
     /// </summary>
     private static void RewriteKeywordRefs(
         ProjectState state, string oldName, string newName)
     {
+        // Rewrite node trees (used for validation and export in the current session).
         foreach (var kw in state.Keywords.Values)
             if (kw.BodyNode is not null)
                 kw.BodyNode = RenameInNode(kw.BodyNode, oldName, newName);
@@ -114,7 +114,78 @@ public sealed class RenameEntryHandler(SidecarState sidecar)
                 if (eff.BodyNode is not null)
                     eff.BodyNode = RenameInBlock(eff.BodyNode, oldName, newName);
         }
+
+        // D27: DSL text is the canonical form stored in the project file.
+        // Rewrite all *Dsl source strings so a save→reload round-trip is clean.
+        foreach (var kw in state.Keywords.Values)
+            kw.BodyDsl = RewriteDsl(kw.BodyDsl, oldName, newName);
+
+        foreach (var card in state.Cards.Values)
+        {
+            card.PrimaryEffectDsl = RewriteDsl(card.PrimaryEffectDsl, oldName, newName);
+            if (card.ActivationConditionDsl is not null)
+                card.ActivationConditionDsl =
+                    RewriteDsl(card.ActivationConditionDsl, oldName, newName);
+            foreach (var eff in card.AdditionalEffects)
+            {
+                eff.BodyDsl = RewriteDsl(eff.BodyDsl, oldName, newName);
+                if (eff.ActivationConditionDsl is not null)
+                    eff.ActivationConditionDsl =
+                        RewriteDsl(eff.ActivationConditionDsl, oldName, newName);
+                foreach (var cost in eff.Costs)
+                    cost.BodyDsl = RewriteDsl(cost.BodyDsl, oldName, newName);
+            }
+            foreach (var cost in card.Costs)
+                cost.BodyDsl = RewriteDsl(cost.BodyDsl, oldName, newName);
+            foreach (var se in card.StaticEffects)
+            {
+                se.ContributionDsl = RewriteDsl(se.ContributionDsl, oldName, newName);
+                if (se.TriggerConditionDsl is not null)
+                    se.TriggerConditionDsl =
+                        RewriteDsl(se.TriggerConditionDsl, oldName, newName);
+                if (se.TriggerBodyDsl is not null)
+                    se.TriggerBodyDsl = RewriteDsl(se.TriggerBodyDsl, oldName, newName);
+            }
+        }
     }
+
+    /// <summary>
+    /// Replaces all whole-token occurrences of <paramref name="oldName"/> with
+    /// <paramref name="newName"/> in a DSL source string.
+    /// Uses a word-boundary approach: a token boundary is any character that is
+    /// not a letter, digit, underscore, or hyphen.
+    /// </summary>
+    private static string RewriteDsl(string dsl, string oldName, string newName)
+    {
+        if (string.IsNullOrEmpty(dsl) || !dsl.Contains(oldName, StringComparison.Ordinal))
+            return dsl;
+
+        // Build result by scanning for the old name and checking token boundaries.
+        var sb = new System.Text.StringBuilder(dsl.Length);
+        int pos = 0;
+        while (pos < dsl.Length)
+        {
+            int idx = dsl.IndexOf(oldName, pos, StringComparison.Ordinal);
+            if (idx == -1)
+            {
+                sb.Append(dsl, pos, dsl.Length - pos);
+                break;
+            }
+
+            // Check that the match is not part of a longer identifier.
+            bool startOk = idx == 0 || !IsIdentChar(dsl[idx - 1]);
+            int end = idx + oldName.Length;
+            bool endOk = end >= dsl.Length || !IsIdentChar(dsl[end]);
+
+            sb.Append(dsl, pos, idx - pos);
+            sb.Append(startOk && endOk ? newName : oldName);
+            pos = end;
+        }
+        return sb.ToString();
+    }
+
+    private static bool IsIdentChar(char c) =>
+        char.IsLetterOrDigit(c) || c == '_' || c == '-';
 
     private static EffectBlockDef RenameInBlock(
         EffectBlockDef block, string oldName, string newName)

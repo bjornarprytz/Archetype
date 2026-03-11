@@ -92,13 +92,20 @@ public static class Validator
             BuiltInKeywords.All.Select(k => k.Name),
             StringComparer.Ordinal);
 
-        foreach (var name in state.Keywords.Keys)
+        foreach (var (name, kw) in state.Keywords)
         {
             if (builtIns.Contains(name))
                 state.Diagnostics.Add(new ProjectDiagnostic(
                     "keyword", name, "error",
                     $"Keyword name '{name}' conflicts with a built-in keyword. " +
                     "Game-creator keywords may not shadow built-in names (D2)."));
+
+            // D27: ReturnType is mandatory on every keyword entry.
+            if (kw.ReturnType is null)
+                state.Diagnostics.Add(new ProjectDiagnostic(
+                    "keyword", name, "error",
+                    $"Keyword '{name}' is missing a return type declaration. " +
+                    "Add a 'returnType' field (e.g. \"returnType\": \"Atom\") (D27)."));
         }
     }
 
