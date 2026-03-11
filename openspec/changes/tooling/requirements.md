@@ -1,7 +1,8 @@
 ---
-status: draft
+status: signed-off
 owner: requirements-analyst
-last-updated: 2026-03-10
+signed-off: 2026-03-11
+last-updated: 2026-03-11
 depends-on:
   - docs/requirements.md
   - docs/domain-model.md
@@ -77,7 +78,7 @@ Keywords are the foundational unit of a game definition. The keyword editor must
 ### Card Fields
 Each card (`CardDefinition`) has:
 - **Name** — localizable string.
-- **Static properties** — game-creator-defined key/value fields (e.g. base attack, mana cost). Values are set per card. The tool must support adding, naming, and setting values for arbitrary static properties.
+- **Static properties** — key/value fields declared in the game's static property schema (e.g. `base_attack`, `mana_cost`). Values are set per card. The tool presents exactly the properties declared in the schema for Cards; new properties are added via the schema editor, not per-card (see Static Property Schema section).
 - **Primary effect block** — the effect block that fires when the card is played. Authored in the DSL editor with the same inline validation and autocomplete as keyword definitions.
 - **Additional (named) effect blocks** — zero or more named, activatable effect blocks (e.g. activated abilities). Each has a name, an optional activation condition, an optional cost, and a body. All authored in the DSL editor.
 - **Static effects** — zero or more static effect definitions attached to the card. Each specifies a lifetime, an optional state contribution block, an optional trigger, and an optional parameter modification. See Static Effects section below.
@@ -102,10 +103,36 @@ A cost on a card or ability is a `CostDef`. The tool must support authoring:
 ### Static Effects
 
 A static effect definition (`StaticEffectDef`) on a card has:
-- **Lifetime** — a `LifetimeSpec` composed from turn timer, trigger count, and/or while-condition (see domain model). The tool provides a structured editor for composing lifetimes.
+- **Lifetime** — a `LifetimeSpec` composed from turn timer, trigger count, and/or while-condition (see domain model). The tool provides a **mini-DSL field** for authoring the lifetime (see Lifetime Editor section below).
 - **State contribution block** — optional effect block that applies state contributions (modifiers, conditions) when the static effect is active.
 - **Trigger** — optional. Specifies the event keyword to listen for, the trigger scope (`ThisAction`, `ThisTurn`, `ThisGame`), event parameter declarations, an optional filter condition, event bindings (mapping event args to block variables), and the effect block to fire. All authored in the DSL or structured form.
 - **Parameter modification** — optional. Either a `ParameterAdjustment` (intercepts a keyword invocation and adjusts its arguments: additive, multiplicative, or replace) or a `Disable` (cancels the invocation entirely). Specifies the target keyword, an optional argument filter, an optional filter condition, and the modification expression(s).
+
+### Lifetime Editor
+
+`LifetimeSpec` is authored in a single **mini-DSL text field**. The three components — turn timer, trigger count, and while-condition — are combined with `|` (OR semantics). Any subset may be used. Examples:
+
+```
+2 turns
+1 trigger
+while in_play(this)
+2 turns | 1 trigger
+while owner.has_condition(shielded) | 3 triggers
+```
+
+Syntax reference (each component is optional; combine any with `|`):
+
+| Component | Syntax |
+|---|---|
+| Turn timer | `<N> turns` |
+| Trigger count | `<N> trigger` / `<N> triggers` |
+| While-condition | `while <bool-expr>` |
+
+The field provides:
+- **Inline syntax validation** — errors flagged as you type.
+- **Autocomplete** — keyword names, atom accessors, and scope variables offered at the cursor position.
+- **Scope panel** — displayed adjacent to the field, listing every variable and atom in scope at the point of authoring the while-condition (e.g. `this: CardInstance`, `owner: PlayerInstance`, event-bound variables if inside a trigger). The scope panel updates as the game creator navigates between static effects. This makes the available expression vocabulary visible without requiring the creator to look elsewhere.
+- **Parsed preview** — a read-only structured summary of the parsed lifetime shown below the field (e.g. "Expires after 2 turns OR when triggered 1 time"), confirming the creator's intent.
 
 ---
 
@@ -121,7 +148,7 @@ A static effect definition (`StaticEffectDef`) on a card has:
 
 Zone definitions (`ZoneDefinition`) are game-creator-defined named containers. The tool must support:
 - Creating and naming zone definitions.
-- Adding arbitrary **static properties** (key/value fields) to a zone definition (e.g. `max_size`, `is_hidden`).
+- Setting **static property values** per zone definition, from the properties declared in the game's static property schema (see Static Property Schema section).
 
 Zone definitions are design-time data only. Runtime zone state is configured in the initial game state (see Initial Game State section).
 
@@ -131,9 +158,35 @@ Zone definitions are design-time data only. Runtime zone state is configured in 
 
 Player definitions (`PlayerDefinition`) describe the static properties of a player role (e.g. "player", "opponent"). The tool must support:
 - Creating named player definitions.
-- Adding arbitrary **static properties** to each player definition.
+- Setting **static property values** per player definition, from the properties declared in the game's static property schema.
 
 Initial mutable player state (accumulators, conditions) is configured in the initial game state.
+
+---
+
+## Authoring: Static Property Schema
+
+`CardDefinition.StaticProperties`, `ZoneDefinition.StaticProperties`, and `PlayerDefinition.StaticProperties` are backed by a **per-game schema declaration** — the single source of truth for what property names and types are valid for each entity kind.
+
+The game creator maintains a schema per entity kind (Cards, Zones, PlayerDefs). Each schema entry declares:
+- **Name** — the property key (e.g. `mana_cost`, `is_legendary`).
+- **Type** — one of the engine's supported value types (`int`, `float`, `bool`, `string`).
+- **Default value** — optional. Applied to all existing and future entities of that kind that do not explicitly set the property.
+
+The tool enforces the schema at edit time:
+- Every card/zone/player definition editor shows exactly the properties declared in the schema for that entity kind — no more, no less.
+- Type-appropriate controls are used (number input for `int`/`float`, checkbox for `bool`, text field for `string`).
+- Values that deviate from the declared type are flagged as errors in the problems panel.
+
+**Adding a property to the schema is a deliberate, explicit action:**
+- There is a dedicated schema editor (one per entity kind) reachable from the main navigation. It lists all declared properties and provides an explicit "Add property" control.
+- A property is never auto-created from a value entry — there is no creation-on-typo or creation-on-paste behaviour.
+- The "Add property" flow always prompts for name and type before the property appears anywhere. The property is created only after the game creator confirms both fields.
+- From within an individual card/zone/player editor, a shortcut can invoke the same "Add property to schema" flow — but confirmation and type selection are always required; there is no one-click auto-creation.
+
+Schema changes propagate immediately:
+- Adding a property adds a blank or default-valued slot to all existing entities of that kind.
+- Removing a property removes it from all entities of that kind; the tool shows a confirmation warning that lists the affected entities and the values that will be discarded before proceeding.
 
 ---
 
@@ -150,17 +203,22 @@ Turn structure is defined as an ordered list of `PhaseDefinition` records. The t
 
 ### Action Rules
 
-Action rules (`ActionRuleDefinition`) wrap a named action type with before/after effect blocks. The tool must support:
-- Associating one or more action rules with a named action type (e.g. `"play-card"`, `"end-turn"`).
+Action rules (`ActionRuleDefinition`) wrap a named action type with before/after effect blocks. The tool presents action rules grouped by action type in an **accordion**: one collapsible section per named action type (e.g. `"play-card"`, `"end-turn"`). Within each section, the rules for that action type are listed in execution order.
+
+The tool must support:
+- Creating a new action rule by naming an action type — if the type already has a section, the rule is appended to it; if not, a new section is created.
 - For each rule: authoring an optional **before** effect block and an optional **after** effect block in the DSL editor.
-- Multiple rules per action type are allowed and must be orderable.
+- **Reordering** rules within an action type section by drag handle or up/down keyboard shortcut. The displayed order is the execution order. Rules for different action types cannot be interleaved — order is meaningful only within a type's group.
+- Renaming and deleting individual rules, and deleting an entire action type section (with confirmation if it contains rules).
 
 ### State-Based Rules
 
-State-based rules (`StateBasedRule`) fire automatically when a condition holds, repeating until a fixpoint is reached. The tool must support:
+State-based rules (`StateBasedRule`) fire automatically when a condition holds, repeating until a fixpoint is reached. The tool presents state-based rules in an **ordered list** using the same accordion-free variant of the same pattern: rules are listed in evaluation order with a drag handle or up/down keyboard shortcut for reordering.
+
+The tool must support:
 - Creating, naming, and deleting state-based rules.
 - For each rule: authoring a **condition** expression (boolean, in the DSL) and a **body** effect block (in the DSL).
-- The evaluation order of state-based rules is meaningful (they run in registration order). The tool must allow the game creator to see and reorder them.
+- **Reordering** rules; the displayed order is the evaluation order (registration order).
 
 ### Trigger Resolution Order
 
@@ -196,6 +254,42 @@ Each `PlayerStateSpec` declares the starting mutable state for one player:
 - **Player** — which player definition this applies to.
 - **Initial accumulators** — e.g. starting health, starting mana.
 - **Initial conditions** — e.g. starting tags or status conditions.
+
+### InitManifest Layout
+
+The InitManifest editor uses a **player-scoped accordion with a neutral zones section at the top**. The layout is text-based — no spatial board visualization.
+
+Structure:
+
+```
+[ Neutral / Shared Zones ]          ← top-level collapsible section
+  Zone: <local-id> (<ZoneDefinition>)
+    accumulators: ...
+    conditions: ...
+    Cards:
+      <CardDefinition> (owner: <player>)
+      ...
+
+[ Player: <name> ]                  ← one collapsible section per PlayerDefinition
+  Player State                      ← collapsible sub-header
+    accumulators: ...
+    conditions: ...
+  Zone: <local-id> (<ZoneDefinition>)
+    accumulators: ...
+    conditions: ...
+    Cards:
+      <CardDefinition>
+      ...
+```
+
+Interaction model:
+- Zones with no owner appear in the Neutral section; zones with an owner appear under that player's section.
+- Cards are shown inline under the zone they start in. A card's owner is displayed but does not affect placement — a card owned by Player 1 may start in a shared zone and is shown there.
+- Adding a card is an explicit inline action within a zone row (e.g. an "Add card" control that opens a card-definition picker). Cards are never auto-populated.
+- Adding a zone is an explicit action within a player section or the Neutral section.
+- Reordering zones within a player's section is supported (drag handle or up/down keys). Card order within a zone is also reorderable (relevant for draw-pile top-to-bottom order).
+- All fields (accumulators, conditions, owner, zone definition, card definition) are editable inline.
+- The accordion state (expanded/collapsed per section) is persisted per session.
 
 ### Game Definition Identity
 Each game definition has a unique **ID** (a non-empty string). The tool must allow the game creator to set this. The ID is stored in save snapshots and used to validate that a loaded save matches the current definition.
@@ -294,15 +388,61 @@ The goal is that a game creator can export a definition and immediately begin pr
 
 ---
 
+## Design Decisions Arising from Tooling Requirements
+
+The following decisions were made during tooling requirements elicitation. They affect the engine API (D14) and must be actioned by the architect as a D14 addendum before implementation begins. They are recorded here so the pipeline has a single authoritative source.
+
+### InitManifest is mandatory and append-only
+
+**Decision:** `InitManifest` is required on every `GameDefinition`. It is not nullable. `Build()` throws if it is absent (even an empty manifest — empty lists — is acceptable). The host cannot replace or skip it.
+
+**Rationale:** The `InitManifest` provides invariants that game rules can rely on — zones exist, player state is initialized, known cards are present. A host that replaces the manifest entirely can silently remove structure that authored rules depend on. The append-only model preserves that invariant unconditionally.
+
+**Impact on D14:**
+- `GameDefinition.DefaultInitManifest : InitManifest?` becomes `InitManifest : InitManifest` (required, not nullable; field renamed to drop "Default" since it is no longer optional).
+- `GameSessionBuilder` loses `.UseDefaultInit()` (no longer a choice — InitManifest is always applied) and loses `.WithInitManifest(InitManifest)` / `.WithInitManifest(Action<ManifestBuilder>)` (the replacement-mode overloads).
+- The "if none is called the session begins with no atoms" escape hatch is removed.
+
+### HostManifest — session-time append layer
+
+**Decision:** The host may supply a `HostManifest` at session build time. The engine applies `InitManifest` first, then appends `HostManifest` entries on top. `HostManifest` may contain both zones and cards.
+
+**Rationale:** The primary use case is variable-deck games: the game definition declares zones and player state in `InitManifest`; the host appends the player's chosen cards into the draw-pile zone at session time. Allowing the host to also append zones (not just cards) is preserved as fertile design space — for example, a session-specific "draft table" zone that only exists for certain game modes.
+
+**Impact on D14:**
+- New type `HostManifest { Zones: IReadOnlyList<ZoneSpec>, Cards: IReadOnlyList<CardSpec> }` (same `ZoneSpec`/`CardSpec` shapes as `InitManifest`).
+- `GameSessionBuilder` gains `.WithHostManifest(HostManifest)` and `.WithHostManifest(Action<HostManifestBuilder>)`. These are optional; omitting them means no host additions.
+- Provisioning order gains a step after `InitManifest` provisioning: host manifest zones are created, then host manifest cards are placed (referencing `LocalId`s from either `InitManifest` or `HostManifest` zones).
+
+### LocalId uniqueness rule
+
+**Decision:** `LocalId` uniqueness is enforced across the union of `InitManifest.Zones` and `HostManifest.Zones`. A `HostManifest` zone `LocalId` that collides with any `InitManifest` zone `LocalId` is a `SessionException` at `.Build()` time. No namespace prefixing or reserved ranges are required — a single uniqueness check across both sets is sufficient. `HostCardSpec.ZoneLocalId` may reference a `LocalId` from either `InitManifest` or `HostManifest`.
+
+---
+
 ## Open Items / Deferred
 
-- **Platform/framework** — deferred to architect. Preference: Electron or web-based stack. No XAML.
-- **Deeper balancing analytics** — deferred. Numerical stat distribution, mana curve, simulation, playtest log review are acknowledged as desirable but depend on game-definition specifics. To be revisited once a concrete game definition exists.
-- **Flavour text domain model** — flavour text is referenced here as a per-card optional localizable string but is not yet in `docs/domain-model.md`. The domain modeler must add it before this requirements document can be signed off.
-- **Signal derivation rules** — exactly which engine events map to which GDScript signals, and how the tool derives the signal set from keyword definitions, is not yet specified. This is an architect-level decision.
+### Resolved UX Items (all four closed)
+
+- ~~**Lifetime editor UX**~~ — resolved. See Lifetime Editor section under Authoring: Cards.
+- ~~**Static property schema**~~ — resolved. See Static Property Schema section.
+- ~~**InitManifest UX**~~ — resolved. See InitManifest Layout section under Authoring: Initial Game State.
+- ~~**Multiple action rules per action type ordering**~~ — resolved. See Action Rules section under Authoring: Game Rules.
+
+### Deferred to Architect
+
+The following are explicitly deferred. They are acknowledged requirements, not gaps — the architect is responsible for specifying them.
+
+- **Platform/framework** — deferred to architect. Stated preference: Electron or web-based stack (HTML/CSS/TypeScript). No XAML. Final decision is the architect's.
+- **Signal derivation rules** — exactly which engine events map to which GDScript signals, and how the tool derives the signal set from keyword definitions, is not yet specified. Architect-level decision.
 - **Export package format** — whether art assets are bundled as a zip, a folder, or embedded in the JSON is an architect-level decision.
-- **Missing-translation export gate** — whether missing translations block export is described as configurable, but the exact UX for this configuration is not specified.
-- **Lifetime editor UX** — `LifetimeSpec` can compose turn timer, trigger count, and while-condition as OR. The exact form-based or DSL UI for this is not yet specified; an architect or UX pass is needed.
-- **Static property schema** — `CardDefinition.StaticProperties` and `ZoneDefinition.StaticProperties` are untyped `Dictionary<string, object>` in the engine. The tool needs a way for the game creator to declare what static property names and types exist for a given definition type. Whether this is a per-game schema declaration or inferred from existing values is not yet specified.
-- **InitManifest UX** — the tool must present an ergonomic view of zone instances, card instances, and player state as a single "starting board state." The exact layout is not specified here; it is a UX/design decision for the architect.
-- **Multiple action rules per action type ordering** — the engine runs multiple rules per action type in registration order. The tool must allow reordering them, but the exact UX for this is not yet specified.
+- **Missing-translation export gate** — described as configurable (game creator decides at export time). The exact UX for this configuration is not specified here; architect to specify.
+- **D14 addendum required** — the InitManifest mandatory/append-only and `HostManifest` decisions (see Design Decisions section) must be written into `docs/architecture.md` as a D14 addendum by the architect before implementation.
+
+### Deferred to Domain Modeler
+
+- **Flavour text domain model** — flavour text is referenced here as a per-card optional localizable string but is not yet in `docs/domain-model.md`. The domain modeler must add it before this requirements document can be signed off.
+
+### Deferred / Acknowledged as Out of Scope
+
+- **Deeper balancing analytics** — numerical stat distribution, mana curve analysis, simulation, playtest log review are acknowledged as desirable but depend on game-definition structure that varies too much to specify now. To be revisited once a concrete game definition exists.

@@ -2,7 +2,7 @@
 status: signed-off
 owner: domain-modeler
 signed-off: 2026-03-09
-last-updated: 2026-03-09
+last-updated: 2026-03-11
 depends-on:
   - docs/requirements.md
 ---
@@ -10,7 +10,7 @@ depends-on:
 # Archetype — Domain Model
 
 ## Status
-**Signed off 2026-03-02. Updated and re-signed off 2026-03-03. Updated 2026-03-03 (A15, A16). Updated and re-signed off 2026-03-09 (A17–A22).**
+**Signed off 2026-03-02. Updated and re-signed off 2026-03-03. Updated 2026-03-03 (A15, A16). Updated and re-signed off 2026-03-09 (A17–A22). Updated 2026-03-11 (flavour text on CardDefinition — minor additive field, §2.2).**
 
 All seven requirements-phase open items and all sixteen architecture-phase additions (A1–A16) are resolved and incorporated below. A fourteenth addition (A14) incorporates the sharpened Tool Layer type-system requirement: keyword signatures now include explicit return types and human-readable descriptions; a formal type system is defined (§1.4); atom type definitions and shared schemas are introduced (§2.6–2.7). §1.4, §2.6, and §2.7 have been reviewed against the signed-off requirements and are consistent with them. A fifteenth addition (A15) introduces Session as a fourth first-class atom kind and generalises the player model to a named registry. Six further additions (A17–A22) introduce the cost model (`CostDef`, `assert`), the combined-block validation algorithm, the `ValidateActionArgs` host callback, and the ownership-filter removal from available-action computation.
 
@@ -227,6 +227,8 @@ The engine defines four first-class game atoms: **Player**, **Card**, **Zone**, 
 - A card occupies at most one zone at any given time.
 
 **Static properties.** Defined at design time on the card definition; read-only during play. Examples: name, base cost, base attack, base health, color, rarity, card art reference. The engine does not prescribe which static properties a card must have beyond what is required for engine mechanics.
+
+**Flavour text.** An optional, localizable, design-time string on a card definition. Flavour text is purely presentational — it carries no rules meaning, does not affect game state, and is never evaluated by the engine. It is part of the card's localizable content alongside the card name and effect text, and is managed by the same localization mechanism as those fields. A card definition with no flavour text is fully valid.
 
 **State.** Mutable runtime data. Three types: modifiers, accumulators, conditions/tags (§3). All are contribution-tracked by the engine.
 
@@ -970,6 +972,7 @@ These are property keywords that operate on collections returned by `events-matc
 | **Activated effect** | An effect block that executes when a player takes an action (§6). |
 | **Binding time** | The moment before an action executes when inputs are validated and bound (§8.1). |
 | **Card** | A first-class atom with static properties, state, and effect blocks (§2.2). |
+| **Flavour text** | An optional, localizable, design-time string on a card definition. Carries no rules meaning; purely presentational. Managed by the same localization mechanism as card name and effect text (§2.2). |
 | **Card pool** | The union of all card sets available to a game (§10.2). |
 | **Card set** | A named collection of card definitions (§10.1). |
 | **Composite keyword** | A keyword that invokes other keywords as part of its definition (§1.1). |
