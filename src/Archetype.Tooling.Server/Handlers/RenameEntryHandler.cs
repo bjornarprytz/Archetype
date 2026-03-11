@@ -147,6 +147,33 @@ public sealed class RenameEntryHandler(SidecarState sidecar)
                     se.TriggerBodyDsl = RewriteDsl(se.TriggerBodyDsl, oldName, newName);
             }
         }
+
+        // D27 requires all DSL-carrying entry types to be rewritten (BLOCKER 2).
+        // Phase init/cleanup blocks may invoke game-creator keywords.
+        foreach (var phase in state.Phases)
+        {
+            if (phase.InitDsl is not null)
+                phase.InitDsl = RewriteDsl(phase.InitDsl, oldName, newName);
+            if (phase.CleanupDsl is not null)
+                phase.CleanupDsl = RewriteDsl(phase.CleanupDsl, oldName, newName);
+        }
+
+        // Action rule before/after hooks may invoke game-creator keywords.
+        foreach (var rules in state.ActionRules.Values)
+            foreach (var rule in rules)
+            {
+                if (rule.BeforeDsl is not null)
+                    rule.BeforeDsl = RewriteDsl(rule.BeforeDsl, oldName, newName);
+                if (rule.AfterDsl is not null)
+                    rule.AfterDsl = RewriteDsl(rule.AfterDsl, oldName, newName);
+            }
+
+        // State-based rule conditions and bodies may invoke game-creator keywords.
+        foreach (var sbr in state.StateBasedRules)
+        {
+            sbr.ConditionDsl = RewriteDsl(sbr.ConditionDsl, oldName, newName);
+            sbr.BodyDsl      = RewriteDsl(sbr.BodyDsl, oldName, newName);
+        }
     }
 
     /// <summary>

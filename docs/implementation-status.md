@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-11 (tooling sidecar D27/D28 bug-fix pass — 142/142 tests passing; 10 new tests covering all 6 bug fixes)
+> Last updated: 2026-03-11 (tooling sidecar D27/D28 bug-fix pass + BLOCKER fixes — 150/150 tests passing; 18 new tests covering all 6 bug fixes and both reviewer blockers)
 > Branch: `impl/text-renderer`
 > All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`.
 
@@ -265,6 +265,10 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 - **Fix 5** — `ProjectFileSerializer.SerializeInitManifest` zone `"definition"` field corrected to `z.Definition` (was `z.LocalId`); `ProjectFileLoader` constructor args corrected to use named params
 - **Fix 6** — `GetSymbolInfoHandler.referencedBy` already returns only `{ entryName }` (confirmed by test; no code change needed)
 
+**Reviewer BLOCKER fixes (2026-03-11)**:
+- **BLOCKER 1** — `UpdateLifetimeSpecHandler` now calls `LifetimeDsl.Parse` immediately after storing `LifetimeDsl`, populating `LifetimeNode` in-session so the exporter sees the updated spec without a save/reload cycle (D27). Invalid DSL records a diagnostic and leaves `LifetimeNode` null.
+- **BLOCKER 2** — `RenameEntryHandler.RewriteKeywordRefs` extended to rewrite `PhaseEntry.InitDsl`/`CleanupDsl`, `ActionRuleEntry.BeforeDsl`/`AfterDsl`, and `StateBasedRuleEntry.ConditionDsl`/`BodyDsl` — previously these three entry types were silently skipped, leaving stale keyword references after a rename (D27).
+
 **Remaining** (Groups 2, 5–7): Electron scaffold, IPC bridge, UI panels, and packaging — these are TypeScript/React work outside the C# assemblies.
 
 ---
@@ -307,9 +311,9 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `GameSession/LastActionEventsTests.cs` | 4 | ✅ All passing (new — D30 LastActionEvents) |
 | `Tooling/ProjectFileLoaderTests.cs` | 8 | ✅ All passing (3 new: returnType round-trip, ArtCropRegion round-trip, ZoneSpec definition/localId) |
 | `Tooling/ValidatorTests.cs` | 5 | ✅ All passing (2 new: missing-ReturnType error, ReturnType-present no error) |
-| `Tooling/RpcHandlerTests.cs` | 15 | ✅ All passing (6 new: export ReturnType, export static effect, rename DSL rewrite, rename round-trip, GetSymbolInfo shape) |
+| `Tooling/RpcHandlerTests.cs` | 23 | ✅ All passing (14 new: export ReturnType, export static effect, rename DSL rewrite, rename round-trip, GetSymbolInfo shape; BLOCKER 1: UpdateLifetimeSpec 2 tests; BLOCKER 2: RenameEntry phase/actionRule/SBR rewrite 6 tests) |
 
-**Total: 142 tests, 142 passing.**
+**Total: 150 tests, 150 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

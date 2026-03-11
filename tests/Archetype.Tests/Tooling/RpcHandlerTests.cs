@@ -541,6 +541,340 @@ public sealed class RpcHandlerTests
     }
 
     // -----------------------------------------------------------------------
+    //  BLOCKER-1  UpdateLifetimeSpec — LifetimeNode populated in-session (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void UpdateLifetimeSpec_SetsLifetimeNode_SoExportReflectsSpec()
+    {
+        // A card with a permanent static effect (no LifetimeDsl yet).
+        var contribDsl   = "modify-accumulator(target, \"shield\", target)";
+        var contribBlock = DslParser.ParseBlock(contribDsl);
+
+        var sidecar = SidecarWith(s =>
+        {
+            s.Id = "lt-test";
+            s.Cards["tank"] = new CardEntry
+            {
+                Name              = "tank",
+                PrimaryEffectDsl  = "modify-accumulator(tank, \"damage\", tank)",
+                PrimaryEffectNode = DslParser.ParseBlock(
+                    "modify-accumulator(tank, \"damage\", tank)").Block,
+                StaticEffects     = [
+                    new StaticEffectEntry
+                    {
+                        ContributionDsl  = contribDsl,
+                        ContributionNode = contribBlock.IsSuccess ? contribBlock.Block : null,
+                        LifetimeDsl      = null,   // permanent initially
+                        LifetimeNode     = null,
+                    }
+                ],
+            };
+        });
+
+        // Edit lifetime spec in-session (no save/reload).
+        var handler = new UpdateLifetimeSpecHandler(sidecar);
+        handler.Handle(BuildParams(new
+        {
+            cardName    = "tank",
+            effectIndex = 0,
+            dsl         = "3 turns",
+        }));
+
+        // LifetimeNode must be populated immediately — no save/reload required.
+        var effect = sidecar.State.Cards["tank"].StaticEffects[0];
+        Assert.NotNull(effect.LifetimeNode);
+        Assert.False(effect.LifetimeNode!.IsPermanent);
+
+        // Exporting immediately must reflect "3 turns", not permanent.
+        var exportResult = GameDefinitionExporter.Export(sidecar.State, force: true);
+        Assert.True(exportResult.IsSuccess, exportResult.ErrorMessage);
+
+        // The exported JSON must contain the TurnTimer condition.
+        // LifetimeCondition uses [JsonDerivedType] with discriminator "turn",
+        // so the exported JSON contains "\"$type\": \"turn\"" and "\"Turns\": 3",
+        // not the class name "TurnTimer".
+        Assert.Contains("\"$type\": \"turn\"", exportResult.Json!);
+        Assert.Contains("\"Turns\": 3", exportResult.Json!);
+    }
+
+    [Fact]
+    public void UpdateLifetimeSpec_InvalidDsl_RecordsDiagnostic_LifetimeNodeNull()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Cards["bad-card"] = new CardEntry
+            {
+                Name              = "bad-card",
+                PrimaryEffectDsl  = "modify-accumulator(bad-card, \"hp\", bad-card)",
+                PrimaryEffectNode = DslParser.ParseBlock(
+                    "modify-accumulator(bad-card, \"hp\", bad-card)").Block,
+                StaticEffects     = [new StaticEffectEntry { ContributionDsl = "" }],
+            };
+        });
+
+        var handler = new UpdateLifetimeSpecHandler(sidecar);
+        handler.Handle(BuildParams(new
+        {
+            cardName    = "bad-card",
+            effectIndex = 0,
+            dsl         = "??not-valid??",   // unparseable lifetime
+        }));
+
+        // LifetimeNode must be null — parse failed.
+        Assert.Null(sidecar.State.Cards["bad-card"].StaticEffects[0].LifetimeNode);
+        // An error diagnostic must be recorded.
+        Assert.Contains(sidecar.State.Cards["bad-card"].StaticEffects[0].Diagnostics,
+            d => d.Severity == "error" && d.Message.Contains("lifetime"));
+    }
+
+    // -----------------------------------------------------------------------
+    //  BLOCKER-2a  RenameEntry rewrites PhaseEntry.*Dsl (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void RenameEntry_RewritesPhaseInitAndCleanupDsl()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Keywords["phase-kw"] = new KeywordEntry
+            {
+                Name       = "phase-kw",
+                ReturnType = TypeName.Atom,
+                BodyDsl    = "modify-accumulator(phase-kw, \"v\", phase-kw)",
+                BodyNode   = DslParser.Parse(
+                    "modify-accumulator(phase-kw, \"v\", phase-kw)").Node,
+            };
+
+            s.Phases.Add(new PhaseEntry
+            {
+                Name       = "main",
+                InitDsl    = "phase-kw()",
+                InitNode   = DslParser.ParseBlock("phase-kw()").Block,
+                CleanupDsl = "phase-kw()",
+                CleanupNode = DslParser.ParseBlock("phase-kw()").Block,
+            });
+
+            ReferenceGraph.Build(s);
+        });
+
+        var handler = new RenameEntryHandler(sidecar);
+        handler.Handle(BuildParams(new
+        {
+            entryKind = "keyword",
+            oldName   = "phase-kw",
+            newName   = "phase-kw-v2",
+        }));
+
+        var phase = sidecar.State.Phases[0];
+        Assert.Contains("phase-kw-v2", phase.InitDsl!);
+        Assert.DoesNotContain("phase-kw()", phase.InitDsl!);
+        Assert.Contains("phase-kw-v2", phase.CleanupDsl!);
+    }
+
+    [Fact]
+    public void RenameEntry_Phase_SaveReload_ZeroErrors()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Id = "phase-rt";
+            s.Keywords["init-hook"] = new KeywordEntry
+            {
+                Name       = "init-hook",
+                ReturnType = TypeName.Atom,
+                BodyDsl    = "modify-accumulator(init-hook, \"v\", init-hook)",
+                BodyNode   = DslParser.Parse(
+                    "modify-accumulator(init-hook, \"v\", init-hook)").Node,
+            };
+
+            s.Phases.Add(new PhaseEntry
+            {
+                Name    = "setup",
+                InitDsl = "init-hook()",
+                InitNode = DslParser.ParseBlock("init-hook()").Block,
+            });
+
+            ReferenceGraph.Build(s);
+        });
+
+        new RenameEntryHandler(sidecar).Handle(BuildParams(new
+        {
+            entryKind = "keyword",
+            oldName   = "init-hook",
+            newName   = "setup-hook",
+        }));
+
+        var saved    = ProjectFileSerializer.Serialize(sidecar.State);
+        var reloaded = ProjectFileLoader.Load(saved);
+
+        Assert.Empty(reloaded.Diagnostics.Where(d => d.Severity == "error"));
+    }
+
+    // -----------------------------------------------------------------------
+    //  BLOCKER-2b  RenameEntry rewrites ActionRuleEntry.*Dsl (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void RenameEntry_RewritesActionRuleBeforeAndAfterDsl()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Keywords["ar-kw"] = new KeywordEntry
+            {
+                Name       = "ar-kw",
+                ReturnType = TypeName.Atom,
+                BodyDsl    = "modify-accumulator(ar-kw, \"v\", ar-kw)",
+                BodyNode   = DslParser.Parse(
+                    "modify-accumulator(ar-kw, \"v\", ar-kw)").Node,
+            };
+
+            s.ActionRules["PlayCard"] = [
+                new ActionRuleEntry
+                {
+                    BeforeDsl  = "ar-kw()",
+                    BeforeNode = DslParser.ParseBlock("ar-kw()").Block,
+                    AfterDsl   = "ar-kw()",
+                    AfterNode  = DslParser.ParseBlock("ar-kw()").Block,
+                }
+            ];
+
+            ReferenceGraph.Build(s);
+        });
+
+        new RenameEntryHandler(sidecar).Handle(BuildParams(new
+        {
+            entryKind = "keyword",
+            oldName   = "ar-kw",
+            newName   = "ar-kw-v2",
+        }));
+
+        var rule = sidecar.State.ActionRules["PlayCard"][0];
+        Assert.Contains("ar-kw-v2", rule.BeforeDsl!);
+        Assert.DoesNotContain("ar-kw()", rule.BeforeDsl!);
+        Assert.Contains("ar-kw-v2", rule.AfterDsl!);
+    }
+
+    [Fact]
+    public void RenameEntry_ActionRule_SaveReload_ZeroErrors()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Id = "ar-rt";
+            s.Keywords["pre-hook"] = new KeywordEntry
+            {
+                Name       = "pre-hook",
+                ReturnType = TypeName.Atom,
+                BodyDsl    = "modify-accumulator(pre-hook, \"v\", pre-hook)",
+                BodyNode   = DslParser.Parse(
+                    "modify-accumulator(pre-hook, \"v\", pre-hook)").Node,
+            };
+
+            s.ActionRules["Pass"] = [
+                new ActionRuleEntry
+                {
+                    BeforeDsl  = "pre-hook()",
+                    BeforeNode = DslParser.ParseBlock("pre-hook()").Block,
+                }
+            ];
+
+            ReferenceGraph.Build(s);
+        });
+
+        new RenameEntryHandler(sidecar).Handle(BuildParams(new
+        {
+            entryKind = "keyword",
+            oldName   = "pre-hook",
+            newName   = "pre-hook-v2",
+        }));
+
+        var saved    = ProjectFileSerializer.Serialize(sidecar.State);
+        var reloaded = ProjectFileLoader.Load(saved);
+
+        Assert.Empty(reloaded.Diagnostics.Where(d => d.Severity == "error"));
+    }
+
+    // -----------------------------------------------------------------------
+    //  BLOCKER-2c  RenameEntry rewrites StateBasedRuleEntry.*Dsl (D27)
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void RenameEntry_RewritesStateBasedRuleConditionAndBodyDsl()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Keywords["sbr-cond"] = new KeywordEntry
+            {
+                Name       = "sbr-cond",
+                ReturnType = TypeName.Boolean,
+                BodyDsl    = "equal-to(sbr-cond, sbr-cond)",
+                BodyNode   = DslParser.Parse("equal-to(sbr-cond, sbr-cond)").Node,
+            };
+
+            s.StateBasedRules.Add(new StateBasedRuleEntry
+            {
+                Name         = "my-rule",
+                ConditionDsl = "sbr-cond()",
+                ConditionNode = DslParser.Parse("sbr-cond()").Node,
+                BodyDsl      = "sbr-cond()",
+                BodyNode     = DslParser.ParseBlock("sbr-cond()").Block,
+            });
+
+            ReferenceGraph.Build(s);
+        });
+
+        new RenameEntryHandler(sidecar).Handle(BuildParams(new
+        {
+            entryKind = "keyword",
+            oldName   = "sbr-cond",
+            newName   = "sbr-cond-v2",
+        }));
+
+        var sbr = sidecar.State.StateBasedRules[0];
+        Assert.Contains("sbr-cond-v2", sbr.ConditionDsl);
+        Assert.DoesNotContain("sbr-cond()", sbr.ConditionDsl);
+        Assert.Contains("sbr-cond-v2", sbr.BodyDsl);
+    }
+
+    [Fact]
+    public void RenameEntry_StateBasedRule_SaveReload_ZeroErrors()
+    {
+        var sidecar = SidecarWith(s =>
+        {
+            s.Id = "sbr-rt";
+            s.Keywords["win-check"] = new KeywordEntry
+            {
+                Name       = "win-check",
+                ReturnType = TypeName.Boolean,
+                BodyDsl    = "equal-to(win-check, win-check)",
+                BodyNode   = DslParser.Parse("equal-to(win-check, win-check)").Node,
+            };
+
+            s.StateBasedRules.Add(new StateBasedRuleEntry
+            {
+                Name          = "win-rule",
+                ConditionDsl  = "win-check()",
+                ConditionNode = DslParser.Parse("win-check()").Node,
+                BodyDsl       = "win-check()",
+                BodyNode      = DslParser.ParseBlock("win-check()").Block,
+            });
+
+            ReferenceGraph.Build(s);
+        });
+
+        new RenameEntryHandler(sidecar).Handle(BuildParams(new
+        {
+            entryKind = "keyword",
+            oldName   = "win-check",
+            newName   = "win-check-v2",
+        }));
+
+        var saved    = ProjectFileSerializer.Serialize(sidecar.State);
+        var reloaded = ProjectFileLoader.Load(saved);
+
+        Assert.Empty(reloaded.Diagnostics.Where(d => d.Severity == "error"));
+    }
+
+    // -----------------------------------------------------------------------
     //  Param builder — constructs a JsonElement from an anonymous object
     // -----------------------------------------------------------------------
 
