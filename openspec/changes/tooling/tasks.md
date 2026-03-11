@@ -179,12 +179,12 @@ structure, build pipeline, and IPC skeleton.
 
 ---
 
-## Group 3 — Sidecar scaffold (D26, D27)
+## Group 3 — Sidecar scaffold (D26, D27) ✅ COMPLETE
 
 Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
 (uses updated Core types).
 
-### 3.1  Add `Archetype.Tooling.Server` .NET project
+### 3.1  Add `Archetype.Tooling.Server` .NET project ✅
   - reads: `docs/architecture.md#D26`, `src/Archetype.slnx` (or equivalent)
   - writes: `src/Archetype.Tooling.Server/Archetype.Tooling.Server.csproj`,
     `src/Archetype.Tooling.Server/Program.cs`
@@ -192,7 +192,7 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
     `Archetype.Build`, `Archetype.Text`. Does NOT reference `Archetype.Engine`.
     Add to `.slnx`.
 
-### 3.2  JSON-RPC stdio loop
+### 3.2  JSON-RPC stdio loop ✅
   - reads: `docs/architecture.md#D26`, `src/Archetype.Tooling.Server/Program.cs`
   - writes: `src/Archetype.Tooling.Server/RpcServer.cs`,
     `src/Archetype.Tooling.Server/RpcRequest.cs`,
@@ -203,7 +203,7 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
     Unknown method → error response. Malformed JSON → error response. Loop until
     stdin is closed.
 
-### 3.3  `ProjectState` and `*Entry` types
+### 3.3  `ProjectState` and `*Entry` types ✅
   - reads: `docs/architecture.md#D27`
   - writes: `src/Archetype.Tooling.Server/ProjectState.cs`,
     `src/Archetype.Tooling.Server/KeywordEntry.cs`,
@@ -223,7 +223,7 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
     `entryKind`, `entryName`, `severity` ("error" | "warning"), `message`,
     optional `dslRange { start, end }`.
 
-### 3.4  `ProjectFileLoader` — lenient load
+### 3.4  `ProjectFileLoader` — lenient load ✅
   - reads: `docs/architecture.md#D27`, `src/Archetype.Tooling.Server/ProjectState.cs`
   - writes: `src/Archetype.Tooling.Server/ProjectFileLoader.cs`
   - Parse `.archetype` JSON into `ProjectState`. On invalid JSON: single fatal
@@ -232,7 +232,7 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
     cross-entry name-resolution pass; record unresolved-reference diagnostics.
     Note: full type-checking and acyclicity checking are deferred to 3.6.
 
-### 3.5  `ProjectFileSerializer` — save
+### 3.5  `ProjectFileSerializer` — save ✅
   - reads: `docs/architecture.md#D27`, `src/Archetype.Tooling.Server/ProjectState.cs`
   - writes: `src/Archetype.Tooling.Server/ProjectFileSerializer.cs`
   - Serialise `ProjectState` to the `.archetype` JSON format. DSL source
@@ -240,7 +240,7 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
     round-tripped verbatim from the raw `JsonElement` stored on
     `ProjectState`.
 
-### 3.6  Reference graph and full validation pass
+### 3.6  Reference graph and full validation pass ✅
   - reads: `docs/architecture.md#D27`, `docs/architecture.md#D28`,
     `src/Archetype.Tooling.Server/ProjectState.cs`
   - writes: `src/Archetype.Tooling.Server/ReferenceGraph.cs`,
@@ -253,7 +253,7 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
     entries. Missing-translation warnings generated here (severity "warning"
     per D31).
 
-### 3.7  Sidecar unit tests
+### 3.7  Sidecar unit tests ✅
   - reads: `src/Archetype.Tooling.Server/ProjectFileLoader.cs`,
     `src/Archetype.Tooling.Server/ProjectFileSerializer.cs`,
     `src/Archetype.Tooling.Server/Validator.cs`
@@ -272,11 +272,11 @@ Create `src/Archetype.Tooling.Server/` .NET project. Depends on Groups 0 and 1
 
 ---
 
-## Group 4 — Sidecar RPC method implementations (D27, D28)
+## Group 4 — Sidecar RPC method implementations (D27, D28) ✅ COMPLETE
 
 Implement the 18 RPC methods. Depends on Group 3.
 
-### 4.1  `LoadProject` and `SaveProject` methods
+### 4.1  `LoadProject` and `SaveProject` methods ✅
   - reads: `docs/architecture.md#D27`, `src/Archetype.Tooling.Server/RpcServer.cs`
   - writes: `src/Archetype.Tooling.Server/Handlers/LoadProjectHandler.cs`,
     `src/Archetype.Tooling.Server/Handlers/SaveProjectHandler.cs`
@@ -285,7 +285,7 @@ Implement the 18 RPC methods. Depends on Group 3.
   - `SaveProject`: serialise via `ProjectFileSerializer`, return JSON string
     to caller (Electron main process writes to disk).
 
-### 4.2  Mutation methods (DSL field updates)
+### 4.2  Mutation methods (DSL field updates) ✅
   - reads: `docs/architecture.md#D27`, `docs/architecture.md#D28`
   - writes: `src/Archetype.Tooling.Server/Handlers/UpdateKeywordBodyHandler.cs`,
     `src/Archetype.Tooling.Server/Handlers/UpdateCardEffectHandler.cs`,
@@ -297,7 +297,7 @@ Implement the 18 RPC methods. Depends on Group 3.
     (initially full re-validation), return scoped diagnostics +
     `globalErrorCount` + `globalWarningCount`.
 
-### 4.3  Structural mutation methods
+### 4.3  Structural mutation methods ✅
   - reads: `docs/architecture.md#D27`, `docs/architecture.md#D28`
   - writes: `src/Archetype.Tooling.Server/Handlers/AddEntryHandler.cs`,
     `src/Archetype.Tooling.Server/Handlers/RemoveEntryHandler.cs`,
@@ -308,7 +308,7 @@ Implement the 18 RPC methods. Depends on Group 3.
   - `RenameEntry`: rename entry, update all references in `ProjectState`,
     re-validate, return impact diagnostics.
 
-### 4.4  Query methods
+### 4.4  Query methods ✅
   - reads: `docs/architecture.md#D28`
   - writes: `src/Archetype.Tooling.Server/Handlers/GetAllDiagnosticsHandler.cs`,
     `src/Archetype.Tooling.Server/Handlers/GetSymbolInfoHandler.cs`,
@@ -323,14 +323,14 @@ Implement the 18 RPC methods. Depends on Group 3.
     items (keyword names, in-scope parameters, built-in keywords). Must
     respond within 100ms.
 
-### 4.5  `RenderCardText` method
+### 4.5  `RenderCardText` method ✅
   - reads: `docs/architecture.md#D28`, `src/Archetype.Text/`
   - writes: `src/Archetype.Tooling.Server/Handlers/RenderCardTextHandler.cs`
   - Look up card entry by name; if `PrimaryEffect` is parsed, call
     `TextRenderer.RenderBlock`; serialise resulting `RenderNode` tree to JSON.
     Return the render tree. Return empty/error node if card is broken.
 
-### 4.6  Export methods (`ExportGameDefinition`, `ExportGodotClasses`)
+### 4.6  Export methods (`ExportGameDefinition`, `ExportGodotClasses`) ✅
   - reads: `docs/architecture.md#D27`, `docs/architecture.md#D30`,
     `docs/architecture.md#D31`
   - writes: `src/Archetype.Tooling.Server/Handlers/ExportGameDefinitionHandler.cs`,
@@ -349,7 +349,7 @@ Implement the 18 RPC methods. Depends on Group 3.
       `ArchetypePlayer.gd`, `ArchetypeCardImporter.gd`.
     - Return `{ filename → content }` map; main process writes files.
 
-### 4.7  Sidecar RPC handler tests
+### 4.7  Sidecar RPC handler tests ✅
   - reads: `src/Archetype.Tooling.Server/Handlers/`
   - writes: `tests/Archetype.Tests/Tooling/RpcHandlerTests.cs`
   - Tests:

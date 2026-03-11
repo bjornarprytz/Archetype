@@ -1,8 +1,8 @@
 # Implementation Status
 
-> Last updated: 2026-03-11 (D29 HostManifest + D30 LastActionEvents — 115/115 tests passing)
+> Last updated: 2026-03-11 (tooling sidecar Groups 3–4 — 132/132 tests passing)
 > Branch: `impl/text-renderer`
-> All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
+> All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`.
 
 ---
 
@@ -14,6 +14,7 @@
 | `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
+| `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete (Groups 2, 5–7 are Electron-side) |
 
 ---
 
@@ -215,6 +216,50 @@
 
 ---
 
+## Tier 5 — Authoring Tooling Sidecar (Groups 3–4)
+
+### `Archetype.Tooling.Server` ✅
+
+Console app (JSON-RPC over stdio, D26). Built as a self-contained single-file
+executable for Electron resource bundling.
+
+**DSL Parser** (`DslParser.cs`):
+- `Parse(string) → ParseResult` — single expression (returns `KeywordNode?`)
+- `ParseBlock(string) → BlockParseResult` — semicolon-separated block steps
+- Tolerant of partial input (missing close-parens) for `GetCompletions` use
+- Grammar: function-call syntax only; args are invocations, `ParameterRef`s, or literals
+
+**Project State** (`ProjectState`, `*Entry` types):
+- `KeywordEntry`, `CardEntry`, `ZoneEntry`, `PlayerEntry`, `CardSetEntry`, `PhaseEntry`, `ActionRuleEntry`, `StateBasedRuleEntry`, `InitManifestEntry`, `LocalizationState`
+- Each entry carries raw DSL source + parsed `KeywordNode?` (null on parse error)
+- `ProjectDiagnostic` with `EntryKind`, `EntryName`, `Severity`, `Message`, `DslRange?`
+- `SignalBehaviour` enum (`Default`, `Suppress`, `ForceInclude`) on `KeywordEntry` for D30
+
+**Loader/Serializer**:
+- `ProjectFileLoader.Load(json)` — lenient; parse errors → diagnostics, never throws; calls `ReferenceGraph.Build` then `Validator.Validate`
+- `ProjectFileSerializer.Serialize(state)` — writes DSL source strings; round-trips `EditorState` verbatim
+
+**Reference Graph + Validator**:
+- `ReferenceGraph.Build(state)` — rebuilds `state.UsedBy` (reverse-ref map) from all parsed trees
+- `Validator.Validate(state)` — clears and repopulates `state.Diagnostics`; checks built-in name conflicts, unresolved keyword refs, missing translations (D31 → warnings only)
+
+**18 RPC Handlers** (all in `Handlers/`):
+- Mutation: `LoadProject`, `SaveProject`, `UpdateKeywordBody`, `UpdateCardEffect`, `UpdateField`, `UpdateLifetimeSpec`, `UpdateActivationCondition`, `UpdateCostBody`, `AddEntry`, `RemoveEntry`, `RenameEntry`
+- Query: `GetAllDiagnostics`, `GetSymbolInfo`, `GetReferenceGraph`, `GetCompletions`
+- Render: `RenderCardText`
+- Export: `ExportGameDefinition`, `ExportGodotClasses`
+
+All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → returns scoped `MutationResponse` with `AffectedEntries`, `Diagnostics`, `GlobalErrorCount`, `GlobalWarningCount`.
+
+**Export pipeline**:
+- `GameDefinitionExporter.Export(state, force)` — hard-error gate → missing-translation gate (D31) → build `GameDefinition` → serialize JSON
+- `GodotClassGenerator.Generate(state)` → `filename → content` map; `DeriveSignalSet` implements D30 signal inclusion rules
+- Generates: `ArchetypeCard.gd`, `ArchetypeZone.gd`, `ArchetypePlayer.gd`, `ArchetypeSession.gd`, `ArchetypeCardImporter.gd`, `ArchetypeInterop.gd`
+
+**Remaining** (Groups 2, 5–7): Electron scaffold, IPC bridge, UI panels, and packaging — these are TypeScript/React work outside the C# assemblies.
+
+---
+
 ## Tier 5 — Persistence
 
 ### D17 Save/Load ✅ PASS (BLOCKER 1 fixed 2026-03-08)
@@ -251,8 +296,11 @@
 | `CostModel/CostModelTests.cs` | 7 | ✅ All passing (new — D21 cost validation + D23 sequencing) |
 | `HostManifest/HostManifestTests.cs` | 9 | ✅ All passing (new — D29 HostManifest + InitManifest enforcement) |
 | `GameSession/LastActionEventsTests.cs` | 4 | ✅ All passing (new — D30 LastActionEvents) |
+| `Tooling/ProjectFileLoaderTests.cs` | 5 | ✅ All passing (new — sidecar loader, Group 3.7) |
+| `Tooling/ValidatorTests.cs` | 3 | ✅ All passing (new — sidecar validator, Group 3.7) |
+| `Tooling/RpcHandlerTests.cs` | 9 | ✅ All passing (new — sidecar RPC handlers, Group 4.7) |
 
-**Total: 115 tests, 115 passing.**
+**Total: 132 tests, 132 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
