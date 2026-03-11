@@ -208,6 +208,8 @@ public static class TestDefinition
             ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
             TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
             PlayerDefinitions:      new Dictionary<string, PlayerDefinition>(),
+            // D29: InitManifest is required; most test helpers use an empty manifest.
+            InitManifest:           InitManifest.Empty,
             Id:                     "test-game");
     }
 

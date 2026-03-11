@@ -29,3 +29,19 @@ public sealed class DefinitionException : Exception
     /// <inheritdoc/>
     public DefinitionException(string message, Exception inner) : base(message, inner) { }
 }
+
+/// <summary>
+/// Thrown when a session cannot be built due to a contract violation between the
+/// <see cref="GameDefinition"/> and the session-time configuration supplied by the host
+/// (e.g. LocalId collision between <c>InitManifest</c> and <c>HostManifest</c>, or
+/// incompatible builder option combinations).
+/// Fires at <c>GameSessionBuilder.Build()</c> — never during runtime execution.
+/// </summary>
+public sealed class SessionException : Exception
+{
+    /// <inheritdoc/>
+    public SessionException(string message) : base(message) { }
+
+    /// <inheritdoc/>
+    public SessionException(string message, Exception inner) : base(message, inner) { }
+}

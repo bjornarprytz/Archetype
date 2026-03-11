@@ -111,6 +111,12 @@ public sealed record PlayerDefinition(
 /// was produced by the same game definition.
 /// </para>
 /// <para>
+/// <b>InitManifest (D29):</b> required; non-nullable.  Declares the initial state
+/// of a game session (zones, cards, player state).
+/// <c>GameDefinitionBuilder.Build()</c> throws <see cref="DefinitionException"/>
+/// if this is not set.  An empty manifest (all empty lists) is valid.
+/// </para>
+/// <para>
 /// <b>PlayableZoneNames (D19):</b> zone definition names from which cards may
 /// be played.  <c>null</c> = no zone filter.  Specify one or more names
 /// (e.g. <c>"hand"</c>) to enforce zone restrictions on <c>PlayCard</c>.
@@ -126,7 +132,9 @@ public sealed record GameDefinition(
     IReadOnlyDictionary<string, IReadOnlyList<ActionRuleDefinition>> ActionRules,
     TriggerResolutionOrder TriggerResolutionOrder,
     IReadOnlyDictionary<string, PlayerDefinition> PlayerDefinitions,
-    InitManifest? DefaultInitManifest = null,
+    // D29: InitManifest is now required (non-nullable, renamed from DefaultInitManifest).
+    // GameDefinitionBuilder.Build() throws DefinitionException if not set.
+    InitManifest InitManifest,
     IReadOnlyList<string>? PlayableZoneNames = null,
     string? Id = null);
 
@@ -149,11 +157,27 @@ public enum TriggerResolutionOrder
 /// Declares the initial state of a game session.  The engine provisions
 /// this before the first phase: creates zones, then cards, then applies
 /// mutable state overrides.  No events are logged during provisioning.
+/// <para>
+/// <b>D29:</b> Required on every <see cref="GameDefinition"/>.
+/// <c>GameDefinitionBuilder.Build()</c> throws <see cref="DefinitionException"/>
+/// if not set.  Use <see cref="Empty"/> for games that build all state through
+/// phase init blocks.
+/// </para>
 /// </summary>
 public sealed record InitManifest(
     IReadOnlyList<ZoneSpec> Zones,
     IReadOnlyList<CardSpec> Cards,
-    IReadOnlyList<PlayerStateSpec> PlayerStates);
+    IReadOnlyList<PlayerStateSpec> PlayerStates)
+{
+    /// <summary>
+    /// An empty <see cref="InitManifest"/> with no zones, cards, or player states.
+    /// Valid for games that build all state through phase init blocks.
+    /// </summary>
+    public static readonly InitManifest Empty = new(
+        Array.Empty<ZoneSpec>(),
+        Array.Empty<CardSpec>(),
+        Array.Empty<PlayerStateSpec>());
+}
 
 /// <summary>Specifies a zone to create at session start.</summary>
 public sealed record ZoneSpec(
@@ -163,13 +187,24 @@ public sealed record ZoneSpec(
     IReadOnlyDictionary<string, double>? Accumulators = null,
     IReadOnlyList<string>? Conditions = null);
 
-/// <summary>Specifies a card to create at session start.</summary>
+/// <summary>
+/// Specifies a card to create at session start.
+/// <para>
+/// <b>LocalId (D29):</b> optional.  When set, uniquely identifies this card
+/// instance within its manifest so that <see cref="AtomStateOverride"/> or
+/// <see cref="HostManifest"/> can reference it by name.  Must be unique within
+/// <see cref="InitManifest.Cards"/> (non-null values only).  Card LocalIds and
+/// zone LocalIds do not share a namespace.
+/// </para>
+/// </summary>
 public sealed record CardSpec(
     string Owner,
     string ZoneLocalId,
     string Definition,
     IReadOnlyDictionary<string, double>? Accumulators = null,
-    IReadOnlyList<string>? Conditions = null);
+    IReadOnlyList<string>? Conditions = null,
+    // D29: optional; required only when host state overrides target this card.
+    string? LocalId = null);
 
 /// <summary>Specifies initial mutable state for a player atom.</summary>
 public sealed record PlayerStateSpec(

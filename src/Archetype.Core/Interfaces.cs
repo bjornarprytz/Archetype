@@ -240,6 +240,11 @@ public sealed record TriggerOrderResponse(IReadOnlyList<StaticEffectId> Order) :
 public sealed class GameStateView
 {
     private readonly IGameStateReadable _inner;
+    // D30: events from the most recently completed ResolveAction call.
+    // Reset to empty at the start of each new action; populated after all blocks,
+    // SBRs, and triggers resolve.  The engine sets this via SetLastActionEvents;
+    // callers read it via LastActionEvents.
+    private IReadOnlyList<GameEvent> _lastActionEvents = Array.Empty<GameEvent>();
 
     /// <summary>
     /// Wraps an <see cref="IGameStateReadable"/> in a read-only view.
@@ -247,6 +252,26 @@ public sealed class GameStateView
     /// <see cref="IPlayerStrategy"/> callbacks; the engine constructs it here.
     /// </summary>
     public GameStateView(IGameStateReadable inner) => _inner = inner;
+
+    /// <summary>
+    /// The events appended during the most recently completed
+    /// <c>ResolveAction</c> call.  Reset to an empty list at the start of
+    /// each new action and populated after all blocks, SBRs, and triggers
+    /// have resolved (D30).
+    /// <para>
+    /// Used by the Godot interop wrapper to emit GDScript signals after each
+    /// action without requiring changes to <see cref="IEngineObserver"/> or
+    /// the engine's execution path.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<GameEvent> LastActionEvents => _lastActionEvents;
+
+    /// <summary>
+    /// Sets the <see cref="LastActionEvents"/> list.  Called by the engine
+    /// after <c>ResolveAction</c> completes.  Not part of the game-creator API.
+    /// </summary>
+    public void SetLastActionEvents(IReadOnlyList<GameEvent> events) =>
+        _lastActionEvents = events;
 
     /// <summary>Returns the accumulated value for the named property on an atom.</summary>
     public double GetAccumulator(AtomId atom, string name) =>

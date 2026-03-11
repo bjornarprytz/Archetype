@@ -40,6 +40,7 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
+            InitManifest:           InitManifest.Empty,
             Id:                     "test-game");
 
     /// <summary>
@@ -155,6 +156,7 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
+            InitManifest:           InitManifest.Empty,
             Id:                     "test-game");
 
         var strategy = new ScriptedPlayerStrategy()
@@ -301,7 +303,7 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: manifest,
+            InitManifest: manifest,
             Id:                  "test-game");
 
         var strategy = new ScriptedPlayerStrategy().QueueAction(null);
@@ -309,7 +311,6 @@ public sealed class GameSessionTests
         var session = Archetype.Engine.GameSession.Create(def)
             .WithPlayerStrategy("p1", strategy)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build();
 
         // Act — game ends via SBR.
@@ -391,7 +392,7 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: manifest,
+            InitManifest: manifest,
             Id:                  "test-game");
 
         var strategy = new ScriptedPlayerStrategy().QueueAction(null);
@@ -399,7 +400,6 @@ public sealed class GameSessionTests
         var session = Archetype.Engine.GameSession.Create(def)
             .WithPlayerStrategy("p1", strategy)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build();
 
         // Act
@@ -499,7 +499,7 @@ public sealed class GameSessionTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: manifest,
+            InitManifest: manifest,
             Id:                  "test-game");
 
         // Strategy: we don't know the card AtomId until after provisioning,
@@ -518,7 +518,6 @@ public sealed class GameSessionTests
         var session = Archetype.Engine.GameSession.Create(def)
             .WithPlayerStrategy("p1", captureStrategy)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build();
 
         // Act

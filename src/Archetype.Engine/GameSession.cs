@@ -18,7 +18,7 @@ public sealed class GameSessionBuilder
     private readonly Dictionary<string, IPlayerStrategy> _strategies = new(StringComparer.Ordinal);
     private IRandomSource? _randomSource;
     private IEngineObserver? _observer;
-    private InitManifest? _manifest;
+    private HostManifest? _hostManifest;
     // Non-null when FromSavedState was called; drives the load path in Build().
     private GameStateSnapshot? _snapshot;
 
@@ -54,31 +54,23 @@ public sealed class GameSessionBuilder
     }
 
     /// <summary>
-    /// Uses <see cref="GameDefinition.DefaultInitManifest"/> as the starting
-    /// state.  Mutually exclusive with <see cref="WithInitManifest(InitManifest)"/>
-    /// and <see cref="FromSavedState"/>; last call wins.
+    /// Supplies an optional <see cref="HostManifest"/> that is appended after
+    /// <see cref="GameDefinition.InitManifest"/> is provisioned.  Use this for
+    /// session-specific additions such as a player's chosen cards.
+    /// <para>
+    /// Mutually exclusive with <see cref="FromSavedState"/>; calling both is a
+    /// <see cref="SessionException"/> at <c>Build()</c> time.
+    /// </para>
     /// </summary>
-    public GameSessionBuilder UseDefaultInit()
+    public GameSessionBuilder WithHostManifest(HostManifest manifest)
     {
-        _manifest = _definition.DefaultInitManifest;
-        return this;
-    }
-
-    /// <summary>
-    /// Uses a custom <see cref="InitManifest"/> as the starting state.
-    /// Mutually exclusive with <see cref="UseDefaultInit"/> and
-    /// <see cref="FromSavedState"/>; last call wins.
-    /// </summary>
-    public GameSessionBuilder WithInitManifest(InitManifest manifest)
-    {
-        _manifest = manifest;
+        _hostManifest = manifest;
         return this;
     }
 
     /// <summary>
     /// Loads a previously saved session from a <see cref="GameStateSnapshot"/>.
-    /// Mutually exclusive with <see cref="UseDefaultInit"/> and
-    /// <see cref="WithInitManifest(InitManifest)"/>; last call wins.
+    /// Mutually exclusive with <see cref="WithHostManifest"/>; last call wins.
     /// <para>
     /// When this is set, <c>Build()</c> does not require <see cref="WithRandomSource"/>
     /// — the RNG is seeded from the snapshot.  <c>Build()</c> validates that
@@ -116,6 +108,26 @@ public sealed class GameSessionBuilder
                 "GameSessionBuilder.Build(): GameDefinition.Id must be set to a non-empty string. " +
                 "This is required for save/load snapshot validation (D17).");
 
+        // D29: validate InitManifest zone LocalId uniqueness.
+        var initZoneIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var zone in _definition.InitManifest.Zones)
+        {
+            if (!initZoneIds.Add(zone.LocalId))
+                throw new DefinitionException(
+                    $"GameDefinition.InitManifest: duplicate zone LocalId '{zone.LocalId}'. " +
+                    "Zone LocalIds must be unique within InitManifest.Zones.");
+        }
+
+        // D29: validate InitManifest card LocalId uniqueness (non-null values only).
+        var initCardIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var card in _definition.InitManifest.Cards)
+        {
+            if (card.LocalId is not null && !initCardIds.Add(card.LocalId))
+                throw new DefinitionException(
+                    $"GameDefinition.InitManifest: duplicate card LocalId '{card.LocalId}'. " +
+                    "Non-null card LocalIds must be unique within InitManifest.Cards.");
+        }
+
         // When loading from a snapshot the RNG is derived from the snapshot;
         // WithRandomSource is not required.
         if (_snapshot is null && _randomSource is null)
@@ -129,6 +141,75 @@ public sealed class GameSessionBuilder
                 $"GameSessionBuilder.Build(): snapshot GameDefinitionId '{_snapshot.GameDefinitionId}' " +
                 $"does not match GameDefinition.Id '{_definition.Id}'. " +
                 "Cannot load a snapshot from a different game definition.");
+
+        // D29: WithHostManifest and FromSavedState are mutually exclusive.
+        if (_snapshot is not null && _hostManifest is not null)
+            throw new SessionException(
+                "GameSessionBuilder.Build(): WithHostManifest and FromSavedState are mutually exclusive. " +
+                "A saved-state session cannot accept a host manifest because provisioning was already completed " +
+                "when the snapshot was taken.");
+
+        // D29: validate HostManifest LocalId uniqueness against InitManifest zone LocalIds.
+        if (_hostManifest is not null)
+        {
+            // Build the set of InitManifest zone LocalIds for collision checking.
+            var existingZoneIds = new HashSet<string>(
+                _definition.InitManifest.Zones.Select(z => z.LocalId),
+                StringComparer.Ordinal);
+
+            // No duplicates within HostManifest.Zones.
+            var hostZoneIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var zone in _hostManifest.Zones)
+            {
+                if (!hostZoneIds.Add(zone.LocalId))
+                    throw new SessionException(
+                        $"GameSessionBuilder.Build(): duplicate zone LocalId '{zone.LocalId}' " +
+                        "within HostManifest.Zones.");
+                if (existingZoneIds.Contains(zone.LocalId))
+                    throw new SessionException(
+                        $"GameSessionBuilder.Build(): HostManifest zone LocalId '{zone.LocalId}' " +
+                        "collides with an InitManifest zone LocalId. Zone LocalIds must be unique " +
+                        "across both manifests.");
+            }
+
+            // No duplicate non-null card LocalIds within HostManifest.Cards.
+            var hostCardIds = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var card in _hostManifest.Cards)
+            {
+                if (card.LocalId is not null && !hostCardIds.Add(card.LocalId))
+                    throw new SessionException(
+                        $"GameSessionBuilder.Build(): duplicate card LocalId '{card.LocalId}' " +
+                        "within HostManifest.Cards.");
+            }
+
+            // D29 §5: AtomStateOverride CardTarget must refer to InitManifest cards,
+            // not HostManifest cards.  Validate at Build() time before provisioning.
+            var initCardLocalIds = new HashSet<string>(
+                _definition.InitManifest.Cards
+                    .Where(c => c.LocalId is not null)
+                    .Select(c => c.LocalId!),
+                StringComparer.Ordinal);
+
+            foreach (var stateOverride in _hostManifest.StateOverrides)
+            {
+                if (stateOverride.Target is CardTarget ct)
+                {
+                    if (!initCardLocalIds.Contains(ct.LocalId))
+                    {
+                        // If the LocalId matches a HostManifest card, give a specific error.
+                        bool isHostCard = hostCardIds.Contains(ct.LocalId);
+                        if (isHostCard)
+                            throw new SessionException(
+                                $"GameSessionBuilder.Build(): AtomStateOverride CardTarget '{ct.LocalId}' " +
+                                "targets a HostManifest card. State overrides may only target InitManifest " +
+                                "cards (D29 §5). Configure host card state via CardSpec fields.");
+                        throw new SessionException(
+                            $"GameSessionBuilder.Build(): AtomStateOverride CardTarget '{ct.LocalId}' " +
+                            "does not match any non-null CardSpec.LocalId in InitManifest.Cards.");
+                    }
+                }
+            }
+        }
 
         // Every defined player needs a strategy.
         foreach (var name in _definition.PlayerDefinitions.Keys)
@@ -153,7 +234,7 @@ public sealed class GameSessionBuilder
             ? SeededRandom.FromSnapshot(_snapshot.Rng)
             : _randomSource!;
 
-        return new GameSession(_definition, _strategies, rng, _observer, _manifest, _snapshot);
+        return new GameSession(_definition, _strategies, rng, _observer, _hostManifest, _snapshot);
     }
 }
 
@@ -162,8 +243,9 @@ public sealed class GameSessionBuilder
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// The public runtime handle for a game.  Provisions atoms from the
-/// <see cref="InitManifest"/>, then drives the phase/turn loop until a
+/// The public runtime handle for a game.  Provisions atoms from
+/// <see cref="GameDefinition.InitManifest"/> (and an optional
+/// <see cref="HostManifest"/>), then drives the phase/turn loop until a
 /// state-based rule declares an outcome.
 /// <para>
 /// Obtain an instance via <c>GameSession.Create(definition).With...().Build()</c>.
@@ -175,7 +257,7 @@ public sealed class GameSession
     private readonly IReadOnlyDictionary<string, IPlayerStrategy> _strategies;
     private readonly IRandomSource _randomSource;
     private readonly IEngineObserver? _observer;
-    private readonly InitManifest? _manifest;
+    private readonly HostManifest? _hostManifest;
     // Non-null when the session was constructed via FromSavedState (D17 load path).
     private readonly GameStateSnapshot? _loadSnapshot;
 
@@ -197,14 +279,14 @@ public sealed class GameSession
         IReadOnlyDictionary<string, IPlayerStrategy> strategies,
         IRandomSource randomSource,
         IEngineObserver? observer,
-        InitManifest? manifest,
+        HostManifest? hostManifest,
         GameStateSnapshot? loadSnapshot = null)
     {
         _definition   = definition;
         _strategies   = strategies;
         _randomSource = randomSource;
         _observer     = observer;
-        _manifest     = manifest;
+        _hostManifest = hostManifest;
         _loadSnapshot = loadSnapshot;
 
         _state    = new GameState();
@@ -359,6 +441,8 @@ public sealed class GameSession
             if (action is null or Pass)
             {
                 await _resolver.ResolveAction(null, _state, _eventLog, activePlayer, turn);
+                // D30: populate LastActionEvents after the action completes.
+                stateView.SetLastActionEvents(_eventLog.LastActionEvents);
                 return;
             }
 
@@ -370,6 +454,8 @@ public sealed class GameSession
 
             await _resolver.ResolveAction(primaryBlock, _state, _eventLog, activePlayer, turn,
                 costBlocks: costBlocks);
+            // D30: populate LastActionEvents after the action completes.
+            stateView.SetLastActionEvents(_eventLog.LastActionEvents);
             if (_state.GameIsOver) return;
         }
     }
@@ -618,23 +704,29 @@ public sealed class GameSession
             _playerOrder.Add(name);
         }
 
-        // Steps 3–6: manifest provisioning (optional).
-        if (_manifest is not null)
-            ProvisionManifest(_manifest);
+        // Steps 3–6: InitManifest provisioning (D29: always applied, non-nullable).
+        ProvisionManifest(_definition.InitManifest, out var localIdToAtomId);
+
+        // Steps 7–9: HostManifest provisioning (optional append and patch layer).
+        if (_hostManifest is not null)
+            ProvisionHostManifest(_hostManifest, localIdToAtomId);
     }
 
     /// <summary>
     /// Provisions an <see cref="InitManifest"/> into <see cref="_state"/>.
     /// <para>
-    /// Follows the provisioning order specified in D14:
+    /// Follows the nine-step provisioning order specified in D29:
     /// zones → cards (with static effects) → card overrides → player overrides.
-    /// No events are logged during provisioning.
+    /// The <paramref name="localIdToAtomId"/> map is returned to the caller so that
+    /// <see cref="ProvisionHostManifest"/> can resolve zone references that span
+    /// both manifests.  No events are logged during provisioning.
     /// </para>
     /// </summary>
-    private void ProvisionManifest(InitManifest manifest)
+    private void ProvisionManifest(InitManifest manifest, out Dictionary<string, AtomId> localIdToAtomId)
     {
-        // Zone LocalId → engine AtomId mapping; scoped to this provisioning pass.
+        // Zone LocalId → engine AtomId mapping; returned to caller for host manifest use.
         var zoneLocalToAtomId = new Dictionary<string, AtomId>(StringComparer.Ordinal);
+        localIdToAtomId = zoneLocalToAtomId;
 
         // -- Step 3: zones --
         foreach (var zoneSpec in manifest.Zones)
@@ -664,6 +756,10 @@ public sealed class GameSession
             var cardId  = _state.CreateAtom(AtomKind.Card, ownerId: ownerId, zoneId: zoneAtomId);
             _atomDefinitionNames[cardId] = cardSpec.Definition;
 
+            // D29: register card LocalId → AtomId so AtomStateOverride can target it.
+            if (cardSpec.LocalId is not null)
+                zoneLocalToAtomId[$"card:{cardSpec.LocalId}"] = cardId;
+
             // Provision declarative static effects from the card definition (D6/D12).
             // Pass cardDefinitionName and effectIndex so D17 snapshots can produce
             // StaticEffectDefRef without scanning all definitions.
@@ -687,6 +783,127 @@ public sealed class GameSession
             var playerId = RequirePlayerAtomId(playerSpec.Player, "PlayerStateSpec");
             ApplyAccumulators(playerId, playerSpec.Accumulators);
             ApplyConditions(playerId, playerSpec.Conditions);
+        }
+    }
+
+    /// <summary>
+    /// Provisions the host manifest's zones, cards, and state overrides into
+    /// <see cref="_state"/> (steps 7–9 of D29's nine-step provisioning order).
+    /// <para>
+    /// The <paramref name="localIdToAtomId"/> map is already populated with zone
+    /// and card LocalId → AtomId entries from <see cref="ProvisionManifest"/>
+    /// (steps 3–6).  Host zones and cards extend it; state overrides patch atoms
+    /// from either manifest.
+    /// </para>
+    /// </summary>
+    private void ProvisionHostManifest(
+        HostManifest host,
+        Dictionary<string, AtomId> localIdToAtomId)
+    {
+        var lifetimes = new LifetimeChecker(new BlockExecutor());
+
+        // -- Step 7: host zones --
+        foreach (var zoneSpec in host.Zones)
+        {
+            var ownerId = RequirePlayerAtomId(zoneSpec.Owner, "HostManifest ZoneSpec");
+            var zoneId  = _state.CreateAtom(AtomKind.Zone, ownerId: ownerId);
+            localIdToAtomId[zoneSpec.LocalId] = zoneId;
+
+            ApplyAccumulators(zoneId, zoneSpec.Accumulators);
+            ApplyConditions(zoneId, zoneSpec.Conditions);
+            _atomDefinitionNames[zoneId] = zoneSpec.Definition;
+        }
+
+        // -- Step 8: host cards --
+        foreach (var cardSpec in host.Cards)
+        {
+            // ZoneLocalId may reference zones from either InitManifest or HostManifest.
+            if (!localIdToAtomId.TryGetValue(cardSpec.ZoneLocalId, out var zoneAtomId))
+                throw new InvalidOperationException(
+                    $"HostManifest card '{cardSpec.Definition}' references unknown zone LocalId " +
+                    $"'{cardSpec.ZoneLocalId}'. It must exist in either InitManifest or HostManifest zones.");
+
+            var ownerId = RequirePlayerAtomId(cardSpec.Owner, "HostManifest CardSpec");
+            var cardId  = _state.CreateAtom(AtomKind.Card, ownerId: ownerId, zoneId: zoneAtomId);
+            _atomDefinitionNames[cardId] = cardSpec.Definition;
+
+            // Register card LocalId for potential state override reference.
+            if (cardSpec.LocalId is not null)
+                localIdToAtomId[$"host-card:{cardSpec.LocalId}"] = cardId;
+
+            // Provision declarative static effects.
+            if (_definition.CardDefinitions.TryGetValue(cardSpec.Definition, out var cardDef))
+            {
+                for (int ei = 0; ei < cardDef.StaticEffects.Count; ei++)
+                    lifetimes.ProvisionDeclarativeEffect(
+                        cardDef.StaticEffects[ei], cardId, _state,
+                        cardDefinitionName: cardSpec.Definition,
+                        effectIndex: ei);
+            }
+
+            ApplyAccumulators(cardId, cardSpec.Accumulators);
+            ApplyConditions(cardId, cardSpec.Conditions);
+        }
+
+        // -- Step 9: state overrides (accumulator merge, condition append) --
+        // D29: AtomStateOverride may only target atoms from InitManifest, not HostManifest atoms.
+        foreach (var stateOverride in host.StateOverrides)
+        {
+            var atomId = ResolveOverrideTarget(stateOverride.Target, localIdToAtomId);
+            ApplyAccumulators(atomId, stateOverride.Accumulators);
+            ApplyConditions(atomId, stateOverride.Conditions);
+        }
+    }
+
+    /// <summary>
+    /// Resolves an <see cref="OverrideTarget"/> to an <see cref="AtomId"/>.
+    /// Throws <see cref="SessionException"/> if the target cannot be resolved or
+    /// targets a <see cref="HostManifest"/>-provisioned atom.
+    /// </summary>
+    private AtomId ResolveOverrideTarget(
+        OverrideTarget target,
+        Dictionary<string, AtomId> localIdToAtomId)
+    {
+        switch (target)
+        {
+            case ZoneTarget z:
+                if (!localIdToAtomId.TryGetValue(z.LocalId, out var zoneId))
+                    throw new SessionException(
+                        $"AtomStateOverride ZoneTarget '{z.LocalId}' does not match any zone LocalId " +
+                        "in InitManifest or HostManifest zones.");
+                // D29: overrides may target atoms from InitManifest zones.
+                // (HostManifest zones are listed under the same namespace but this is accepted
+                // by D29 §5 — the restriction is only on CardTarget, not ZoneTarget.)
+                return zoneId;
+
+            case CardTarget c:
+                // D29: card overrides target InitManifest cards only (keyed with "card:" prefix).
+                var initKey = $"card:{c.LocalId}";
+                if (!localIdToAtomId.TryGetValue(initKey, out var cardId))
+                {
+                    // Check if it's a host card — targeting those is prohibited.
+                    var hostKey = $"host-card:{c.LocalId}";
+                    if (localIdToAtomId.ContainsKey(hostKey))
+                        throw new SessionException(
+                            $"AtomStateOverride CardTarget '{c.LocalId}' targets a HostManifest card. " +
+                            "State overrides may only target InitManifest cards. Configure host card " +
+                            "state via CardSpec.Accumulators / CardSpec.Conditions at construction time.");
+                    throw new SessionException(
+                        $"AtomStateOverride CardTarget '{c.LocalId}' does not match any non-null " +
+                        "CardSpec.LocalId in InitManifest. Ensure the card has a LocalId set.");
+                }
+                return cardId;
+
+            case PlayerTarget p:
+                if (!_playerAtomIds.TryGetValue(p.PlayerName, out var playerId))
+                    throw new SessionException(
+                        $"AtomStateOverride PlayerTarget '{p.PlayerName}' does not match any player " +
+                        "defined in GameDefinition.PlayerDefinitions.");
+                return playerId;
+
+            default:
+                throw new SessionException(
+                    $"Unknown OverrideTarget type '{target.GetType().Name}'.");
         }
     }
 

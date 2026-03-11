@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-09 (D20–D25 action-args-and-cost-model — 102/102 tests passing — Reviewer: PASS)
+> Last updated: 2026-03-11 (D29 HostManifest + D30 LastActionEvents — 115/115 tests passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
@@ -55,6 +55,13 @@
 - `ValidationResult` record (D21/D22) — `IsValid: bool`, `CostTexts: IReadOnlyList<string>`, static `Empty` and `Invalid` factories
 - `OnFail` enum (`Continue | Stop | Panic`) and `NotifyFlag` enum (`On | Off`) — inline-literal-only (D20)
 - `DiagnosticKind` enum and `DiagnosticEvent` record (D25)
+- **D29**: `InitManifest` renamed from `DefaultInitManifest`; now non-nullable on `GameDefinition`; `InitManifest.Empty` static property; `CardSpec.LocalId: string?` optional field
+
+### `HostManifest` ✅ (D29)
+- `HostManifest(Zones, Cards, StateOverrides)` in `Archetype.Core/HostManifest.cs` — session-time append+patch layer
+- `AtomStateOverride(Target, Accumulators?, Conditions?)` — patches atom state after provisioning
+- `OverrideTarget` discriminated union: `ZoneTarget(LocalId)`, `CardTarget(LocalId)`, `PlayerTarget(PlayerName)`
+- `SessionException` in `Archetype.Core/Exceptions.cs` — session-build-time contract violations (distinct from `DefinitionException`)
 
 ### Interfaces ✅
 - `IPlayerStrategy`, `IRandomSource`, `IEngineObserver` (`OnTurnStart` + `OnTriggerCascadeAsync` → `CascadeDirective` + `OnDiagnostic(DiagnosticEvent)` D25)
@@ -62,6 +69,8 @@
 - `AvailableActions` now carries `ValidateActionArgs: Func<PlayerAction, ValidationResult>` (D22)
 - Prompt types: `PromptContext`, `PromptResponse`, `ChoicePrompt`, `TriggerOrderPrompt`
 - `GameStateView` (public read-only view), `IGameStateReadable`
+- **D30**: `GameStateView.LastActionEvents: IReadOnlyList<GameEvent>` — events from most recently completed `ResolveAction` (including all recursive descendants); `SetLastActionEvents` called by engine after each action
+- **D30**: `EventLog.LastActionEvents` — captured in `CloseAction()` before accumulator is cleared; exposes recursive `SelfAndDescendants()` flat list
 
 ---
 
@@ -137,9 +146,9 @@
 - `WithPlayerStrategy(name, strategy)` — registers one strategy per defined player; validated at `Build()` time
 - `WithRandomSource(source)` — required; `Build()` throws if absent
 - `WithObserver(observer)` — optional cascade observer
-- `UseDefaultInit()` / `WithInitManifest(manifest)` — manifest selection; last call wins
+- `WithHostManifest(HostManifest)` (D29) — session-time append layer; mutually exclusive with `FromSavedState`
 - `FromSavedState(GameStateSnapshot snapshot)` — load path; `Build()` skips `WithRandomSource` requirement, validates `GameDefinitionId`, derives RNG from snapshot
-- `Build()` — validates `GameDefinition.Id` non-empty; validates all players have strategies; no extra strategies for undefined players
+- `Build()` — validates `GameDefinition.Id` non-empty; validates all players have strategies; no extra strategies for undefined players; D29 LocalId uniqueness validation (InitManifest zones/cards, HostManifest zones/cards, cross-manifest collision); CardTarget in `StateOverrides` must target InitManifest cards only
 
 ### `GameSession` ✅
 - `static GameSessionBuilder Create(GameDefinition)` — factory entry point
@@ -147,10 +156,12 @@
 - **Turn loop**: advances `turn-number` and `phase-index` accumulators; each phase runs Init → ActionWindow → Cleanup
 - **`GameIsOver` propagation**: checks `_state.GameIsOver` after every `ResolveAction` call; also short-circuits mid-cascade in `ActionResolver`
 - **Round-robin active player**: `(turn-1) % playerCount` over `PlayerDefinitions` insertion order
-- **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest`
-- **`ProvisionManifest(InitManifest)`**: zones → cards (with `ProvisionDeclarativeEffect`) → card overrides → player overrides
+- **`ProvisionSession()`**: creates session atom (turn-number=1, phase-index=0), player atoms, calls `ProvisionManifest(InitManifest)` then optionally `ProvisionHostManifest`
+- **`ProvisionManifest(InitManifest, out Dictionary<string, AtomId>)`** (D29): zones (LocalId keyed) → cards (with `ProvisionDeclarativeEffect`, card LocalId keyed with `"card:{LocalId}"` prefix) → card overrides → player overrides
+- **`ProvisionHostManifest(HostManifest, existingLocalIds)`** (D29): zones → cards (LocalId keyed `"host-card:{LocalId}"`) → `AtomStateOverride` application; `CardTarget` may only reference InitManifest cards; `PlayerTarget` resolved by player name
 - **`ComputeAvailableActions`**: two independent passes — Pass 1 (PlayCard, zone-filtered + activation condition, no ownership predicate — D24); Pass 2 (abilities, all card atoms regardless of zone or owner — D24); `ValidateActionArgs` delegate captures state clone at compute time (D22)
 - **`TranslatePlayerAction`**: `PlayCard` → definition's `PrimaryEffect`; `ActivateAbility` → named `AdditionalEffects` body; `Pass` → null
+- **D30 `LastActionEvents`**: `RunActionWindowAsync` calls `stateView.SetLastActionEvents(_eventLog.LastActionEvents)` after each `ResolveAction` (both card play and pass paths)
 
 ### `get-atoms-in-zone` built-in ✅
 - `get-atoms-in-zone(zone: Zone) → Collection` — pure read; returns all atoms whose `ZoneId` matches the given zone atom
@@ -238,8 +249,10 @@
 | `SaveLoad/SaveLoadTests.cs` | 13 | ✅ All passing (T13 added for BLOCKER 1 regression) |
 | `BuiltIns/AssertTests.cs` | 7 | ✅ All passing (new — D20 assert semantics) |
 | `CostModel/CostModelTests.cs` | 7 | ✅ All passing (new — D21 cost validation + D23 sequencing) |
+| `HostManifest/HostManifestTests.cs` | 9 | ✅ All passing (new — D29 HostManifest + InitManifest enforcement) |
+| `GameSession/LastActionEventsTests.cs` | 4 | ✅ All passing (new — D30 LastActionEvents) |
 
-**Total: 102 tests, 102 passing.**
+**Total: 115 tests, 115 passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

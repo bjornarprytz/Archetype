@@ -76,6 +76,7 @@ public sealed class SaveLoadTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
+            InitManifest:           InitManifest.Empty,
             Id:                     "save-load-test");
     }
 
@@ -244,7 +245,7 @@ public sealed class SaveLoadTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest:    manifest,
+            InitManifest:    manifest,
             Id:                     "save-load-test");
 
         var observer = new CapturingObserver();
@@ -254,7 +255,6 @@ public sealed class SaveLoadTests
             .WithPlayerStrategy("p1", strategy)
             .WithRandomSource(new SeededRandom(1L))
             .WithObserver(observer)
-            .UseDefaultInit()
             .Build();
 
         await session.RunAsync();
@@ -484,6 +484,7 @@ public sealed class SaveLoadTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
+            InitManifest:           InitManifest.Empty,
             Id: "save-load-test");
 
         var observer = new CapturingObserver();
@@ -528,7 +529,9 @@ public sealed class SaveLoadTests
             PlayerDefinitions:      new Dictionary<string, PlayerDefinition>
             {
                 ["p1"] = new(new Dictionary<string, object>()),
-            }
+            },
+            // D29: InitManifest is required; use Empty to satisfy the record constructor.
+            InitManifest:           InitManifest.Empty
             // Id intentionally omitted — defaults to null
         );
 
@@ -608,6 +611,7 @@ public sealed class SaveLoadTests
             ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
             TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
             PlayerDefinitions:      new Dictionary<string, PlayerDefinition>(),
+            InitManifest:           InitManifest.Empty,
             Id:                     "save-load-test");
 
         // Load state using GameState.LoadFromSnapshot.
@@ -688,7 +692,7 @@ public sealed class SaveLoadTests
             {
                 ["p1"] = new(new Dictionary<string, object>()),
             },
-            DefaultInitManifest:    manifest,
+            InitManifest:    manifest,
             Id:                     "save-load-test");
 
         var observer = new CapturingObserver();
@@ -698,7 +702,6 @@ public sealed class SaveLoadTests
             .WithPlayerStrategy("p1", strategy)
             .WithRandomSource(new SeededRandom(1L))
             .WithObserver(observer)
-            .UseDefaultInit()
             .Build();
 
         await session.RunAsync();

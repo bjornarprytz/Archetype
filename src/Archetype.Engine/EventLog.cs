@@ -27,6 +27,10 @@ internal sealed class EventLog
     // EvaluateComposite to implement the parent-event tree (D4).
     private readonly Stack<GameEvent> _compositeStack = new();
 
+    // D30: snapshot of the last completed action's events for GameStateView.LastActionEvents.
+    // Captured in CloseAction before _actionAccum is cleared.
+    private IReadOnlyList<GameEvent> _lastActionEvents = Array.Empty<GameEvent>();
+
     private long _seqNext = 1;
 
     // -----------------------------------------------------------------------
@@ -94,9 +98,21 @@ internal sealed class EventLog
     /// <summary>Closes the action scope: merges into the turn accumulator.</summary>
     public void CloseAction()
     {
+        // D30: capture the full action event list (with recursive descendants)
+        // before clearing so GameStateView.LastActionEvents can expose them.
+        _lastActionEvents = _actionAccum
+            .SelectMany(e => e.SelfAndDescendants())
+            .ToList();
         _turnAccum.AddRange(_actionAccum);
         _actionAccum.Clear();
     }
+
+    /// <summary>
+    /// D30: the events from the most recently completed action, including all
+    /// recursive descendants.  Reset when the next action opens via
+    /// <see cref="OpenAction"/>.
+    /// </summary>
+    public IReadOnlyList<GameEvent> LastActionEvents => _lastActionEvents;
 
     /// <summary>Opens a new turn scope.</summary>
     public void OpenTurn() => _turnAccum.Clear();

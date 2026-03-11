@@ -280,7 +280,6 @@ public sealed class CostModelTests
         var result = await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -364,7 +363,7 @@ public sealed class CostModelTests
             {
                 ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: new InitManifest(
+            InitManifest: new InitManifest(
                 Zones:  [new ZoneSpec("p1-hand", "p1", "hand")],
                 Cards:  [new CardSpec("p1", "p1-hand", "test-card")],
                 PlayerStates: []),

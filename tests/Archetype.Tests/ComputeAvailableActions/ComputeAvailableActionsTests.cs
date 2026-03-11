@@ -142,7 +142,6 @@ public sealed class ComputeAvailableActionsTests
         await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -184,7 +183,6 @@ public sealed class ComputeAvailableActionsTests
         await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -232,7 +230,6 @@ public sealed class ComputeAvailableActionsTests
         await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -262,7 +259,6 @@ public sealed class ComputeAvailableActionsTests
         await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -319,7 +315,6 @@ public sealed class ComputeAvailableActionsTests
         await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -374,7 +369,6 @@ public sealed class ComputeAvailableActionsTests
             .WithPlayerStrategy("p1", capturing)
             .WithPlayerStrategy("p2", new PassPlayerStrategy())
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -427,7 +421,6 @@ public sealed class ComputeAvailableActionsTests
             .WithPlayerStrategy("p1", capturing)
             .WithPlayerStrategy("p2", new PassPlayerStrategy())
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -479,7 +472,6 @@ public sealed class ComputeAvailableActionsTests
             .WithPlayerStrategy("p1", capturing)
             .WithPlayerStrategy("p2", new PassPlayerStrategy())
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -559,7 +551,7 @@ public sealed class ComputeAvailableActionsTests
             {
                 ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
             },
-            DefaultInitManifest: new InitManifest(
+            InitManifest: new InitManifest(
                 Zones:  [new ZoneSpec("p1-hand", "p1", "hand")],
                 Cards:  [new CardSpec("p1", "p1-hand", "energy-card")],
                 PlayerStates:
@@ -577,7 +569,6 @@ public sealed class ComputeAvailableActionsTests
         var result = await EngineGameSession.Create(def)
             .WithPlayerStrategy("p1", capturing)
             .WithRandomSource(new MockRandomSource())
-            .UseDefaultInit()
             .Build()
             .RunAsync();
 
@@ -650,7 +641,7 @@ public sealed class ComputeAvailableActionsTests
             {
                 ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
             },
-            DefaultInitManifest:    manifest,
+            InitManifest:    manifest,
             PlayableZoneNames:      playableZoneNames,
             Id:                     "test-game");
     }
@@ -692,7 +683,7 @@ public sealed class ComputeAvailableActionsTests
                 ["p1"] = new PlayerDefinition(new Dictionary<string, object>()),
                 ["p2"] = new PlayerDefinition(new Dictionary<string, object>()),
             },
-            DefaultInitManifest:    manifest,
+            InitManifest:    manifest,
             PlayableZoneNames:      playableZoneNames,
             Id:                     "test-game");
     }
