@@ -124,13 +124,13 @@ Small engine addition; depends only on existing engine code.
 
 ---
 
-## Group 2 — Electron project scaffold (D26)
+## Group 2 — Electron project scaffold (D26) ✅ COMPLETE
 
 Create the `tooling/` directory with a working Electron + TypeScript + React
 skeleton. No sidecar integration yet — this group establishes the project
 structure, build pipeline, and IPC skeleton.
 
-### 2.1  Scaffold `tooling/` Electron project
+### 2.1  Scaffold `tooling/` Electron project ✅
   - reads: `docs/architecture.md#D26`
   - writes: `tooling/package.json`, `tooling/tsconfig.json`,
     `tooling/tsconfig.main.json`, `tooling/tsconfig.preload.json`,
@@ -140,14 +140,14 @@ structure, build pipeline, and IPC skeleton.
     Vite for renderer bundle; `tsx` for main/preload dev run.
     Vitest for renderer tests; add `vitest.config.ts`.
 
-### 2.2  Main process entry point + window management
+### 2.2  Main process entry point + window management ✅
   - reads: `docs/architecture.md#D26`, `tooling/package.json`
   - writes: `tooling/src/main/main.ts`, `tooling/src/main/windowManager.ts`
   - Create `BrowserWindow` with `contextIsolation: true`. Preload script path
     configured. Dev: load Vite dev server URL. Prod: load `index.html` from
     dist. No sidecar spawn yet.
 
-### 2.3  Preload bridge (`contextBridge`)
+### 2.3  Preload bridge (`contextBridge`) ✅
   - reads: `docs/architecture.md#D26`
   - writes: `tooling/src/preload/preload.ts`, `tooling/src/shared/ipc.ts`
   - `contextBridge.exposeInMainWorld('archetype', ...)` exposes:
@@ -156,14 +156,14 @@ structure, build pipeline, and IPC skeleton.
   - `src/shared/ipc.ts` defines all IPC channel names and request/response
     types as TypeScript interfaces (strict, no `any`).
 
-### 2.4  Renderer entry point (React)
+### 2.4  Renderer entry point (React) ✅
   - reads: `docs/architecture.md#D26`, `tooling/src/shared/ipc.ts`
   - writes: `tooling/src/renderer/index.tsx`, `tooling/src/renderer/App.tsx`,
     `tooling/index.html`
   - Minimal React app mounting in `#root`. App shell: sidebar nav + main
     content area. No real content yet — placeholder panels.
 
-### 2.5  State management setup (Zustand)
+### 2.5  State management setup (Zustand) ✅
   - reads: `docs/architecture.md#D26`, `docs/architecture.md#D27`
   - writes: `tooling/src/renderer/store/projectStore.ts`,
     `tooling/src/renderer/store/diagnosticsStore.ts`
@@ -171,7 +171,7 @@ structure, build pipeline, and IPC skeleton.
     pending mutation state. `diagnosticsStore`: tracks global error/warning
     counts (updated from every sidecar mutation response).
 
-### 2.6  Renderer unit test skeleton
+### 2.6  Renderer unit test skeleton ✅
   - reads: `tooling/src/renderer/store/projectStore.ts`
   - writes: `tooling/src/renderer/__tests__/App.test.tsx`
   - Smoke test: App renders without crashing. Establishes that Vitest +

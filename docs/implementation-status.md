@@ -1,8 +1,8 @@
 # Implementation Status
 
-> Last updated: 2026-03-11 (tooling sidecar D27/D28 bug-fix pass + BLOCKER fixes — reviewer re-review: PASS; 150/150 tests; MINOR fix applied: StaticEffectEntry.Diagnostics now propagated to state.Diagnostics in Validator)
+> Last updated: 2026-03-12 (Group 2 complete — Electron scaffold: tooling/package.json, TS configs, Vite, Vitest, main process, preload contextBridge, shared IPC contracts, React app shell, Zustand stores, 5 renderer unit tests passing)
 > Branch: `impl/text-renderer`
-> All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`.
+> All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`. Electron tooling in `tooling/`.
 
 ---
 
@@ -14,7 +14,8 @@
 | `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
-| `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete (Groups 2, 5–7 are Electron-side) |
+| `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete |
+| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores | ✅ Group 2 complete (Groups 5–7 pending) |
 
 ---
 
@@ -269,7 +270,48 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 - **BLOCKER 1** — `UpdateLifetimeSpecHandler` now calls `LifetimeDsl.Parse` immediately after storing `LifetimeDsl`, populating `LifetimeNode` in-session so the exporter sees the updated spec without a save/reload cycle (D27). Invalid DSL records a diagnostic and leaves `LifetimeNode` null.
 - **BLOCKER 2** — `RenameEntryHandler.RewriteKeywordRefs` extended to rewrite `PhaseEntry.InitDsl`/`CleanupDsl`, `ActionRuleEntry.BeforeDsl`/`AfterDsl`, and `StateBasedRuleEntry.ConditionDsl`/`BodyDsl` — previously these three entry types were silently skipped, leaving stale keyword references after a rename (D27).
 
-**Remaining** (Groups 2, 5–7): Electron scaffold, IPC bridge, UI panels, and packaging — these are TypeScript/React work outside the C# assemblies.
+**Remaining** (Groups 5–7): IPC bridge wiring to sidecar, UI panels, and packaging — TypeScript/React work outside the C# assemblies.
+
+---
+
+## Tier 5 — Electron Authoring Tool (Group 2)
+
+### Project scaffold ✅ (`tooling/`)
+
+**Configuration files:**
+- `tooling/package.json` — Electron 30, TypeScript 5.4, React 18, Zustand 4, Vite 5, Vitest 1, `@testing-library/react`. Dev deps include `tsx` for main/preload dev run and `eslint` with TS + React plugins.
+- `tooling/tsconfig.json` — base config; `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`; `@shared/*` path alias.
+- `tooling/tsconfig.main.json` — main process: CommonJS, `rootDir: src`, `outDir: dist`.
+- `tooling/tsconfig.preload.json` — preload script: CommonJS (required for contextBridge), same root/out layout.
+- `tooling/vite.config.ts` — renderer bundle; React plugin; `@shared` alias; `outDir: dist/renderer`; dev server on port 5173.
+- `tooling/vitest.config.ts` — jsdom environment; `setupFiles: [setup.ts]`; includes `*.test.{ts,tsx}` only.
+- `tooling/.eslintrc.json` — `@typescript-eslint/recommended-requiring-type-checking`; `no-explicit-any: error`.
+
+**Main process (`src/main/`):**
+- `main.ts` — app lifecycle; creates `BrowserWindow` via `windowManager`; macOS re-open handling; quit on all-windows-closed (non-macOS). Sidecar spawn deferred to Group 5.
+- `windowManager.ts` — creates `BrowserWindow` with `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`. Loads Vite dev server URL in dev (via `VITE_DEV_SERVER_URL`) or `dist/renderer/index.html` in production.
+
+**Preload (`src/preload/preload.ts`):**
+- `contextBridge.exposeInMainWorld("archetype", ...)` exposing:
+  - `invoke(channel, payload)` — wraps `ipcRenderer.invoke`; typed to `IpcChannel`.
+  - `onNotification(channel, handler)` — wraps `ipcRenderer.on`; returns unsubscribe function.
+- No raw Electron APIs leaked to renderer.
+
+**Shared IPC contracts (`src/shared/ipc.ts`):**
+- All 18 sidecar method channel names + 5 file I/O channel names as `IPC_CHANNELS` const object.
+- Full request/response TypeScript interfaces for all 23 channels (strict, no `any`).
+- `ArchetypeApi` interface — the shape of `window.archetype` (used by both preload and renderer).
+- `Window` interface augmentation so renderer gets full type safety on `window.archetype`.
+
+**Renderer (`src/renderer/`):**
+- `index.tsx` — React 18 concurrent root mounting `<App />` into `#root`.
+- `App.tsx` — shell layout: 200px sidebar nav + flex-grow main content + 28px status bar. Sidebar drives `activePanel` state; main area renders named `PanelPlaceholder` components (replaced by real panels in Group 6).
+- `store/projectStore.ts` — Zustand store: `sidecarStatus`, `projectPath`, `projectName`, `isDirty`, `isMutating`. Actions: `setSidecarStatus`, `setProject`, `clearProject`, `markDirty`, `markClean`, `setMutating`.
+- `store/diagnosticsStore.ts` — Zustand store: `globalErrorCount`, `globalWarningCount`, `diagnostics` (full list; null when not loaded). Actions: `updateCounts`, `setDiagnostics`, `clearDiagnostics`, `reset`.
+
+**Tests:**
+- `__tests__/setup.ts` — mocks `window.archetype` with `vi.fn()` stubs; imports `@testing-library/jest-dom`.
+- `__tests__/App.test.tsx` — 5 tests: renders without crashing, sidebar present, default Keywords panel active, navigation to Cards panel, status bar present.
 
 ---
 
@@ -313,7 +355,9 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `Tooling/ValidatorTests.cs` | 5 | ✅ All passing (2 new: missing-ReturnType error, ReturnType-present no error) |
 | `Tooling/RpcHandlerTests.cs` | 23 | ✅ All passing (14 new: export ReturnType, export static effect, rename DSL rewrite, rename round-trip, GetSymbolInfo shape; BLOCKER 1: UpdateLifetimeSpec 2 tests; BLOCKER 2: RenameEntry phase/actionRule/SBR rewrite 6 tests) |
 
-**Total: 150 tests, 150 passing.**
+| `tooling/src/renderer/__tests__/App.test.tsx` | 5 | ✅ All passing (new — Group 2 scaffold smoke test) |
+
+**Total: 150 C# tests passing + 5 TypeScript/React tests passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
