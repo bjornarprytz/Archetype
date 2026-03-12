@@ -57,7 +57,14 @@ public static class Validator
             state.Diagnostics.AddRange(kw.Diagnostics);
 
         foreach (var card in state.Cards.Values)
+        {
             state.Diagnostics.AddRange(card.Diagnostics);
+            // StaticEffectEntry has its own Diagnostics list (e.g. lifetime parse errors);
+            // collect them so they appear in state.Diagnostics and are reflected in
+            // GlobalErrorCount returned to the renderer.
+            foreach (var se in card.StaticEffects)
+                state.Diagnostics.AddRange(se.Diagnostics);
+        }
 
         foreach (var zone in state.Zones.Values)
             state.Diagnostics.AddRange(zone.Diagnostics);

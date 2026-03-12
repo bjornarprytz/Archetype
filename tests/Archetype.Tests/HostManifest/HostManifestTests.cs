@@ -195,12 +195,29 @@ public sealed class HostManifestTests
                     Accumulators: new Dictionary<string, double> { ["health"] = 20.0 })
             ]);
 
-        // We confirm via the game result's final log (or just that the session ran).
-        // For accumulator assertions we need to inspect state; run the session and
-        // trust the provisioning code — the real assertion is it doesn't throw.
-        var session = BuildSession(def, host);
-        var result  = await session.RunAsync();
+        // Capture GameStateView during the first action window, which fires after
+        // both InitManifest and HostManifest have been provisioned but before any
+        // action resolves.  The SBR always-draw ends the session on the same turn.
+        GameStateView? capturedView = null;
+        var capturingStrategy = new CapturingStrategy(
+            onSelect: view => { capturedView = view; return null; });
+
+        var session = Archetype.Engine.GameSession.Create(def)
+            .WithPlayerStrategy("p1", capturingStrategy)
+            .WithRandomSource(new MockRandomSource())
+            .WithHostManifest(host)
+            .Build();
+
+        var result = await session.RunAsync();
         Assert.True(result.IsDraw);
+
+        // capturedView is populated after the first SelectActionAsync call.
+        Assert.NotNull(capturedView);
+        var playerAtom = Assert.Single(capturedView!.GetAtoms(AtomKind.Player));
+        // "health" was overridden to 20.0 by HostManifest.
+        Assert.Equal(20.0, capturedView.GetAccumulator(playerAtom, "health"));
+        // "mana" was not touched; it retains the InitManifest value of 5.0.
+        Assert.Equal(5.0,  capturedView.GetAccumulator(playerAtom, "mana"));
     }
 
     // -----------------------------------------------------------------------
@@ -228,9 +245,29 @@ public sealed class HostManifestTests
                     Conditions: ["shielded"])
             ]);
 
-        var session = BuildSession(def, host);
-        var result  = await session.RunAsync();
+        // Capture GameStateView during the first action window, which fires after
+        // both InitManifest and HostManifest have been provisioned.
+        GameStateView? capturedView = null;
+        var capturingStrategy = new CapturingStrategy(
+            onSelect: view => { capturedView = view; return null; });
+
+        var session = Archetype.Engine.GameSession.Create(def)
+            .WithPlayerStrategy("p1", capturingStrategy)
+            .WithRandomSource(new MockRandomSource())
+            .WithHostManifest(host)
+            .Build();
+
+        var result = await session.RunAsync();
         Assert.True(result.IsDraw);
+
+        Assert.NotNull(capturedView);
+        var playerAtom = Assert.Single(capturedView!.GetAtoms(AtomKind.Player));
+        // "poisoned" was set by InitManifest and must not have been wiped by the override.
+        Assert.True(capturedView.HasCondition(playerAtom, "poisoned"),
+            "Expected 'poisoned' condition (from InitManifest) to survive the HostManifest override.");
+        // "shielded" was appended by HostManifest.
+        Assert.True(capturedView.HasCondition(playerAtom, "shielded"),
+            "Expected 'shielded' condition (from HostManifest override) to be present.");
     }
 
     // -----------------------------------------------------------------------
@@ -312,4 +349,35 @@ public sealed class HostManifestTests
 
         Assert.Throws<SessionException>(() => BuildSession(def, host));
     }
+}
+
+// ---------------------------------------------------------------------------
+//  Test-local helpers
+// ---------------------------------------------------------------------------
+
+/// <summary>
+/// A minimal <see cref="IPlayerStrategy"/> that invokes a delegate on
+/// <c>SelectActionAsync</c> so tests can capture the live
+/// <see cref="GameStateView"/> during the first action window.
+/// </summary>
+internal sealed class CapturingStrategy : IPlayerStrategy
+{
+    private readonly Func<GameStateView, PlayerAction?> _onSelect;
+
+    /// <param name="onSelect">
+    /// Called with the current <see cref="GameStateView"/> each time an action
+    /// window opens.  Return <c>null</c> to pass (end the action window).
+    /// </param>
+    public CapturingStrategy(Func<GameStateView, PlayerAction?> onSelect)
+        => _onSelect = onSelect;
+
+    /// <inheritdoc/>
+    public Task<PlayerAction?> SelectActionAsync(
+        AvailableActions available, GameStateView state, CancellationToken ct = default)
+        => Task.FromResult(_onSelect(state));
+
+    /// <inheritdoc/>
+    public Task<PromptResponse> RespondToPromptAsync(
+        PromptContext context, GameStateView state, CancellationToken ct = default)
+        => throw new InvalidOperationException("CapturingStrategy: unexpected prompt.");
 }

@@ -871,9 +871,13 @@ public sealed class GameSession
                     throw new SessionException(
                         $"AtomStateOverride ZoneTarget '{z.LocalId}' does not match any zone LocalId " +
                         "in InitManifest or HostManifest zones.");
-                // D29: overrides may target atoms from InitManifest zones.
-                // (HostManifest zones are listed under the same namespace but this is accepted
-                // by D29 §5 — the restriction is only on CardTarget, not ZoneTarget.)
+                // D29 OPEN QUESTION: §5 says "may target only atoms provisioned by InitManifest"
+                // (applying to all OverrideTarget variants), but §4's ZoneTarget definition says
+                // "matches a ZoneSpec.LocalId in InitManifest or HostManifest zones."
+                // The two sub-sections are contradictory.  This implementation follows §4 (wider scope)
+                // for ZoneTarget while enforcing the narrower §5 restriction for CardTarget.
+                // Architect must clarify D29 §4 vs §5 before this behaviour is finalised.
+                // If §5 wins, add a guard here that rejects host-zone LocalIds.
                 return zoneId;
 
             case CardTarget c:
