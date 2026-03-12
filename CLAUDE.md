@@ -16,6 +16,7 @@ Personas live in `./prompts/`. Each is a self-contained role definition to be lo
 - `./prompts/technical-architect.md`
 - `./prompts/implementer.md`
 - `./prompts/reviewer.md`
+- `./prompts/simplifier.md` — post-merge code reduction pass; invoked at milestone boundaries, not after every review cycle
 
 ## Core Domain Concepts
 

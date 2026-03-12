@@ -11,7 +11,7 @@ depends-on:
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness).**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected).**
 
 All decisions D1–D31 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15). Updated 2026-03-05 to ratify game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) and their `GameIsOver` propagation contract (D7 amendments and D14 addendum), and to add D19 (`ComputeAvailableActions` contract — `get-atoms-in-zone` primitive, `CardDefinition.ActivationCondition`, `GameDefinition.PlayableZoneNames`). Updated 2026-03-11 to add D26 (Electron + .NET sidecar platform), D27 (sidecar-authoritative data layer, project file format, DSL text as canonical form), D28 (validation trigger model, debounce, sidecar protocol surface), D29 (D14 addendum: InitManifest mandatory and renamed, HostManifest append layer with StateOverrides, CardSpec LocalId, AtomStateOverride, updated nine-step provisioning order), D30 (Godot export pipeline: folder-drop package, Level 1 signal derivation with opt-out, post-action event log polling via GameStateView.LastActionEvents), and D31 (missing-translation export gate: warning classification, confirmation dialog, no persistent preference).
 
@@ -2898,6 +2898,7 @@ Each `*Entry` type (e.g. `KeywordEntry`) carries the DSL source text for its exp
 KeywordEntry {
   Name         : string
   Parameters   : List<ParameterDecl>
+  ReturnType   : TypeName                // mandatory; no default; mirrors KeywordDefinition.ReturnType
   BodyDsl      : string                  // raw DSL text; canonical
   BodyNode     : KeywordNode?            // null if BodyDsl did not parse
   TextTemplate : string?
@@ -2905,7 +2906,60 @@ KeywordEntry {
 }
 ```
 
+`ReturnType` is mandatory. The `Validator` emits an error-severity `ProjectDiagnostic` for any keyword entry that has no return type declared. The exporter must read `ReturnType` from `KeywordEntry` when constructing a `KeywordDefinition` — hardcoding `TypeName.Atom` is incorrect. `ProjectFileLoader` must deserialise the `"returnType"` JSON field (case-insensitive enum parse, same pattern as parameter `"type"`).
+
 This allows the sidecar to maintain a coherent, partially-valid state — keywords with parse errors are present in `ProjectState.Keywords` but have `BodyNode = null`. Downstream validation (e.g. type-checking call sites of a broken keyword) reports additional diagnostics referencing the broken entry by name rather than crashing.
+
+**`CardEntry` schema:**
+
+```
+CardEntry {
+  Name                   : string
+  StaticProperties       : Dictionary<string, object>
+  PrimaryEffectDsl       : string
+  PrimaryEffectNode      : EffectBlockDef?
+  AdditionalEffects      : List<NamedEffectEntry>
+  StaticEffects          : List<StaticEffectEntry>
+  ActivationConditionDsl : string?
+  ActivationConditionNode: KeywordNode?
+  Costs                  : List<CostEntry>
+  FlavourText            : string?
+  ArtPath                : string?
+  ArtCropRegion          : float[4]?     // [x, y, width, height] normalised 0..1; null = full image
+  Diagnostics            : List<ProjectDiagnostic>
+}
+```
+
+`ArtCropRegion` must be serialised by `ProjectFileSerializer` (as a JSON array `[x, y, w, h]`) and deserialised by `ProjectFileLoader`. Omitting it from serialisation is a round-trip data loss bug — crop data would be silently discarded on every save.
+
+**`StaticEffectEntry` schema:**
+
+Static effects are not deferred. The exporter must produce correct `StaticEffectDef` output from `StaticEffectEntry`; generating an empty list is incorrect.
+
+```
+StaticEffectEntry {
+  ContributionDsl      : string              // DSL for the state-contribution effect block (mandatory)
+  ContributionNode     : EffectBlockDef?     // null on parse error
+  TriggerEventKeyword  : string?             // keyword name the trigger subscribes to (e.g. "take-damage"); required when a trigger is defined
+  TriggerScope         : TriggerScope        // event-log query window for condition evaluation (default: ThisAction)
+  TriggerConditionDsl  : string?             // DSL for the event-log subscription condition (optional)
+  TriggerConditionNode : KeywordNode?        // null when not set or on parse error
+  TriggerBodyDsl       : string?             // DSL for the triggered effect block (optional)
+  TriggerBodyNode      : EffectBlockDef?     // null when not set or on parse error
+  LifetimeDsl          : string?             // DSL for the lifetime spec (optional; null = permanent)
+  LifetimeNode         : LifetimeSpec?       // parsed lifetime; null when not set or on parse error
+  Diagnostics          : List<ProjectDiagnostic>
+}
+```
+
+`LifetimeSpec` is the parsed form of a lifetime spec string. The `LifetimeSpec` type is defined in `Archetype.Core` (D6). The sidecar parser must parse lifetime DSL strings into `LifetimeSpec` values; this is a distinct parse path from keyword DSL. A missing `LifetimeNode` when `LifetimeDsl` is non-empty must produce a diagnostic, the same as any other parse failure.
+
+When `LifetimeDsl` is null or empty, the static effect is permanent — this matches `LifetimeSpec.Permanent` (D6).
+
+The exporter maps `StaticEffectEntry` to `StaticEffectDef`:
+- `ContributionNode` → `StaticEffectDef.Contribution` (required; skip entry if null with a diagnostic)
+- `TriggerEventKeyword` + `TriggerScope` + `TriggerConditionNode` + `TriggerBodyNode` → `StaticEffectDef.Trigger` (optional; omit if `TriggerEventKeyword` is null or either node is null; emit a diagnostic if `TriggerConditionDsl` is set but `TriggerEventKeyword` is absent)
+- `LifetimeNode ?? LifetimeSpec.Permanent` → `StaticEffectDef.Lifetime`
 
 ---
 
@@ -2944,6 +2998,7 @@ Top-level structure:
   "id": "my-game",
   "keywords": {
     "take-damage": {
+      "returnType": "Atom",
       "parameters": [
         { "name": "target", "type": "Card" },
         { "name": "amount", "type": "Number" }
@@ -2996,6 +3051,39 @@ Load sequence:
 
 ---
 
+**`RenameEntry` must rewrite DSL source strings.**
+
+DSL text is the canonical form in the project file (decision point 3 above). When `RenameEntry` renames a keyword, it must rewrite every DSL source string in every entry that references the old name — not only the in-memory `KeywordNode` trees. Rewriting only the in-memory trees causes a round-trip correctness bug: the project file saved to disk would contain stale DSL strings referencing the old name, which would produce unresolved-reference diagnostics on the next load.
+
+Required rewrite scope for a keyword rename from `oldName` to `newName`:
+- All `KeywordEntry.BodyDsl` fields that contain `oldName` as a keyword invocation
+- All `CardEntry.PrimaryEffectDsl`, `CardEntry.ActivationConditionDsl`, and each `NamedEffectEntry.BodyDsl` and `CostEntry.BodyDsl` within that card
+- All `StaticEffectEntry.ContributionDsl`, `TriggerConditionDsl`, `TriggerBodyDsl` within each card
+- All `PhaseEntry.InitDsl`, `PhaseEntry.CleanupDsl`
+- All `ActionRuleEntry.BeforeDsl`, `ActionRuleEntry.AfterDsl`
+- All `StateBasedRuleEntry.ConditionDsl`, `StateBasedRuleEntry.BodyDsl`
+
+The rewrite is a text substitution on the DSL string: replace occurrences of `oldName(` with `newName(` (the trailing `(` disambiguates a keyword invocation from a parameter or literal that happens to share the name). After rewriting DSL strings, re-parse all affected entries and update their `*Node` fields. Then rebuild the reference graph and run the validation pass as normal.
+
+Card renames do not require DSL rewriting (card names do not appear in DSL expressions).
+
+---
+
+**ZoneSpec `definition` field.**
+
+In `ProjectFileSerializer`, when serialising `InitManifestEntry` zones, the `"definition"` JSON field must hold the **zone definition name** — the key from `GameDefinition.ZoneDefinitions` — not the `LocalId`. These two values may differ. Writing `LocalId` as the `"definition"` value is incorrect and causes the loader to associate the zone with the wrong definition on reload.
+
+Correct serialisation:
+```json
+{ "owner": "player1", "definition": "hand-zone", "localId": "p1-hand" }
+```
+
+where `"hand-zone"` is the `ZoneDefinition` key and `"p1-hand"` is the `ZoneSpec.LocalId`. The current `ProjectFileSerializer` implementation has this wrong — it writes `z.LocalId` for both `"definition"` and `"localId"`. The implementer must fix `ProjectFileSerializer.SerializeInitManifest` to write the correct definition name. `ZoneSpec` must therefore carry (or be derivable from) the zone definition name, not only the `LocalId`.
+
+**Note on `ZoneSpec` shape:** `ZoneSpec(Owner, DefinitionName, LocalId)` — the definition name and local ID are separate fields. Confirm this matches the `Archetype.Core.ZoneSpec` constructor before fixing the serialiser.
+
+---
+
 **Save and autosave.**
 
 Save is a `SaveProject` request. The sidecar serialises `ProjectState` to the `.archetype` JSON format (preserving `tooling` verbatim) and returns the JSON string to the main process, which writes it to disk. The sidecar does not perform file I/O directly — that is the main process's responsibility (D26).
@@ -3025,6 +3113,11 @@ The export artifact is not the project file. They are distinct files with distin
 **Consequences:**
 - `Archetype.Tooling.Server` gains `ProjectState`, `KeywordEntry` (and parallel `*Entry` types for each definition kind), `ProjectDiagnostic`, `ProjectFileLoader`, and `ProjectFileSerializer`.
 - `ProjectFileLoader` must be kept in sync with `GameDefinitionLoader.FromJson` in terms of what fields are recognised — new `GameDefinition` fields must be added to both loaders.
+- `KeywordEntry.ReturnType` is mandatory. `ProjectFileLoader` must deserialise `"returnType"` from the keyword JSON object (case-insensitive enum parse). `Validator` must emit an error diagnostic for any keyword missing this field. `GameDefinitionExporter` must read `ReturnType` from `KeywordEntry`; hardcoding `TypeName.Atom` is incorrect.
+- `CardEntry.ArtCropRegion` (`float[4]?`) must be serialised by `ProjectFileSerializer` as a JSON array and deserialised by `ProjectFileLoader`. Omitting it causes silent round-trip data loss.
+- `StaticEffectEntry` must carry `TriggerEventKeyword : string?`, `TriggerScope : TriggerScope` (default `ThisAction`), `ContributionNode : EffectBlockDef?`, `TriggerConditionNode : KeywordNode?`, `TriggerBodyNode : EffectBlockDef?`, and `LifetimeNode : LifetimeSpec?`. `ProjectFileLoader` must parse all DSL fields and deserialise `TriggerEventKeyword` and `TriggerScope` from the project file. `GameDefinitionExporter` must pass `TriggerEventKeyword` and `TriggerScope` when constructing a `TriggerDefinition` — these fields are required to build the event-log subscription; emitting an empty trigger or an empty static-effect list is incorrect.
+- `RenameEntry` for keywords must rewrite all `*Dsl` source strings across all affected entries (see "RenameEntry must rewrite DSL source strings" above), not only in-memory node trees. Failing to rewrite DSL strings is a round-trip correctness bug.
+- `ProjectFileSerializer.SerializeInitManifest` must write the zone definition name into the `"definition"` field, not the `LocalId`. The current implementation has this wrong. See "ZoneSpec `definition` field" above for the correct shape.
 - The sidecar's internal reference graph (for impact propagation) must be rebuilt incrementally on each mutation. The initial implementation may rebuild it fully on each mutation; optimisation to incremental rebuild is deferred.
 - The `tooling.editorState` schema is a renderer-level concern. No schema validation is performed by the sidecar; it is stored and returned verbatim.
 - File I/O (read project file, write project file, write export artifact) is always performed by the Electron main process. The sidecar receives file contents as strings and returns serialised strings. This maintains the D26 responsibility split cleanly.
@@ -3160,7 +3253,9 @@ OverrideTarget (discriminated union):
 
 **Condition overrides — append.** Each condition name in `AtomStateOverride.Conditions` is applied additively to the target atom. Conditions already present from `InitManifest` are unaffected. No conditions are removed by a host override.
 
-`AtomStateOverride` may target only atoms provisioned by `InitManifest`. Targeting a `HostManifest`-added atom is a `SessionException` — those atoms are configured at construction time via their `ZoneSpec`/`CardSpec` `Accumulators` and `Conditions` fields directly.
+`CardTarget` and `PlayerTarget` may target only atoms provisioned by `InitManifest`. Targeting a `HostManifest`-added card via `CardTarget`, or a player (which is always engine-managed) via `PlayerTarget`, is a `SessionException` — those atoms are configured at construction time via their `ZoneSpec`/`CardSpec` `Accumulators` and `Conditions` fields directly.
+
+`ZoneTarget` is an explicit exception: it may match a zone `LocalId` from either `InitManifest` or `HostManifest` zones. Zones are part of the shared game structure, not player-specific initial state, so patching a host-appended zone's mutable state via `StateOverrides` is coherent and permitted. Targeting a `LocalId` that does not exist in either manifest is still a `SessionException`.
 
 ---
 
@@ -3344,14 +3439,14 @@ The sidecar identifies the symbol at the cursor (e.g. the keyword name `take-dam
     "kind": "keyword",
     "definition": { "entryKind": "keyword", "entryName": "take-damage" },
     "referencedBy": [
-      { "entryKind": "keyword", "entryName": "attack" },
-      { "entryKind": "card",    "entryName": "goblin" }
+      { "entryName": "attack" },
+      { "entryName": "goblin" }
     ]
   }
 }
 ```
 
-The renderer uses `definition` to navigate to the target entry (switching panels if necessary) and `referencedBy` to populate the "used by" list in the graph navigation sidebar.
+`referencedBy` items carry only `entryName` — the sidecar's reference graph tracks callers by name without recording the caller's kind. The renderer uses `definition` to navigate to the target entry (switching panels if necessary) and `referencedBy` to populate the "used by" list in the graph navigation sidebar.
 
 ---
 

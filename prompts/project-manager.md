@@ -25,6 +25,7 @@ Each persona has a defined responsibility and hands off to the next:
 | Technical Architect | Technology decisions, module structure | `docs/architecture.md` |
 | Implementer | Working C# code + tests | `docs/implementation-status.md` |
 | Reviewer | Correctness and conformance verification | Review report in `docs/implementation-status.md` |
+| Simplifier | Post-merge code reduction (invoked at milestone boundaries, not every cycle) | `docs/simplification-report.md` |
 
 Persona prompts live in `./prompts/`. Load them with `--system-prompt-file` at the start of a session (e.g. `claude --system-prompt-file prompts/implementer.md`).
 

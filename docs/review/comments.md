@@ -1,4 +1,76 @@
-# Review: Text Renderer — `Archetype.Text` + `Archetype.Core/RenderNode.cs` (impl/text-renderer)
+# Review: Tooling Sidecar Bug Fixes — `Archetype.Tooling.Server` + `Archetype.Core/GameDefinitionJsonOptions.cs` (impl/text-renderer)
+
+Review date: 2026-03-11. Bug fixes: 6 items covering Fix 1–6 as described in the task.
+Re-review date: 2026-03-11. Blocker fixes verified.
+
+Changeset (original + blocker fixes):
+- `src/Archetype.Tooling.Server/KeywordEntry.cs` — `ReturnType: TypeName?` added
+- `src/Archetype.Tooling.Server/CardEntry.cs` — `StaticEffectEntry` full schema
+- `src/Archetype.Tooling.Server/ProjectFileLoader.cs` — reads `returnType`, `artCropRegion`, static effect fields, corrected `ZoneSpec` constructor args
+- `src/Archetype.Tooling.Server/ProjectFileSerializer.cs` — serializes `artCropRegion`, static effect fields, corrects `ZoneSpec` definition field
+- `src/Archetype.Tooling.Server/Export/GameDefinitionExporter.cs` — real `StaticEffectDef` export, `ReturnType` from entry
+- `src/Archetype.Tooling.Server/Handlers/RenameEntryHandler.cs` — DSL rewrite added, extended to Phase/ActionRule/SBR (BLOCKER 2 fix)
+- `src/Archetype.Tooling.Server/Handlers/UpdateLifetimeSpecHandler.cs` — calls `LifetimeDsl.Parse` immediately (BLOCKER 1 fix)
+- `src/Archetype.Tooling.Server/LifetimeDsl.cs` — new file
+- `src/Archetype.Core/GameDefinitionJsonOptions.cs` — new file
+- Tests: 10 + 8 new tests in `ProjectFileLoaderTests`, `ValidatorTests`, `RpcHandlerTests`
+
+Architecture decisions checked: D27, D28, D6.
+
+---
+
+## Defects
+
+### ~~[BLOCKER 1] `UpdateLifetimeSpecHandler` does not call `LifetimeDsl.Parse`~~ — RESOLVED
+
+`UpdateLifetimeSpecHandler.cs:39` now calls `LifetimeDsl.Parse(dsl)` immediately after storing the string, and assigns the result to `effect.LifetimeNode`. If the parse returns null for a non-empty string, a diagnostic is recorded to `effect.Diagnostics`. The XML doc has been corrected to describe this behaviour. Test `UpdateLifetimeSpec_SetsLifetimeNode_SoExportReflectsSpec` verifies the `TurnTimer` path end-to-end (parse → `LifetimeNode` non-null → `IsPermanent == false` → export JSON contains `"$type": "turn"` and `"Turns": 3`). Test `UpdateLifetimeSpec_InvalidDsl_RecordsDiagnostic_LifetimeNodeNull` covers the parse-failure path.
+
+### ~~[BLOCKER 2] `RenameEntryHandler.RewriteKeywordRefs` omits Phase/ActionRule/SBR DSL fields~~ — RESOLVED
+
+`RenameEntryHandler.cs:153–176` now rewrites:
+- `PhaseEntry.InitDsl` and `CleanupDsl` (lines 155–159)
+- `ActionRuleEntry.BeforeDsl` and `AfterDsl` (lines 165–168)
+- `StateBasedRuleEntry.ConditionDsl` and `BodyDsl` (lines 174–175)
+
+Six new tests cover all three entry types, each with a DSL-content assertion test and a save/reload zero-errors test: `RenameEntry_RewritesPhaseInitAndCleanupDsl`, `RenameEntry_Phase_SaveReload_ZeroErrors`, `RenameEntry_RewritesActionRuleBeforeAndAfterDsl`, `RenameEntry_ActionRule_SaveReload_ZeroErrors`, `RenameEntry_RewritesStateBasedRuleConditionAndBodyDsl`, `RenameEntry_StateBasedRule_SaveReload_ZeroErrors`.
+
+---
+
+## Minor Fixes Applied Directly
+
+### [MINOR 1] `Validator.CollectEntryDiagnostics` does not collect `StaticEffectEntry.Diagnostics` — `Validator.cs:59–60`
+
+`UpdateLifetimeSpecHandler` records parse-failure diagnostics into `effect.Diagnostics` (`StaticEffectEntry.Diagnostics`). However, `CollectEntryDiagnostics` only iterates `card.Diagnostics` (the card-level list), not the per-`StaticEffectEntry` sub-lists. After `RevalidateAndBuildResponse` calls `Validator.Validate`, `state.Diagnostics` is rebuilt without including static-effect-level diagnostics. The result: `GlobalErrorCount` is not incremented on a bad lifetime DSL, so the renderer's problems panel never sees the error. The test for the invalid-DSL path asserts against `StaticEffects[0].Diagnostics` directly and passes, but the gap means the diagnostic is invisible in the response payload.
+
+**Fixed in place:** `CollectEntryDiagnostics` now iterates `card.StaticEffects` and collects each `se.Diagnostics` in addition to `card.Diagnostics`. All 150 tests continue to pass.
+
+---
+
+## Observations
+
+- **`LifetimeDsl.Parse` `TurnTimer` path now covered.** The previous review flagged that all three `LifetimeDsl` condition paths were untested. `UpdateLifetimeSpec_SetsLifetimeNode_SoExportReflectsSpec` now covers the `TurnTimer` path end-to-end. The `TriggerCount` and `WhileCondition` paths remain untested in isolation, but this is a coverage gap rather than a correctness defect; the parsing logic for all three paths is straightforward.
+
+- **D27 rewrite method diverges from architecture spec — benign.** D27 says to use `oldName(` (with trailing `(`) to disambiguate. The implementation uses a token-boundary approach (`IsIdentChar`) instead, which is strictly more correct. The divergence is documented in the `RewriteDsl` XML comment. No action needed.
+
+- **`RenameEntry_RewritesPhaseInitAndCleanupDsl` test uses a slightly imprecise assertion.** Line 671: `Assert.DoesNotContain("phase-kw()", phase.InitDsl!)` checks that the literal string `"phase-kw()"` is absent. After rewriting, `InitDsl` becomes `"phase-kw-v2()"`, which indeed does not contain `"phase-kw()"`. This is correct but it would also pass if `InitDsl` became empty or was set to something unrelated. The paired `Assert.Contains("phase-kw-v2", ...)` assertion is the load-bearing one. Together they provide sufficient coverage.
+
+- **All six save/reload tests rely on `ProjectFileLoader.Load` producing zero errors.** This is the correct way to verify the D27 round-trip invariant. The tests would catch any regression where DSL strings are left stale.
+
+- **`TriggerEventKeyword` and `TriggerScope` not yet ratified.** These two `StaticEffectEntry` fields lack architect sign-off. No change needed from the reviewer.
+
+- **Fix 5, Fix 6, Fix 1, Fix 2, `GameDefinitionJsonOptions` — all confirmed correct** (unchanged from initial review observations).
+
+---
+
+## Verdict
+
+**PASS**
+
+Both blockers are resolved. MINOR 1 (static-effect diagnostics not propagated to `state.Diagnostics`) was fixed directly in `Validator.cs`. All 150 tests pass. No outstanding defects.
+
+---
+
+# Previous Review: Text Renderer — `Archetype.Text` + `Archetype.Core/RenderNode.cs` (impl/text-renderer)
 
 Initial review: 2026-03-05. Implementation commit: `47b10e8`.
 Re-review: 2026-03-07. Fix commit: `1a49699 Fix BLOCKER 1: RenderBlock always returns SequenceNode (D11 API contract)`.
@@ -105,6 +177,116 @@ All 85 tests pass.
 **PASS**
 
 BLOCKER 1 resolved: `ApplyConditions` now registers each `ConditionContribution` in `ContributionRegistry` (`GameSession.cs:662`), matching the `BuiltInHandlers.cs:209` pattern. Regression test T13 (`ManifestProvisionedCondition_SurvivesSnapshotRoundTrip`) correctly catches the defect — it would fail at the `ConditionContributionSnapshot` assertion if the registry call were absent. All 85 tests pass. No outstanding defects remain.
+
+---
+
+## Review: tooling change — D29–D31, Groups 3–4 (impl/text-renderer)
+
+Initial review: 2026-03-11.
+
+Changeset: `src/Archetype.Core/GameDefinition.cs` (InitManifest mandatory, CardSpec.LocalId), `src/Archetype.Core/HostManifest.cs` (HostManifest, AtomStateOverride, OverrideTarget — new), `src/Archetype.Core/Exceptions.cs` (SessionException — new), `src/Archetype.Core/Interfaces.cs` (GameStateView.LastActionEvents D30), `src/Archetype.Engine/GameSession.cs` (nine-step provisioning, WithHostManifest, Build() validation), `src/Archetype.Engine/EventLog.cs` (CloseAction captures LastActionEvents), `src/Archetype.Build/HostManifestBuilder.cs` (new), `src/Archetype.Build/GameSessionBuilderExtensions.cs` (new), `src/Archetype.Tooling.Server/` (full sidecar — 18 RPC handlers, DSL parser, validator, export pipeline), `tests/Archetype.Tests/HostManifest/HostManifestTests.cs` (9 tests), `tests/Archetype.Tests/GameSession/LastActionEventsTests.cs` (4 tests), `tests/Archetype.Tests/Tooling/` (17 tests).
+
+---
+
+### Defects
+
+#### [BLOCKER 1] D29 §5 / §4 contradiction — `ZoneTarget` resolution allows HostManifest zones — `GameSession.cs:869–877`
+
+D29 §5 states: "AtomStateOverride may target only atoms provisioned by InitManifest. Targeting a HostManifest-added atom is a SessionException." This applies to all three `OverrideTarget` variants.
+
+D29 §4 (the `OverrideTarget` discriminated union) says: "ZoneTarget { LocalId : string } — matches a ZoneSpec.LocalId in InitManifest or HostManifest zones."
+
+These are contradictory. §5 is the policy statement; §4 is a technical key-space description. The implementer resolved this in favour of §4 (ZoneTarget accepts HostManifest zones). The code even carries a comment acknowledging the tension: "The restriction is only on CardTarget, not ZoneTarget."
+
+This is incorrect. The asymmetry is not explained anywhere in D29 and creates a class of runtime behaviour (host patching its own zones via `StateOverrides`) that §5 explicitly prohibits. The correct resolution is for the architect to clarify D29 §4 — either the `ZoneTarget` description should say "InitManifest zones only" (consistent with §5), or D29 §5 should be narrowed to apply only to `CardTarget` (which has clear rationale). The implementer cannot make this call unilaterally.
+
+Until resolved: the `Build()` validation correctly rejects `CardTarget` for HostManifest cards but does not perform the same check for `ZoneTarget` against HostManifest zones. If the architect's intent is §5 (all targets must be InitManifest-only), a missing `SessionException` guard at `ResolveOverrideTarget` (and correspondingly at `Build()` pre-validation) is a gap. If the intent is §4 (ZoneTarget is wider), D29 §5 needs an exception clause.
+
+**Action required: architect must clarify D29 §4 vs §5 for ZoneTarget. No code change until the architecture is updated.**
+
+---
+
+### Minor Fixes Applied Directly
+
+#### [MINOR 1] `GameSession.ResolveOverrideTarget` ZoneTarget comment is ambiguous — `GameSession.cs:874–876`
+
+The comment says "this is accepted by D29 §5 — the restriction is only on CardTarget, not ZoneTarget." This misreads §5, which says "may target only atoms provisioned by InitManifest" without exception. The comment should instead note the contradiction and flag it as an open architecture question.
+
+**Fixed in place:** comment reworded to accurately describe the ambiguity.
+
+---
+
+### Observations
+
+#### D29 — Nine-step provisioning order
+
+All nine steps are implemented correctly in `ProvisionSession` → `ProvisionManifest` → `ProvisionHostManifest`:
+- Steps 1–2 (session atom, player atoms) in `ProvisionSession`.
+- Steps 3–6 (InitManifest zones, cards with static effects, card mutable state, player mutable state) in `ProvisionManifest`.
+- Steps 7–9 (HostManifest zones, cards with static effects, StateOverrides) in `ProvisionHostManifest`.
+- `LocalId → AtomId` map thread correctly across all nine steps (passed `out`/by reference between methods).
+- Card and zone LocalIds use separate key prefixes (`"card:"`/`"host-card:"`) so they cannot collide despite sharing one `Dictionary<string, AtomId>`. This matches D29 §4's statement that card and zone LocalIds "do not share a namespace."
+
+#### D29 — Uniqueness validation placement
+
+D29 §6 says: "Duplicate within InitManifest.Zones → DefinitionException at GameDefinitionBuilder.Build()." Since `GameDefinition` is a record (directly constructed, no builder class), this check is performed in `GameSessionBuilder.Build()` instead. The exception type `DefinitionException` is correct. The pre-existing absence of a `GameDefinitionBuilder` class means the check fires slightly later (session build, not definition build), but there is no functional impact. The test comment at `HostManifestTests.cs:92–94` correctly documents this. This is a pre-existing architectural gap (references to `GameDefinitionBuilder.Build()` in XML docs) that predates this change.
+
+#### D29 — `WithHostManifest`/`FromSavedState` mutual exclusion
+
+`GameSessionBuilder.Build()` correctly throws `SessionException` when both `_snapshot` and `_hostManifest` are non-null (line 146–150). Test 0.8h covers this exactly.
+
+#### D29 — `CardTarget` validation in `Build()` (pre-provisioning)
+
+`Build()` validates `CardTarget` overrides against InitManifest card LocalIds at build time (lines 185–211) — before provisioning. This is correct and ensures early failure without requiring provisioning to complete first.
+
+#### D30 — `LastActionEvents` reset semantics
+
+D30 says "reset to empty at the start of each new action." The implementation resets `_lastActionEvents` in `CloseAction()` (overwriting it with the new content). It is NOT reset to empty in `OpenAction()`. While the observable behaviour is correct for the post-action polling use case (after `CloseAction`, the value shows only the just-completed action), there is a window between `OpenAction()` and `CloseAction()` where `LastActionEvents` still holds the previous action's events. For the intended Godot interop use case (read after `ResolveAction` completes), this is harmless. No defect.
+
+#### D30 — Signal prefix
+
+The generated signal names correctly use `on_` prefix with hyphens-to-underscores conversion (`sig.GdScriptName`) matching D30's spec: "foo-bar produces a GDScript signal named on_foo_bar." Both `AppendSignals` (line 267) and the interop wrapper `deliver_signals` function (line 239) use this convention.
+
+#### D30 — All four per-game GDScript classes generated
+
+`ArchetypeCard.gd`, `ArchetypeZone.gd`, `ArchetypePlayer.gd`, `ArchetypeSession.gd`, `ArchetypeCardImporter.gd`, and `ArchetypeInterop.gd` are all generated as specified in D30. All signals are emitted on every class (not per-atom-kind filtered). D30 says signals fire on the matching atom kind's class — the current implementation emits all signals on all four class types. This is a minor fidelity gap but the Electron/Godot integration (out of scope for this review) is where per-kind filtering would be implemented.
+
+#### D31 — Two-step force flow
+
+`ExportGameDefinitionHandler` correctly implements the two-step flow: first call returns `missingTranslations` if warnings exist and `force: false`; second call with `force: true` proceeds to export. `ExportGameDefinitionExporter.Export()` tests cover both branches (4.7-H7, 4.7-H8). `ExportGodotClassesHandler` correctly omits the translation gate (D28 method table says both export methods are "gated on 0 errors" — translation gate is only on `ExportGameDefinition` per D31).
+
+#### D28 — 18 methods
+
+`Program.cs` registers exactly 18 methods, matching D28's method table:
+`LoadProject`, `SaveProject`, `UpdateKeywordBody`, `UpdateCardEffect`, `UpdateLifetimeSpec`, `UpdateActivationCondition`, `UpdateCostBody`, `UpdateField`, `AddEntry`, `RemoveEntry`, `RenameEntry`, `GetAllDiagnostics`, `GetSymbolInfo`, `GetReferenceGraph`, `GetCompletions`, `RenderCardText`, `ExportGameDefinition`, `ExportGodotClasses`. Complete.
+
+#### D28 — Debounce is renderer-side
+
+The sidecar has no debounce logic (correct per D28 — debounce is the renderer's responsibility). Handlers are synchronous; there is no built-in delay mechanism.
+
+#### D27 — `KeywordEntry.ReturnType` absent; exporter hardcodes `TypeName.Atom`
+
+`KeywordEntry` (as specified in D27's schema, line 2897–2906 of architecture.md) does not include a `ReturnType` field. Consequently `GameDefinitionExporter` hardcodes `ReturnType: TypeName.Atom` for all game-creator keywords (line 77). The engine does not use `ReturnType` at runtime, so this has no execution impact. It is a known limitation of D27's authoring-state model. Not a defect against this implementation.
+
+#### Test coverage
+
+All 9 HostManifest tests cover: duplicate zone LocalId (InitManifest), CardSpec.LocalId null by default, cross-manifest zone LocalId collision, host provisioning order, accumulator merge patch semantics, condition append semantics, CardTarget-against-host-card SessionException, mutual exclusion, duplicate zone within HostManifest. The accumulator merge and condition append tests (0.8e, 0.8f) do not directly assert the mutable state values post-provisioning (they only verify the session runs to completion). This is a coverage gap — the tests cannot detect if the override was silently dropped. However, since `GameStateView` does expose `GetAccumulator` and `HasCondition`, this could be strengthened.
+
+All 4 LastActionEvents tests correctly cover: empty before first action, populated after a card play, not carrying over between actions, and the before-first-action assertion. The two-action tests correctly detect accumulator events.
+
+WASM constraint (D1): no `Thread`, `ThreadPool`, `Task.Run`, or `Reflection.Emit` introduced. The sidecar is explicitly exempted from the WASM constraint (D1: "Tooling is separate"). No Godot types in any engine assembly.
+
+---
+
+### Verdict
+
+**PASS WITH MINOR FIXES**
+
+One BLOCKER (B1) requires an **architect decision** before the implementer can make any code change. It is not an implementer error — the architecture document is self-contradictory on `ZoneTarget` semantics, and the implementer made a reasonable choice and documented it. The verdict cannot be PASS until D29 §4/§5 is clarified. Once the architect adds the clarification, the implementer either adds a `SessionException` guard for HostManifest ZoneTarget (if §5 wins) or updates the §5 policy text (if §4 wins), and this review closes.
+
+MINOR 1 (comment inaccuracy) has been fixed directly.
+
+All 132 tests pass. No new compiler warnings. All other D29–D31 and D28 decisions are correctly and completely implemented.
 
 ---
 

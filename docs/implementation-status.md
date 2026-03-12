@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-11 (tooling sidecar D27/D28 bug-fix pass + BLOCKER fixes — 150/150 tests passing; 18 new tests covering all 6 bug fixes and both reviewer blockers)
+> Last updated: 2026-03-11 (tooling sidecar D27/D28 bug-fix pass + BLOCKER fixes — reviewer re-review: PASS; 150/150 tests; MINOR fix applied: StaticEffectEntry.Diagnostics now propagated to state.Diagnostics in Validator)
 > Branch: `impl/text-renderer`
 > All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`.
 
