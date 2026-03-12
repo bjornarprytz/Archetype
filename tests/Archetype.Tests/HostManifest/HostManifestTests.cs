@@ -86,6 +86,26 @@ public sealed class HostManifestTests
         return builder.Build();
     }
 
+    /// <summary>
+    /// Runs the session with a <see cref="CapturingStrategy"/> and returns the
+    /// <see cref="GameStateView"/> captured during the first action window.
+    /// Asserts the session ends as a draw and that the view was captured.
+    /// </summary>
+    private static async Task<GameStateView> RunWithCapture(GameDefinition def, HostManifest host)
+    {
+        GameStateView? capturedView = null;
+        var strategy = new CapturingStrategy(view => { capturedView = view; return null; });
+        var session = Archetype.Engine.GameSession.Create(def)
+            .WithPlayerStrategy("p1", strategy)
+            .WithRandomSource(new MockRandomSource())
+            .WithHostManifest(host)
+            .Build();
+        var result = await session.RunAsync();
+        Assert.True(result.IsDraw);
+        Assert.NotNull(capturedView);
+        return capturedView!;
+    }
+
     // -----------------------------------------------------------------------
     //  0.8a  InitManifest required — GameSessionBuilder.Build throws when absent
     // -----------------------------------------------------------------------
@@ -195,25 +215,8 @@ public sealed class HostManifestTests
                     Accumulators: new Dictionary<string, double> { ["health"] = 20.0 })
             ]);
 
-        // Capture GameStateView during the first action window, which fires after
-        // both InitManifest and HostManifest have been provisioned but before any
-        // action resolves.  The SBR always-draw ends the session on the same turn.
-        GameStateView? capturedView = null;
-        var capturingStrategy = new CapturingStrategy(
-            onSelect: view => { capturedView = view; return null; });
-
-        var session = Archetype.Engine.GameSession.Create(def)
-            .WithPlayerStrategy("p1", capturingStrategy)
-            .WithRandomSource(new MockRandomSource())
-            .WithHostManifest(host)
-            .Build();
-
-        var result = await session.RunAsync();
-        Assert.True(result.IsDraw);
-
-        // capturedView is populated after the first SelectActionAsync call.
-        Assert.NotNull(capturedView);
-        var playerAtom = Assert.Single(capturedView!.GetAtoms(AtomKind.Player));
+        var capturedView = await RunWithCapture(def, host);
+        var playerAtom = Assert.Single(capturedView.GetAtoms(AtomKind.Player));
         // "health" was overridden to 20.0 by HostManifest.
         Assert.Equal(20.0, capturedView.GetAccumulator(playerAtom, "health"));
         // "mana" was not touched; it retains the InitManifest value of 5.0.
@@ -245,23 +248,8 @@ public sealed class HostManifestTests
                     Conditions: ["shielded"])
             ]);
 
-        // Capture GameStateView during the first action window, which fires after
-        // both InitManifest and HostManifest have been provisioned.
-        GameStateView? capturedView = null;
-        var capturingStrategy = new CapturingStrategy(
-            onSelect: view => { capturedView = view; return null; });
-
-        var session = Archetype.Engine.GameSession.Create(def)
-            .WithPlayerStrategy("p1", capturingStrategy)
-            .WithRandomSource(new MockRandomSource())
-            .WithHostManifest(host)
-            .Build();
-
-        var result = await session.RunAsync();
-        Assert.True(result.IsDraw);
-
-        Assert.NotNull(capturedView);
-        var playerAtom = Assert.Single(capturedView!.GetAtoms(AtomKind.Player));
+        var capturedView = await RunWithCapture(def, host);
+        var playerAtom = Assert.Single(capturedView.GetAtoms(AtomKind.Player));
         // "poisoned" was set by InitManifest and must not have been wiped by the override.
         Assert.True(capturedView.HasCondition(playerAtom, "poisoned"),
             "Expected 'poisoned' condition (from InitManifest) to survive the HostManifest override.");
