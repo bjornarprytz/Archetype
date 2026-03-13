@@ -219,6 +219,15 @@ export interface ExportGodotClassesResult {
 // the sidecar — D26)
 // ---------------------------------------------------------------------------
 
+export interface ReadFileParams {
+  readonly path: string;
+}
+
+export interface WriteFileParams {
+  readonly path: string;
+  readonly content: string;
+}
+
 export interface ShowOpenDialogOptions {
   readonly title?: string;
   readonly defaultPath?: string;
@@ -264,6 +273,9 @@ export const IPC_CHANNELS = {
   ShowOpenDialog: "File:ShowOpenDialog",
   ShowSaveDialog: "File:ShowSaveDialog",
   GetUserDataPath: "File:GetUserDataPath",
+
+  // Push notification channels (main → renderer; not invoke/handle)
+  SidecarError: "SidecarError",
 } as const;
 
 /** Union of all valid channel names. */

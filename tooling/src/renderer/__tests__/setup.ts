@@ -15,8 +15,12 @@ const mockArchetypeApi = {
 };
 
 // Assign to window before any test or component import.
-Object.defineProperty(window, "archetype", {
-  value: mockArchetypeApi,
-  writable: true, // allow test-level overrides
-  configurable: true,
-});
+// Guard against non-DOM environments (main-process tests run in Node where
+// `window` is not defined).
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "archetype", {
+    value: mockArchetypeApi,
+    writable: true, // allow test-level overrides
+    configurable: true,
+  });
+}

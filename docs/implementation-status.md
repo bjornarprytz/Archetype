@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-12 (Group 2 complete — Electron scaffold: tooling/package.json, TS configs, Vite, Vitest, main process, preload contextBridge, shared IPC contracts, React app shell, Zustand stores, 5 renderer unit tests passing)
+> Last updated: 2026-03-13 (Group 5 complete — Main process sidecar lifecycle + IPC bridge: sidecarManager.ts, ipcHandlers.ts, fileHandlers.ts, autosave.ts; main.ts updated to wire all; 27 new tests; 32 TypeScript tests total passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`. Electron tooling in `tooling/`.
 
@@ -15,7 +15,7 @@
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
 | `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete |
-| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores | ✅ Group 2 complete (Groups 5–7 pending) |
+| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores | ✅ Groups 2 + 5 complete (Groups 6–7 pending) |
 
 ---
 
@@ -310,8 +310,64 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 - `store/diagnosticsStore.ts` — Zustand store: `globalErrorCount`, `globalWarningCount`, `diagnostics` (full list; null when not loaded). Actions: `updateCounts`, `setDiagnostics`, `clearDiagnostics`, `reset`.
 
 **Tests:**
-- `__tests__/setup.ts` — mocks `window.archetype` with `vi.fn()` stubs; imports `@testing-library/jest-dom`.
+- `__tests__/setup.ts` — mocks `window.archetype` with `vi.fn()` stubs; imports `@testing-library/jest-dom`. Guarded with `typeof window !== "undefined"` so it loads safely in Node environment.
 - `__tests__/App.test.tsx` — 5 tests: renders without crashing, sidebar present, default Keywords panel active, navigation to Cards panel, status bar present.
+
+---
+
+## Tier 5 — Electron Authoring Tool (Group 5)
+
+### Sidecar lifecycle + IPC bridge ✅ (`tooling/src/main/`)
+
+**`sidecarManager.ts` (task 5.1):**
+- Resolves sidecar binary via `process.resourcesPath` (prod) or `src/Archetype.Tooling.Server/bin/Debug/net10.0/` (dev)
+- Spawns sidecar via `child_process.spawn` with `stdio: pipe`
+- Readline interface on stdout for newline-delimited JSON response parsing
+- `Map<string, PendingEntry>` correlates requests to responses by `id`
+- Crash handling: rejects all pending, attempts one restart; calls `_onError` if restart fails
+- `startSidecar(onError)`, `invoke(method, params)`, `stopSidecar()` public API
+
+**`fileHandlers.ts` (task 5.3):**
+- `readFile(path)` — reads UTF-8 file; validates path inside allowed roots (home, userData, temp, documents, desktop)
+- `writeFile(path, content)` — writes UTF-8 file; creates intermediate dirs; path validated
+- `showOpenDialog(opts)` → `string | null` — wraps `dialog.showOpenDialog`; returns null on cancel
+- `showSaveDialog(opts)` → `string | null` — wraps `dialog.showSaveDialog`; returns null on cancel
+- `getUserDataPath()` → `string` — returns `app.getPath("userData")`
+- Path validation: `path.isAbsolute` check + `path.normalize` + allowed-root prefix check prevents directory traversal
+
+**`ipcHandlers.ts` (task 5.2):**
+- `registerIpcHandlers(win)` — single registration entry point called from `main.ts`
+- Mutation channels (`UpdateKeywordBody`, `AddEntry`, etc.) call `notifyMutation()` then forward to sidecar
+- Non-mutating sidecar channels (`GetAllDiagnostics`, `RenderCardText`, etc.) forwarded directly
+- File I/O channels (`File:ReadFile`, etc.) call fileHandlers implementations
+- `SaveProject` not counted as a user mutation (does not reset autosave timer)
+
+**`autosave.ts` (task 5.4):**
+- 60-second inactivity timer; reset on every `notifyMutation()` call
+- `performAutosave()`: calls sidecar `SaveProject` → `writeFile`; all errors swallowed silently
+- Active only when `_projectPath` is set (`setProjectPath` / `clearProjectPath`)
+- `shutdownAutosave()` for graceful app quit
+
+**`main.ts` (updated):**
+- Calls `registerIpcHandlers(mainWindow)` before renderer loads
+- Calls `startSidecar(onError)` with callback that does `win.webContents.send("SidecarError", msg)`
+- `before-quit` handler calls `shutdownAutosave()` + `stopSidecar()` for clean exit
+
+**`src/shared/ipc.ts` (updated):**
+- Added `ReadFileParams` and `WriteFileParams` typed interfaces for file I/O payloads
+- Added `IPC_CHANNELS.SidecarError` notification channel constant
+
+**`tsconfig.main.json` (updated):**
+- Added `exclude` for `src/main/**/__tests__/**/*.ts` so test files are not compiled into the main process bundle
+
+**`vitest.config.ts` (updated):**
+- Added `src/main/**/*.test.ts` to `include`
+- Added `environmentMatchGlobs: [["src/main/**/*.test.ts", "node"]]` so main tests run in Node, not jsdom
+
+**Tests (27 new):**
+- `src/main/__tests__/sidecarManager.test.ts` — 9 tests: request serialisation, id correlation, error envelope, concurrent requests, crash rejection, restart attempt, onError callback, `stopSidecar` stdin.end, malformed JSON tolerance
+- `src/main/__tests__/fileHandlers.test.ts` — 12 tests: readFile success/traverse-rejection/relative-rejection/ENOENT, writeFile success/mkdir/rejection, showOpenDialog success/cancel, showSaveDialog success/cancel, getUserDataPath
+- `src/main/__tests__/autosave.test.ts` — 6 tests: fires after 60s, resets on each mutation, no-op without project, cancelled on clearProjectPath, errors swallowed, shutdownAutosave cancels
 
 ---
 
@@ -356,8 +412,11 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `Tooling/RpcHandlerTests.cs` | 23 | ✅ All passing (14 new: export ReturnType, export static effect, rename DSL rewrite, rename round-trip, GetSymbolInfo shape; BLOCKER 1: UpdateLifetimeSpec 2 tests; BLOCKER 2: RenameEntry phase/actionRule/SBR rewrite 6 tests) |
 
 | `tooling/src/renderer/__tests__/App.test.tsx` | 5 | ✅ All passing (new — Group 2 scaffold smoke test) |
+| `tooling/src/main/__tests__/sidecarManager.test.ts` | 9 | ✅ All passing (new — Group 5 sidecar lifecycle) |
+| `tooling/src/main/__tests__/fileHandlers.test.ts` | 12 | ✅ All passing (new — Group 5 file I/O channels) |
+| `tooling/src/main/__tests__/autosave.test.ts` | 6 | ✅ All passing (new — Group 5 autosave timer) |
 
-**Total: 150 C# tests passing + 5 TypeScript/React tests passing.**
+**Total: 150 C# tests passing + 32 TypeScript/React tests passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

@@ -365,12 +365,12 @@ Implement the 18 RPC methods. Depends on Group 3.
 
 ---
 
-## Group 5 — Main process: sidecar lifecycle + IPC bridge (D26)
+## Group 5 — Main process: sidecar lifecycle + IPC bridge (D26) ✅ COMPLETE
 
 Connect Electron main process to sidecar. Depends on Group 2 (scaffold) and
 Group 3 (sidecar exists and builds).
 
-### 5.1  Sidecar process manager
+### 5.1  Sidecar process manager ✅
   - reads: `docs/architecture.md#D26`, `tooling/src/main/main.ts`
   - writes: `tooling/src/main/sidecarManager.ts`
   - Spawn sidecar via `child_process.spawn`. Resolve binary path via
@@ -380,7 +380,7 @@ Group 3 (sidecar exists and builds).
     On sidecar crash: reject all pending requests; attempt one restart; if
     restart fails, emit error to renderer.
 
-### 5.2  IPC bridge — main process handlers
+### 5.2  IPC bridge — main process handlers ✅
   - reads: `docs/architecture.md#D26`, `tooling/src/shared/ipc.ts`,
     `tooling/src/main/sidecarManager.ts`
   - writes: `tooling/src/main/ipcHandlers.ts`
@@ -390,7 +390,7 @@ Group 3 (sidecar exists and builds).
     `ShowOpenDialog`, `ShowSaveDialog`) call Node's `fs` / Electron's
     `dialog` APIs directly — not forwarded to sidecar.
 
-### 5.3  File I/O channels
+### 5.3  File I/O channels ✅
   - reads: `docs/architecture.md#D26`
   - writes: `tooling/src/main/fileHandlers.ts`
   - Channels: `ReadFile(path) → string`, `WriteFile(path, content) → void`,
@@ -399,7 +399,7 @@ Group 3 (sidecar exists and builds).
     `GetUserDataPath() → string`.
   - All file paths validated to prevent directory traversal.
 
-### 5.4  Autosave timer
+### 5.4  Autosave timer ✅
   - reads: `docs/architecture.md#D27`, `tooling/src/main/ipcHandlers.ts`
   - writes: `tooling/src/main/autosave.ts`
   - 60-second inactivity timer: reset on every mutation IPC call; fires
