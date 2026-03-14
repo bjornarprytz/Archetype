@@ -1,0 +1,16 @@
+{
+  "name": "archetype",
+  "private": true,
+  "scripts": {
+    "tool": "pnpm --filter archetype-tooling dev",
+    "tool:build": "pnpm --filter archetype-tooling build",
+    "tool:test": "pnpm --filter archetype-tooling test"
+  },
+  "engines": {
+    "pnpm": ">=9",
+    "node": ">=20"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["electron", "esbuild"]
+  }
+}

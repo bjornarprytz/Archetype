@@ -8,6 +8,10 @@
 *.user
 .idea/
 
+# Node / pnpm
+node_modules/
+tooling/dist/
+
 # OS
 .DS_Store
 Thumbs.db

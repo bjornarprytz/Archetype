@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { App } from "../App";
+import { useProjectStore } from "../store/projectStore";
 
 // ---------------------------------------------------------------------------
 // App smoke tests (Task 2.6)
@@ -10,23 +11,22 @@ import { App } from "../App";
 // Verifies that:
 //   1. The app renders without throwing.
 //   2. The sidebar navigation is present.
-//   3. Clicking a nav item updates the main panel heading.
-//   4. The status bar is present.
-//
-// No IPC calls are made by the App shell itself — the mock from setup.ts is
-// sufficient.  Stores are in their initial (empty) state for all tests here.
+//   3. Welcome screen is shown with no project open.
+//   4. Clicking a nav item updates the main panel heading (with project loaded).
+//   5. The status bar is present.
 // ---------------------------------------------------------------------------
 
+function loadProject(): void {
+  useProjectStore.getState().setProject("/fake/project.archetype", "test-project");
+}
+
 describe("App", () => {
-  beforeEach(() => {
-    // Reset Zustand stores between tests by re-importing (stores hold module
-    // state; vitest isolates modules per test file but not per test case).
-    // For this smoke test the default initial state is sufficient — no reset
-    // needed since no actions are dispatched.
+  afterEach(() => {
+    // Clear project state between tests.
+    useProjectStore.getState().clearProject();
   });
 
   it("renders without crashing", () => {
-    // If this throws, the Vite + React + Vitest pipeline is broken.
     expect(() => render(<App />)).not.toThrow();
   });
 
@@ -35,21 +35,25 @@ describe("App", () => {
     expect(screen.getByRole("navigation", { name: "Main navigation" })).toBeInTheDocument();
   });
 
-  it("shows Keywords as the default active panel", () => {
+  it("shows welcome screen when no project is open", () => {
     render(<App />);
-    // The placeholder panel heading should read "Keywords".
+    expect(screen.getByRole("region", { name: "Welcome screen" })).toBeInTheDocument();
+  });
+
+  it("shows Keywords as the default active panel when a project is open", () => {
+    loadProject();
+    render(<App />);
     expect(screen.getByRole("heading", { name: "Keywords" })).toBeInTheDocument();
   });
 
   it("navigates to Cards panel when Cards nav item is clicked", async () => {
+    loadProject();
     const user = userEvent.setup();
     render(<App />);
 
-    // Click the "Cards" nav item.
     const cardsNavItem = screen.getByRole("option", { name: "Cards" });
     await user.click(cardsNavItem);
 
-    // The main content area should now show the Cards placeholder.
     expect(screen.getByRole("heading", { name: "Cards" })).toBeInTheDocument();
   });
 

@@ -60,9 +60,18 @@ function resolveSidecarPath(): string {
 
   if (isDev) {
     // Development: use the debug build output next to the tooling directory.
+    // Runtime identifier subfolder: dotnet self-contained builds include a
+    // platform/arch subdirectory (e.g. linux-x64, osx-arm64, win-x64).
+    const arch = process.arch === "arm64" ? "arm64" : "x64";
+    const rid  = process.platform === "win32"    ? `win-${arch}`
+               : process.platform === "darwin"   ? `osx-${arch}`
+               : `linux-${arch}`;
+    const binaryName = process.platform === "win32"
+      ? "Archetype.Tooling.Server.exe"
+      : "Archetype.Tooling.Server";
+
     const devPath = path.join(
       __dirname,
-      "..",
       "..",
       "..",
       "..",
@@ -71,9 +80,8 @@ function resolveSidecarPath(): string {
       "bin",
       "Debug",
       "net10.0",
-      process.platform === "win32"
-        ? "Archetype.Tooling.Server.exe"
-        : "Archetype.Tooling.Server",
+      rid,
+      binaryName,
     );
     return devPath;
   }
