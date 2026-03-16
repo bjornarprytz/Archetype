@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LocalizationPanel } from "./LocalizationPanel";
+import { invalidateSnapshotCache } from "../snapshot";
 
 const snap = {
   id: "test",
@@ -24,6 +25,7 @@ const snap = {
 
 describe("LocalizationPanel", () => {
   beforeEach(() => {
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockResolvedValue({ json: JSON.stringify(snap) });
   });
 

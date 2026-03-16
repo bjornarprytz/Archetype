@@ -244,7 +244,13 @@ function KeywordDetail({ keyword, onRename, onRefresh }: KeywordDetailProps): Re
             <input
               style={{ ...S.input, flex: 1 }}
               value={p.name}
-              onChange={(e) => { void updateParam(i, "name", e.target.value); }}
+              // D28: non-DSL fields commit on blur/Enter, not on every keystroke,
+              // to avoid firing UpdateField + full re-validation per keypress.
+              onChange={(e) => setParams((prev) =>
+                prev.map((pp, idx) => idx === i ? { ...pp, name: e.target.value } : pp)
+              )}
+              onBlur={(e) => { void updateParam(i, "name", e.target.value); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { void updateParam(i, "name", (e.target as HTMLInputElement).value); } }}
               aria-label={`Parameter ${i + 1} name`}
             />
             <select

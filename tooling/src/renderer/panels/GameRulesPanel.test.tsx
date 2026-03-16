@@ -10,6 +10,7 @@ vi.mock("@monaco-editor/react", () => ({
 }));
 
 import { GameRulesPanel } from "./GameRulesPanel";
+import { invalidateSnapshotCache } from "../snapshot";
 
 const snap = {
   id: "test",
@@ -30,6 +31,7 @@ const snap = {
 
 describe("GameRulesPanel", () => {
   beforeEach(() => {
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockResolvedValue({ json: JSON.stringify(snap) });
   });
 

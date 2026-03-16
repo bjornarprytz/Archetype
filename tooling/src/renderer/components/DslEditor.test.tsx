@@ -85,7 +85,7 @@ describe("DslEditor", () => {
 
   it("calls invoke with UpdateKeywordBody for Keyword entries", async () => {
     vi.useFakeTimers();
-    const { unmount } = render(
+    render(
       <DslEditor
         value=""
         entryKind="Keyword"
@@ -94,29 +94,41 @@ describe("DslEditor", () => {
         debounceMs={10}
       />
     );
-    // Simulate monaco onChange via the textarea
     const editor = screen.getByTestId("dsl-editor") as HTMLTextAreaElement;
     await act(async () => {
-      Object.defineProperty(editor, "value", { writable: true, value: "new dsl" });
-      editor.dispatchEvent(new Event("input", { bubbles: true }));
-      editor.dispatchEvent(new Event("change", { bubbles: true }));
+      fireEvent.change(editor, { target: { value: "new dsl" } });
     });
     await act(async () => { vi.runAllTimers(); });
-    await act(async () => { /* flush promises */ });
-    // The mock invoke may have been called; we verify invocation shape at integration level.
-    unmount();
+    // Flush microtasks so the async invoke callback settles.
+    await act(async () => { await Promise.resolve(); });
+    expect(window.archetype.invoke).toHaveBeenCalledWith(
+      "UpdateKeywordBody",
+      { entryName: "attack", dsl: "new dsl" }
+    );
     vi.useRealTimers();
   });
 
-  it("calls invoke with UpdateActivationCondition for card activationCondition", () => {
+  it("calls invoke with UpdateActivationCondition for card activationCondition", async () => {
+    vi.useFakeTimers();
     render(
       <DslEditor
-        value="target.health > 3"
+        value=""
         entryKind="Card"
         entryName="Firebolt"
         dslField="activationCondition"
+        debounceMs={10}
       />
     );
-    expect(screen.getByTestId("dsl-editor")).toBeInTheDocument();
+    const editor = screen.getByTestId("dsl-editor") as HTMLTextAreaElement;
+    await act(async () => {
+      fireEvent.change(editor, { target: { value: "target.health > 3" } });
+    });
+    await act(async () => { vi.runAllTimers(); });
+    await act(async () => { await Promise.resolve(); });
+    expect(window.archetype.invoke).toHaveBeenCalledWith(
+      "UpdateActivationCondition",
+      { cardName: "Firebolt", dsl: "target.health > 3" }
+    );
+    vi.useRealTimers();
   });
 });

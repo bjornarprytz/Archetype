@@ -258,18 +258,50 @@ function normalizeSnapshot(raw: RawProjectFile): ProjectSnapshot {
   };
 }
 
-/** Serialise → parse project from sidecar. Returns null if no project loaded. */
-export async function fetchSnapshot(): Promise<ProjectSnapshot | null> {
-  try {
-    const result = await window.archetype.invoke<SaveProjectResult>(
-      IPC_CHANNELS.SaveProject
-    );
-    if (!result?.json) return null;
-    const raw = JSON.parse(result.json) as RawProjectFile;
-    return normalizeSnapshot(raw);
-  } catch {
-    return null;
-  }
+// ---------------------------------------------------------------------------
+// Snapshot cache
+// ---------------------------------------------------------------------------
+
+/**
+ * Module-level cache for the last `SaveProject` result.
+ *
+ * Multiple panels call `fetchSnapshot()` on mount. Without caching, each panel
+ * triggers a full serialisation round-trip (`SaveProject`) to the sidecar.
+ * This is wasteful when switching panels quickly on a large project.
+ *
+ * The cache holds the in-flight or resolved promise so that concurrent calls
+ * made during the same render cycle share a single IPC call. The cache is
+ * invalidated by `invalidateSnapshotCache()`, which panels and the mutation
+ * path must call whenever they know the project state has changed.
+ */
+let snapshotCache: Promise<ProjectSnapshot | null> | null = null;
+
+/**
+ * Invalidate the snapshot cache. Call this after any mutation that changes
+ * project state so the next `fetchSnapshot()` call fetches fresh data.
+ */
+export function invalidateSnapshotCache(): void {
+  snapshotCache = null;
+}
+
+/** Serialise → parse project from sidecar. Returns null if no project loaded.
+ *  Results are cached per-mutation-cycle: concurrent calls share one IPC
+ *  round-trip, and the cache is cleared by `invalidateSnapshotCache()`. */
+export function fetchSnapshot(): Promise<ProjectSnapshot | null> {
+  if (snapshotCache !== null) return snapshotCache;
+  snapshotCache = (async () => {
+    try {
+      const result = await window.archetype.invoke<SaveProjectResult>(
+        IPC_CHANNELS.SaveProject
+      );
+      if (!result?.json) return null;
+      const raw = JSON.parse(result.json) as RawProjectFile;
+      return normalizeSnapshot(raw);
+    } catch {
+      return null;
+    }
+  })();
+  return snapshotCache;
 }
 
 // ---------------------------------------------------------------------------

@@ -43,12 +43,13 @@ export function ProblemsPanel({ onNavigate }: ProblemsPanelProps): React.ReactEl
     };
   }, [setDiagnostics, clearDiagnostics]);
 
-  // Sort: errors first, then warnings
+  // Sort: errors first, then warnings; within each severity tier sort by
+  // entry name ascending (D28 — renderer sorts, does not rely on sidecar order).
   const sorted = React.useMemo(() => {
     if (!diagnostics) return [];
     return [...diagnostics].sort((a, b) => {
-      if (a.severity === b.severity) return 0;
-      return a.severity === "error" ? -1 : 1;
+      if (a.severity !== b.severity) return a.severity === "error" ? -1 : 1;
+      return a.entryName.localeCompare(b.entryName);
     });
   }, [diagnostics]);
 

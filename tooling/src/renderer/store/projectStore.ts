@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { invalidateSnapshotCache } from "../snapshot";
 
 // ---------------------------------------------------------------------------
 // projectStore — sidecar connection status and current project state (D26)
@@ -49,7 +50,8 @@ interface ProjectActions {
   /** Called by the sidecar manager when the sidecar process is ready. */
   setSidecarStatus: (status: SidecarStatus) => void;
 
-  /** Called after a successful LoadProject response. */
+  /** Called after a successful LoadProject response. Also invalidates the
+   *  snapshot cache so panels pick up the new project's data. */
   setProject: (path: string | null, name: string | null) => void;
 
   /** Called when the user closes the project (not yet implemented in Group 2). */
@@ -81,14 +83,21 @@ export const useProjectStore = create<ProjectState & ProjectActions>((set) => ({
   },
 
   setProject(path, name) {
+    // A new project was loaded — discard any cached snapshot from the
+    // previous project so panels re-fetch on next mount.
+    invalidateSnapshotCache();
     set({ projectPath: path, projectName: name, isDirty: false });
   },
 
   clearProject() {
+    invalidateSnapshotCache();
     set({ projectPath: null, projectName: null, isDirty: false, isMutating: false });
   },
 
   markDirty() {
+    // Invalidate the snapshot cache so the next fetchSnapshot() call
+    // re-fetches from the sidecar rather than returning stale data.
+    invalidateSnapshotCache();
     set({ isDirty: true });
   },
 

@@ -54,6 +54,24 @@ describe("ProblemsPanel", () => {
     expect(items[1]).toHaveTextContent("foo");
   });
 
+  it("sorts same-severity rows by entry name ascending", async () => {
+    vi.mocked(window.archetype.invoke).mockResolvedValue({
+      diagnostics: [
+        { entryKind: "Keyword", entryName: "zebra",  severity: "error", message: "bad z" },
+        { entryKind: "Keyword", entryName: "alpha",  severity: "error", message: "bad a" },
+        { entryKind: "Keyword", entryName: "middle", severity: "error", message: "bad m" },
+      ],
+    });
+    render(<ProblemsPanel onNavigate={onNavigate} />);
+    await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(3));
+
+    const items = screen.getAllByRole("listitem");
+    // Same severity — secondary sort should be entry name ascending.
+    expect(items[0]).toHaveTextContent("alpha");
+    expect(items[1]).toHaveTextContent("middle");
+    expect(items[2]).toHaveTextContent("zebra");
+  });
+
   it("navigates to keywords panel when a Keyword row is clicked", async () => {
     vi.mocked(window.archetype.invoke).mockResolvedValue({
       diagnostics: [

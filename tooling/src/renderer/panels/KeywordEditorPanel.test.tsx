@@ -10,6 +10,7 @@ vi.mock("@monaco-editor/react", () => ({
 }));
 
 import { KeywordEditorPanel } from "./KeywordEditorPanel";
+import { invalidateSnapshotCache } from "../snapshot";
 
 const makeSnapshot = (keywords = [{ name: "attack", body: "take_damage(a,1)", parameters: [], textTemplate: "", noSignal: false }]) => ({
   keywords,
@@ -21,6 +22,7 @@ const makeSnapshot = (keywords = [{ name: "attack", body: "take_damage(a,1)", pa
 
 describe("KeywordEditorPanel", () => {
   beforeEach(() => {
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockResolvedValue({
       json: JSON.stringify(makeSnapshot()),
     });

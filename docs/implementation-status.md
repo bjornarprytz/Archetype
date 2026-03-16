@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-16 (Group 6 complete — Renderer UI panels: DslEditor, KeywordEditorPanel, CardEditorPanel, GameRulesPanel, InitManifestPanel, LocalizationPanel, ProblemsPanel, StatusBar, ExportModal, GraphPanel, SetOverviewPanel; snapshot.ts normalizeSnapshot dual-format; 105 TypeScript tests passing; 150 C# tests passing)
+> Last updated: 2026-03-17 (Group 6 review observations addressed. All 7 observations fixed: DslEditor insertText, CardEditorPanel staticEffect comment, snapshot cache, ProblemsPanel secondary sort, completion provider deduplication, KeywordDetail param blur-on-commit, DslEditor invoke assertions. 106 TypeScript tests passing; 150 C# tests passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`. Electron tooling in `tooling/`.
 

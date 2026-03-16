@@ -282,6 +282,11 @@ function CardDetail({
                 height="80px"
               />
               <label style={{ ...S.sectionLabel, marginTop: "8px" }}>Effect</label>
+              {/* dslField="staticEffect_${i}" falls through resolveMutation to
+                  UpdateCardEffect with effectName="staticEffect_0" etc. D28
+                  has no dedicated method for static effect bodies; routing
+                  through UpdateCardEffect is intentional and consistent with
+                  how the sidecar's UpdateCardEffectHandler stores named effects. */}
               <DslEditor
                 value={se.effectDsl}
                 entryKind="Card"

@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { InitManifestPanel } from "./InitManifestPanel";
+import { invalidateSnapshotCache } from "../snapshot";
 
 const snap = {
   id: "test",
@@ -23,6 +24,8 @@ const snap = {
 
 describe("InitManifestPanel", () => {
   beforeEach(() => {
+    // Invalidate the snapshot cache so each test fetches fresh mock data.
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockResolvedValue({ json: JSON.stringify(snap) });
   });
 
@@ -65,6 +68,7 @@ describe("InitManifestPanel", () => {
   });
 
   it("renders empty state when no manifest", async () => {
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockResolvedValue({
       json: JSON.stringify({ ...snap, initManifest: [] }),
     });

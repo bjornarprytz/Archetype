@@ -10,6 +10,7 @@ vi.mock("@monaco-editor/react", () => ({
 }));
 
 import { CardEditorPanel } from "./CardEditorPanel";
+import { invalidateSnapshotCache } from "../snapshot";
 
 const snap = {
   id: "test",
@@ -34,6 +35,7 @@ const snap = {
 
 describe("CardEditorPanel", () => {
   beforeEach(() => {
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockResolvedValue({ json: JSON.stringify(snap) });
   });
 

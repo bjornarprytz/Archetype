@@ -9,6 +9,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { SetOverviewPanel } from "./SetOverviewPanel";
+import { invalidateSnapshotCache } from "../snapshot";
 
 const snap = {
   id: "test",
@@ -53,6 +54,8 @@ const graphResult = {
 
 describe("SetOverviewPanel", () => {
   beforeEach(() => {
+    // Invalidate the snapshot cache so each test fetches fresh mock data.
+    invalidateSnapshotCache();
     // First call returns SaveProject (snapshot), second returns GetReferenceGraph
     vi.mocked(window.archetype.invoke)
       .mockResolvedValueOnce({ json: JSON.stringify(snap) })
@@ -104,6 +107,7 @@ describe("SetOverviewPanel", () => {
   });
 
   it("shows empty state when no project is open", async () => {
+    invalidateSnapshotCache();
     vi.mocked(window.archetype.invoke).mockReset();
     vi.mocked(window.archetype.invoke)
       .mockResolvedValueOnce({ json: null })   // SaveProject returns null

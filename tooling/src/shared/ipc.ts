@@ -176,6 +176,10 @@ export interface CompletionItem {
   readonly label: string;
   readonly kind: string;
   readonly detail: string | null;
+  /** Monaco snippet syntax tab-stop template (e.g. `get-state($1, $2)`). When
+   *  present, use this as the Monaco `insertText`; fall back to `label` when
+   *  absent (D28). */
+  readonly insertText?: string;
 }
 export interface GetCompletionsResult {
   readonly items: readonly CompletionItem[];

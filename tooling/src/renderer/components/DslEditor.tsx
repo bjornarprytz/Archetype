@@ -53,6 +53,9 @@ export interface DslEditorProps {
 // ---------------------------------------------------------------------------
 
 let languageRegistered = false;
+// Completion provider must be registered once per Monaco instance — registering
+// on every mount accumulates duplicate providers (Monaco does not deduplicate).
+let completionProviderRegistered = false;
 
 function registerLanguage(monaco: Monaco): void {
   if (languageRegistered) return;
@@ -162,36 +165,43 @@ export function DslEditor({
       monaco.editor.setModelMarkers(model, "archetype", [...markers]);
     }
 
-    // Completion provider
-    monaco.languages.registerCompletionItemProvider("archetype-dsl", {
-      triggerCharacters: [".", "("],
-      provideCompletionItems: async (model, position) => {
-        const offset   = model.getOffsetAt(position);
-        const wordInfo = model.getWordUntilPosition(position);
-        try {
-          const result = await window.archetype.invoke<GetCompletionsResult>(
-            IPC_CHANNELS.GetCompletions,
-            { entryKind, entryName, dslField, offset, prefix: wordInfo.word }
-          );
-          return {
-            suggestions: result.items.map((item) => ({
-              label:      item.label,
-              kind:       completionKind(monaco, item.kind),
-              detail:     item.detail ?? undefined,
-              insertText: item.label,
-              range: {
-                startLineNumber: position.lineNumber,
-                startColumn:     wordInfo.startColumn,
-                endLineNumber:   position.lineNumber,
-                endColumn:       wordInfo.endColumn,
-              },
-            })),
-          };
-        } catch {
-          return { suggestions: [] };
-        }
-      },
-    });
+    // Register the completion provider once per Monaco instance. Monaco
+    // accumulates rather than deduplicates, so a second registration would
+    // produce N copies of every suggestion (same pattern as languageRegistered).
+    if (!completionProviderRegistered) {
+      completionProviderRegistered = true;
+      monaco.languages.registerCompletionItemProvider("archetype-dsl", {
+        triggerCharacters: [".", "("],
+        provideCompletionItems: async (model, position) => {
+          const offset   = model.getOffsetAt(position);
+          const wordInfo = model.getWordUntilPosition(position);
+          try {
+            const result = await window.archetype.invoke<GetCompletionsResult>(
+              IPC_CHANNELS.GetCompletions,
+              { entryKind, entryName, dslField, offset, prefix: wordInfo.word }
+            );
+            return {
+              suggestions: result.items.map((item) => ({
+                label:      item.label,
+                kind:       completionKind(monaco, item.kind),
+                detail:     item.detail ?? undefined,
+                // Use sidecar-supplied snippet template when present (D28);
+                // fall back to label for plain identifiers.
+                insertText: item.insertText ?? item.label,
+                range: {
+                  startLineNumber: position.lineNumber,
+                  startColumn:     wordInfo.startColumn,
+                  endLineNumber:   position.lineNumber,
+                  endColumn:       wordInfo.endColumn,
+                },
+              })),
+            };
+          } catch {
+            return { suggestions: [] };
+          }
+        },
+      });
+    }
   }, [entryKind, entryName, dslField, markers]);
 
   const handleChange = useCallback((newValue: string | undefined) => {
