@@ -25,7 +25,7 @@ public sealed class UpdateFieldHandler(SidecarState sidecar)
 
         var state = sidecar.State;
 
-        switch (kind)
+        switch (kind.ToLowerInvariant())
         {
             case "keyword":
                 if (state.Keywords.TryGetValue(name, out var kw))

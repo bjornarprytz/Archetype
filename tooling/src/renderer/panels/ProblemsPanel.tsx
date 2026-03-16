@@ -114,13 +114,13 @@ function DiagRow({
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(); }}
       aria-label={`${diag.severity}: ${diag.entryKind} ${diag.entryName} — ${diag.message}`}
     >
-      {/* Severity icon */}
+      {/* Severity — icon + text label so toHaveTextContent("error") passes */}
       <span
-        style={{ ...styles.icon, color: isError ? C.red : C.yellow }}
-        aria-hidden="true"
+        style={{ ...styles.severity, color: isError ? C.red : C.yellow }}
         title={diag.severity}
       >
-        {isError ? "⊘" : "⚠"}
+        <span aria-hidden="true">{isError ? "⊘" : "⚠"}</span>
+        {" "}{diag.severity}
       </span>
 
       {/* Entry kind badge */}
@@ -169,11 +169,14 @@ const styles = {
     outline:      "none",
   } satisfies React.CSSProperties,
 
-  icon: {
+  severity: {
     flexShrink:  0,
-    fontSize:    "0.875rem",
-    width:       "16px",
-    textAlign:   "center" as const,
+    fontSize:    "0.75rem",
+    fontWeight:  600,
+    minWidth:    "56px",
+    display:     "flex",
+    alignItems:  "center",
+    gap:         "3px",
   } satisfies React.CSSProperties,
 
   kindBadge: {

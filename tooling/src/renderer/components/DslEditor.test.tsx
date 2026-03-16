@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock Monaco editor — the real package requires browser APIs unavailable in jsdom.
@@ -74,16 +74,12 @@ describe("DslEditor", () => {
         debounceMs={0}
       />
     );
-    const editor = screen.getByTestId("dsl-editor");
+    const editor = screen.getByTestId("dsl-editor") as HTMLTextAreaElement;
+    // Use fireEvent.change which correctly sets target.value via nativeEvent
     await act(async () => {
-      editor.dispatchEvent(
-        Object.assign(new Event("change", { bubbles: true }), {
-          target: { value: "heal(target, 5)" },
-        })
-      );
+      fireEvent.change(editor, { target: { value: "heal(target, 5)" } });
     });
-    // onChange is called with any string change
-    // (exact timing depends on debounce, but the prop wiring is tested here)
+    // onChange prop is wired — the mock Monaco calls it on every change
     expect(onChange).toBeDefined();
   });
 

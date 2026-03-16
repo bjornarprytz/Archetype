@@ -14,15 +14,18 @@ import type { LoadProjectResult } from "@shared/ipc";
 import { C, Font }             from "./design/tokens";
 
 // Minimal empty project accepted by LoadProject.
+// keywords/cards/zones/players/cardSets/actionRules are keyed dictionaries in
+// the sidecar (EnumerateObject), so they must be objects, not arrays.
+// initManifest is an object with zones/cards/players sub-arrays.
 const EMPTY_PROJECT_JSON = JSON.stringify({
-  keywords: [],
-  cards: [],
-  zones: [],
+  keywords: {},
+  cards: {},
+  zones: {},
   phases: [],
-  actionRules: [],
+  actionRules: {},
   stateBasedRules: [],
   triggerResolutionOrder: "Chronological",
-  initManifest: [],
+  initManifest: { zones: [], cards: [], players: [] },
   sourceLanguage: "en",
   locales: [],
 });
@@ -92,10 +95,11 @@ const NAV_GROUPS: readonly NavGroup[] = [
 export function App(): React.ReactElement {
   const [activePanel, setActivePanel] = useState<PanelId>("keywords");
 
+  const projectPath = useProjectStore((s) => s.projectPath);
   const projectName = useProjectStore((s) => s.projectName);
   const setProject  = useProjectStore((s) => s.setProject);
 
-  const hasProject = projectName !== null;
+  const hasProject = projectPath !== null;
 
   function navigate(panel: string): void {
     setActivePanel(panel as PanelId);
@@ -320,8 +324,9 @@ function ProjectButtons({
       await window.archetype.invoke(IPC_CHANNELS.WriteFile,
         { path: savePath, content: EMPTY_PROJECT_JSON });
       onProjectLoaded(savePath, result?.id ?? null);
-    } catch { /* ignore */ }
-    finally { setBusy(false); }
+    } catch (e) {
+      console.error("[ProjectButtons] New project failed:", e);
+    } finally { setBusy(false); }
   }
 
   async function handleOpen(): Promise<void> {
@@ -342,8 +347,9 @@ function ProjectButtons({
         IPC_CHANNELS.LoadProject, { json }
       );
       onProjectLoaded(filePath, result?.id ?? null);
-    } catch { /* ignore */ }
-    finally { setBusy(false); }
+    } catch (e) {
+      console.error("[ProjectButtons] Open project failed:", e);
+    } finally { setBusy(false); }
   }
 
   return (

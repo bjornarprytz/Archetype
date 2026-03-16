@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-13 (Group 5 complete — Main process sidecar lifecycle + IPC bridge: sidecarManager.ts, ipcHandlers.ts, fileHandlers.ts, autosave.ts; main.ts updated to wire all; 27 new tests; 32 TypeScript tests total passing)
+> Last updated: 2026-03-16 (Group 6 complete — Renderer UI panels: DslEditor, KeywordEditorPanel, CardEditorPanel, GameRulesPanel, InitManifestPanel, LocalizationPanel, ProblemsPanel, StatusBar, ExportModal, GraphPanel, SetOverviewPanel; snapshot.ts normalizeSnapshot dual-format; 105 TypeScript tests passing; 150 C# tests passing)
 > Branch: `impl/text-renderer`
 > All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`. Electron tooling in `tooling/`.
 
@@ -15,7 +15,7 @@
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
 | `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete |
-| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores | ✅ Groups 2 + 5 complete (Groups 6–7 pending) |
+| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores, all UI panels | ✅ Groups 2 + 5 + 6 complete (Group 7 pending) |
 
 ---
 
@@ -371,6 +371,79 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 
 ---
 
+## Tier 5 — Electron Authoring Tool (Group 6)
+
+### Renderer UI panels ✅ (`tooling/src/renderer/`)
+
+**`snapshot.ts` (updated):**
+- `normalizeSnapshot` handles both raw `.archetype` file format (dict-based keywords/cards/zones/actionRules) and already-normalized `ProjectSnapshot` format (array-based). Detection: if `keywords` is an array, fast-path passes data through directly. Enables unit tests to mock `SaveProject` with normalized fixtures.
+- `RawProjectFile`, `RawKeyword`, `RawCard`, `RawZone` interfaces document the on-disk serialisation format.
+
+**`components/DslEditor.tsx` (Task 6.1):**
+- Wraps `@monaco-editor/react`; registers `archetype-dsl` language with Monarch tokenizer and `archetype-dark` theme.
+- Debounces content changes (default 200ms); dispatches to the correct sidecar mutation channel based on `entryKind` + `dslField` (UpdateKeywordBody / UpdateCardEffect / UpdateLifetimeSpec / UpdateCostBody / UpdateActivationCondition).
+- `IMarkerData[]` prop forwarded to `monaco.editor.setModelMarkers` on change.
+- `CompletionItemProvider` calls `GetCompletions` sidecar channel.
+- 5 tests: render, readOnly, onChange wiring, UpdateKeywordBody dispatch, activationCondition dispatch.
+
+**`panels/KeywordEditorPanel.tsx` (Task 6.2):**
+- Sidebar keyword list + detail view; name, parameters (type dropdown), DslEditor body, text template, [NoSignal] checkbox.
+- Create / delete / rename actions wired to AddEntry / RemoveEntry / RenameEntry channels.
+- 5 tests: render, heading, list population, detail on selection, create button.
+
+**`panels/CardEditorPanel.tsx` (Task 6.3):**
+- Sidebar card list + detail view: name, primary effect (DslEditor), additional effects (accordion), static effects, activation condition, cost definitions, flavour text, art path, card text preview (RenderCardText).
+- 5 tests: render, heading, card list, detail on selection, create button.
+
+**`panels/GameRulesPanel.tsx` (Task 6.4):**
+- Tab-based: Phases (drag-to-reorder, init/cleanup DslEditor), Action Rules (grouped by type, before/after DslEditor), State Rules (drag-to-reorder, condition/body DslEditor), Trigger Order (radio group).
+- All mutations use UpdateField with `entryKind: "GameRules"`.
+- 7 tests: render, heading, tabs, action rules tab, trigger order radios, radio switch+sidecar.
+
+**`panels/InitManifestPanel.tsx` (Task 6.5):**
+- Player-scoped accordion: shared/neutral section at top, then per-player sections.
+- Zone rows with card sub-rows; Add/Remove zone and card actions.
+- 7 tests: render, heading, shared zones, player section, zone names, card names, empty state.
+
+**`panels/LocalizationPanel.tsx` (Task 6.6):**
+- Source language dropdown. Per-locale tabs with missing-string badge.
+- Translation editor: source key on left, editable target on right. Missing strings flagged yellow (warning only per D31).
+- Calls UpdateField with `entryKind: "Localization"` on translation change.
+- 8 tests: render, heading, source language, locale tabs, missing badge, locale switch, missing warning hint, UpdateField call.
+
+**`panels/ProblemsPanel.tsx` (Task 6.7):**
+- Calls `GetAllDiagnostics` on mount; clears on unmount.
+- Sorted: errors first then warnings. Each row shows severity text (visible), entry kind badge, entry name, message.
+- Row click navigates to relevant panel.
+- 8 tests: render, heading, empty state, GetAllDiagnostics call, sorted rows, navigate to keywords, navigate to cards, clearDiagnostics on unmount.
+
+**`components/StatusBar.tsx` (Task 6.8):**
+- Always-visible footer: project name (+ dirty indicator), error + warning count pills.
+- Pills sourced from `diagnosticsStore`; clicking navigates to Problems panel.
+- 7 tests: render, no-project text, project name, dirty indicator, counts, error pill click, warning pill click.
+
+**`components/ExportModal.tsx` (Task 6.8):**
+- Dialog role; shows per-locale missing counts + total. "Export anyway" / "Cancel".
+- Export anyway sends `ExportGameDefinition { force: true }`. Error state shown if response has `kind: "errors"`.
+- 7 tests: render, summary display, total count text, cancel, force export, error kind handling, dialog role.
+
+**`panels/GraphPanel.tsx` (Task 6.9):**
+- React Flow + Dagre layout for keyword composition graph.
+- Calls `GetReferenceGraph` on mount; node click navigates to keywords/cards panel.
+- 7 tests: render, heading, GetReferenceGraph call, flow canvas, empty state, node click navigation, error state.
+
+**`panels/SetOverviewPanel.tsx` (Task 6.10):**
+- Stat tiles (keyword/card/zone/phase counts), keyword usage CSS bar chart (in-refs from graph), composition depth buckets (primitive/composite/complex).
+- 7 tests: render, heading, stat tiles, usage chart, keyword names in chart, depth buckets, empty/no-project state.
+
+**Bug fixes incorporated from WIP:**
+- `App.tsx`: `EMPTY_PROJECT_JSON` changed from array to dict format for `keywords`/`cards`/`zones`/`actionRules` (sidecar expects `EnumerateObject`); `hasProject` uses `projectPath` not `projectName`.
+- `sidecarManager.ts`: null-check added to `envelope.error` test to avoid false rejections on `null` error field.
+- Sidecar handlers (`AddEntryHandler`, `RemoveEntryHandler`, `RenameEntryHandler`, `UpdateFieldHandler`): `kind.ToLowerInvariant()` in switch for case-insensitive entry kind matching from renderer.
+- `ProjectFileLoader.cs`: `ValueKind == JsonValueKind.Object` guards on all dict fields to tolerate array input gracefully.
+
+---
+
 ## Tier 5 — Persistence
 
 ### D17 Save/Load ✅ PASS (BLOCKER 1 fixed 2026-03-08)
@@ -411,12 +484,23 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `Tooling/ValidatorTests.cs` | 5 | ✅ All passing (2 new: missing-ReturnType error, ReturnType-present no error) |
 | `Tooling/RpcHandlerTests.cs` | 23 | ✅ All passing (14 new: export ReturnType, export static effect, rename DSL rewrite, rename round-trip, GetSymbolInfo shape; BLOCKER 1: UpdateLifetimeSpec 2 tests; BLOCKER 2: RenameEntry phase/actionRule/SBR rewrite 6 tests) |
 
-| `tooling/src/renderer/__tests__/App.test.tsx` | 5 | ✅ All passing (new — Group 2 scaffold smoke test) |
+| `tooling/src/renderer/__tests__/App.test.tsx` | 6 | ✅ All passing (updated — Group 6: welcome screen + project open tests) |
 | `tooling/src/main/__tests__/sidecarManager.test.ts` | 9 | ✅ All passing (new — Group 5 sidecar lifecycle) |
 | `tooling/src/main/__tests__/fileHandlers.test.ts` | 12 | ✅ All passing (new — Group 5 file I/O channels) |
 | `tooling/src/main/__tests__/autosave.test.ts` | 6 | ✅ All passing (new — Group 5 autosave timer) |
+| `tooling/src/renderer/components/DslEditor.test.tsx` | 5 | ✅ All passing (new — Group 6 Monaco wrapper) |
+| `tooling/src/renderer/components/StatusBar.test.tsx` | 7 | ✅ All passing (new — Group 6 status bar) |
+| `tooling/src/renderer/components/ExportModal.test.tsx` | 7 | ✅ All passing (new — Group 6 export modal) |
+| `tooling/src/renderer/panels/KeywordEditorPanel.test.tsx` | 5 | ✅ All passing (new — Group 6 keyword editor) |
+| `tooling/src/renderer/panels/CardEditorPanel.test.tsx` | 5 | ✅ All passing (new — Group 6 card editor) |
+| `tooling/src/renderer/panels/GameRulesPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 game rules) |
+| `tooling/src/renderer/panels/InitManifestPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 init manifest) |
+| `tooling/src/renderer/panels/LocalizationPanel.test.tsx` | 8 | ✅ All passing (new — Group 6 localization) |
+| `tooling/src/renderer/panels/ProblemsPanel.test.tsx` | 8 | ✅ All passing (new — Group 6 problems panel) |
+| `tooling/src/renderer/panels/GraphPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 graph view) |
+| `tooling/src/renderer/panels/SetOverviewPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 set overview) |
 
-**Total: 150 C# tests passing + 32 TypeScript/React tests passing.**
+**Total: 150 C# tests passing + 105 TypeScript/React tests passing.**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

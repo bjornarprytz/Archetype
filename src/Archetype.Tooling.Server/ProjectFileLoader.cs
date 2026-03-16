@@ -74,7 +74,8 @@ public static class ProjectFileLoader
         }
 
         // Step 2: load each keyword entry; parse DSL bodies.
-        if (root.TryGetProperty("keywords", out var kws))
+        if (root.TryGetProperty("keywords", out var kws) &&
+            kws.ValueKind == JsonValueKind.Object)
         {
             foreach (var kw in kws.EnumerateObject())
             {
@@ -84,7 +85,8 @@ public static class ProjectFileLoader
         }
 
         // Cards
-        if (root.TryGetProperty("cards", out var cards))
+        if (root.TryGetProperty("cards", out var cards) &&
+            cards.ValueKind == JsonValueKind.Object)
         {
             foreach (var c in cards.EnumerateObject())
             {
@@ -94,7 +96,8 @@ public static class ProjectFileLoader
         }
 
         // Zones
-        if (root.TryGetProperty("zones", out var zones))
+        if (root.TryGetProperty("zones", out var zones) &&
+            zones.ValueKind == JsonValueKind.Object)
         {
             foreach (var z in zones.EnumerateObject())
             {
@@ -107,7 +110,8 @@ public static class ProjectFileLoader
         }
 
         // Players
-        if (root.TryGetProperty("players", out var players))
+        if (root.TryGetProperty("players", out var players) &&
+            players.ValueKind == JsonValueKind.Object)
         {
             foreach (var p in players.EnumerateObject())
             {
@@ -120,7 +124,8 @@ public static class ProjectFileLoader
         }
 
         // Card sets
-        if (root.TryGetProperty("cardSets", out var cardSets))
+        if (root.TryGetProperty("cardSets", out var cardSets) &&
+            cardSets.ValueKind == JsonValueKind.Object)
         {
             foreach (var cs in cardSets.EnumerateObject())
             {
@@ -163,7 +168,8 @@ public static class ProjectFileLoader
         }
 
         // Action rules
-        if (root.TryGetProperty("actionRules", out var actionRules))
+        if (root.TryGetProperty("actionRules", out var actionRules) &&
+            actionRules.ValueKind == JsonValueKind.Object)
         {
             foreach (var ar in actionRules.EnumerateObject())
             {
@@ -218,7 +224,8 @@ public static class ProjectFileLoader
         }
 
         // InitManifest
-        if (root.TryGetProperty("initManifest", out var im))
+        if (root.TryGetProperty("initManifest", out var im) &&
+            im.ValueKind == JsonValueKind.Object)
         {
             state.InitManifest = LoadInitManifestEntry(im, state);
         }

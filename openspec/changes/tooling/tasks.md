@@ -408,13 +408,13 @@ Group 3 (sidecar exists and builds).
 
 ---
 
-## Group 6 — Renderer UI panels (D26, D27, D28, D31)
+## Group 6 — Renderer UI panels (D26, D27, D28, D31) ✅ COMPLETE
 
 React UI panels. Depends on Group 2 (scaffold) and conceptually on Group 4
 (sidecar methods exist), but UI can be built against mocked sidecar responses
 in tests.
 
-### 6.1  Monaco DSL editor component
+### 6.1  Monaco DSL editor component ✅
   - reads: `docs/architecture.md#D26`, `docs/architecture.md#D28`
   - writes: `tooling/src/renderer/components/DslEditor.tsx`,
     `tooling/src/renderer/components/DslEditor.test.tsx`
@@ -425,7 +425,7 @@ in tests.
     `IMarkerData[]` prop and calls `monaco.editor.setModelMarkers`.
     Registers `CompletionItemProvider` that calls `invoke('GetCompletions', ...)`.
 
-### 6.2  Keyword editor panel
+### 6.2  Keyword editor panel ✅
   - reads: `docs/architecture.md#D26`, `tooling/src/renderer/store/projectStore.ts`
   - writes: `tooling/src/renderer/panels/KeywordEditorPanel.tsx`,
     `tooling/src/renderer/panels/KeywordEditorPanel.test.tsx`
@@ -435,7 +435,7 @@ in tests.
     "Create new keyword" action available from this panel and from the
     unresolved-reference inline quickfix.
 
-### 6.3  Card editor panel
+### 6.3  Card editor panel ✅
   - reads: `docs/architecture.md#D26`, `docs/architecture.md#D30`
   - writes: `tooling/src/renderer/panels/CardEditorPanel.tsx`,
     `tooling/src/renderer/panels/CardEditorPanel.test.tsx`
@@ -446,7 +446,7 @@ in tests.
     `RenderCardText`).
 
 ### 6.4  Game rules panel (phases, action rules, state-based rules,
-         trigger resolution order)
+         trigger resolution order) ✅
   - reads: `docs/architecture.md#D26`
   - writes: `tooling/src/renderer/panels/GameRulesPanel.tsx`,
     `tooling/src/renderer/panels/GameRulesPanel.test.tsx`
@@ -456,7 +456,7 @@ in tests.
     handles; per-rule condition + body `DslEditor`. Trigger resolution order:
     radio group.
 
-### 6.5  InitManifest editor panel
+### 6.5  InitManifest editor panel ✅
   - reads: `docs/architecture.md#D26`, `docs/architecture.md#D29`
   - writes: `tooling/src/renderer/panels/InitManifestPanel.tsx`,
     `tooling/src/renderer/panels/InitManifestPanel.test.tsx`
@@ -464,7 +464,7 @@ in tests.
     rows with inline accumulator/condition editing. Card rows nested under
     zone, reorderable. All mutations send `UpdateInitManifest` to sidecar.
 
-### 6.6  Localization panel
+### 6.6  Localization panel ✅
   - reads: `docs/architecture.md#D26`, `docs/architecture.md#D31`
   - writes: `tooling/src/renderer/panels/LocalizationPanel.tsx`,
     `tooling/src/renderer/panels/LocalizationPanel.test.tsx`
@@ -472,7 +472,7 @@ in tests.
     editable target strings on right, per locale. Missing strings flagged
     visually (warning state, not error).
 
-### 6.7  Problems panel
+### 6.7  Problems panel ✅
   - reads: `docs/architecture.md#D28`
   - writes: `tooling/src/renderer/panels/ProblemsPanel.tsx`,
     `tooling/src/renderer/panels/ProblemsPanel.test.tsx`
@@ -480,7 +480,7 @@ in tests.
     warnings. Each row: severity icon + entry kind + entry name + message.
     Clicking a row navigates to the relevant panel and entry.
 
-### 6.8  Status bar + export flow (D31)
+### 6.8  Status bar + export flow (D31) ✅
   - reads: `docs/architecture.md#D31`
   - writes: `tooling/src/renderer/components/StatusBar.tsx`,
     `tooling/src/renderer/components/ExportModal.tsx`,
@@ -494,7 +494,7 @@ in tests.
     "Cancel" buttons. On "Export anyway" sends second request with
     `{ "force": true }`. No "don't ask again" option.
 
-### 6.9  Keyword composition graph view
+### 6.9  Keyword composition graph view ✅
   - reads: `docs/architecture.md#D26`
   - writes: `tooling/src/renderer/panels/GraphPanel.tsx`,
     `tooling/src/renderer/panels/GraphPanel.test.tsx`
@@ -503,7 +503,7 @@ in tests.
     keyword editor. Layout computed client-side (Dagre algorithm via
     `@dagrejs/dagre`).
 
-### 6.10  Set overview panel
+### 6.10  Set overview panel ✅
   - reads: `docs/architecture.md#D26`
   - writes: `tooling/src/renderer/panels/SetOverviewPanel.tsx`,
     `tooling/src/renderer/panels/SetOverviewPanel.test.tsx`

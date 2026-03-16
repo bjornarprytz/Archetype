@@ -24,7 +24,7 @@ public sealed class RemoveEntryHandler(SidecarState sidecar)
         state.UsedBy.TryGetValue(name, out var callers);
         var affected = callers?.ToList() ?? [];
 
-        switch (kind)
+        switch (kind.ToLowerInvariant())
         {
             case "keyword":   state.Keywords.Remove(name);                                           break;
             case "card":      state.Cards.Remove(name);                                              break;

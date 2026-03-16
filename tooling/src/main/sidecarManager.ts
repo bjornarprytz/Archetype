@@ -187,7 +187,7 @@ function handleResponseLine(line: string): void {
 
   _pending.delete(id);
 
-  if (envelope.error !== undefined) {
+  if (envelope.error !== undefined && envelope.error !== null) {
     entry.reject(
       new Error(
         typeof envelope.error === "string"

@@ -26,7 +26,7 @@ public sealed class RenameEntryHandler(SidecarState sidecar)
 
         var state = sidecar.State;
 
-        switch (kind)
+        switch (kind.ToLowerInvariant())
         {
             case "keyword":
                 if (state.Keywords.TryGetValue(oldName, out var kw))

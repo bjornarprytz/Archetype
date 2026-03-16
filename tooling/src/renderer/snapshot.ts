@@ -116,6 +116,148 @@ export interface ProjectSnapshot {
 // Fetch helper
 // ---------------------------------------------------------------------------
 
+/**
+ * Raw shape of the .archetype file as produced by ProjectFileSerializer.
+ * Dictionary fields are keyed by entry name; arrays match the loader format.
+ */
+interface RawProjectFile {
+  id?: string | null;
+  keywords?: Record<string, RawKeyword>;
+  cards?: Record<string, RawCard>;
+  zones?: Record<string, RawZone>;
+  phases?: Array<{ name: string; init?: string; cleanup?: string }>;
+  actionRules?: Record<string, Array<{ before?: string; after?: string }>>;
+  stateBasedRules?: Array<{ condition?: string; body?: string }>;
+  triggerResolutionOrder?: string;
+  initManifest?: unknown;
+  localization?: { sourceLanguage?: string };
+}
+
+interface RawKeyword {
+  body?: string;
+  parameters?: ParameterSpec[];
+  textTemplate?: string;
+  signalBehaviour?: string;
+}
+
+interface RawCard {
+  primaryEffect?: string;
+  activationCondition?: string | null;
+  flavourText?: string;
+  artPath?: string | null;
+  staticProperties?: Record<string, unknown>;
+  costs?: Array<{ body?: string }>;
+  staticEffects?: Array<{ contribution?: string; triggerCondition?: string; lifetime?: string }>;
+  additionalEffects?: Record<string, { body?: string }>;
+}
+
+interface RawZone {
+  staticProperties?: Record<string, unknown>;
+}
+
+/** Converts a dictionary of raw entries into a typed array with name injected. */
+function dictToArray<Raw, Out>(
+  dict: Record<string, Raw> | undefined,
+  transform: (name: string, raw: Raw) => Out,
+): readonly Out[] {
+  if (!dict || Array.isArray(dict)) return [];
+  return Object.entries(dict).map(([name, raw]) => transform(name, raw));
+}
+
+/**
+ * Normalises a raw .archetype file (dictionary-based) into the panel-friendly
+ * snapshot shape.
+ *
+ * Also handles the case where the JSON is already in normalized ProjectSnapshot
+ * format — this happens in unit tests where mocks return an already-shaped
+ * object rather than a raw file.  Detection: if `keywords` is an array, the
+ * data is already normalized.
+ */
+function normalizeSnapshot(raw: RawProjectFile): ProjectSnapshot {
+  // Fast-path: already normalized (array-based keywords).
+  // Cast is safe because array-keywords => the whole object follows the
+  // ProjectSnapshot shape from the test fixture.
+  const rawKws = (raw as Record<string, unknown>)["keywords"];
+  if (Array.isArray(rawKws)) {
+    const snap = raw as unknown as ProjectSnapshot;
+    return {
+      id: snap.id ?? null,
+      keywords: snap.keywords ?? [],
+      cards: snap.cards ?? [],
+      zones: snap.zones ?? [],
+      phases: snap.phases ?? [],
+      actionRules: snap.actionRules ?? [],
+      stateBasedRules: snap.stateBasedRules ?? [],
+      triggerResolutionOrder: snap.triggerResolutionOrder ?? "Chronological",
+      initManifest: snap.initManifest ?? [],
+      sourceLanguage: snap.sourceLanguage ?? "en",
+      locales: snap.locales ?? [],
+    };
+  }
+
+  // Raw .archetype file — dict-based fields need to be converted.
+  return {
+    id: raw.id ?? null,
+    triggerResolutionOrder: raw.triggerResolutionOrder ?? "Chronological",
+    sourceLanguage: raw.localization?.sourceLanguage ?? "en",
+    locales: [],
+    initManifest: [],
+
+    keywords: dictToArray(raw.keywords, (name, kw) => ({
+      name,
+      body: kw.body ?? "",
+      parameters: kw.parameters ?? [],
+      textTemplate: kw.textTemplate ?? "",
+      noSignal: kw.signalBehaviour === "NoSignal",
+    })),
+
+    cards: dictToArray(raw.cards, (name, card) => ({
+      name,
+      primaryEffect: { name: null, dsl: card.primaryEffect ?? "" },
+      activationCondition: card.activationCondition ?? null,
+      flavourText: card.flavourText ?? "",
+      artPath: card.artPath ?? null,
+      staticProperties: card.staticProperties ?? {},
+      costs: (card.costs ?? []).map((c) => ({ dsl: c.body ?? "" })),
+      additionalEffects: dictToArray(card.additionalEffects, (eName, e) => ({
+        name: eName,
+        dsl: e.body ?? "",
+      })),
+      staticEffects: (card.staticEffects ?? []).map((se) => ({
+        lifetimeDsl: se.lifetime ?? "",
+        triggerDsl: se.triggerCondition ?? null,
+        effectDsl: se.contribution ?? "",
+      })),
+    })),
+
+    zones: dictToArray(raw.zones, (name, _zone) => ({
+      name,
+      ownedBy: null,
+      accumulator: "",
+      condition: null,
+    })),
+
+    phases: (raw.phases ?? []).map((ph) => ({
+      name: ph.name,
+      initDsl: ph.init ?? "",
+      cleanupDsl: ph.cleanup ?? "",
+    })),
+
+    actionRules: Object.entries(raw.actionRules ?? {}).flatMap(([actionType, rules]) =>
+      rules.map((r) => ({
+        actionType,
+        beforeDsl: r.before ?? "",
+        afterDsl: r.after ?? "",
+      })),
+    ),
+
+    stateBasedRules: (raw.stateBasedRules ?? []).map((sbr) => ({
+      conditionDsl: sbr.condition ?? "",
+      bodyDsl: sbr.body ?? "",
+    })),
+  };
+}
+
 /** Serialise → parse project from sidecar. Returns null if no project loaded. */
 export async function fetchSnapshot(): Promise<ProjectSnapshot | null> {
   try {
@@ -123,7 +265,8 @@ export async function fetchSnapshot(): Promise<ProjectSnapshot | null> {
       IPC_CHANNELS.SaveProject
     );
     if (!result?.json) return null;
-    return JSON.parse(result.json) as ProjectSnapshot;
+    const raw = JSON.parse(result.json) as RawProjectFile;
+    return normalizeSnapshot(raw);
   } catch {
     return null;
   }
