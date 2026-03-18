@@ -1,8 +1,8 @@
 # Implementation Status
 
-> Last updated: 2026-03-17 (Monaco CSP fix: installed monaco-editor@0.55.1 as direct dependency, added loader.config({ monaco }) in index.tsx to bypass CDN load. 109 TypeScript tests passing; 150 C# tests passing)
+> Last updated: 2026-03-18 (code-first-authoring change: removed Electron tooling and Archetype.Tooling.Server; added GameDefinitionBuilder, CardSet distribution format, BuildRunner, GodotEmitter. 164 C# tests passing)
 > Branch: `impl/text-renderer`
-> All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`. Electron tooling in `tooling/`.
+> All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
 ---
 
@@ -11,11 +11,11 @@
 | Assembly | Role | Status |
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
-| `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
+| `Archetype.Build` | `Kw` factory shorthands, `GameDefinitionBuilder`, `CardSet` serialization, `BuildRunner`, `GodotEmitter` | ✅ Complete |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
-| `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete |
-| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores, all UI panels | ✅ Groups 2 + 5 + 6 complete (Group 7 pending) |
+| ~~`Archetype.Tooling.Server`~~ | Removed (superseded by `Archetype.Build` code-first authoring model — D32) | ❌ Deleted |
+| ~~`tooling/`~~ | Electron desktop app — removed (D32) | ❌ Deleted |
 
 ---
 
@@ -569,13 +569,13 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 
 ## Resolved Issues
 
-### action-args-and-cost-model (D20–D25) — 102 tests — review verdict: PASS (2026-03-09)
+### action-args-and-cost-model (D20–D25) — 164 tests — review verdict: PASS (re-verified 2026-03-18)
 
-All ten reviewer checks (10.1–10.10) passed with no blockers. Two minor issues fixed directly by reviewer:
+All ten reviewer checks (10.1–10.10) passed with no blockers on `impl/text-renderer`. 164/164 tests pass. Prior review cycle (2026-03-09) fixed two minor issues directly:
 - `CloneForValidation` XML doc inaccurately listed "Player name registry, session atom" as excluded; corrected to "Also copied (required for cost-body keyword resolution)" (`GameState.cs`).
 - Dead variable `sessionEnergyBefore` removed from `ComputeAvailableActionsTests.cs:512` (CS0219 warning eliminated).
 
-No functional changes. 102/102 tests pass with zero compiler warnings.
+Re-verification 2026-03-18: no new defects found. Test count increased to 164 (up from 102) due to subsequent work in the same branch.
 
 ### SaveLoad tests (D17) — 13 tests — review verdict: PASS (2026-03-08)
 - `SeededRandom_SameSeed_ProducesSameSequence`

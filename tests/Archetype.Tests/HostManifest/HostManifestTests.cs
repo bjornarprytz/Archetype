@@ -28,7 +28,6 @@ public sealed class HostManifestTests
             {
                 ["hand"] = new("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw", new Literal(true),
@@ -59,7 +58,6 @@ public sealed class HostManifestTests
             {
                 ["hand"] = new("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw", new Literal(true),

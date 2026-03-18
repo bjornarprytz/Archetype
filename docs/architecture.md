@@ -46,7 +46,7 @@ All decisions D1–D31 are stable and signed off. Updated 2026-03-02 to incorpor
 
 ### D2 — Keyword Representation
 
-**Decision:** Keywords are represented as interpreted expression trees. The source format is a textual DSL authored by game creators. The tooling parses DSL text into a `KeywordNode` tree and serializes it to JSON. The engine loads JSON and deserializes to trees at startup — it does not contain a parser.
+**Decision:** Keywords are represented as interpreted expression trees. Game creators author rules and keywords using the C# builder API (`GameDefinitionBuilder`, `Kw` static class in `Archetype.Build`). The builder constructs `KeywordNode` trees in memory and produces a `GameDefinition` directly — no parser, no intermediate text format. Card definitions are distributed as JSON card sets loaded at runtime; the engine deserializes them into `CardDefinition` trees at startup.
 
 **Tree structure:**
 
@@ -90,7 +90,7 @@ ParameterDecl {
 
 `AtomKindRestriction` is stored in `BuiltInKeywords` in `Core` alongside the parameter's declared type. The type-checker in `Archetype.Build` reads it during validation. Game-creator-defined keywords may not declare `AtomKindRestriction` — it is a mechanism for engine built-ins only.
 
-**Serialization boundary.** The tooling (desktop app) owns the parser. It parses DSL text → validates → emits a JSON game definition file. The engine owns the deserializer. It reads JSON → constructs `KeywordDefinition` trees in memory. The engine never sees raw DSL text; the parser is not in the engine assembly. This keeps the WASM binary smaller and the engine free of parser complexity.
+**Authoring boundary.** `Archetype.Build` owns the builder API. Game creators call `GameDefinitionBuilder.Build()` to produce a `GameDefinition` in memory; no JSON is written for rules. Card sets are authored in C# and serialized to JSON by `BuildRunner`; the engine deserializes card set JSON at startup. The engine never sees DSL text; there is no parser.
 
 **Dual-use.** Two separate interpreters walk the same `KeywordNode` tree:
 - **Execution interpreter** — walks the tree against live `ExecutionContext` (game state, scope, variable bindings), applying mutations and reading values.
@@ -98,21 +98,21 @@ ParameterDecl {
 
 **Rationale:**
 - The tree is pure data: immutable, serializable, inspectable. It satisfies §1.1's dual-use invariant without duplicating definitions.
-- Keeping the parser in the tooling and the deserializer in the engine maintains a clean boundary, reduces engine complexity, and improves WASM binary size.
+- Keeping construction logic in `Archetype.Build` and deserialization in the engine maintains a clean boundary and reduces engine complexity.
 - The `TextTemplate` on each definition gives game creators control over rendered text without a separate file; falling back to structural rendering preserves the full composition tree for detailed inspection.
 
 **Consequences:**
-- The JSON schema for `KeywordDefinition` trees is a first-class contract between the tooling and the engine. It must be versioned.
-- The tooling must validate the tree at parse time (type-checking, acyclicity, mutation/property subtype invariants) so the engine can trust what it loads.
+- The JSON schema for `CardSet` (card definitions) is a first-class contract between `BuildRunner` output and the engine deserializer. It must be versioned.
+- `GameDefinitionBuilder.Build()` validates the tree at build time (type-checking, acyclicity, mutation/property subtype invariants) so the engine can trust what it loads.
 - The text renderer needs a depth parameter or strategy so the game layer can choose between "show top-level text only" and "expand full composition."
-- Built-in (primitive) keywords are registered in the engine at startup, not loaded from JSON. The JSON file references them by name; the engine resolves the name to its built-in implementation.
+- Built-in (primitive) keywords are registered in the engine at startup, not loaded from JSON. Card set JSON references them by name; the engine resolves the name to its built-in implementation.
 
 **Addendum — `TextTemplate` cross-reference tag syntax (D18).** `TextTemplate` strings and locale file template strings may contain keyword cross-reference tags alongside `{paramName}` substitutions:
 
 - **Short form:** `[keyword-name]` — the keyword name is used as both the lookup key and the display text.
 - **Long form:** `[display text](keyword-name)` — explicit display text when the prose term differs from the keyword name (e.g. `[damage](take-damage)`).
 
-Both forms produce a `RulesRef` node in the rendered output (see D18). The `keyword-name` in a tag must resolve to an entry in `GameDefinition.Keywords` (built-in or game-creator-defined); this is validated at authoring time — build time for the C# builder, parse time for the DSL tooling, load time for the JSON deserializer. An unknown keyword name in a tag is a `DefinitionException`. Tag parsing occurs after `{paramName}` substitution resolution; a tag may not span a `{paramName}` boundary.
+Both forms produce a `RulesRef` node in the rendered output (see D18). The `keyword-name` in a tag must resolve to an entry in `GameDefinition.Keywords` (built-in or game-creator-defined); this is validated at authoring time — at `GameDefinitionBuilder.Build()` for rules, and at card set merge time (`GameDefinition.WithCardSets`) for card definitions. An unknown keyword name in a tag is a `DefinitionException`. Tag parsing occurs after `{paramName}` substitution resolution; a tag may not span a `{paramName}` boundary.
 
 ---
 
@@ -1395,7 +1395,7 @@ static class Assert
 
 ### D15 — Module Boundaries
 
-**Decision:** The engine is partitioned into four assemblies. `Archetype.Core` contains all pure data types and interfaces — it has no dependencies beyond the .NET BCL and is WASM-safe by construction. `Archetype.Build`, `Archetype.Text`, and `Archetype.Engine` each depend on `Core` only; none depends on any other of the three. This lets the DSL tooling (a separate desktop application) reference `Core`, `Build`, and `Text` without pulling in the runtime engine.
+**Decision:** The engine is partitioned into four assemblies. `Archetype.Core` contains all pure data types and interfaces — it has no dependencies beyond the .NET BCL and is WASM-safe by construction. `Archetype.Build`, `Archetype.Text`, and `Archetype.Engine` each depend on `Core` only; none depends on any other of the three. This lets game-creator build projects (e.g. `[GameName].Build`) reference `Core`, `Build`, and `Text` without pulling in the runtime engine.
 
 ---
 
@@ -2741,7 +2741,9 @@ DiagnosticEvent {
 
 ---
 
-### D26 — Authoring Tool Platform and Process Architecture
+### D26 — Authoring Tool Platform and Process Architecture *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The Electron authoring tool described below was replaced by the code-first C# authoring model (see D32). This section is retained as a historical record.
 
 **Decision:** The authoring tool is an Electron desktop application with a TypeScript/React frontend and a co-located .NET sidecar process. The Electron main process spawns the sidecar on startup and communicates with it over stdin/stdout using newline-delimited JSON-RPC. The sidecar owns all C# logic; the Electron renderer process owns all UI.
 
@@ -2857,7 +2859,9 @@ Build         Text      Engine   Tooling.Server
 
 ---
 
-### D27 — Tooling Data Layer and Project File Format
+### D27 — Tooling Data Layer and Project File Format *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The sidecar-authoritative data layer and project file format described below were replaced by the code-first C# authoring model (see D32). This section is retained as a historical record.
 
 **Decision:** Three related decisions govern how the authoring tool stores and manipulates game definition state.
 
@@ -3311,7 +3315,9 @@ No events are logged during any provisioning step (unchanged from D14). The `Loc
 
 ---
 
-### D28 — Tooling Validation Approach
+### D28 — Tooling Validation Approach *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The sidecar validation approach described below was replaced by compile-time validation in `GameDefinitionBuilder.Build()` (see D32). This section is retained as a historical record.
 
 **Decision:** Validation is triggered on every DSL field content-change event, debounced at a configurable delay (default 200ms). The sidecar returns scoped diagnostics — covering the changed entry and its reverse-dependency closure — plus a global error count. Autocomplete queries are routed to the sidecar (not computed locally in the renderer). The initial sidecar implementation validates the full project on every mutation; the API surface is designed for incremental validation from day one so the implementation can be tightened without a protocol change.
 
@@ -3490,7 +3496,9 @@ The sidecar identifies the symbol at the cursor (e.g. the keyword name `take-dam
 
 ---
 
-### D30 — Godot Export Pipeline
+### D30 — Godot Export Pipeline *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The sidecar-driven Godot export pipeline described below was replaced by `BuildRunner` in `Archetype.Build` (see D32). Signal derivation rules and GDScript generation logic from this section are preserved in D32. This section is retained as a historical record.
 
 **Decision:** The export package is written as a folder of files directly into a game-creator-specified directory inside their Godot project (e.g. `res://archetype-export/`). GDScript signals are derived from every keyword referenced in any card effect block, cost body, or static effect in the game definition, with built-in primitives suppressed by default and a per-keyword `[NoSignal]` opt-out available. Signal delivery uses post-action event log polling via `GameStateView` — no engine API changes are required.
 
@@ -3675,7 +3683,11 @@ The authoring tool surfaces these as checkboxes in the keyword editor ("Generate
 
 ---
 
-### D31 — Missing-Translation Export Gate UX
+### D31 — Missing-Translation Export Gate UX *(SUPERSEDED)*
+
+**SUPERSEDED.** This decision was specific to the Electron authoring tool's UX (see D26/D32). With the code-first model there is no GUI export gate. Missing-translation handling is a build-time concern; see D32.
+
+---
 
 **Decision:** Missing translations are classified as warnings (never errors) and never block saving. At export time, if any missing-translation warnings exist, the export flow surfaces a narrowly-scoped confirmation dialog before proceeding. Hard errors block export before this dialog is ever reached — by the time the dialog appears, the definition is clean of errors. The dialog is strictly about missing translations and contains no other diagnostic information. General error status belongs in the persistent problems panel and status bar, not in the export dialog.
 
@@ -3761,6 +3773,100 @@ General error and warning status is always visible in the persistent status bar 
 
 ---
 
+### D32 — Code-First Authoring Model
+
+**Decision:** Game rules are authored in C# using the builder API (`GameDefinitionBuilder`, `Kw` static class). The builder produces a `GameDefinition` in memory at startup. Card definitions are distributed as JSON card sets authored in C# and serialized by `BuildRunner`. This replaces the DSL/Electron model (D26–D28, D30–D31). D29 (InitManifest, HostManifest) is unaffected.
+
+---
+
+**Two-layer authoring model.**
+
+| Layer | Authoring format | Distribution format | Loaded by |
+|---|---|---|---|
+| Rules (keywords, phases, zones, state-based rules) | C# (`GameDefinitionBuilder`) | Compiled `.dll` | Godot project reference |
+| Card definitions | C# (builder API) | JSON (`CardSet`) | Loaded from disk at startup |
+
+```
+[GameName].Rules.dll         → compiled Godot dependency; BuildDefinition() returns GameDefinition
+[GameName].CoreSet.json      → loaded at runtime; merged via GameDefinition.WithCardSets()
+[GameName].Expansion.json    → loaded at runtime; merged via GameDefinition.WithCardSets()
+```
+
+---
+
+**`Kw` static class.**
+
+All built-in keywords are exposed as typed static methods on the `Kw` class in `Archetype.Build`. Each method accepts `KeywordNode` parameters and returns a `KeywordNode`:
+
+```csharp
+Kw.TakeDamage(Kw.Param("target"), Kw.Num(3))
+Kw.MoveCard(Kw.Param("card"), Kw.Param("zone"))
+Kw.Assert(Kw.AtLeast(Kw.GetState(Kw.Param("source"), Kw.Str("energy")), Kw.Num(2)))
+```
+
+Game-creator keywords are ordinary C# methods that return `KeywordNode` trees by composing built-ins and other game-creator methods. No registration is required for keyword composition — only for named lookup (RulesRef in card text and card set validation).
+
+---
+
+**`GameDefinitionBuilder`.**
+
+A fluent builder in `Archetype.Build` for constructing `GameDefinition` instances. Provides methods for registering zones, phases, keywords, state-based rules, trigger resolution order, player definitions, and `InitManifest`. `Build()` performs validation (duplicate names, unknown parameter references, TextTemplate tag resolution) and returns an immutable `GameDefinition`.
+
+Named keyword registration:
+```csharp
+builder.RegisterKeyword(
+    name: "attack",
+    parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
+    body: Kw.TakeDamage(Kw.Param("target"), Kw.Max(Kw.Num(0), Kw.Subtract(Kw.Param("amount"), Kw.GetState(Kw.Param("target"), Kw.Str("defense"))))),
+    textTemplate: "{target} takes {amount} damage");
+```
+
+---
+
+**`CardSet` and `GameDefinition.WithCardSets`.**
+
+`CardSet` is a record in `Archetype.Core` containing a set name, format version, and a list of `CardDefinition` entries. `GameDefinition.WithCardSets(IEnumerable<CardSet>)` returns a new `GameDefinition` with the card definitions merged in additively. Keyword references in card effect blocks are validated against the registered keywords at merge time; unknown references throw `DefinitionException`.
+
+---
+
+**`BuildRunner` (Archetype.Build).**
+
+A static API for game-creator build projects. The game developer writes their own `Program.cs`:
+
+```csharp
+var definition = MyGame.Rules.BuildDefinition();
+var coreset   = new MyGame.CoreSet.SetBuilder().Build();
+BuildRunner.Run(definition, [coreset], outputDir: "godot/archetype-export/");
+```
+
+`BuildRunner.Run` outputs:
+- `[set-name].json` — one file per `CardSet`, for runtime loading
+- `archetype_keywords.gd` — SCREAMING_SNAKE_CASE string constants for all registered keyword names
+- `game_events.gd` — GDScript signal declarations derived from keyword event log contributions
+
+Signal derivation rules are carried forward from D30:
+- **Inclusion:** a keyword produces a signal if it is directly referenced in a card primary effect, named effect body, cost body, or static effect block.
+- **Default suppression:** all built-in primitives are suppressed unless opted in via `.WithSignal()` in the builder.
+- **Opt-out:** any game-creator keyword may be suppressed via `.NoSignal()` on the `RegisterKeyword` call.
+- **Naming:** keyword `foo-bar` → signal `on_foo_bar`; parameters mirror the keyword's `ParameterDecl` list with engine types mapped to GDScript types (see D30 type mapping table).
+
+---
+
+**Module boundary update (D15 addendum).**
+
+`Archetype.Tooling.Server` is removed. The four-assembly model is restored: `Core`, `Build`, `Text`, `Engine`. `Archetype.Build` is the authoring-time assembly; game-creator build projects reference it. Godot runtime projects reference `Core`, `Engine`, and the game-specific rules assembly.
+
+---
+
+**Consequences:**
+- `Archetype.Tooling.Server` project and `tooling/` Electron directory are deleted.
+- `GameDefinition` gains `WithCardSets(IEnumerable<CardSet>)`.
+- `GameDefinition.CardSets` (the old tooling-only name-grouping field) is removed.
+- `Archetype.Build` gains `GameDefinitionBuilder`, `BuildRunner`, and `GodotEmitter`.
+- The `.slnx` file removes `Archetype.Tooling.Server`.
+
+---
+
 ## Open Items
 
 - [x] Language and runtime — D1
@@ -3788,9 +3894,10 @@ General error and warning status is always visible in the persistent status bar 
 - [x] Cost execution sequencing at action time — D23
 - [x] `ComputeAvailableActions` ownership filter removal — D24
 - [x] Breaking changes catalogue for action-args-and-cost-model — D25
-- [x] Authoring tool platform and process architecture — D26
-- [x] Tooling data layer and project file format — D27
-- [x] Tooling validation approach (trigger model, debounce, sidecar protocol surface) — D28
+- [x] Authoring tool platform and process architecture — D26 *(superseded by D32)*
+- [x] Tooling data layer and project file format — D27 *(superseded by D32)*
+- [x] Tooling validation approach (trigger model, debounce, sidecar protocol surface) — D28 *(superseded by D32)*
 - [x] D14 addendum — InitManifest mandatory, HostManifest append-only, LocalId uniqueness — D29
-- [x] Godot export pipeline (signal derivation rules, export package format, GDScript generation) — D30
-- [x] Missing-translation export gate UX — D31
+- [x] Godot export pipeline (signal derivation rules, export package format, GDScript generation) — D30 *(superseded by D32)*
+- [x] Missing-translation export gate UX — D31 *(superseded by D32)*
+- [x] Code-first authoring model (builder API, CardSet, BuildRunner, Godot artifact generation) — D32

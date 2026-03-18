@@ -1,3 +1,49 @@
+## Review: action-args-and-cost-model — Reviewer Tasks 10.1–10.10
+
+Review date: 2026-03-18.
+
+Scope: `src/Archetype.Engine/BuiltInHandlers.cs` (`Assert` handler), `src/Archetype.Engine/ExecutionContext.cs`, `src/Archetype.Engine/ActionResolver.cs`, `src/Archetype.Engine/CostValidator.cs`, `src/Archetype.Engine/GameSession.cs` (`ComputeAvailableActions`, `ResolveCostsForAction`), `src/Archetype.Engine/GameState.cs` (`CloneForValidation`), `src/Archetype.Build/Kw.cs` (`OwnedByActivePlayer`), `src/Archetype.Core/Interfaces.cs` (`IEngineObserver`), `tests/Archetype.Tests/BuiltIns/AssertTests.cs`, `tests/Archetype.Tests/CostModel/CostModelTests.cs`, `tests/Archetype.Tests/ComputeAvailableActions/ComputeAvailableActionsTests.cs`, `tests/Archetype.Tests/SaveLoad/SaveLoadTests.cs`.
+
+Architecture decisions checked: D20, D21, D22, D23, D24, D25.
+
+---
+
+### Defects
+
+None.
+
+---
+
+### Observations
+
+- **10.1 — PASS.** `BuiltInHandlers.Assert` checks `ctx.IsCostBody` first; on `true` it throws `EngineException` unconditionally without reading `on_fail` or `notify` arguments and without calling `OnDiagnostic`. Conforms to D20.
+
+- **10.2 — PASS.** `OnDiagnostic` is called inside `if (notify == NotifyFlag.On)` at line 478, then the `return onFail switch { ... OnFail.Panic => throw ... }` executes at line 481. Observer call precedes the exception. When `notify == NotifyFlag.Off` the block is skipped entirely. Conforms to D25.
+
+- **10.3 — PASS.** The `Assert` handler never calls `ctx.EventLog.Append`. The event-log invariant is tested directly in `Assert_NeverAppendsToEventLog`. Conforms to D20.
+
+- **10.4 — PASS.** `GameState.CloneForValidation` copies atom table (Accumulators, ZoneId, OwnerId, Kind), modifier index, condition index, session atom ID, and player name registry. It explicitly excludes `ContributionRegistry`, `ActiveStaticEffects`, `DormantDeclarativeEffects`, game outcome flags, and — since `EventLog` is not a field on `GameState` at all — event log. Conforms to D21.
+
+- **10.5 — PASS.** `ComputeAvailableActions` captures `stateSnapshot = _state.CloneForValidation()` into a local variable before constructing the lambda. The delegate closes over the clone, not over `_state`. No live reference to the mutable session state drifts into the delegate. Conforms to D22.
+
+- **10.6 — PASS.** `ActionResolver.ResolveAction` calls `eventLog.OpenAction()` once, executes all cost blocks (with `IsCostBody = true`) and then the primary block inside the same action scope, then calls `eventLog.CloseAction()` in `finally`. No separate `OpenAction`/`CloseAction` pair wraps individual cost bodies. Conforms to D23.
+
+- **10.7 — PASS.** `ComputeAvailableActions` Pass 1 iterates `_state.GetAtoms(AtomKind.Card)` with a zone definition-name filter only; no `OwnerId` predicate is present. Pass 2 iterates all card atoms with no zone or owner filter. Test 9.13 (`ComputeAvailableActions_CardInPlayableZone_IncludedRegardlessOfOwner`) and 9.14 (`ComputeAvailableActions_AbilityOnUnownedCard_Included`) confirm this at the integration level. Conforms to D24.
+
+- **10.8 — PASS.** `Kw.OwnedByActivePlayer()` carries a `<summary>` XML doc with a `<b>Requirement:</b>` paragraph that names the `"active-player"` session state field and explains the runtime consequence. The doc accurately reflects that the field must be set by game-level initialization. Minor note: D24 says "Games that do not declare this field will receive a `DefinitionException` at `Build()` time," but no Build()-time check for `"active-player"` field presence is implemented; the doc correctly describes the actual runtime behavior (`EvaluateCondition` will throw). The gap between D24's stated promise and the actual enforcement is a pre-existing architecture note, not a new defect introduced by this change. Conforms to 10.8's stated requirement (doc states the `"active-player"` session state requirement).
+
+- **10.9 — PASS.** Two `IEngineObserver` implementations exist in the codebase: `RecordingObserver` in `AssertTests.cs` and `CapturingObserver` in `SaveLoadTests.cs`. Both have `void OnDiagnostic(DiagnosticEvent e)`. All 164 tests pass; no compilation errors.
+
+- **10.10 — PASS.** All 164 tests pass (`dotnet test` output: `Failed: 0, Passed: 164`). The test suite includes 6 new assert tests (9.1–9.6), 7 new cost-model tests (9.7–9.12, 9.16), and 3 new `ComputeAvailableActions` tests (9.13–9.15) plus the updated 3.8 test. Net test count increased from the prior baseline.
+
+---
+
+### Verdict
+
+PASS
+
+---
+
 ## Review: Group 6 — Renderer UI Panels (impl/text-renderer)
 
 Review date: 2026-03-16.

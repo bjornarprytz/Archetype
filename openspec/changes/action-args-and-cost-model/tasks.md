@@ -156,13 +156,13 @@
 
 ## 10. Reviewer Checks
 
-- [ ] 10.1 Reviewer: verify `assert` in cost body always panics silently regardless of `on_fail`/`notify` arguments at the call site; inspect `BlockExecutor` for the `IsCostBody` guard
-- [ ] 10.2 Reviewer: verify `OnDiagnostic` is called BEFORE `EngineException` is raised when `on_fail: panic, notify: on`; verify it is NOT called when `notify: off`
-- [ ] 10.3 Reviewer: verify `assert` never appends to `EventLog` under any outcome (success, continue, stop, panic)
-- [ ] 10.4 Reviewer: verify `GameState` clone in `CostValidator` excludes `EventLog`, contribution registries, and active static effects; includes atom table, accumulators, zone membership, condition presence
-- [ ] 10.5 Reviewer: verify `ValidateActionArgs` delegate captures a snapshot of state at `ComputeAvailableActions` time; no live reference that can drift
-- [ ] 10.6 Reviewer: verify cost bodies execute within the existing action scope (no separate `OpenAction`/`CloseAction` pair) and cost events appear in `events.this_action`
-- [ ] 10.7 Reviewer: verify no ownership predicate remains in `ComputeAvailableActions` steps 1 or 2
-- [ ] 10.8 Reviewer: verify `Kw.OwnedByActivePlayer()` XML doc states the `"active-player"` session state requirement
-- [ ] 10.9 Reviewer: verify all `IEngineObserver` implementations have `OnDiagnostic`; no compilation errors
-- [ ] 10.10 Reviewer: verify all new tests pass and existing `ComputeAvailableActions` tests are updated; net test count increases
+- [x] 10.1 Reviewer: verify `assert` in cost body always panics silently regardless of `on_fail`/`notify` arguments at the call site; inspect `BlockExecutor` for the `IsCostBody` guard
+- [x] 10.2 Reviewer: verify `OnDiagnostic` is called BEFORE `EngineException` is raised when `on_fail: panic, notify: on`; verify it is NOT called when `notify: off`
+- [x] 10.3 Reviewer: verify `assert` never appends to `EventLog` under any outcome (success, continue, stop, panic)
+- [x] 10.4 Reviewer: verify `GameState` clone in `CostValidator` excludes `EventLog`, contribution registries, and active static effects; includes atom table, accumulators, zone membership, condition presence
+- [x] 10.5 Reviewer: verify `ValidateActionArgs` delegate captures a snapshot of state at `ComputeAvailableActions` time; no live reference that can drift
+- [x] 10.6 Reviewer: verify cost bodies execute within the existing action scope (no separate `OpenAction`/`CloseAction` pair) and cost events appear in `events.this_action`
+- [x] 10.7 Reviewer: verify no ownership predicate remains in `ComputeAvailableActions` steps 1 or 2
+- [x] 10.8 Reviewer: verify `Kw.OwnedByActivePlayer()` XML doc states the `"active-player"` session state requirement
+- [x] 10.9 Reviewer: verify all `IEngineObserver` implementations have `OnDiagnostic`; no compilation errors
+- [x] 10.10 Reviewer: verify all new tests pass and existing `ComputeAvailableActions` tests are updated; net test count increases
