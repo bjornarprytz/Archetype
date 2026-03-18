@@ -1,0 +1,21 @@
+schema: spec-driven
+
+context: |
+  See CLAUDE.md for project overview, domain vocabulary, personas, and conventions.
+
+  ## Current phase
+  Requirements are complete and signed off (2026-03-01). The project is now in the domain modeling /
+  architecture phase. There is no implementation yet. The `master` branch contains a stale prior
+  prototype; `back-to-basics` is the active branch and starts fresh.
+
+rules:
+  proposal:
+    - Use domain vocabulary from the context precisely; flag any new terms introduced
+    - Include a "Non-goals" section
+    - Identify which persona(s) own the work
+  spec:
+    - Reference the relevant section of docs/requirements.md where applicable
+    - Explicitly state any domain invariants the spec must preserve
+  tasks:
+    - Scope each task to a single persona's concern
+    - Tasks should be completable and reviewable independently

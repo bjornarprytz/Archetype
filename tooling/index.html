@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+    />
+    <title>Archetype</title>
+    <style>
+      /* Reset: ensure the React root fills the window */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html, body, #root {
+        height: 100%;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #1e1e2e;
+        color: #cdd6f4;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Vite injects the module script tag during dev and build -->
+    <script type="module" src="/src/renderer/index.tsx"></script>
+  </body>
+</html>
