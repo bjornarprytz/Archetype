@@ -36,9 +36,9 @@ describe("ExportModal", () => {
     expect(screen.getByText("2")).toBeInTheDocument();
   });
 
-  it("shows total missing count in description", () => {
+  it("shows fallback explanation in description", () => {
     render(<ExportModal summary={summary} onClose={onClose} onExported={onExported} />);
-    expect(screen.getByText(/6 strings/i)).toBeInTheDocument();
+    expect(screen.getByText(/fall back to the source language/i)).toBeInTheDocument();
   });
 
   it("calls onClose when Cancel is clicked", async () => {

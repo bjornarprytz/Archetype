@@ -62,9 +62,8 @@ export function ExportModal({
         </div>
 
         <p style={styles.body}>
-          {totalMissing} string{totalMissing !== 1 ? "s" : ""} are untranslated across{" "}
-          {summary.length} locale{summary.length !== 1 ? "s" : ""}. Export will include
-          untranslated placeholders.
+          The following locales have missing strings. Missing strings will fall back to the
+          source language at runtime.
         </p>
 
         {/* Per-locale table */}

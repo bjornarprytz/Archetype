@@ -44,6 +44,13 @@ export interface DslEditorProps {
   onChange?: (dsl: string) => void;
   /** Called with updated markers after a successful mutation. */
   onMarkersChange?: (markers: MarkerData[]) => void;
+  /**
+   * Called after every successful debounced mutation to the sidecar.
+   * Use this to invalidate parent state that depends on the committed value
+   * (e.g. refreshing the keyword list after a body edit so that re-mounting
+   * `KeywordDetail` with `key={name}` picks up the correct body).
+   */
+  onAfterCommit?: () => void;
   readOnly?: boolean;
   height?: string;
 }
@@ -125,6 +132,7 @@ export function DslEditor({
   debounceMs = 200,
   onChange,
   onMarkersChange,
+  onAfterCommit,
   readOnly = false,
   height = "160px",
 }: DslEditorProps): React.ReactElement {
@@ -225,6 +233,9 @@ export function DslEditor({
           );
           onMarkersChange(relevantDiags.map((d) => diagnosticToMarker(newValue, d)));
         }
+        // Notify the parent that a commit succeeded so it can refresh any
+        // stale snapshot-derived state (e.g. keyword body in parent's list).
+        onAfterCommit?.();
       } catch {
         // Errors surface as diagnostics; swallow network/IPC errors
       } finally {
@@ -232,7 +243,7 @@ export function DslEditor({
       }
     }, debounceMs);
   }, [entryKind, entryName, dslField, debounceMs, isMutating, onChange,
-      onMarkersChange, updateCounts, setMutating, markDirty]);
+      onMarkersChange, onAfterCommit, updateCounts, setMutating, markDirty]);
 
   return (
     <div style={{ border: `1px solid ${C.surface0}`, borderRadius: "3px", overflow: "hidden" }}>

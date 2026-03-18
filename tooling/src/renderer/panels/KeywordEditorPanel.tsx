@@ -18,6 +18,13 @@ import { C, Font, S } from "../design/tokens";
 
 const PARAM_TYPES = ["Atom", "Int", "Bool", "String", "Player", "Zone"] as const;
 
+// TypeName enum values from the domain model (D27).
+const RETURN_TYPES = [
+  "Atom", "Card", "Zone", "Player", "Session", "Number", "Boolean",
+  "ConditionName", "PropertyName", "ContributionId", "Lifetime",
+  "EffectBlock", "CardDefinitionName",
+] as const;
+
 export function KeywordEditorPanel(): React.ReactElement {
   const [keywords,  setKeywords]  = useState<KeywordSnapshot[]>([]);
   const [selected,  setSelected]  = useState<string | null>(null);
@@ -177,6 +184,7 @@ function KeywordDetail({ keyword, onRename, onRefresh }: KeywordDetailProps): Re
   const [noSignal,   setNoSignal]    = useState(keyword.noSignal);
   const [params,     setParams]      = useState<ParameterSpec[]>([...keyword.parameters]);
   const [bodyValue,  setBodyValue]   = useState(keyword.body);
+  const [returnType, setReturnType]  = useState<string>(keyword.returnType ?? "");
   const [markers,    setMarkers]     = useState<MarkerData[]>([]);
 
   const updateCounts = useDiagnosticsStore((s) => s.updateCounts);
@@ -229,6 +237,25 @@ function KeywordDetail({ keyword, onRename, onRefresh }: KeywordDetailProps): Re
           onBlur={() => { void handleNameBlur(); }}
           onKeyDown={(e) => { if (e.key === "Enter") { void handleNameBlur(); } }}
         />
+      </section>
+
+      {/* Return type */}
+      <section style={styles.section}>
+        <label style={S.sectionLabel} htmlFor="kw-return-type">Return Type</label>
+        <select
+          id="kw-return-type"
+          style={S.select}
+          value={returnType}
+          onChange={(e) => {
+            setReturnType(e.target.value);
+            void commitField("returnType", e.target.value || null);
+          }}
+          aria-label="Return type"
+        >
+          {/* Empty option lets the user leave return type unset (validator will flag it). */}
+          <option value="">— unset —</option>
+          {RETURN_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select>
       </section>
 
       {/* Parameters */}
@@ -286,6 +313,7 @@ function KeywordDetail({ keyword, onRename, onRefresh }: KeywordDetailProps): Re
           markers={markers}
           onChange={setBodyValue}
           onMarkersChange={setMarkers}
+          onAfterCommit={onRefresh}
           height="200px"
         />
       </section>

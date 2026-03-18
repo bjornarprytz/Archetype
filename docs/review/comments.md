@@ -1,3 +1,51 @@
+## Review: Group 6 — Renderer UI Panels (impl/text-renderer)
+
+Review date: 2026-03-16.
+
+Scope: all files under `tooling/src/renderer/` introduced or modified by Group 6 — `components/DslEditor.tsx`, `panels/KeywordEditorPanel.tsx`, `panels/CardEditorPanel.tsx`, `panels/GameRulesPanel.tsx`, `panels/InitManifestPanel.tsx`, `panels/LocalizationPanel.tsx`, `panels/ProblemsPanel.tsx`, `components/StatusBar.tsx`, `components/ExportModal.tsx`, `panels/GraphPanel.tsx`, `panels/SetOverviewPanel.tsx`, `snapshot.ts`, and `App.tsx`. All corresponding test files reviewed.
+
+Architecture decisions checked: D26, D27, D28, D31.
+
+---
+
+### Defects
+
+#### [MINOR 1] `ExportModal` body copy deviates from D31 specified text — `ExportModal.tsx:65`
+
+D31 specifies the dialog body must say "Missing strings will fall back to the source language at runtime." The implementation says "Export will include untranslated placeholders." These communicate different (and conflicting) things: the spec copy is accurate (the runtime does fall back via the `TextTemplate` resolution order); the implementation copy is misleading ("untranslated placeholders" implies visible empty/broken strings in game, not a graceful fallback). D31 is explicit about this message being the mechanism by which the game creator understands the runtime fallback behaviour without needing to know the renderer internals.
+
+**Fixed in place:** updated `ExportModal.tsx:65` to match the D31 copy.
+
+---
+
+### Observations
+
+- **`completionItem.insertText` ignores snippet syntax from D28.** `DslEditor.tsx:181` always sets `insertText: item.label` — it ignores the `insertText` field that the sidecar returns in `CompletionItem`. D28 says `insertText` uses Monaco snippet syntax (`$1`, `$2` for tab stops) for keyword suggestions like `get-state($1, $2)`. The effect is that completions never insert tab-stop templates, reducing the UX value of autocomplete. This is not a protocol defect (the correct data is in the `item` object), it is a renderer-side oversight in how the data is consumed. It does not affect correctness, only completeness of the feature.
+
+- **`staticEffect_${i}` dslField falls through to `UpdateCardEffect` — no dedicated handler.** In `CardEditorPanel.tsx:289` the static effect body editor uses `dslField={`staticEffect_${i}`}`. In `DslEditor.tsx` `resolveMutation`, this falls through to `UpdateCardEffect` with `effectName = "staticEffect_0"` etc. D28 does not specify a dedicated method for static effect bodies; routing through `UpdateCardEffect` is the reasonable interpretation. The sidecar's `UpdateCardEffectHandler` must handle these effect names correctly. The static effect `lifetime` DSL correctly routes to `UpdateLifetimeSpec` via the `lifetime:` prefix. This is consistent and the fallthrough is intentional, but worth a comment in `resolveMutation` explaining the naming contract.
+
+- **`fetchSnapshot()` calls `SaveProject` on every panel mount.** Multiple panels (`KeywordEditorPanel`, `CardEditorPanel`, `GameRulesPanel`, `InitManifestPanel`, `LocalizationPanel`, `SetOverviewPanel`) each independently call `fetchSnapshot()` on mount, which calls `SaveProject` under the hood. This means opening/switching panels triggers multiple round-trip serialisations of the entire project state. For large projects this could become noticeable. Not a correctness defect; noted for the simplifier pass.
+
+- **`ProblemsPanel` secondary sort by entry name not implemented.** D28 specifies "sorted by severity then entry name." The sort comparator in `ProblemsPanel.tsx:49-52` only implements the severity tier and returns 0 for same-severity pairs. Within-tier ordering depends on sidecar sort order. Practically correct because the sidecar's `GetAllDiagnosticsHandler` does the full sort, but the renderer should not rely on this.
+
+- **`DslEditor` completion provider registered on every `onMount`.** `DslEditor.tsx:166` registers a `CompletionItemProvider` for `archetype-dsl` on every mount. Monaco accumulates providers rather than deduplicating, so panels with many DSL editors will show N copies of each suggestion. A module-level `completionProviderRegistered` flag (same pattern as the existing `languageRegistered` flag on line 55) would fix this.
+
+- **`KeywordDetail` parameter name input commits on every `onChange` keystroke.** `KeywordEditorPanel.tsx:247` calls `void updateParam(i, "name", e.target.value)` on `onChange`. D28 specifies non-DSL fields commit on "blur / Enter / selection," not on every keystroke. This fires one `UpdateField` + full re-validation per keypress while the user is typing a parameter name. The type dropdown is unaffected (dropdown fires `onChange` only on selection).
+
+- **`DslEditor` invoke assertion is absent from two tests.** `DslEditor.test.tsx:86-108` does not assert `window.archetype.invoke` was called with the correct channel and payload (comment on line 106 acknowledges this). Similarly, the `activationCondition` test (line 111) is a render-only smoke test. These are known gaps.
+
+- **All 10 Group 6 tasks have test files; coverage is solid.** Each panel has render, interaction, and IPC-call assertions. Happy paths and empty states are covered across all panels; error states are covered where most impactful (GraphPanel network error, ExportModal errors-kind response, ProblemsPanel sort order). No missing test files.
+
+---
+
+### Verdict
+
+**PASS WITH MINOR FIXES**
+
+MINOR 1 (ExportModal body copy deviation from D31) has been fixed directly. No blockers. All observations are improvement opportunities; none violate architecture decisions or domain invariants. All 105 TypeScript tests pass.
+
+---
+
 # Review: Tooling Sidecar Bug Fixes — `Archetype.Tooling.Server` + `Archetype.Core/GameDefinitionJsonOptions.cs` (impl/text-renderer)
 
 Review date: 2026-03-11. Bug fixes: 6 items covering Fix 1–6 as described in the task.

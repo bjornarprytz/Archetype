@@ -14,9 +14,9 @@ import { invalidateSnapshotCache } from "../snapshot";
 const snap = {
   id: "test",
   keywords: [
-    { name: "attack",     body: "take_damage(a,1)", parameters: [], textTemplate: "", noSignal: false },
-    { name: "take_damage", body: "",                parameters: [], textTemplate: "", noSignal: false },
-    { name: "heal",       body: "add_hp(a,1)",      parameters: [], textTemplate: "", noSignal: false },
+    { name: "attack",     body: "take_damage(a,1)", parameters: [], textTemplate: "", noSignal: false, returnType: null },
+    { name: "take_damage", body: "",               parameters: [], textTemplate: "", noSignal: false, returnType: null },
+    { name: "heal",       body: "add_hp(a,1)",     parameters: [], textTemplate: "", noSignal: false, returnType: null },
   ],
   cards: [
     {

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Archetype.Core;
 
 namespace Archetype.Tooling.Server.Handlers;
 
@@ -66,7 +67,47 @@ public sealed class UpdateFieldHandler(SidecarState sidecar)
                     Enum.TryParse<SignalBehaviour>(sb, out var b))
                     kw.SignalBehaviour = b;
                 break;
+            // "noSignal" is the renderer-side boolean shorthand for signal suppression.
+            // Map it to the canonical SignalBehaviour enum value.
+            case "noSignal":
+                kw.SignalBehaviour = val.ValueKind == JsonValueKind.True
+                    ? SignalBehaviour.Suppress
+                    : SignalBehaviour.Default;
+                break;
+            // "parameters" arrives as a JSON array of { name, type } objects.
+            case "parameters":
+                kw.Parameters = ParseParameterDecls(val);
+                break;
+            // "returnType" is the TypeName enum value as a string.
+            case "returnType":
+                if (val.GetString() is { } rtStr &&
+                    Enum.TryParse<TypeName>(rtStr, ignoreCase: true, out var rt))
+                    kw.ReturnType = rt;
+                else
+                    kw.ReturnType = null;
+                break;
         }
+    }
+
+    /// <summary>
+    /// Parses a JSON array of <c>{ name: string, type: string }</c> objects into
+    /// a list of <see cref="ParameterDecl"/> values.
+    /// Unknown type strings default to <see cref="TypeName.Atom"/>.
+    /// </summary>
+    private static List<ParameterDecl> ParseParameterDecls(JsonElement val)
+    {
+        var list = new List<ParameterDecl>();
+        if (val.ValueKind != JsonValueKind.Array) return list;
+        foreach (var el in val.EnumerateArray())
+        {
+            var name = el.TryGetString("name") ?? "";
+            var typeName = TypeName.Atom;
+            if (el.TryGetString("type") is { } typeStr &&
+                Enum.TryParse<TypeName>(typeStr, ignoreCase: true, out var t))
+                typeName = t;
+            list.Add(new ParameterDecl(name, typeName));
+        }
+        return list;
     }
 
     private static void ApplyCardField(CardEntry card, string field, JsonElement val)

@@ -12,7 +12,7 @@ vi.mock("@monaco-editor/react", () => ({
 import { KeywordEditorPanel } from "./KeywordEditorPanel";
 import { invalidateSnapshotCache } from "../snapshot";
 
-const makeSnapshot = (keywords = [{ name: "attack", body: "take_damage(a,1)", parameters: [], textTemplate: "", noSignal: false }]) => ({
+const makeSnapshot = (keywords = [{ name: "attack", body: "take_damage(a,1)", parameters: [], textTemplate: "", noSignal: false, returnType: null as string | null }]) => ({
   keywords,
   cards: [], zones: [], phases: [], actionRules: [], stateBasedRules: [],
   triggerResolutionOrder: "Chronological",
@@ -53,6 +53,50 @@ describe("KeywordEditorPanel", () => {
     await user.click(screen.getByRole("option", { name: /attack/i }));
     await waitFor(() => screen.getByLabelText("New keyword name"));
     expect(screen.getByTestId("dsl-editor")).toBeInTheDocument();
+  });
+
+  it("shows return type select when keyword is selected", async () => {
+    const user = userEvent.setup();
+    render(<KeywordEditorPanel />);
+    await waitFor(() => screen.getByRole("option", { name: /attack/i }));
+    await user.click(screen.getByRole("option", { name: /attack/i }));
+    await waitFor(() => screen.getByLabelText("Return type"));
+    expect(screen.getByLabelText("Return type")).toBeInTheDocument();
+  });
+
+  it("calls UpdateField with returnType when return type is changed", async () => {
+    vi.mocked(window.archetype.invoke)
+      .mockResolvedValueOnce({ json: JSON.stringify(makeSnapshot()) })
+      .mockResolvedValue({
+        affectedEntries: [],
+        diagnostics: [],
+        globalErrorCount: 0,
+        globalWarningCount: 0,
+      });
+
+    const user = userEvent.setup();
+    render(<KeywordEditorPanel />);
+    await waitFor(() => screen.getByRole("option", { name: /attack/i }));
+    await user.click(screen.getByRole("option", { name: /attack/i }));
+    await waitFor(() => screen.getByLabelText("Return type"));
+    await user.selectOptions(screen.getByLabelText("Return type"), "Number");
+    await waitFor(() =>
+      expect(window.archetype.invoke).toHaveBeenCalledWith("UpdateField", {
+        entryKind: "Keyword",
+        entryName: "attack",
+        field: "returnType",
+        value: "Number",
+      })
+    );
+  });
+
+  it("populates DSL body editor with keyword body from snapshot", async () => {
+    const user = userEvent.setup();
+    render(<KeywordEditorPanel />);
+    await waitFor(() => screen.getByRole("option", { name: /attack/i }));
+    await user.click(screen.getByRole("option", { name: /attack/i }));
+    await waitFor(() => screen.getByTestId("dsl-editor"));
+    expect(screen.getByTestId("dsl-editor")).toHaveValue("take_damage(a,1)");
   });
 
   it("calls AddEntry when create button is clicked", async () => {

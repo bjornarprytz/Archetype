@@ -26,6 +26,8 @@ export interface KeywordSnapshot {
   readonly parameters: readonly ParameterSpec[];
   readonly textTemplate: string;
   readonly noSignal: boolean;
+  /** Declared return type (TypeName enum string), or null if not yet set. */
+  readonly returnType: string | null;
 }
 
 export interface EffectSnapshot {
@@ -138,6 +140,7 @@ interface RawKeyword {
   parameters?: ParameterSpec[];
   textTemplate?: string;
   signalBehaviour?: string;
+  returnType?: string;
 }
 
 interface RawCard {
@@ -208,7 +211,8 @@ function normalizeSnapshot(raw: RawProjectFile): ProjectSnapshot {
       body: kw.body ?? "",
       parameters: kw.parameters ?? [],
       textTemplate: kw.textTemplate ?? "",
-      noSignal: kw.signalBehaviour === "NoSignal",
+      noSignal: kw.signalBehaviour === "Suppress",
+      returnType: kw.returnType ?? null,
     })),
 
     cards: dictToArray(raw.cards, (name, card) => ({

@@ -41,6 +41,7 @@
     "@dagrejs/dagre": "^2.0.4",
     "@monaco-editor/react": "^4.7.0",
     "@xyflow/react": "^12.10.1",
+    "monaco-editor": "0.55.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "zustand": "^4.5.0"
