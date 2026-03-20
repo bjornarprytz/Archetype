@@ -65,8 +65,10 @@ public static class BuildRunner
         // (Merges all sets so signal scan sees all defined cards.)
         var fullDefinition = definition.WithCardSets(setList);
 
-        // Emit Godot interop files.
+        // Emit Godot interop files (D32, D33).
         GodotEmitter.EmitKeywordConstants(fullDefinition, outputDir);
         GodotEmitter.EmitSignals(fullDefinition, outputDir, noSignalKeywords);
+        GodotEmitter.EmitArchetypeNode(fullDefinition, outputDir, noSignalKeywords);
+        GodotEmitter.EmitInteropScripts(fullDefinition, outputDir, noSignalKeywords);
     }
 }
