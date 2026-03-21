@@ -314,6 +314,87 @@ public class BuildRunnerTests : IDisposable
     }
 
     // -----------------------------------------------------------------------
+    //  Static effect signal derivation — D32 blocker fix
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// A keyword referenced only inside a <see cref="StaticEffectDef"/> block must
+    /// still appear in the derived signal set.  The primary effect here is a plain
+    /// built-in invocation so only the static effect contributes the "buff" name.
+    /// All three generated files must reflect the signal.
+    /// </summary>
+    [Fact]
+    public void Run_StaticEffectBlock_KeywordAppearsInSignalSet()
+    {
+        // Card whose primary effect is a no-op built-in call so that "buff" is
+        // contributed exclusively by a StaticEffectDef.StateContributionBlock.
+        var staticCard = new CardDefinition(
+            Name: "StaticOnlyCard",
+            StaticProperties: new Dictionary<string, object>(),
+            PrimaryEffect: new EffectBlockDef([
+                new EffectBlockStep("modify-accumulator",
+                    [Kw.Param("source"), Kw.Str("hp"), Kw.Num(0)])]),
+            AdditionalEffects: [],
+            StaticEffects: [
+                new StaticEffectDef(
+                    Lifetime: LifetimeSpec.Permanent,
+                    StateContributionBlock: new EffectBlockDef([
+                        new EffectBlockStep("buff", [Kw.Param("source"), Kw.Num(1)])]))]);
+
+        var set = new CardSet("core", 1, [staticCard]);
+        BuildRunner.Run(BaseDefinition(), [set], _outputDir);
+
+        // game_events.gd must declare the signal.
+        var gameEvents = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        Assert.Contains("signal on_buff(", gameEvents);
+
+        // archetype_signals.gd must emit the constant.
+        var signalConsts = File.ReadAllText(Path.Combine(_outputDir, "archetype_signals.gd"));
+        Assert.Contains("ON_BUFF = \"on_buff\"", signalConsts);
+
+        // ArchetypeNode.cs must declare the event handler type.
+        var archetypeNode = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        Assert.Contains("OnBuffEventHandler", archetypeNode);
+    }
+
+    /// <summary>
+    /// A keyword referenced only inside a <see cref="TriggerDefinition.FiredBlock"/>
+    /// (the other <see cref="EffectBlockDef"/> member of <see cref="StaticEffectDef"/>)
+    /// must also appear in the derived signal set.
+    /// </summary>
+    [Fact]
+    public void Run_StaticEffectTriggerFiredBlock_KeywordAppearsInSignalSet()
+    {
+        var triggerCard = new CardDefinition(
+            Name: "TriggerOnlyCard",
+            StaticProperties: new Dictionary<string, object>(),
+            PrimaryEffect: new EffectBlockDef([
+                new EffectBlockStep("modify-accumulator",
+                    [Kw.Param("source"), Kw.Str("hp"), Kw.Num(0)])]),
+            AdditionalEffects: [],
+            StaticEffects: [
+                new StaticEffectDef(
+                    Lifetime: LifetimeSpec.Permanent,
+                    Trigger: new TriggerDefinition(
+                        EventKeyword: "strike",
+                        Scope: TriggerScope.ThisAction,
+                        EventParams: [],
+                        Condition: null,
+                        EventBindings: [],
+                        FiredBlock: new EffectBlockDef([
+                            new EffectBlockStep("buff", [Kw.Param("source"), Kw.Num(2)])])))]);
+
+        var set = new CardSet("core", 1, [triggerCard]);
+        BuildRunner.Run(BaseDefinition(), [set], _outputDir);
+
+        var gameEvents = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        Assert.Contains("signal on_buff(", gameEvents);
+
+        var archetypeNode = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        Assert.Contains("OnBuffEventHandler", archetypeNode);
+    }
+
+    // -----------------------------------------------------------------------
     //  archetype_interop.gd — D33
     // -----------------------------------------------------------------------
 

@@ -157,8 +157,6 @@ public static class GodotEmitter
 
         // --- Session fields ---
         sb.AppendLine("    // --- Session state ---");
-        sb.AppendLine("    private GameDefinition? _definition;");
-        sb.AppendLine("    private GameStateView? _stateView;");
         sb.AppendLine("    private Task? _runTask;");
         sb.AppendLine("    private CancellationTokenSource? _cts;");
         sb.AppendLine();
@@ -182,7 +180,6 @@ public static class GodotEmitter
         sb.AppendLine("    /// </summary>");
         sb.AppendLine("    public void StartGame(Godot.Collections.Dictionary hostManifestData, GameDefinition definition)");
         sb.AppendLine("    {");
-        sb.AppendLine("        _definition = definition;");
         sb.AppendLine("        _cts = new CancellationTokenSource();");
         sb.AppendLine();
         sb.AppendLine("        var builder = GameSession.Create(definition)");
@@ -197,7 +194,6 @@ public static class GodotEmitter
 
         sb.AppendLine();
         sb.AppendLine("        var session = builder.Build();");
-        sb.AppendLine("        _stateView = new GameStateView(new NullGameStateReadable());");
         sb.AppendLine("        _runTask = RunLoopAsync(session, _cts.Token);");
         sb.AppendLine("    }");
         sb.AppendLine();
@@ -392,19 +388,6 @@ public static class GodotEmitter
         sb.AppendLine("    }");
         sb.AppendLine();
 
-        // --- NullGameStateReadable stub (needed for _stateView initialisation before session starts) ---
-        sb.AppendLine("    // Minimal IGameStateReadable that returns safe defaults before the session starts.");
-        sb.AppendLine("    private sealed class NullGameStateReadable : IGameStateReadable");
-        sb.AppendLine("    {");
-        sb.AppendLine("        public double GetAccumulator(AtomId atom, string name) => 0;");
-        sb.AppendLine("        public bool HasCondition(AtomId atom, string name) => false;");
-        sb.AppendLine("        public double GetComputedProperty(AtomId atom, string name) => 0;");
-        sb.AppendLine("        public AtomId GetZone(AtomId card) => AtomId.None;");
-        sb.AppendLine("        public AtomId GetOwner(AtomId atom) => AtomId.None;");
-        sb.AppendLine("        public AtomKind GetKind(AtomId atom) => AtomKind.Card;");
-        sb.AppendLine("        public IReadOnlyList<AtomId> GetAtoms(AtomKind kind) => System.Array.Empty<AtomId>();");
-        sb.AppendLine("    }");
-
         sb.AppendLine("}");
 
         File.WriteAllText(Path.Combine(outputDir, "ArchetypeNode.cs"), sb.ToString());
@@ -468,6 +451,15 @@ public static class GodotEmitter
                 CollectFromBlock(extra.Body, referenced);
             foreach (var cost in card.Cost ?? [])
                 CollectFromBlock(cost.Body, referenced);
+            // D32: also scan static effect blocks — both the state-contribution
+            // block and the trigger's fired block count as referenced.
+            foreach (var se in card.StaticEffects)
+            {
+                if (se.StateContributionBlock is not null)
+                    CollectFromBlock(se.StateContributionBlock, referenced);
+                if (se.Trigger is not null)
+                    CollectFromBlock(se.Trigger.FiredBlock, referenced);
+            }
         }
 
         // Apply derivation rules: exclude built-ins and opted-out keywords.

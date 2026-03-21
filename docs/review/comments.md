@@ -1,3 +1,87 @@
+## Re-Review: D33 — GDScript Interop Generation (blocker-fix pass)
+
+Review date: 2026-03-21.
+
+Scope: `src/Archetype.Build/GodotEmitter.cs`, `src/Archetype.Build/BuildRunner.cs`,
+`tests/Archetype.Tests/Builder/BuildRunnerTests.cs`.
+
+Architecture decisions checked: D1, D3, D30, D32, D33.
+
+---
+
+### Defects
+
+- [BLOCKER] `DeriveSignalSet` does not scan `card.StaticEffects` — `StaticEffectDef.StateContributionBlock` and `TriggerDefinition.FiredBlock` are both `EffectBlockDef` that may directly reference game-creator keywords. D32 states inclusion applies to "card primary effect, named effect body, cost body, **or static effect block**." Keywords referenced only inside a static effect will not appear in any of the three generated interop artifacts. — `src/Archetype.Build/GodotEmitter.cs:464–478` — violates D32 signal derivation inclusion rule.
+
+- [BLOCKER] No test covers the static-effect-block derivation path. The gap is correlated with the defect above: a keyword referenced only in a `StaticEffectDef` block would silently disappear from all generated output with no failing test to catch it. — `tests/Archetype.Tests/Builder/BuildRunnerTests.cs` — required by the Reviewer standard (every non-trivial module must cover core invariants from the domain model).
+
+### Minor defects (fixed directly)
+
+- [MINOR] `_stateView` and `_definition` are stored in the generated class but never read; both are dead code. `_stateView` is initialized with a `NullGameStateReadable` stub that is only needed if the field is read before the session starts — but nothing reads it. `_definition` is assigned from the `StartGame` parameter and likewise never used. Both fields should be removed from the generated output. — `src/Archetype.Build/GodotEmitter.cs:160–161, 185–186, 200` — no architecture reference violated; style/clarity.
+
+### Observations
+
+- **WASM safety (D1):** Confirmed. The generated `ArchetypeNode.cs` uses `TaskCompletionSource<T>` with `TaskCreationOptions.RunContinuationsAsynchronously` and `async`/`await` exclusively. No `Thread`, `ThreadPool`, or blocking `.Result`/`.Wait()` calls appear in the generator or generated template. `File.WriteAllText` is only in the generator itself, which runs at build time, not in WASM. Satisfies D1.
+
+- **Engine stays Godot-free (D1):** Confirmed. `GodotEmitter.cs` references no Godot types; all Godot coupling (`using Godot;`, `Node`, `[Signal]`, `Godot.Collections.Dictionary`, `GD.Randi()`, `GD.PrintErr`) is confined to generated output strings. Satisfies D1.
+
+- **`BuildRunner.Run` call order (D33):** Confirmed. The four emitter calls appear in the exact order specified: `EmitKeywordConstants`, `EmitSignals`, `EmitArchetypeNode`, `EmitInteropScripts`. Satisfies D33.
+
+- **All three D33 artifacts generated:** Confirmed. `EmitArchetypeNode` writes `ArchetypeNode.cs`; `EmitInteropScripts` delegates to `EmitSignalConstants` (writes `archetype_signals.gd`) and `EmitInteropAutoload` (writes `archetype_interop.gd`). All three are confirmed by tests.
+
+- **`archetype_interop.gd` is game-agnostic (D33):** Confirmed. `EmitInteropAutoload` emits a verbatim constant string independent of the signal set. The test `Run_ArchetypeInteropFile_IsIdenticalRegardlessOfSignalSet` verifies this directly.
+
+- **Signal naming convention:** `on_` prefix applied, hyphens replaced with underscores, consistent with `archetype_keywords.gd` convention. `SCREAMING_SNAKE_CASE` applied correctly to constants via `ToScreamingSnakeCase`. `ToPascalCase` splits on both `-` and `_` which correctly handles both hyphenated and underscored keyword names.
+
+- **`GD.Randi()` type:** In Godot 4, `GD.Randi()` returns `uint`. `SeededRandom(long seed)` accepts `long`. The implicit widening from `uint` to `long` is valid in C# and behaves correctly. No defect.
+
+- **First-call `ActionResolved` emission:** On the very first `SelectActionAsync` call, the engine has not yet completed any action, so `state.LastActionEvents` is empty. `EmitDerivedSignals` emits nothing, and `ActionResolved` fires immediately before `ActionRequested`. D33's interaction diagram does not address the startup case explicitly, so this is a tolerable implementation choice — but game creators connecting to `ActionResolved` should be aware the first emission is synthetic. This could be worth documenting in the generated class header.
+
+- **`PromptContext` context dictionary is always empty:** `RespondToPromptAsync` creates an empty `contextDict` and passes it through `PromptRequested`. GDScript has no way to inspect prompt options (e.g., what cards to choose from). D33 does not specify the context dictionary format, so this is not a spec violation, but it will limit usability for prompts. Worth raising with the architect before the next feature requiring real prompt UX.
+
+- **`_stateView` and `_definition` dead fields:** Fixed directly — see Minor Defects section. The dead `NullGameStateReadable` inner class was introduced specifically to support the `_stateView` initialization; once `_stateView` is removed, the class is also dead. Both removed in the fix below.
+
+---
+
+### Original Verdict (superseded)
+
+NEEDS REWORK — two blockers must be resolved by the implementer before this can pass:
+1. `DeriveSignalSet` must scan static effect blocks (both `StateContributionBlock` and `TriggerDefinition.FiredBlock`).
+2. A test must cover a keyword referenced only in a static effect block appearing in the derived signal set.
+
+The two minor issues (dead `_stateView`/`_definition` fields and the associated `NullGameStateReadable` stub) were fixed directly in `GodotEmitter.cs`.
+
+---
+
+### Re-review (2026-03-21) — Blocker fix pass
+
+**Blocker 1 — RESOLVED.**
+`DeriveSignalSet` at `GodotEmitter.cs:456–462` now iterates `card.StaticEffects` and calls
+`CollectFromBlock` on both `se.StateContributionBlock` (guarded `is not null`) and
+`se.Trigger.FiredBlock` (guarded `se.Trigger is not null`). The null guards are correct
+because both fields are `?`-typed on `StaticEffectDef`. The `ParameterModification` field
+on `StaticEffectDef` carries no `EffectBlockDef` and is correctly not scanned. The fix is complete.
+
+**Blocker 2 — RESOLVED.**
+Two new tests in `BuildRunnerTests.cs` (lines 327–395):
+- `Run_StaticEffectBlock_KeywordAppearsInSignalSet` — creates a card whose primary effect is
+  a built-in no-op (`modify-accumulator`) so `"buff"` can only enter the signal set via
+  `StateContributionBlock`. Asserts the signal appears in all three generated files
+  (`game_events.gd`, `archetype_signals.gd`, `ArchetypeNode.cs`). Adequate.
+- `Run_StaticEffectTriggerFiredBlock_KeywordAppearsInSignalSet` — same isolation strategy,
+  but contributes `"buff"` through `TriggerDefinition.FiredBlock`. Asserts signal presence
+  in `game_events.gd` and `ArchetypeNode.cs`. Adequate. (The `archetype_signals.gd` assertion
+  present in the first test is not repeated here; the derivation path is identical beyond
+  the collection step, and the first test already covers all three files.)
+
+**Full suite:** 179/179 tests passing. No regressions.
+
+### Re-review Verdict
+
+PASS
+
+---
+
 ## Review: action-args-and-cost-model — Reviewer Tasks 10.1–10.10
 
 Review date: 2026-03-18.
