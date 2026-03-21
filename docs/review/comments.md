@@ -1,3 +1,181 @@
+## Re-Review: D33 — GDScript Interop Generation (blocker-fix pass)
+
+Review date: 2026-03-21.
+
+Scope: `src/Archetype.Build/GodotEmitter.cs`, `src/Archetype.Build/BuildRunner.cs`,
+`tests/Archetype.Tests/Builder/BuildRunnerTests.cs`.
+
+Architecture decisions checked: D1, D3, D30, D32, D33.
+
+---
+
+### Defects
+
+- [BLOCKER] `DeriveSignalSet` does not scan `card.StaticEffects` — `StaticEffectDef.StateContributionBlock` and `TriggerDefinition.FiredBlock` are both `EffectBlockDef` that may directly reference game-creator keywords. D32 states inclusion applies to "card primary effect, named effect body, cost body, **or static effect block**." Keywords referenced only inside a static effect will not appear in any of the three generated interop artifacts. — `src/Archetype.Build/GodotEmitter.cs:464–478` — violates D32 signal derivation inclusion rule.
+
+- [BLOCKER] No test covers the static-effect-block derivation path. The gap is correlated with the defect above: a keyword referenced only in a `StaticEffectDef` block would silently disappear from all generated output with no failing test to catch it. — `tests/Archetype.Tests/Builder/BuildRunnerTests.cs` — required by the Reviewer standard (every non-trivial module must cover core invariants from the domain model).
+
+### Minor defects (fixed directly)
+
+- [MINOR] `_stateView` and `_definition` are stored in the generated class but never read; both are dead code. `_stateView` is initialized with a `NullGameStateReadable` stub that is only needed if the field is read before the session starts — but nothing reads it. `_definition` is assigned from the `StartGame` parameter and likewise never used. Both fields should be removed from the generated output. — `src/Archetype.Build/GodotEmitter.cs:160–161, 185–186, 200` — no architecture reference violated; style/clarity.
+
+### Observations
+
+- **WASM safety (D1):** Confirmed. The generated `ArchetypeNode.cs` uses `TaskCompletionSource<T>` with `TaskCreationOptions.RunContinuationsAsynchronously` and `async`/`await` exclusively. No `Thread`, `ThreadPool`, or blocking `.Result`/`.Wait()` calls appear in the generator or generated template. `File.WriteAllText` is only in the generator itself, which runs at build time, not in WASM. Satisfies D1.
+
+- **Engine stays Godot-free (D1):** Confirmed. `GodotEmitter.cs` references no Godot types; all Godot coupling (`using Godot;`, `Node`, `[Signal]`, `Godot.Collections.Dictionary`, `GD.Randi()`, `GD.PrintErr`) is confined to generated output strings. Satisfies D1.
+
+- **`BuildRunner.Run` call order (D33):** Confirmed. The four emitter calls appear in the exact order specified: `EmitKeywordConstants`, `EmitSignals`, `EmitArchetypeNode`, `EmitInteropScripts`. Satisfies D33.
+
+- **All three D33 artifacts generated:** Confirmed. `EmitArchetypeNode` writes `ArchetypeNode.cs`; `EmitInteropScripts` delegates to `EmitSignalConstants` (writes `archetype_signals.gd`) and `EmitInteropAutoload` (writes `archetype_interop.gd`). All three are confirmed by tests.
+
+- **`archetype_interop.gd` is game-agnostic (D33):** Confirmed. `EmitInteropAutoload` emits a verbatim constant string independent of the signal set. The test `Run_ArchetypeInteropFile_IsIdenticalRegardlessOfSignalSet` verifies this directly.
+
+- **Signal naming convention:** `on_` prefix applied, hyphens replaced with underscores, consistent with `archetype_keywords.gd` convention. `SCREAMING_SNAKE_CASE` applied correctly to constants via `ToScreamingSnakeCase`. `ToPascalCase` splits on both `-` and `_` which correctly handles both hyphenated and underscored keyword names.
+
+- **`GD.Randi()` type:** In Godot 4, `GD.Randi()` returns `uint`. `SeededRandom(long seed)` accepts `long`. The implicit widening from `uint` to `long` is valid in C# and behaves correctly. No defect.
+
+- **First-call `ActionResolved` emission:** On the very first `SelectActionAsync` call, the engine has not yet completed any action, so `state.LastActionEvents` is empty. `EmitDerivedSignals` emits nothing, and `ActionResolved` fires immediately before `ActionRequested`. D33's interaction diagram does not address the startup case explicitly, so this is a tolerable implementation choice — but game creators connecting to `ActionResolved` should be aware the first emission is synthetic. This could be worth documenting in the generated class header.
+
+- **`PromptContext` context dictionary is always empty:** `RespondToPromptAsync` creates an empty `contextDict` and passes it through `PromptRequested`. GDScript has no way to inspect prompt options (e.g., what cards to choose from). D33 does not specify the context dictionary format, so this is not a spec violation, but it will limit usability for prompts. Worth raising with the architect before the next feature requiring real prompt UX.
+
+- **`_stateView` and `_definition` dead fields:** Fixed directly — see Minor Defects section. The dead `NullGameStateReadable` inner class was introduced specifically to support the `_stateView` initialization; once `_stateView` is removed, the class is also dead. Both removed in the fix below.
+
+---
+
+### Original Verdict (superseded)
+
+NEEDS REWORK — two blockers must be resolved by the implementer before this can pass:
+1. `DeriveSignalSet` must scan static effect blocks (both `StateContributionBlock` and `TriggerDefinition.FiredBlock`).
+2. A test must cover a keyword referenced only in a static effect block appearing in the derived signal set.
+
+The two minor issues (dead `_stateView`/`_definition` fields and the associated `NullGameStateReadable` stub) were fixed directly in `GodotEmitter.cs`.
+
+---
+
+### Re-review (2026-03-21) — Blocker fix pass
+
+**Blocker 1 — RESOLVED.**
+`DeriveSignalSet` at `GodotEmitter.cs:456–462` now iterates `card.StaticEffects` and calls
+`CollectFromBlock` on both `se.StateContributionBlock` (guarded `is not null`) and
+`se.Trigger.FiredBlock` (guarded `se.Trigger is not null`). The null guards are correct
+because both fields are `?`-typed on `StaticEffectDef`. The `ParameterModification` field
+on `StaticEffectDef` carries no `EffectBlockDef` and is correctly not scanned. The fix is complete.
+
+**Blocker 2 — RESOLVED.**
+Two new tests in `BuildRunnerTests.cs` (lines 327–395):
+- `Run_StaticEffectBlock_KeywordAppearsInSignalSet` — creates a card whose primary effect is
+  a built-in no-op (`modify-accumulator`) so `"buff"` can only enter the signal set via
+  `StateContributionBlock`. Asserts the signal appears in all three generated files
+  (`game_events.gd`, `archetype_signals.gd`, `ArchetypeNode.cs`). Adequate.
+- `Run_StaticEffectTriggerFiredBlock_KeywordAppearsInSignalSet` — same isolation strategy,
+  but contributes `"buff"` through `TriggerDefinition.FiredBlock`. Asserts signal presence
+  in `game_events.gd` and `ArchetypeNode.cs`. Adequate. (The `archetype_signals.gd` assertion
+  present in the first test is not repeated here; the derivation path is identical beyond
+  the collection step, and the first test already covers all three files.)
+
+**Full suite:** 179/179 tests passing. No regressions.
+
+### Re-review Verdict
+
+PASS
+
+---
+
+## Review: action-args-and-cost-model — Reviewer Tasks 10.1–10.10
+
+Review date: 2026-03-18.
+
+Scope: `src/Archetype.Engine/BuiltInHandlers.cs` (`Assert` handler), `src/Archetype.Engine/ExecutionContext.cs`, `src/Archetype.Engine/ActionResolver.cs`, `src/Archetype.Engine/CostValidator.cs`, `src/Archetype.Engine/GameSession.cs` (`ComputeAvailableActions`, `ResolveCostsForAction`), `src/Archetype.Engine/GameState.cs` (`CloneForValidation`), `src/Archetype.Build/Kw.cs` (`OwnedByActivePlayer`), `src/Archetype.Core/Interfaces.cs` (`IEngineObserver`), `tests/Archetype.Tests/BuiltIns/AssertTests.cs`, `tests/Archetype.Tests/CostModel/CostModelTests.cs`, `tests/Archetype.Tests/ComputeAvailableActions/ComputeAvailableActionsTests.cs`, `tests/Archetype.Tests/SaveLoad/SaveLoadTests.cs`.
+
+Architecture decisions checked: D20, D21, D22, D23, D24, D25.
+
+---
+
+### Defects
+
+None.
+
+---
+
+### Observations
+
+- **10.1 — PASS.** `BuiltInHandlers.Assert` checks `ctx.IsCostBody` first; on `true` it throws `EngineException` unconditionally without reading `on_fail` or `notify` arguments and without calling `OnDiagnostic`. Conforms to D20.
+
+- **10.2 — PASS.** `OnDiagnostic` is called inside `if (notify == NotifyFlag.On)` at line 478, then the `return onFail switch { ... OnFail.Panic => throw ... }` executes at line 481. Observer call precedes the exception. When `notify == NotifyFlag.Off` the block is skipped entirely. Conforms to D25.
+
+- **10.3 — PASS.** The `Assert` handler never calls `ctx.EventLog.Append`. The event-log invariant is tested directly in `Assert_NeverAppendsToEventLog`. Conforms to D20.
+
+- **10.4 — PASS.** `GameState.CloneForValidation` copies atom table (Accumulators, ZoneId, OwnerId, Kind), modifier index, condition index, session atom ID, and player name registry. It explicitly excludes `ContributionRegistry`, `ActiveStaticEffects`, `DormantDeclarativeEffects`, game outcome flags, and — since `EventLog` is not a field on `GameState` at all — event log. Conforms to D21.
+
+- **10.5 — PASS.** `ComputeAvailableActions` captures `stateSnapshot = _state.CloneForValidation()` into a local variable before constructing the lambda. The delegate closes over the clone, not over `_state`. No live reference to the mutable session state drifts into the delegate. Conforms to D22.
+
+- **10.6 — PASS.** `ActionResolver.ResolveAction` calls `eventLog.OpenAction()` once, executes all cost blocks (with `IsCostBody = true`) and then the primary block inside the same action scope, then calls `eventLog.CloseAction()` in `finally`. No separate `OpenAction`/`CloseAction` pair wraps individual cost bodies. Conforms to D23.
+
+- **10.7 — PASS.** `ComputeAvailableActions` Pass 1 iterates `_state.GetAtoms(AtomKind.Card)` with a zone definition-name filter only; no `OwnerId` predicate is present. Pass 2 iterates all card atoms with no zone or owner filter. Test 9.13 (`ComputeAvailableActions_CardInPlayableZone_IncludedRegardlessOfOwner`) and 9.14 (`ComputeAvailableActions_AbilityOnUnownedCard_Included`) confirm this at the integration level. Conforms to D24.
+
+- **10.8 — PASS.** `Kw.OwnedByActivePlayer()` carries a `<summary>` XML doc with a `<b>Requirement:</b>` paragraph that names the `"active-player"` session state field and explains the runtime consequence. The doc accurately reflects that the field must be set by game-level initialization. Minor note: D24 says "Games that do not declare this field will receive a `DefinitionException` at `Build()` time," but no Build()-time check for `"active-player"` field presence is implemented; the doc correctly describes the actual runtime behavior (`EvaluateCondition` will throw). The gap between D24's stated promise and the actual enforcement is a pre-existing architecture note, not a new defect introduced by this change. Conforms to 10.8's stated requirement (doc states the `"active-player"` session state requirement).
+
+- **10.9 — PASS.** Two `IEngineObserver` implementations exist in the codebase: `RecordingObserver` in `AssertTests.cs` and `CapturingObserver` in `SaveLoadTests.cs`. Both have `void OnDiagnostic(DiagnosticEvent e)`. All 164 tests pass; no compilation errors.
+
+- **10.10 — PASS.** All 164 tests pass (`dotnet test` output: `Failed: 0, Passed: 164`). The test suite includes 6 new assert tests (9.1–9.6), 7 new cost-model tests (9.7–9.12, 9.16), and 3 new `ComputeAvailableActions` tests (9.13–9.15) plus the updated 3.8 test. Net test count increased from the prior baseline.
+
+---
+
+### Verdict
+
+PASS
+
+---
+
+## Review: Group 6 — Renderer UI Panels (impl/text-renderer)
+
+Review date: 2026-03-16.
+
+Scope: all files under `tooling/src/renderer/` introduced or modified by Group 6 — `components/DslEditor.tsx`, `panels/KeywordEditorPanel.tsx`, `panels/CardEditorPanel.tsx`, `panels/GameRulesPanel.tsx`, `panels/InitManifestPanel.tsx`, `panels/LocalizationPanel.tsx`, `panels/ProblemsPanel.tsx`, `components/StatusBar.tsx`, `components/ExportModal.tsx`, `panels/GraphPanel.tsx`, `panels/SetOverviewPanel.tsx`, `snapshot.ts`, and `App.tsx`. All corresponding test files reviewed.
+
+Architecture decisions checked: D26, D27, D28, D31.
+
+---
+
+### Defects
+
+#### [MINOR 1] `ExportModal` body copy deviates from D31 specified text — `ExportModal.tsx:65`
+
+D31 specifies the dialog body must say "Missing strings will fall back to the source language at runtime." The implementation says "Export will include untranslated placeholders." These communicate different (and conflicting) things: the spec copy is accurate (the runtime does fall back via the `TextTemplate` resolution order); the implementation copy is misleading ("untranslated placeholders" implies visible empty/broken strings in game, not a graceful fallback). D31 is explicit about this message being the mechanism by which the game creator understands the runtime fallback behaviour without needing to know the renderer internals.
+
+**Fixed in place:** updated `ExportModal.tsx:65` to match the D31 copy.
+
+---
+
+### Observations
+
+- **`completionItem.insertText` ignores snippet syntax from D28.** `DslEditor.tsx:181` always sets `insertText: item.label` — it ignores the `insertText` field that the sidecar returns in `CompletionItem`. D28 says `insertText` uses Monaco snippet syntax (`$1`, `$2` for tab stops) for keyword suggestions like `get-state($1, $2)`. The effect is that completions never insert tab-stop templates, reducing the UX value of autocomplete. This is not a protocol defect (the correct data is in the `item` object), it is a renderer-side oversight in how the data is consumed. It does not affect correctness, only completeness of the feature.
+
+- **`staticEffect_${i}` dslField falls through to `UpdateCardEffect` — no dedicated handler.** In `CardEditorPanel.tsx:289` the static effect body editor uses `dslField={`staticEffect_${i}`}`. In `DslEditor.tsx` `resolveMutation`, this falls through to `UpdateCardEffect` with `effectName = "staticEffect_0"` etc. D28 does not specify a dedicated method for static effect bodies; routing through `UpdateCardEffect` is the reasonable interpretation. The sidecar's `UpdateCardEffectHandler` must handle these effect names correctly. The static effect `lifetime` DSL correctly routes to `UpdateLifetimeSpec` via the `lifetime:` prefix. This is consistent and the fallthrough is intentional, but worth a comment in `resolveMutation` explaining the naming contract.
+
+- **`fetchSnapshot()` calls `SaveProject` on every panel mount.** Multiple panels (`KeywordEditorPanel`, `CardEditorPanel`, `GameRulesPanel`, `InitManifestPanel`, `LocalizationPanel`, `SetOverviewPanel`) each independently call `fetchSnapshot()` on mount, which calls `SaveProject` under the hood. This means opening/switching panels triggers multiple round-trip serialisations of the entire project state. For large projects this could become noticeable. Not a correctness defect; noted for the simplifier pass.
+
+- **`ProblemsPanel` secondary sort by entry name not implemented.** D28 specifies "sorted by severity then entry name." The sort comparator in `ProblemsPanel.tsx:49-52` only implements the severity tier and returns 0 for same-severity pairs. Within-tier ordering depends on sidecar sort order. Practically correct because the sidecar's `GetAllDiagnosticsHandler` does the full sort, but the renderer should not rely on this.
+
+- **`DslEditor` completion provider registered on every `onMount`.** `DslEditor.tsx:166` registers a `CompletionItemProvider` for `archetype-dsl` on every mount. Monaco accumulates providers rather than deduplicating, so panels with many DSL editors will show N copies of each suggestion. A module-level `completionProviderRegistered` flag (same pattern as the existing `languageRegistered` flag on line 55) would fix this.
+
+- **`KeywordDetail` parameter name input commits on every `onChange` keystroke.** `KeywordEditorPanel.tsx:247` calls `void updateParam(i, "name", e.target.value)` on `onChange`. D28 specifies non-DSL fields commit on "blur / Enter / selection," not on every keystroke. This fires one `UpdateField` + full re-validation per keypress while the user is typing a parameter name. The type dropdown is unaffected (dropdown fires `onChange` only on selection).
+
+- **`DslEditor` invoke assertion is absent from two tests.** `DslEditor.test.tsx:86-108` does not assert `window.archetype.invoke` was called with the correct channel and payload (comment on line 106 acknowledges this). Similarly, the `activationCondition` test (line 111) is a render-only smoke test. These are known gaps.
+
+- **All 10 Group 6 tasks have test files; coverage is solid.** Each panel has render, interaction, and IPC-call assertions. Happy paths and empty states are covered across all panels; error states are covered where most impactful (GraphPanel network error, ExportModal errors-kind response, ProblemsPanel sort order). No missing test files.
+
+---
+
+### Verdict
+
+**PASS WITH MINOR FIXES**
+
+MINOR 1 (ExportModal body copy deviation from D31) has been fixed directly. No blockers. All observations are improvement opportunities; none violate architecture decisions or domain invariants. All 105 TypeScript tests pass.
+
+---
+
 # Review: Tooling Sidecar Bug Fixes — `Archetype.Tooling.Server` + `Archetype.Core/GameDefinitionJsonOptions.cs` (impl/text-renderer)
 
 Review date: 2026-03-11. Bug fixes: 6 items covering Fix 1–6 as described in the task.

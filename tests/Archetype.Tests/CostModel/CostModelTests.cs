@@ -347,7 +347,6 @@ public sealed class CostModelTests
             {
                 ["hand"] = new ZoneDefinition("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:
             [
                 new StateBasedRule("end-game", alwaysTrue,

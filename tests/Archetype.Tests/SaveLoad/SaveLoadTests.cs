@@ -57,7 +57,6 @@ public sealed class SaveLoadTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw-after-turns",
@@ -228,7 +227,6 @@ public sealed class SaveLoadTests
             {
                 ["hand"] = zoneDef,
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw",
@@ -466,7 +464,6 @@ public sealed class SaveLoadTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw",
@@ -521,7 +518,6 @@ public sealed class SaveLoadTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>(),
             Phases:                 new List<PhaseDefinition>(),
             ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
@@ -605,7 +601,6 @@ public sealed class SaveLoadTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>(),
             Phases:                 new List<PhaseDefinition> { new("main", null, null) },
             ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
@@ -680,7 +675,6 @@ public sealed class SaveLoadTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition> { ["test-card"] = cardDef },
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition> { ["hand"] = zoneDef },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw", Condition: new Literal(true), Body: drawBlock),

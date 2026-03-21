@@ -538,7 +538,6 @@ public sealed class ComputeAvailableActionsTests
             {
                 ["hand"] = new ZoneDefinition("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:
             [
                 new StateBasedRule("end-game", alwaysTrue,
@@ -623,7 +622,6 @@ public sealed class ComputeAvailableActionsTests
                 ["hand"]    = new ZoneDefinition("hand",    new Dictionary<string, object>()),
                 ["discard"] = new ZoneDefinition("discard", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:
             [
                 // Terminate after the first action window; prevents infinite loop.
@@ -666,7 +664,6 @@ public sealed class ComputeAvailableActionsTests
             {
                 ["hand"] = new ZoneDefinition("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:
             [
                 new StateBasedRule("end-game", alwaysTrue,

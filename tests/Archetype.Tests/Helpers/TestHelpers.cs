@@ -202,7 +202,6 @@ public static class TestDefinition
             Keywords:               keywords,
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>(),
             Phases:                 new List<PhaseDefinition>(),
             ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),

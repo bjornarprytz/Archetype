@@ -28,7 +28,6 @@ public sealed class GameSessionTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>(),
             Phases:                 new List<PhaseDefinition>
             {
@@ -136,7 +135,6 @@ public sealed class GameSessionTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             // SBR: fires on turn 1, declares draw immediately.
             StateBasedRules:        new List<StateBasedRule>
             {
@@ -289,7 +287,6 @@ public sealed class GameSessionTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition> { ["hand-zone"] = zoneDef },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("auto-draw",
@@ -380,7 +377,6 @@ public sealed class GameSessionTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition> { ["test-card"] = cardDef },
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition> { ["play"] = zoneDef },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("auto-draw", Condition: new Literal(true), Body: declareDrawBlock),
@@ -483,7 +479,6 @@ public sealed class GameSessionTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition> { ["score-card"] = cardDef },
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition> { ["hand"] = zoneDef },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw-when-scored",

@@ -88,7 +88,6 @@ public sealed class LastActionEventsTests
             {
                 ["hand"] = new("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("end-when-scored",
@@ -197,7 +196,6 @@ public sealed class LastActionEventsTests
             {
                 ["hand"] = new("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("end-when-2-scored",
@@ -277,7 +275,6 @@ public sealed class LastActionEventsTests
             {
                 ["hand"] = new("hand", new Dictionary<string, object>()),
             },
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("end-at-2",
@@ -333,7 +330,6 @@ public sealed class LastActionEventsTests
             Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
             CardDefinitions:        new Dictionary<string, CardDefinition>(),
             ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
-            CardSets:               new Dictionary<string, CardSet>(),
             StateBasedRules:        new List<StateBasedRule>
             {
                 new("draw", new Literal(true),

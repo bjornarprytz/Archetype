@@ -1,8 +1,8 @@
 # Implementation Status
 
-> Last updated: 2026-03-17 (Group 6 review observations addressed. All 7 observations fixed: DslEditor insertText, CardEditorPanel staticEffect comment, snapshot cache, ProblemsPanel secondary sort, completion provider deduplication, KeywordDetail param blur-on-commit, DslEditor invoke assertions. 106 TypeScript tests passing; 150 C# tests passing)
+> Last updated: 2026-03-21 (D33 re-review: PASS — both blockers resolved. DeriveSignalSet now scans StaticEffectDef.StateContributionBlock and Trigger.FiredBlock; two new tests cover both paths. 179/179 C# tests passing.)
 > Branch: `impl/text-renderer`
-> All source in `src/` (5 assemblies) + `tests/Archetype.Tests/`. Electron tooling in `tooling/`.
+> All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
 ---
 
@@ -11,11 +11,11 @@
 | Assembly | Role | Status |
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
-| `Archetype.Build` | `Kw` factory shorthands for authoring effect blocks | ✅ Complete |
+| `Archetype.Build` | `Kw` factory shorthands, `GameDefinitionBuilder`, `CardSet` serialization, `BuildRunner`, `GodotEmitter` (D32, D33) | ✅ Complete — D33 PASS |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
-| `Archetype.Tooling.Server` | JSON-RPC sidecar for Electron authoring tool — `ProjectState`, DSL parser, reference graph, validator, 18 RPC handlers, export pipeline | ✅ Groups 3–4 complete |
-| `tooling/` (Electron) | Desktop authoring tool — Electron main process, preload contextBridge, React renderer, Zustand stores, all UI panels | ✅ Groups 2 + 5 + 6 complete (Group 7 pending) |
+| ~~`Archetype.Tooling.Server`~~ | Removed (superseded by `Archetype.Build` code-first authoring model — D32) | ❌ Deleted |
+| ~~`tooling/`~~ | Electron desktop app — removed (D32) | ❌ Deleted |
 
 ---
 
@@ -500,7 +500,9 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `tooling/src/renderer/panels/GraphPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 graph view) |
 | `tooling/src/renderer/panels/SetOverviewPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 set overview) |
 
-**Total: 150 C# tests passing + 105 TypeScript/React tests passing.**
+| `Builder/BuildRunnerTests.cs` | 26 | ✅ All passing (13 new — D33: ArchetypeNode.cs, archetype_signals.gd, archetype_interop.gd) |
+
+**Total: 177 C# tests passing + 105 TypeScript/React tests passing (note: TypeScript tests are for the deleted Electron tooling; C# count is authoritative).**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`
@@ -569,13 +571,13 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 
 ## Resolved Issues
 
-### action-args-and-cost-model (D20–D25) — 102 tests — review verdict: PASS (2026-03-09)
+### action-args-and-cost-model (D20–D25) — 164 tests — review verdict: PASS (re-verified 2026-03-18)
 
-All ten reviewer checks (10.1–10.10) passed with no blockers. Two minor issues fixed directly by reviewer:
+All ten reviewer checks (10.1–10.10) passed with no blockers on `impl/text-renderer`. 164/164 tests pass. Prior review cycle (2026-03-09) fixed two minor issues directly:
 - `CloneForValidation` XML doc inaccurately listed "Player name registry, session atom" as excluded; corrected to "Also copied (required for cost-body keyword resolution)" (`GameState.cs`).
 - Dead variable `sessionEnergyBefore` removed from `ComputeAvailableActionsTests.cs:512` (CS0219 warning eliminated).
 
-No functional changes. 102/102 tests pass with zero compiler warnings.
+Re-verification 2026-03-18: no new defects found. Test count increased to 164 (up from 102) due to subsequent work in the same branch.
 
 ### SaveLoad tests (D17) — 13 tests — review verdict: PASS (2026-03-08)
 - `SeededRandom_SameSeed_ProducesSameSequence`

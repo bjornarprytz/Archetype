@@ -2,7 +2,7 @@
 status: signed-off
 owner: technical-architect
 signed-off: 2026-03-11
-last-updated: 2026-03-11
+last-updated: 2026-03-20
 depends-on:
   - docs/requirements.md
   - docs/domain-model.md
@@ -11,7 +11,7 @@ depends-on:
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected).**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected). Updated 2026-03-20 (D33: GDScript interop generation — ArchetypeNode.cs generated bridge class, async/GDScript action-submission bridge, archetype_interop.gd static autoload, archetype_signals.gd per-game constants).**
 
 All decisions D1–D31 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15). Updated 2026-03-05 to ratify game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) and their `GameIsOver` propagation contract (D7 amendments and D14 addendum), and to add D19 (`ComputeAvailableActions` contract — `get-atoms-in-zone` primitive, `CardDefinition.ActivationCondition`, `GameDefinition.PlayableZoneNames`). Updated 2026-03-11 to add D26 (Electron + .NET sidecar platform), D27 (sidecar-authoritative data layer, project file format, DSL text as canonical form), D28 (validation trigger model, debounce, sidecar protocol surface), D29 (D14 addendum: InitManifest mandatory and renamed, HostManifest append layer with StateOverrides, CardSpec LocalId, AtomStateOverride, updated nine-step provisioning order), D30 (Godot export pipeline: folder-drop package, Level 1 signal derivation with opt-out, post-action event log polling via GameStateView.LastActionEvents), and D31 (missing-translation export gate: warning classification, confirmation dialog, no persistent preference).
 
@@ -46,7 +46,7 @@ All decisions D1–D31 are stable and signed off. Updated 2026-03-02 to incorpor
 
 ### D2 — Keyword Representation
 
-**Decision:** Keywords are represented as interpreted expression trees. The source format is a textual DSL authored by game creators. The tooling parses DSL text into a `KeywordNode` tree and serializes it to JSON. The engine loads JSON and deserializes to trees at startup — it does not contain a parser.
+**Decision:** Keywords are represented as interpreted expression trees. Game creators author rules and keywords using the C# builder API (`GameDefinitionBuilder`, `Kw` static class in `Archetype.Build`). The builder constructs `KeywordNode` trees in memory and produces a `GameDefinition` directly — no parser, no intermediate text format. Card definitions are distributed as JSON card sets loaded at runtime; the engine deserializes them into `CardDefinition` trees at startup.
 
 **Tree structure:**
 
@@ -90,7 +90,7 @@ ParameterDecl {
 
 `AtomKindRestriction` is stored in `BuiltInKeywords` in `Core` alongside the parameter's declared type. The type-checker in `Archetype.Build` reads it during validation. Game-creator-defined keywords may not declare `AtomKindRestriction` — it is a mechanism for engine built-ins only.
 
-**Serialization boundary.** The tooling (desktop app) owns the parser. It parses DSL text → validates → emits a JSON game definition file. The engine owns the deserializer. It reads JSON → constructs `KeywordDefinition` trees in memory. The engine never sees raw DSL text; the parser is not in the engine assembly. This keeps the WASM binary smaller and the engine free of parser complexity.
+**Authoring boundary.** `Archetype.Build` owns the builder API. Game creators call `GameDefinitionBuilder.Build()` to produce a `GameDefinition` in memory; no JSON is written for rules. Card sets are authored in C# and serialized to JSON by `BuildRunner`; the engine deserializes card set JSON at startup. The engine never sees DSL text; there is no parser.
 
 **Dual-use.** Two separate interpreters walk the same `KeywordNode` tree:
 - **Execution interpreter** — walks the tree against live `ExecutionContext` (game state, scope, variable bindings), applying mutations and reading values.
@@ -98,21 +98,21 @@ ParameterDecl {
 
 **Rationale:**
 - The tree is pure data: immutable, serializable, inspectable. It satisfies §1.1's dual-use invariant without duplicating definitions.
-- Keeping the parser in the tooling and the deserializer in the engine maintains a clean boundary, reduces engine complexity, and improves WASM binary size.
+- Keeping construction logic in `Archetype.Build` and deserialization in the engine maintains a clean boundary and reduces engine complexity.
 - The `TextTemplate` on each definition gives game creators control over rendered text without a separate file; falling back to structural rendering preserves the full composition tree for detailed inspection.
 
 **Consequences:**
-- The JSON schema for `KeywordDefinition` trees is a first-class contract between the tooling and the engine. It must be versioned.
-- The tooling must validate the tree at parse time (type-checking, acyclicity, mutation/property subtype invariants) so the engine can trust what it loads.
+- The JSON schema for `CardSet` (card definitions) is a first-class contract between `BuildRunner` output and the engine deserializer. It must be versioned.
+- `GameDefinitionBuilder.Build()` validates the tree at build time (type-checking, acyclicity, mutation/property subtype invariants) so the engine can trust what it loads.
 - The text renderer needs a depth parameter or strategy so the game layer can choose between "show top-level text only" and "expand full composition."
-- Built-in (primitive) keywords are registered in the engine at startup, not loaded from JSON. The JSON file references them by name; the engine resolves the name to its built-in implementation.
+- Built-in (primitive) keywords are registered in the engine at startup, not loaded from JSON. Card set JSON references them by name; the engine resolves the name to its built-in implementation.
 
 **Addendum — `TextTemplate` cross-reference tag syntax (D18).** `TextTemplate` strings and locale file template strings may contain keyword cross-reference tags alongside `{paramName}` substitutions:
 
 - **Short form:** `[keyword-name]` — the keyword name is used as both the lookup key and the display text.
 - **Long form:** `[display text](keyword-name)` — explicit display text when the prose term differs from the keyword name (e.g. `[damage](take-damage)`).
 
-Both forms produce a `RulesRef` node in the rendered output (see D18). The `keyword-name` in a tag must resolve to an entry in `GameDefinition.Keywords` (built-in or game-creator-defined); this is validated at authoring time — build time for the C# builder, parse time for the DSL tooling, load time for the JSON deserializer. An unknown keyword name in a tag is a `DefinitionException`. Tag parsing occurs after `{paramName}` substitution resolution; a tag may not span a `{paramName}` boundary.
+Both forms produce a `RulesRef` node in the rendered output (see D18). The `keyword-name` in a tag must resolve to an entry in `GameDefinition.Keywords` (built-in or game-creator-defined); this is validated at authoring time — at `GameDefinitionBuilder.Build()` for rules, and at card set merge time (`GameDefinition.WithCardSets`) for card definitions. An unknown keyword name in a tag is a `DefinitionException`. Tag parsing occurs after `{paramName}` substitution resolution; a tag may not span a `{paramName}` boundary.
 
 ---
 
@@ -1395,7 +1395,7 @@ static class Assert
 
 ### D15 — Module Boundaries
 
-**Decision:** The engine is partitioned into four assemblies. `Archetype.Core` contains all pure data types and interfaces — it has no dependencies beyond the .NET BCL and is WASM-safe by construction. `Archetype.Build`, `Archetype.Text`, and `Archetype.Engine` each depend on `Core` only; none depends on any other of the three. This lets the DSL tooling (a separate desktop application) reference `Core`, `Build`, and `Text` without pulling in the runtime engine.
+**Decision:** The engine is partitioned into four assemblies. `Archetype.Core` contains all pure data types and interfaces — it has no dependencies beyond the .NET BCL and is WASM-safe by construction. `Archetype.Build`, `Archetype.Text`, and `Archetype.Engine` each depend on `Core` only; none depends on any other of the three. This lets game-creator build projects (e.g. `[GameName].Build`) reference `Core`, `Build`, and `Text` without pulling in the runtime engine.
 
 ---
 
@@ -2741,7 +2741,9 @@ DiagnosticEvent {
 
 ---
 
-### D26 — Authoring Tool Platform and Process Architecture
+### D26 — Authoring Tool Platform and Process Architecture *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The Electron authoring tool described below was replaced by the code-first C# authoring model (see D32). This section is retained as a historical record.
 
 **Decision:** The authoring tool is an Electron desktop application with a TypeScript/React frontend and a co-located .NET sidecar process. The Electron main process spawns the sidecar on startup and communicates with it over stdin/stdout using newline-delimited JSON-RPC. The sidecar owns all C# logic; the Electron renderer process owns all UI.
 
@@ -2857,7 +2859,9 @@ Build         Text      Engine   Tooling.Server
 
 ---
 
-### D27 — Tooling Data Layer and Project File Format
+### D27 — Tooling Data Layer and Project File Format *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The sidecar-authoritative data layer and project file format described below were replaced by the code-first C# authoring model (see D32). This section is retained as a historical record.
 
 **Decision:** Three related decisions govern how the authoring tool stores and manipulates game definition state.
 
@@ -3311,7 +3315,9 @@ No events are logged during any provisioning step (unchanged from D14). The `Loc
 
 ---
 
-### D28 — Tooling Validation Approach
+### D28 — Tooling Validation Approach *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The sidecar validation approach described below was replaced by compile-time validation in `GameDefinitionBuilder.Build()` (see D32). This section is retained as a historical record.
 
 **Decision:** Validation is triggered on every DSL field content-change event, debounced at a configurable delay (default 200ms). The sidecar returns scoped diagnostics — covering the changed entry and its reverse-dependency closure — plus a global error count. Autocomplete queries are routed to the sidecar (not computed locally in the renderer). The initial sidecar implementation validates the full project on every mutation; the API surface is designed for incremental validation from day one so the implementation can be tightened without a protocol change.
 
@@ -3490,7 +3496,9 @@ The sidecar identifies the symbol at the cursor (e.g. the keyword name `take-dam
 
 ---
 
-### D30 — Godot Export Pipeline
+### D30 — Godot Export Pipeline *(SUPERSEDED by D32)*
+
+**SUPERSEDED.** The sidecar-driven Godot export pipeline described below was replaced by `BuildRunner` in `Archetype.Build` (see D32). Signal derivation rules and GDScript generation logic from this section are preserved in D32. This section is retained as a historical record.
 
 **Decision:** The export package is written as a folder of files directly into a game-creator-specified directory inside their Godot project (e.g. `res://archetype-export/`). GDScript signals are derived from every keyword referenced in any card effect block, cost body, or static effect in the game definition, with built-in primitives suppressed by default and a per-keyword `[NoSignal]` opt-out available. Signal delivery uses post-action event log polling via `GameStateView` — no engine API changes are required.
 
@@ -3675,7 +3683,11 @@ The authoring tool surfaces these as checkboxes in the keyword editor ("Generate
 
 ---
 
-### D31 — Missing-Translation Export Gate UX
+### D31 — Missing-Translation Export Gate UX *(SUPERSEDED)*
+
+**SUPERSEDED.** This decision was specific to the Electron authoring tool's UX (see D26/D32). With the code-first model there is no GUI export gate. Missing-translation handling is a build-time concern; see D32.
+
+---
 
 **Decision:** Missing translations are classified as warnings (never errors) and never block saving. At export time, if any missing-translation warnings exist, the export flow surfaces a narrowly-scoped confirmation dialog before proceeding. Hard errors block export before this dialog is ever reached — by the time the dialog appears, the definition is clean of errors. The dialog is strictly about missing translations and contains no other diagnostic information. General error status belongs in the persistent problems panel and status bar, not in the export dialog.
 
@@ -3761,6 +3773,352 @@ General error and warning status is always visible in the persistent status bar 
 
 ---
 
+### D32 — Code-First Authoring Model
+
+**Decision:** Game rules are authored in C# using the builder API (`GameDefinitionBuilder`, `Kw` static class). The builder produces a `GameDefinition` in memory at startup. Card definitions are distributed as JSON card sets authored in C# and serialized by `BuildRunner`. This replaces the DSL/Electron model (D26–D28, D30–D31). D29 (InitManifest, HostManifest) is unaffected.
+
+---
+
+**Two-layer authoring model.**
+
+| Layer | Authoring format | Distribution format | Loaded by |
+|---|---|---|---|
+| Rules (keywords, phases, zones, state-based rules) | C# (`GameDefinitionBuilder`) | Compiled `.dll` | Godot project reference |
+| Card definitions | C# (builder API) | JSON (`CardSet`) | Loaded from disk at startup |
+
+```
+[GameName].Rules.dll         → compiled Godot dependency; BuildDefinition() returns GameDefinition
+[GameName].CoreSet.json      → loaded at runtime; merged via GameDefinition.WithCardSets()
+[GameName].Expansion.json    → loaded at runtime; merged via GameDefinition.WithCardSets()
+```
+
+---
+
+**`Kw` static class.**
+
+All built-in keywords are exposed as typed static methods on the `Kw` class in `Archetype.Build`. Each method accepts `KeywordNode` parameters and returns a `KeywordNode`:
+
+```csharp
+Kw.TakeDamage(Kw.Param("target"), Kw.Num(3))
+Kw.MoveCard(Kw.Param("card"), Kw.Param("zone"))
+Kw.Assert(Kw.AtLeast(Kw.GetState(Kw.Param("source"), Kw.Str("energy")), Kw.Num(2)))
+```
+
+Game-creator keywords are ordinary C# methods that return `KeywordNode` trees by composing built-ins and other game-creator methods. No registration is required for keyword composition — only for named lookup (RulesRef in card text and card set validation).
+
+---
+
+**`GameDefinitionBuilder`.**
+
+A fluent builder in `Archetype.Build` for constructing `GameDefinition` instances. Provides methods for registering zones, phases, keywords, state-based rules, trigger resolution order, player definitions, and `InitManifest`. `Build()` performs validation (duplicate names, unknown parameter references, TextTemplate tag resolution) and returns an immutable `GameDefinition`.
+
+Named keyword registration:
+```csharp
+builder.RegisterKeyword(
+    name: "attack",
+    parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
+    body: Kw.TakeDamage(Kw.Param("target"), Kw.Max(Kw.Num(0), Kw.Subtract(Kw.Param("amount"), Kw.GetState(Kw.Param("target"), Kw.Str("defense"))))),
+    textTemplate: "{target} takes {amount} damage");
+```
+
+---
+
+**`CardSet` and `GameDefinition.WithCardSets`.**
+
+`CardSet` is a record in `Archetype.Core` containing a set name, format version, and a list of `CardDefinition` entries. `GameDefinition.WithCardSets(IEnumerable<CardSet>)` returns a new `GameDefinition` with the card definitions merged in additively. Keyword references in card effect blocks are validated against the registered keywords at merge time; unknown references throw `DefinitionException`.
+
+---
+
+**`BuildRunner` (Archetype.Build).**
+
+A static API for game-creator build projects. The game developer writes their own `Program.cs`:
+
+```csharp
+var definition = MyGame.Rules.BuildDefinition();
+var coreset   = new MyGame.CoreSet.SetBuilder().Build();
+BuildRunner.Run(definition, [coreset], outputDir: "godot/archetype-export/");
+```
+
+`BuildRunner.Run` outputs:
+- `[set-name].json` — one file per `CardSet`, for runtime loading
+- `archetype_keywords.gd` — SCREAMING_SNAKE_CASE string constants for all registered keyword names
+- `game_events.gd` — GDScript signal declarations derived from keyword event log contributions
+
+Signal derivation rules are carried forward from D30:
+- **Inclusion:** a keyword produces a signal if it is directly referenced in a card primary effect, named effect body, cost body, or static effect block.
+- **Default suppression:** all built-in primitives are suppressed unless opted in via `.WithSignal()` in the builder.
+- **Opt-out:** any game-creator keyword may be suppressed via `.NoSignal()` on the `RegisterKeyword` call.
+- **Naming:** keyword `foo-bar` → signal `on_foo_bar`; parameters mirror the keyword's `ParameterDecl` list with engine types mapped to GDScript types (see D30 type mapping table).
+
+---
+
+**Module boundary update (D15 addendum).**
+
+`Archetype.Tooling.Server` is removed. The four-assembly model is restored: `Core`, `Build`, `Text`, `Engine`. `Archetype.Build` is the authoring-time assembly; game-creator build projects reference it. Godot runtime projects reference `Core`, `Engine`, and the game-specific rules assembly.
+
+---
+
+**Consequences:**
+- `Archetype.Tooling.Server` project and `tooling/` Electron directory are deleted.
+- `GameDefinition` gains `WithCardSets(IEnumerable<CardSet>)`.
+- `GameDefinition.CardSets` (the old tooling-only name-grouping field) is removed.
+- `Archetype.Build` gains `GameDefinitionBuilder`, `BuildRunner`, and `GodotEmitter`.
+- The `.slnx` file removes `Archetype.Tooling.Server`.
+
+---
+
+### D33 — GDScript Interop Generation
+
+**Decision:** `BuildRunner` generates three additional artifacts that bridge the C# engine to GDScript:
+
+1. **`ArchetypeNode.cs`** — a per-game generated C# class extending `Node` that wraps `GameSession`, bridges the async action loop to GDScript, and emits hardcoded `EmitSignal` calls for each derived keyword signal after each action.
+2. **`archetype_interop.gd`** — a static GDScript autoload that provides a thin signal bus and convenience API over `ArchetypeNode`.
+3. **`archetype_signals.gd`** — a per-game generated GDScript file containing string constants for every derived signal name (parallel to `archetype_keywords.gd` for keyword names).
+
+The engine assemblies (`Archetype.Core`, `Archetype.Engine`, `Archetype.Build`) gain no Godot dependencies. All Godot coupling is confined to generated output dropped into the game creator's Godot project.
+
+---
+
+**Why generated output, not a reusable library assembly.**
+
+The alternative is a static `Archetype.Engine.Godot` assembly that references `GodotSharp` and dispatches signals dynamically (via `EmitSignal(name, Variant[])` with runtime argument marshalling). This was rejected for three reasons:
+
+- Hardcoded `EmitSignal` calls in generated code are explicit, readable, and carry GDScript's static type information without any runtime reflection or `Variant` boxing. The generated output is inspectable by the game creator.
+- A `GodotSharp`-referencing assembly would need to be versioned against the game creator's Godot version. Generated output has no such coupling — it is C# source that compiles against whatever `GodotSharp` the project already uses.
+- The existing pattern (`archetype_keywords.gd`, `game_events.gd`) is already generated output. Adding three more generated files is consistent; adding a new dependency-bearing assembly is not.
+
+The consequence is that `BuildRunner.Run` must be re-executed whenever the signal set changes (i.e., whenever the registered keywords or card effect blocks change). This is already required for `game_events.gd` and is inherent to the code-first model.
+
+---
+
+**The async/GDScript bridge.**
+
+`GameSession.RunAsync` is a single continuous `async Task` driven by `IPlayerStrategy.SelectActionAsync`. GDScript cannot await C# tasks — it calls methods and connects signals. `ArchetypeNode` bridges these models as follows.
+
+`ArchetypeNode` implements `IPlayerStrategy` internally, one instance per player. Each internal strategy holds a `TaskCompletionSource<PlayerAction?>` that is reset at the start of each decision point. When the engine calls `SelectActionAsync`, the strategy suspends by awaiting that `TaskCompletionSource`. When GDScript calls `ArchetypeNode.SubmitAction(...)`, the node resolves the pending `TaskCompletionSource`, which resumes the engine loop.
+
+After the action resolves (all blocks, SBRs, and triggers complete), `ArchetypeNode` reads `GameStateView.LastActionEvents`, iterates the events, and emits the appropriate signals via hardcoded `EmitSignal` calls. It then emits a `action_resolved` signal so GDScript knows the engine is ready for the next decision.
+
+GDScript interaction flow for a single player action:
+
+```
+# 1. Engine suspends, emits signal asking GDScript for an action
+ArchetypeNode -> action_requested(player_name: String, available_actions: Dictionary)
+
+# 2. GDScript examines available_actions, builds a choice, submits it
+ArchetypeNode.submit_play_card(player_name, card_atom_id, cost_choices)
+  # or:
+ArchetypeNode.submit_activate_ability(player_name, source_atom_id, effect_name, cost_choices)
+  # or:
+ArchetypeNode.submit_pass(player_name)
+
+# 3. Engine resolves the action, emits keyword signals, then:
+ArchetypeNode -> on_attack(attacker, target, amount)   # example derived signal
+ArchetypeNode -> action_resolved()
+
+# 4. Engine suspends again for next decision; loop repeats
+```
+
+For mid-effect prompts (`RespondToPromptAsync`), the same pattern applies: the engine emits `prompt_requested(player_name, prompt_type, context)`, GDScript calls `ArchetypeNode.submit_prompt_response(player_name, response)`.
+
+---
+
+**`ArchetypeNode.cs` — generated class structure.**
+
+`ArchetypeNode.cs` is generated once per `BuildRunner.Run` call. Its content is game-specific because the `EmitSignal` calls are hardcoded to the derived signal set. The class is not parameterised or generic — it is a concrete, fully-specified Godot node.
+
+Generated class structure:
+
+```csharp
+// ArchetypeNode.cs — generated by Archetype.Build; do not edit
+using Godot;
+using Archetype.Core;
+using Archetype.Engine;
+
+public partial class ArchetypeNode : Node
+{
+    // --- Signals ---
+    // Engine lifecycle
+    [Signal] public delegate void ActionRequestedEventHandler(string playerName, Godot.Collections.Dictionary availableActions);
+    [Signal] public delegate void ActionResolvedEventHandler();
+    [Signal] public delegate void PromptRequestedEventHandler(string playerName, string promptType, Godot.Collections.Dictionary context);
+    [Signal] public delegate void GameOverEventHandler(string winnerName);  // winnerName is "" for a draw
+
+    // Derived keyword signals (one per signal in the derived set)
+    [Signal] public delegate void OnAttackEventHandler(int attacker, int target, float amount);
+    // ... (one per derived keyword)
+
+    // --- Session management ---
+    private GameSession? _session;
+    private GameStateView? _stateView;
+    // One TCS per player, reset each decision point
+    private readonly Dictionary<string, TaskCompletionSource<PlayerAction?>> _pendingActions = new();
+    private readonly Dictionary<string, TaskCompletionSource<PromptResponse>> _pendingPrompts = new();
+
+    // --- GDScript-callable action submission methods ---
+    public void SubmitPlayCard(string playerName, long cardAtomId, Godot.Collections.Dictionary costChoices) { ... }
+    public void SubmitActivateAbility(string playerName, long sourceAtomId, string effectName, Godot.Collections.Dictionary costChoices) { ... }
+    public void SubmitPass(string playerName) { ... }
+    public void SubmitPromptResponse(string playerName, Godot.Collections.Dictionary response) { ... }
+
+    // --- Session startup ---
+    public void StartGame(Godot.Collections.Dictionary hostManifestData) { ... }  // builds HostManifest, starts RunAsync as fire-and-forget
+
+    // --- Signal emission (called after each action resolves) ---
+    private void EmitDerivedSignals(System.Collections.Generic.IReadOnlyList<GameEvent> events)
+    {
+        foreach (var ev in FlattenEvents(events))
+        {
+            switch (ev.KeywordName)
+            {
+                case "attack":
+                    EmitSignal(SignalName.OnAttack,
+                        (long)(AtomId)ev.BoundArgs["attacker"],
+                        (long)(AtomId)ev.BoundArgs["target"],
+                        (double)ev.BoundArgs["amount"]);
+                    break;
+                // ... one case per derived signal
+            }
+        }
+    }
+}
+```
+
+`FlattenEvents` iterates `GameEvent.SelfAndDescendants()` across the `LastActionEvents` list, matching on `KeywordName`. Events whose `KeywordName` is not in the derived signal set are silently skipped.
+
+The `AvailableActions` struct is serialised to a `Godot.Collections.Dictionary` before being passed through `ActionRequested`, so GDScript receives a plain dictionary it can inspect without importing C# types.
+
+---
+
+**`ArchetypeNode.cs` generation in `GodotEmitter`.**
+
+A new method `GodotEmitter.EmitArchetypeNode(GameDefinition, string, IEnumerable<string>?)` generates `ArchetypeNode.cs`. It uses the same derived-signal set computed by `EmitSignals` — the two methods share the signal-derivation logic (extracted to a private helper `DeriveSignalSet`).
+
+`BuildRunner.Run` calls all three emitter methods:
+
+```csharp
+GodotEmitter.EmitKeywordConstants(fullDefinition, outputDir);
+GodotEmitter.EmitSignals(fullDefinition, outputDir, noSignalKeywords);
+GodotEmitter.EmitArchetypeNode(fullDefinition, outputDir, noSignalKeywords);
+GodotEmitter.EmitInteropScripts(fullDefinition, outputDir, noSignalKeywords);
+```
+
+`EmitInteropScripts` generates both GDScript files (`archetype_interop.gd` and `archetype_signals.gd`) in a single pass since they share the derived-signal set.
+
+---
+
+**`archetype_signals.gd` — per-game signal name constants.**
+
+Parallel in structure to `archetype_keywords.gd`. Contains one `const` per derived signal, in `SCREAMING_SNAKE_CASE`, holding the signal name string. Allows GDScript to reference signal names by constant rather than string literal when calling `connect()` or `disconnect()` programmatically.
+
+```gdscript
+# archetype_signals.gd — generated by Archetype.Build; do not edit
+class_name ArchetypeSignals
+
+const ON_ATTACK = "on_attack"
+const ON_TAKE_DAMAGE = "on_take_damage"
+# ... one per derived signal
+```
+
+---
+
+**`archetype_interop.gd` — static autoload.**
+
+A static GDScript file intended to be added to the project's autoload list in Godot's project settings under the name `ArchetypeInterop`. It does not vary per game — it is a fixed utility wrapper. Its content does not depend on the derived signal set and is therefore the same for every project that uses Archetype.
+
+Responsibilities:
+
+- Holds a reference to the `ArchetypeNode` instance (set by the game creator once the node is in the scene tree).
+- Re-emits `ArchetypeNode` signals on itself so GDScript scripts can connect to a single stable autoload rather than to a specific scene node. This decouples UI scripts from the scene tree structure.
+- Provides a `submit_action(player_name, action_type, args)` convenience method that delegates to `ArchetypeNode`.
+
+```gdscript
+# archetype_interop.gd — generated by Archetype.Build; do not edit
+# Add to Project Settings > Autoload as "ArchetypeInterop"
+extends Node
+
+var _node: ArchetypeNode
+
+func register(node: ArchetypeNode) -> void:
+    _node = node
+    _node.action_requested.connect(_on_action_requested)
+    _node.action_resolved.connect(_on_action_resolved)
+    _node.game_over.connect(_on_game_over)
+
+signal action_requested(player_name: String, available: Dictionary)
+signal action_resolved()
+signal game_over(winner_name: String)
+
+func _on_action_requested(player_name: String, available: Dictionary) -> void:
+    action_requested.emit(player_name, available)
+
+func _on_action_resolved() -> void:
+    action_resolved.emit()
+
+func _on_game_over(winner_name: String) -> void:
+    game_over.emit(winner_name)
+
+func submit_pass(player_name: String) -> void:
+    _node.submit_pass(player_name)
+
+func submit_play_card(player_name: String, card_atom_id: int, cost_choices: Dictionary = {}) -> void:
+    _node.submit_play_card(player_name, card_atom_id, cost_choices)
+
+func submit_activate_ability(player_name: String, source_atom_id: int, effect_name: String, cost_choices: Dictionary = {}) -> void:
+    _node.submit_activate_ability(player_name, source_atom_id, effect_name, cost_choices)
+
+func submit_prompt_response(player_name: String, response: Dictionary) -> void:
+    _node.submit_prompt_response(player_name, response)
+```
+
+Because `archetype_interop.gd` does not reference any derived signals by name, it is identical for every Archetype-based game. `BuildRunner` generates it alongside the per-game files for completeness — the game creator gets the full set in one output directory.
+
+---
+
+**Game creator setup steps.**
+
+After running `BuildRunner.Run`:
+
+1. Copy all generated files to the Godot project (or configure the output directory to point into it directly).
+2. Add `ArchetypeNode.cs` and the three `.gd` files to the Godot project.
+3. Add `ArchetypeNode` as a node in the game's main scene.
+4. Add `archetype_interop.gd` as an autoload named `ArchetypeInterop` in Project Settings.
+5. In the scene's `_ready()` function, call `ArchetypeInterop.register($ArchetypeNode)` and then `$ArchetypeNode.start_game(host_manifest_data)`.
+6. Connect to `ArchetypeInterop.action_requested` and `ArchetypeInterop.action_resolved` to drive the UI.
+7. Connect to game-specific keyword signals directly on `$ArchetypeNode` (or via `ArchetypeInterop` which re-emits them if the game creator chooses to extend `archetype_interop.gd`).
+
+---
+
+**`RunAsync` task ownership and error handling.**
+
+`ArchetypeNode.StartGame` launches `_session.RunAsync(ct)` as a fire-and-forget task via Godot's C# interop (the equivalent of `_ = RunLoopAsync(ct)`). The task is held in a private field so it can be awaited or cancelled on `_ExitTree`.
+
+If `RunAsync` throws (e.g., engine error, `DefinitionException`), the exception is caught in a wrapper method that emits a `game_error(message: String)` signal and logs via `GD.PrintErr`. The game creator is responsible for handling `game_error`.
+
+`CancellationToken` is tied to a `CancellationTokenSource` created at `StartGame` time and cancelled in `_ExitTree`. This ensures the engine loop does not outlive the node.
+
+---
+
+**Rationale:**
+
+- **Generated per-game, not reusable library:** Keeps all Godot coupling out of the engine assemblies. Generated output is explicit and inspectable. Compiles against the game creator's existing `GodotSharp` reference without version coordination.
+- **Single `ArchetypeNode` for all players:** Godot's `Node`-based scene structure is flat from the engine's perspective. A single node owning all per-player `TaskCompletionSource` instances is simpler than a child-node-per-player pattern and avoids scene tree coupling in the generated code.
+- **`TaskCompletionSource` suspension:** This is the established C#/async pattern for bridging a callback-based external caller (GDScript) into an async continuation. It is the same mechanism the engine already uses internally for mid-effect prompts. No threads are involved — `async`/`await` compiles to state machines, satisfying the WASM single-thread constraint (D1).
+- **`LastActionEvents` polling:** Already implemented in `GameStateView` (D30). No changes to the engine execution path or `IEngineObserver` are required.
+- **`archetype_interop.gd` autoload:** Decouples UI scripts from the scene tree position of `ArchetypeNode`. Game creators who do not want the indirection can connect directly to `ArchetypeNode` signals; the autoload is additive.
+- **`archetype_signals.gd` constants:** Eliminates magic strings in `connect()` calls. Follows the same rationale as `archetype_keywords.gd`.
+
+**Consequences:**
+
+- `GodotEmitter` gains two new public methods: `EmitArchetypeNode` and `EmitInteropScripts`. The existing `DeriveSignalSet` logic (currently inlined in `EmitSignals`) is extracted to a private static helper shared by all three methods.
+- `BuildRunner.Run` gains two additional `GodotEmitter` calls. Its signature is unchanged.
+- `ArchetypeNode.cs` is game-specific generated output; it must be regenerated whenever the derived signal set changes. The game creator's build project (`Program.cs`) drives this — no additional tooling step is required.
+- `archetype_interop.gd` does not vary per game but is generated alongside per-game files for delivery convenience.
+- No changes to `Archetype.Core`, `Archetype.Engine`, or `Archetype.Text`. No new assemblies.
+- The game creator must not check `ArchetypeNode.cs` or the generated `.gd` files into version control as hand-edited files; they should be treated as build output (`.gitignore` or equivalent).
+
+---
+
 ## Open Items
 
 - [x] Language and runtime — D1
@@ -3788,9 +4146,11 @@ General error and warning status is always visible in the persistent status bar 
 - [x] Cost execution sequencing at action time — D23
 - [x] `ComputeAvailableActions` ownership filter removal — D24
 - [x] Breaking changes catalogue for action-args-and-cost-model — D25
-- [x] Authoring tool platform and process architecture — D26
-- [x] Tooling data layer and project file format — D27
-- [x] Tooling validation approach (trigger model, debounce, sidecar protocol surface) — D28
+- [x] Authoring tool platform and process architecture — D26 *(superseded by D32)*
+- [x] Tooling data layer and project file format — D27 *(superseded by D32)*
+- [x] Tooling validation approach (trigger model, debounce, sidecar protocol surface) — D28 *(superseded by D32)*
 - [x] D14 addendum — InitManifest mandatory, HostManifest append-only, LocalId uniqueness — D29
-- [x] Godot export pipeline (signal derivation rules, export package format, GDScript generation) — D30
-- [x] Missing-translation export gate UX — D31
+- [x] Godot export pipeline (signal derivation rules, export package format, GDScript generation) — D30 *(superseded by D32)*
+- [x] Missing-translation export gate UX — D31 *(superseded by D32)*
+- [x] GDScript interop generation (`ArchetypeNode.cs` bridge, `archetype_interop.gd` autoload, `archetype_signals.gd` constants) — D33
+- [x] Code-first authoring model (builder API, CardSet, BuildRunner, Godot artifact generation) — D32

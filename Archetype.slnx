@@ -1,10 +1,12 @@
 <Solution>
+  <Folder Name="/poc/">
+    <Project Path="poc/SampleGame/SampleGame.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Archetype.Build/Archetype.Build.csproj" />
     <Project Path="src/Archetype.Core/Archetype.Core.csproj" />
     <Project Path="src/Archetype.Engine/Archetype.Engine.csproj" />
     <Project Path="src/Archetype.Text/Archetype.Text.csproj" />
-    <Project Path="src/Archetype.Tooling.Server/Archetype.Tooling.Server.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Archetype.Tests/Archetype.Tests.csproj" />

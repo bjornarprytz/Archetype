@@ -79,10 +79,18 @@ public sealed record StateBasedRule(
     EffectBlockDef Body);
 
 /// <summary>
-/// A named grouping of card definitions (for tooling / meta-game).
-/// Not used by the engine during execution.
+/// A distributable package of card definitions (D32).
+/// <para>
+/// Card sets are authored in C# and serialized to JSON by <c>BuildRunner</c>.
+/// At runtime the Godot host loads JSON card set files from disk and merges
+/// them into the <see cref="GameDefinition"/> via
+/// <see cref="GameDefinition.WithCardSets"/>.
+/// </para>
 /// </summary>
-public sealed record CardSet(string Name, IReadOnlyList<string> Cards);
+public sealed record CardSet(
+    string Name,
+    int FormatVersion,
+    IReadOnlyList<CardDefinition> Cards);
 
 /// <summary>
 /// Static properties that define a player role.  Mutable state (health,
@@ -126,7 +134,6 @@ public sealed record GameDefinition(
     IReadOnlyDictionary<string, KeywordDefinition> Keywords,
     IReadOnlyDictionary<string, CardDefinition> CardDefinitions,
     IReadOnlyDictionary<string, ZoneDefinition> ZoneDefinitions,
-    IReadOnlyDictionary<string, CardSet> CardSets,
     IReadOnlyList<StateBasedRule> StateBasedRules,
     IReadOnlyList<PhaseDefinition> Phases,
     IReadOnlyDictionary<string, IReadOnlyList<ActionRuleDefinition>> ActionRules,
@@ -136,7 +143,86 @@ public sealed record GameDefinition(
     // GameDefinitionBuilder.Build() throws DefinitionException if not set.
     InitManifest InitManifest,
     IReadOnlyList<string>? PlayableZoneNames = null,
-    string? Id = null);
+    string? Id = null)
+{
+    /// <summary>
+    /// Returns a new <see cref="GameDefinition"/> with the card definitions
+    /// from each <see cref="CardSet"/> merged in additively (D32).
+    /// <para>
+    /// Keyword references in card effect blocks are validated against
+    /// <see cref="Keywords"/> at merge time; unknown references throw
+    /// <see cref="DefinitionException"/>.
+    /// </para>
+    /// </summary>
+    /// <exception cref="DefinitionException">
+    /// Thrown when a card name appears in more than one set (or already exists
+    /// in <see cref="CardDefinitions"/>), or when a card's effect block
+    /// references an unknown keyword name.
+    /// </exception>
+    public GameDefinition WithCardSets(IEnumerable<CardSet> sets)
+    {
+        var merged = new Dictionary<string, CardDefinition>(CardDefinitions);
+
+        foreach (var set in sets)
+        {
+            foreach (var card in set.Cards)
+            {
+                if (merged.ContainsKey(card.Name))
+                    throw new DefinitionException(
+                        $"Duplicate card name '{card.Name}' found while merging card set '{set.Name}'.");
+
+                ValidateCardKeywordRefs(card, Keywords.Keys.ToHashSet(), set.Name);
+                merged[card.Name] = card;
+            }
+        }
+
+        return this with { CardDefinitions = merged };
+    }
+
+    private static void ValidateCardKeywordRefs(
+        CardDefinition card,
+        HashSet<string> knownKeywords,
+        string setName)
+    {
+        ValidateBlock(card.PrimaryEffect, card.Name, setName, knownKeywords);
+        foreach (var extra in card.AdditionalEffects)
+            ValidateBlock(extra.Body, card.Name, setName, knownKeywords);
+        foreach (var cost in card.Cost ?? [])
+            ValidateBlock(cost.Body, card.Name, setName, knownKeywords);
+    }
+
+    private static void ValidateBlock(
+        EffectBlockDef block,
+        string cardName,
+        string setName,
+        HashSet<string> knownKeywords)
+    {
+        foreach (var step in block.Steps)
+        {
+            if (!knownKeywords.Contains(step.KeywordName))
+                throw new DefinitionException(
+                    $"Card '{cardName}' in set '{setName}' references unknown keyword '{step.KeywordName}'.");
+            foreach (var arg in step.ArgNodes)
+                ValidateNode(arg, knownKeywords, cardName, setName);
+        }
+    }
+
+    private static void ValidateNode(
+        KeywordNode node,
+        HashSet<string> knownKeywords,
+        string cardName,
+        string setName)
+    {
+        if (node is Invocation inv)
+        {
+            if (!knownKeywords.Contains(inv.KeywordName))
+                throw new DefinitionException(
+                    $"Card '{cardName}' in set '{setName}' references unknown keyword '{inv.KeywordName}'.");
+            foreach (var arg in inv.Args)
+                ValidateNode(arg, knownKeywords, cardName, setName);
+        }
+    }
+}
 
 /// <summary>Determines the order in which simultaneous triggers resolve (D8).</summary>
 public enum TriggerResolutionOrder
