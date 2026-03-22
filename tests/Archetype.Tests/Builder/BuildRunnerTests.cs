@@ -216,6 +216,7 @@ public class BuildRunnerTests : IDisposable
         Assert.Contains("ActionResolvedEventHandler", content);
         Assert.Contains("PromptRequestedEventHandler", content);
         Assert.Contains("GameOverEventHandler", content);
+        Assert.Contains("GameErrorEventHandler", content);
     }
 
     [Fact]
@@ -422,6 +423,19 @@ public class BuildRunnerTests : IDisposable
         Assert.Contains("func submit_play_card(", content);
         Assert.Contains("func submit_activate_ability(", content);
         Assert.Contains("func submit_prompt_response(", content);
+    }
+
+    [Fact]
+    public void Run_ArchetypeInteropFile_ConnectsAllFiveLifecycleSignals()
+    {
+        BuildRunner.Run(BaseDefinition(), [], _outputDir);
+        var content = File.ReadAllText(GdFile("archetype_interop.gd"));
+
+        Assert.Contains("ActionRequested.connect(", content);
+        Assert.Contains("ActionResolved.connect(", content);
+        Assert.Contains("PromptRequested.connect(", content);
+        Assert.Contains("GameOver.connect(", content);
+        Assert.Contains("GameError.connect(", content);
     }
 
     [Fact]

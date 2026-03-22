@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.1] - 2026-03-22
+
+### Fixed
+- Generated `archetype_interop.gd` now connects to C# signals using PascalCase names (`ActionRequested`, `ActionResolved`, etc.) as required by Godot 4's C# interop — snake_case names silently fail at runtime
+- `PromptRequested` and `GameError` lifecycle signals were declared on `ArchetypeNode` but not forwarded by the autoload; both are now connected and re-emitted
+- `docs/architecture.md` D33 signal list now includes `GameErrorEventHandler`
+
 ## [0.2.0] - 2026-03-22
 
 ### Added

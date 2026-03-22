@@ -3943,6 +3943,7 @@ public partial class ArchetypeNode : Node
     [Signal] public delegate void ActionResolvedEventHandler();
     [Signal] public delegate void PromptRequestedEventHandler(string playerName, string promptType, Godot.Collections.Dictionary context);
     [Signal] public delegate void GameOverEventHandler(string winnerName);  // winnerName is "" for a draw
+    [Signal] public delegate void GameErrorEventHandler(string message);
 
     // Derived keyword signals (one per signal in the derived set)
     [Signal] public delegate void OnAttackEventHandler(int attacker, int target, float amount);
