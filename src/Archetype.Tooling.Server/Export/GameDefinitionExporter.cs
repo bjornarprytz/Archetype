@@ -126,11 +126,6 @@ public static class GameDefinitionExporter
         foreach (var (name, zone) in state.Zones)
             zones[name] = new ZoneDefinition(name, zone.StaticProperties);
 
-        // Card sets
-        var cardSets = new Dictionary<string, CardSet>(StringComparer.Ordinal);
-        foreach (var (name, cs) in state.CardSets)
-            cardSets[name] = new CardSet(name, cs.Cards);
-
         // State-based rules
         var sbrs = state.StateBasedRules
             .Where(r => r.ConditionNode is not null && r.BodyNode is not null)
@@ -172,7 +167,6 @@ public static class GameDefinitionExporter
             Keywords:              keywords,
             CardDefinitions:       cards,
             ZoneDefinitions:       zones,
-            CardSets:              cardSets,
             StateBasedRules:       sbrs,
             Phases:                phases,
             ActionRules:           actionRules,
