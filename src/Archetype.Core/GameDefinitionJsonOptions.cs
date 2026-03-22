@@ -187,6 +187,7 @@ public sealed class KeywordNodeConverter : JsonConverter<KeywordNode>
 
         var bytes  = ms.ToArray();
         var reader = new Utf8JsonReader(bytes);
+        reader.Read(); // advance to StartObject before delegating
         return _literalConverter.Read(ref reader, typeof(Literal), options)!;
     }
 }
