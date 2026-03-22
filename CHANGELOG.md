@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.2] - 2026-03-22
+
+### Fixed
+- `KeywordNodeConverter.DeserializeLiteral` passed a fresh `Utf8JsonReader` (at `TokenType.None`) to `LiteralConverter.Read`, which expects `StartObject` — adding `reader.Read()` before the delegate call fixes the runtime exception when a `Literal` appears as an argument inside an `Invocation`
+
 ## [0.3.0-alpha.1] - 2026-03-22
 
 ### Fixed

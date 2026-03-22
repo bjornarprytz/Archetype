@@ -45,6 +45,15 @@ public class KeywordNodeSerializationTests
         Assert.Equal(node, back);
     }
 
+    [Fact]
+    public void Literal_AtomId_RoundTrips()
+    {
+        KeywordNode node = new Literal(new AtomId(42));
+        var json = JsonSerializer.Serialize(node, Options);
+        var back = JsonSerializer.Deserialize<KeywordNode>(json, Options);
+        Assert.Equal(node, back);
+    }
+
     // -----------------------------------------------------------------------
     //  Literal nested inside an Invocation (the regression case)
     // -----------------------------------------------------------------------
