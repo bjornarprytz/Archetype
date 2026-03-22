@@ -5,9 +5,11 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Archetype.Text</PackageId>
+    <Description>Card text renderer for Archetype — generates human-readable text from card definitions.</Description>
   </PropertyGroup>
 
 </Project>

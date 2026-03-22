@@ -6,11 +6,13 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Archetype.Build</PackageId>
+    <Description>Godot export pipeline for Archetype — generates ArchetypeNode.cs and GDScript interop files from a game definition.</Description>
   </PropertyGroup>
 
 </Project>

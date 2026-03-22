@@ -5,12 +5,14 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <PackageId>Archetype.Engine</PackageId>
+    <Description>Execution engine for Archetype card games — resolves actions, events, and triggers.</Description>
   </PropertyGroup>
 
   <!-- White-box test access to engine internals (D15) -->
