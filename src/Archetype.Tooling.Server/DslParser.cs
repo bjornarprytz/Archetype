@@ -45,7 +45,7 @@ public static class DslParser
 
         var tokenizer = new Tokenizer(dsl);
         var tokens    = tokenizer.Tokenize();
-        var parser    = new Parser(dsl, tokens);
+        var parser    = new Parser(tokens);
         return parser.ParseExpression();
     }
 
@@ -228,7 +228,7 @@ public static class DslParser
     //  Recursive-descent parser
     // -----------------------------------------------------------------------
 
-    private sealed class Parser(string source, List<Token> tokens)
+    private sealed class Parser(List<Token> tokens)
     {
         private int _pos;
 
@@ -370,10 +370,10 @@ public sealed record ParseResult
 /// <summary>
 /// Result of parsing a full effect block (semicolon-separated statements).
 /// </summary>
+/// <param name="Block">The parsed block; steps with parse errors are omitted.</param>
+/// <param name="Diagnostics">All parse errors, with source offsets into the original DSL string.</param>
 public sealed record BlockParseResult(
-    /// <summary>The parsed block; steps with parse errors are omitted.</summary>
     EffectBlockDef Block,
-    /// <summary>All parse errors, with source offsets into the original DSL string.</summary>
     IReadOnlyList<ParseDiagnostic> Diagnostics)
 {
     /// <summary>True when all statements parsed without error.</summary>

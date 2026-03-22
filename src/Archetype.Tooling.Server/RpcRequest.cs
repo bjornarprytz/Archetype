@@ -11,10 +11,10 @@ namespace Archetype.Tooling.Server;
 /// A single JSON-RPC request received from the Electron main process over stdin.
 /// Each line from stdin is one complete JSON object deserialised to this type.
 /// </summary>
+/// <param name="Id">Caller-assigned correlation ID; echoed in the response.</param>
+/// <param name="Method">Method name to dispatch.</param>
+/// <param name="Params">Method-specific parameters; may be null for no-parameter methods.</param>
 public sealed record RpcRequest(
-    /// <summary>Caller-assigned correlation ID; echoed in the response.</summary>
-    [property: JsonPropertyName("id")] string Id,
-    /// <summary>Method name to dispatch.</summary>
+    [property: JsonPropertyName("id")]     string Id,
     [property: JsonPropertyName("method")] string Method,
-    /// <summary>Method-specific parameters; may be null for no-parameter methods.</summary>
     [property: JsonPropertyName("params")] JsonElement? Params = null);

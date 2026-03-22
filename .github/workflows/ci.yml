@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore
+        run: dotnet restore Archetype.slnx
+
+      - name: Build
+        run: dotnet build Archetype.slnx --no-restore -c Release
+
+      - name: Test
+        run: dotnet test Archetype.slnx --no-restore -c Release

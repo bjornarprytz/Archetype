@@ -11,13 +11,13 @@ namespace Archetype.Tooling.Server;
 /// A JSON-RPC response written to stdout.  Exactly one of
 /// <see cref="Result"/> or <see cref="Error"/> is non-null.
 /// </summary>
+/// <param name="Id">Correlation ID from the originating request.</param>
+/// <param name="Result">Successful result payload; null when <see cref="Error"/> is set.</param>
+/// <param name="Error">Error descriptor; null when <see cref="Result"/> is set.</param>
 public sealed record RpcResponse(
-    /// <summary>Correlation ID from the originating request.</summary>
-    [property: JsonPropertyName("id")] string Id,
-    /// <summary>Successful result payload; null when <see cref="Error"/> is set.</summary>
+    [property: JsonPropertyName("id")]     string Id,
     [property: JsonPropertyName("result")] object? Result = null,
-    /// <summary>Error descriptor; null when <see cref="Result"/> is set.</summary>
-    [property: JsonPropertyName("error")] RpcError? Error = null)
+    [property: JsonPropertyName("error")]  RpcError? Error = null)
 {
     /// <summary>Constructs a success response.</summary>
     public static RpcResponse Ok(string id, object result) => new(id, Result: result);

@@ -707,7 +707,7 @@ public sealed class RpcHandlerTests
         var saved    = ProjectFileSerializer.Serialize(sidecar.State);
         var reloaded = ProjectFileLoader.Load(saved);
 
-        Assert.Empty(reloaded.Diagnostics.Where(d => d.Severity == "error"));
+        Assert.DoesNotContain(reloaded.Diagnostics, d => d.Severity == "error");
     }
 
     // -----------------------------------------------------------------------
@@ -790,7 +790,7 @@ public sealed class RpcHandlerTests
         var saved    = ProjectFileSerializer.Serialize(sidecar.State);
         var reloaded = ProjectFileLoader.Load(saved);
 
-        Assert.Empty(reloaded.Diagnostics.Where(d => d.Severity == "error"));
+        Assert.DoesNotContain(reloaded.Diagnostics, d => d.Severity == "error");
     }
 
     // -----------------------------------------------------------------------
@@ -871,7 +871,7 @@ public sealed class RpcHandlerTests
         var saved    = ProjectFileSerializer.Serialize(sidecar.State);
         var reloaded = ProjectFileLoader.Load(saved);
 
-        Assert.Empty(reloaded.Diagnostics.Where(d => d.Severity == "error"));
+        Assert.DoesNotContain(reloaded.Diagnostics, d => d.Severity == "error");
     }
 
     // -----------------------------------------------------------------------

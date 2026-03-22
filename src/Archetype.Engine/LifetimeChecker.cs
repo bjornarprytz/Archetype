@@ -200,6 +200,9 @@ internal sealed class LifetimeChecker
     /// consequence).
     /// </para>
     /// </summary>
+    /// <param name="def">The static effect definition to provision.</param>
+    /// <param name="ownerAtom">The atom that owns this static effect.</param>
+    /// <param name="state">Current game state; mutated if the effect activates immediately.</param>
     /// <param name="cardDefinitionName">
     /// The name of the <see cref="CardDefinition"/> that owns this effect.
     /// Stored on the <see cref="StaticEffect"/> so snapshot serialization can
@@ -247,6 +250,9 @@ internal sealed class LifetimeChecker
     /// Allocates fresh IDs; sets <c>TriggerFireCount = 0</c> and
     /// <c>TriggerHighWaterMark = 0</c>.  Called from Phase 2 and card provisioning.
     /// </summary>
+    /// <param name="def">The static effect definition to instantiate.</param>
+    /// <param name="ownerAtom">The atom that owns this static effect.</param>
+    /// <param name="state">Current game state; used to allocate fresh IDs.</param>
     /// <param name="cardDefinitionName">
     /// Optional: the card definition name for declarative effects (D17 snapshot).
     /// </param>
