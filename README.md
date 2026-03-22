@@ -57,18 +57,31 @@ Run this once whenever your game definition or card sets change. It is not calle
 
 `BuildRunner.Run` writes these files into your Godot project:
 
+```
+<outputDir>/
+└── archetype/
+    ├── ArchetypeNode.cs
+    ├── archetype_interop.gd
+    ├── archetype_keywords.gd
+    ├── archetype_signals.gd
+    ├── game_events.gd
+    └── card-sets/
+        ├── core.json
+        └── ...
+```
+
 | File | What it is |
 |---|---|
-| `ArchetypeNode.cs` | C# `Node` subclass; hosts the game session and bridges signals to GDScript |
-| `archetype_interop.gd` | Autoload that decouples UI scripts from the scene tree |
-| `archetype_keywords.gd` | `class_name ArchetypeKeywords` — string constants for every keyword |
-| `archetype_signals.gd` | `class_name ArchetypeSignals` — string constants for derived signals |
-| `game_events.gd` | Typed signal declarations for every keyword referenced in your cards |
-| `*.json` | Serialised card sets; load these at runtime |
+| `archetype/ArchetypeNode.cs` | C# `Node` subclass; hosts the game session and bridges signals to GDScript |
+| `archetype/archetype_interop.gd` | Autoload that decouples UI scripts from the scene tree |
+| `archetype/archetype_keywords.gd` | `class_name ArchetypeKeywords` — string constants for every keyword |
+| `archetype/archetype_signals.gd` | `class_name ArchetypeSignals` — string constants for derived signals |
+| `archetype/game_events.gd` | Typed signal declarations for every keyword referenced in your cards |
+| `archetype/card-sets/*.json` | Serialised card sets; load these at runtime |
 
 ### 4. Configure Godot
 
-**Register the autoload** — in *Project → Project Settings → Autoload*, add `archetype_interop.gd` with the name `ArchetypeInterop`.
+**Register the autoload** — in *Project → Project Settings → Autoload*, add `res://archetype/archetype_interop.gd` with the name `ArchetypeInterop`.
 
 **Add `ArchetypeNode` to your scene** — attach it to a node in your main scene.
 

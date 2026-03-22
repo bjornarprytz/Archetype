@@ -33,6 +33,9 @@ public readonly record struct AtomId(long Value)
 
     /// <inheritdoc/>
     public override string ToString() => $"atom:{Value}";
+
+    public static implicit operator long(AtomId id) => id.Value;
+    public static implicit operator AtomId(long value) => new(value);
 }
 
 /// <summary>
