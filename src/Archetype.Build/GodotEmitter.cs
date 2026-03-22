@@ -205,7 +205,7 @@ public static class GodotEmitter
         sb.AppendLine("        var definition = JsonSerializer.Deserialize<GameDefinition>(defJson, jsonOptions)!;");
         sb.AppendLine();
         sb.AppendLine("        var cardSets = new List<CardSet>();");
-        sb.AppendLine("        var paths = cardSetPaths ?? LoadDefaultCardSetPaths();");
+        sb.AppendLine("        var paths = (cardSetPaths == null || cardSetPaths.Count == 0) ? LoadDefaultCardSetPaths() : cardSetPaths;");
         sb.AppendLine("        foreach (var path in paths)");
         sb.AppendLine("        {");
         sb.AppendLine("            var json = FileAccess.GetFileAsString(path.ToString()!);");
@@ -256,7 +256,7 @@ public static class GodotEmitter
         sb.AppendLine("        }");
         sb.AppendLine("        catch (System.Exception ex)");
         sb.AppendLine("        {");
-        sb.AppendLine("            GD.PrintErr(\"[ArchetypeNode] engine error: \", ex.Message);");
+        sb.AppendLine("            GD.PrintErr(\"[ArchetypeNode] engine error: \", ex.Message, \"\\n\", ex.StackTrace);");
         sb.AppendLine("            EmitSignal(SignalName.GameError, ex.Message);");
         sb.AppendLine("        }");
         sb.AppendLine("    }");
@@ -616,7 +616,10 @@ public static class GodotEmitter
         sb.AppendLine("func start(host_manifest: Dictionary = {},");
         sb.AppendLine("        definition_path: String = \"res://archetype/game_definition.json\",");
         sb.AppendLine("        card_set_paths: Array = []) -> void:");
-        sb.AppendLine("    _node.StartGame(host_manifest, definition_path, card_set_paths)");
+        sb.AppendLine("    if card_set_paths.is_empty():");
+        sb.AppendLine("        _node.StartGame(host_manifest, definition_path)");
+        sb.AppendLine("    else:");
+        sb.AppendLine("        _node.StartGame(host_manifest, definition_path, card_set_paths)");
         sb.AppendLine();
         sb.AppendLine("## Submits a pass action for [param player_name].");
         sb.AppendLine("func submit_pass(player_name: String) -> void:");
