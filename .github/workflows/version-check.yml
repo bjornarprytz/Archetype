@@ -25,7 +25,7 @@ jobs:
       - name: Block preview versions from merging to main
         run: |
           if [[ "$VERSION" == *"-"* ]]; then
-            echo "::error::Preview version '$VERSION' cannot be merged into main. Bump to a stable version first."
+            echo "::error::Preview version '$VERSION' cannot be merged into main. Bump to a stable version before merging."
             exit 1
           fi
 
