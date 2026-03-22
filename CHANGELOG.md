@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.3] - 2026-03-22
+
+### Fixed
+- `GameSessionBuilder.Build()` now throws `DefinitionException` when `GameDefinition.Phases` is empty — a game with no phases produces no action windows and would spin synchronously, blocking the Godot main thread
+
 ## [0.3.0-alpha.2] - 2026-03-22
 
 ### Fixed

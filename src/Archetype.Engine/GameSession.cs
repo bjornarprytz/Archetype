@@ -108,6 +108,13 @@ public sealed class GameSessionBuilder
                 "GameSessionBuilder.Build(): GameDefinition.Id must be set to a non-empty string. " +
                 "This is required for save/load snapshot validation (D17).");
 
+        // A game with no phases produces no action windows and no genuine async
+        // suspension, causing RunAsync to spin synchronously and block the caller.
+        if (_definition.Phases.Count == 0)
+            throw new DefinitionException(
+                "GameSessionBuilder.Build(): GameDefinition.Phases is empty. " +
+                "A game must have at least one phase to produce action windows.");
+
         // D29: validate InitManifest zone LocalId uniqueness.
         var initZoneIds = new HashSet<string>(StringComparer.Ordinal);
         foreach (var zone in _definition.InitManifest.Zones)
