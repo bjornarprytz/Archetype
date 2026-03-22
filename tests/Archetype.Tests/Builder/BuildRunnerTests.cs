@@ -7,6 +7,12 @@ public class BuildRunnerTests : IDisposable
 {
     private readonly string _outputDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
+    private string ArchetypeDir      => Path.Combine(_outputDir, "archetype");
+    private string CardSetsDir       => Path.Combine(_outputDir, "archetype", "card-sets");
+    private string CardSetFile(string name) => Path.Combine(CardSetsDir, $"{name}.json");
+    private string GdFile(string name)      => Path.Combine(ArchetypeDir, name);
+    private string CsFile(string name)      => Path.Combine(ArchetypeDir, name);
+
     public void Dispose()
     {
         if (Directory.Exists(_outputDir))
@@ -72,15 +78,15 @@ public class BuildRunnerTests : IDisposable
 
         BuildRunner.Run(BaseDefinition(), sets, _outputDir);
 
-        Assert.True(File.Exists(Path.Combine(_outputDir, "core.json")));
-        Assert.True(File.Exists(Path.Combine(_outputDir, "expansion-1.json")));
+        Assert.True(File.Exists(CardSetFile("core")));
+        Assert.True(File.Exists(CardSetFile("expansion-1")));
     }
 
     [Fact]
     public void Run_OverwritesExistingCardSetFile()
     {
-        var setPath = Path.Combine(_outputDir, "core.json");
-        Directory.CreateDirectory(_outputDir);
+        var setPath = CardSetFile("core");
+        Directory.CreateDirectory(CardSetsDir);
         File.WriteAllText(setPath, "old content");
 
         BuildRunner.Run(BaseDefinition(), [MakeSet("core", "strike")], _outputDir);
@@ -95,7 +101,7 @@ public class BuildRunnerTests : IDisposable
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
 
-        var jsonFiles = Directory.GetFiles(_outputDir, "*.json");
+        var jsonFiles = Directory.GetFiles(CardSetsDir, "*.json");
         Assert.Empty(jsonFiles);
     }
 
@@ -107,14 +113,14 @@ public class BuildRunnerTests : IDisposable
     public void Run_EmitsKeywordConstantsFile()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        Assert.True(File.Exists(Path.Combine(_outputDir, "archetype_keywords.gd")));
+        Assert.True(File.Exists(GdFile("archetype_keywords.gd")));
     }
 
     [Fact]
     public void Run_KeywordConstantsFile_ContainsGameCreatorKeywords()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "archetype_keywords.gd"));
+        var content = File.ReadAllText(GdFile("archetype_keywords.gd"));
         Assert.Contains("STRIKE = \"strike\"", content);
         Assert.Contains("BUFF = \"buff\"", content);
     }
@@ -123,7 +129,7 @@ public class BuildRunnerTests : IDisposable
     public void Run_KeywordConstantsFile_ContainsBuiltInKeywords()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "archetype_keywords.gd"));
+        var content = File.ReadAllText(GdFile("archetype_keywords.gd"));
         Assert.Contains("MODIFY_ACCUMULATOR = \"modify-accumulator\"", content);
     }
 
@@ -135,7 +141,7 @@ public class BuildRunnerTests : IDisposable
     public void Run_EmitsSignalDefinitionsFile()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        Assert.True(File.Exists(Path.Combine(_outputDir, "game_events.gd")));
+        Assert.True(File.Exists(GdFile("game_events.gd")));
     }
 
     [Fact]
@@ -144,7 +150,7 @@ public class BuildRunnerTests : IDisposable
         var set = MakeSet("core", "strike");
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
 
-        var content = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        var content = File.ReadAllText(GdFile("game_events.gd"));
         Assert.Contains("signal on_strike(", content);
     }
 
@@ -164,7 +170,7 @@ public class BuildRunnerTests : IDisposable
 
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
 
-        var content = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        var content = File.ReadAllText(GdFile("game_events.gd"));
         Assert.DoesNotContain("on_modify_accumulator", content);
     }
 
@@ -174,7 +180,7 @@ public class BuildRunnerTests : IDisposable
         var set = MakeSet("core", "strike", "buff");
         BuildRunner.Run(BaseDefinition(), [set], _outputDir, noSignalKeywords: ["buff"]);
 
-        var content = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        var content = File.ReadAllText(GdFile("game_events.gd"));
         Assert.Contains("on_strike", content);
         Assert.DoesNotContain("on_buff", content);
     }
@@ -185,7 +191,7 @@ public class BuildRunnerTests : IDisposable
         // "buff" keyword is registered but not used in any card.
         BuildRunner.Run(BaseDefinition(), [MakeSet("core", "strike")], _outputDir);
 
-        var content = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        var content = File.ReadAllText(GdFile("game_events.gd"));
         Assert.DoesNotContain("on_buff", content);
     }
 
@@ -197,14 +203,14 @@ public class BuildRunnerTests : IDisposable
     public void Run_EmitsArchetypeNodeFile()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        Assert.True(File.Exists(Path.Combine(_outputDir, "ArchetypeNode.cs")));
+        Assert.True(File.Exists(CsFile("ArchetypeNode.cs")));
     }
 
     [Fact]
     public void Run_ArchetypeNodeFile_ContainsLifecycleSignals()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
 
         Assert.Contains("ActionRequestedEventHandler", content);
         Assert.Contains("ActionResolvedEventHandler", content);
@@ -217,7 +223,7 @@ public class BuildRunnerTests : IDisposable
     {
         var set = MakeSet("core", "strike");
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
 
         // Derived signal handler uses PascalCase: "strike" → "OnStrikeEventHandler"
         Assert.Contains("OnStrikeEventHandler", content);
@@ -228,7 +234,7 @@ public class BuildRunnerTests : IDisposable
     {
         var set = MakeSet("core", "strike", "buff");
         BuildRunner.Run(BaseDefinition(), [set], _outputDir, noSignalKeywords: ["buff"]);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
 
         Assert.Contains("OnStrikeEventHandler", content);
         Assert.DoesNotContain("OnBuffEventHandler", content);
@@ -238,7 +244,7 @@ public class BuildRunnerTests : IDisposable
     public void Run_ArchetypeNodeFile_ContainsSubmissionMethods()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
 
         Assert.Contains("SubmitPlayCard", content);
         Assert.Contains("SubmitActivateAbility", content);
@@ -252,7 +258,7 @@ public class BuildRunnerTests : IDisposable
     {
         // No card sets → no derived signals; lifecycle signals should still be present.
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
 
         Assert.Contains("ActionRequestedEventHandler", content);
         Assert.DoesNotContain("OnStrikeEventHandler", content);
@@ -275,7 +281,7 @@ public class BuildRunnerTests : IDisposable
         var set = new CardSet("core", 1, [card]);
 
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
 
         Assert.DoesNotContain("OnModifyAccumulatorEventHandler", content);
     }
@@ -288,7 +294,7 @@ public class BuildRunnerTests : IDisposable
     public void Run_EmitsArchetypeSignalsFile()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        Assert.True(File.Exists(Path.Combine(_outputDir, "archetype_signals.gd")));
+        Assert.True(File.Exists(GdFile("archetype_signals.gd")));
     }
 
     [Fact]
@@ -296,7 +302,7 @@ public class BuildRunnerTests : IDisposable
     {
         var set = MakeSet("core", "strike");
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "archetype_signals.gd"));
+        var content = File.ReadAllText(GdFile("archetype_signals.gd"));
 
         // "strike" → signal name "on_strike" → const "ON_STRIKE"
         Assert.Contains("ON_STRIKE = \"on_strike\"", content);
@@ -307,7 +313,7 @@ public class BuildRunnerTests : IDisposable
     {
         // No cards → no derived signals → no consts (just the comment).
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "archetype_signals.gd"));
+        var content = File.ReadAllText(GdFile("archetype_signals.gd"));
 
         Assert.Contains("ArchetypeSignals", content);
         Assert.DoesNotContain("ON_STRIKE", content);
@@ -345,15 +351,15 @@ public class BuildRunnerTests : IDisposable
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
 
         // game_events.gd must declare the signal.
-        var gameEvents = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        var gameEvents = File.ReadAllText(GdFile("game_events.gd"));
         Assert.Contains("signal on_buff(", gameEvents);
 
         // archetype_signals.gd must emit the constant.
-        var signalConsts = File.ReadAllText(Path.Combine(_outputDir, "archetype_signals.gd"));
+        var signalConsts = File.ReadAllText(GdFile("archetype_signals.gd"));
         Assert.Contains("ON_BUFF = \"on_buff\"", signalConsts);
 
         // ArchetypeNode.cs must declare the event handler type.
-        var archetypeNode = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var archetypeNode = File.ReadAllText(CsFile("ArchetypeNode.cs"));
         Assert.Contains("OnBuffEventHandler", archetypeNode);
     }
 
@@ -387,10 +393,10 @@ public class BuildRunnerTests : IDisposable
         var set = new CardSet("core", 1, [triggerCard]);
         BuildRunner.Run(BaseDefinition(), [set], _outputDir);
 
-        var gameEvents = File.ReadAllText(Path.Combine(_outputDir, "game_events.gd"));
+        var gameEvents = File.ReadAllText(GdFile("game_events.gd"));
         Assert.Contains("signal on_buff(", gameEvents);
 
-        var archetypeNode = File.ReadAllText(Path.Combine(_outputDir, "ArchetypeNode.cs"));
+        var archetypeNode = File.ReadAllText(CsFile("ArchetypeNode.cs"));
         Assert.Contains("OnBuffEventHandler", archetypeNode);
     }
 
@@ -402,14 +408,14 @@ public class BuildRunnerTests : IDisposable
     public void Run_EmitsArchetypeInteropFile()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        Assert.True(File.Exists(Path.Combine(_outputDir, "archetype_interop.gd")));
+        Assert.True(File.Exists(GdFile("archetype_interop.gd")));
     }
 
     [Fact]
     public void Run_ArchetypeInteropFile_ContainsRegisterAndSubmitMethods()
     {
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var content = File.ReadAllText(Path.Combine(_outputDir, "archetype_interop.gd"));
+        var content = File.ReadAllText(GdFile("archetype_interop.gd"));
 
         Assert.Contains("func register(node: ArchetypeNode)", content);
         Assert.Contains("func submit_pass(", content);
@@ -423,11 +429,11 @@ public class BuildRunnerTests : IDisposable
     {
         // interop.gd is game-agnostic — signal set changes must not alter it.
         BuildRunner.Run(BaseDefinition(), [], _outputDir);
-        var noSignals = File.ReadAllText(Path.Combine(_outputDir, "archetype_interop.gd"));
+        var noSignals = File.ReadAllText(GdFile("archetype_interop.gd"));
 
         var dir2 = Path.Combine(_outputDir, "with-signals");
         BuildRunner.Run(BaseDefinition(), [MakeSet("core", "strike")], dir2);
-        var withSignals = File.ReadAllText(Path.Combine(dir2, "archetype_interop.gd"));
+        var withSignals = File.ReadAllText(Path.Combine(dir2, "archetype", "archetype_interop.gd"));
 
         Assert.Equal(noSignals, withSignals);
     }

@@ -34,11 +34,12 @@ public static class BuildRunner
     /// </param>
     /// <param name="sets">
     /// Card sets to serialize.  Each set is written to
-    /// <c>[set-name].json</c> in <paramref name="outputDir"/>.
+    /// <c>archetype/card-sets/[set-name].json</c> under <paramref name="outputDir"/>.
     /// </param>
     /// <param name="outputDir">
-    /// Directory to write all output files.  Created if it does not exist.
-    /// Existing files are overwritten.
+    /// Root output directory (typically your Godot project root).  The runner
+    /// creates <c>archetype/</c> for interop files and <c>archetype/card-sets/</c>
+    /// for JSON card sets.  Created if it does not exist; existing files are overwritten.
     /// </param>
     /// <param name="noSignalKeywords">
     /// Optional set of game-creator keyword names to exclude from
@@ -50,7 +51,10 @@ public static class BuildRunner
         string outputDir,
         IEnumerable<string>? noSignalKeywords = null)
     {
-        Directory.CreateDirectory(outputDir);
+        var archetypeDir = Path.Combine(outputDir, "archetype");
+        var cardSetsDir  = Path.Combine(archetypeDir, "card-sets");
+        Directory.CreateDirectory(archetypeDir);
+        Directory.CreateDirectory(cardSetsDir);
 
         var setList = sets.ToList();
 
@@ -58,7 +62,7 @@ public static class BuildRunner
         foreach (var set in setList)
         {
             var json = JsonSerializer.Serialize(set, JsonOptions);
-            File.WriteAllText(Path.Combine(outputDir, $"{set.Name}.json"), json);
+            File.WriteAllText(Path.Combine(cardSetsDir, $"{set.Name}.json"), json);
         }
 
         // Merge card sets into definition for signal derivation.
@@ -66,9 +70,9 @@ public static class BuildRunner
         var fullDefinition = definition.WithCardSets(setList);
 
         // Emit Godot interop files (D32, D33).
-        GodotEmitter.EmitKeywordConstants(fullDefinition, outputDir);
-        GodotEmitter.EmitSignals(fullDefinition, outputDir, noSignalKeywords);
-        GodotEmitter.EmitArchetypeNode(fullDefinition, outputDir, noSignalKeywords);
-        GodotEmitter.EmitInteropScripts(fullDefinition, outputDir, noSignalKeywords);
+        GodotEmitter.EmitKeywordConstants(fullDefinition, archetypeDir);
+        GodotEmitter.EmitSignals(fullDefinition, archetypeDir, noSignalKeywords);
+        GodotEmitter.EmitArchetypeNode(fullDefinition, archetypeDir, noSignalKeywords);
+        GodotEmitter.EmitInteropScripts(fullDefinition, archetypeDir, noSignalKeywords);
     }
 }
