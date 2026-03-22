@@ -2,7 +2,7 @@
 status: signed-off
 owner: technical-architect
 signed-off: 2026-03-11
-last-updated: 2026-03-20
+last-updated: 2026-03-22
 depends-on:
   - docs/requirements.md
   - docs/domain-model.md
@@ -11,7 +11,7 @@ depends-on:
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected). Updated 2026-03-20 (D33: GDScript interop generation — ArchetypeNode.cs generated bridge class, async/GDScript action-submission bridge, archetype_interop.gd static autoload, archetype_signals.gd per-game constants).**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected). Updated 2026-03-20 (D33: GDScript interop generation — ArchetypeNode.cs generated bridge class, async/GDScript action-submission bridge, archetype_interop.gd static autoload, archetype_signals.gd per-game constants). Updated 2026-03-22 (D34–D37: retroactive decisions for output directory structure, file-based runtime loading, AtomId implicit conversions, and [GlobalClass] on ArchetypeNode).**
 
 All decisions D1–D31 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15). Updated 2026-03-05 to ratify game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) and their `GameIsOver` propagation contract (D7 amendments and D14 addendum), and to add D19 (`ComputeAvailableActions` contract — `get-atoms-in-zone` primitive, `CardDefinition.ActivationCondition`, `GameDefinition.PlayableZoneNames`). Updated 2026-03-11 to add D26 (Electron + .NET sidecar platform), D27 (sidecar-authoritative data layer, project file format, DSL text as canonical form), D28 (validation trigger model, debounce, sidecar protocol surface), D29 (D14 addendum: InitManifest mandatory and renamed, HostManifest append layer with StateOverrides, CardSpec LocalId, AtomStateOverride, updated nine-step provisioning order), D30 (Godot export pipeline: folder-drop package, Level 1 signal derivation with opt-out, post-action event log polling via GameStateView.LastActionEvents), and D31 (missing-translation export gate: warning classification, confirmation dialog, no persistent preference).
 
@@ -4119,6 +4119,149 @@ If `RunAsync` throws (e.g., engine error, `DefinitionException`), the exception 
 
 ---
 
+### D34 — `BuildRunner` Output Directory Structure
+
+**Decision:** `BuildRunner.Run` emits all artifacts into a subdirectory tree under `outputDir`, not directly into `outputDir`:
+
+```
+<outputDir>/
+  archetype/
+    game_definition.json          # rules-only GameDefinition (no card definitions)
+    archetype_keywords.gd
+    archetype_signals.gd
+    game_events.gd
+    ArchetypeNode.cs
+    archetype_interop.gd
+    card-sets/
+      <set-name>.json             # one file per CardSet
+```
+
+`BuildRunner` creates `archetype/` and `archetype/card-sets/` if they do not exist. Existing files are overwritten.
+
+**Why `game_definition.json` contains rules only (not cards).**
+
+`BuildRunner` internally calls `definition.WithCardSets(sets)` to produce a `fullDefinition` for signal derivation (so the signal scanner sees all card effect blocks). It serializes the original `definition` — without cards merged — to `game_definition.json`. The generated `StartGame` loads `game_definition.json` and then calls `WithCardSets(cardSets)` at runtime to merge the card-set JSON files.
+
+Serializing `fullDefinition` instead would cause a `DefinitionException` at runtime: `WithCardSets` throws on duplicate card names, and the cards would already be present in the deserialized `GameDefinition` before the card-set files were merged again.
+
+**Rationale:**
+- An `archetype/` subdirectory keeps Archetype output isolated from the rest of the Godot project root. Game creators typically point `outputDir` at the Godot project root, so without a subdirectory all generated files would land alongside `project.godot`, `scenes/`, etc.
+- Separating card sets into `card-sets/` allows the runtime to auto-discover them with `DirAccess` (see D35) without scanning the entire `archetype/` directory.
+- The rules-only `game_definition.json` is small and fast to load; card definitions stay in their per-set files and can be loaded selectively if needed in future.
+
+**Consequences:**
+- D32's description of `BuildRunner.Run` output (which stated flat `[set-name].json` files alongside GDScript files with no subdirectory) is superseded by this structure.
+- D33's setup instructions, which referred to copying generated files without specifying a subdirectory, are superseded: all files land under `archetype/`.
+- The default resource paths in the generated `StartGame` and in `LoadDefaultCardSetPaths` are `res://archetype/game_definition.json` and `res://archetype/card-sets/` respectively (see D35).
+- `GodotEmitter` methods receive `archetypeDir` (the `archetype/` subdirectory path), not `outputDir`. `BuildRunner` is responsible for the subdirectory calculation.
+
+---
+
+### D35 — File-Based Runtime Loading in Generated `StartGame`
+
+**Decision:** The generated `ArchetypeNode.StartGame` method no longer accepts a `GameDefinition` parameter. Instead it loads `GameDefinition` and `CardSet` instances from JSON files at runtime using Godot's `FileAccess` and `DirAccess` APIs.
+
+**New signature (generated):**
+
+```csharp
+public void StartGame(
+    Godot.Collections.Dictionary hostManifestData,
+    string definitionPath = "res://archetype/game_definition.json",
+    Godot.Collections.Array? cardSetPaths = null)
+```
+
+**Runtime loading sequence inside `StartGame`:**
+
+1. Read `definitionPath` via `FileAccess.GetFileAsString`.
+2. Deserialize `GameDefinition` using `GameDefinitionJsonOptions.Build()`.
+3. If `cardSetPaths` is null or empty, call `LoadDefaultCardSetPaths()`, which opens `res://archetype/card-sets/` via `DirAccess` and collects all `.json` file paths.
+4. For each path, read and deserialize a `CardSet`.
+5. Call `definition.WithCardSets(cardSets)` to merge.
+6. Build and start the `GameSession` (fire-and-forget via `RunLoopAsync`).
+
+`LoadDefaultCardSetPaths` is a private static helper generated inside `ArchetypeNode`. Explicit `cardSetPaths` override the auto-discovery for scenarios where the game creator wants to load a subset of sets or load from a non-default location.
+
+The generated file adds `using Archetype.Build;` so it can reference `GameDefinitionJsonOptions.Build()`.
+
+**`archetype_interop.gd` `start()` convenience method.**
+
+`archetype_interop.gd` gains a `start()` method that delegates to `ArchetypeNode.StartGame`:
+
+```gdscript
+func start(host_manifest: Dictionary = {},
+        definition_path: String = "res://archetype/game_definition.json",
+        card_set_paths: Array = []) -> void:
+    _node.StartGame(host_manifest, definition_path, card_set_paths)
+```
+
+The typical zero-configuration initialisation in GDScript is therefore:
+
+```gdscript
+func _ready() -> void:
+    ArchetypeInterop.register($ArchetypeNode)
+    ArchetypeInterop.start()
+```
+
+**Rationale:**
+- The original D33 `StartGame(Dictionary hostManifestData)` signature required the caller to pass a `GameDefinition` C# object, which GDScript cannot construct. A GDScript caller had no way to call it correctly.
+- File-based loading is consistent with how Godot resources are distributed for web export: assets are accessed via `res://` paths regardless of whether the game runs on desktop or WASM.
+- The default paths match the output structure from D34, so the zero-argument `ArchetypeInterop.start()` call works without any configuration for the common case.
+- Explicit path overrides support testing scenarios (loading a reduced card set) and future multi-expansion loading strategies without changing the API.
+
+**Consequences:**
+- D33's stated `StartGame` signature (`public void StartGame(Godot.Collections.Dictionary hostManifestData)`) is superseded by the three-parameter version above.
+- D33's setup step 5 (`$ArchetypeNode.start_game(host_manifest_data)`) is superseded by `ArchetypeInterop.start()` as the standard initialisation call.
+- `GodotEmitter.EmitArchetypeNode` gains the `LoadDefaultCardSetPaths` helper in its generated output.
+- `GodotEmitter.EmitInteropScripts` gains the `start()` method in `archetype_interop.gd`.
+- The generated `ArchetypeNode.cs` gains `using Archetype.Build;`.
+- No changes to `Archetype.Core`, `Archetype.Engine`, or `Archetype.Text`.
+
+---
+
+### D36 — `AtomId` Implicit Conversions
+
+**Decision:** `AtomId` gains two implicit conversion operators:
+
+```csharp
+public static implicit operator long(AtomId id) => id.Value;
+public static implicit operator AtomId(long value) => new(value);
+```
+
+**Rationale:**
+
+The generated `ArchetypeNode.cs` emits event-argument casts of the form `(long)(AtomId)(ev.BoundArgs["target"])`. This two-step chain requires both directions: `object` is cast to `AtomId` (via explicit cast, not implicit), then `AtomId` is widened to `long` for the Godot `EmitSignal` call which expects `long` for atom ID parameters. Without `implicit operator long`, the second step requires an explicit `.Value` property access that the emitter would have to special-case for atom types.
+
+Similarly, `SubmitPlayCard` and `SubmitActivateAbility` in the generated node receive `long cardAtomId` / `long sourceAtomId` from GDScript and construct `AtomId` values: `new AtomId(cardAtomId)`. With `implicit operator AtomId(long)` this construction is valid and explicit — the implicit conversion is available but not invoked here, since `new AtomId(...)` is used directly.
+
+**Risk: sentinel collision.** `AtomId.None` has `Value == 0`. The implicit `long → AtomId` conversion means that the literal `0L` is silently a valid `AtomId` equal to `None`. Game code that passes an uninitialised `long` where an `AtomId` is expected will compile without warning. This is accepted: the same risk existed before (via explicit `new AtomId(0)`) and the conversions are required for the generated Godot bridge code to compile cleanly.
+
+**Consequences:**
+- `AtomId` in `Archetype.Core` gains two `public static implicit operator` members. It remains a `readonly record struct`.
+- The implicit `long` widening is used in the generated `EmitDerivedSignals` cast chain.
+- No callers outside the generated bridge code are expected to rely on the implicit conversions, but they are public API.
+
+---
+
+### D37 — `[GlobalClass]` on Generated `ArchetypeNode`
+
+**Decision:** The generated `ArchetypeNode.cs` carries the `[GlobalClass]` attribute:
+
+```csharp
+[GlobalClass]
+public partial class ArchetypeNode : Node
+```
+
+**Rationale:**
+
+Without `[GlobalClass]`, Godot does not expose the C# class to GDScript's type system. `archetype_interop.gd` declares `var _node: ArchetypeNode`, and without the attribute this type annotation is unresolvable, causing a GDScript parse error when the autoload is loaded. `[GlobalClass]` registers the class in Godot's ClassDB so GDScript can reference it by name as a static type.
+
+**Consequences:**
+- `[GlobalClass]` must precede the `partial class` declaration in the generated output. `GodotEmitter.EmitArchetypeNode` emits it on the line immediately before the class declaration.
+- `[GlobalClass]` classes in Godot must not be defined inside a namespace. The generated `ArchetypeNode.cs` has no namespace declaration; this constraint is already satisfied.
+- No other generated files are affected.
+
+---
+
 ## Open Items
 
 - [x] Language and runtime — D1
@@ -4154,3 +4297,7 @@ If `RunAsync` throws (e.g., engine error, `DefinitionException`), the exception 
 - [x] Missing-translation export gate UX — D31 *(superseded by D32)*
 - [x] GDScript interop generation (`ArchetypeNode.cs` bridge, `archetype_interop.gd` autoload, `archetype_signals.gd` constants) — D33
 - [x] Code-first authoring model (builder API, CardSet, BuildRunner, Godot artifact generation) — D32
+- [x] `BuildRunner` output directory structure (`archetype/` subdirectory, `card-sets/` subdirectory, rules-only `game_definition.json`) — D34
+- [x] File-based runtime loading in generated `StartGame`; `archetype_interop.gd` `start()` convenience method — D35
+- [x] `AtomId` implicit conversions (`long ↔ AtomId`) — D36
+- [x] `[GlobalClass]` on generated `ArchetypeNode` — D37

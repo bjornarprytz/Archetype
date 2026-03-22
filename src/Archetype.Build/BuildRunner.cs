@@ -69,6 +69,12 @@ public static class BuildRunner
         // (Merges all sets so signal scan sees all defined cards.)
         var fullDefinition = definition.WithCardSets(setList);
 
+        // Serialize the rules-only definition (no cards merged) so GDScript can load
+        // it at runtime and then merge the card-set JSONs itself via StartGame.
+        // Serializing fullDefinition here would cause duplicate card names at runtime.
+        var defJson = JsonSerializer.Serialize(definition, JsonOptions);
+        File.WriteAllText(Path.Combine(archetypeDir, "game_definition.json"), defJson);
+
         // Emit Godot interop files (D32, D33).
         GodotEmitter.EmitKeywordConstants(fullDefinition, archetypeDir);
         GodotEmitter.EmitSignals(fullDefinition, archetypeDir, noSignalKeywords);

@@ -1,0 +1,46 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read PR version
+        run: |
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' src/Directory.Build.props)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Read main version
+        run: |
+          MAIN_VERSION=$(git show origin/main:src/Directory.Build.props 2>/dev/null | grep -oP '(?<=<Version>)[^<]+' || echo "0.0.0")
+          echo "MAIN_VERSION=$MAIN_VERSION" >> $GITHUB_ENV
+
+      - name: Block preview versions from merging to main
+        run: |
+          if [[ "$VERSION" == *"-"* ]]; then
+            echo "::error::Preview version '$VERSION' cannot be merged into main. Bump to a stable version first."
+            exit 1
+          fi
+
+      - name: Check source changes require a version bump
+        run: |
+          CHANGED=$(git diff --name-only origin/main...HEAD | grep -cE '^src/' || true)
+          if [[ "$CHANGED" -gt 0 && "$VERSION" == "$MAIN_VERSION" ]]; then
+            echo "::error::Source files changed but version is still '$VERSION'. Bump <Version> in src/Directory.Build.props."
+            exit 1
+          fi
+
+      - name: Require changelog entry for new version
+        if: env.VERSION != env.MAIN_VERSION
+        run: |
+          if ! grep -qP "## \[$VERSION\]" CHANGELOG.md; then
+            echo "::error::No CHANGELOG.md entry for version '$VERSION'. Add a '## [$VERSION] - date' section."
+            exit 1
+          fi
