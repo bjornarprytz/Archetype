@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.4] - 2026-03-22
+
+### Fixed
+- Generated `archetype_interop.gd` `start()` now always passes all three arguments to `StartGame` — GDScript cannot use C# default parameters, so the two-argument call path was an invalid call signature
+
 ## [0.3.0-alpha.3] - 2026-03-22
 
 ### Fixed

@@ -616,10 +616,7 @@ public static class GodotEmitter
         sb.AppendLine("func start(host_manifest: Dictionary = {},");
         sb.AppendLine("        definition_path: String = \"res://archetype/game_definition.json\",");
         sb.AppendLine("        card_set_paths: Array = []) -> void:");
-        sb.AppendLine("    if card_set_paths.is_empty():");
-        sb.AppendLine("        _node.StartGame(host_manifest, definition_path)");
-        sb.AppendLine("    else:");
-        sb.AppendLine("        _node.StartGame(host_manifest, definition_path, card_set_paths)");
+        sb.AppendLine("    _node.StartGame(host_manifest, definition_path, card_set_paths)");
         sb.AppendLine();
         sb.AppendLine("## Submits a pass action for [param player_name].");
         sb.AppendLine("func submit_pass(player_name: String) -> void:");
