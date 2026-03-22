@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    
+    <PackageId>Archetype.Core</PackageId>
+    <Description>Core domain model for the Archetype card game engine.</Description>
+
   </PropertyGroup>
 
 </Project>

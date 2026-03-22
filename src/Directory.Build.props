@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Bjørnar Prytz</Authors>
+    <RepositoryUrl>https://github.com/bjornarprytz/Archetype</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/bjornarprytz/Archetype</PackageProjectUrl>
+    <PackageTags>archetype;card-game;game-engine;godot</PackageTags>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+</Project>
