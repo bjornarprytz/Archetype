@@ -90,8 +90,14 @@ Run this once whenever your game definition or card sets change. It is not calle
 ```gdscript
 func _ready() -> void:
     ArchetypeInterop.register($ArchetypeNode)
-    $ArchetypeNode.StartGame({}, definition)
+    ArchetypeInterop.start()
+    # Or with explicit paths:
+    # ArchetypeInterop.start({}, "res://archetype/game_definition.json", [
+    #     "res://archetype/card-sets/core.json"
+    # ])
 ```
+
+`start()` with no arguments automatically loads `res://archetype/game_definition.json` and all `.json` files in `res://archetype/card-sets/`.
 
 ### 5. Connect signals in GDScript
 
@@ -141,7 +147,7 @@ ArchetypeInterop.submit_pass(player_name)
 ### Signal flow
 
 ```
-StartGame()
+ArchetypeInterop.start()
     └── engine starts async loop
             └── ActionRequested  →  UI shows available actions
                     └── submit_play_card / submit_pass / ...
