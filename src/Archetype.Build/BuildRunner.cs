@@ -75,10 +75,12 @@ public static class BuildRunner
         var defJson = JsonSerializer.Serialize(definition, JsonOptions);
         File.WriteAllText(Path.Combine(archetypeDir, "game_definition.json"), defJson);
 
-        // Emit Godot interop files (D32, D33).
+        // Emit Godot interop files (D32, D33, D38, D39).
         GodotEmitter.EmitKeywordConstants(fullDefinition, archetypeDir);
         GodotEmitter.EmitSignals(fullDefinition, archetypeDir, noSignalKeywords);
         GodotEmitter.EmitArchetypeNode(fullDefinition, archetypeDir, noSignalKeywords);
         GodotEmitter.EmitInteropScripts(fullDefinition, archetypeDir, noSignalKeywords);
+        // D39: AtomKind integer constants for GDScript; does not depend on GameDefinition.
+        GodotEmitter.EmitAtomKindConstants(archetypeDir);
     }
 }

@@ -451,4 +451,68 @@ public class BuildRunnerTests : IDisposable
 
         Assert.Equal(noSignals, withSignals);
     }
+
+    // -----------------------------------------------------------------------
+    //  archetype_atom_kinds.gd — D39
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Run_ArchetypeAtomKindsFile_IsEmitted()
+    {
+        BuildRunner.Run(BaseDefinition(), [], _outputDir);
+        Assert.True(File.Exists(GdFile("archetype_atom_kinds.gd")));
+    }
+
+    [Fact]
+    public void Run_ArchetypeAtomKindsFile_ContainsAllKinds()
+    {
+        BuildRunner.Run(BaseDefinition(), [], _outputDir);
+        var content = File.ReadAllText(GdFile("archetype_atom_kinds.gd"));
+
+        Assert.Contains("const CARD    = 0", content);
+        Assert.Contains("const ZONE    = 1", content);
+        Assert.Contains("const PLAYER  = 2", content);
+        Assert.Contains("const SESSION = 3", content);
+        Assert.Contains("class_name ArchetypeAtomKinds", content);
+    }
+
+    // -----------------------------------------------------------------------
+    //  ArchetypeNode.cs — D38 state query methods
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Run_ArchetypeNodeFile_ContainsStateQueryMethods()
+    {
+        BuildRunner.Run(BaseDefinition(), [], _outputDir);
+        var content = File.ReadAllText(CsFile("ArchetypeNode.cs"));
+
+        Assert.Contains("GetAccumulator", content);
+        Assert.Contains("HasCondition", content);
+        Assert.Contains("GetComputedProperty", content);
+        Assert.Contains("GetZone", content);
+        Assert.Contains("GetOwner", content);
+        Assert.Contains("GetKind", content);
+        Assert.Contains("GetAtoms", content);
+        // _stateView field must be present
+        Assert.Contains("_stateView", content);
+    }
+
+    // -----------------------------------------------------------------------
+    //  archetype_interop.gd — D38 forwarding methods
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void Run_ArchetypeInteropFile_ContainsStateQueryForwardingMethods()
+    {
+        BuildRunner.Run(BaseDefinition(), [], _outputDir);
+        var content = File.ReadAllText(GdFile("archetype_interop.gd"));
+
+        Assert.Contains("func get_accumulator(", content);
+        Assert.Contains("func has_condition(", content);
+        Assert.Contains("func get_computed_property(", content);
+        Assert.Contains("func get_zone(", content);
+        Assert.Contains("func get_owner(", content);
+        Assert.Contains("func get_kind(", content);
+        Assert.Contains("func get_atoms(", content);
+    }
 }
