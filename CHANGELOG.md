@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.5] - 2026-03-23
+
+### Added
+- Generated `ArchetypeNode` now stores `GameStateView` and exposes seven GDScript-callable state query methods: `GetAccumulator`, `HasCondition`, `GetComputedProperty`, `GetZone`, `GetOwner`, `GetKind`, `GetAtoms` (D38)
+- `archetype_interop.gd` forwards all seven query methods as snake_case GDScript functions
+- New generated artifact `archetype_atom_kinds.gd` exposes `ArchetypeAtomKinds` integer constants (`CARD`, `ZONE`, `PLAYER`, `SESSION`) for use with `get_atoms` and `get_kind` (D39)
+
 ## [0.3.0-alpha.4] - 2026-03-22
 
 ### Fixed
