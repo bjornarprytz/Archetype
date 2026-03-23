@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.7] - 2026-03-23
+
+### Added
+- `StateFieldDecl` and `StateFieldType` — explicit state map declarations (`Number` accumulators, `Bool` conditions) on `CardDefinition`, `ZoneDefinition`, `PlayerDefinition`, and `GameDefinition` (session), closing the §2.6 domain model gap (D40)
+- `GameDefinitionBuilder` validates `modify-accumulator`, `apply-condition`, `apply-modifier`, `remove-condition`, `get-state` against declared fields at build time; undeclared field access throws `DefinitionException`
+- Generated `card_atom.gd`, `zone_atom.gd`, `player_atom.gd`, `session_atom.gd` — typed GDScript `RefCounted` views with pull-model getters derived from state map declarations (D40)
+- `ArchetypeInterop` factory methods: `get_card(id)`, `get_zone_atom(id)`, `get_player(id)`, `get_session()` (singleton)
+
 ## [0.3.0-alpha.6] - 2026-03-23
 
 ### Fixed

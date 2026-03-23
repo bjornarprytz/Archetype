@@ -115,12 +115,12 @@ public class StateMapValidatorTests
     // -----------------------------------------------------------------------
 
     [Fact]
-    public void ClearAccumulator_UndeclaredField_ThrowsDefinitionException()
+    public void ClearAccumulator_UnknownKeyword_ThrowsDefinitionException()
     {
-        // "clear-accumulator" is specified in the requirements but not (yet) in
-        // BuiltInKeywords — if it appears in a keyword body as an unknown keyword
-        // the builder's own validation will throw DefinitionException first.
-        // We verify the error path exists; the error message may differ.
+        // "clear-accumulator" is not in BuiltInKeywords.All. A keyword body that
+        // invokes it is rejected by GameDefinitionBuilder.Build() with "invokes
+        // unknown keyword" — this is the correct and expected failure mode.
+        // The StateMapValidator is not reached in this case.
         var builder = new GameDefinitionBuilder()
             .WithId("test")
             .WithInitManifest(InitManifest.Empty)

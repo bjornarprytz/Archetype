@@ -4,10 +4,14 @@ namespace Archetype.Build;
 
 /// <summary>
 /// Build-time validator that checks field-name arguments in
-/// <c>modify-accumulator</c>, <c>clear-accumulator</c>, <c>apply-condition</c>,
-/// <c>remove-condition</c>, <c>apply-modifier</c>, and <c>get-state</c>
-/// invocations against the declared <see cref="StateFieldDecl"/> sets on the
-/// target atom type (D38 / §2.6).
+/// <c>modify-accumulator</c>, <c>apply-condition</c>, <c>remove-condition</c>,
+/// <c>apply-modifier</c>, and <c>get-state</c> invocations against the declared
+/// <see cref="StateFieldDecl"/> sets on the target atom type (D38 / §2.6).
+/// <para>
+/// <c>clear-accumulator</c> is not currently in <see cref="BuiltInKeywords.All"/>
+/// and is therefore not listed here; any reference to it in a keyword body is
+/// rejected earlier by <see cref="GameDefinitionBuilder"/> before this validator runs.
+/// </para>
 /// <para>
 /// <b>Known limitation:</b> when the target atom argument is not statically
 /// resolvable to a specific <see cref="AtomKind"/> (e.g. an untyped
@@ -19,12 +23,14 @@ namespace Archetype.Build;
 public static class StateMapValidator
 {
     // Field-name keyword sentinel names and the StateFieldType(s) each requires.
+    // NOTE: "clear-accumulator" is intentionally absent — it is not currently in
+    // BuiltInKeywords.All and any keyword body that invokes it would be rejected
+    // by GameDefinitionBuilder.Build() before this validator is reached.
     private static readonly IReadOnlyDictionary<string, StateFieldType?> FieldKeywords =
         new Dictionary<string, StateFieldType?>
         {
             // null means "any declared type is accepted"
             ["modify-accumulator"] = StateFieldType.Number,
-            ["clear-accumulator"]  = StateFieldType.Number,
             ["apply-modifier"]     = StateFieldType.Number,
             ["apply-condition"]    = StateFieldType.Bool,
             ["remove-condition"]   = StateFieldType.Bool,
