@@ -1,7 +1,7 @@
 # Implementation Status
 
-> Last updated: 2026-03-21 (D33 re-review: PASS — both blockers resolved. DeriveSignalSet now scans StaticEffectDef.StateContributionBlock and Trigger.FiredBlock; two new tests cover both paths. 179/179 C# tests passing.)
-> Branch: `impl/text-renderer`
+> Last updated: 2026-03-24 (D40: StateMapDeclarations, StateMapValidator, GDScript atom views. 262/262 C# tests passing. Reviewer: PASS — D40 recorded in docs/architecture.md. Two MINORs fixed directly by reviewer.)
+> Branch: `impl/d38-d39-state-query-atomkind`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
 ---
@@ -11,7 +11,7 @@
 | Assembly | Role | Status |
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
-| `Archetype.Build` | `Kw` factory shorthands, `GameDefinitionBuilder`, `CardSet` serialization, `BuildRunner`, `GodotEmitter` (D32, D33) | ✅ Complete — D33 PASS |
+| `Archetype.Build` | `Kw` factory shorthands, `GameDefinitionBuilder`, `CardSet` serialization, `BuildRunner`, `GodotEmitter` (D32, D33, D38, D39, D40), `StateMapValidator` | ✅ Complete — D40 implemented |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
 | ~~`Archetype.Tooling.Server`~~ | Removed (superseded by `Archetype.Build` code-first authoring model — D32) | ❌ Deleted |
@@ -73,6 +73,7 @@
 - `GameStateView` (public read-only view), `IGameStateReadable`
 - **D30**: `GameStateView.LastActionEvents: IReadOnlyList<GameEvent>` — events from most recently completed `ResolveAction` (including all recursive descendants); `SetLastActionEvents` called by engine after each action
 - **D30**: `EventLog.LastActionEvents` — captured in `CloseAction()` before accumulator is cleared; exposes recursive `SelfAndDescendants()` flat list
+- **D38**: `GameStateView` has `GetAccumulator`, `HasCondition`, `GetComputedProperty`, `GetZone`, `GetOwner`, `GetKind`, `GetAtoms` — generated `ArchetypeNode` stores `_stateView`, assigns before emitting `action_requested`/`prompt_requested`, exposes all seven query methods; `archetype_interop.gd` forwards all seven
 
 ---
 
@@ -500,9 +501,9 @@ All mutation handlers call `MutationHelpers.RevalidateAndBuildResponse` → retu
 | `tooling/src/renderer/panels/GraphPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 graph view) |
 | `tooling/src/renderer/panels/SetOverviewPanel.test.tsx` | 7 | ✅ All passing (new — Group 6 set overview) |
 
-| `Builder/BuildRunnerTests.cs` | 26 | ✅ All passing (13 new — D33: ArchetypeNode.cs, archetype_signals.gd, archetype_interop.gd) |
+| `Builder/BuildRunnerTests.cs` | 33 | ✅ All passing (4 new — D38/D39: state query methods, AtomKind constants, interop forwarding) |
 
-**Total: 177 C# tests passing + 105 TypeScript/React tests passing (note: TypeScript tests are for the deleted Electron tooling; C# count is authoritative).**
+**Total: 229 C# tests passing (TypeScript tooling tests no longer maintained — C# count is authoritative).**
 
 ### Layer 1 (unit, isolated state)
 - `MoveCard_UpdatesCardZoneId_ToDestination`

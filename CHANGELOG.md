@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-03-23
+
+### Added
+- Game state is now queryable from GDScript via `ArchetypeInterop`: `get_accumulator`, `has_condition`, `get_computed_property`, `get_zone`, `get_atom_owner`, `get_kind`, `get_atoms` (D38)
+- `archetype_atom_kinds.gd` — `ArchetypeAtomKinds` integer constants (`CARD`, `ZONE`, `PLAYER`, `SESSION`) for use with `get_atoms`/`get_kind` (D39)
+- Typed GDScript atom view classes — `CardAtom`, `ZoneAtom`, `PlayerAtom`, `SessionAtom` — with pull-model property getters generated from state map declarations; factory methods `get_card(id)`, `get_zone_atom(id)`, `get_player(id)`, `get_session()` on `ArchetypeInterop` (D40)
+- `StateFieldDecl`/`StateFieldType` — explicit state map declarations (`Number` accumulators, `Bool` conditions) on all four atom definition types; `GameDefinitionBuilder.Build()` validates keyword invocations against declared fields at build time
+
+### Fixed
+- Generated `archetype_interop.gd` now connects to C# signals using PascalCase names as required by Godot 4's C# interop — snake_case names silently fail at runtime
+- `PromptRequested` and `GameError` lifecycle signals were missing from the autoload; both are now connected and re-emitted
+- `KeywordNodeConverter.DeserializeLiteral` passed an unadvanced `Utf8JsonReader` to `LiteralConverter.Read`, causing a runtime exception when a `Literal` appeared as a keyword argument
+- `GameSessionBuilder.Build()` now throws `DefinitionException` when `GameDefinition.Phases` is empty
+- Generated `start()` always passes all three arguments to `StartGame` — GDScript cannot use C# default parameters
+- Renamed `get_atom_owner`/`GetAtomOwner` (was `get_owner`/`GetOwner`) — the old name shadowed a Godot `Node` built-in causing a GDScript signature mismatch error
+
 ## [0.2.0] - 2026-03-22
 
 ### Added

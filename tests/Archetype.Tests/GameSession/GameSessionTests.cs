@@ -66,6 +66,34 @@ public sealed class GameSessionTests
     // -----------------------------------------------------------------------
 
     [Fact]
+    public void Builder_ThrowsWhenNoPhasesDefinedDefinition()
+    {
+        // A game with no phases produces no action windows and would spin
+        // synchronously in RunAsync, blocking the Godot main thread (D33).
+        var def = new GameDefinition(
+            Keywords:               BuiltInKeywords.All.ToDictionary(k => k.Name),
+            CardDefinitions:        new Dictionary<string, CardDefinition>(),
+            ZoneDefinitions:        new Dictionary<string, ZoneDefinition>(),
+            StateBasedRules:        new List<StateBasedRule>(),
+            Phases:                 new List<PhaseDefinition>(), // empty — the bad case
+            ActionRules:            new Dictionary<string, IReadOnlyList<ActionRuleDefinition>>(),
+            TriggerResolutionOrder: TriggerResolutionOrder.OldestFirst,
+            PlayerDefinitions:      new Dictionary<string, PlayerDefinition>
+            {
+                ["p1"] = new(new Dictionary<string, object>()),
+            },
+            PlayableZoneNames:      null,
+            InitManifest:           new InitManifest([], [], []),
+            Id:                     "no-phases-game");
+
+        Assert.Throws<DefinitionException>(() =>
+            Archetype.Engine.GameSession.Create(def)
+                .WithPlayerStrategy("p1", new ScriptedPlayerStrategy())
+                .WithRandomSource(new MockRandomSource())
+                .Build());
+    }
+
+    [Fact]
     public void Builder_ThrowsWhenRandomSourceMissing()
     {
         var def      = SinglePlayerSinglePhase();

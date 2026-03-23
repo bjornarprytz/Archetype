@@ -25,6 +25,87 @@ jobs:
       - name: Test
         run: dotnet test Archetype.slnx --no-restore -c Release
 
+  preview-release:
+    needs: test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Read version
+        run: |
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' src/Directory.Build.props)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Skip if not a preview version
+        run: |
+          if [[ "$VERSION" != *"-"* ]]; then
+            echo "Not a preview version — skipping preview publish."
+            echo "IS_PREVIEW=false" >> $GITHUB_ENV
+          else
+            echo "IS_PREVIEW=true" >> $GITHUB_ENV
+          fi
+
+      - name: Check if release exists
+        if: env.IS_PREVIEW == 'true'
+        run: |
+          if gh release view "v$VERSION" --repo ${{ github.repository }} > /dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract changelog notes
+        if: env.IS_PREVIEW == 'true' && env.RELEASE_EXISTS == 'false'
+        run: |
+          python3 - <<'EOF'
+          import re, os
+
+          version = os.environ["VERSION"]
+          with open("CHANGELOG.md") as f:
+              content = f.read()
+
+          pattern = rf"## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n## \[|\Z)"
+          match = re.search(pattern, content, re.DOTALL)
+          notes = match.group(1).strip() if match else "_No changelog entry found._"
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              print(f"notes<<EOF_NOTES\n{notes}\nEOF_NOTES", file=out)
+          EOF
+        id: changelog
+
+      - name: Pack
+        if: env.IS_PREVIEW == 'true' && env.RELEASE_EXISTS == 'false'
+        run: |
+          dotnet restore Archetype.slnx
+          dotnet pack src/Archetype.Core/Archetype.Core.csproj       -c Release --no-restore --output ./nupkg
+          dotnet pack src/Archetype.Engine/Archetype.Engine.csproj   -c Release --no-restore --output ./nupkg
+          dotnet pack src/Archetype.Text/Archetype.Text.csproj       -c Release --no-restore --output ./nupkg
+          dotnet pack src/Archetype.Build/Archetype.Build.csproj     -c Release --no-restore --output ./nupkg
+
+      - name: Push to NuGet
+        if: env.IS_PREVIEW == 'true' && env.RELEASE_EXISTS == 'false'
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Create GitHub prerelease
+        if: env.IS_PREVIEW == 'true' && env.RELEASE_EXISTS == 'false'
+        run: |
+          gh release create "v$VERSION" ./nupkg/*.nupkg \
+            --title "v$VERSION" \
+            --notes "${{ steps.changelog.outputs.notes }}" \
+            --prerelease \
+            --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   release:
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

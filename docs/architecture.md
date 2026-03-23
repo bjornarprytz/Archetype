@@ -2,7 +2,7 @@
 status: signed-off
 owner: technical-architect
 signed-off: 2026-03-11
-last-updated: 2026-03-22
+last-updated: 2026-03-23 (D38–D40: GDScript state query exposure, AtomKind constants, typed atom view classes)
 depends-on:
   - docs/requirements.md
   - docs/domain-model.md
@@ -11,7 +11,7 @@ depends-on:
 # Archetype — Architecture
 
 ## Status
-**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected). Updated 2026-03-20 (D33: GDScript interop generation — ArchetypeNode.cs generated bridge class, async/GDScript action-submission bridge, archetype_interop.gd static autoload, archetype_signals.gd per-game constants). Updated 2026-03-22 (D34–D37: retroactive decisions for output directory structure, file-based runtime loading, AtomId implicit conversions, and [GlobalClass] on ArchetypeNode).**
+**Complete. Signed off 2026-03-02. Updated and re-signed off 2026-03-03 (A14, A15, D17). Updated 2026-03-03 (D18, A16, D9/D7 corrections). Updated 2026-03-05 (game outcome primitives ratified in D7/D14 addendum; D19 ComputeAvailableActions contract). Updated 2026-03-06 (D11 amendment: `RenderStaticEffect` omits lifetime node for permanent effects; `PromptChannel` suspension gap ratified as host integration concern). Updated 2026-03-11 (tooling change: D26–D31 added; D14 addendum in D29 for InitManifest mandatory, HostManifest, LocalId uniqueness). Updated 2026-03-11 (D27 implementation-review amendments: `KeywordEntry.ReturnType` mandatory; `CardEntry.ArtCropRegion` specified; `StaticEffectEntry` full schema specified, static-effect export not deferred; `RenameEntry` DSL-rewrite requirement; `ZoneSpec` serialisation bug corrected; D28 `GetSymbolInfo` `referencedBy` shape corrected). Updated 2026-03-20 (D33: GDScript interop generation — ArchetypeNode.cs generated bridge class, async/GDScript action-submission bridge, archetype_interop.gd static autoload, archetype_signals.gd per-game constants). Updated 2026-03-22 (D34–D37: retroactive decisions for output directory structure, file-based runtime loading, AtomId implicit conversions, and [GlobalClass] on ArchetypeNode). Updated 2026-03-22 (D33 amendment: threading invariants — GodotSynchronizationContext dependency, ConfigureAwait(false) ban, Task.Run ban, synchronous-spin risk for zero-action games). Updated 2026-03-23 (D38–D39: GDScript state query exposure via GameStateView, AtomKind integer constants file).**
 
 All decisions D1–D31 are stable and signed off. Updated 2026-03-02 to incorporate domain model amendments A1–A13: declarative re-activation mechanism (D6), dormant effect tracking, resolved domain model flags in D4/D8/D9/D12/D13, and consistency fixes in D12/D16/D17. Updated 2026-03-03 to incorporate A14 (type system formalization — `ParameterDecl` atom-kind subtype restriction, D2 addendum), A15 (Session atom as a fourth atom kind; player registry generalization — D14 addendum, D15 and D16 minor updates), and D17 (Save/Load — turn-boundary granularity, `GameStateSnapshot`, `BoundValue`, `SeededRandom` reimplementation, `IEngineObserver.OnTurnStart`). Updated 2026-03-03 to add D18 (Keyword cross-references in card text — `RulesRef` render node, `[display](key)` tag syntax in `TextTemplate`, `TextRenderer.Resolve`). Updated 2026-03-03 to incorporate A16 (zone movement primitive — `move-card` added to D12 primitives table, `Kw.MoveCard` added to D14, `BuiltInKeywords` note updated in D15) and to correct stale `IPromptChannel` constructor references in D9 and D7 consequences (superseded by D14/A15). Updated 2026-03-05 to ratify game outcome primitives (`declare-winner`, `declare-draw`, `player-by-name`) and their `GameIsOver` propagation contract (D7 amendments and D14 addendum), and to add D19 (`ComputeAvailableActions` contract — `get-atoms-in-zone` primitive, `CardDefinition.ActivationCondition`, `GameDefinition.PlayableZoneNames`). Updated 2026-03-11 to add D26 (Electron + .NET sidecar platform), D27 (sidecar-authoritative data layer, project file format, DSL text as canonical form), D28 (validation trigger model, debounce, sidecar protocol surface), D29 (D14 addendum: InitManifest mandatory and renamed, HostManifest append layer with StateOverrides, CardSpec LocalId, AtomStateOverride, updated nine-step provisioning order), D30 (Godot export pipeline: folder-drop package, Level 1 signal derivation with opt-out, post-action event log polling via GameStateView.LastActionEvents), and D31 (missing-translation export gate: warning classification, confirmation dialog, no persistent preference).
 
@@ -3943,6 +3943,7 @@ public partial class ArchetypeNode : Node
     [Signal] public delegate void ActionResolvedEventHandler();
     [Signal] public delegate void PromptRequestedEventHandler(string playerName, string promptType, Godot.Collections.Dictionary context);
     [Signal] public delegate void GameOverEventHandler(string winnerName);  // winnerName is "" for a draw
+    [Signal] public delegate void GameErrorEventHandler(string message);
 
     // Derived keyword signals (one per signal in the derived set)
     [Signal] public delegate void OnAttackEventHandler(int attacker, int target, float amount);
@@ -4096,6 +4097,20 @@ After running `BuildRunner.Run`:
 If `RunAsync` throws (e.g., engine error, `DefinitionException`), the exception is caught in a wrapper method that emits a `game_error(message: String)` signal and logs via `GD.PrintErr`. The game creator is responsible for handling `game_error`.
 
 `CancellationToken` is tied to a `CancellationTokenSource` created at `StartGame` time and cancelled in `_ExitTree`. This ensures the engine loop does not outlive the node.
+
+---
+
+**Threading invariants for the generated `ArchetypeNode.cs`.**
+
+The safety of the fire-and-forget `async Task` pattern depends entirely on `GodotSynchronizationContext` being installed on the Godot main thread. That context's `Post` implementation calls `Callable.From(action).CallDeferred()`, which defers each resumed continuation to the next Godot frame on the main thread. This means:
+
+- Every `EmitSignal`, `GD.PrintErr`, and game-state read/write in a continuation executes on the main thread. No Godot API is called from a thread-pool thread.
+- No `Task.Run`, `Thread`, or `ThreadPool.QueueUserWorkItem` may be introduced anywhere in the call chain from `RunLoopAsync` through `RunAsync` into the engine. There are none in the current code; this is a permanent constraint.
+- No `ConfigureAwait(false)` may appear anywhere in that same call chain. `ConfigureAwait(false)` discards the captured `SynchronizationContext` and causes continuations to resume on a thread-pool thread, breaking the thread-safety argument.
+
+`TaskCreationOptions.RunContinuationsAsynchronously` is set on every `TaskCompletionSource` in the generated bridge. This prevents `TrySetResult` (called from GDScript's `SubmitPlayCard` / `SubmitPass` / etc.) from running the engine continuation synchronously and inline inside the submit call. With `GodotSynchronizationContext`, the continuation is posted to the next frame instead.
+
+**Synchronous-spin risk.** The `while(true)` loop in `RunAsync` does not block the main thread for any game that has at least one action window, because `strategy.SelectActionAsync` always suspends at an incomplete `TaskCompletionSource.Task` until GDScript submits a decision. The risk is real only for fully-scripted or zero-player games in which no phase ever reaches an action window: if all awaited tasks complete synchronously, the loop spins continuously on the main thread without yielding to Godot. Any game creator authoring a scripted simulation with no human decision points must ensure the engine yields at a frame boundary (e.g., by inserting an `await Task.Yield()` in the strategy, or by introducing a phase with a pass action). This is a game-creator responsibility; the engine does not insert automatic yield points.
 
 ---
 
@@ -4262,6 +4277,128 @@ Without `[GlobalClass]`, Godot does not expose the C# class to GDScript's type s
 
 ---
 
+### D38 — `GameStateView` Storage and GDScript Query Exposure
+
+**Decision:** The generated `ArchetypeNode` stores the current `GameStateView` in a nullable field and exposes seven query methods callable from GDScript. `ArchetypeInterop` forwards all seven.
+
+**Field on `ArchetypeNode`:**
+
+```csharp
+private GameStateView? _stateView;
+```
+
+`InnerStrategy.SelectActionAsync` and `RespondToPromptAsync` each assign `_node._stateView = state` immediately before emitting `action_requested` / `prompt_requested` and awaiting the `TaskCompletionSource`. This ordering guarantees `_stateView` is non-null during the entire window in which GDScript is expected to call query methods.
+
+**Query methods on `ArchetypeNode`:**
+
+```csharp
+public double GetAccumulator(long atomId, string name)      => _stateView?.GetAccumulator(new AtomId(atomId), name) ?? 0.0;
+public bool   HasCondition(long atomId, string name)        => _stateView?.HasCondition(new AtomId(atomId), name) ?? false;
+public double GetComputedProperty(long atomId, string name) => _stateView?.GetComputedProperty(new AtomId(atomId), name) ?? 0.0;
+public long   GetZone(long atomId)  => _stateView != null ? (long)_stateView.GetZone(new AtomId(atomId))  : 0L;
+public long   GetOwner(long atomId) => _stateView != null ? (long)_stateView.GetOwner(new AtomId(atomId)) : 0L;
+public int    GetKind(long atomId)  => _stateView != null ? (int)_stateView.GetKind(new AtomId(atomId))   : -1;
+public Godot.Collections.Array GetAtoms(int kind)
+{
+    var result = new Godot.Collections.Array();
+    if (_stateView == null) return result;
+    foreach (var id in _stateView.GetAtoms((AtomKind)kind))
+        result.Add((long)id);
+    return result;
+}
+```
+
+Outside the action/prompt window (before the first action, or after game-over), query methods return safe defaults (0, false, empty array) rather than throwing. `GetZone` and `GetOwner` return `0L` for absent atoms; `0L` corresponds to `AtomId(0)` which is the conventional none-value (D36). `GetKind` returns `-1` to indicate "no state available" without conflicting with any valid `AtomKind` ordinal.
+
+**Forwarding methods on `archetype_interop.gd`:**
+
+```gdscript
+func get_accumulator(atom_id: int, name: String) -> float:     return _node.GetAccumulator(atom_id, name)
+func has_condition(atom_id: int, name: String) -> bool:        return _node.HasCondition(atom_id, name)
+func get_computed_property(atom_id: int, name: String) -> float: return _node.GetComputedProperty(atom_id, name)
+func get_zone(atom_id: int) -> int:                            return _node.GetZone(atom_id)
+func get_owner(atom_id: int) -> int:                           return _node.GetOwner(atom_id)
+func get_kind(atom_id: int) -> int:                            return _node.GetKind(atom_id)
+func get_atoms(kind: int) -> Array:                            return _node.GetAtoms(kind)
+```
+
+**Null-safety contract:** No synchronization is required. D33 threading invariants already guarantee all signal emissions and GDScript callbacks run on the Godot main thread via `GodotSynchronizationContext`; `_stateView` is read and written only from that thread.
+
+**Visibility:** The query API is an omniscient point-in-time view — no per-player filtering. Hidden information is not a modelled domain concept (see D10). If it is added to the domain model in future, the query API will be extended at that point; `player_name` parameters must not be added speculatively.
+
+**No changes to:** `GameStateView`, `IGameStateReadable`, engine assemblies, derived-signal logic, or D33 threading invariants.
+
+---
+
+### D39 — `AtomKind` GDScript Representation
+
+**Decision:** `GodotEmitter` generates `archetype_atom_kinds.gd` as a static integer-constant file parallel to `archetype_keywords.gd` and `archetype_signals.gd`. `BuildRunner.Run` calls `GodotEmitter.EmitAtomKindConstants(archetypeDir)` as part of the standard Godot artifact emission step.
+
+```gdscript
+# archetype_atom_kinds.gd — generated by Archetype.Build; do not edit
+## Integer constants for AtomKind values.
+## Use with [method ArchetypeInterop.get_atoms] and [method ArchetypeInterop.get_kind].
+class_name ArchetypeAtomKinds
+
+const CARD    = 0
+const ZONE    = 1
+const PLAYER  = 2
+const SESSION = 3
+```
+
+**Rationale:** Standalone C# enums are not accessible from GDScript. Nesting `AtomKind` inside the generated `[GlobalClass]` would create type-ownership confusion (`AtomKind` is defined in `Archetype.Core`). The constant-file pattern is already established by `archetype_keywords.gd` and `archetype_signals.gd`.
+
+**Cross-language contract:** The integer values are the underlying `int` values of the `AtomKind` enum members in declaration order. If `AtomKind` members are reordered in C#, `archetype_atom_kinds.gd` must be regenerated. `BuildRunner.Run` does this automatically on every build; manual edits to the generated file are not supported.
+
+`GetAtoms(int kind)` on `ArchetypeNode` accepts `int` and casts to `AtomKind`. `EmitAtomKindConstants` does not require a `GameDefinition` parameter — it depends only on the static `AtomKind` type.
+
+---
+
+### D40 — Typed GDScript Atom View Classes and State Map Declarations
+
+**Decision:** `GodotEmitter` generates four typed GDScript `RefCounted` classes — `CardAtom`, `ZoneAtom`, `PlayerAtom`, `SessionAtom` — driven by the `StateMapDeclarations` on each atom type definition. `BuildRunner.Run` calls `GodotEmitter.EmitAtomViews(definition, archetypeDir)` after `EmitInteropScripts`. `ArchetypeInterop` gains four factory methods appended by `AppendInteropFactoryMethods`.
+
+**Object type:** Pure GDScript classes extending `RefCounted`. No Godot `Node` coupling; no scene tree placement required. Appropriate for query wrappers that do not render or participate in `_process`.
+
+**Update model:** Pull — every property access delegates live to `ArchetypeInterop`. Properties are GDScript getter methods (`func get_health() -> float`). No caching, no subscription, no invalidation complexity. Null-safety inherited from D38: returns 0/false/empty before game start or after game over.
+
+**Property surface per class:**
+
+*Always present on all kinds:*
+- `func get_atom_id() -> int`
+
+*`CardAtom` structural:*
+- `func get_zone_id() -> int` (delegates to `ArchetypeInterop.get_zone`)
+- `func get_owner_id() -> int` (delegates to `ArchetypeInterop.get_atom_owner`)
+
+*`ZoneAtom`, `PlayerAtom` structural:*
+- `func get_owner_id() -> int`
+
+*`SessionAtom` structural:* none beyond `get_atom_id()` — session has no owner and no zone.
+
+*Typed fields from `StateMapDeclarations`:*
+- Each `StateFieldType.Number` field named `foo-bar` → `func get_foo_bar() -> float`
+- Each `StateFieldType.Bool` field named `foo-bar` → `func has_foo_bar() -> bool`
+- Field names are converted from kebab-case to snake_case via `ToSnakeCase`.
+
+**Factory methods on `ArchetypeInterop`:**
+- `func get_card(atom_id: int) -> CardAtom`
+- `func get_zone_atom(atom_id: int) -> ZoneAtom`
+- `func get_player(atom_id: int) -> PlayerAtom`
+- `func get_session() -> SessionAtom` — singleton pattern: queries `get_atoms(ArchetypeAtomKinds.SESSION)[0]` on first call, caches result in `_session_atom`
+
+**Files emitted:** `card_atom.gd`, `zone_atom.gd`, `player_atom.gd`, `session_atom.gd` — alongside existing `archetype/` artifacts.
+
+**Relationship to state map declarations (D40 dependency):** `EmitAtomViews` unions `StateMapDeclarations` across all definitions of each kind via `UnionKindDeclarations`. Conflicting `StateFieldType` values for the same field name raise `InvalidOperationException` (should be caught at `Build()` time by `StateMapValidator`). Kinds with no declarations (all null `StateMapDeclarations`) emit view files with structural getters only — no typed field methods.
+
+**Known limitation:** Property keywords (computed derived values like threshold or delirium) are not invocable from GDScript via this mechanism. The workaround is to implement them as state-based rules that `apply-condition`, making them queryable via `has_condition` / `has_<name>()`. Direct GDScript invocation of arbitrary property keywords is deferred.
+
+**`SessionAtom` note:** `get_session()` is a singleton factory. The session atom ID is resolved lazily via `get_atoms(ArchetypeAtomKinds.SESSION)`. The cached `_session_atom` reference is valid for the lifetime of the game session; it must be reset if `StartGame` is called again (handled by `_node = null` reset in `register`).
+
+**No changes to:** engine assemblies, `GameStateView`, `IGameStateReadable`, D33 threading invariants, derived-signal logic.
+
+---
+
 ## Open Items
 
 - [x] Language and runtime — D1
@@ -4301,3 +4438,6 @@ Without `[GlobalClass]`, Godot does not expose the C# class to GDScript's type s
 - [x] File-based runtime loading in generated `StartGame`; `archetype_interop.gd` `start()` convenience method — D35
 - [x] `AtomId` implicit conversions (`long ↔ AtomId`) — D36
 - [x] `[GlobalClass]` on generated `ArchetypeNode` — D37
+- [x] `GameStateView` storage and GDScript query exposure (`get_accumulator`, `has_condition`, `get_computed_property`, `get_zone`, `get_owner`, `get_kind`, `get_atoms`) — D38
+- [x] `AtomKind` GDScript representation (`archetype_atom_kinds.gd` integer constants) — D39
+- [x] Typed GDScript atom view classes (`CardAtom`, `ZoneAtom`, `PlayerAtom`, `SessionAtom`) and state map declarations — D40

@@ -29,7 +29,12 @@ public sealed record CardDefinition(
     IReadOnlyList<NamedEffectBlockDef> AdditionalEffects,
     IReadOnlyList<StaticEffectDef> StaticEffects,
     KeywordNode? ActivationCondition = null,
-    IReadOnlyList<CostDef>? Cost = null);
+    IReadOnlyList<CostDef>? Cost = null,
+    /// <summary>
+    /// Declared mutable state fields for instances of this card definition.
+    /// <c>null</c> is treated as empty — existing callers are unaffected.
+    /// </summary>
+    IReadOnlyList<StateFieldDecl>? StateMapDeclarations = null);
 
 /// <summary>
 /// A named, activatable effect block on a card (e.g. an activated ability).
@@ -51,7 +56,12 @@ public sealed record NamedEffectBlockDef(
 /// </summary>
 public sealed record ZoneDefinition(
     string Name,
-    IReadOnlyDictionary<string, object> StaticProperties);
+    IReadOnlyDictionary<string, object> StaticProperties,
+    /// <summary>
+    /// Declared mutable state fields for instances of this zone definition.
+    /// <c>null</c> is treated as empty — existing callers are unaffected.
+    /// </summary>
+    IReadOnlyList<StateFieldDecl>? StateMapDeclarations = null);
 
 /// <summary>
 /// Definition of a game phase, run in turn order.  <see cref="Init"/> runs
@@ -97,7 +107,12 @@ public sealed record CardSet(
 /// resources) belongs in the <see cref="InitManifest"/>.
 /// </summary>
 public sealed record PlayerDefinition(
-    IReadOnlyDictionary<string, object> StaticProperties);
+    IReadOnlyDictionary<string, object> StaticProperties,
+    /// <summary>
+    /// Declared mutable state fields for instances of this player definition.
+    /// <c>null</c> is treated as empty — existing callers are unaffected.
+    /// </summary>
+    IReadOnlyList<StateFieldDecl>? StateMapDeclarations = null);
 
 // ---------------------------------------------------------------------------
 //  GameDefinition — the immutable aggregate (D14)
@@ -143,7 +158,14 @@ public sealed record GameDefinition(
     // GameDefinitionBuilder.Build() throws DefinitionException if not set.
     InitManifest InitManifest,
     IReadOnlyList<string>? PlayableZoneNames = null,
-    string? Id = null)
+    string? Id = null,
+    /// <summary>
+    /// Additional state fields declared on the singleton session atom by the game creator.
+    /// The two engine-reserved session fields (<c>turn-number</c> and <c>phase-index</c>)
+    /// are implicitly declared and must not appear here.
+    /// <c>null</c> is treated as empty — existing callers are unaffected.
+    /// </summary>
+    IReadOnlyList<StateFieldDecl>? SessionStateMapDeclarations = null)
 {
     /// <summary>
     /// Returns a new <see cref="GameDefinition"/> with the card definitions

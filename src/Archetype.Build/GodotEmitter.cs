@@ -4,7 +4,7 @@ using Archetype.Core;
 namespace Archetype.Build;
 
 /// <summary>
-/// Generates GDScript interop files from a <see cref="GameDefinition"/> (D32, D33).
+/// Generates GDScript interop files from a <see cref="GameDefinition"/> (D32, D33, D38, D39).
 /// <para>
 /// Files produced:
 /// <list type="bullet">
@@ -12,7 +12,8 @@ namespace Archetype.Build;
 ///   <item><c>game_events.gd</c> — GDScript signal declarations derived from keyword event log contributions.</item>
 ///   <item><c>ArchetypeNode.cs</c> — generated C# partial class bridging <c>GameSession</c> to GDScript (D33).</item>
 ///   <item><c>archetype_signals.gd</c> — per-game signal name constants in SCREAMING_SNAKE_CASE (D33).</item>
-///   <item><c>archetype_interop.gd</c> — static autoload wrapper over <c>ArchetypeNode</c> (D33).</item>
+///   <item><c>archetype_interop.gd</c> — static autoload wrapper over <c>ArchetypeNode</c> with state query forwarding methods (D33, D38).</item>
+///   <item><c>archetype_atom_kinds.gd</c> — integer constants for <see cref="AtomKind"/> values (D39).</item>
 /// </list>
 /// </para>
 /// </summary>
@@ -174,6 +175,9 @@ public static class GodotEmitter
         sb.AppendLine("    // --- Session state ---");
         sb.AppendLine("    private Task? _runTask;");
         sb.AppendLine("    private CancellationTokenSource? _cts;");
+        // _stateView is set by InnerStrategy before each action/prompt window (D38).
+        // Query methods return safe defaults when it is null (before game start or after game over).
+        sb.AppendLine("    private GameStateView? _stateView;");
         sb.AppendLine();
 
         // One TCS pair per player for action + prompt suspension.
@@ -205,7 +209,7 @@ public static class GodotEmitter
         sb.AppendLine("        var definition = JsonSerializer.Deserialize<GameDefinition>(defJson, jsonOptions)!;");
         sb.AppendLine();
         sb.AppendLine("        var cardSets = new List<CardSet>();");
-        sb.AppendLine("        var paths = cardSetPaths ?? LoadDefaultCardSetPaths();");
+        sb.AppendLine("        var paths = (cardSetPaths == null || cardSetPaths.Count == 0) ? LoadDefaultCardSetPaths() : cardSetPaths;");
         sb.AppendLine("        foreach (var path in paths)");
         sb.AppendLine("        {");
         sb.AppendLine("            var json = FileAccess.GetFileAsString(path.ToString()!);");
@@ -256,7 +260,7 @@ public static class GodotEmitter
         sb.AppendLine("        }");
         sb.AppendLine("        catch (System.Exception ex)");
         sb.AppendLine("        {");
-        sb.AppendLine("            GD.PrintErr(\"[ArchetypeNode] engine error: \", ex.Message);");
+        sb.AppendLine("            GD.PrintErr(\"[ArchetypeNode] engine error: \", ex.Message, \"\\n\", ex.StackTrace);");
         sb.AppendLine("            EmitSignal(SignalName.GameError, ex.Message);");
         sb.AppendLine("        }");
         sb.AppendLine("    }");
@@ -357,6 +361,39 @@ public static class GodotEmitter
         sb.AppendLine("    }");
         sb.AppendLine();
 
+        // --- State query methods (D38) ---
+        // These forward to _stateView and return safe defaults when null (before game start or after game over).
+        sb.AppendLine("    // --- GDScript-callable state query methods (D38) ---");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the named accumulator value for the given atom, or 0.0 if no state is available.</summary>");
+        sb.AppendLine("    public double GetAccumulator(long atomId, string name) => _stateView?.GetAccumulator(new AtomId(atomId), name) ?? 0.0;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns whether the named condition is set on the given atom, or false if no state is available.</summary>");
+        sb.AppendLine("    public bool HasCondition(long atomId, string name) => _stateView?.HasCondition(new AtomId(atomId), name) ?? false;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the named computed property for the given atom, or 0.0 if no state is available.</summary>");
+        sb.AppendLine("    public double GetComputedProperty(long atomId, string name) => _stateView?.GetComputedProperty(new AtomId(atomId), name) ?? 0.0;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the zone atom ID for the given card atom, or 0L if no state is available.</summary>");
+        sb.AppendLine("    public long GetZone(long atomId) => _stateView != null ? (long)_stateView.GetZone(new AtomId(atomId)) : 0L;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the owner atom ID for the given atom, or 0L if no state is available.</summary>");
+        sb.AppendLine("    public long GetAtomOwner(long atomId) => _stateView != null ? (long)_stateView.GetOwner(new AtomId(atomId)) : 0L;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the AtomKind ordinal for the given atom, or -1 if no state is available.</summary>");
+        sb.AppendLine("    public int GetKind(long atomId) => _stateView != null ? (int)_stateView.GetKind(new AtomId(atomId)) : -1;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns all atom IDs of the given AtomKind as an array of longs.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetAtoms(int kind)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var id in _stateView.GetAtoms((AtomKind)kind))");
+        sb.AppendLine("            result.Add((long)id);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
         // --- InnerStrategy nested class ---
         sb.AppendLine("    // --- InnerStrategy — per-player IPlayerStrategy implementation ---");
         sb.AppendLine();
@@ -387,6 +424,8 @@ public static class GodotEmitter
         sb.AppendLine("            var tcs = new TaskCompletionSource<PlayerAction?>(");
         sb.AppendLine("                TaskCreationOptions.RunContinuationsAsynchronously);");
         sb.AppendLine("            _node._pendingActions[_playerName] = tcs;");
+        // Store state before emitting so query methods are callable during the action window (D38).
+        sb.AppendLine("            _node._stateView = state;");
         sb.AppendLine("            _node.EmitSignal(SignalName.ActionRequested, _playerName, availableDict);");
         sb.AppendLine();
         sb.AppendLine("            using var reg = ct.Register(() => tcs.TrySetCanceled());");
@@ -403,6 +442,8 @@ public static class GodotEmitter
         sb.AppendLine("            var tcs = new TaskCompletionSource<PromptResponse>(");
         sb.AppendLine("                TaskCreationOptions.RunContinuationsAsynchronously);");
         sb.AppendLine("            _node._pendingPrompts[_playerName] = tcs;");
+        // Store state before emitting so query methods are callable during the prompt window (D38).
+        sb.AppendLine("            _node._stateView = state;");
         sb.AppendLine("            _node.EmitSignal(SignalName.PromptRequested, _playerName, promptType, contextDict);");
         sb.AppendLine();
         sb.AppendLine("            using var reg = ct.Register(() => tcs.TrySetCanceled());");
@@ -570,9 +611,11 @@ public static class GodotEmitter
         sb.AppendLine("## Call this from your main scene's [method Node._ready], then call [method start].");
         sb.AppendLine("func register(node: ArchetypeNode) -> void:");
         sb.AppendLine("    _node = node");
-        sb.AppendLine("    _node.action_requested.connect(_on_action_requested)");
-        sb.AppendLine("    _node.action_resolved.connect(_on_action_resolved)");
-        sb.AppendLine("    _node.game_over.connect(_on_game_over)");
+        sb.AppendLine("    _node.ActionRequested.connect(_on_action_requested)");
+        sb.AppendLine("    _node.ActionResolved.connect(_on_action_resolved)");
+        sb.AppendLine("    _node.PromptRequested.connect(_on_prompt_requested)");
+        sb.AppendLine("    _node.GameOver.connect(_on_game_over)");
+        sb.AppendLine("    _node.GameError.connect(_on_game_error)");
         sb.AppendLine();
         sb.AppendLine("## Emitted when a player must choose an action.");
         sb.AppendLine("## [param player_name] identifies which player is acting.");
@@ -582,8 +625,16 @@ public static class GodotEmitter
         sb.AppendLine("## Emitted after the engine finishes resolving an action,");
         sb.AppendLine("## before the next [signal action_requested].");
         sb.AppendLine("signal action_resolved()");
+        sb.AppendLine("## Emitted when the engine needs a player to respond to a prompt.");
+        sb.AppendLine("## [param player_name] identifies which player must respond.");
+        sb.AppendLine("## [param prompt_type] is the prompt class name (e.g. [code]ChoicePrompt[/code]).");
+        sb.AppendLine("## [param context] contains prompt-specific fields.");
+        sb.AppendLine("signal prompt_requested(player_name: String, prompt_type: String, context: Dictionary)");
         sb.AppendLine("## Emitted when the game ends. [param winner_name] is empty for a draw.");
         sb.AppendLine("signal game_over(winner_name: String)");
+        sb.AppendLine("## Emitted when an unrecoverable engine error occurs.");
+        sb.AppendLine("## [param message] contains the error description.");
+        sb.AppendLine("signal game_error(message: String)");
         sb.AppendLine();
         sb.AppendLine("func _on_action_requested(player_name: String, available: Dictionary) -> void:");
         sb.AppendLine("    action_requested.emit(player_name, available)");
@@ -591,8 +642,14 @@ public static class GodotEmitter
         sb.AppendLine("func _on_action_resolved() -> void:");
         sb.AppendLine("    action_resolved.emit()");
         sb.AppendLine();
+        sb.AppendLine("func _on_prompt_requested(player_name: String, prompt_type: String, context: Dictionary) -> void:");
+        sb.AppendLine("    prompt_requested.emit(player_name, prompt_type, context)");
+        sb.AppendLine();
         sb.AppendLine("func _on_game_over(winner_name: String) -> void:");
         sb.AppendLine("    game_over.emit(winner_name)");
+        sb.AppendLine();
+        sb.AppendLine("func _on_game_error(message: String) -> void:");
+        sb.AppendLine("    game_error.emit(message)");
         sb.AppendLine();
         sb.AppendLine("## Starts the game, loading definition and card sets from the generated");
         sb.AppendLine("## [code]res://archetype/[/code] files. Call after [method register].");
@@ -623,8 +680,70 @@ public static class GodotEmitter
         sb.AppendLine("## [param response] is a dictionary of chosen values keyed by prompt field name.");
         sb.AppendLine("func submit_prompt_response(player_name: String, response: Dictionary) -> void:");
         sb.AppendLine("    _node.SubmitPromptResponse(player_name, response)");
+        sb.AppendLine();
+        // State query forwarding methods (D38).
+        // These are callable outside an action window but return safe defaults — callers should
+        // not rely on meaningful values outside the action_requested / prompt_requested window.
+        sb.AppendLine("## Returns the named accumulator value for [param atom_id].");
+        sb.AppendLine("## Returns 0.0 before the game starts or after it ends.");
+        sb.AppendLine("func get_accumulator(atom_id: int, name: String) -> float:     return _node.GetAccumulator(atom_id, name)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns true if the named condition is set on [param atom_id].");
+        sb.AppendLine("## Returns false before the game starts or after it ends.");
+        sb.AppendLine("func has_condition(atom_id: int, name: String) -> bool:        return _node.HasCondition(atom_id, name)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the named computed property for [param atom_id].");
+        sb.AppendLine("## Returns 0.0 before the game starts or after it ends.");
+        sb.AppendLine("func get_computed_property(atom_id: int, name: String) -> float: return _node.GetComputedProperty(atom_id, name)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the zone atom ID for the given card atom.");
+        sb.AppendLine("## Returns 0 before the game starts or after it ends.");
+        sb.AppendLine("func get_zone(atom_id: int) -> int:                            return _node.GetZone(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the owner atom ID for the given atom.");
+        sb.AppendLine("## Returns 0 before the game starts or after it ends.");
+        sb.AppendLine("func get_atom_owner(atom_id: int) -> int:                      return _node.GetAtomOwner(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the [ArchetypeAtomKinds] integer constant for the given atom.");
+        sb.AppendLine("## Returns -1 before the game starts or after it ends.");
+        sb.AppendLine("func get_kind(atom_id: int) -> int:                            return _node.GetKind(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns all atom IDs of the given [param kind] as an Array of ints.");
+        sb.AppendLine("## Returns an empty Array before the game starts or after it ends.");
+        sb.AppendLine("func get_atoms(kind: int) -> Array:                            return _node.GetAtoms(kind)");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_interop.gd"), sb.ToString());
+    }
+
+    // -----------------------------------------------------------------------
+    //  AtomKind constants file (D39)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Emits <c>archetype_atom_kinds.gd</c> to <paramref name="outputDir"/> (D39).
+    /// <para>
+    /// Contains integer constants for each <see cref="AtomKind"/> value so GDScript
+    /// can pass kinds to <c>ArchetypeInterop.get_atoms</c> and read the result of
+    /// <c>ArchetypeInterop.get_kind</c> without hard-coding magic numbers.
+    /// The values are the underlying <c>int</c> ordinals of <see cref="AtomKind"/>
+    /// in declaration order: Card=0, Zone=1, Player=2, Session=3.
+    /// </para>
+    /// </summary>
+    public static void EmitAtomKindConstants(string outputDir)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("# archetype_atom_kinds.gd — generated by Archetype.Build; do not edit");
+        sb.AppendLine("## Integer constants for AtomKind values.");
+        sb.AppendLine("## Use with [method ArchetypeInterop.get_atoms] and [method ArchetypeInterop.get_kind].");
+        sb.AppendLine("class_name ArchetypeAtomKinds");
+        sb.AppendLine();
+        // Values must match AtomKind enum declaration order in Archetype.Core (D39 cross-language contract).
+        sb.AppendLine($"const CARD    = {(int)AtomKind.Card}");
+        sb.AppendLine($"const ZONE    = {(int)AtomKind.Zone}");
+        sb.AppendLine($"const PLAYER  = {(int)AtomKind.Player}");
+        sb.AppendLine($"const SESSION = {(int)AtomKind.Session}");
+
+        File.WriteAllText(Path.Combine(outputDir, "archetype_atom_kinds.gd"), sb.ToString());
     }
 
     private static void CollectFromBlock(EffectBlockDef block, HashSet<string> collected)
@@ -632,6 +751,243 @@ public static class GodotEmitter
         foreach (var step in block.Steps)
             collected.Add(step.KeywordName);
     }
+
+    // -----------------------------------------------------------------------
+    //  Atom view files (D40)
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Emits four typed GDScript atom view classes (<c>card_atom.gd</c>,
+    /// <c>zone_atom.gd</c>, <c>player_atom.gd</c>, <c>session_atom.gd</c>)
+    /// and appends the four factory methods to the existing
+    /// <c>archetype_interop.gd</c> (D40).
+    /// <para>
+    /// Each class extends <c>RefCounted</c> and exposes:
+    /// <list type="bullet">
+    ///   <item>A static <c>_create(atom_id)</c> factory.</item>
+    ///   <item>A getter per <see cref="StateFieldType.Number"/> field:
+    ///         <c>get_&lt;snake_name&gt;() → float</c>.</item>
+    ///   <item>A predicate per <see cref="StateFieldType.Bool"/> field:
+    ///         <c>has_&lt;snake_name&gt;() → bool</c>.</item>
+    ///   <item>Structural getters always present for the atom kind.</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// When the same field name is declared with conflicting <see cref="StateFieldType"/>
+    /// values across definitions of the same kind, <see cref="InvalidOperationException"/>
+    /// is raised (this should have been caught by <c>Build()</c>).
+    /// </para>
+    /// </summary>
+    public static void EmitAtomViews(GameDefinition definition, string outputDir)
+    {
+        // Build per-kind declaration unions.
+        var cardDecls   = UnionKindDeclarations(definition.CardDefinitions.Values
+                              .Select(c => c.StateMapDeclarations));
+        var zoneDecls   = UnionKindDeclarations(definition.ZoneDefinitions.Values
+                              .Select(z => z.StateMapDeclarations));
+        var playerDecls = UnionKindDeclarations(definition.PlayerDefinitions.Values
+                              .Select(p => p.StateMapDeclarations));
+        var sessionDecls = (definition.SessionStateMapDeclarations ?? []).ToList();
+
+        // Emit the four atom view files.
+        EmitAtomViewFile(outputDir, "card_atom.gd",    "CardAtom",    cardDecls,    AtomKind.Card);
+        EmitAtomViewFile(outputDir, "zone_atom.gd",    "ZoneAtom",    zoneDecls,    AtomKind.Zone);
+        EmitAtomViewFile(outputDir, "player_atom.gd",  "PlayerAtom",  playerDecls,  AtomKind.Player);
+        EmitAtomViewFile(outputDir, "session_atom.gd", "SessionAtom", sessionDecls, AtomKind.Session);
+
+        // Append factory methods to archetype_interop.gd.
+        AppendInteropFactoryMethods(outputDir);
+    }
+
+    /// <summary>
+    /// Emits one typed GDScript atom view class file.
+    /// </summary>
+    private static void EmitAtomViewFile(
+        string outputDir,
+        string fileName,
+        string className,
+        IReadOnlyList<StateFieldDecl> declarations,
+        AtomKind kind)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"# {fileName} — generated by Archetype.Build; do not edit");
+        sb.AppendLine($"## Typed view wrapper for {kind} atoms (D40).");
+        var factoryMethodName = kind switch
+        {
+            AtomKind.Card    => "get_card",
+            AtomKind.Zone    => "get_zone_atom",
+            AtomKind.Player  => "get_player",
+            AtomKind.Session => "get_session",
+            _                => $"get_{kind.ToString().ToLowerInvariant()}",
+        };
+        sb.AppendLine($"## Use [method ArchetypeInterop.{factoryMethodName}] to obtain instances.");
+        sb.AppendLine($"class_name {className}");
+        sb.AppendLine("extends RefCounted");
+        sb.AppendLine();
+        sb.AppendLine("var _atom_id: int");
+        sb.AppendLine();
+
+        // Static factory.
+        sb.AppendLine($"## Creates a new [{className}] wrapping [param atom_id].");
+        sb.AppendLine($"static func _create(atom_id: int) -> {className}:");
+        sb.AppendLine($"    var obj := {className}.new()");
+        sb.AppendLine("    obj._atom_id = atom_id");
+        sb.AppendLine("    return obj");
+        sb.AppendLine();
+
+        // Structural getters — always present.
+        EmitStructuralGetters(sb, kind);
+
+        // Typed field getters/predicates derived from state map declarations.
+        foreach (var decl in declarations)
+        {
+            var snakeName = ToSnakeCase(decl.Name);
+            if (decl.FieldType == StateFieldType.Number)
+            {
+                if (decl.TextTemplate is not null)
+                    sb.AppendLine($"## Returns {decl.TextTemplate}.");
+                sb.AppendLine($"func get_{snakeName}() -> float:");
+                sb.AppendLine($"    return ArchetypeInterop.get_accumulator(_atom_id, \"{decl.Name}\")");
+                sb.AppendLine();
+            }
+            else // Bool
+            {
+                if (decl.TextTemplate is not null)
+                    sb.AppendLine($"## Returns true if {decl.TextTemplate}.");
+                sb.AppendLine($"func has_{snakeName}() -> bool:");
+                sb.AppendLine($"    return ArchetypeInterop.has_condition(_atom_id, \"{decl.Name}\")");
+                sb.AppendLine();
+            }
+        }
+
+        File.WriteAllText(Path.Combine(outputDir, fileName), sb.ToString());
+    }
+
+    /// <summary>
+    /// Emits the structural getters that are always present for a given atom kind,
+    /// independent of <see cref="StateFieldDecl"/> declarations.
+    /// </summary>
+    private static void EmitStructuralGetters(StringBuilder sb, AtomKind kind)
+    {
+        // get_atom_id() is always present on every atom kind.
+        sb.AppendLine("## Returns the raw engine atom ID.");
+        sb.AppendLine("func get_atom_id() -> int:");
+        sb.AppendLine("    return _atom_id");
+        sb.AppendLine();
+
+        switch (kind)
+        {
+            case AtomKind.Card:
+                sb.AppendLine("## Returns the zone atom ID this card currently occupies.");
+                sb.AppendLine("func get_zone_id() -> int:");
+                sb.AppendLine("    return ArchetypeInterop.get_zone(_atom_id)");
+                sb.AppendLine();
+                sb.AppendLine("## Returns the owner player atom ID.");
+                sb.AppendLine("func get_owner_id() -> int:");
+                sb.AppendLine("    return ArchetypeInterop.get_atom_owner(_atom_id)");
+                sb.AppendLine();
+                break;
+
+            case AtomKind.Zone:
+            case AtomKind.Player:
+                sb.AppendLine("## Returns the owner player atom ID.");
+                sb.AppendLine("func get_owner_id() -> int:");
+                sb.AppendLine("    return ArchetypeInterop.get_atom_owner(_atom_id)");
+                sb.AppendLine();
+                break;
+
+            case AtomKind.Session:
+                // Session has no owner and no zone; only get_atom_id().
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Appends the four atom view factory methods to the existing
+    /// <c>archetype_interop.gd</c> file.  Must be called after
+    /// <see cref="EmitInteropScripts"/> has written the base file.
+    /// </summary>
+    private static void AppendInteropFactoryMethods(string outputDir)
+    {
+        var path = Path.Combine(outputDir, "archetype_interop.gd");
+        var sb = new StringBuilder();
+
+        sb.AppendLine();
+        sb.AppendLine("## Returns a [CardAtom] view for [param atom_id].");
+        sb.AppendLine("func get_card(atom_id: int) -> CardAtom:");
+        sb.AppendLine("    return CardAtom._create(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns a [ZoneAtom] view for [param atom_id].");
+        sb.AppendLine("func get_zone_atom(atom_id: int) -> ZoneAtom:");
+        sb.AppendLine("    return ZoneAtom._create(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns a [PlayerAtom] view for [param atom_id].");
+        sb.AppendLine("func get_player(atom_id: int) -> PlayerAtom:");
+        sb.AppendLine("    return PlayerAtom._create(atom_id)");
+        sb.AppendLine();
+        // get_session() — singleton pattern.
+        sb.AppendLine("var _session_atom: SessionAtom = null");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the singleton [SessionAtom] view.");
+        sb.AppendLine("## The instance is created on first call and cached for the session lifetime.");
+        sb.AppendLine("func get_session() -> SessionAtom:");
+        sb.AppendLine("    if _session_atom == null:");
+        sb.AppendLine("        var ids: Array = get_atoms(ArchetypeAtomKinds.SESSION)");
+        sb.AppendLine("        if ids.size() > 0:");
+        sb.AppendLine("            _session_atom = SessionAtom._create(ids[0])");
+        sb.AppendLine("    return _session_atom");
+
+        File.AppendAllText(path, sb.ToString());
+    }
+
+    /// <summary>
+    /// Unions per-definition <see cref="StateFieldDecl"/> lists across all
+    /// definitions of one kind, deduplicating matching fields and raising
+    /// <see cref="InvalidOperationException"/> on conflicting types.
+    /// </summary>
+    private static List<StateFieldDecl> UnionKindDeclarations(
+        IEnumerable<IReadOnlyList<StateFieldDecl>?> sources)
+    {
+        var seen = new Dictionary<string, StateFieldType>(StringComparer.Ordinal);
+        var result = new List<StateFieldDecl>();
+
+        foreach (var list in sources)
+        {
+            if (list is null) continue;
+            foreach (var decl in list)
+            {
+                if (seen.TryGetValue(decl.Name, out var existingType))
+                {
+                    if (existingType != decl.FieldType)
+                        throw new InvalidOperationException(
+                            $"Conflicting StateFieldType for field '{decl.Name}': " +
+                            $"declared as both {existingType} and {decl.FieldType}. " +
+                            "This should have been caught by Build().");
+                    // Same name + same type → already in result, skip.
+                }
+                else
+                {
+                    seen[decl.Name] = decl.FieldType;
+                    result.Add(decl);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // -----------------------------------------------------------------------
+    //  String case helpers
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Converts a kebab-case or camelCase field name to snake_case for GDScript
+    /// method names.
+    /// <example><c>take-damage</c> → <c>take_damage</c></example>
+    /// <example><c>is-shielded</c> → <c>is_shielded</c></example>
+    /// </summary>
+    internal static string ToSnakeCase(string name) =>
+        name.Replace('-', '_');
 
     /// <summary>
     /// Converts a kebab-case keyword name to SCREAMING_SNAKE_CASE.

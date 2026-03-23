@@ -159,6 +159,8 @@ public sealed class KeywordNodeConverter : JsonConverter<KeywordNode>
         }
     }
 
+    // JsonSerializer.Deserialize<> creates its own internal reader over the raw text,
+    // already positioned at StartObject — no manual reader.Read() needed here.
     private static Invocation DeserializeInvocation(JsonElement root, JsonSerializerOptions options)
     {
         var kwName = root.GetProperty("KeywordName").GetString()
@@ -187,6 +189,7 @@ public sealed class KeywordNodeConverter : JsonConverter<KeywordNode>
 
         var bytes  = ms.ToArray();
         var reader = new Utf8JsonReader(bytes);
+        reader.Read(); // advance to StartObject before delegating
         return _literalConverter.Read(ref reader, typeof(Literal), options)!;
     }
 }
