@@ -1,6 +1,6 @@
 # Implementation Status
 
-> Last updated: 2026-03-24 (D40: StateMapDeclarations, StateMapValidator, GDScript atom views. 262/262 C# tests passing.)
+> Last updated: 2026-03-24 (D40: StateMapDeclarations, StateMapValidator, GDScript atom views. 262/262 C# tests passing. Reviewer: PASS — D40 recorded in docs/architecture.md. Two MINORs fixed directly by reviewer.)
 > Branch: `impl/d38-d39-state-query-atomkind`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
