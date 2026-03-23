@@ -1,7 +1,7 @@
 # Implementation Status
 
-> Last updated: 2026-03-23 (D38–D39: GameStateView query exposure and AtomKind GDScript constants. 229/229 C# tests passing.)
-> Branch: `impl/text-renderer`
+> Last updated: 2026-03-24 (D40: StateMapDeclarations, StateMapValidator, GDScript atom views. 262/262 C# tests passing.)
+> Branch: `impl/d38-d39-state-query-atomkind`
 > All source in `src/` (4 assemblies) + `tests/Archetype.Tests/`.
 
 ---
@@ -11,7 +11,7 @@
 | Assembly | Role | Status |
 |---|---|---|
 | `Archetype.Core` | Immutable data types, interfaces, `BuiltInKeywords` registry | ✅ Complete (Tier 1 subset) |
-| `Archetype.Build` | `Kw` factory shorthands, `GameDefinitionBuilder`, `CardSet` serialization, `BuildRunner`, `GodotEmitter` (D32, D33, D38, D39) | ✅ Complete — D38/D39 implemented |
+| `Archetype.Build` | `Kw` factory shorthands, `GameDefinitionBuilder`, `CardSet` serialization, `BuildRunner`, `GodotEmitter` (D32, D33, D38, D39, D40), `StateMapValidator` | ✅ Complete — D40 implemented |
 | `Archetype.Engine` | Runtime executor, `GameState`, `EventLog`, `LifetimeChecker`, `TriggerResolver`, `ActionResolver`, `GameSession`, `GameSessionBuilder` | ✅ Tier 1–4 complete |
 | `Archetype.Text` | Card text renderer | ✅ Complete (Tier 4) |
 | ~~`Archetype.Tooling.Server`~~ | Removed (superseded by `Archetype.Build` code-first authoring model — D32) | ❌ Deleted |
