@@ -378,7 +378,7 @@ public static class GodotEmitter
         sb.AppendLine("    public long GetZone(long atomId) => _stateView != null ? (long)_stateView.GetZone(new AtomId(atomId)) : 0L;");
         sb.AppendLine();
         sb.AppendLine("    /// <summary>Returns the owner atom ID for the given atom, or 0L if no state is available.</summary>");
-        sb.AppendLine("    public long GetOwner(long atomId) => _stateView != null ? (long)_stateView.GetOwner(new AtomId(atomId)) : 0L;");
+        sb.AppendLine("    public long GetAtomOwner(long atomId) => _stateView != null ? (long)_stateView.GetOwner(new AtomId(atomId)) : 0L;");
         sb.AppendLine();
         sb.AppendLine("    /// <summary>Returns the AtomKind ordinal for the given atom, or -1 if no state is available.</summary>");
         sb.AppendLine("    public int GetKind(long atomId) => _stateView != null ? (int)_stateView.GetKind(new AtomId(atomId)) : -1;");
@@ -702,7 +702,7 @@ public static class GodotEmitter
         sb.AppendLine();
         sb.AppendLine("## Returns the owner atom ID for the given atom.");
         sb.AppendLine("## Returns 0 before the game starts or after it ends.");
-        sb.AppendLine("func get_owner(atom_id: int) -> int:                           return _node.GetOwner(atom_id)");
+        sb.AppendLine("func get_atom_owner(atom_id: int) -> int:                      return _node.GetAtomOwner(atom_id)");
         sb.AppendLine();
         sb.AppendLine("## Returns the [ArchetypeAtomKinds] integer constant for the given atom.");
         sb.AppendLine("## Returns -1 before the game starts or after it ends.");

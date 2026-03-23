@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0-alpha.6] - 2026-03-23
+
+### Fixed
+- Renamed generated `get_owner` / `GetOwner` to `get_atom_owner` / `GetAtomOwner` — `get_owner()` shadows a Godot `Node` built-in and causes a GDScript signature mismatch error
+
 ## [0.3.0-alpha.5] - 2026-03-23
 
 ### Added

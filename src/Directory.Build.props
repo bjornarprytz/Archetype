@@ -7,6 +7,6 @@
     <PackageProjectUrl>https://github.com/bjornarprytz/Archetype</PackageProjectUrl>
     <PackageTags>archetype;card-game;game-engine;godot</PackageTags>
     <IsPackable>true</IsPackable>
-    <Version>0.3.0-alpha.5</Version>
+    <Version>0.3.0-alpha.6</Version>
   </PropertyGroup>
 </Project>
