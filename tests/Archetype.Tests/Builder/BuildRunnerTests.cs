@@ -490,7 +490,7 @@ public class BuildRunnerTests : IDisposable
         Assert.Contains("HasCondition", content);
         Assert.Contains("GetComputedProperty", content);
         Assert.Contains("GetZone", content);
-        Assert.Contains("GetOwner", content);
+        Assert.Contains("GetAtomOwner", content);
         Assert.Contains("GetKind", content);
         Assert.Contains("GetAtoms", content);
         // _stateView field must be present
@@ -511,7 +511,7 @@ public class BuildRunnerTests : IDisposable
         Assert.Contains("func has_condition(", content);
         Assert.Contains("func get_computed_property(", content);
         Assert.Contains("func get_zone(", content);
-        Assert.Contains("func get_owner(", content);
+        Assert.Contains("func get_atom_owner(", content);
         Assert.Contains("func get_kind(", content);
         Assert.Contains("func get_atoms(", content);
     }
