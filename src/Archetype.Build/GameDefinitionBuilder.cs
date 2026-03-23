@@ -37,6 +37,7 @@ public sealed class GameDefinitionBuilder
     private readonly Dictionary<string, PlayerDefinition> _playerDefinitions = new();
     private InitManifest? _initManifest;
     private IReadOnlyList<string>? _playableZoneNames;
+    private IReadOnlyList<StateFieldDecl>? _sessionStateMap;
 
     // -----------------------------------------------------------------------
     //  Game identity
@@ -55,8 +56,19 @@ public sealed class GameDefinitionBuilder
 
     /// <summary>Registers a zone definition.</summary>
     public GameDefinitionBuilder AddZone(string name, IReadOnlyDictionary<string, object> staticProperties)
+        => AddZone(name, staticProperties, stateMapDeclarations: null);
+
+    /// <summary>
+    /// Registers a zone definition with explicit state map declarations.
+    /// Existing callers that omit <paramref name="stateMapDeclarations"/> continue
+    /// to compile unchanged.
+    /// </summary>
+    public GameDefinitionBuilder AddZone(
+        string name,
+        IReadOnlyDictionary<string, object> staticProperties,
+        IReadOnlyList<StateFieldDecl>? stateMapDeclarations)
     {
-        _zoneDefinitions[name] = new ZoneDefinition(name, staticProperties);
+        _zoneDefinitions[name] = new ZoneDefinition(name, staticProperties, stateMapDeclarations);
         return this;
     }
 
@@ -153,8 +165,34 @@ public sealed class GameDefinitionBuilder
 
     /// <summary>Registers a player definition.</summary>
     public GameDefinitionBuilder AddPlayer(string name, IReadOnlyDictionary<string, object> staticProperties)
+        => AddPlayer(name, staticProperties, stateMapDeclarations: null);
+
+    /// <summary>
+    /// Registers a player definition with explicit state map declarations.
+    /// Existing callers that omit <paramref name="stateMapDeclarations"/> continue
+    /// to compile unchanged.
+    /// </summary>
+    public GameDefinitionBuilder AddPlayer(
+        string name,
+        IReadOnlyDictionary<string, object> staticProperties,
+        IReadOnlyList<StateFieldDecl>? stateMapDeclarations)
     {
-        _playerDefinitions[name] = new PlayerDefinition(staticProperties);
+        _playerDefinitions[name] = new PlayerDefinition(staticProperties, stateMapDeclarations);
+        return this;
+    }
+
+    // -----------------------------------------------------------------------
+    //  Session state map
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Declares additional state fields on the singleton session atom.
+    /// The engine-reserved fields (<c>turn-number</c>, <c>phase-index</c>) are
+    /// implicitly declared and must not appear here.
+    /// </summary>
+    public GameDefinitionBuilder WithSessionStateMap(IReadOnlyList<StateFieldDecl> declarations)
+    {
+        _sessionStateMap = declarations;
         return this;
     }
 
@@ -232,18 +270,24 @@ public sealed class GameDefinitionBuilder
             }
         }
 
-        return new GameDefinition(
-            Keywords:               allKeywords,
-            CardDefinitions:        _cardDefinitions,
-            ZoneDefinitions:        _zoneDefinitions,
-            StateBasedRules:        _stateBasedRules,
-            Phases:                 _phases,
-            ActionRules:            _actionRules,
-            TriggerResolutionOrder: _triggerResolutionOrder,
-            PlayerDefinitions:      _playerDefinitions,
-            InitManifest:           _initManifest,
-            PlayableZoneNames:      _playableZoneNames,
-            Id:                     _id);
+        var definition = new GameDefinition(
+            Keywords:                    allKeywords,
+            CardDefinitions:             _cardDefinitions,
+            ZoneDefinitions:             _zoneDefinitions,
+            StateBasedRules:             _stateBasedRules,
+            Phases:                      _phases,
+            ActionRules:                 _actionRules,
+            TriggerResolutionOrder:      _triggerResolutionOrder,
+            PlayerDefinitions:           _playerDefinitions,
+            InitManifest:                _initManifest,
+            PlayableZoneNames:           _playableZoneNames,
+            Id:                          _id,
+            SessionStateMapDeclarations: _sessionStateMap);
+
+        // Validate state-map field references in keyword bodies and effect blocks.
+        StateMapValidator.Validate(definition);
+
+        return definition;
     }
 
     // -----------------------------------------------------------------------

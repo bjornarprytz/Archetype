@@ -82,5 +82,8 @@ public static class BuildRunner
         GodotEmitter.EmitInteropScripts(fullDefinition, archetypeDir, noSignalKeywords);
         // D39: AtomKind integer constants for GDScript; does not depend on GameDefinition.
         GodotEmitter.EmitAtomKindConstants(archetypeDir);
+        // D40: Typed atom view classes + factory methods on ArchetypeInterop.
+        // Called after EmitInteropScripts so archetype_interop.gd exists for appending.
+        GodotEmitter.EmitAtomViews(fullDefinition, archetypeDir);
     }
 }
