@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Archetype.Core\Archetype.Core.csproj" />
     <ProjectReference Include="..\..\src\Archetype.Build\Archetype.Build.csproj" />
+    <ProjectReference Include="..\..\src\Archetype.Build.Extensions\Archetype.Build.Extensions.csproj" />
     <ProjectReference Include="..\..\src\Archetype.Text\Archetype.Text.csproj" />
     <ProjectReference Include="..\..\src\Archetype.Engine\Archetype.Engine.csproj" />
     <ProjectReference Include="..\..\src\Archetype.Tooling.Server\Archetype.Tooling.Server.csproj" />

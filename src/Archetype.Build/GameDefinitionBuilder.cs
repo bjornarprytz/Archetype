@@ -15,10 +15,13 @@ namespace Archetype.Build;
 /// var definition = new GameDefinitionBuilder()
 ///     .WithId("my-game")
 ///     .AddZone("hand", new Dictionary&lt;string, object&gt;())
-///     .RegisterKeyword("take-damage",
-///         parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
-///         body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Num(-1)),
-///         textTemplate: "{target} takes {amount} damage")
+///     .RegisterKeyword(new KeywordDefinition(
+///         Name: "take-damage",
+///         Parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
+///         ReturnType: TypeName.Number,
+///         Description: "take-damage",
+///         Body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Num(-1)),
+///         TextTemplate: "{target} takes {amount} damage"))
 ///     .WithInitManifest(InitManifest.Empty)
 ///     .Build();
 /// </code>
@@ -55,22 +58,16 @@ public sealed class GameDefinitionBuilder
     // -----------------------------------------------------------------------
 
     /// <summary>Registers a zone definition.</summary>
-    public GameDefinitionBuilder AddZone(string name, IReadOnlyDictionary<string, object> staticProperties)
-        => AddZone(name, staticProperties, stateMapDeclarations: null);
-
-    /// <summary>
-    /// Registers a zone definition with explicit state map declarations.
-    /// Existing callers that omit <paramref name="stateMapDeclarations"/> continue
-    /// to compile unchanged.
-    /// </summary>
-    public GameDefinitionBuilder AddZone(
-        string name,
-        IReadOnlyDictionary<string, object> staticProperties,
-        IReadOnlyList<StateFieldDecl>? stateMapDeclarations)
+    public GameDefinitionBuilder AddZone(ZoneDefinition zone)
     {
-        _zoneDefinitions[name] = new ZoneDefinition(name, staticProperties, stateMapDeclarations);
+        _zoneDefinitions[zone.Name] = zone;
         return this;
     }
+
+    /// <summary>Registers a zone definition.</summary>
+    public GameDefinitionBuilder AddZone(string name, IReadOnlyDictionary<string, object> staticProperties,
+        IReadOnlyList<StateFieldDecl>? stateMapDeclarations = null)
+        => AddZone(new ZoneDefinition(name, staticProperties, stateMapDeclarations));
 
     // -----------------------------------------------------------------------
     //  Phases
@@ -88,30 +85,17 @@ public sealed class GameDefinitionBuilder
     // -----------------------------------------------------------------------
 
     /// <summary>
-    /// Registers a named game-creator keyword.
+    /// Registers a game-creator keyword.
     /// <para>
-    /// The <paramref name="body"/> should be constructed by calling game-creator
-    /// or <see cref="Kw"/> methods with <see cref="Kw.Param"/> placeholders for
-    /// each declared parameter. <c>Build()</c> validates that all
-    /// <see cref="ParameterRef"/> names in the body appear in <paramref name="parameters"/>.
+    /// <c>Build()</c> validates that all <see cref="ParameterRef"/> names in
+    /// <see cref="KeywordDefinition.Body"/> appear in
+    /// <see cref="KeywordDefinition.Parameters"/>, and that every invoked
+    /// keyword name is known.
     /// </para>
     /// </summary>
-    public GameDefinitionBuilder RegisterKeyword(
-        string name,
-        ParameterDecl[] parameters,
-        KeywordNode body,
-        string? textTemplate = null,
-        string? description = null,
-        TypeName returnType = TypeName.Number)
+    public GameDefinitionBuilder RegisterKeyword(KeywordDefinition keyword)
     {
-        _keywords[name] = new KeywordDefinition(
-            Name: name,
-            Parameters: parameters,
-            ReturnType: returnType,
-            Description: description ?? name,
-            Body: body,
-            PrimitiveSentinel: null,
-            TextTemplate: textTemplate);
+        _keywords[keyword.Name] = keyword;
         return this;
     }
 
@@ -164,22 +148,16 @@ public sealed class GameDefinitionBuilder
     // -----------------------------------------------------------------------
 
     /// <summary>Registers a player definition.</summary>
-    public GameDefinitionBuilder AddPlayer(string name, IReadOnlyDictionary<string, object> staticProperties)
-        => AddPlayer(name, staticProperties, stateMapDeclarations: null);
-
-    /// <summary>
-    /// Registers a player definition with explicit state map declarations.
-    /// Existing callers that omit <paramref name="stateMapDeclarations"/> continue
-    /// to compile unchanged.
-    /// </summary>
-    public GameDefinitionBuilder AddPlayer(
-        string name,
-        IReadOnlyDictionary<string, object> staticProperties,
-        IReadOnlyList<StateFieldDecl>? stateMapDeclarations)
+    public GameDefinitionBuilder AddPlayer(string name, PlayerDefinition player)
     {
-        _playerDefinitions[name] = new PlayerDefinition(staticProperties, stateMapDeclarations);
+        _playerDefinitions[name] = player;
         return this;
     }
+
+    /// <summary>Registers a player definition.</summary>
+    public GameDefinitionBuilder AddPlayer(string name, IReadOnlyDictionary<string, object> staticProperties,
+        IReadOnlyList<StateFieldDecl>? stateMapDeclarations = null)
+        => AddPlayer(name, new PlayerDefinition(staticProperties, stateMapDeclarations));
 
     // -----------------------------------------------------------------------
     //  Session state map
@@ -316,7 +294,7 @@ public sealed class GameDefinitionBuilder
                 if (!knownKeywords.Contains(inv.KeywordName))
                     throw new DefinitionException(
                         $"Keyword '{owningKeyword}' body invokes unknown keyword '{inv.KeywordName}'. " +
-                        "Register it with RegisterKeyword() before calling Build().");
+                        "Register it with RegisterKeyword(KeywordDefinition) before calling Build().");
                 foreach (var arg in inv.Args)
                     ValidateNode(arg, paramNames, knownKeywords, owningKeyword);
                 break;

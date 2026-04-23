@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageId>Archetype.Core</PackageId>
     <Description>Core domain model for the Archetype card game engine.</Description>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
   </PropertyGroup>
 

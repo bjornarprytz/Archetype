@@ -1,4 +1,5 @@
 using Archetype.Build;
+using Archetype.Build.Extensions;
 using Archetype.Core;
 
 namespace Archetype.Tests.StateMap;
@@ -48,10 +49,10 @@ public class StateMapValidatorTests
         };
         allArgs.AddRange(extraArgs);
 
-        return builder.RegisterKeyword(
-            name: "test-kw",
-            parameters: [new ParameterDecl("target", TypeName.Card)],
-            body: new Invocation(kwName, allArgs.ToArray()));
+        return builder.RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+            .WithParam("target", TypeName.Card)
+            .WithBody(new Invocation(kwName, allArgs.ToArray()))
+            .Build());
     }
 
     // -----------------------------------------------------------------------
@@ -124,11 +125,10 @@ public class StateMapValidatorTests
         var builder = new GameDefinitionBuilder()
             .WithId("test")
             .WithInitManifest(InitManifest.Empty)
-            .RegisterKeyword(
-                name: "test-kw",
-                parameters: [new ParameterDecl("target", TypeName.Card)],
-                body: new Invocation("clear-accumulator",
-                    Kw.Param("target"), Kw.Str("health")));
+            .RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+                .WithParam("target", TypeName.Card)
+                .WithBody(new Invocation("clear-accumulator", Kw.Param("target"), Kw.Str("health")))
+                .Build());
         Assert.Throws<DefinitionException>(() => builder.Build());
     }
 
@@ -171,15 +171,15 @@ public class StateMapValidatorTests
     {
         var builder = BuilderWithCardField("attack", StateFieldType.Number);
         // References "defense" which is not declared.
-        builder = builder.RegisterKeyword(
-            name: "test-kw",
-            parameters: [new ParameterDecl("target", TypeName.Card)],
-            body: new Invocation("apply-modifier",
+        builder = builder.RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+            .WithParam("target", TypeName.Card)
+            .WithBody(new Invocation("apply-modifier",
                 Kw.Param("target"),
                 Kw.Str("defense"),  // undeclared
                 Kw.Num(0),
                 Kw.Num(1),
-                new Invocation("session")));
+                new Invocation("session")))
+            .Build());
         Assert.Throws<DefinitionException>(() => builder.Build());
     }
 
@@ -192,12 +192,12 @@ public class StateMapValidatorTests
     {
         var builder = BuilderWithCardField("poisoned", StateFieldType.Bool);
         // References "frozen" which is not declared.
-        builder = builder.RegisterKeyword(
-            name: "test-kw",
-            parameters: [new ParameterDecl("target", TypeName.Card)],
-            body: new Invocation("remove-condition",
+        builder = builder.RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+            .WithParam("target", TypeName.Card)
+            .WithBody(new Invocation("remove-condition",
                 Kw.Param("target"),
-                Kw.Str("frozen")));  // undeclared
+                Kw.Str("frozen")))  // undeclared
+            .Build());
         Assert.Throws<DefinitionException>(() => builder.Build());
     }
 
@@ -212,13 +212,13 @@ public class StateMapValidatorTests
         var builder = new GameDefinitionBuilder()
             .WithId("test")
             .WithInitManifest(InitManifest.Empty)
-            .RegisterKeyword(
-                name: "test-kw",
-                parameters: [new ParameterDecl("target", TypeName.Atom)],
-                body: new Invocation("modify-accumulator",
+            .RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+                .WithParam("target", TypeName.Atom)
+                .WithBody(new Invocation("modify-accumulator",
                     Kw.Param("target"),
                     Kw.Str("anything"),  // not declared on any specific kind
-                    Kw.Num(1)));
+                    Kw.Num(1)))
+                .Build());
         // Should NOT throw — atom kind is not statically determinable.
         var def = builder.Build();
         Assert.NotNull(def);
@@ -231,16 +231,14 @@ public class StateMapValidatorTests
         var builder = new GameDefinitionBuilder()
             .WithId("test")
             .WithInitManifest(InitManifest.Empty)
-            .RegisterKeyword(
-                name: "test-kw",
-                parameters: [
-                    new ParameterDecl("target", TypeName.Card),
-                    new ParameterDecl("field", TypeName.PropertyName),
-                ],
-                body: new Invocation("modify-accumulator",
+            .RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+                .WithParam("target", TypeName.Card)
+                .WithParam("field", TypeName.PropertyName)
+                .WithBody(new Invocation("modify-accumulator",
                     Kw.Param("target"),
                     Kw.Param("field"),  // parameter ref — not a literal
-                    Kw.Num(1)));
+                    Kw.Num(1)))
+                .Build());
         // Should NOT throw — field name is not a string literal.
         var def = builder.Build();
         Assert.NotNull(def);
@@ -257,12 +255,9 @@ public class StateMapValidatorTests
         var builder = new GameDefinitionBuilder()
             .WithId("test")
             .WithInitManifest(InitManifest.Empty)
-            .RegisterKeyword(
-                name: "test-kw",
-                parameters: [],
-                body: new Invocation("get-state",
-                    new Invocation("session"),
-                    Kw.Str("turn-number")));
+            .RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+                .WithBody(new Invocation("get-state", new Invocation("session"), Kw.Str("turn-number")))
+                .Build());
         var def = builder.Build();
         Assert.NotNull(def);
     }
@@ -274,12 +269,9 @@ public class StateMapValidatorTests
         var builder = new GameDefinitionBuilder()
             .WithId("test")
             .WithInitManifest(InitManifest.Empty)
-            .RegisterKeyword(
-                name: "test-kw",
-                parameters: [],
-                body: new Invocation("get-state",
-                    new Invocation("session"),
-                    Kw.Str("phase-index")));
+            .RegisterKeyword(new KeywordDefinitionBuilder("test-kw")
+                .WithBody(new Invocation("get-state", new Invocation("session"), Kw.Str("phase-index")))
+                .Build());
         var def = builder.Build();
         Assert.NotNull(def);
     }
