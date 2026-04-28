@@ -394,6 +394,13 @@ public static class GodotEmitter
         sb.AppendLine("    }");
         sb.AppendLine();
 
+        sb.AppendLine("    /// <summary>Returns the definition name the atom was instantiated from, or empty string.</summary>");
+        sb.AppendLine("    public string GetDefinitionName(long atomId) => _stateView?.GetDefinitionName(new AtomId(atomId)) ?? string.Empty;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns a static property value from the atom's definition, serialised to string, or empty string if absent.</summary>");
+        sb.AppendLine("    public string GetStaticProperty(long atomId, string key) => _stateView?.GetStaticProperty(new AtomId(atomId), key)?.ToString() ?? string.Empty;");
+        sb.AppendLine();
+
         // --- InnerStrategy nested class ---
         sb.AppendLine("    // --- InnerStrategy — per-player IPlayerStrategy implementation ---");
         sb.AppendLine();
@@ -711,6 +718,8 @@ public static class GodotEmitter
         sb.AppendLine("## Returns all atom IDs of the given [param kind] as an Array of ints.");
         sb.AppendLine("## Returns an empty Array before the game starts or after it ends.");
         sb.AppendLine("func get_atoms(kind: int) -> Array:                            return _node.GetAtoms(kind)");
+        sb.AppendLine("func get_definition_name(atom_id: int) -> String:             return _node.GetDefinitionName(atom_id)");
+        sb.AppendLine("func get_static_property(atom_id: int, key: String) -> String: return _node.GetStaticProperty(atom_id, key)");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_interop.gd"), sb.ToString());
     }
@@ -869,10 +878,20 @@ public static class GodotEmitter
     /// </summary>
     private static void EmitStructuralGetters(StringBuilder sb, AtomKind kind)
     {
-        // get_atom_id() is always present on every atom kind.
+        // get_atom_id() — always present.
         sb.AppendLine("## Returns the raw engine atom ID.");
         sb.AppendLine("func get_atom_id() -> int:");
         sb.AppendLine("    return _atom_id");
+        sb.AppendLine();
+
+        // get_definition_name() / get_static_property() — always present.
+        sb.AppendLine("## Returns the definition name this atom was instantiated from.");
+        sb.AppendLine("func get_definition_name() -> String:");
+        sb.AppendLine("    return ArchetypeInterop.get_definition_name(_atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns a static property from this atom's definition, or empty string if absent.");
+        sb.AppendLine("func get_static_property(key: String) -> String:");
+        sb.AppendLine("    return ArchetypeInterop.get_static_property(_atom_id, key)");
         sb.AppendLine();
 
         switch (kind)
@@ -882,22 +901,71 @@ public static class GodotEmitter
                 sb.AppendLine("func get_zone_id() -> int:");
                 sb.AppendLine("    return ArchetypeInterop.get_zone(_atom_id)");
                 sb.AppendLine();
+                sb.AppendLine("## Returns the zone this card currently occupies.");
+                sb.AppendLine("func get_zone() -> ZoneAtom:");
+                sb.AppendLine("    return ZoneAtom._create(ArchetypeInterop.get_zone(_atom_id))");
+                sb.AppendLine();
                 sb.AppendLine("## Returns the owner player atom ID.");
                 sb.AppendLine("func get_owner_id() -> int:");
                 sb.AppendLine("    return ArchetypeInterop.get_atom_owner(_atom_id)");
                 sb.AppendLine();
+                sb.AppendLine("## Returns the owner player.");
+                sb.AppendLine("func get_owner() -> PlayerAtom:");
+                sb.AppendLine("    return PlayerAtom._create(ArchetypeInterop.get_atom_owner(_atom_id))");
+                sb.AppendLine();
                 break;
 
             case AtomKind.Zone:
+                sb.AppendLine("## Returns the owner player atom ID.");
+                sb.AppendLine("func get_owner_id() -> int:");
+                sb.AppendLine("    return ArchetypeInterop.get_atom_owner(_atom_id)");
+                sb.AppendLine();
+                sb.AppendLine("## Returns the owner player.");
+                sb.AppendLine("func get_owner() -> PlayerAtom:");
+                sb.AppendLine("    return PlayerAtom._create(ArchetypeInterop.get_atom_owner(_atom_id))");
+                sb.AppendLine();
+                sb.AppendLine("## Returns all cards currently in this zone.");
+                sb.AppendLine("func get_cards() -> Array[CardAtom]:");
+                sb.AppendLine("    var result: Array[CardAtom] = []");
+                sb.AppendLine("    for id in ArchetypeInterop.get_atoms(ArchetypeAtomKinds.CARD):");
+                sb.AppendLine("        if ArchetypeInterop.get_zone(id) == _atom_id:");
+                sb.AppendLine("            result.append(CardAtom._create(id))");
+                sb.AppendLine("    return result");
+                sb.AppendLine();
+                break;
+
             case AtomKind.Player:
                 sb.AppendLine("## Returns the owner player atom ID.");
                 sb.AppendLine("func get_owner_id() -> int:");
                 sb.AppendLine("    return ArchetypeInterop.get_atom_owner(_atom_id)");
                 sb.AppendLine();
+                sb.AppendLine("## Returns all zones owned by this player.");
+                sb.AppendLine("func get_zones() -> Array[ZoneAtom]:");
+                sb.AppendLine("    var result: Array[ZoneAtom] = []");
+                sb.AppendLine("    for id in ArchetypeInterop.get_atoms(ArchetypeAtomKinds.ZONE):");
+                sb.AppendLine("        if ArchetypeInterop.get_atom_owner(id) == _atom_id:");
+                sb.AppendLine("            result.append(ZoneAtom._create(id))");
+                sb.AppendLine("    return result");
+                sb.AppendLine();
+                sb.AppendLine("## Returns all cards owned by this player.");
+                sb.AppendLine("func get_cards() -> Array[CardAtom]:");
+                sb.AppendLine("    var result: Array[CardAtom] = []");
+                sb.AppendLine("    for id in ArchetypeInterop.get_atoms(ArchetypeAtomKinds.CARD):");
+                sb.AppendLine("        if ArchetypeInterop.get_atom_owner(id) == _atom_id:");
+                sb.AppendLine("            result.append(CardAtom._create(id))");
+                sb.AppendLine("    return result");
+                sb.AppendLine();
                 break;
 
             case AtomKind.Session:
-                // Session has no owner and no zone; only get_atom_id().
+                sb.AppendLine("## Returns the current turn number.");
+                sb.AppendLine("func get_turn_number() -> float:");
+                sb.AppendLine("    return ArchetypeInterop.get_accumulator(_atom_id, \"turn-number\")");
+                sb.AppendLine();
+                sb.AppendLine("## Returns the current phase index.");
+                sb.AppendLine("func get_phase_index() -> float:");
+                sb.AppendLine("    return ArchetypeInterop.get_accumulator(_atom_id, \"phase-index\")");
+                sb.AppendLine();
                 break;
         }
     }

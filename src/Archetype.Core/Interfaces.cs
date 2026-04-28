@@ -240,18 +240,26 @@ public sealed record TriggerOrderResponse(IReadOnlyList<StaticEffectId> Order) :
 public sealed class GameStateView
 {
     private readonly IGameStateReadable _inner;
-    // D30: events from the most recently completed ResolveAction call.
-    // Reset to empty at the start of each new action; populated after all blocks,
-    // SBRs, and triggers resolve.  The engine sets this via SetLastActionEvents;
-    // callers read it via LastActionEvents.
+    private readonly IReadOnlyDictionary<AtomId, string>? _definitionNames;
+    private readonly GameDefinition? _definition;
+
     private IReadOnlyList<GameEvent> _lastActionEvents = Array.Empty<GameEvent>();
 
-    /// <summary>
-    /// Wraps an <see cref="IGameStateReadable"/> in a read-only view.
-    /// Callers outside the engine assembly obtain this through
-    /// <see cref="IPlayerStrategy"/> callbacks; the engine constructs it here.
-    /// </summary>
+    /// <summary>Initialises a view backed by <paramref name="inner"/>.</summary>
     public GameStateView(IGameStateReadable inner) => _inner = inner;
+
+    /// <summary>
+    /// Initialises a view with definition-name and static-property lookup support.
+    /// </summary>
+    public GameStateView(
+        IGameStateReadable inner,
+        IReadOnlyDictionary<AtomId, string> definitionNames,
+        GameDefinition definition)
+    {
+        _inner = inner;
+        _definitionNames = definitionNames;
+        _definition = definition;
+    }
 
     /// <summary>
     /// The events appended during the most recently completed
@@ -296,6 +304,30 @@ public sealed class GameStateView
 
     /// <summary>Returns all atom IDs of the given kind present in the current state.</summary>
     public IReadOnlyList<AtomId> GetAtoms(AtomKind kind) => _inner.GetAtoms(kind);
+
+    /// <summary>
+    /// Returns the definition name the atom was instantiated from, or an empty
+    /// string if unknown (e.g. the session atom).
+    /// </summary>
+    public string GetDefinitionName(AtomId atom) =>
+        _definitionNames?.TryGetValue(atom, out var name) == true ? name : string.Empty;
+
+    /// <summary>
+    /// Returns the value of a static property on the atom's definition, or
+    /// <c>null</c> if the atom has no definition or the key is absent.
+    /// </summary>
+    public object? GetStaticProperty(AtomId atom, string key)
+    {
+        if (_definition is null || _definitionNames is null) return null;
+        if (!_definitionNames.TryGetValue(atom, out var defName)) return null;
+        if (_definition.CardDefinitions.TryGetValue(defName, out var card) &&
+            card.StaticProperties.TryGetValue(key, out var cv)) return cv;
+        if (_definition.ZoneDefinitions.TryGetValue(defName, out var zone) &&
+            zone.StaticProperties.TryGetValue(key, out var zv)) return zv;
+        if (_definition.PlayerDefinitions.TryGetValue(defName, out var player) &&
+            player.StaticProperties.TryGetValue(key, out var pv)) return pv;
+        return null;
+    }
 }
 
 /// <summary>

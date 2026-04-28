@@ -433,7 +433,7 @@ public sealed class GameSession
     private async Task RunActionWindowAsync(string activePlayer, int turn, CancellationToken ct)
     {
         var strategy  = _strategies[activePlayer];
-        var stateView = new GameStateView(_state);
+        var stateView = new GameStateView(_state, _atomDefinitionNames, _definition);
 
         while (true)
         {
