@@ -580,6 +580,12 @@ internal sealed class GameState : Core.IGameStateReadable
             .Where(kvp => kvp.Value.Count > 0)
             .Select(kvp => kvp.Key)
             .ToList();
+
+    IReadOnlyList<string> IGameStateReadable.GetModifierKeys(AtomId atom) =>
+        GetAtom(atom).ModifierIndex
+            .Where(kvp => kvp.Value.Count > 0)
+            .Select(kvp => kvp.Key)
+            .ToList();
 }
 
 // ---------------------------------------------------------------------------

@@ -430,6 +430,46 @@ public static class GodotEmitter
         sb.AppendLine("        return result;");
         sb.AppendLine("    }");
         sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the property names that have at least one active modifier on the atom.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetModifierKeys(long atomId)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var k in _stateView.GetModifierKeys(new AtomId(atomId)))");
+        sb.AppendLine("            result.Add(k);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the name of the current game phase.</summary>");
+        sb.AppendLine("    public string GetCurrentPhaseName() => _stateView?.GetCurrentPhaseName() ?? string.Empty;");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the names of all registered card definitions.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetCardDefinitionNames()");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var n in _stateView.GetCardDefinitionNames()) result.Add(n);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the names of all registered zone definitions.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetZoneDefinitionNames()");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var n in _stateView.GetZoneDefinitionNames()) result.Add(n);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the names of all registered keywords.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetKeywordNames()");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var n in _stateView.GetKeywordNames()) result.Add(n);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
 
         // --- InnerStrategy nested class ---
         sb.AppendLine("    // --- InnerStrategy — per-player IPlayerStrategy implementation ---");
@@ -768,6 +808,23 @@ public static class GodotEmitter
         sb.AppendLine("## Returns the names of all conditions currently active on the atom.");
         sb.AppendLine("## Returns an empty array before the game starts or after it ends.");
         sb.AppendLine("func get_active_conditions(atom_id: int) -> Array:             return _node.GetActiveConditions(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the property names that have at least one active modifier on the atom.");
+        sb.AppendLine("## Returns an empty array before the game starts or after it ends.");
+        sb.AppendLine("func get_modifier_keys(atom_id: int) -> Array:                 return _node.GetModifierKeys(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the name of the current game phase (e.g. [code]\"main\"[/code]).");
+        sb.AppendLine("## Returns an empty string before the game starts or if no phases are defined.");
+        sb.AppendLine("func get_current_phase_name() -> String:                       return _node.GetCurrentPhaseName()");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the names of all card definitions registered in the game.");
+        sb.AppendLine("func get_card_definition_names() -> Array:                     return _node.GetCardDefinitionNames()");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the names of all zone definitions registered in the game.");
+        sb.AppendLine("func get_zone_definition_names() -> Array:                     return _node.GetZoneDefinitionNames()");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the names of all keywords registered in the game (built-in and game-creator).");
+        sb.AppendLine("func get_keyword_names() -> Array:                             return _node.GetKeywordNames()");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_interop.gd"), sb.ToString());
     }
@@ -957,6 +1014,10 @@ public static class GodotEmitter
         sb.AppendLine("func get_active_conditions() -> Array[String]:");
         sb.AppendLine("    return Array(ArchetypeInterop.get_active_conditions(_atom_id), TYPE_STRING, \"\", null)");
         sb.AppendLine();
+        sb.AppendLine("## Returns the property names that have at least one active modifier on this atom.");
+        sb.AppendLine("func get_modifier_keys() -> Array[String]:");
+        sb.AppendLine("    return Array(ArchetypeInterop.get_modifier_keys(_atom_id), TYPE_STRING, \"\", null)");
+        sb.AppendLine();
 
         switch (kind)
         {
@@ -1030,6 +1091,10 @@ public static class GodotEmitter
                 sb.AppendLine("func get_phase_index() -> float:");
                 sb.AppendLine("    return ArchetypeInterop.get_accumulator(_atom_id, \"phase-index\")");
                 sb.AppendLine();
+                sb.AppendLine("## Returns the name of the current phase (e.g. [code]\"main\"[/code]).");
+                sb.AppendLine("func get_current_phase_name() -> String:");
+                sb.AppendLine("    return ArchetypeInterop.get_current_phase_name()");
+                sb.AppendLine();
                 break;
         }
     }
@@ -1044,6 +1109,27 @@ public static class GodotEmitter
         var path = Path.Combine(outputDir, "archetype_interop.gd");
         var sb = new StringBuilder();
 
+        sb.AppendLine();
+        sb.AppendLine("## Returns all card atoms currently in the game as [Array][[CardAtom]].");
+        sb.AppendLine("func get_all_cards() -> Array[CardAtom]:");
+        sb.AppendLine("    var result: Array[CardAtom] = []");
+        sb.AppendLine("    for id in get_atoms(ArchetypeAtomKinds.CARD):");
+        sb.AppendLine("        result.append(CardAtom._create(id))");
+        sb.AppendLine("    return result");
+        sb.AppendLine();
+        sb.AppendLine("## Returns all zone atoms currently in the game as [Array][[ZoneAtom]].");
+        sb.AppendLine("func get_all_zones() -> Array[ZoneAtom]:");
+        sb.AppendLine("    var result: Array[ZoneAtom] = []");
+        sb.AppendLine("    for id in get_atoms(ArchetypeAtomKinds.ZONE):");
+        sb.AppendLine("        result.append(ZoneAtom._create(id))");
+        sb.AppendLine("    return result");
+        sb.AppendLine();
+        sb.AppendLine("## Returns all player atoms currently in the game as [Array][[PlayerAtom]].");
+        sb.AppendLine("func get_all_players() -> Array[PlayerAtom]:");
+        sb.AppendLine("    var result: Array[PlayerAtom] = []");
+        sb.AppendLine("    for id in get_atoms(ArchetypeAtomKinds.PLAYER):");
+        sb.AppendLine("        result.append(PlayerAtom._create(id))");
+        sb.AppendLine("    return result");
         sb.AppendLine();
         sb.AppendLine("## Returns a [CardAtom] view for [param atom_id].");
         sb.AppendLine("func get_card(atom_id: int) -> CardAtom:");

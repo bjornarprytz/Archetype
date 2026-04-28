@@ -242,6 +242,7 @@ public sealed class GameStateView
     private readonly IGameStateReadable _inner;
     private readonly IReadOnlyDictionary<AtomId, string>? _definitionNames;
     private readonly GameDefinition? _definition;
+    private readonly IReadOnlyList<string>? _phaseNames;
 
     private IReadOnlyList<GameEvent> _lastActionEvents = Array.Empty<GameEvent>();
 
@@ -259,6 +260,7 @@ public sealed class GameStateView
         _inner = inner;
         _definitionNames = definitionNames;
         _definition = definition;
+        _phaseNames = definition.Phases.Select(p => p.Name).ToList();
     }
 
     /// <summary>
@@ -310,6 +312,31 @@ public sealed class GameStateView
 
     /// <summary>Returns the names of all conditions currently active on the atom.</summary>
     public IReadOnlyList<string> GetActiveConditions(AtomId atom) => _inner.GetActiveConditions(atom);
+
+    /// <summary>Returns the property names that have at least one active modifier on the atom.</summary>
+    public IReadOnlyList<string> GetModifierKeys(AtomId atom) => _inner.GetModifierKeys(atom);
+
+    /// <summary>Returns the name of the current phase, derived from the phase index accumulator.</summary>
+    public string GetCurrentPhaseName()
+    {
+        if (_phaseNames is null || _phaseNames.Count == 0) return string.Empty;
+        var sessionAtoms = _inner.GetAtoms(AtomKind.Session);
+        if (sessionAtoms.Count == 0) return string.Empty;
+        var idx = (int)_inner.GetAccumulators(sessionAtoms[0]).GetValueOrDefault("phase-index");
+        return idx >= 0 && idx < _phaseNames.Count ? _phaseNames[idx] : string.Empty;
+    }
+
+    /// <summary>Returns the names of all registered card definitions.</summary>
+    public IReadOnlyList<string> GetCardDefinitionNames() =>
+        _definition?.CardDefinitions.Keys.ToArray() ?? Array.Empty<string>();
+
+    /// <summary>Returns the names of all registered zone definitions.</summary>
+    public IReadOnlyList<string> GetZoneDefinitionNames() =>
+        _definition?.ZoneDefinitions.Keys.ToArray() ?? Array.Empty<string>();
+
+    /// <summary>Returns the names of all registered keywords (built-in and game-creator).</summary>
+    public IReadOnlyList<string> GetKeywordNames() =>
+        _definition?.Keywords.Keys.ToArray() ?? Array.Empty<string>();
 
     /// <summary>
     /// Returns the static property keys defined on this atom's definition,
@@ -384,4 +411,7 @@ public interface IGameStateReadable
 
     /// <summary>Returns the names of all conditions currently active on <paramref name="atom"/>.</summary>
     IReadOnlyList<string> GetActiveConditions(AtomId atom);
+
+    /// <summary>Returns the property names that have at least one active modifier on <paramref name="atom"/>.</summary>
+    IReadOnlyList<string> GetModifierKeys(AtomId atom);
 }
