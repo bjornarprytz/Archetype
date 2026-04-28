@@ -305,6 +305,26 @@ public sealed class GameStateView
     /// <summary>Returns all atom IDs of the given kind present in the current state.</summary>
     public IReadOnlyList<AtomId> GetAtoms(AtomKind kind) => _inner.GetAtoms(kind);
 
+    /// <summary>Returns a snapshot of all accumulators currently set on the atom.</summary>
+    public IReadOnlyDictionary<string, double> GetAccumulators(AtomId atom) => _inner.GetAccumulators(atom);
+
+    /// <summary>Returns the names of all conditions currently active on the atom.</summary>
+    public IReadOnlyList<string> GetActiveConditions(AtomId atom) => _inner.GetActiveConditions(atom);
+
+    /// <summary>
+    /// Returns the static property keys defined on this atom's definition,
+    /// or an empty list if the atom has no definition.
+    /// </summary>
+    public IReadOnlyList<string> GetStaticPropertyKeys(AtomId atom)
+    {
+        if (_definition is null || _definitionNames is null) return Array.Empty<string>();
+        if (!_definitionNames.TryGetValue(atom, out var defName)) return Array.Empty<string>();
+        if (_definition.CardDefinitions.TryGetValue(defName, out var card)) return card.StaticProperties.Keys.ToArray();
+        if (_definition.ZoneDefinitions.TryGetValue(defName, out var zone)) return zone.StaticProperties.Keys.ToArray();
+        if (_definition.PlayerDefinitions.TryGetValue(defName, out var player)) return player.StaticProperties.Keys.ToArray();
+        return Array.Empty<string>();
+    }
+
     /// <summary>
     /// Returns the definition name the atom was instantiated from, or an empty
     /// string if unknown (e.g. the session atom).
@@ -358,4 +378,10 @@ public interface IGameStateReadable
 
     /// <summary>Returns all atom IDs of the given <paramref name="kind"/> currently in state.</summary>
     IReadOnlyList<AtomId> GetAtoms(AtomKind kind);
+
+    /// <summary>Returns a snapshot of all accumulators currently set on <paramref name="atom"/>.</summary>
+    IReadOnlyDictionary<string, double> GetAccumulators(AtomId atom);
+
+    /// <summary>Returns the names of all conditions currently active on <paramref name="atom"/>.</summary>
+    IReadOnlyList<string> GetActiveConditions(AtomId atom);
 }

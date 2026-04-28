@@ -400,6 +400,36 @@ public static class GodotEmitter
         sb.AppendLine("    /// <summary>Returns a static property value from the atom's definition, serialised to string, or empty string if absent.</summary>");
         sb.AppendLine("    public string GetStaticProperty(long atomId, string key) => _stateView?.GetStaticProperty(new AtomId(atomId), key)?.ToString() ?? string.Empty;");
         sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the static property keys defined on the atom's definition.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetStaticPropertyKeys(long atomId)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var k in _stateView.GetStaticPropertyKeys(new AtomId(atomId)))");
+        sb.AppendLine("            result.Add(k);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns all accumulators currently set on the atom as a name→value dictionary.</summary>");
+        sb.AppendLine("    public Godot.Collections.Dictionary GetAccumulators(long atomId)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Dictionary();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var (k, v) in _stateView.GetAccumulators(new AtomId(atomId)))");
+        sb.AppendLine("            result[k] = v;");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    /// <summary>Returns the names of all conditions currently active on the atom.</summary>");
+        sb.AppendLine("    public Godot.Collections.Array GetActiveConditions(long atomId)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var result = new Godot.Collections.Array();");
+        sb.AppendLine("        if (_stateView == null) return result;");
+        sb.AppendLine("        foreach (var c in _stateView.GetActiveConditions(new AtomId(atomId)))");
+        sb.AppendLine("            result.Add(c);");
+        sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
 
         // --- InnerStrategy nested class ---
         sb.AppendLine("    // --- InnerStrategy — per-player IPlayerStrategy implementation ---");
@@ -726,6 +756,18 @@ public static class GodotEmitter
         sb.AppendLine("## Returns the value of a static property from the atom's definition, serialised to [String].");
         sb.AppendLine("## Returns an empty string if [param key] is absent or the atom has no definition.");
         sb.AppendLine("func get_static_property(atom_id: int, key: String) -> String: return _node.GetStaticProperty(atom_id, key)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the static property keys defined on the atom's definition.");
+        sb.AppendLine("## Returns an empty array before the game starts or if the atom has no definition.");
+        sb.AppendLine("func get_static_property_keys(atom_id: int) -> Array:          return _node.GetStaticPropertyKeys(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns all accumulators currently set on the atom as a [Dictionary] of [String] → [float].");
+        sb.AppendLine("## Returns an empty dictionary before the game starts or after it ends.");
+        sb.AppendLine("func get_accumulators(atom_id: int) -> Dictionary:             return _node.GetAccumulators(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the names of all conditions currently active on the atom.");
+        sb.AppendLine("## Returns an empty array before the game starts or after it ends.");
+        sb.AppendLine("func get_active_conditions(atom_id: int) -> Array:             return _node.GetActiveConditions(atom_id)");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_interop.gd"), sb.ToString());
     }
@@ -902,6 +944,18 @@ public static class GodotEmitter
         sb.AppendLine("## Returns a static property from this atom's definition, or empty string if absent.");
         sb.AppendLine("func get_static_property(key: String) -> String:");
         sb.AppendLine("    return ArchetypeInterop.get_static_property(_atom_id, key)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns all static property keys defined on this atom's definition.");
+        sb.AppendLine("func get_static_property_keys() -> Array[String]:");
+        sb.AppendLine("    return Array(ArchetypeInterop.get_static_property_keys(_atom_id), TYPE_STRING, \"\", null)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns all accumulators currently set on this atom as [String] → [float].");
+        sb.AppendLine("func get_accumulators() -> Dictionary:");
+        sb.AppendLine("    return ArchetypeInterop.get_accumulators(_atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the names of all conditions currently active on this atom.");
+        sb.AppendLine("func get_active_conditions() -> Array[String]:");
+        sb.AppendLine("    return Array(ArchetypeInterop.get_active_conditions(_atom_id), TYPE_STRING, \"\", null)");
         sb.AppendLine();
 
         switch (kind)

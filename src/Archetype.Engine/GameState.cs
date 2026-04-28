@@ -571,6 +571,15 @@ internal sealed class GameState : Core.IGameStateReadable
     AtomKind IGameStateReadable.GetKind(AtomId atom) => GetAtom(atom).Kind;
 
     IReadOnlyList<AtomId> IGameStateReadable.GetAtoms(AtomKind kind) => GetAtoms(kind);
+
+    IReadOnlyDictionary<string, double> IGameStateReadable.GetAccumulators(AtomId atom) =>
+        GetAtom(atom).Accumulators;
+
+    IReadOnlyList<string> IGameStateReadable.GetActiveConditions(AtomId atom) =>
+        GetAtom(atom).ConditionIndex
+            .Where(kvp => kvp.Value.Count > 0)
+            .Select(kvp => kvp.Key)
+            .ToList();
 }
 
 // ---------------------------------------------------------------------------
