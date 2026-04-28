@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.0] - 2026-04-29
+
+### Added
+- Generated `CardAtom`, `ZoneAtom`, `PlayerAtom`, `SessionAtom` GDScript classes now expose the full atom view:
+  - `CardAtom`: typed `get_zone() -> ZoneAtom`, `get_owner() -> PlayerAtom` (alongside raw ID getters)
+  - `ZoneAtom`: `get_owner() -> PlayerAtom`, `get_cards() -> Array[CardAtom]`
+  - `PlayerAtom`: `get_zones() -> Array[ZoneAtom]`, `get_cards() -> Array[CardAtom]`
+  - `SessionAtom`: `get_turn_number()`, `get_phase_index()`, `get_current_phase_name()`
+  - All atom types: `get_definition_name()`, `get_static_property(key)`
+- Discovery methods on all atom types: `get_static_property_keys()`, `get_accumulators()`, `get_active_conditions()`, `get_modifier_keys()`
+- `ArchetypeInterop` typed list getters: `get_all_cards()`, `get_all_zones()`, `get_all_players()`
+- `ArchetypeInterop` game definition metadata: `get_card_definition_names()`, `get_zone_definition_names()`, `get_keyword_names()`, `get_current_phase_name()`
+- `GameStateView` gains `GetDefinitionName`, `GetStaticProperty`, `GetStaticPropertyKeys`, `GetAccumulators`, `GetActiveConditions`, `GetModifierKeys`, `GetCurrentPhaseName`, `GetCardDefinitionNames`, `GetZoneDefinitionNames`, `GetKeywordNames`
+- `IGameStateReadable` gains `GetAccumulators`, `GetActiveConditions`, `GetModifierKeys`
+- All generated GDScript methods have `##` docstrings
+
 ## [0.4.0] - 2026-04-28
 
 ### Added
