@@ -718,7 +718,13 @@ public static class GodotEmitter
         sb.AppendLine("## Returns all atom IDs of the given [param kind] as an Array of ints.");
         sb.AppendLine("## Returns an empty Array before the game starts or after it ends.");
         sb.AppendLine("func get_atoms(kind: int) -> Array:                            return _node.GetAtoms(kind)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the definition name the atom was instantiated from (e.g. [code]\"strike\"[/code]).");
+        sb.AppendLine("## Returns an empty string for the session atom or before the game starts.");
         sb.AppendLine("func get_definition_name(atom_id: int) -> String:             return _node.GetDefinitionName(atom_id)");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the value of a static property from the atom's definition, serialised to [String].");
+        sb.AppendLine("## Returns an empty string if [param key] is absent or the atom has no definition.");
         sb.AppendLine("func get_static_property(atom_id: int, key: String) -> String: return _node.GetStaticProperty(atom_id, key)");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_interop.gd"), sb.ToString());
@@ -747,9 +753,13 @@ public static class GodotEmitter
         sb.AppendLine("class_name ArchetypeAtomKinds");
         sb.AppendLine();
         // Values must match AtomKind enum declaration order in Archetype.Core (D39 cross-language contract).
+        sb.AppendLine($"## Card atoms — instantiated from [CardDefinition].");
         sb.AppendLine($"const CARD    = {(int)AtomKind.Card}");
+        sb.AppendLine($"## Zone atoms — instantiated from [ZoneDefinition].");
         sb.AppendLine($"const ZONE    = {(int)AtomKind.Zone}");
+        sb.AppendLine($"## Player atoms — one per registered player definition.");
         sb.AppendLine($"const PLAYER  = {(int)AtomKind.Player}");
+        sb.AppendLine($"## Session atom — singleton; holds turn-number and phase-index.");
         sb.AppendLine($"const SESSION = {(int)AtomKind.Session}");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_atom_kinds.gd"), sb.ToString());
