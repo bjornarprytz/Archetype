@@ -1,4 +1,5 @@
 using Archetype.Build;
+using Archetype.Build.Extensions;
 using Archetype.Core;
 
 namespace Archetype.Tests.Builder;
@@ -22,16 +23,18 @@ public class BuildRunnerTests : IDisposable
     private static GameDefinition BaseDefinition() =>
         new GameDefinitionBuilder()
             .WithId("test-game")
-            .RegisterKeyword(
-                name: "strike",
-                parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("power", TypeName.Number)],
-                body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Multiply(Kw.Param("power"), Kw.Num(-1))),
-                textTemplate: "{target} takes {power} damage")
-            .RegisterKeyword(
-                name: "buff",
-                parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
-                body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("attack"), Kw.Param("amount")),
-                textTemplate: "Give {target} +{amount} attack")
+            .RegisterKeyword(new KeywordDefinitionBuilder("strike")
+                .WithParam("target", TypeName.Card)
+                .WithParam("power", TypeName.Number)
+                .WithBody(Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Multiply(Kw.Param("power"), Kw.Num(-1))))
+                .WithTextTemplate("{target} takes {power} damage")
+                .Build())
+            .RegisterKeyword(new KeywordDefinitionBuilder("buff")
+                .WithParam("target", TypeName.Card)
+                .WithParam("amount", TypeName.Number)
+                .WithBody(Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("attack"), Kw.Param("amount")))
+                .WithTextTemplate("Give {target} +{amount} attack")
+                .Build())
             .WithInitManifest(InitManifest.Empty)
             .Build();
 

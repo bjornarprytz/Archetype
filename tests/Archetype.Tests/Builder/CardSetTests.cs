@@ -1,4 +1,5 @@
 using Archetype.Build;
+using Archetype.Build.Extensions;
 using Archetype.Core;
 
 namespace Archetype.Tests.Builder;
@@ -8,11 +9,12 @@ public class CardSetTests
     private static GameDefinition BaseDefinition() =>
         new GameDefinitionBuilder()
             .WithId("test-game")
-            .RegisterKeyword(
-                name: "deal-damage",
-                parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
-                body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Multiply(Kw.Param("amount"), Kw.Num(-1))),
-                textTemplate: "Deal {amount} damage to {target}")
+            .RegisterKeyword(new KeywordDefinitionBuilder("deal-damage")
+                .WithParam("target", TypeName.Card)
+                .WithParam("amount", TypeName.Number)
+                .WithBody(Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Multiply(Kw.Param("amount"), Kw.Num(-1))))
+                .WithTextTemplate("Deal {amount} damage to {target}")
+                .Build())
             .WithInitManifest(InitManifest.Empty)
             .Build();
 

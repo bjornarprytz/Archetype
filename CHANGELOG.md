@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] - 2026-04-28
+
+### Added
+- `Archetype.Build.Extensions` NuGet package — fluent builder classes for all major game definition types: `KeywordDefinitionBuilder`, `CardDefinitionBuilder`, `EffectBlockBuilder`, `PhaseDefinitionBuilder`, `ZoneDefinitionBuilder`, `PlayerDefinitionBuilder`, `NamedEffectBlockDefBuilder`, `StaticEffectDefBuilder`, `TriggerDefinitionBuilder`
+- `Action<Builder>` overloads throughout — `GameDefinitionBuilder.AddCard/AddZone/AddPlayer/AddPhase/RegisterKeyword`, `CardDefinitionBuilder.AddEffect/AddStaticEffect`, and nested effect/trigger builders all accept callback-style configuration
+- `StaticEffectDefBuilder` lifetime helpers: `Permanent()`, `ForTurns(n)`, `While(expr)`
+- `GameDefinitionBuilder.AddZone(ZoneDefinition)` and `AddPlayer(string, PlayerDefinition)` direct overloads
+
+### Removed
+- Electron desktop tooling (`tooling/`) — scrapped in favour of a future lightweight approach
+
 ## [0.3.0] - 2026-03-23
 
 ### Added

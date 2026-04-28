@@ -1,4 +1,5 @@
 using Archetype.Build;
+using Archetype.Build.Extensions;
 using Archetype.Core;
 
 namespace Archetype.Tests.Builder;
@@ -36,11 +37,12 @@ public class GameDefinitionBuilderTests
     public void Build_WithValidGameCreatorKeyword_Succeeds()
     {
         var def = MinimalBuilder()
-            .RegisterKeyword(
-                name: "heal",
-                parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
-                body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Param("amount")),
-                textTemplate: "{target} heals {amount}")
+            .RegisterKeyword(new KeywordDefinitionBuilder("heal")
+                .WithParam("target", TypeName.Card)
+                .WithParam("amount", TypeName.Number)
+                .WithBody(Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Param("amount")))
+                .WithTextTemplate("{target} heals {amount}")
+                .Build())
             .Build();
 
         Assert.True(def.Keywords.ContainsKey("heal"));
@@ -66,14 +68,15 @@ public class GameDefinitionBuilderTests
     public void Build_WithCompositeKeywordCallingGameCreatorKeyword_Succeeds()
     {
         var def = MinimalBuilder()
-            .RegisterKeyword(
-                name: "heal",
-                parameters: [new ParameterDecl("target", TypeName.Card), new ParameterDecl("amount", TypeName.Number)],
-                body: Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Param("amount")))
-            .RegisterKeyword(
-                name: "big-heal",
-                parameters: [new ParameterDecl("target", TypeName.Card)],
-                body: Kw.Invoke("heal", Kw.Param("target"), Kw.Num(5)))
+            .RegisterKeyword(new KeywordDefinitionBuilder("heal")
+                .WithParam("target", TypeName.Card)
+                .WithParam("amount", TypeName.Number)
+                .WithBody(Kw.ModifyAccumulator(Kw.Param("target"), Kw.Str("health"), Kw.Param("amount")))
+                .Build())
+            .RegisterKeyword(new KeywordDefinitionBuilder("big-heal")
+                .WithParam("target", TypeName.Card)
+                .WithBody(Kw.Invoke("heal", Kw.Param("target"), Kw.Num(5)))
+                .Build())
             .Build();
 
         Assert.True(def.Keywords.ContainsKey("big-heal"));
@@ -100,14 +103,16 @@ public class GameDefinitionBuilderTests
     {
         // Registering the same name twice: last registration wins (dict behaviour).
         var def = MinimalBuilder()
-            .RegisterKeyword("my-kw",
-                parameters: [new ParameterDecl("x", TypeName.Number)],
-                body: Kw.Param("x"),
-                textTemplate: "first")
-            .RegisterKeyword("my-kw",
-                parameters: [new ParameterDecl("x", TypeName.Number)],
-                body: Kw.Param("x"),
-                textTemplate: "second")
+            .RegisterKeyword(new KeywordDefinitionBuilder("my-kw")
+                .WithParam("x", TypeName.Number)
+                .WithBody(Kw.Param("x"))
+                .WithTextTemplate("first")
+                .Build())
+            .RegisterKeyword(new KeywordDefinitionBuilder("my-kw")
+                .WithParam("x", TypeName.Number)
+                .WithBody(Kw.Param("x"))
+                .WithTextTemplate("second")
+                .Build())
             .Build();
 
         Assert.Equal("second", def.Keywords["my-kw"].TextTemplate);
@@ -117,10 +122,10 @@ public class GameDefinitionBuilderTests
     public void Build_GameCreatorKeywordShadowsBuiltIn_ThrowsDefinitionException()
     {
         var builder = MinimalBuilder()
-            .RegisterKeyword(
-                name: "modify-accumulator", // built-in name
-                parameters: [new ParameterDecl("x", TypeName.Number)],
-                body: Kw.Param("x"));
+            .RegisterKeyword(new KeywordDefinitionBuilder("modify-accumulator") // built-in name
+                .WithParam("x", TypeName.Number)
+                .WithBody(Kw.Param("x"))
+                .Build());
 
         var ex = Assert.Throws<DefinitionException>(() => builder.Build());
         Assert.Contains("modify-accumulator", ex.Message);
@@ -135,10 +140,10 @@ public class GameDefinitionBuilderTests
     public void Build_UnknownParameterInBody_ThrowsDefinitionException()
     {
         var builder = MinimalBuilder()
-            .RegisterKeyword(
-                name: "bad-kw",
-                parameters: [new ParameterDecl("target", TypeName.Card)],
-                body: Kw.ModifyAccumulator(Kw.Param("typo"), Kw.Str("hp"), Kw.Num(1)));
+            .RegisterKeyword(new KeywordDefinitionBuilder("bad-kw")
+                .WithParam("target", TypeName.Card)
+                .WithBody(Kw.ModifyAccumulator(Kw.Param("typo"), Kw.Str("hp"), Kw.Num(1)))
+                .Build());
 
         var ex = Assert.Throws<DefinitionException>(() => builder.Build());
         Assert.Contains("typo", ex.Message);
@@ -149,10 +154,10 @@ public class GameDefinitionBuilderTests
     public void Build_UnknownKeywordInBody_ThrowsDefinitionException()
     {
         var builder = MinimalBuilder()
-            .RegisterKeyword(
-                name: "bad-kw",
-                parameters: [new ParameterDecl("target", TypeName.Card)],
-                body: Kw.Invoke("nonexistent-keyword", Kw.Param("target")));
+            .RegisterKeyword(new KeywordDefinitionBuilder("bad-kw")
+                .WithParam("target", TypeName.Card)
+                .WithBody(Kw.Invoke("nonexistent-keyword", Kw.Param("target")))
+                .Build());
 
         var ex = Assert.Throws<DefinitionException>(() => builder.Build());
         Assert.Contains("nonexistent-keyword", ex.Message);
