@@ -240,9 +240,10 @@ public class AtomViewEmitterTests : IDisposable
         ABuild.GodotEmitter.EmitAtomViews(def, _tempDir);
 
         var content = ReadFile("card_atom.gd");
-        // No "get_" methods beyond structural ones.
-        Assert.DoesNotContain("get_accumulator", content);
-        Assert.DoesNotContain("has_condition", content);
+        // Per-field getters must not be generated when there are no state field declarations.
+        // (get_accumulators / get_active_conditions are structural discovery methods — always present.)
+        Assert.DoesNotContain("ArchetypeInterop.get_accumulator(_atom_id,", content);
+        Assert.DoesNotContain("ArchetypeInterop.has_condition(_atom_id,", content);
         // Structural getters must still be there.
         Assert.Contains("func get_atom_id() -> int:", content);
         Assert.Contains("func get_zone_id() -> int:", content);

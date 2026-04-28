@@ -240,18 +240,28 @@ public sealed record TriggerOrderResponse(IReadOnlyList<StaticEffectId> Order) :
 public sealed class GameStateView
 {
     private readonly IGameStateReadable _inner;
-    // D30: events from the most recently completed ResolveAction call.
-    // Reset to empty at the start of each new action; populated after all blocks,
-    // SBRs, and triggers resolve.  The engine sets this via SetLastActionEvents;
-    // callers read it via LastActionEvents.
+    private readonly IReadOnlyDictionary<AtomId, string>? _definitionNames;
+    private readonly GameDefinition? _definition;
+    private readonly IReadOnlyList<string>? _phaseNames;
+
     private IReadOnlyList<GameEvent> _lastActionEvents = Array.Empty<GameEvent>();
 
-    /// <summary>
-    /// Wraps an <see cref="IGameStateReadable"/> in a read-only view.
-    /// Callers outside the engine assembly obtain this through
-    /// <see cref="IPlayerStrategy"/> callbacks; the engine constructs it here.
-    /// </summary>
+    /// <summary>Initialises a view backed by <paramref name="inner"/>.</summary>
     public GameStateView(IGameStateReadable inner) => _inner = inner;
+
+    /// <summary>
+    /// Initialises a view with definition-name and static-property lookup support.
+    /// </summary>
+    public GameStateView(
+        IGameStateReadable inner,
+        IReadOnlyDictionary<AtomId, string> definitionNames,
+        GameDefinition definition)
+    {
+        _inner = inner;
+        _definitionNames = definitionNames;
+        _definition = definition;
+        _phaseNames = definition.Phases.Select(p => p.Name).ToList();
+    }
 
     /// <summary>
     /// The events appended during the most recently completed
@@ -296,6 +306,75 @@ public sealed class GameStateView
 
     /// <summary>Returns all atom IDs of the given kind present in the current state.</summary>
     public IReadOnlyList<AtomId> GetAtoms(AtomKind kind) => _inner.GetAtoms(kind);
+
+    /// <summary>Returns a snapshot of all accumulators currently set on the atom.</summary>
+    public IReadOnlyDictionary<string, double> GetAccumulators(AtomId atom) => _inner.GetAccumulators(atom);
+
+    /// <summary>Returns the names of all conditions currently active on the atom.</summary>
+    public IReadOnlyList<string> GetActiveConditions(AtomId atom) => _inner.GetActiveConditions(atom);
+
+    /// <summary>Returns the property names that have at least one active modifier on the atom.</summary>
+    public IReadOnlyList<string> GetModifierKeys(AtomId atom) => _inner.GetModifierKeys(atom);
+
+    /// <summary>Returns the name of the current phase, derived from the phase index accumulator.</summary>
+    public string GetCurrentPhaseName()
+    {
+        if (_phaseNames is null || _phaseNames.Count == 0) return string.Empty;
+        var sessionAtoms = _inner.GetAtoms(AtomKind.Session);
+        if (sessionAtoms.Count == 0) return string.Empty;
+        var idx = (int)_inner.GetAccumulators(sessionAtoms[0]).GetValueOrDefault("phase-index");
+        return idx >= 0 && idx < _phaseNames.Count ? _phaseNames[idx] : string.Empty;
+    }
+
+    /// <summary>Returns the names of all registered card definitions.</summary>
+    public IReadOnlyList<string> GetCardDefinitionNames() =>
+        _definition?.CardDefinitions.Keys.ToArray() ?? Array.Empty<string>();
+
+    /// <summary>Returns the names of all registered zone definitions.</summary>
+    public IReadOnlyList<string> GetZoneDefinitionNames() =>
+        _definition?.ZoneDefinitions.Keys.ToArray() ?? Array.Empty<string>();
+
+    /// <summary>Returns the names of all registered keywords (built-in and game-creator).</summary>
+    public IReadOnlyList<string> GetKeywordNames() =>
+        _definition?.Keywords.Keys.ToArray() ?? Array.Empty<string>();
+
+    /// <summary>
+    /// Returns the static property keys defined on this atom's definition,
+    /// or an empty list if the atom has no definition.
+    /// </summary>
+    public IReadOnlyList<string> GetStaticPropertyKeys(AtomId atom)
+    {
+        if (_definition is null || _definitionNames is null) return Array.Empty<string>();
+        if (!_definitionNames.TryGetValue(atom, out var defName)) return Array.Empty<string>();
+        if (_definition.CardDefinitions.TryGetValue(defName, out var card)) return card.StaticProperties.Keys.ToArray();
+        if (_definition.ZoneDefinitions.TryGetValue(defName, out var zone)) return zone.StaticProperties.Keys.ToArray();
+        if (_definition.PlayerDefinitions.TryGetValue(defName, out var player)) return player.StaticProperties.Keys.ToArray();
+        return Array.Empty<string>();
+    }
+
+    /// <summary>
+    /// Returns the definition name the atom was instantiated from, or an empty
+    /// string if unknown (e.g. the session atom).
+    /// </summary>
+    public string GetDefinitionName(AtomId atom) =>
+        _definitionNames?.TryGetValue(atom, out var name) == true ? name : string.Empty;
+
+    /// <summary>
+    /// Returns the value of a static property on the atom's definition, or
+    /// <c>null</c> if the atom has no definition or the key is absent.
+    /// </summary>
+    public object? GetStaticProperty(AtomId atom, string key)
+    {
+        if (_definition is null || _definitionNames is null) return null;
+        if (!_definitionNames.TryGetValue(atom, out var defName)) return null;
+        if (_definition.CardDefinitions.TryGetValue(defName, out var card) &&
+            card.StaticProperties.TryGetValue(key, out var cv)) return cv;
+        if (_definition.ZoneDefinitions.TryGetValue(defName, out var zone) &&
+            zone.StaticProperties.TryGetValue(key, out var zv)) return zv;
+        if (_definition.PlayerDefinitions.TryGetValue(defName, out var player) &&
+            player.StaticProperties.TryGetValue(key, out var pv)) return pv;
+        return null;
+    }
 }
 
 /// <summary>
@@ -326,4 +405,13 @@ public interface IGameStateReadable
 
     /// <summary>Returns all atom IDs of the given <paramref name="kind"/> currently in state.</summary>
     IReadOnlyList<AtomId> GetAtoms(AtomKind kind);
+
+    /// <summary>Returns a snapshot of all accumulators currently set on <paramref name="atom"/>.</summary>
+    IReadOnlyDictionary<string, double> GetAccumulators(AtomId atom);
+
+    /// <summary>Returns the names of all conditions currently active on <paramref name="atom"/>.</summary>
+    IReadOnlyList<string> GetActiveConditions(AtomId atom);
+
+    /// <summary>Returns the property names that have at least one active modifier on <paramref name="atom"/>.</summary>
+    IReadOnlyList<string> GetModifierKeys(AtomId atom);
 }
