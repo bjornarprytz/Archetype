@@ -360,6 +360,12 @@ public sealed class GameStateView
         _definitionNames?.TryGetValue(atom, out var name) == true ? name : string.Empty;
 
     /// <summary>
+    /// Exposes the <see cref="GameDefinition"/> passed at construction time,
+    /// or <c>null</c> if this view was constructed without definition metadata.
+    /// </summary>
+    public GameDefinition? Definition => _definition;
+
+    /// <summary>
     /// Returns the value of a static property on the atom's definition, or
     /// <c>null</c> if the atom has no definition or the key is absent.
     /// </summary>

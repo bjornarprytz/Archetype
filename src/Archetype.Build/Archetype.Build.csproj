@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Archetype.Core\Archetype.Core.csproj" />
     <ProjectReference Include="..\Archetype.Engine\Archetype.Engine.csproj" />
+    <ProjectReference Include="..\Archetype.Text\Archetype.Text.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
