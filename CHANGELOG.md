@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.0] - 2026-04-30
+
+### Added
+- `CardAtom.get_rules_tree()` — returns the structured `RenderNode` tree for the card's primary effect as a GDScript `Dictionary`, allowing the game UI to render card text at any level of detail
+- `ArchetypeInterop.get_rules_tree(atom_id)` delegate
+- `ArchetypeNode.GetRulesTree(long atomId)` — converts the `RenderNode` tree to a `Godot.Collections.Dictionary`; node types: `text` (`.text`), `composite` (`.summary`, `.body`), `sequence` (`.items`), `ref` (`.key`, `.display`)
+- `GameStateView.Definition` property — exposes the `GameDefinition` stored at construction time
+- `Archetype.Build` now depends on `Archetype.Text` so the emitter can wire `TextRenderer` into the generated node
+
 ## [0.5.0] - 2026-04-29
 
 ### Added

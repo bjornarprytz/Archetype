@@ -138,6 +138,7 @@ public static class GodotEmitter
         sb.AppendLine("using Archetype.Build;");
         sb.AppendLine("using Archetype.Core;");
         sb.AppendLine("using Archetype.Engine;");
+        sb.AppendLine("using Archetype.Text;");
         sb.AppendLine();
 
         sb.AppendLine("/// <summary>");
@@ -178,6 +179,7 @@ public static class GodotEmitter
         // _stateView is set by InnerStrategy before each action/prompt window (D38).
         // Query methods return safe defaults when it is null (before game start or after game over).
         sb.AppendLine("    private GameStateView? _stateView;");
+        sb.AppendLine("    private TextRenderer? _textRenderer;");
         sb.AppendLine();
 
         // One TCS pair per player for action + prompt suspension.
@@ -219,6 +221,7 @@ public static class GodotEmitter
         sb.AppendLine("        definition = definition.WithCardSets(cardSets);");
         sb.AppendLine();
         sb.AppendLine("        _cts = new CancellationTokenSource();");
+        sb.AppendLine("        _textRenderer = null;");
         sb.AppendLine("        var builder = GameSession.Create(definition)");
         sb.AppendLine("            .WithRandomSource(new Archetype.Engine.SeededRandom(GD.Randi()));");
         sb.AppendLine();
@@ -468,6 +471,52 @@ public static class GodotEmitter
         sb.AppendLine("        if (_stateView == null) return result;");
         sb.AppendLine("        foreach (var n in _stateView.GetKeywordNames()) result.Add(n);");
         sb.AppendLine("        return result;");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+
+        sb.AppendLine("    /// <summary>");
+        sb.AppendLine("    /// Returns the structured render tree for the primary effect of the given card atom.");
+        sb.AppendLine("    /// The dictionary encodes the <c>RenderNode</c> tree recursively:");
+        sb.AppendLine("    /// <c>{\"type\":\"text\",\"text\":\"…\"}</c>,");
+        sb.AppendLine("    /// <c>{\"type\":\"composite\",\"summary\":{…},\"body\":{…}}</c>,");
+        sb.AppendLine("    /// <c>{\"type\":\"sequence\",\"items\":[…]}</c>,");
+        sb.AppendLine("    /// <c>{\"type\":\"ref\",\"key\":\"…\",\"display\":\"…\"}</c>.");
+        sb.AppendLine("    /// Returns an empty dictionary if the atom is not a card or has no definition.");
+        sb.AppendLine("    /// </summary>");
+        sb.AppendLine("    public Godot.Collections.Dictionary GetRulesTree(long atomId)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        if (_stateView?.Definition is not { } def) return new Godot.Collections.Dictionary();");
+        sb.AppendLine("        var defName = _stateView.GetDefinitionName(new AtomId(atomId));");
+        sb.AppendLine("        if (string.IsNullOrEmpty(defName)) return new Godot.Collections.Dictionary();");
+        sb.AppendLine("        if (!def.CardDefinitions.TryGetValue(defName, out var cardDef)) return new Godot.Collections.Dictionary();");
+        sb.AppendLine("        _textRenderer ??= new TextRenderer(def.Keywords);");
+        sb.AppendLine("        return RenderNodeToGodot(_textRenderer.RenderBlock(cardDef.PrimaryEffect, null, null));");
+        sb.AppendLine("    }");
+        sb.AppendLine();
+        sb.AppendLine("    private static Godot.Collections.Dictionary RenderNodeToGodot(Archetype.Core.RenderNode node)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        switch (node)");
+        sb.AppendLine("        {");
+        sb.AppendLine("            case Archetype.Core.TextSpan ts:");
+        sb.AppendLine("                return new Godot.Collections.Dictionary { [\"type\"] = \"text\", [\"text\"] = ts.Text };");
+        sb.AppendLine("            case Archetype.Core.RulesRef rr:");
+        sb.AppendLine("                return new Godot.Collections.Dictionary { [\"type\"] = \"ref\", [\"key\"] = rr.Key, [\"display\"] = rr.DisplayText };");
+        sb.AppendLine("            case Archetype.Core.CompositeNode c:");
+        sb.AppendLine("                return new Godot.Collections.Dictionary");
+        sb.AppendLine("                {");
+        sb.AppendLine("                    [\"type\"]    = \"composite\",");
+        sb.AppendLine("                    [\"summary\"] = RenderNodeToGodot(c.Summary),");
+        sb.AppendLine("                    [\"body\"]    = RenderNodeToGodot(c.Body),");
+        sb.AppendLine("                };");
+        sb.AppendLine("            case Archetype.Core.SequenceNode s:");
+        sb.AppendLine("            {");
+        sb.AppendLine("                var items = new Godot.Collections.Array();");
+        sb.AppendLine("                foreach (var item in s.Items) items.Add(RenderNodeToGodot(item));");
+        sb.AppendLine("                return new Godot.Collections.Dictionary { [\"type\"] = \"sequence\", [\"items\"] = items };");
+        sb.AppendLine("            }");
+        sb.AppendLine("            default:");
+        sb.AppendLine("                return new Godot.Collections.Dictionary { [\"type\"] = \"text\", [\"text\"] = string.Empty };");
+        sb.AppendLine("        }");
         sb.AppendLine("    }");
         sb.AppendLine();
 
@@ -825,6 +874,11 @@ public static class GodotEmitter
         sb.AppendLine();
         sb.AppendLine("## Returns the names of all keywords registered in the game (built-in and game-creator).");
         sb.AppendLine("func get_keyword_names() -> Array:                             return _node.GetKeywordNames()");
+        sb.AppendLine();
+        sb.AppendLine("## Returns the structured render tree for the primary effect of [param atom_id] (card atoms only).");
+        sb.AppendLine("## Node shape: [code]{\"type\": \"text\"|\"composite\"|\"sequence\"|\"ref\", …}[/code].");
+        sb.AppendLine("## Returns an empty [Dictionary] if the atom is not a card or has no definition.");
+        sb.AppendLine("func get_rules_tree(atom_id: int) -> Dictionary:              return _node.GetRulesTree(atom_id)");
 
         File.WriteAllText(Path.Combine(outputDir, "archetype_interop.gd"), sb.ToString());
     }
@@ -1037,6 +1091,13 @@ public static class GodotEmitter
                 sb.AppendLine("## Returns the owner player.");
                 sb.AppendLine("func get_owner() -> PlayerAtom:");
                 sb.AppendLine("    return PlayerAtom._create(ArchetypeInterop.get_atom_owner(_atom_id))");
+                sb.AppendLine();
+                sb.AppendLine("## Returns the structured render tree for this card's primary effect.");
+                sb.AppendLine("## Node shape: [code]{\"type\": \"text\"|\"composite\"|\"sequence\"|\"ref\", …}[/code].");
+                sb.AppendLine("## Use [code]type[/code] to switch on node kind; [code]composite[/code] carries");
+                sb.AppendLine("## [code]summary[/code] (human-readable) and [code]body[/code] (full expansion).");
+                sb.AppendLine("func get_rules_tree() -> Dictionary:");
+                sb.AppendLine("    return ArchetypeInterop.get_rules_tree(_atom_id)");
                 sb.AppendLine();
                 break;
 
