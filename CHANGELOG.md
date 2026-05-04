@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.1] - 2026-05-04
+
+### Added
+- `render_node.gd` — typed GDScript wrapper classes for the rules tree returned by `CardAtom.get_rules_tree()`; use `RenderNode.parse(dict)` to convert to a typed node (`TextSpan`, `CompositeNode`, `SequenceNode`, `RulesRef`); each subtype exposes `flat_text()` for simple display
+- `GodotEmitter.EmitRenderNode` — new public method; also called automatically from `EmitInteropScripts`
+
 ## [0.6.0] - 2026-04-30
 
 ### Added
