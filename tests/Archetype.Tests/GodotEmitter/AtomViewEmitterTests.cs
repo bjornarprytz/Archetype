@@ -270,6 +270,65 @@ public class AtomViewEmitterTests : IDisposable
     }
 
     // -----------------------------------------------------------------------
+    //  RenderNode emitter
+    // -----------------------------------------------------------------------
+
+    [Fact]
+    public void EmitRenderNode_WritesRenderNodeFile()
+    {
+        ABuild.GodotEmitter.EmitRenderNode(_tempDir);
+        Assert.True(File.Exists(Path.Combine(_tempDir, "render_node.gd")));
+    }
+
+    [Fact]
+    public void EmitRenderNode_ContainsClassName()
+    {
+        ABuild.GodotEmitter.EmitRenderNode(_tempDir);
+        var content = ReadFile("render_node.gd");
+        Assert.Contains("class_name RenderNode", content);
+        Assert.Contains("extends RefCounted", content);
+    }
+
+    [Fact]
+    public void EmitRenderNode_ContainsParseFactory()
+    {
+        ABuild.GodotEmitter.EmitRenderNode(_tempDir);
+        var content = ReadFile("render_node.gd");
+        Assert.Contains("static func parse(dict: Dictionary) -> RenderNode:", content);
+        Assert.Contains("\"text\":", content);
+        Assert.Contains("\"composite\":", content);
+        Assert.Contains("\"sequence\":", content);
+        Assert.Contains("\"ref\":", content);
+    }
+
+    [Fact]
+    public void EmitRenderNode_ContainsAllFourSubtypes()
+    {
+        ABuild.GodotEmitter.EmitRenderNode(_tempDir);
+        var content = ReadFile("render_node.gd");
+        Assert.Contains("class TextSpan extends RenderNode:", content);
+        Assert.Contains("class CompositeNode extends RenderNode:", content);
+        Assert.Contains("class SequenceNode extends RenderNode:", content);
+        Assert.Contains("class RulesRef extends RenderNode:", content);
+    }
+
+    [Fact]
+    public void EmitRenderNode_ContainsFlatTextOnEachSubtype()
+    {
+        ABuild.GodotEmitter.EmitRenderNode(_tempDir);
+        var content = ReadFile("render_node.gd");
+        Assert.Equal(5, CountOccurrences(content, "func flat_text() -> String:"));
+    }
+
+    [Fact]
+    public void EmitInteropScripts_EmitsRenderNodeFile()
+    {
+        var def = EmptyDefinition();
+        ABuild.GodotEmitter.EmitInteropScripts(def, _tempDir);
+        Assert.True(File.Exists(Path.Combine(_tempDir, "render_node.gd")));
+    }
+
+    // -----------------------------------------------------------------------
     //  Helper
     // -----------------------------------------------------------------------
 
