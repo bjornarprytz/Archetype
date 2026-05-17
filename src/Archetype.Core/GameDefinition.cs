@@ -165,7 +165,12 @@ public sealed record GameDefinition(
     /// are implicitly declared and must not appear here.
     /// <c>null</c> is treated as empty — existing callers are unaffected.
     /// </summary>
-    IReadOnlyList<StateFieldDecl>? SessionStateMapDeclarations = null)
+    IReadOnlyList<StateFieldDecl>? SessionStateMapDeclarations = null,
+    /// <summary>
+    /// Optional build-time AtomGroups defining cross-cutting transformations.
+    /// Stored in exported GameDefinition JSON so hosts or tooling can inspect them.
+    /// </summary>
+    IReadOnlyList<AtomGroupDef>? AtomGroups = null)
 {
     /// <summary>
     /// Returns a new <see cref="GameDefinition"/> with the card definitions
