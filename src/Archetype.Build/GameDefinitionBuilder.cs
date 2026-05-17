@@ -267,7 +267,11 @@ public sealed class GameDefinitionBuilder
                 {
                     var card = cardDefinitions[name];
                     if (group.MatchesCard(name, card))
-                        cardDefinitions[name] = group.TransformCard(card);
+                    {
+                        var transformed = group.TransformCard(card);
+                        var merged = MergeCardDefinitions(card, transformed, group.OverrideLocal);
+                        cardDefinitions[name] = merged;
+                    }
                 }
             }
         }
@@ -290,6 +294,39 @@ public sealed class GameDefinitionBuilder
         StateMapValidator.Validate(definition);
 
         return definition;
+    }
+
+    private static CardDefinition MergeCardDefinitions(CardDefinition original, CardDefinition transformed, bool overrideLocal)
+    {
+        // Merge static properties: do not overwrite local keys unless overrideLocal is true.
+        var mergedStatic = new Dictionary<string, object>(original.StaticProperties);
+        foreach (var kv in transformed.StaticProperties)
+        {
+            if (mergedStatic.ContainsKey(kv.Key) && !overrideLocal)
+                continue;
+            mergedStatic[kv.Key] = kv.Value;
+        }
+
+        // Merge additional effects: preserve originals, append new ones by name.
+        var additional = new List<NamedEffectBlockDef>(original.AdditionalEffects);
+        var existingNames = new HashSet<string>(additional.Select(a => a.Name));
+        foreach (var extra in transformed.AdditionalEffects)
+            if (!existingNames.Contains(extra.Name))
+                additional.Add(extra);
+
+        // Merge static effects: append transformed effects (do not remove existing ones).
+        var staticEffects = new List<StaticEffectDef>(original.StaticEffects);
+        staticEffects.AddRange(transformed.StaticEffects);
+
+        // ActivationCondition, Cost, StateMapDeclarations: only set if original did not declare them or overrideLocal==true
+        var activation = (!overrideLocal && original.ActivationCondition is not null) ? original.ActivationCondition : transformed.ActivationCondition;
+        var cost = (!overrideLocal && original.Cost is not null) ? original.Cost : transformed.Cost;
+        var stateMap = (!overrideLocal && original.StateMapDeclarations is not null) ? original.StateMapDeclarations : transformed.StateMapDeclarations;
+
+        // PrimaryEffect: prefer original unless overrideLocal requested and transformed differs.
+        var primary = (!overrideLocal && !ReferenceEquals(original.PrimaryEffect, transformed.PrimaryEffect)) ? original.PrimaryEffect : transformed.PrimaryEffect;
+
+        return new CardDefinition(original.Name, mergedStatic, primary, additional, staticEffects, activation, cost, stateMap);
     }
 
     // -----------------------------------------------------------------------
