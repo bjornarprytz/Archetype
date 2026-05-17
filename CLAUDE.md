@@ -97,6 +97,18 @@ Use document anchor notation (`#section`) for large docs. An agent reads only th
 
 Each file should contain exactly one primary type, named after that type (`ValidationResult.cs` for `ValidationResult`, etc.). When writing task annotations, use the correct target file name — do not group unrelated types under a generic name like `ActionArgs.cs`.
 
+### Skills and Public API
+
+Claude Code skills for Archetype live in `.claude/skills/`. There are three:
+
+- `archetype-cards/SKILL.md` — `CardDefinition`, costs, effect blocks, static effects
+- `archetype-keywords/SKILL.md` — `KeywordDefinition`, parameters, text templates, primitives
+- `archetype-game-structure/SKILL.md` — `GameDefinitionBuilder`, zones, phases, manifests, rules
+
+**These skills are distributed to game projects via the `Archetype.Tools` NuGet package** (`dotnet archetype install-skills`). They are embedded into the package at build time from `.claude/skills/`. A skill file that is out of date with the C# API will mislead every Claude session working in a downstream game project.
+
+**Rule:** Any change to a public API covered by a skill (types, method signatures, builder DSL, GDScript output shape) must include a corresponding update to the relevant skill file in the same PR. The reviewerchecklistshould verify this.
+
 ### Summaries and Responses
 
 When summarising completed work or presenting proposals to the user, always include relative file links (with `#anchor` where applicable) so the user can navigate directly to the relevant sections. Example:
