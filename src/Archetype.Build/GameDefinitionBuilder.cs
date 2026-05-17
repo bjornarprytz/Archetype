@@ -41,6 +41,7 @@ public sealed class GameDefinitionBuilder
     private InitManifest? _initManifest;
     private IReadOnlyList<string>? _playableZoneNames;
     private IReadOnlyList<StateFieldDecl>? _sessionStateMap;
+    private readonly List<AtomGroup> _atomGroups = new();
 
     // -----------------------------------------------------------------------
     //  Game identity
@@ -174,6 +175,13 @@ public sealed class GameDefinitionBuilder
         return this;
     }
 
+    /// <summary>Registers an AtomGroup for build-time transformations.</summary>
+    public GameDefinitionBuilder RegisterAtomGroup(AtomGroup group)
+    {
+        _atomGroups.Add(group);
+        return this;
+    }
+
     // -----------------------------------------------------------------------
     //  InitManifest
     // -----------------------------------------------------------------------
@@ -248,9 +256,25 @@ public sealed class GameDefinitionBuilder
             }
         }
 
+        var cardDefinitions = new Dictionary<string, CardDefinition>(_cardDefinitions);
+
+        if (_atomGroups.Count > 0)
+        {
+            foreach (var group in _atomGroups.OrderBy(g => g.Priority))
+            {
+                if (!group.Kinds.Contains(AtomKind.Card)) continue;
+                foreach (var name in cardDefinitions.Keys.ToList())
+                {
+                    var card = cardDefinitions[name];
+                    if (group.MatchesCard(name, card))
+                        cardDefinitions[name] = group.TransformCard(card);
+                }
+            }
+        }
+
         var definition = new GameDefinition(
             Keywords:                    allKeywords,
-            CardDefinitions:             _cardDefinitions,
+            CardDefinitions:             cardDefinitions,
             ZoneDefinitions:             _zoneDefinitions,
             StateBasedRules:             _stateBasedRules,
             Phases:                      _phases,
