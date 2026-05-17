@@ -144,6 +144,37 @@ ArchetypeInterop.submit_activate_ability(player_name, source_atom_id, effect_nam
 ArchetypeInterop.submit_pass(player_name)
 ```
 
+## Claude Code Integration
+
+Archetype ships Claude Code skills that give Claude accurate knowledge of the builder API, keyword DSL, and card definition types. Install them once per project, then re-run after upgrading the package.
+
+### Install
+
+```bash
+dotnet tool install --global Archetype.Tools
+dotnet archetype install-skills
+```
+
+Or pin to a specific version via a tool manifest so the whole team stays in sync:
+
+```bash
+dotnet new tool-manifest      # creates .config/dotnet-tools.json
+dotnet tool install Archetype.Tools
+dotnet tool restore            # teammates run this after pulling
+dotnet archetype install-skills
+```
+
+### Update after a package upgrade
+
+```bash
+dotnet tool update Archetype.Tools   # or bump the version in dotnet-tools.json
+dotnet archetype install-skills --overwrite
+```
+
+The skills are versioned alongside the library — the version you installed matches the API that Claude will reference.
+
+---
+
 ### Signal flow
 
 ```

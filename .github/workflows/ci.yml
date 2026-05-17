@@ -91,6 +91,7 @@ jobs:
           dotnet pack src/Archetype.Text/Archetype.Text.csproj       -c Release --no-restore --output ./nupkg
           dotnet pack src/Archetype.Build/Archetype.Build.csproj     -c Release --no-restore --output ./nupkg
           dotnet pack src/Archetype.Build.Extensions/Archetype.Build.Extensions.csproj -c Release --no-restore --output ./nupkg
+          dotnet pack src/Archetype.Tools/Archetype.Tools.csproj                       -c Release --no-restore --output ./nupkg
 
       - name: Push to NuGet
         if: env.IS_PREVIEW == 'true' && env.RELEASE_EXISTS == 'false'
@@ -163,6 +164,7 @@ jobs:
           dotnet pack src/Archetype.Text/Archetype.Text.csproj       -c Release --no-restore --output ./nupkg
           dotnet pack src/Archetype.Build/Archetype.Build.csproj     -c Release --no-restore --output ./nupkg
           dotnet pack src/Archetype.Build.Extensions/Archetype.Build.Extensions.csproj -c Release --no-restore --output ./nupkg
+          dotnet pack src/Archetype.Tools/Archetype.Tools.csproj                       -c Release --no-restore --output ./nupkg
 
       - name: Push to NuGet
         if: env.RELEASE_EXISTS == 'false'

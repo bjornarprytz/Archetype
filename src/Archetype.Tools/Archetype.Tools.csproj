@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>archetype</ToolCommandName>
+    <PackageId>Archetype.Tools</PackageId>
+    <Description>CLI tool for Archetype — installs versioned Claude Code skills into a game project.</Description>
+    <RollForward>Major</RollForward>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Embed skills from .claude/skills/ so the tool is self-contained.
+         %(RecursiveDir) is relative to the wildcard base (../../.claude/skills/),
+         so each resource name is "skills/<skill-name>/SKILL.md". -->
+    <EmbeddedResource Include="../../.claude/skills/**/*.md">
+      <LogicalName>skills/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
