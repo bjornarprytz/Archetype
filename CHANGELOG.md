@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.3] - 2026-05-18
+
+### Added
+- `AtomGroup<TDef>` — build-time cross-cutting transformation for atom definitions; selects by matcher predicate and applies a transform during `Build()`, in ascending priority order
+- `GameDefinitionBuilder.RegisterCardGroup` / `RegisterZoneGroup` / `RegisterPlayerGroup` — register named groups that patch card, zone, or player definitions before the `GameDefinition` is finalised; groups are purely build-time and leave no trace in the serialised output
+
 ## [0.6.2] - 2026-05-17
 
 ### Added
