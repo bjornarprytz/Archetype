@@ -41,6 +41,9 @@ public sealed class GameDefinitionBuilder
     private InitManifest? _initManifest;
     private IReadOnlyList<string>? _playableZoneNames;
     private IReadOnlyList<StateFieldDecl>? _sessionStateMap;
+    private readonly List<AtomGroup<CardDefinition>> _cardGroups = new();
+    private readonly List<AtomGroup<ZoneDefinition>> _zoneGroups = new();
+    private readonly List<AtomGroup<PlayerDefinition>> _playerGroups = new();
 
     // -----------------------------------------------------------------------
     //  Game identity
@@ -200,6 +203,54 @@ public sealed class GameDefinitionBuilder
     }
 
     // -----------------------------------------------------------------------
+    //  Atom groups
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Registers a build-time group that selects card definitions by
+    /// <paramref name="matcher"/> and transforms them via <paramref name="transform"/>.
+    /// Groups are applied in ascending <paramref name="priority"/> order during
+    /// <see cref="Build"/>, after all cards have been registered.
+    /// </summary>
+    public GameDefinitionBuilder RegisterCardGroup(
+        string name,
+        Func<CardDefinition, bool> matcher,
+        Func<CardDefinition, CardDefinition> transform,
+        int priority = 0)
+    {
+        _cardGroups.Add(new AtomGroup<CardDefinition>(name, matcher, transform, priority));
+        return this;
+    }
+
+    /// <summary>
+    /// Registers a build-time group that selects zone definitions by
+    /// <paramref name="matcher"/> and transforms them via <paramref name="transform"/>.
+    /// </summary>
+    public GameDefinitionBuilder RegisterZoneGroup(
+        string name,
+        Func<ZoneDefinition, bool> matcher,
+        Func<ZoneDefinition, ZoneDefinition> transform,
+        int priority = 0)
+    {
+        _zoneGroups.Add(new AtomGroup<ZoneDefinition>(name, matcher, transform, priority));
+        return this;
+    }
+
+    /// <summary>
+    /// Registers a build-time group that selects player definitions by
+    /// <paramref name="matcher"/> and transforms them via <paramref name="transform"/>.
+    /// </summary>
+    public GameDefinitionBuilder RegisterPlayerGroup(
+        string name,
+        Func<PlayerDefinition, bool> matcher,
+        Func<PlayerDefinition, PlayerDefinition> transform,
+        int priority = 0)
+    {
+        _playerGroups.Add(new AtomGroup<PlayerDefinition>(name, matcher, transform, priority));
+        return this;
+    }
+
+    // -----------------------------------------------------------------------
     //  Build
     // -----------------------------------------------------------------------
 
@@ -248,15 +299,19 @@ public sealed class GameDefinitionBuilder
             }
         }
 
+        var cardDefs   = ApplyGroups(_cardDefinitions,   _cardGroups);
+        var zoneDefs   = ApplyGroups(_zoneDefinitions,   _zoneGroups);
+        var playerDefs = ApplyGroups(_playerDefinitions, _playerGroups);
+
         var definition = new GameDefinition(
             Keywords:                    allKeywords,
-            CardDefinitions:             _cardDefinitions,
-            ZoneDefinitions:             _zoneDefinitions,
+            CardDefinitions:             cardDefs,
+            ZoneDefinitions:             zoneDefs,
             StateBasedRules:             _stateBasedRules,
             Phases:                      _phases,
             ActionRules:                 _actionRules,
             TriggerResolutionOrder:      _triggerResolutionOrder,
-            PlayerDefinitions:           _playerDefinitions,
+            PlayerDefinitions:           playerDefs,
             InitManifest:                _initManifest,
             PlayableZoneNames:           _playableZoneNames,
             Id:                          _id,
@@ -266,6 +321,29 @@ public sealed class GameDefinitionBuilder
         StateMapValidator.Validate(definition);
 
         return definition;
+    }
+
+    // -----------------------------------------------------------------------
+    //  Group application
+    // -----------------------------------------------------------------------
+
+    private static Dictionary<string, TDef> ApplyGroups<TDef>(
+        Dictionary<string, TDef> source,
+        List<AtomGroup<TDef>> groups)
+    {
+        if (groups.Count == 0)
+            return source;
+
+        var result = new Dictionary<string, TDef>(source);
+        foreach (var group in groups.OrderBy(g => g.Priority))
+        {
+            foreach (var key in result.Keys.ToList())
+            {
+                if (group.Matcher(result[key]))
+                    result[key] = group.Transform(result[key]);
+            }
+        }
+        return result;
     }
 
     // -----------------------------------------------------------------------
@@ -301,3 +379,13 @@ public sealed class GameDefinitionBuilder
         }
     }
 }
+
+/// <summary>
+/// A named, build-time transformation applied to all atom definitions
+/// that satisfy <see cref="Matcher"/>, in ascending <see cref="Priority"/> order.
+/// </summary>
+public sealed record AtomGroup<TDef>(
+    string Name,
+    Func<TDef, bool> Matcher,
+    Func<TDef, TDef> Transform,
+    int Priority);

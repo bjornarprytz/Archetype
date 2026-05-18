@@ -247,6 +247,60 @@ var host = new HostManifestBuilder()
 
 ---
 
+## Atom Groups — Build-Time Cross-Cutting Transformations
+
+`AtomGroup<TDef>` selects atom definitions by predicate and applies a transformation during `Build()`, before the `GameDefinition` is finalised. Groups are purely build-time — the serialised output reflects already-applied results.
+
+Groups are applied in ascending **priority** order (lower number runs first). Registration order does not affect application order.
+
+```csharp
+// Apply a default cost to any card that has none declared.
+builder.RegisterCardGroup(
+    name:      "default-cost",
+    matcher:   card => card.Cost is null or { Count: 0 },
+    transform: card => card with { Cost = [payManaCost] },
+    priority:  0);
+
+// Tag all spell-type cards with an extra static property.
+builder.RegisterCardGroup(
+    name:      "spell-tag",
+    matcher:   card => card.StaticProperties.TryGetValue("type", out var t) && t is "spell",
+    transform: card => card with
+    {
+        StaticProperties = new Dictionary<string, object>(card.StaticProperties) { ["tagged"] = true }
+    },
+    priority:  1);
+
+// Add a default static property to every zone that lacks "hidden".
+builder.RegisterZoneGroup(
+    name:      "visible-default",
+    matcher:   zone => !zone.StaticProperties.ContainsKey("hidden"),
+    transform: zone => zone with
+    {
+        StaticProperties = new Dictionary<string, object>(zone.StaticProperties) { ["visible"] = true }
+    });
+
+// Apply a bonus static property to a specific player role.
+builder.RegisterPlayerGroup(
+    name:      "hero-bonus",
+    matcher:   p => p.StaticProperties.TryGetValue("role", out var r) && r is "hero",
+    transform: p => p with
+    {
+        StaticProperties = new Dictionary<string, object>(p.StaticProperties) { ["bonus"] = true }
+    });
+```
+
+**"Don't override local" pattern:** put the guard in the matcher, not the framework.
+
+```csharp
+// Only set cost if the card author didn't explicitly declare one.
+matcher: card => card.Cost is null or { Count: 0 }
+```
+
+**Multiple groups on the same card** compose: each transform receives the output of the previous one (in priority order).
+
+---
+
 ## Assembling a GameSession
 
 ```csharp
